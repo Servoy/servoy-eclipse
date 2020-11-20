@@ -9,16 +9,16 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
 export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield{
 
     @Input() maxLength: number;
-    
+
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
-    
+
     svyOnInit() {
         super.svyOnInit();
-        if (!this.maxLength || this.maxLength == 0) {
+        if (!this.maxLength || this.maxLength === 0) {
             this.maxLength = 524288;
         }
     }
-    
+
 }

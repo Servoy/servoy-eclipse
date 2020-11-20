@@ -1,7 +1,7 @@
 import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
 import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
- 
+
 @Component( {
     selector: 'bootstrapcomponents-button',
     templateUrl: './button.html',

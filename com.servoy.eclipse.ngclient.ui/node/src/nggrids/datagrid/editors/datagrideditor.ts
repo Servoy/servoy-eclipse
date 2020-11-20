@@ -6,7 +6,7 @@ import { DataGrid } from '../datagrid';
 @Directive()
 export class DatagridEditor implements ICellEditorAngularComp {
 
-    @ViewChild("element") elementRef: ElementRef;
+    @ViewChild('element') elementRef: ElementRef;
     dataGrid: DataGrid;
     params: ICellEditorParams;
     initialValue;

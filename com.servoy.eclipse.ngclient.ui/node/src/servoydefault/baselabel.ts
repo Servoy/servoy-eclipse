@@ -38,7 +38,8 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
                         innerThis.timeoutID = window.setTimeout(function() {
                             innerThis.timeoutID = null;
                             innerThis.onActionMethodID( e );
-                        }, 250); }
+                        }, 250);
+}
                  });
             } else {
                 this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));

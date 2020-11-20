@@ -1,7 +1,7 @@
 import { BSWindow } from './bswindow.service';
-import { Injectable, Inject, RendererFactory2, Renderer2 } from "@angular/core";
-import { DOCUMENT } from "@angular/common";
-import { SvyUtilsService } from "../utils.service";
+import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { SvyUtilsService } from '../utils.service';
 
 @Injectable()
 export class BSWindowManager {
@@ -10,12 +10,12 @@ export class BSWindowManager {
     options: any;
     windows: any;
     modalStack: any;
-    
+
     private renderer: Renderer2;
 
     constructor(@Inject(DOCUMENT) private document: Document,
-            private rendererFactory: RendererFactory2, 
-            private bsWindow : BSWindow,
+            private rendererFactory: RendererFactory2,
+            private bsWindow: BSWindow,
             private utils: SvyUtilsService) {
         this.windows = [];
         this.modalStack = [];
@@ -24,7 +24,7 @@ export class BSWindowManager {
     }
 
     findWindowByID(id) {
-        var returnValue = null;
+        let returnValue = null;
         Array.prototype.forEach.call(this.windows, function(window, index){
             if (window.id === id) {
                 returnValue = window;
@@ -34,7 +34,7 @@ export class BSWindowManager {
     }
 
     destroyWindow(window_handle) {
-        var _this = this; 
+        const _this = this;
         if (window_handle.options.isModal) {
             this.removeModal(window_handle);
         }
@@ -47,15 +47,15 @@ export class BSWindowManager {
     }
 
     resortWindows() {
-        var startZIndex = 900;
+        const startZIndex = 900;
         Array.prototype.forEach.call(this.windows, (window, index) => {
             window.setIndex(startZIndex + index * this.zIndexIncrement);
         });
-        
+
         if(this.modalStack.length>0){
             //update modal backdrop z-index.
-            var lastWindowZindex = parseInt(this.modalStack[this.modalStack.length-1].element.style.zIndex);
-            var backdropModals = this.document.getElementsByClassName('modal-backdrop');
+            const lastWindowZindex = parseInt(this.modalStack[this.modalStack.length-1].element.style.zIndex);
+            const backdropModals = this.document.getElementsByClassName('modal-backdrop');
            Array.from(backdropModals).forEach((el, index) => {
                 this.renderer.setStyle(el, 'z-index', lastWindowZindex - 1);
             });
@@ -63,7 +63,7 @@ export class BSWindowManager {
     }
 
     setFocused(focused_window) {
-        var focusedWindowIndex;
+        let focusedWindowIndex;
         while (focused_window.getBlocker()) {
             focused_window = focused_window.getBlocker();
         }
@@ -75,7 +75,7 @@ export class BSWindowManager {
         });
         if(this.modalStack.indexOf(focused_window) == -1){
             this.windows.push(this.windows.splice(focusedWindowIndex, 1)[0]);
-        }        
+        }
         focused_window.setActive(true);
         this.resortWindows();
 
@@ -86,9 +86,9 @@ export class BSWindowManager {
      * */
     sendToBack(window) {
         //move the BS window instance to the front of the array
-        var from = this.windows.indexOf(window)
-        var toWindow = this.modalStack.length > 0 ? this.modalStack[this.modalStack.length-1] : null;
-        var to = toWindow ? this.windows.indexOf(toWindow)+1: 0;
+        const from = this.windows.indexOf(window);
+        const toWindow = this.modalStack.length > 0 ? this.modalStack[this.modalStack.length-1] : null;
+        const to = toWindow ? this.windows.indexOf(toWindow)+1: 0;
         this.windows.splice(to/*to*/, 0, this.windows.splice(from, 1)[0]);
         this.setFocused(this.windows[this.windows.length-1]);
    }
@@ -107,36 +107,36 @@ export class BSWindowManager {
        }
    }
 
-   setNextFocused = function () {
+   setNextFocused = function() {
        this.setFocused(this.windows[this.windows.length-1]);
-   }
+   };
 
    addWindow(window_object) {
-        var _this = this;
+        const _this = this;
         this.renderer.listen(window_object.getElement(), 'focused', () => {
             _this.setFocused(window_object);
-        })
+        });
         this.renderer.listen(window_object.getElement(), 'close', () => {
             _this.destroyWindow(window_object);
             if (window_object.getWindowTab()) {
                 window_object.getWindowTab().remove(); // change remove
             }
-        })
+        });
 
         if (this.options.container) {
-            let spanElement = this.document.createElement('span');
+            const spanElement = this.document.createElement('span');
             spanElement.className = 'label label-default';
             spanElement.innerHTML = '<button class="close">x</button>';
             window_object.setWindowTab(spanElement);
             this.renderer.listen(window_object.getWindowTab().querySelector('.close'), 'click', () => {
                 window_object.close();
-            })
+            });
             this.renderer.listen(window_object.getWindowTab(), 'click', () => {
                 _this.setFocused(window_object);
                 if (window_object.getSticky()) {
                     window.scrollTo(0, window_object.getElement().offsetTop);
                 }
-            })
+            });
             this.options.container.appendChild(window_object.getWindowTab());
         }
 
@@ -147,20 +147,20 @@ export class BSWindowManager {
     }
 
     createWindow(window_options) {
-        var _this = this;
+        const _this = this;
         let final_options: any;
         final_options = this.utils.deepExtend([true, final_options, window_options, this.options]);
         if (this.options.windowTemplate && !final_options.template) {
             final_options.template = this.options.windowTemplate;
         }
-        var newWindow = this.bsWindow;
+        const newWindow = this.bsWindow;
         newWindow.setOptions(final_options);
         if(final_options.isModal) {
             this.addModal(newWindow);
-        }                  
+        }
         return this.addWindow(newWindow);
     }
-    
+
     addModal(windowObj) {
         /*PRIVATE FUNCTION*/
         if(this.modalStack.length  === 0) {
@@ -168,25 +168,25 @@ export class BSWindowManager {
             setTimeout(() => {
                 const backdrop = this.document.getElementsByClassName('modal-backdrop');
                 Array.from(backdrop).forEach((el, index) => {
-                     this.renderer.addClass(el, "in");
+                     this.renderer.addClass(el, 'in');
                  });
             },50);
         }
         this.modalStack.push(windowObj);
     }
-    
+
     removeModal(windowObj) {
         /*PRIVATE FUNCTION*/
-        var i = this.modalStack.indexOf(windowObj);
+        const i = this.modalStack.indexOf(windowObj);
             if(i != -1) {
                 this.modalStack.splice(i, 1);
                 //also remove from dom with animation
                 if(this.modalStack.length === 0) {
                     const backdrop = this.document.getElementsByClassName('modal-backdrop');
                     Array.from(backdrop).forEach((el, index) => {
-                         this.renderer.removeClass(el, "in");
+                         this.renderer.removeClass(el, 'in');
                      });
-                    setTimeout(() => { 
+                    setTimeout(() => {
                         Array.from(backdrop).forEach((el, index) => {
                             el.remove();
                         });

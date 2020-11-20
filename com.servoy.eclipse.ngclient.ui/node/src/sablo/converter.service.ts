@@ -104,12 +104,11 @@ export class ConverterService {
       const customConverter = this.customPropertyConverters[conversionInfo];
       if (customConverter) {
         serverSentData = customConverter.fromServerToClient(serverSentData, currentClientData, propertyContext);
-      }
-      else { // converter not found - will not convert
+      } else { // converter not found - will not convert
         this.log.error(this.log.buildMessage(() => ('cannot find type converter (s->c) for: \'' + conversionInfo + '\'.')));
       }
     } else if (conversionInfo) {
-      // tslint:disable-next-line:forin
+      // eslint-disable-next-line guard-for-in
       for (const conKey in conversionInfo) {
         serverSentData[conKey] = this.convertFromServerToClient(serverSentData[conKey], conversionInfo[conKey],
           currentClientData ? currentClientData[conKey] : undefined, propertyContext);
@@ -128,7 +127,7 @@ export class ConverterService {
       }
     } else if (conversionInfo) {
       const retVal = Array.isArray(newClientData) ? [] : {}; // was: (Array.isArray ? Array.isArray(newClientData) : $.isArray(newClientData)) ? [] : {};
-      // tslint:disable-next-line:forin
+      // eslint-disable-next-line guard-for-in
       for (const conKey in conversionInfo) {
         retVal[conKey] = this.convertFromClientToServer(newClientData[conKey], conversionInfo[conKey], oldClientData ? oldClientData[conKey] : undefined, propertyContext);
       }

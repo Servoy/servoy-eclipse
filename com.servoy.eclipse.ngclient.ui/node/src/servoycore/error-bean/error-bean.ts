@@ -6,13 +6,13 @@ import { Component, ViewChild, Input, Renderer2, ElementRef } from '@angular/cor
   styles: ['.svy-errorbean { color: #a94442; }']
 })
 export class ErrorBean {
-    
+
     @Input() error;
     @Input() servoyApi;
     @Input() toolTipText: string;
-    
-    @ViewChild('element') elementRef:ElementRef;
-    
+
+    @ViewChild('element') elementRef: ElementRef;
+
     constructor(renderer: Renderer2 ) {
-    }    
+    }
 }

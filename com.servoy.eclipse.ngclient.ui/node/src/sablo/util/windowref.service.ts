@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 
-function getWindow (): Window {
+function getWindow(): Window {
     return window;
 }
 
 @Injectable()
 export class WindowRefService {
-    get nativeWindow (): Window {
+    get nativeWindow(): Window {
         return getWindow();
     }
 }

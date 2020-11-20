@@ -6,8 +6,8 @@ import { SabloService } from '../../sablo/sablo.service';
 export class ServiceChangeHandler {
     constructor(private sabloService: SabloService) {
     }
-    
-    public changed(serviceName: string,propertyName:string, propertyValue: any) {
+
+    public changed(serviceName: string,propertyName: string, propertyValue: any) {
         this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
     }
 }

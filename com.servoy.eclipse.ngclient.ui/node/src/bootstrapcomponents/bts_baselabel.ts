@@ -1,5 +1,5 @@
-import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
-import { Input, ViewChild, ElementRef, Renderer2, Directive, ChangeDetectorRef } from "@angular/core";
+import { ServoyBootstrapBaseComponent } from './bts_basecomp';
+import { Input, ViewChild, ElementRef, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
 @Directive()
 export class ServoyBootstrapBaseLabel extends ServoyBootstrapBaseComponent {

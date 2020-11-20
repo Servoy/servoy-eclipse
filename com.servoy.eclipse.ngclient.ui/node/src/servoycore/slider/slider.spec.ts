@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module'
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 import { ServoyCoreSlider } from './slider';
-import { TooltipService } from '../../ngclient/servoy_public'
+import { TooltipService } from '../../ngclient/servoy_public';
 
 
-describe("ServoyCoreSlider", () => {
+describe('ServoyCoreSlider', () => {
   let component: ServoyCoreSlider;
   let fixture: ComponentFixture<ServoyCoreSlider>;
 
@@ -23,7 +23,7 @@ describe("ServoyCoreSlider", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreSlider);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
     fixture.detectChanges();
   });
 

@@ -37,7 +37,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
                     this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
                       .then(() => {
                         this.realContainedForm = this.containedForm;
-                      })
+                      });
                   } else if (change.currentValue) {
                     this.setRealContainedForm(change.currentValue, this.relationName);
                   }
@@ -52,7 +52,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
                   }
                 }
               }
-            } 
+            }
         }
         super.svyOnChanges(changes);
     }
@@ -82,6 +82,6 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
   }
 
   getContainerStyle() {
-      return {position:"relative", minHeight:this.height+"px"};
+      return {position:'relative', minHeight:this.height+'px'};
   }
 }

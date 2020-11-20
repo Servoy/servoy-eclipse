@@ -9,7 +9,7 @@ import { Format, FormattingService } from './formatting.service';
 
 @Directive({
 
-    // tslint:disable-next-line: directive-selector
+    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[svyFormat]',
     providers: [{
         provide: NG_VALUE_ACCESSOR,
@@ -18,7 +18,7 @@ import { Format, FormattingService } from './formatting.service';
     }]
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit {
-    @Input("svyFormat") format: Format;
+    @Input('svyFormat') format: Format;
     @Input() inputType: string;
     @Input() findMode: boolean;
 
@@ -37,14 +37,14 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
     ngAfterViewInit(): void {
 		if (this.format) {
 			if (this.format.uppercase || this.format.lowercase) {
-				this._renderer.listen(this._elementRef.nativeElement,"input",(event) => this.upperOrLowerCase(event));
+				this._renderer.listen(this._elementRef.nativeElement,'input',(event) => this.upperOrLowerCase(event));
 			}
-			if (this.format.isNumberValidator || this.format.type == "NUMBER" || this.format.type == "INTEGER") {
-				this._renderer.listen(this._elementRef.nativeElement,"keypress",(event) => {
+			if (this.format.isNumberValidator || this.format.type == 'NUMBER' || this.format.type == 'INTEGER') {
+				this._renderer.listen(this._elementRef.nativeElement,'keypress',(event) => {
 					this.isKeyPressEventFired=true;
 					return this.testForNumbersOnly(event, null,true,false);
 				});
-				this._renderer.listen(this._elementRef.nativeElement,"input",(event) => this.inputFiredForNumbersCheck(event));
+				this._renderer.listen(this._elementRef.nativeElement,'input',(event) => this.inputFiredForNumbersCheck(event));
 			}
 			if (this.format.maxLength) {
 				this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
@@ -54,7 +54,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 			}
 		}
 	}
-	
+
 	registerOnChange(fn: any) {
         this.onChangeCallback = fn;
     }
@@ -67,42 +67,42 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
         this.onTouchedCallback();
         this.hasFocus = false;
 		if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
-			this.writeValue(this.realValue)
+			this.writeValue(this.realValue);
 		}
     }
 
     @HostListener('focus', []) focussed() {
 		this.hasFocus = true;
 		if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
-			this.writeValue(this.realValue)
+			this.writeValue(this.realValue);
 		}
     }
 
     @HostListener('change', ['$event.target.value']) input(value: any) {
-        let data = value
+        let data = value;
         if (!this.findMode && this.format) {
             const type = this.format.type;
-            let format = this.format.display ? this.format.display : this.format.edit
-            if (this.hasFocus&& this.format.edit && !this.format.isMask) format = this.format.edit
+            let format = this.format.display ? this.format.display : this.format.edit;
+            if (this.hasFocus&& this.format.edit && !this.format.isMask) format = this.format.edit;
             try {
                 data = this.unformat(data, format, type, this.realValue);
             } catch (e) {
-                console.log(e)
+                console.log(e);
                     //TODO set error state
             }
-            if (this.format.type == "TEXT" && this.format.isRaw && this.format.isMask) {
+            if (this.format.type == 'TEXT' && this.format.isRaw && this.format.isMask) {
                 if (data && format && data.length === format.length){
-                    let ret = ''
-                    for (var i = 0; i < format.length; i++) {
+                    let ret = '';
+                    for (let i = 0; i < format.length; i++) {
                         switch (format[i]) {
-                            case 'U': 
+                            case 'U':
                             case 'L':
-                            case 'A': 
+                            case 'A':
                             case '?':
                             case '*':
                             case 'H':
                             case '#':
-                                ret += data[i]
+                                ret += data[i];
                                 break;
                             default:
                                 // ignore literal characters
@@ -113,7 +113,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
                 }
             }
         }
-			
+
         this.onChangeCallback(data);
 	}
 
@@ -128,9 +128,9 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
                  try {
                      data = this.formatService.format(data, format, this.format.type);
                  } catch (e) {
-                     console.log(e)
+                     console.log(e);
                  }
-                 if (data && this.format.type == "TEXT") {
+                 if (data && this.format.type == 'TEXT') {
                      if (this.format.uppercase) data = data.toUpperCase();
                      else if (this.format.lowercase) data = data.toLowerCase();
                  }
@@ -140,7 +140,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
              this._renderer.setProperty(this._elementRef.nativeElement, 'value', value?value:'');
          }
 	 }
-	 
+
 	 // lower and upper case handling
 
 	 private upperOrLowerCase(event: Event) {
@@ -149,22 +149,22 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
         element.value = this.format.uppercase?element.value.toUpperCase():element.value.toLowerCase();
         element.setSelectionRange(caretPos, caretPos);
 	}
-	
+
 	// unformatting stuff
 
     private unformat(data: any, servoyFormat: string, type: string, currentValue: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
-        if ((type == "NUMBER") || (type == "INTEGER")) {
+        if ((type == 'NUMBER') || (type == 'INTEGER')) {
             return this.unformatNumbers(data, servoyFormat);
-        } else if (type == "TEXT") {
+        } else if (type == 'TEXT') {
             return data;
-        } else if (type == "DATETIME") {
-            if ("" === data ) return null;
+        } else if (type == 'DATETIME') {
+            if ('' === data ) return null;
             // some compatibility issues, see http://momentjs.com/docs/ and http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
             servoyFormat = servoyFormat.replace(new RegExp('d', 'g'), 'D');
             servoyFormat = servoyFormat.replace(new RegExp('y', 'g'), 'Y');
             // use moment.js from calendar component
-            var d = moment(data, servoyFormat,true).toDate();
+            const d = moment(data, servoyFormat,true).toDate();
             // if format has not year/month/day use the one from the current model value
             // because moment will just use current date
             if(currentValue && !isNaN(currentValue.getTime())) {
@@ -183,36 +183,33 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
         return data;
     }
 
-    private unformatNumbers(data:any, format:string) { // todo throw error when not coresponding to format (reimplement with state machine)
-		if (data === "") return data;
+    private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
+		if (data === '') return data;
 		//treat scientiffic numbers
 		if (data.toString().toLowerCase().indexOf('e') > -1 && !isNaN(data)) {
-			return new Number(data).valueOf()
+			return new Number(data).valueOf();
 		}
 
-		var multFactor = 1;
-		var MILLSIGN = '\u2030'
-		if (format.indexOf(MILLSIGN) > -1 && format.indexOf("'"+MILLSIGN+"'") == -1) {
-			multFactor *= 0.001
+		let multFactor = 1;
+		const MILLSIGN = '\u2030';
+		if (format.indexOf(MILLSIGN) > -1 && format.indexOf('\''+MILLSIGN+'\'') == -1) {
+			multFactor *= 0.001;
 		}
-		if (format.indexOf("'") > -1)
-		{
+		if (format.indexOf('\'') > -1) {
 			// replace the literals
-			var parts = format.split("'");
-			for (var i=0;i<parts.length;i++)
-			{
-				if (i % 2 == 1)
-				{
+			const parts = format.split('\'');
+			for (let i=0;i<parts.length;i++) {
+				if (i % 2 == 1) {
 					data = data.replace(new RegExp(parts[i], 'g'), '');
 				}
 			}
-		}		
-		var ret = numbro(data).value();
+		}
+		let ret = numbro(data).value();
 		ret *= multFactor;
-		return ret
+		return ret;
 	}
-	
-	
+
+
 	// test numbers only
 
 	private testForNumbersOnly(e, keyChar, vCheckNumbers, skipMaxLength) {
@@ -220,29 +217,27 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 			if (this.formatService.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() == 'INPUT') {
 				//do not looses focus, just apply the format and push value
 				this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => this._elementRef.nativeElement.value } }));
-			} else if (this.format.type == "INTEGER") {
+			} else if (this.format.type == 'INTEGER') {
 				var currentLanguageNumeralSymbols = numbro.languageData();
-				
+
 				if(keyChar == undefined) {
 					return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
 							.symbol,
-							this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength,);							
-				}
-				else {
+							this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength,);
+				} else {
 					return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
 							.symbol,
 							this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength);
 				}
-			} else if (this.format.type == "NUMBER" || ((this.format.type == "TEXT") && this.format.isNumberValidator)) {
+			} else if (this.format.type == 'NUMBER' || ((this.format.type == 'TEXT') && this.format.isNumberValidator)) {
 				var currentLanguageNumeralSymbols = numbro.languageData();
-				
+
 				if(keyChar == undefined) {
 					return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency.symbol,
-						this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength);							
-				}
-				else {
+						this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength);
+				} else {
 					return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency.symbol,
-						this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength);														
+						this.format.percent, skipMaxLength === true ? 0 : this.format.maxLength);
 				}
 			}
 		}
@@ -252,23 +247,23 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 	private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, mlength) {
 		const value = this._elementRef.nativeElement.value;
 		if (mlength > 0 && value) {
-			var counter = 0;
-			if (("0123456789").indexOf(keychar) != -1) counter++;
-			var stringLength = value.length;
+			let counter = 0;
+			if (('0123456789').indexOf(keychar) != -1) counter++;
+			const stringLength = value.length;
 			for (var i = 0; i < stringLength; i++) {
-				if (("0123456789").indexOf(value.charAt(i)) != -1) counter++;
+				if (('0123456789').indexOf(value.charAt(i)) != -1) counter++;
 			}
-			var selectedTxt = this.getSelectedText(this._elementRef.nativeElement);
+			const selectedTxt = this.getSelectedText(this._elementRef.nativeElement);
 			if (selectedTxt) {
 				// selection will get deleted/replaced by typed key
 				for (var i = 0; i < selectedTxt.length; i++) {
-					if (("0123456789").indexOf(selectedTxt.charAt(i)) != -1) counter--;
+					if (('0123456789').indexOf(selectedTxt.charAt(i)) != -1) counter--;
 				}
 			}
 			if (counter > mlength) return false;
 		}
 
-		if ((("-0123456789").indexOf(keychar) > -1)) {
+		if ((('-0123456789').indexOf(keychar) > -1)) {
 			return true;
 		} else if (decimal && (keychar == decimalChar)) {
 			return true;
@@ -279,12 +274,12 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 		} else if (keychar == percentChar) {
 			return true;
 		}
-		return false;				
+		return false;
 	}
-	
+
 	private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, mlength) {
-		var key;
-		var keychar;
+		let key;
+		let keychar;
 
 		if (window.event) {
 			key = window.event['keyCode'];
@@ -305,17 +300,16 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 	}
 
 	private getSelectedText(textarea) {
-		var sel = null;
+		let sel = null;
 		if(textarea) {
 			// code for IE
 			if (document['selection']) {
 				textarea.focus();
 				sel = document['selection'].createRange().text;
-			}
-			else {
+			} else {
 				// code for Mozilla
-				var start = textarea['selectionStart'];
-				var end = textarea['selectionEnd'];
+				const start = textarea['selectionStart'];
+				const end = textarea['selectionEnd'];
 				sel = textarea['value'].substring(start, end);
 			}
 		}
@@ -323,31 +317,30 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 	}
 
 	private inputFiredForNumbersCheck(event) {
-		var currentValue = this._elementRef.nativeElement.value;
+		let currentValue = this._elementRef.nativeElement.value;
 
-		if(!this.isKeyPressEventFired && event.target.tagName.toUpperCase() == 'INPUT') {			    
+		if(!this.isKeyPressEventFired && event.target.tagName.toUpperCase() == 'INPUT') {
 			// get inserted chars
-			var inserted = this.findDelta(currentValue, this.oldInputValue);
+			const inserted = this.findDelta(currentValue, this.oldInputValue);
 			// get removed chars
-			var removed = this.findDelta(this.oldInputValue, currentValue);
-			// determine if user pasted content				    
-			var pasted = inserted.length > 1 || (!inserted && !removed);
-			
+			const removed = this.findDelta(this.oldInputValue, currentValue);
+			// determine if user pasted content
+			const pasted = inserted.length > 1 || (!inserted && !removed);
+
 			if(!pasted && !removed) {
 				if(!this.testForNumbersOnly(event, inserted, true, true)) {
 					currentValue = this.oldInputValue;
 				}
 			}
-			
+
 			//If number validator, check all chars in string and extract only the valid chars.
-			if(event.target.type.toUpperCase() == 'NUMBER' || this.format.type =='NUMBER' || this.format.type == 'INTEGER' || this.format.isNumberValidator){                     
+			if(event.target.type.toUpperCase() == 'NUMBER' || this.format.type =='NUMBER' || this.format.type == 'INTEGER' || this.format.isNumberValidator){
 				currentValue = this.getNumbersFromString(event,currentValue, this.oldInputValue);
 			}
-			
-			if (currentValue != this._elementRef.nativeElement.value)
-			{
+
+			if (currentValue != this._elementRef.nativeElement.value) {
 				this._elementRef.nativeElement.value = currentValue;
-				
+
 				// // detect IE8 and above, and Edge; call on change manually because of https://bugs.jquery.com/ticket/10818
 				// if (/MSIE/.test(navigator.userAgent) || /rv:11.0/i.test(navigator.userAgent) || /Edge/.test(navigator.userAgent)) {
 				// 	var changeOnBlurForIE = function() {
@@ -356,9 +349,9 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 				// 	 }
 				// 	 element.on("blur", changeOnBlurForIE);
 				// }
-			}	
-			
-			this.oldInputValue = currentValue; 
+			}
+
+			this.oldInputValue = currentValue;
 			this.isKeyPressEventFired = false;
 		}
 
@@ -369,10 +362,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 	}
 
 	private findDelta(value: string, prevValue: string): string {
-		var delta = '';
+		let delta = '';
 		if(typeof value === 'string' && typeof prevValue === 'string' && value.length >= prevValue.length) {
-			for (var i = 0; i < value.length; i++) {
-				var str = value.substr(0, i) + value.substr(i + value.length - prevValue.length);
+			for (let i = 0; i < value.length; i++) {
+				const str = value.substr(0, i) + value.substr(i + value.length - prevValue.length);
 				if (str === prevValue) {
 					delta = value.substr(i, value.length - prevValue.length);
 					break;
@@ -381,18 +374,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 		}
 		return delta;
 	}
-	
+
 	private getNumbersFromString(e, currentValue, oldInputValue){
 		if(oldInputValue === currentValue){
-			return currentValue;               
-		}   
-		var stripped = "";
-		for (var i = 0; i < currentValue.length; i++) {
+			return currentValue;
+		}
+		let stripped = '';
+		for (let i = 0; i < currentValue.length; i++) {
 			if(this.testForNumbersOnly(e, currentValue.charAt(i), true, true)){
 				stripped = stripped + currentValue.charAt(i);
 				if(stripped.length === this.format.maxLength) break;
 			}
 		}
-		return stripped;    
+		return stripped;
 	}
 }

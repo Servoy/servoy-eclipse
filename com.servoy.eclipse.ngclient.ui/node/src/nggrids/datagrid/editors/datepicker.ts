@@ -49,8 +49,8 @@ export class DatePicker extends DatagridEditor {
     const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
     if (showCalendar) {
       if (showTime) this.pickerType = 'both';
-      else this.pickerType = 'calendar'
-    } else this.pickerType = 'timer'
+      else this.pickerType = 'calendar';
+    } else this.pickerType = 'timer';
     this.showSecondsTimer = format.indexOf('s') >= 0;
     this.hour12Timer = format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0;
   }

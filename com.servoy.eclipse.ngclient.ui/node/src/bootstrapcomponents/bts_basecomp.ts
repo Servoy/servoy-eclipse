@@ -28,27 +28,27 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
         this.attachHandlers();
     }
 
-    svyOnChanges( changes: SimpleChanges ) {
+    svyOnChanges(changes: SimpleChanges) {
         if (changes) {
-            for ( const property of Object.keys(changes) ) {
+            for (const property of Object.keys(changes)) {
                 const change = changes[property];
-                switch ( property ) {
-                case 'enabled':
-                    if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getFocusElement(),  'disabled' );
-                    else
-                        this.renderer.setAttribute(this.getFocusElement(),  'disabled', 'disabled' );
-                    break;
-                case 'styleClass':
-                    if (change.previousValue) {
-                        const array = change.previousValue.split(' ');
-                        array.forEach(element => this.renderer.removeClass(this.getStyleClassElement(), element ));
-                    }
-                    if ( change.currentValue) {
-                        const array = change.currentValue.split(' ');
-                        array.forEach(element => this.renderer.addClass(this.getStyleClassElement(), element ));
-                    }
-                    break;
+                switch (property) {
+                    case 'enabled':
+                        if (change.currentValue)
+                            this.renderer.removeAttribute(this.getFocusElement(), 'disabled');
+                        else
+                            this.renderer.setAttribute(this.getFocusElement(), 'disabled', 'disabled');
+                        break;
+                    case 'styleClass':
+                        if (change.previousValue) {
+                            const array = change.previousValue.split(' ');
+                            array.forEach(element => this.renderer.removeClass(this.getStyleClassElement(), element));
+                        }
+                        if (change.currentValue) {
+                            const array = change.currentValue.split(' ');
+                            array.forEach(element => this.renderer.addClass(this.getStyleClassElement(), element));
+                        }
+                        break;
                 }
             }
         }
@@ -68,10 +68,10 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     }
 
     protected attachHandlers() {
-        if ( this.onActionMethodID ) {
+        if (this.onActionMethodID) {
             if (this.onDoubleClickMethodID) {
                 const innerThis: ServoyBootstrapBaseComponent = this;
-                this.renderer.listen( this.getNativeElement(), 'click', e => {
+                this.renderer.listen(this.getNativeElement(), 'click', e => {
                     if (innerThis.timeoutID) {
                         window.clearTimeout(innerThis.timeoutID);
                         innerThis.timeoutID = null;
@@ -79,20 +79,25 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
                     } else {
                         innerThis.timeoutID = window.setTimeout(function() {
                             innerThis.timeoutID = null;
-                            innerThis.onActionMethodID( e );
-                        }, 250); }
-                 });
+                            innerThis.onActionMethodID(e);
+                        }, 250);
+                    }
+                });
             } else {
                 if (this.getNativeElement().tagName == 'TEXTAREA' || this.getNativeElement().type == 'text') {
-                    this.renderer.listen( this.getNativeElement(), 'keydown', e => { if (e.keyCode == 13) this.onActionMethodID( e ); });
+                    this.renderer.listen(this.getNativeElement(), 'keydown', e => {
+                        if (e.keyCode == 13) this.onActionMethodID(e);
+                    });
                 } else {
-                    this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+                    this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID(e));
                 }
 
             }
         }
-        if ( this.onRightClickMethodID ) {
-          this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; });
+        if (this.onRightClickMethodID) {
+            this.renderer.listen(this.getNativeElement(), 'contextmenu', e => {
+                this.onRightClickMethodID(e); return false;
+            });
         }
     }
     public getScrollX(): number {

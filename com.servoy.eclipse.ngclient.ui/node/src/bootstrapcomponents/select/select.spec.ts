@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapSelect } from './select';
-import { ShowDisplayValuePipe } from "../lib/showDisplayValue.pipe";
+import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 
 describe('SelectComponent', () => {
   let component: ServoyBootstrapSelect;
@@ -9,7 +9,7 @@ describe('SelectComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapSelect ], 
+      declarations: [ ServoyBootstrapSelect ],
       providers: [ShowDisplayValuePipe]
     })
     .compileComponents();
@@ -18,7 +18,7 @@ describe('SelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapSelect);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
     fixture.detectChanges();
   });
 

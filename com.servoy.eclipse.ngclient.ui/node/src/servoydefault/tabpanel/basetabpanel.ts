@@ -57,7 +57,9 @@ export abstract class BaseTabpanel extends ServoyBaseComponent {
            this.initTabID();
         }
         if ( changes['tabIndex'] ) {
-            Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ); } );
+            Promise.resolve( null ).then(() => {
+ this.select( this.tabs[this.getRealTabIndex()] );
+} );
         }
         super.svyOnChanges(changes);
     }

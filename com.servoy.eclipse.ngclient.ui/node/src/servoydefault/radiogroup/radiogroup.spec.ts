@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
-import { SabloModule } from "../../sablo/sablo.module";
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
-import { FormsModule } from "@angular/forms";
-import { FormattingService, TooltipService } from "../../ngclient/servoy_public";
-import { IValuelist } from "../../sablo/spectypes.service";
-import { By } from "@angular/platform-browser";
-import { NotNullOrEmptyPipe } from "../../ngclient/pipes/pipes";
-import { DebugElement } from "@angular/core";
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { FormsModule } from '@angular/forms';
+import { FormattingService, TooltipService } from '../../ngclient/servoy_public';
+import { IValuelist } from '../../sablo/spectypes.service';
+import { By } from '@angular/platform-browser';
+import { NotNullOrEmptyPipe } from '../../ngclient/pipes/pipes';
+import { DebugElement } from '@angular/core';
 
 const mockData = [
                   {
@@ -42,7 +42,7 @@ describe('ServoyDefaultRadiogroup', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRadiogroup);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
     component.valuelistID = mockData;
     component.enabled = true;
     component.editable = true;
@@ -52,7 +52,7 @@ describe('ServoyDefaultRadiogroup', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  
+
   it('should click change value', () => {
       input = fixture.debugElement.query(By.css('input'));
       expect(input.nativeElement.checked).toBeFalsy(); // default state
@@ -60,17 +60,17 @@ describe('ServoyDefaultRadiogroup', () => {
       fixture.detectChanges();
       expect(input.nativeElement.checked).toBeTruthy(); // state after click
     });
-   
+
   it('should call itemClicked', () => {
       input = fixture.debugElement.query(By.css('input'));
-      spyOn(component, "itemClicked");
+      spyOn(component, 'itemClicked');
       input.nativeElement.dispatchEvent(new Event('click'));
       fixture.detectChanges();
       expect(component.itemClicked).toHaveBeenCalled();
   });
-  
-  it ('should be enabled', () => { 
+
+  it ('should be enabled', () => {
       input = fixture.debugElement.query(By.css('input'));
       expect(input.nativeElement.disabled).toBe(false);
-  })
+  });
 });

@@ -1,35 +1,34 @@
-
-import { FormService, FormCache, StructureCache, ComponentCache } from '../ngclient/form.service';
-import { ServoyService } from '../ngclient/servoy.service'
-import { Observable, of } from 'rxjs';
+import { FormService, ComponentCache } from '../ngclient/form.service';
+import { ServoyService } from '../ngclient/servoy.service';
 
 export class ServoyApi {
     constructor( private item: ComponentCache, private formname: string, private absolute: boolean, private formservice: FormService, private servoyService: ServoyService ) {
     }
 
 
-    public formWillShow( formname, relationname?, formIndex ?): Promise<boolean> {
+    public formWillShow( formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
         return this.formservice.formWillShow( formname, true, this.formname, this.item.name, relationname, formIndex );
     }
 
-    public hideForm( formname, relationname?, formIndex?, formNameThatWillShow?, relationnameThatWillBeShown?, formIndexThatWillBeShown? ):Promise<boolean> {
+    public hideForm( formname: string, relationname?: string, formIndex?: number,
+                        formNameThatWillShow?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number ): Promise<boolean> {
         return this.formservice.hideForm( formname, this.formname, this.item.name, relationname, formIndex, formNameThatWillShow, relationnameThatWillBeShown, formIndexThatWillBeShown );
     }
 
-    public startEdit( propertyName ) {
+    public startEdit( propertyName: string ) {
         this.formservice.pushEditingStarted(this.formname, this.item.name, propertyName);
     }
 
-    public apply( propertyName ) {
+    public apply( _propertyName: string ) {
         // TODO is this ever needed now? this is now always done through EventEmitter ....
         //        $servoyInternal.pushDPChange( "${name}", this.item.name, propertyName );
     }
 
-    public callServerSideApi( methodName, args ) {
+    public callServerSideApi( methodName: string, args: Array<any> ) {
         return this.formservice.callServerSideApi(this.formname, this.item.name, methodName, args);
     }
 
-    public getFormComponentElements( propertyName, formComponentValue ) { }
+    public getFormComponentElements( _propertyName: string, _formComponentValue: any ) { }
 
     public isInDesigner() {
         return false;
@@ -39,7 +38,7 @@ export class ServoyApi {
         if ( this.item.model && this.item.model.clientProperty && this.item.model.clientProperty.trustDataAsHtml ) {
             return this.item.model.clientProperty.trustDataAsHtml;
         }
-        return this.servoyService.getUIProperties().getUIProperty( "trustDataAsHtml" );
+        return this.servoyService.getUIProperties().getUIProperty( 'trustDataAsHtml' );
     }
 
     public isInAbsoluteLayout() {
@@ -49,7 +48,7 @@ export class ServoyApi {
     public getMarkupId() {
         return this.item.model.svyMarkupId;
     }
-    
+
     public getFormname() {
         return this.formname;
     }

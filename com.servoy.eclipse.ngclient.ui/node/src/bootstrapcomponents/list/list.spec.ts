@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapList } from './list';
-import { ShowDisplayValuePipe } from "../lib/showDisplayValue.pipe";
+import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 
 describe('ListComponent', () => {
   let component: ServoyBootstrapList;
@@ -9,10 +9,10 @@ describe('ListComponent', () => {
   let datalistPolyfill;
 
   beforeEach(waitForAsync(() => {
-      
+
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapList ],  
-      providers: [ShowDisplayValuePipe] 
+      declarations: [ ServoyBootstrapList ],
+      providers: [ShowDisplayValuePipe]
     })
     .compileComponents();
   }));

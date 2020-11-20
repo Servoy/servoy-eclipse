@@ -1,12 +1,12 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { FileUploadModule, FileSelectDirective, FileUploader } from 'ng2-file-upload';
 
 @Component( {
     selector: 'servoyextra-fileupload',
     templateUrl: './fileupload.html',
-    styleUrls: ["./fileupload.css"]
+    styleUrls: ['./fileupload.css']
 } )
 export class ServoyExtraFileUpload extends ServoyBaseComponent {
 
@@ -48,7 +48,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
         super( renderer, cdRef );
         this.log = logFactory.getLogger( 'FileUpload' );
         this.uploader = new FileUploader( {
-            url: "",
+            url: '',
         } );
         this.hasBaseDropZoneOver = false;
     }
@@ -58,15 +58,15 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
     }
 
     public fileInputClick(): void {
-        let element: HTMLElement = document.getElementById( "fileInputLabel" ) as HTMLElement;
+        const element: HTMLElement = document.getElementById( 'fileInputLabel' ) as HTMLElement;
         element.click();
     }
 
     svyOnInit() {
         super.svyOnInit();
-        const url = this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, "dataProviderID" );
+        const url = this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'dataProviderID' );
         this.uploader = new FileUploader( {
-            url: url,
+            url,
         });
     }
 

@@ -4,9 +4,9 @@ import { MainComponent } from './main.component';
 import {ServoyService} from './servoy.service';
 import {AllServiceService} from './allservices.service';
 import { FormService } from './form.service';
-import { I18NProvider } from "./servoy_public";
-import { WebsocketService } from "../sablo/websocket.service";
-import { LoadingIndicatorService } from "../sablo/util/loading-indicator/loading-indicator.service";
+import { I18NProvider } from './servoy_public';
+import { WebsocketService } from '../sablo/websocket.service';
+import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 
 describe('MainComponent', () => {
   const servicesService = jasmine.createSpyObj('ServoyService', ['connect']);
@@ -17,7 +17,7 @@ describe('MainComponent', () => {
       ],
       providers:    [ {provide: ServoyService, useValue: servicesService },
         { provide:AllServiceService, useValue: {} },
-        { provide:FormService, useValue: {} }, 
+        { provide:FormService, useValue: {} },
         { provide:I18NProvider, useValue: {} },
         { provide:WebsocketService, useValue: {} },
         { provide:LoadingIndicatorService, useValue: {}}]

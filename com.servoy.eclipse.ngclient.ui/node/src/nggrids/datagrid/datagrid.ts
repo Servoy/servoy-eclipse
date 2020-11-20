@@ -15,21 +15,21 @@ import { TextEditor } from './editors/texteditor';
 import { TypeaheadEditor } from './editors/typeaheadeditor';
 
 const COLUMN_PROPERTIES_DEFAULTS = {
-    headerTitle: { colDefProperty: "headerName", default: null },
-    headerTooltip: { colDefProperty: "headerTooltip", default: null },
-    id: { colDefProperty: "colId", default: null },
-    styleClassDataprovider: { colDefProperty: "cellClass", default: null },
-    styleClass: { colDefProperty: "cellClass", default: null },
-    rowGroupIndex: { colDefProperty: "rowGroupIndex", default: -1 },
-    width: { colDefProperty: "width", default: 0 },
-    enableToolPanel: { colDefProperty: "suppressToolPanel", default: true },
-    maxWidth: { colDefProperty: "maxWidth", default: null },
-    minWidth: { colDefProperty: "minWidth", default: null },
-    visible: { colDefProperty: "hide", default: true },
-    enableResize: { colDefProperty: "resizable", default: true },
-    autoResize: { colDefProperty: "suppressSizeToFit", default: true },
-    enableSort: { colDefProperty: "sortable", default: true }
-}
+    headerTitle: { colDefProperty: 'headerName', default: null },
+    headerTooltip: { colDefProperty: 'headerTooltip', default: null },
+    id: { colDefProperty: 'colId', default: null },
+    styleClassDataprovider: { colDefProperty: 'cellClass', default: null },
+    styleClass: { colDefProperty: 'cellClass', default: null },
+    rowGroupIndex: { colDefProperty: 'rowGroupIndex', default: -1 },
+    width: { colDefProperty: 'width', default: 0 },
+    enableToolPanel: { colDefProperty: 'suppressToolPanel', default: true },
+    maxWidth: { colDefProperty: 'maxWidth', default: null },
+    minWidth: { colDefProperty: 'minWidth', default: null },
+    visible: { colDefProperty: 'hide', default: true },
+    enableResize: { colDefProperty: 'resizable', default: true },
+    autoResize: { colDefProperty: 'suppressSizeToFit', default: true },
+    enableSort: { colDefProperty: 'sortable', default: true }
+};
 
 
 const CHUNK_SIZE = 50;
@@ -48,7 +48,7 @@ export class DataGrid {
     templateRef: TemplateRef<any>;
 
     @ViewChild('agGrid') agGrid: AgGridAngular;
-    
+
     @Input() myFoundset: IFoundset;
     @Input() columns;
     @Input() readOnly;
@@ -59,7 +59,7 @@ export class DataGrid {
     @Input() arrowsUpDownMoveWhenEditing;
     @Input() _internalExpandedState;
     @Input() _internalFormEditorValue;
-    
+
 
     @Input() servoyApi: ServoyApi;
 
@@ -82,31 +82,31 @@ export class DataGrid {
     groupManager: GroupManager;
 
     // when the grid is not ready yet set the value to the foundset/column index for which has been edit cell called
-    startEditFoundsetIndex: number = -1;
-    startEditColumnIndex: number = -1;
+    startEditFoundsetIndex = -1;
+    startEditColumnIndex = -1;
 
     /**
      * Store the state of the table. TODO to be persisted
      * */
-    state: State = new State()
+    state: State = new State();
 
     dirtyCache: boolean;
     // used in HTML template to toggle sync button
-    isGroupView:boolean = false;
+    isGroupView = false;
 
     // set to true once the grid is rendered and the selection is set
-    isSelectionReady: boolean = false;
+    isSelectionReady = false;
 
     // set to true during data request from ag grid, from request-start until all data is loaded
-    isDataLoading: boolean = false;    
+    isDataLoading = false;
 
-    scrollToSelectionWhenSelectionReady:boolean = false;
+    scrollToSelectionWhenSelectionReady = false;
 
     // set to true, if columns needs to be fit after rows are rendered - set to true when purge is called (all rows are rendered)
-    columnsToFitAfterRowsRendered: boolean = false;
+    columnsToFitAfterRowsRendered = false;
 
     // flag used to set removing all foundset just before getting data tp display; it is set when doing sort while grouped
-    removeAllFoundsetRef: boolean = false;
+    removeAllFoundsetRef = false;
 
     // foundset sort promise
     sortPromise;
@@ -114,7 +114,7 @@ export class DataGrid {
 
 
     // if row autoHeight, we need to do a refresh after first time data are displayed, to allow ag grid to re-calculate the heights
-    isRefreshNeededForAutoHeight:boolean = false;
+    isRefreshNeededForAutoHeight = false;
 
     selectionEvent;
 
@@ -152,16 +152,16 @@ export class DataGrid {
     getColumnDefs() {
         //create the column definitions from the specified columns in designer
         const colDefs = [];
-        let colDef:any = { };
+        let colDef: any = { };
         let column;
         for (let i = 0; this.columns && i < this.columns.length; i++) {
             column = this.columns[i];
 
-            let field = this.getColumnID(column, i);
+            const field = this.getColumnID(column, i);
             //create a column definition based on the properties defined at design time
             colDef = {
-                headerName: column.headerTitle ? column.headerTitle : "",
-                field: field,
+                headerName: column.headerTitle ? column.headerTitle : '',
+                field,
                 headerTooltip: column.headerTooltip ? column.headerTooltip : null
                 //TODO: add cellRenderer support
                 //cellRenderer: cellRenderer
@@ -184,20 +184,20 @@ export class DataGrid {
             if (column.rowGroupIndex >= 0) colDef.rowGroupIndex = column.rowGroupIndex;
             //TODO: width
             //if (column.width || column.width === 0) colDef.width = column.width;
-            
+
             // tool panel
             if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
-            
+
             // column sizing
             //TODO: min/max width
             //if (column.maxWidth) colDef.maxWidth = column.maxWidth;
             //if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
             if (column.visible === false) colDef.hide = true;
-            
+
             // column resizing https://www.ag-grid.com/javascript-grid-resizing/
             if (column.enableResize === false) colDef.resizable = false;
             if (column.autoResize === false) colDef.suppressSizeToFit = !column.autoResize;
-            
+
             // column sort
             if (column.enableSort === false) colDef.sortable = false;
 
@@ -205,18 +205,14 @@ export class DataGrid {
                 colDef.editable = column.editType != 'CHECKBOX' ? this.isColumnEditable : false;
 
                 if(column.editType == 'TEXTFIELD') {
-                    colDef.cellEditorFramework = TextEditor
-                }
-                else if(column.editType == 'TYPEAHEAD') {
-                    colDef.cellEditorFramework = TypeaheadEditor
-                }
-                else if(column.editType == 'DATEPICKER') {
+                    colDef.cellEditorFramework = TextEditor;
+                } else if(column.editType == 'TYPEAHEAD') {
+                    colDef.cellEditorFramework = TypeaheadEditor;
+                } else if(column.editType == 'DATEPICKER') {
                     colDef.cellEditorFramework = DatePicker;
-                }
-                else if(column.editType == 'COMBOBOX') {
+                } else if(column.editType == 'COMBOBOX') {
                     colDef.cellEditorFramework = SelectEditor;
-                }
-                else if(column.editType == 'FORM') {
+                } else if(column.editType == 'FORM') {
                     colDef.cellEditorFramework = FormEditor;
                 }
 
@@ -254,7 +250,7 @@ export class DataGrid {
             //     else if(column.filterType == 'VALUELIST' || column.filterType == 'RADIO') {
             //         colDef.filter = getValuelistFilter();
             //         colDef.filterParams.svyFilterType = column.filterType;
-            //     }	
+            //     }
             // }
 
             //TODO: get tooltip
@@ -273,13 +269,13 @@ export class DataGrid {
             columnOptions = this.mergeConfig(columnOptions, column.columnDef);
 
             if(columnOptions) {
-                var colDefSetByComponent = {};
-                for( var p in COLUMN_PROPERTIES_DEFAULTS) {
-                    if(COLUMN_PROPERTIES_DEFAULTS[p]["default"] != column[p]) {
-                        colDefSetByComponent[COLUMN_PROPERTIES_DEFAULTS[p]["colDefProperty"]] = true;
+                const colDefSetByComponent = {};
+                for( const p in COLUMN_PROPERTIES_DEFAULTS) {
+                    if(COLUMN_PROPERTIES_DEFAULTS[p]['default'] != column[p]) {
+                        colDefSetByComponent[COLUMN_PROPERTIES_DEFAULTS[p]['colDefProperty']] = true;
                     }
                 }
-                for (var property in columnOptions) {
+                for (const property in columnOptions) {
                     if (columnOptions.hasOwnProperty(property) && !colDefSetByComponent.hasOwnProperty(property)) {
                         colDef[property] = columnOptions[property];
                     }
@@ -315,33 +311,36 @@ export class DataGrid {
 
     /**
      * Returns the column identifier
-     * @param {Object} column
-     * @param {Number} idx
      *
-     * @return {String}
+     * @param column
+     * @param idx
+     *
+     * @return
      *
      * @private
-     * */
-    getColumnID(column, idx) {					
+     */
+    getColumnID(column, idx) {
         if (column.dataprovider) {
             return column.dataprovider.idForFoundset + ':' + idx;
         } else {
-            return "col_" + idx;
+            return 'col_' + idx;
         }
     }
 
     /**
      * Returns the column with the given fieldName
-     * @param {String} field
-     * @return {Object}
-     * */
+     *
+     * @param field
+     * @return
+     *
+     */
     getColumn(field, columnsModel?) {
         if (!columnsModel && this.state.columns[field]) { // check if is already cached
             return this.state.columns[field];
         } else {
-            let columns = columnsModel ? columnsModel : this.columns;
+            const columns = columnsModel ? columnsModel : this.columns;
             for (let i = 0; i < columns.length; i++) {
-                let column = columns[i];
+                const column = columns[i];
                 if (column.id === field || this.getColumnID(column, i) === field) {
                     // cache it in hashmap for quick retrieval
                     if(!columnsModel) this.state.columns[field] = column;
@@ -354,14 +353,16 @@ export class DataGrid {
 
     /**
      * Returns the column with the given fieldName
-     * @param {String} field
-     * @return {Number}
-     * */
+     *
+     * @param field
+     * @return
+     *
+     */
     getColumnIndex(field) {
         let fieldToCompare = field;
         let fieldIdx = 0;
         if (field.indexOf('_') > 0) { // has index
-            var fieldParts = field.split('_');
+            const fieldParts = field.split('_');
             if('col' != fieldParts[0] && !isNaN(fieldParts[1])) {
                 fieldToCompare = fieldParts[0];
                 fieldIdx = parseInt(fieldParts[1]);
@@ -369,7 +370,7 @@ export class DataGrid {
         }
 
         for (let i = 0; i < this.columns.length; i++) {
-            var column = this.columns[i];
+            const column = this.columns[i];
             if (column.id === fieldToCompare || this.getColumnID(column, i) == fieldToCompare) {
                 if(fieldIdx < 1) {
                     return i;
@@ -381,20 +382,20 @@ export class DataGrid {
     }
 
     /**
-     * @param {String} idsForFoundset
+     * @param idsForFoundset
      * Finds all the columns with the given idForFoundset
      *
-     * @return {Array<String>}
+     * @return
      *
      * @private
-     * */
+     */
     getColIDs(idsForFoundset) {
-        
+
         const result = [];
         if (!idsForFoundset) {
             return [];
         }
-        
+
         for (let i = 0; i < this.columns.length; i++) {
             const column = this.columns[i];
             if (column.dataprovider && column.dataprovider.idForFoundset === idsForFoundset) {
@@ -412,82 +413,82 @@ export class DataGrid {
 
     stripUnsortableColumns(sortString) {
         if (sortString) {
-            let newSortString = "";
-            const sortColumns = sortString.split(",");
+            let newSortString = '';
+            const sortColumns = sortString.split(',');
             for (let i = 0; i < sortColumns.length; i++) {
                 const sortColumn = sortColumns[i];
                 let idForFoundset;
                 let sortDirection;
                 if (!sortColumn) {
                     continue;
-                } else if (sortColumn.substr(sortColumn.length - 5, 5) === " desc") {
+                } else if (sortColumn.substr(sortColumn.length - 5, 5) === ' desc') {
                     idForFoundset = sortColumn.substring(0, sortColumn.length - 5);
-                    sortDirection = "desc";
-                } else if (sortColumn.substr(sortColumn.length - 4, 4) === " asc") {
+                    sortDirection = 'desc';
+                } else if (sortColumn.substr(sortColumn.length - 4, 4) === ' asc') {
                     idForFoundset = sortColumn.substring(0, sortColumn.length - 4),
-                    sortDirection = "asc";
+                    sortDirection = 'asc';
                 }
 
                 let isSortable = false;
                 if (idForFoundset && sortDirection) {
-                    var agColIds = this.getColIDs(idForFoundset);
+                    const agColIds = this.getColIDs(idForFoundset);
                     for (let j = 0; j < agColIds.length; j++) {
                         isSortable = isSortable || this.getColumn(agColIds[j]).enableSort;
                         if(isSortable) break;
                     }
                 }
                 if(isSortable) {
-                    if(newSortString) newSortString += ",";
-                    newSortString += idForFoundset + " " + sortDirection;
+                    if(newSortString) newSortString += ',';
+                    newSortString += idForFoundset + ' ' + sortDirection;
                 }
             }
             return newSortString;
-        }
-        else return sortString;
+        } else return sortString;
     }
 
     /**
      * Returns true if table is grouping
-     * @return {Boolean}
-     * */
+     *
+     * @return
+     *
+     */
     isTableGrouped() {
-        var rowGroupCols = this.getRowGroupColumns();
+        const rowGroupCols = this.getRowGroupColumns();
         return rowGroupCols.length > 0;
     }
 
     /**
      * Returns table's rowGroupColumns
      * */
-    getRowGroupColumns():any {
-        var rowGroupCols = this.gridOptions.columnApi ? this.gridOptions.columnApi.getRowGroupColumns() : null;
+    getRowGroupColumns(): any {
+        const rowGroupCols = this.gridOptions.columnApi ? this.gridOptions.columnApi.getRowGroupColumns() : null;
         return rowGroupCols ? rowGroupCols : [];
     }
 
     /**
-    * Returns the group hierarchy for the given node
-    * @private 
-    * @param {Object} node
-    * @return {{
-    * 	rowGroupFields : Array<String>,
-    * 	rowGroupKeys: Array
-    * }}
-    * 
-    * */
+     * Returns the group hierarchy for the given node
+     *
+     * @private
+     * @param node
+     * @return
+     *
+     *
+     */
     getNodeGroupInfo(node) {
         const rowGroupCols = [];
         //var rowGroupColIdxs = [];
         const groupKeys = [];
-        
+
         const isExpanded = node.expanded;
-        
+
         let parentNode = node.parent;
         while (parentNode && parentNode.level >= 0 && parentNode.group === true) {
             // check if all fields are fine
             if (!parentNode.field && !parentNode.data) {
-                this.log.warn("cannot resolve group nodes ");
+                this.log.warn('cannot resolve group nodes ');
                 // exit
                 return;
-            }			
+            }
 
             // is reverse order
             rowGroupCols.unshift(parentNode.field);
@@ -497,29 +498,29 @@ export class DataGrid {
             // next node
             parentNode = parentNode.parent;
         }
-        
+
         const field = node.field;
         const key = node.key;
-        
+
         rowGroupCols.push(field);
         groupKeys.push(key);
-        
+
         const result = {
             rowGroupFields: rowGroupCols,
             rowGroupKeys: groupKeys
-        }
+        };
         return result;
     }
 
     mergeConfig(target, source) {
-        var property;
-        
+        let property;
+
         // clone target to avoid side effects
-        var mergeConfig = {};
+        let mergeConfig = {};
         for (property in target) {
             mergeConfig[property] = target[property];
         }
-        
+
         if(source) {
             if(mergeConfig) {
                 for (property in source) {
@@ -535,9 +536,9 @@ export class DataGrid {
     }
 
     getCellClass(params) {
-        var column = this.getColumn(params.colDef.field);
+        const column = this.getColumn(params.colDef.field);
 
-        var cellClass = 'ag-table-cell';
+        let cellClass = 'ag-table-cell';
         if(column.styleClass) cellClass += ' ' + column.styleClass;
 
         return cellClass;
@@ -567,7 +568,7 @@ export class DataGrid {
     //     }
     //     return tooltip;
     // }
-    
+
     // cellRenderer(params) {
     //     var isGroupColumn = false;
     //     var colId = null;
@@ -601,7 +602,7 @@ export class DataGrid {
     //         } else {
     //             returnValueFormatted = true;
     //         }
-        
+
     //         if(value instanceof Date) returnValueFormatted = true;
     //     }
 
@@ -628,7 +629,7 @@ export class DataGrid {
     //             styleClassProvider = col.footerStyleClass;
     //         }
     //     }
-        
+
     //     if(styleClassProvider) {
     //         var divContainer = document.createElement("div");
     //         divContainer.className = styleClassProvider;
@@ -658,13 +659,15 @@ export class DataGrid {
 
     /**
      * Update the uiGrid row with given viewPort index
-     * @param {Array<{startIndex: Number, endIndex: Number, type: Number}>} rowUpdates
-     * @param {Number} [oldStartIndex]
-     * @param {Number} oldSize
+     *
+     * @param rowUpdates
+     * @param [oldStartIndex]
+     * @param oldSize
      *
      * return {Boolean} whatever a purge ($scope.purge();) was done due to update
-     *  */
-    updateRows(rowUpdates, oldStartIndex, oldSize) { 
+     *
+     */
+    updateRows(rowUpdates, oldStartIndex, oldSize) {
     }
 
     updateFoundsetRecord(params) {
@@ -768,6 +771,7 @@ export class DataGrid {
     /**
      * remove the given foundset hash from the model hashmap.
      * User to clear the memory
+     *
      * @public
      *  */
     removeFoundSetByFoundsetUUID(foundsetHash) {
@@ -779,11 +783,11 @@ export class DataGrid {
 
         // remove the hashedFoundsets
         const _this = this;
-        this.servoyApi.callServerSideApi("removeGroupedFoundsetUUID", [foundsetHash]).then(function(removed) {
+        this.servoyApi.callServerSideApi('removeGroupedFoundsetUUID', [foundsetHash]).then(function(removed) {
             if (removed) {
                 delete _this.state.foundsetManagers[foundsetHash];
             } else {
-                _this.log.warn("could not delete hashed foundset " + foundsetHash);
+                _this.log.warn('could not delete hashed foundset ' + foundsetHash);
             }
         }).catch(function(e) {
             _this.log.error(e);
@@ -799,7 +803,7 @@ export class DataGrid {
         // TODO return something else here ?
         if (foundsetHash === 'root') return this.myFoundset;
         if (this.hashedFoundsets) {
-            for (var i = 0; i < this.hashedFoundsets.length; i++) {
+            for (let i = 0; i < this.hashedFoundsets.length; i++) {
                 if (this.hashedFoundsets[i].foundsetUUID == foundsetHash)
                     return this.hashedFoundsets[i].foundset;
 
@@ -810,9 +814,10 @@ export class DataGrid {
 
     /**
      * Returns the foundset manager for the given hash
-     * @return {FoundSetManager}
+     *
+     * @return
      * @public
-     *  */
+     */
     getFoundsetManagerByFoundsetUUID(foundsetHash) {
         if (!foundsetHash) return null;
 
@@ -835,11 +840,11 @@ export class DataGrid {
 
     /**
      * @type {SortModelType}
-     *
      * Returns the sortString and sortColumns array for the given sortModel
      *
-     * @return {{sortString: String, sortColumns: Array<{name:String, direction:String}>}}
-     * */
+     * @return
+     *
+     */
     getFoundsetSortModel(sortModel) {
         let sortString;
         const sortColumns = [];
@@ -856,7 +861,7 @@ export class DataGrid {
                         const direction = sortModelCol.sort;
                         if (i > 0) sortString += ',';
                         sortString += columnName + ' ' + direction + '';
-                        sortColumns.push({ name: columnName, direction: direction });
+                        sortColumns.push({ name: columnName, direction });
                     }
                 }
             }
@@ -864,8 +869,8 @@ export class DataGrid {
         }
 
         return {
-            sortString: sortString,
-            sortColumns: sortColumns
+            sortString,
+            sortColumns
         };
     }
 
@@ -885,13 +890,14 @@ export class DataGrid {
      * TODO parametrize foundset or add it into foundsetManager object
      * Returns the sort model for the root foundset
      *
-     * @return {SortModelType}
-     * */
+     * @return
+     *
+     */
     getSortModel() {
         const sortModel = [];
         let sortColumns: any = this.foundset.getSortColumns();
         if (sortColumns) {
-            sortColumns = sortColumns.split(",");
+            sortColumns = sortColumns.split(',');
             for (let i = 0; i < sortColumns.length; i++) {
                 // TODO parse sortColumns into default sort string
                 /** @type {String} */
@@ -900,18 +906,18 @@ export class DataGrid {
                 let sortDirection;
                 if (!sortColumn) {
                     continue;
-                } else if (sortColumn.substr(sortColumn.length - 5, 5) === " desc") {
+                } else if (sortColumn.substr(sortColumn.length - 5, 5) === ' desc') {
                     idForFoundset = sortColumn.substring(0, sortColumn.length - 5);
-                    sortDirection = "desc";
-                } else if (sortColumn.substr(sortColumn.length - 4, 4) === " asc") {
+                    sortDirection = 'desc';
+                } else if (sortColumn.substr(sortColumn.length - 4, 4) === ' asc') {
                     idForFoundset = sortColumn.substring(0, sortColumn.length - 4),
-                    sortDirection = "asc";
+                    sortDirection = 'asc';
                 }
-                
+
                 // add it into the sort model
                 if (idForFoundset && sortDirection) {
                     const agColIds = this.getColIDs(idForFoundset);
-                    
+
                     for (let j = 0; j < agColIds.length; j++) {
                         sortModel.push({
                             colId: agColIds[j],
@@ -934,7 +940,7 @@ export class DataGrid {
         // reset root foundset
         this.foundset.foundset = this.myFoundset;
 
-        var currentEditCells = this.agGrid.api.getEditingCells();
+        const currentEditCells = this.agGrid.api.getEditingCells();
         if(currentEditCells.length != 0) {
             this.startEditFoundsetIndex = currentEditCells[0].rowIndex + 1;
             this.startEditColumnIndex = this.getColumnIndex(currentEditCells[0].column.getColId());
@@ -954,9 +960,9 @@ export class DataGrid {
         //						// FIXME there is no ag-grid method to force group expand for a specific key value
         //					}
     }
-    
+
     getValuelist(params, asCodeString?): any {
-        return this.getValuelistEx(params.node.data, params.column.colId, asCodeString)
+        return this.getValuelistEx(params.node.data, params.column.colId, asCodeString);
     }
 
     getValuelistEx(row, colId, asCodeString): any {
@@ -984,37 +990,36 @@ export class DataGrid {
 
         // if it's a foundset linked prop (starting with Servoy 8.3.2) or not (prior to 8.3.2)
         if (column.valuelist && column.valuelist.state
-                && column.valuelist.state["recordLinked"] != undefined) {
+                && column.valuelist.state['recordLinked'] != undefined) {
             // _svyRowId: "5.10643;_0"
             const rowId = row[ViewportService.ROW_ID_COL_KEY];
-            
+
             if (column.valuelist.length == 0 && foundsetRows.length > 0) {
                 // this if is just for backwards compatilility editing comboboxes with valuelists with Servoy < 8.3.3 (there the foundset-linked-in-spec valuelists in custom objects
                 // would not be able to reference their foundset from client-side JS => for valuelists that were not actually linked
                 // client side valuelist.js would simulate a viewport that has as many items as the foundset rows containing really the same valuelist object
                 // and this did not work until the fix of SVY-12718 (valuelist.js was not able to find foundset from the same custom object) => valuelist viewport
                 // was length 0; this whole if can be removed once groupingtable's package will require Servoy >= 8.3.3
-                
+
                 // fall back to what was done previously - use root valuelist and foundset to resolve stuff (which will probably work except for related valuelists)
                 column = this.getColumn(colId);
                 foundsetRows = this.myFoundset.viewPort.rows;
             }
-            
-            let idxInFoundsetViewport:any = -1;
-            for (let idx in foundsetRows)
+
+            let idxInFoundsetViewport: any = -1;
+            for (const idx in foundsetRows)
                 if (foundsetRows[idx][ViewportService.ROW_ID_COL_KEY].indexOf(rowId) == 0) {
                     idxInFoundsetViewport = idx;
                     break;
                 }
-            
-            if (idxInFoundsetViewport >= 0 && idxInFoundsetViewport < column.valuelist.length) return asCodeString ? ".valuelist[" + idxInFoundsetViewport + "]" : column.valuelist[idxInFoundsetViewport];
-            else if (!column.valuelist.state["recordLinked"] && column.valuelist.length > 0) return asCodeString ? ".valuelist[0]" : column.valuelist[0];
+
+            if (idxInFoundsetViewport >= 0 && idxInFoundsetViewport < column.valuelist.length) return asCodeString ? '.valuelist[' + idxInFoundsetViewport + ']' : column.valuelist[idxInFoundsetViewport];
+            else if (!column.valuelist.state['recordLinked'] && column.valuelist.length > 0) return asCodeString ? '.valuelist[0]' : column.valuelist[0];
             else {
                 this.log.error('Cannot find the valuelist entry for the row that was clicked.');
                 return null;
             }
-        }
-        else return asCodeString ? ".valuelist" : column.valuelist;
+        } else return asCodeString ? '.valuelist' : column.valuelist;
     }
 
     /**
@@ -1043,12 +1048,11 @@ export class DataGrid {
                 const index = args.node.rowIndex - _this.foundset.foundset.viewPort.startIndex;
                 isColumnEditable = column.isEditableDataprovider[index];
             }
-        }
-        else {
+        } else {
             const foundsetManager = _this.getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
             const index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
-            if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_isEditableDataprovider"] != undefined) {
-                isColumnEditable = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_isEditableDataprovider"];
+            if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + '_isEditableDataprovider'] != undefined) {
+                isColumnEditable = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + '_isEditableDataprovider'];
             }
         }
 
@@ -1083,28 +1087,29 @@ class State {
 }
 
 class WaitForInfo {
-    sort: number = 0;
-    loadRecords: number = 0;
+    sort = 0;
+    loadRecords = 0;
 }
 
 class ExpandedInfo {
-    /** The column collapsed 
+    /** The column collapsed
+     *
      * @deprecated */
-    columns = {};   
+    columns = {};
     /** the group fields in order
      * This is a re-duntant info. I can obtain it via:
-     * 	
+     *
      * var groupedColumns = gridOptions.columnApi.getRowGroupColumns();
      * var groupFields = [];
      * for (var j = 0; j < groupedColumns.length; j++) {
      *	    groupFields.push(groupedColumns[j].colDef.field);
      * }
-     *  */    
+     *  */
     fields = [];
 }
 
 class GroupedInfo {
-    columns = [];   
+    columns = [];
 }
 
 /**
@@ -1119,10 +1124,13 @@ class FoundsetManager {
         }
     }
 
-    /** return the viewPort data in a new object
-     * @param {Number} [startIndex]
-     * @param {Number} [endIndex]
-     * */
+    /**
+     *  return the viewPort data in a new object
+     *
+     * @param [startIndex]
+     * @param [endIndex]
+     *
+     */
     getViewPortData(startIndex: number, endIndex: number) {
         const result = [];
         startIndex = startIndex ? startIndex : 0;
@@ -1145,7 +1153,7 @@ class FoundsetManager {
         }
 
         for (let j = startIndex; j < endIndex; j++) {
-            var row = this.getViewPortRow(j, columnsModel);
+            const row = this.getViewPortRow(j, columnsModel);
             if (row) result.push(row);
         }
 
@@ -1158,9 +1166,9 @@ class FoundsetManager {
         try {
             r = new Object();
             // push the id so the rows can be merged
-            var viewPortRow = this.foundset.viewPort.rows[index];
+            const viewPortRow = this.foundset.viewPort.rows[index];
             if (!viewPortRow) {
-                this.dataGrid.log.error("Cannot find row " + index + ' in foundset ' + this.foundsetUUID + ' size ' + this.foundset.viewPort.size + ' startIndex ' + this.foundset.viewPort.startIndex);
+                this.dataGrid.log.error('Cannot find row ' + index + ' in foundset ' + this.foundsetUUID + ' size ' + this.foundset.viewPort.size + ' startIndex ' + this.foundset.viewPort.startIndex);
                 return null;
             }
 
@@ -1172,10 +1180,10 @@ class FoundsetManager {
 
             // push each dataprovider
             for (let i = 0; i < columns.length; i++) {
-                let header = columns[i];
-                let field = header.id == 'svycount' ? header.id : this.dataGrid.getColumnID(header, i);
+                const header = columns[i];
+                const field = header.id == 'svycount' ? header.id : this.dataGrid.getColumnID(header, i);
 
-                let value = header.dataprovider ? header.dataprovider[index] : null;
+                const value = header.dataprovider ? header.dataprovider[index] : null;
                 r[field] = value;
             }
             return r;
@@ -1212,7 +1220,7 @@ class FoundsetManager {
 
         // Wait for response
         const isRootFoundset = this.isRoot;
-        let requestId = 1 + Math.random();
+        const requestId = 1 + Math.random();
         this.dataGrid.state.waitFor.loadRecords = isRootFoundset ? requestId : 0; // we use state.waitfor.loadRecords only in the root foundset change listener
         // TODO can it handle multiple requests ?
         const _this = this;
@@ -1224,8 +1232,8 @@ class FoundsetManager {
                 setTimeout(function() {
                     if (_this.dataGrid.state.waitFor.loadRecords !== requestId) {
                         // FIXME if this happen reduce parallel async requests to 1
-                        _this.dataGrid.log.warn("Load record request id '" + _this.dataGrid.state.waitFor.loadRecords + "' is different from the resolved promise '" + requestId + "'; this should not happen !!!");
-                    }		
+                        _this.dataGrid.log.warn('Load record request id \'' + _this.dataGrid.state.waitFor.loadRecords + '\' is different from the resolved promise \'' + requestId + '\'; this should not happen !!!');
+                    }
                     _this.dataGrid.state.waitFor.loadRecords = 0;
                 }, 0);
             }
@@ -1246,8 +1254,9 @@ class FoundsetManager {
     }
 
     /**
-     * @return {Number} return the foundset index of the given row in viewPort (includes the startIndex diff)
-     *  */
+     * @return return the foundset index of the given row in viewPort (includes the startIndex diff)
+     *
+     */
     getRowIndex(row) {
         const id = row._svyRowId;
         const viewPortRows = this.foundset.viewPort.rows;
@@ -1263,11 +1272,11 @@ class FoundsetManager {
         this.dataGrid.log.debug('child foundset changed listener ' + this.foundset);
 
         if (change.sortColumnsChanged) {
-            var newSort = change.sortColumnsChanged.newValue;
-            var oldSort = change.sortColumnsChanged.oldValue;
+            const newSort = change.sortColumnsChanged.newValue;
+            const oldSort = change.sortColumnsChanged.oldValue;
 
             // sort changed
-            this.dataGrid.log.debug("Change Group Sort Model " + newSort);
+            this.dataGrid.log.debug('Change Group Sort Model ' + newSort);
             return;
         }
 
@@ -1276,8 +1285,8 @@ class FoundsetManager {
         }
 
         if (change.viewportRowsUpdated) {
-            var updates = change.viewportRowsUpdated;
-            this.dataGrid.log.debug(updates)
+            const updates = change.viewportRowsUpdated;
+            this.dataGrid.log.debug(updates);
             this.dataGrid.updateRows(updates, null, null);
         }
 
@@ -1300,17 +1309,17 @@ class FoundsetServer {
     }
 
     /**
-     * @param {AgDataRequestType} request
-     * @param {Array} groupKeys
-     * @param {Function} callback callback(data, isLastRow)
+     * @param request
+     * @param groupKeys
+     * @param callback callback(data, isLastRow)
      * @protected
-     * */
+     */
     getData(request, groupKeys, callback) {
 
         this.dataGrid.log.debug(request);
 
         // the row group cols, ie the cols that the user has dragged into the 'group by' zone, eg 'Country' and 'Customerid'
-        const rowGroupCols = request.rowGroupCols
+        const rowGroupCols = request.rowGroupCols;
 
         // if going aggregation, contains the value columns, eg ['gold','silver','bronze']
         const valueCols = request.valueCols;
@@ -1323,7 +1332,7 @@ class FoundsetServer {
         const filterModel = this.dataGrid.agGrid.api.getFilterModel();
         // create filter model with column indexes that we can send to the server
         const updatedFilterModel = {};
-        for(let c in filterModel) {
+        for(const c in filterModel) {
             const columnIndex = this.dataGrid.getColumnIndex(c);
             if(columnIndex != -1) {
                 updatedFilterModel[columnIndex] = filterModel[c];
@@ -1331,19 +1340,18 @@ class FoundsetServer {
         }
         const sUpdatedFilterModel = JSON.stringify(updatedFilterModel);
         // if filter is changed, apply it on the root foundset, and clear the foundset cache if grouped
-        if (sUpdatedFilterModel != this.dataGrid.filterModel && !(sUpdatedFilterModel == "{}" && this.dataGrid.filterModel == undefined)) {
+        if (sUpdatedFilterModel != this.dataGrid.filterModel && !(sUpdatedFilterModel == '{}' && this.dataGrid.filterModel == undefined)) {
             this.dataGrid.filterModel = sUpdatedFilterModel;
-            var filterMyFoundsetArg = [];
+            const filterMyFoundsetArg = [];
             filterMyFoundsetArg.push(sUpdatedFilterModel);
 
             if(rowGroupCols.length) {
                 this.dataGrid.groupManager.removeFoundsetRefAtLevel(0);
-                filterMyFoundsetArg.push("{}");
-            }
-            else {
+                filterMyFoundsetArg.push('{}');
+            } else {
                 filterMyFoundsetArg.push(sUpdatedFilterModel);
             }
-            allPromises.push(this.dataGrid.servoyApi.callServerSideApi("filterMyFoundset", filterMyFoundsetArg));
+            allPromises.push(this.dataGrid.servoyApi.callServerSideApi('filterMyFoundset', filterMyFoundsetArg));
         }
 
         let sortModel =  this.dataGrid.agGrid.api.getSortModel();
@@ -1353,8 +1361,8 @@ class FoundsetServer {
 
         // if clicking sort on the grouping column
         if (rowGroupCols.length > 0 && sortModel[0] &&
-            (sortModel[0].colId === ("ag-Grid-AutoColumn-" + rowGroupCols[0].id) || sortModel[0].colId === rowGroupCols[0].id)) {
-            // replace colFd with the id of the grouped column						
+            (sortModel[0].colId === ('ag-Grid-AutoColumn-' + rowGroupCols[0].id) || sortModel[0].colId === rowGroupCols[0].id)) {
+            // replace colFd with the id of the grouped column
             sortModel = [{ colId: rowGroupCols[0].field, sort: sortModel[0].sort }];
             if(!this.dataGrid.state.rootGroupSort  || this.dataGrid.state.rootGroupSort.colId != sortModel[0].colId || this.dataGrid.state.rootGroupSort.sort != sortModel[0].sort) {
                 sortRootGroup = true;
@@ -1363,7 +1371,7 @@ class FoundsetServer {
         let foundsetSortModel = this.dataGrid.getFoundsetSortModel(sortModel);
         const sortString = foundsetSortModel.sortString;
 
-        this.dataGrid.log.debug("Group " + (rowGroupCols[0] ? rowGroupCols[0].displayName : '/') + ' + ' + (groupKeys[0] ? groupKeys[0] : '/') + ' # ' + request.startRow + ' # ' + request.endRow);
+        this.dataGrid.log.debug('Group ' + (rowGroupCols[0] ? rowGroupCols[0].displayName : '/') + ' + ' + (groupKeys[0] ? groupKeys[0] : '/') + ' # ' + request.startRow + ' # ' + request.endRow);
 
         // init state of grouped columns. Is normally done by onRowColumnsChanged but is not triggered if rowGroupIndex is set at design time
         // FIXME should handle runtime changes to model.columns. It does not at the moment
@@ -1389,9 +1397,9 @@ class FoundsetServer {
         /**
          * GetFoundserRef Promise Callback
          *
-         * @param {String} foundsetUUID
+         * @param foundsetUUID
          * @protected
-         *  */
+         */
         function getFoundsetRefSuccess(args) {
 
             const foundsetUUID = args[args.length - 1];
@@ -1403,7 +1411,7 @@ class FoundsetServer {
             // group, in the foundsetHashmap and in the state ?
             const foundsetRefManager = _this.dataGrid.getFoundsetManagerByFoundsetUUID(foundsetUUID);
 
-            if (sortString === "") {
+            if (sortString === '') {
                 // TODO restore a default sort order when sort is removed
                 // $log.warn(" Use the default foundset sort.. which is ? ");
             }
@@ -1433,7 +1441,7 @@ class FoundsetServer {
                 if(isColumnSortable) {
                     // send sort request if header is clicked; skip if is is not from UI (isSelectionReady == false) or if it from a sort handler or a group column sort
                     if(_this.dataGrid.isSelectionReady || sortString) {
-                        foundsetSortModel = _this.dataGrid.getFoundsetSortModel(sortModel)
+                        foundsetSortModel = _this.dataGrid.getFoundsetSortModel(sortModel);
                         _this.dataGrid.sortPromise = foundsetRefManager.sort(foundsetSortModel.sortColumns);
                         _this.dataGrid.sortPromise.then(function() {
                             getDataFromFoundset(foundsetRefManager);
@@ -1442,7 +1450,7 @@ class FoundsetServer {
                                 _this.dataGrid.sortPromise = null;
                             }, 0);
                         }).catch(function(e) {
-                            _this.dataGrid.sortPromise = null
+                            _this.dataGrid.sortPromise = null;
                         });
                     }
                     // set the grid sorting if foundset sort changed from the grid initialization (like doing foundset sort on form's onShow)
@@ -1450,12 +1458,10 @@ class FoundsetServer {
                         _this.dataGrid.agGrid.api.setSortModel(_this.dataGrid.getSortModel());
                         _this.dataGrid.agGrid.api.purgeServerSideCache();
                     }
-                }
-                else {
+                } else {
                     getDataFromFoundset(foundsetRefManager);
                 }
-            }
-            else {
+            } else {
                 getDataFromFoundset(foundsetRefManager);
             }
         }
@@ -1463,9 +1469,9 @@ class FoundsetServer {
         /**
          * GetDataFromFoundset Promise Callback
          *
-         * @param {FoundsetManager} foundsetRef the foundsetManager object
+         * @param foundsetRef the foundsetManager object
          * @protected
-         *  */
+         */
         function getDataFromFoundset(foundsetManager: FoundsetManager) {
             // test cache blocks
             //if (!isTableGrouped()) test_validateCache();
@@ -1516,7 +1522,7 @@ class FoundsetServer {
 
                     result = foundsetManager.getViewPortData(viewPortStartIndex, viewPortEndIndex);
                     callback(result, lastRowIndex);
-                    
+
                     // TODO data is ready here ?
 
                 }).catch(getFoundsetRefError);
@@ -1544,7 +1550,7 @@ class FoundsetDatasource {
         this.dataGrid.isDataLoading = true;
 
         // the row group cols, ie the cols that the user has dragged into the 'group by' zone, eg 'Country' and 'Customerid'
-        const rowGroupCols = params.request.rowGroupCols
+        const rowGroupCols = params.request.rowGroupCols;
         // the keys we are looking at. will be empty if looking at top level (either no groups, or looking at top level groups). eg ['United States','2002']
         const groupKeys = params.request.groupKeys;
 
@@ -1567,8 +1573,7 @@ class FoundsetDatasource {
         for (let i = 0; i < groupKeys.length; i++) {
             if (groupKeys[i] == NULL_VALUE) {
                 groupKeys[i] = null;	// reset to real null, so we use the right value for grouping
-            }
-            else {
+            } else {
                 const vl = this.dataGrid.getValuelistEx(params.parentNode.data, rowGroupCols[i]['id'], false);
                 if(vl) {
                     filterPromises.push(vl.filterList(groupKeys[i]));
@@ -1588,7 +1593,7 @@ class FoundsetDatasource {
             this.dataGrid.groupManager.removeFoundsetRefAtLevel(0);
         }
 
-        let allPromisses = this.dataGrid.sortHandlerPromises.concat(filterPromises);
+        const allPromisses = this.dataGrid.sortHandlerPromises.concat(filterPromises);
         Promise.all(allPromisses).then(function() {
             _this.dataGrid.removeAllFoundsetRef = false;
             _this.foundsetServer.getData(params.request, groupKeys,
@@ -1600,10 +1605,10 @@ class FoundsetDatasource {
                     if(_this.dataGrid.isRefreshNeededForAutoHeight) {
                         const model = this.dataGrid.agGrid.api.getModel();
                         if(model.rootNode.childrenCache) {
-                            let sortedBlockIds = model.rootNode.childrenCache.getBlockIdsSorted();
+                            const sortedBlockIds = model.rootNode.childrenCache.getBlockIdsSorted();
                             if(sortedBlockIds.length) {
-                                const firstBlock = model.rootNode.childrenCache.getBlock(sortedBlockIds[0])
-                                if(firstBlock.state == "loaded") {
+                                const firstBlock = model.rootNode.childrenCache.getBlock(sortedBlockIds[0]);
+                                if(firstBlock.state == 'loaded') {
                                     _this.dataGrid.isRefreshNeededForAutoHeight = false;
                                     setTimeout(function() {
                                         _this.dataGrid.purgeImpl();
@@ -1623,14 +1628,14 @@ class FoundsetDatasource {
                     if(_this.dataGrid.startEditFoundsetIndex > -1 && _this.dataGrid.startEditColumnIndex > -1) {
                         _this.dataGrid.editCellAtWithTimeout(_this.dataGrid.startEditFoundsetIndex, _this.dataGrid.startEditColumnIndex);
                     }
-                    
-                    
+
+
                     // Preserve Group State
                     // https://www.ag-grid.com/javascript-grid-server-side-model-grouping/#preserving-group-state
-                    
+
                     let expandedState = _this.dataGrid._internalExpandedState;
                     const groupFields = _this.dataGrid.state.expanded.fields;
-                    
+
                     if (resultForGrid && resultForGrid.length && _this.dataGrid.isTableGrouped() && groupFields && expandedState) {
 
                         // get the fs manager for the group
@@ -1638,30 +1643,30 @@ class FoundsetDatasource {
 
                         // to preserve group state we expand any previously expanded groups for this block
                         for (let i = 0; i < resultForGrid.length; i++) {
-                            
+
                             const row = resultForGrid[i];
                             try {
-                                
+
                                 // get group levels, in order
 //											var groupedColumns = gridOptions.columnApi.getRowGroupColumns();
 //											var groupFields = [];
 //											for (var j = 0; j < groupedColumns.length; j++) {
 //												groupFields.push(groupedColumns[j].colDef.field);
 //											}
-                                
-                                
+
+
                                 // TODO do i need to retrieve the node before to know if column is expanded or not ?
                                 const node = _this.dataGrid.agGrid.api.getRowNode(row._svyFoundsetUUID + '_' + row._svyFoundsetIndex);
                                 if (!node) break;
-                                
+
                                 const rowGroupInfo = _this.dataGrid.getNodeGroupInfo(node);
                                 const rowGroupFields = rowGroupInfo.rowGroupFields;
                                 const rowGroupKeys = rowGroupInfo.rowGroupKeys;
-                                
+
                                 // check if node is expanded
                                 let isExpanded;
-                                        
-                                
+
+
                                 // check if the expanded columns matches the expanded columns in cache
 //											for (var j = 0; j < rowGroupFields.length; j++) {
 //												if (rowGroupFields[j] != groupFields[j]) {
@@ -1672,10 +1677,10 @@ class FoundsetDatasource {
 //											if (isExpanded === false) {
 //												break;
 //											}
-                                
+
                                 // check if the node is expanded
                                 expandedState = _this.dataGrid._internalExpandedState;
-                                
+
                                 for (let j = 0; expandedState && j < rowGroupKeys.length; j++) {
                                     expandedState = expandedState[rowGroupKeys[j]];
                                     if (!expandedState) {
@@ -1685,14 +1690,14 @@ class FoundsetDatasource {
                                         isExpanded = true;
                                     }
                                 }
-                                
+
                                 // expand the node
                                 if (isExpanded) {
                                     node.setExpanded(true);
                                 }
-                                
+
                             } catch (e) {
-                                console.log(e)
+                                console.log(e);
                             }
                         }
                     }
@@ -1700,7 +1705,7 @@ class FoundsetDatasource {
         }, function(reason) {
             _this.dataGrid.log.error('Can not get realValues for groupKeys ' + reason);
         });
-    };   
+    };
 }
 
 class GroupManager {
@@ -1709,7 +1714,7 @@ class GroupManager {
 
     groupedColumns = [];
     groupedValues = new Object();
-    
+
     constructor(public dataGrid: DataGrid) {
         this.hashTree = new GroupHashCache(this.dataGrid);
     }
@@ -1717,12 +1722,13 @@ class GroupManager {
     /**
      * Returns the foundset with the given grouping criteria is already exists in cache
      *
-     * @param {Array} rowGroupCols
-     * @param {Array} groupKeys
-     * @param {String} [sort] desc or asc. Default asc
+     * @param rowGroupCols
+     * @param groupKeys
+     * @param [sort] desc or asc. Default asc
      *
-     * @return {String} returns the UUID of the foundset if exists in cache
-     * */
+     * @return returns the UUID of the foundset if exists in cache
+     *
+     */
     getCachedFoundsetUUID(rowGroupCols, groupKeys) {
         return this.hashTree.getCachedFoundset(rowGroupCols, groupKeys);
     }
@@ -1730,12 +1736,13 @@ class GroupManager {
     /**
      * Returns the foundset with the given grouping criteria
      *
-     * @param {Array} rowGroupCols
-     * @param {Array} groupKeys
-     * @param {String} [sort] desc or asc. Default asc
+     * @param rowGroupCols
+     * @param groupKeys
+     * @param [sort] desc or asc. Default asc
      *
-     * @return {PromiseType} returns a promise
-     * */
+     * @return returns a promise
+     *
+     */
     getFoundsetRef(rowGroupCols, groupKeys, sort?) {
 
         // create a promise
@@ -1799,7 +1806,7 @@ class GroupManager {
 
                 // get the index of each grouped column
                 const groupColumnIndexes = [];
-                for (var idx = 0; idx < groupCols.length; idx++) {
+                for (let idx = 0; idx < groupCols.length; idx++) {
                     columnId = rowGroupCols[idx].field;
                     columnIndex = this.dataGrid.getColumnIndex(columnId);
                     groupColumnIndexes.push(columnIndex);
@@ -1815,11 +1822,13 @@ class GroupManager {
                 }
             }
 
-            /** @return {Object} returns the foundsetRef object */
+            /**
+             * @return returns the foundsetRef object
+             */
             function getHashFoundsetSuccess(foundsetUUID) {
 
                 if (!foundsetUUID) {
-                    this.dataGrid.log.error("why i don't have a foundset ref ?")
+                    this.dataGrid.log.error('why i don\'t have a foundset ref ?');
                     return;
                 } else {
                     this.dataGrid.debug('Get hashed foundset success ' + foundsetUUID);
@@ -1854,12 +1863,14 @@ class GroupManager {
     /**
      * Handle ChildFoundsets
      * Returns the foundset in a promise
-     * @param {Array<Number>} groupColumns index of all grouped columns
-     * @param {Array} groupKeys value for each grouped column
-     * @param {String} [sort]
      *
-     * @return {PromiseType}
-     *  */
+     * @param groupColumns index of all grouped columns
+     * @param groupKeys value for each grouped column
+     * @param [sort]
+     *
+     * @return
+     *
+     */
     getHashFoundset(groupColumns, groupKeys, sort) {
 
         const resultDeferred = new Deferred();
@@ -1883,14 +1894,14 @@ class GroupManager {
         }
 
         const _this = this;
-        childFoundsetPromise = this.dataGrid.servoyApi.callServerSideApi("getGroupedFoundsetUUID",
+        childFoundsetPromise = this.dataGrid.servoyApi.callServerSideApi('getGroupedFoundsetUUID',
             [groupColumns, groupKeys, idForFoundsets, sort, this.dataGrid.filterModel, hasRowStyleClassDataprovider, sortColumn, sortColumnDirection]);
 
         childFoundsetPromise.then(function(childFoundsetUUID) {
             _this.dataGrid.log.debug(childFoundsetUUID);
                 if (!childFoundsetUUID) {
-                    _this.dataGrid.log.error("why i don't have a childFoundset ?");
-                    resultDeferred.reject("can't retrieve the child foundset");
+                    _this.dataGrid.log.error('why i don\'t have a childFoundset ?');
+                    resultDeferred.reject('can\'t retrieve the child foundset');
                 }
 
                 // FIXME add listener somewhere else
@@ -1917,7 +1928,7 @@ class GroupManager {
      *
      * */
     createOrReplaceFoundsetRef(groupColumns, groupKeys, sort) {
-        const foundsetHash = this.hashTree.getCachedFoundset(groupColumns, groupKeys)
+        const foundsetHash = this.hashTree.getCachedFoundset(groupColumns, groupKeys);
         if (foundsetHash) {
             this.removeFoundsetRef(foundsetHash);
 
@@ -1933,26 +1944,28 @@ class GroupManager {
     }
 
     /**
-     * @param {Number} level
+     * @param level
      *
-     *  */
+     *
+     */
     removeFoundsetRefAtLevel(level) {
         return this.hashTree.removeCachedFoundsetAtLevel(level);
     }
 
     /**
-     * @param {String} foundsetUUID
-     * @param {String} [field] if given delete only the child having field equal to value
-     * @param {Object} [value] if given delete only the child having field equal to value
+     * @param foundsetUUID
+     * @param [field] if given delete only the child having field equal to value
+     * @param [value] if given delete only the child having field equal to value
      *
-     * */
+     *
+     */
     removeChildFoundsetRef(foundsetUUID, field, value) {
         return this.hashTree.removeChildFoundset(foundsetUUID, field, value);
     }
 
     clearAll() {
         this.hashTree.clearAll();
-    }    
+    }
 }
 
 /**
@@ -1986,24 +1999,27 @@ class GroupHashCache {
     }
 
     /**
-     * @param {String} foundsetUUID
-     * Remove the node */
+     * @param foundsetUUID
+     * Remove the node
+     */
     removeCachedFoundset(foundsetUUID) {
         return this.removeFoundset(this.rootGroupNode, foundsetUUID);
     }
 
     /**
-     * @param {Number} level
-     * Remove the node */
+     * @param level
+     * Remove the node
+     */
     removeCachedFoundsetAtLevel(level) {
         return this.removeFoundsetAtLevel(this.rootGroupNode, level);
     }
 
     /**
-     * @param {String} foundsetUUID
-     * @param {String} [field]
-     * @param {String} [value]
-     * Remove all it's child node */
+     * @param foundsetUUID
+     * @param [field]
+     * @param [value]
+     * Remove all it's child node
+     */
     removeChildFoundset(foundsetUUID, field, value) {
         return this.removeChildFoundsets(this.rootGroupNode, foundsetUUID, field, value);
     }
@@ -2024,15 +2040,16 @@ class GroupHashCache {
 
         });
         if (this.dataGrid.hashedFoundsets.length > 0) {
-            this.dataGrid.log.error("Clear All was not successful, please debug");
+            this.dataGrid.log.error('Clear All was not successful, please debug');
         }
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {String} foundsetUUID
+     * @param tree
+     * @param foundsetUUID
      * @return Boolean
-     *  */
+     *
+     */
     removeFoundset(tree, foundsetUUID) {
         if (!tree) {
             return true;
@@ -2056,10 +2073,11 @@ class GroupHashCache {
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {Number} level
-     * @return {Boolean}
-     *  */
+     * @param tree
+     * @param level
+     * @return
+     *
+     */
     removeFoundsetAtLevel(tree, level) {
         if (!tree) {
             return true;
@@ -2069,7 +2087,7 @@ class GroupHashCache {
             return true;
         }
 
-        var success = true;
+        let success = true;
 
         const _this = this;
         tree.forEach(function(node) {
@@ -2082,7 +2100,7 @@ class GroupHashCache {
                 return true;
             } else {
                 success = node.forEach(function(subNode) {
-                    return _this.removeFoundsetAtLevel(node, level - 1)
+                    return _this.removeFoundsetAtLevel(node, level - 1);
                 }) && success;
                 return success;
             }
@@ -2091,16 +2109,17 @@ class GroupHashCache {
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {String} foundsetUUID
-     * @param {String} [field]
-     * @param {String} [value]
-     *  */
+     * @param tree
+     * @param foundsetUUID
+     * @param [field]
+     * @param [value]
+     *
+     */
     removeChildFoundsets(tree, foundsetUUID, field?, value?) {
 
         if (foundsetUUID) {
             // remove all child nodes
-            var node = this.getGroupNodeByFoundsetUUID(tree, foundsetUUID);
+            const node = this.getGroupNodeByFoundsetUUID(tree, foundsetUUID);
             if (node) {
                 node.removeAllSubNodes();
                 return true;
@@ -2129,7 +2148,7 @@ class GroupHashCache {
                     });
                 } else if (node.hasNodes()) { // search in subnodes
                     success = success && node.forEachUntilSuccess(function(subNode) {
-                        return _this.removeChildFoundsets(node, foundsetUUID)
+                        return _this.removeChildFoundsets(node, foundsetUUID);
                     });
                 }
             });
@@ -2137,14 +2156,15 @@ class GroupHashCache {
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {Array} rowGroupCols
-     * @param {Array} groupKeys
-     * @param {Boolean} [create]
+     * @param tree
+     * @param rowGroupCols
+     * @param groupKeys
+     * @param [create]
      *
-     * @return {GroupNode}
+     * @return
      *
-     * */
+     *
+     */
     getTreeNode(tree, rowGroupCols, groupKeys, create?) {
 
         let result = null;
@@ -2212,14 +2232,14 @@ class GroupHashCache {
                 result = keyTree;
 
             } else { // no group key criteria
-                this.dataGrid.log.warn("this should not happen");
+                this.dataGrid.log.warn('this should not happen');
             }
 
         } else if (rowGroupCols.length > 1) { // is not the last group
             const key = groupKeys.length ? groupKeys[0] : null;
 
             if (!colTree) {
-                this.dataGrid.log.warn("this should not happen")
+                this.dataGrid.log.warn('this should not happen');
                 return null;
             }
 
@@ -2240,7 +2260,7 @@ class GroupHashCache {
 
             } else {
                 // if is not the last group, should always have a key criteria
-                this.dataGrid.log.warn("this should not happen")
+                this.dataGrid.log.warn('this should not happen');
             }
 
             rowGroupCols = rowGroupCols.slice(1);
@@ -2249,18 +2269,19 @@ class GroupHashCache {
             result = this.getTreeNode(subTree, rowGroupCols, groupKeys, create);
 
         } else {
-            this.dataGrid.log.warn("No group criteria, should not happen");
+            this.dataGrid.log.warn('No group criteria, should not happen');
         }
 
         return result;
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {String} foundsetUUID
-     * @return {GroupNode}
+     * @param tree
+     * @param foundsetUUID
+     * @return
      *
-     * */
+     *
+     */
     getGroupNodeByFoundsetUUID(tree: GroupNode, foundsetUUID: string): GroupNode {
         if (!tree) {
             return null;
@@ -2293,11 +2314,12 @@ class GroupHashCache {
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {String} foundsetUUID
-     * @return {GroupNode}
+     * @param tree
+     * @param foundsetUUID
+     * @return
      *
-     * */
+     *
+     */
     getParentGroupNode(tree, foundsetUUID) {
         if (!tree) {
             return null;
@@ -2336,13 +2358,12 @@ class GroupHashCache {
     }
 
     /**
-     * @param {GroupNode} tree
-     * @param {String} foundsetUUID
-     * @return {Array<GroupNode>}
+     * @param tree
+     * @param foundsetUUID
+     * @return
      *
      * @deprecated
-     *
-     * */
+     */
     getTreeNodePath(tree, foundsetUUID) {
         if (!tree) {
             return null;
@@ -2354,7 +2375,7 @@ class GroupHashCache {
 
         const path = [];
 
-        let resultNode = null;
+        const resultNode = null;
         const _this = this;
         tree.forEachUntilSuccess(function(node) {
             if (node.foundsetUUID === foundsetUUID) {
@@ -2394,21 +2415,23 @@ class GroupNode {
 
     /**
      * @public
-     * @param {Function} callback execute function for each subnode. Arguments GroupNode
-     *  */
+     * @param callback execute function for each subnode. Arguments GroupNode
+     *
+     */
     forEach(callback) {
-        for (let key in this.nodes) {
+        for (const key in this.nodes) {
             callback.call(this, this.nodes[key]);
         }
     }
 
     /**
      * @public
-     * @return {Boolean} returns true if the callback ever returns true
-     * @param {Function} callback execute function for each subnode until returns true. Arguments GroupNode
-     *  */
+     * @return returns true if the callback ever returns true
+     * @param callback execute function for each subnode until returns true. Arguments GroupNode
+     *
+     */
     forEachUntilSuccess(callback) {
-        for (let key in this.nodes) {
+        for (const key in this.nodes) {
             if (callback.call(this, this.nodes[key]) === true) {
                 return true;
             }
@@ -2419,10 +2442,11 @@ class GroupNode {
 
     /**
      * @public
-     * @return {Boolean} returns true if the callback ever returns true
-     *  */
+     * @return returns true if the callback ever returns true
+     *
+     */
     hasNodes() {
-        for (let key in this.nodes) {
+        for (const key in this.nodes) {
             return true;
         }
         return false;
@@ -2444,7 +2468,7 @@ class GroupNode {
             //		if (this.onDestroy) {
             //			this.onDestroy.call(this, [this.id, this.foundsetUUID]);
             //		}
-            var foundsetManager = this.dataGrid.getFoundsetManagerByFoundsetUUID(this.foundsetUUID);
+            const foundsetManager = this.dataGrid.getFoundsetManagerByFoundsetUUID(this.foundsetUUID);
             foundsetManager.destroy();
         }
     }

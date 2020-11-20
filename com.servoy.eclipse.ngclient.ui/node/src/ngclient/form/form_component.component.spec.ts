@@ -11,7 +11,7 @@ import { ErrorBean } from '../../servoycore/error-bean/error-bean';
 import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 
-import { ServoyPublicModule } from '../servoy_public.module'
+import { ServoyPublicModule } from '../servoy_public.module';
 
 
 describe('FormComponent', () => {

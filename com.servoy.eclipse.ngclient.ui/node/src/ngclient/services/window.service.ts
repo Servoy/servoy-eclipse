@@ -13,7 +13,7 @@ import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 
 @Injectable()
 export class WindowService {
@@ -73,7 +73,7 @@ export class WindowService {
                         this.setTitle(window.name, window.title);
                         this.setCSSClassName(window.name, window.cssClassName);
                         this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
-                          // in order to show all the windows the counter must be reset 
+                          // in order to show all the windows the counter must be reset
                           if (this.windowsRestored && !windowCounterReset) {
                               this.windowCounter = 0;
                               windowCounterReset = true;
@@ -97,19 +97,19 @@ export class WindowService {
     public create(name: string, type: number) {
         const storedWindow = this.sessionStorageService.get('window' + this.windowCounter);
         if (!storedWindow || storedWindow.name != name) {
-            this.sessionStorageService.set('window' + this.windowCounter, { 
-                name: name,
-                type: type 
+            this.sessionStorageService.set('window' + this.windowCounter, {
+                name,
+                type
             });
         }
         if (!this.instances[name]) {
             this.instances[name] = new SvyWindow(name, type, this);
         }
     }
-  
-    public show(name: string, form: string, title: string) { 
+
+    public show(name: string, form: string, title: string) {
         const currentWindow = 'window' + this.windowCounter;
-        const storedWindow = this.sessionStorageService.get(currentWindow)
+        const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.showForm) {
             storedWindow.showForm = form;
             storedWindow.showTitle = title;
@@ -199,10 +199,10 @@ export class WindowService {
                 title: instance.title,
                 resizable: !!instance.resizable,
                 location: loc,
-                size: size,
+                size,
                 isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG
             };
-            
+
             // test if it is modal dialog, then the request blocks on the server and we should hide the loading.
             if (instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG && this.sabloLoadingIndicatorService.isShowing()) {
                 instance['loadingIndicatorIsHidden'] = 0;
@@ -215,11 +215,15 @@ export class WindowService {
                     this.sabloLoadingIndicatorService.hideLoading();
                 }
             }
-            
+
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
 
-            instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size); } );
-            instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => { instance.onResize(event, location); } );
+            instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => {
+ instance.onResize(event, size);
+} );
+            instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => {
+ instance.onResize(event, location);
+} );
             instance.bsWindowInstance.element.addEventListener( 'bswin.active', (event) => {
                 const customEvent = new CustomEvent(event.detail.active ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
@@ -232,7 +236,7 @@ export class WindowService {
             const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
             const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if ( width > 0 && height > 0 ) {
-                const dialogSize = { width: width, height: height };
+                const dialogSize = { width, height };
                 this.sabloService.callService( '$windowService', 'resize', { name: instance.name, size: dialogSize }, true );
             }
         }
@@ -251,7 +255,7 @@ export class WindowService {
         const instance = this.instances[name];
         if (instance) {
             if ( instance['loadingIndicatorIsHidden'] ) {
-                var counter = instance['loadingIndicatorIsHidden'];
+                let counter = instance['loadingIndicatorIsHidden'];
                 delete instance['loadingIndicatorIsHidden'];
                 while ( counter-- > 0 ) {
                     this.sabloLoadingIndicatorService.showLoading();
@@ -379,7 +383,7 @@ export class WindowService {
         // var body = $( 'body' );
         const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
         const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
-        let top, left;
+        let top; let left;
             // bodyTop = body.position().top + parseInt( body.css( 'paddingTop' ), 10 );
         left = ( windowWidth / 2 ) - ( formSize.width / 2 );
         top = ( windowHeight / 2 ) - ( formSize.height / 2 );
@@ -423,8 +427,7 @@ export class WindowService {
             if (formCache) {
                 formCache.navigatorForm = navigatorForm;
             }
-            if (!this.windowsRestored)
-            {
+            if (!this.windowsRestored) {
               this.windowsRestored = true;
               this.restoreWindows();
             }

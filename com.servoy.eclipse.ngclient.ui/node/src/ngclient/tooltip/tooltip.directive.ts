@@ -1,16 +1,16 @@
-import {Directive, HostListener, Input, OnDestroy} from "@angular/core";
-import {TooltipService} from "./tooltip.service";
-import {ServoyService} from "../servoy.service"
+import {Directive, HostListener, Input, OnDestroy} from '@angular/core';
+import {TooltipService} from './tooltip.service';
+import {ServoyService} from '../servoy.service';
 
 @Directive({ selector: '[svyTooltip]' })
 export class TooltipDirective implements OnDestroy {
 
   @Input('svyTooltip') tooltipText: string;
-  isActive: boolean = false;
+  isActive = false;
 
   constructor(private tooltipService: TooltipService){
     this.tooltipService.isTooltipActive.subscribe(a => {
-      this.isActive = a
+      this.isActive = a;
     });
   }
 
@@ -24,12 +24,12 @@ export class TooltipDirective implements OnDestroy {
   onMouseLeave(): void {
     this.tooltipService.hideTooltip();
   }
-  
+
   @HostListener('click')
   onClick(): void {
     this.tooltipService.hideTooltip();
   }
-  
+
   @HostListener('contextmenu')
   onContextMenu(): void {
     this.tooltipService.hideTooltip();
@@ -37,5 +37,5 @@ export class TooltipDirective implements OnDestroy {
 
   ngOnDestroy(): void {
     this.tooltipService.hideTooltip();
-  }  
+  }
 }

@@ -1,31 +1,31 @@
 import { Injectable, } from '@angular/core';
 import { SessionStorageService } from './webstorage/sessionstorage.service';
-import { WindowRefService } from './util/windowref.service' 
+import { WindowRefService } from './util/windowref.service';
 import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
-import { ConverterService } from './converter.service'
-import { LoggerService, LoggerFactory } from './logger.service'
+import { ConverterService } from './converter.service';
+import { LoggerService, LoggerFactory } from './logger.service';
 
 @Injectable()
 export class SabloService {
 
     private locale = null;
-    private wsSession:WebsocketSession;
-    private currentServiceCallCallbacks = []
+    private wsSession: WebsocketSession;
+    private currentServiceCallCallbacks = [];
     private currentServiceCallDone;
-    private currentServiceCallWaiting = 0
+    private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts;
     private log: LoggerService;
-    
 
-    constructor( private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService:WindowRefService, private logFactory : LoggerFactory ) {
-        this.log = logFactory.getLogger("SabloService");
+
+    constructor( private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService: WindowRefService, private logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger('SabloService');
     }
 
     public connect( context, queryArgs, websocketUri ): WebsocketSession {
         const wsSessionArgs = {
-            context: context,
-            queryArgs: queryArgs,
-            websocketUri: websocketUri
+            context,
+            queryArgs,
+            websocketUri
         };
 
         if(this.websocketService.getURLParameter(WebsocketConstants.CLEAR_SESSION_PARAM) == 'true'){
@@ -39,10 +39,10 @@ export class SabloService {
             if ( conversionInfo && conversionInfo.call ) msg.call = this.converterService.convertFromServerToClient( msg.call, conversionInfo.call, undefined, undefined );
 
             if ( msg.clientnr ) {
-                this.sessionStorage.set( "clientnr", msg.clientnr );
+                this.sessionStorage.set( 'clientnr', msg.clientnr );
             }
             if ( msg.windownr ) {
-                this.sessionStorage.set( "windownr", msg.windownr );
+                this.sessionStorage.set( 'windownr', msg.windownr );
             }
             if ( msg.clientnr || msg.windownr ) {
                 // update the arguments on the reconnection websocket.
@@ -50,16 +50,16 @@ export class SabloService {
             }
         } );
 
-        return this.wsSession
+        return this.wsSession;
     }
-    
+
     private clearSabloInfo() {
         this.sessionStorage.remove('windownr');
         this.sessionStorage.remove('clientnr');
     }
 
     public getClientnr() {
-        const sessionnr = this.sessionStorage.get( 'clientnr' )
+        const sessionnr = this.sessionStorage.get( 'clientnr' );
         if ( sessionnr ) {
             return sessionnr;
         }
@@ -75,7 +75,7 @@ export class SabloService {
     }
 
     public getWindowUrl( windowname: string ) {
-        return "index.html?windowname=" + encodeURIComponent( windowname ) + "&clientnr=" + this.getClientnr();
+        return 'index.html?windowname=' + encodeURIComponent( windowname ) + '&clientnr=' + this.getClientnr();
     }
 
     public getLanguageAndCountryFromBrowser() {
@@ -99,7 +99,7 @@ export class SabloService {
     public getLocale() {
         if ( !this.locale ) {
             const langAndCountry = this.getLanguageAndCountryFromBrowser();
-            const array = langAndCountry.split( "-" );
+            const array = langAndCountry.split( '-' );
             this.locale = { language: array[0], country: array[1], full: langAndCountry };
         }
         return this.locale;
@@ -108,48 +108,53 @@ export class SabloService {
     public setLocale( loc ) {
         this.locale = loc;
     }
-    
-    public callService(serviceName:string, methodName:string, argsObject, async?:boolean) {
-        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async)
-        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000])
+
+    public callService(serviceName: string, methodName: string, argsObject, async?: boolean) {
+        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async);
+        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
-    
+
     public addToCurrentServiceCall(func) {
         if (this.currentServiceCallWaiting == 0) {
             // No service call currently running, call the function now
-            setTimeout(function() { func.apply(); })
-        }
-        else {
-            this.currentServiceCallCallbacks.push(func)
+            setTimeout(function() {
+ func.apply();
+});
+        } else {
+            this.currentServiceCallCallbacks.push(func);
         }
     }
 
     private  callServiceCallbacksWhenDone() {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting == 0) {
-            this.currentServiceCallWaiting = 0
-            this.currentServiceCallTimeouts.map(function(id) { return clearTimeout(id) })
-            const tmp = this.currentServiceCallCallbacks
-            this.currentServiceCallCallbacks = []
-            tmp.map(function(func) { func.apply() })
+            this.currentServiceCallWaiting = 0;
+            this.currentServiceCallTimeouts.map(function(id) {
+ return clearTimeout(id);
+});
+            const tmp = this.currentServiceCallCallbacks;
+            this.currentServiceCallCallbacks = [];
+            tmp.map(function(func) {
+ func.apply();
+});
         }
     }
 
-    private waitForServiceCallbacks(promise:Promise<{}>, times) {
+    private waitForServiceCallbacks(promise: Promise<{}>, times) {
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
-            return promise
+            return promise;
         }
 
-        this.currentServiceCallDone = false
-        this.currentServiceCallWaiting = times.length
-        this.currentServiceCallTimeouts = times.map((t)=> { return setTimeout(this.callServiceCallbacksWhenDone, t) })
+        this.currentServiceCallDone = false;
+        this.currentServiceCallWaiting = times.length;
+        this.currentServiceCallTimeouts = times.map((t)=> setTimeout(this.callServiceCallbacksWhenDone, t));
         return promise.then((arg) => {
             this.currentServiceCallDone = true;
             return arg;
         }, (arg) => {
             this.currentServiceCallDone = true;
             return Promise.reject(arg);
-        })
+        });
     }
 
     private getAPICallFunctions( call, formState ) {
@@ -157,30 +162,27 @@ export class SabloService {
         if ( call.viewIndex != undefined ) {
             // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if it want to allow calling API on non-selected rows, but it is not used
             funcThis = formState.api[call.bean][call.viewIndex];
-        }
-        else if ( call.propertyPath != undefined ) {
+        } else if ( call.propertyPath != undefined ) {
             // handle nested components; the property path is an array of string or int keys going
             // through the form's model starting with the root bean name, then it's properties (that could be nested)
-            // then maybe nested child properties and so on 
+            // then maybe nested child properties and so on
             let obj = formState.model;
             let pn;
             for ( pn in call.propertyPath ) obj = obj[call.propertyPath[pn]];
             funcThis = obj.api;
-        }
-        else {
+        } else {
             funcThis = formState.api[call.bean];
         }
         return funcThis;
     }
-    
-    public sendServiceChanges (serviceName : string, propertyName : string, value : any)
-    {
-        let changes = {};
+
+    public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
+        const changes = {};
         changes[propertyName] = this.converterService.convertClientObject(value);
-        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes: changes });
+        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
     }
 
     public addIncomingMessageHandlingDoneTask(func: () => any) {
         this.wsSession.addIncomingMessageHandlingDoneTask(func);
-     } 
+     }
 }

@@ -2,14 +2,14 @@ import {TestBed, ComponentFixture, tick, fakeAsync} from '@angular/core/testing'
 import {TooltipDirective} from './tooltip.directive';
 import {TooltipService} from './tooltip.service';
 import {Component, DebugElement} from '@angular/core';
-import {By} from "@angular/platform-browser";
+import {By} from '@angular/platform-browser';
 const mouseEnter: Event = new Event('mouseenter');
 
 @Component({
   template: '<input  type="text" [svyTooltip]="textTooltip">',
 })
 class TestTooltipWrapperComponent {
-  textTooltip = "Hi";
+  textTooltip = 'Hi';
 }
 
 describe('Directive: Tooltip', () => {
@@ -46,14 +46,14 @@ describe('Directive: Tooltip', () => {
   });
 
   it('should display when text is present', () => {
-    directiveInstance.tooltipText = "Hi";
+    directiveInstance.tooltipText = 'Hi';
     fixture.detectChanges();
     expect(directiveInstance.tooltipText).toBe('Hi');
   });
 
   it('show tooltip on requestedDelay', fakeAsync(() => {
     tick();
-    directiveInstance.tooltipText = "Hi";
+    directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     tick(200);
@@ -69,7 +69,7 @@ describe('Directive: Tooltip', () => {
 
   it('close tooltip after requestedDelay', fakeAsync(() => {
     tick();
-    directiveInstance.tooltipText = "Hi";
+    directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     tick(6000);
@@ -79,7 +79,7 @@ describe('Directive: Tooltip', () => {
 
   it('show when hover over input', fakeAsync(() => {
     tick();
-    directiveInstance.tooltipText = "Hi";
+    directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     tick(200);
@@ -132,7 +132,7 @@ describe('Directive: Tooltip', () => {
 
   /**Create tooltip and add 800 delay in order to really display tooltip. */
    function initTooltip(directiveInstance: TooltipDirective, inputEl: DebugElement) {
-    directiveInstance.tooltipText = "Him";
+    directiveInstance.tooltipText = 'Him';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
   }
 });

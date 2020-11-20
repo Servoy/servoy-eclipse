@@ -33,7 +33,7 @@ export class LocaleService {
         this.loadedLocale = new Deferred<any>();
         this.setAngularLocale(language, country).then(localeId => {
             this.i18nProvider.flush();
-            this.sabloService.setLocale({ language: language, country: country, full: localeId });
+            this.sabloService.setLocale({ language, country, full: localeId });
             if (!initializing) {
                 // in the session storage we always have the value set via applicationService.setLocale
                 this.sessionStorageService.set('locale', language + '-' + country);

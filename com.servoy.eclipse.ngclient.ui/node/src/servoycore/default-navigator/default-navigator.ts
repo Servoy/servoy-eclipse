@@ -21,7 +21,7 @@ export class DefaultNavigator {
   }
 
   setIndex(newIndex: any) {
-    var i = parseInt(newIndex)
+    let i = parseInt(newIndex);
     if (!i) {
       i = 1;
     }

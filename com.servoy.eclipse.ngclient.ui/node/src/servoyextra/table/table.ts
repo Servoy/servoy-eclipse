@@ -38,7 +38,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @Input() responsiveHeight;
     @Input() responsiveDynamicHeight;
     @Input() lastSelectionFirstElement: number;
-    @Input() keyCodeSettings: {arrowUp: boolean , arrowDown: boolean, end: boolean, enter: boolean, home: boolean, pageDown: boolean, pageUp: boolean};
+    @Input() keyCodeSettings: {arrowUp: boolean ; arrowDown: boolean; end: boolean; enter: boolean; home: boolean; pageDown: boolean; pageUp: boolean};
 
     @Input() onViewPortChanged;
     @Input() onCellClick;
@@ -58,7 +58,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     autoColumnPercentage: any;
     tableWidth = 0;
     scrollWidth = 0;
-    autoColumns: { [x: string]: any; count: any; length?: any; columns?: {}; minWidth?: {}; autoResize?: {}; };
+    autoColumns: { [x: string]: any; count: any; length?: any; columns?: {}; minWidth?: {}; autoResize?: {} };
     componentWidth: any;
     needToUpdateAutoColumnsWidth = false;
     extraWidth: any;
@@ -363,7 +363,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let columnStyle: object = this.columnStyleCache[column];
         if (columnStyle) return columnStyle;
 
-        columnStyle = { 'overflow': 'hidden'};
+        columnStyle = { overflow: 'hidden'};
         this.columnStyleCache[column] = columnStyle;
         const w = this.getNumberFromPxString(this.columns[column].width);
         if (w > -1) {

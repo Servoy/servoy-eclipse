@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Component( {
@@ -17,7 +17,7 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent {
     @Input() visible;
     @Input() media;
 
-    imageURL: string = "bootstrapcomponents/imagemedia/images/empty.gif";
+    imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';
 
     private log: LoggerService;
 
@@ -70,7 +70,9 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent {
             this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
         }
         if ( this.onRightClickMethodID ) {
-            this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; } );
+            this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
+ this.onRightClickMethodID( e ); return false;
+} );
         }
     }
 }

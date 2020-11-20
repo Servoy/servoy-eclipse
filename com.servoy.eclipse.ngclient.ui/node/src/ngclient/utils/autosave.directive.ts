@@ -6,13 +6,13 @@ import { SabloService } from '../../sablo/sablo.service';
 })
 export class AutosaveDirective {
 
-  constructor(private sabloService: SabloService, private elementRef:ElementRef) {    
+  constructor(private sabloService: SabloService, private elementRef: ElementRef) {
   }
 
   @HostListener('click', ['$event.target'])
   onClick(target): void {
     if (target == this.elementRef.nativeElement || target.parentNode == this.elementRef.nativeElement) {
-      this.sabloService.callService("applicationServerService", "autosave", {}, true);
+      this.sabloService.callService('applicationServerService', 'autosave', {}, true);
     }
   }
 }

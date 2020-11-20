@@ -5,18 +5,24 @@ const MASK_CONST = {
     // Predefined character definitions
     definitions: {
         '#': '[0-9]',
-        '0': '[0-9]',
-        'U': '[A-Z]',
-        'L': '[a-z]',
-        'A': '[A-Za-z0-9]',
+        0: '[0-9]',
+        U: '[A-Z]',
+        L: '[a-z]',
+        A: '[A-Za-z0-9]',
         '?': '[A-Za-z]',
         '*': '.',
-        'H': '[A-F0-9]'
+        H: '[A-F0-9]'
     },
     converters: {
-        'U': function(c) {return c.toUpperCase(); },
-        'L': function(c) {return c.toLowerCase(); },
-        'H': function(c) {return c.toUpperCase(); }
+        U(c) {
+return c.toUpperCase();
+},
+        L(c) {
+return c.toLowerCase();
+},
+        H(c) {
+return c.toUpperCase();
+}
     }
 };
 
@@ -91,7 +97,9 @@ export class MaskFormat {
             return this.tests[i] ? this.getPlaceHolder(i) : c;
         }, this);
 
-        this._renderer.listen(this.element, 'input', () => {this.setCaret(this.checkVal(true)); });
+        this._renderer.listen(this.element, 'input', () => {
+this.setCaret(this.checkVal(true));
+});
         this._renderer.listen(this.element, 'focus', () => this.onFocus());
         this._renderer.listen(this.element, 'blur', () => this.onBlur());
         this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event));
@@ -228,7 +236,7 @@ export class MaskFormat {
                 begin = 0 - range.duplicate().moveStart('character', -100000);
                 end = begin + range.text.length;
             }
-            return { begin: begin, end: end };
+            return { begin, end };
         }
     }
 

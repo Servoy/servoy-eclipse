@@ -2,7 +2,7 @@ import { Component, Renderer2, Input, Output, EventEmitter, ChangeDetectorRef } 
 import { WindowRefService } from '../../sablo/util/windowref.service';
 
 import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
-import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
+import { NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'bootstrapcomponents-tabpanel',
@@ -13,69 +13,65 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
 
   @Input() onTabClickedMethodID;
   @Input() onTabCloseMethodID;
-  
+
   @Input() showTabCloseIcon;
   @Input() closeIconStyleClass;
-  
+
   @Input() tabIndex;
   @Output() tabIndexChange = new EventEmitter();
-  
-  
+
+
   constructor(renderer: Renderer2,cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
       super(renderer,cdRef, windowRefService);
    }
-  
+
   onTabChange( event: NgbTabChangeEvent ) {
       // do prevent it by default, so that hte server side can decide of the swich can happen.
       event.preventDefault();
   }
-  
-  tabClicked(tab: Tab,tabIndexClicked : number, event){
+
+  tabClicked(tab: Tab,tabIndexClicked: number, event){
       if (event.target.classList.contains('bts-tabpanel-close-icon')) {
-          if (this.onTabCloseMethodID)
-          {
+          if (this.onTabCloseMethodID) {
               const promise = this.onTabCloseMethodID( this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /* TODO $.Event("tabclicked") */ ,tabIndexClicked + 1);
               promise.then(( ok ) => {
                   if ( ok ) {
-                      this.removeTabAt(tabIndexClicked+1)
-                  }
-              } )
-          }
-          else
-          {
-              this.removeTabAt(tabIndexClicked+1)  
-          }    
-      }
-      else {
-          if (tab.disabled === true) {
-              return;
-          }
-          
-          if (this.onTabClickedMethodID) {
-              /*var dataTargetAttr = $(event.target).closest('[data-target]');
-              var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
-              const promise =  this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, null)
-              promise.then(( ok ) => {
-                  if ( ok ) {
-                      this.select( this.tabs[tabIndexClicked] ); 
+                      this.removeTabAt(tabIndexClicked+1);
                   }
               } );
           } else {
-              this.select( this.tabs[tabIndexClicked] ); 
+              this.removeTabAt(tabIndexClicked+1);
           }
-      }    
+      } else {
+          if (tab.disabled === true) {
+              return;
+          }
+
+          if (this.onTabClickedMethodID) {
+              /*var dataTargetAttr = $(event.target).closest('[data-target]');
+              var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
+              const promise =  this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, null);
+              promise.then(( ok ) => {
+                  if ( ok ) {
+                      this.select( this.tabs[tabIndexClicked] );
+                  }
+              } );
+          } else {
+              this.select( this.tabs[tabIndexClicked] );
+          }
+      }
   }
-  
-  removeTabAt(removeIndex:number) {
+
+  removeTabAt(removeIndex: number) {
       // copied from the serverside code
       if (removeIndex > 0 && removeIndex <= this.tabs.length) {
-          let oldTabIndex = this.tabIndex;
+          const oldTabIndex = this.tabIndex;
           let formToHide;
           let formToShow;
           if (this.tabIndex === removeIndex) {
               formToHide = this.tabs[removeIndex - 1];
 
-              var nextIndex = this.getFirstEnabledTabIndexNotAtIndex(this.tabIndex)
+              const nextIndex = this.getFirstEnabledTabIndexNotAtIndex(this.tabIndex);
               // if the tabIndex after removal will remain the same after removal, shall force showForm
               if ((nextIndex > -1 && nextIndex === this.tabIndex + 1) && this.tabs.length > 1) {
                   // get the tab at second position
@@ -85,18 +81,18 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
 
           // remove the tab
           // create a new tabObject, so angular-ui is properly refreshed.
-          var newTabs = [];
-          for (var i = 0; i < this.tabs.length; i++) {
+          const newTabs = [];
+          for (let i = 0; i < this.tabs.length; i++) {
               if (i == removeIndex - 1) continue;
               newTabs.push(this.tabs[i]);
           }
           this.tabs = newTabs;
-          
+
 
           // update the tabIndex
           if (this.tabIndex >= removeIndex) {
               if (this.tabIndex === removeIndex) {
-                  var newTabIndex = this.getFirstEnabledTabIndex();
+                  let newTabIndex = this.getFirstEnabledTabIndex();
                   if (newTabIndex > - 1) {
                       this.tabIndex = newTabIndex;
                   } else {
@@ -122,31 +118,31 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
                   // This will happen only when the first tab is the visible tab and i am closing the first tab.
                   // The previous tab already call the onHide.. here i force the onShow of the "next" tab.. since the $scope.model.tabIndex doesn't change
                   // Using ng-repeat="tab in model.tabs track by $index" to make angularui aware of the change.
-                  
+
                   this.servoyApi.formWillShow(formToShow.containedForm, formToShow.relationName);
                   if (this.onChangeMethodID) {
                       setTimeout(() => {
                           this.onChangeMethodID( 1 , this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /* TODO $.Event("change") */ );
                       }, 0, false );
-                  } 
+                  }
               }
           }
       }
   }
-  
-  getFirstEnabledTabIndexNotAtIndex (skipIndex : number) {
-      for (var i = 0; this.tabs && i < this.tabs.length; i++) {
-          var tab = this.tabs[i];
+
+  getFirstEnabledTabIndexNotAtIndex(skipIndex: number) {
+      for (let i = 0; this.tabs && i < this.tabs.length; i++) {
+          const tab = this.tabs[i];
           if (tab.disabled !== true && (skipIndex !== i +1 )) {
               return i + 1;
           }
       }
       return -1;
   }
-  
+
   getFirstEnabledTabIndex() {
-      for (var i = 0; this.tabs && i < this.tabs.length; i++) {
-          var tab = this.tabs[i];
+      for (let i = 0; this.tabs && i < this.tabs.length; i++) {
+          const tab = this.tabs[i];
           if (tab.disabled !== true) {
               return i + 1;
           }

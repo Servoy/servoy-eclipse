@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { ConverterService } from '../sablo/converter.service'
+import { ConverterService } from '../sablo/converter.service';
 import { WindowRefService } from '../sablo/util/windowref.service';
-import { LoggerService, LoggerFactory } from '../sablo/logger.service'
+import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
-import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service'; 
-import { DateConverter } from './converters/date_converter'
-import { JSONObjectConverter } from './converters/json_object_converter'
-import { JSONArrayConverter } from './converters/json_array_converter'
-import { ValuelistConverter } from './converters/valuelist_converter'
-import { FoundsetConverter } from './converters/foundset_converter'
-import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter'
-import { I18NProvider } from './services/i18n_provider.service'
-import { ViewportService } from './services/viewport.service'
+import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
+import { DateConverter } from './converters/date_converter';
+import { JSONObjectConverter } from './converters/json_object_converter';
+import { JSONArrayConverter } from './converters/json_array_converter';
+import { ValuelistConverter } from './converters/valuelist_converter';
+import { FoundsetConverter } from './converters/foundset_converter';
+import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter';
+import { I18NProvider } from './services/i18n_provider.service';
+import { ViewportService } from './services/viewport.service';
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
@@ -54,7 +54,7 @@ class UIProperties {
     const uiProps = this.getUiProperties();
     if (value == null) delete uiProps[key];
     else uiProps[key] = value;
-    this.sessionStorageService.set('uiProperties', JSON.stringify(uiProps))
+    this.sessionStorageService.set('uiProperties', JSON.stringify(uiProps));
   }
 }
 
@@ -89,7 +89,7 @@ export class ServoyService {
     private viewportService: ViewportService) {
 
     this.log = logFactory.getLogger('ServoyService');
-    this.uiProperties = new UIProperties(sessionStorageService)
+    this.uiProperties = new UIProperties(sessionStorageService);
     const dateConverter = new DateConverter();
     converterService.registerCustomPropertyHandler('svy_date', dateConverter);
     converterService.registerCustomPropertyHandler('Date', dateConverter);
@@ -116,7 +116,7 @@ export class ServoyService {
 
     }
     const wsSession = this.sabloService.connect('/solution/' + this.solutionSettings.solutionName,
-                      { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix)
+                      { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix);
     // TODO find mode and anchors handling (anchors should be handles completely at the server side,
     // css positioning should go over the line)
     wsSession.onMessageObject((msg, conversionInfo) => {
@@ -163,7 +163,7 @@ export class ServoyService {
 
   public executeInlineScript(formname: string, script: string, params: any[]) {
     return this.sabloService.callService('formService', 'executeInlineScript',
-                                          { 'formname': formname, 'script': script, 'params': params }, false);
+                                          { formname, script, params }, false);
   }
 
   public loaded(): Promise<any> {
@@ -175,9 +175,9 @@ export class ServoyService {
       this.findModeShortCutCallback = (event: KeyboardEvent) => {
         // perform find on ENTER
         if (event.keyCode === 13) {
-          this.sabloService.callService('formService', 'performFind', { 'formname': formName, 'clear': true, 'reduce': true, 'showDialogOnNoResults': true }, true);
+          this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: true }, true);
         }
-      }
+      };
       this.windowRefService.nativeWindow.addEventListener('keyup', this.findModeShortCutCallback);
     } else if (findmode == false && this.findModeShortCutCallback != null) {
       this.windowRefService.nativeWindow.removeEventListener('keyup', this.findModeShortCutCallback);
@@ -197,7 +197,7 @@ class AnchorConstants {
 
 export class FormSettings {
   public name: String;
-  public size: { width: number, height: number };
+  public size: { width: number; height: number };
 }
 
 export class SessionProblem {

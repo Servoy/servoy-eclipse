@@ -5,7 +5,7 @@ import { WebStorage } from './webstorage.interface';
 export class LocalStorageService implements WebStorage {
 
     hasLocalStorage: boolean;
-    prefix: string = '';
+    prefix = '';
 
     constructor() {
         this.hasLocalStorage = this.isSupported();
@@ -23,8 +23,8 @@ export class LocalStorageService implements WebStorage {
 
     set(key: string, value: any): boolean {
         if (this.hasLocalStorage) {
-			try { 
-				localStorage.setItem(this.prefix + key, JSON.stringify(value)); 
+			try {
+				localStorage.setItem(this.prefix + key, JSON.stringify(value));
 			} catch (e) {
                 console.log(e);
 				return false;
@@ -37,7 +37,7 @@ export class LocalStorageService implements WebStorage {
     get(key: string) {
         if (this.hasLocalStorage) {
 			try {
-				var value = localStorage.getItem(this.prefix + key);
+				const value = localStorage.getItem(this.prefix + key);
 				return value && JSON.parse(value);
 			} catch (e) {
 				console.log(e);
@@ -69,7 +69,7 @@ export class LocalStorageService implements WebStorage {
 		if (!!this.prefix) {
 			const prefixLength = this.prefix.length;
 			try {
-				for (let key in localStorage) {
+				for (const key in localStorage) {
 					if (key.substr(0, prefixLength) === this.prefix) {
 						localStorage.removeItem(key);
 					}

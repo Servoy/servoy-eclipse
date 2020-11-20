@@ -28,10 +28,10 @@ import { ServoyDefaultListBox } from './listbox/listbox';
 import { ServoyDefaultImageMedia } from './imagemedia/imagemedia';
 import {ServoyDefaultSpinner} from './spinner/spinner';
 
-import { SabloModule } from '../sablo/sablo.module'
-import { ServoyPublicModule } from '../ngclient/servoy_public.module'
+import { SabloModule } from '../sablo/sablo.module';
+import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 
-import { FormattingService, I18NProvider} from '../ngclient/servoy_public'
+import { FormattingService, I18NProvider} from '../ngclient/servoy_public';
 
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
@@ -77,7 +77,7 @@ import { Select2Module } from 'ng-select2-component';
     OwlMomentDateTimeModule,
     AngularEditorModule,
     ServoyPublicModule,
-    Select2Module 
+    Select2Module
   ],
   exports: [
             ServoyDefaultTextField,

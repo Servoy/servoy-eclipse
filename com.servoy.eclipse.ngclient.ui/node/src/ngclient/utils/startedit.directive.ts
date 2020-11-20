@@ -1,5 +1,5 @@
 import { Directive , Input , HostListener, ViewContainerRef} from '@angular/core';
-import {LoggerService, LoggerFactory} from '../../sablo/logger.service'
+import {LoggerService, LoggerFactory} from '../../sablo/logger.service';
 import { ServoyBaseComponent } from '../servoy_public';
 
 @Directive({

@@ -3,9 +3,9 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } fr
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
 import { FormService } from './form.service';
-import { I18NProvider } from "./servoy_public";
+import { I18NProvider } from './servoy_public';
 import { WebsocketService } from '../sablo/websocket.service';
-import { LoadingIndicatorService } from "../sablo/util/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 
 @Component({
   selector: 'servoy-main',
@@ -16,19 +16,19 @@ export class MainComponent implements OnInit {
   title = 'Servoy NGClient';
   i18n_reconnecting_feedback: string;
 
-  constructor(private servoyService: ServoyService, 
-          private allService: AllServiceService, 
-          private i18nProvider: I18NProvider, 
+  constructor(private servoyService: ServoyService,
+          private allService: AllServiceService,
+          private i18nProvider: I18NProvider,
           private formservice: FormService,
           public websocketService: WebsocketService,
-          public loadingIndicatorService: LoadingIndicatorService) { 
+          public loadingIndicatorService: LoadingIndicatorService) {
     this.servoyService.connect();
   }
-  
+
   ngOnInit() {
       this.i18nProvider.getI18NMessages(
-              "servoy.ngclient.reconnecting").then((val)=> {
-                this.i18n_reconnecting_feedback = val["servoy.ngclient.reconnecting"];
+              'servoy.ngclient.reconnecting').then((val)=> {
+                this.i18n_reconnecting_feedback = val['servoy.ngclient.reconnecting'];
       });
   }
 
@@ -59,20 +59,20 @@ export class MainComponent implements OnInit {
   public getNavigatorStyle() {
     const ltrOrientation = this.servoyService.getSolutionSettings().ltrOrientation;
     const orientationVar = ltrOrientation ? 'left' : 'right';
-    const style = { 'position': 'absolute',
-                    'top': '0px',
-                    'bottom': '0px',
-                    'width': this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px'
-                  }
+    const style = { position: 'absolute',
+                    top: '0px',
+                    bottom: '0px',
+                    width: this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px'
+                  };
     style[orientationVar] = '0px';
     return style;
   }
-  
+
   public getFormStyle() {
     const ltrOrientation = this.servoyService.getSolutionSettings().ltrOrientation;
     const orientationVar1 = ltrOrientation ? 'right' : 'left';
     const orientationVar2 = ltrOrientation ? 'left' : 'right';
-    const style = { 'position': 'absolute', 'top': '0px', 'bottom': '0px' }
+    const style = { position: 'absolute', top: '0px', bottom: '0px' };
     style[orientationVar1] = '0px';
     style[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
     return style;

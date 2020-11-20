@@ -27,7 +27,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
     }
   }
 
-  itemClicked (event, index) {
+  itemClicked(event, index) {
     const newValue = event.target.value ? event.target.value : event.target.innerText;
     const changed = !(newValue === this.value);
     this.value = newValue;

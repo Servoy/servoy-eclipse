@@ -40,7 +40,9 @@ export class PropertyUtils {
     }
 
     public static setBorder( element: any, renderer: Renderer2, newVal ) {
-        if ( typeof newVal !== 'object' || newVal == null ) { renderer.removeStyle( element, 'border' ); return; }
+        if ( typeof newVal !== 'object' || newVal == null ) {
+ renderer.removeStyle( element, 'border' ); return;
+}
 
         if ( renderer.parentNode( element ).nodeName === 'FIELDSET' ) {
             // unwrap fieldset
@@ -85,7 +87,9 @@ export class PropertyUtils {
     }
 
     public static setFont( element: any, renderer: Renderer2, newVal ) {
-        if ( typeof newVal !== 'object' || newVal == null ) { renderer.removeStyle( element, 'font' ); return; }
+        if ( typeof newVal !== 'object' || newVal == null ) {
+ renderer.removeStyle( element, 'font' ); return;
+}
 
         renderer.removeStyle( element, 'font' );
         for ( const key of Object.keys( newVal) ) {
@@ -118,7 +122,7 @@ export class PropertyUtils {
     }
     public static getScrollbarsStyleObj(scrollbars: number) {
        const style = {};
-       /* tslint:disable:no-bitwise */
+       /* eslint-disable no-bitwise */
        if ((scrollbars & scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) === scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) {
          style['overflowX'] = 'hidden';
        } else if ((scrollbars & scrollbarConstants.HORIZONTAL_SCROLLBAR_ALWAYS) === scrollbarConstants.HORIZONTAL_SCROLLBAR_ALWAYS) {
@@ -134,7 +138,7 @@ export class PropertyUtils {
        } else {
          style['overflowY'] = 'auto'; // $NON-NLS-1$
        }
-       /* tslint:enable:no-bitwise */
+       /* eslint-enable no-bitwise */
        return style;
      }
 

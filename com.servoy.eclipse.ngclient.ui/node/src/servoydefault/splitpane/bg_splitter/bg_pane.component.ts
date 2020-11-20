@@ -6,16 +6,16 @@ import { BGSplitter } from './bg_splitter.component';
     selector: 'bg-pane',
     host: {
        '[class]':'"split-pane"+index',
-       'style':"overflow:auto"
+       style:'overflow:auto'
      }
 })
 export class BGPane{
-    
+
     @Input()minSize;
 
     index;
-    
+
     constructor(public element: ElementRef) {
-	
+
     }
 }

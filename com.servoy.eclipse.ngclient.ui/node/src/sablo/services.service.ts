@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 
-import { ConverterService } from './converter.service'
-import { LoggerService, LoggerFactory } from './logger.service'
+import { ConverterService } from './converter.service';
+import { LoggerService, LoggerFactory } from './logger.service';
 
 @Injectable()
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
     private log: LoggerService;
 
-    constructor( private converterService: ConverterService, private logFactory : LoggerFactory ) {
-        this.log = logFactory.getLogger("ServicesService");
+    constructor( private converterService: ConverterService, private logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger('ServicesService');
     }
 
     private serviceScopesConversionInfo = {};
@@ -23,7 +23,7 @@ export class ServicesService {
     }
 
     public callServiceApi( service ) {
-        var serviceInstance = this.getServiceProvider().getService( service.name );
+        const serviceInstance = this.getServiceProvider().getService( service.name );
         if ( serviceInstance
             && serviceInstance[service.call] ) {
             // responseValue keeps last services call return value
@@ -32,18 +32,18 @@ export class ServicesService {
     }
 
     public updateServiceScopes( services, conversionInfo ) {
-        for ( var servicename in services ) {
+        for ( const servicename in services ) {
             // current model
-            var service = this.serviceProvider.getService( servicename );
+            const service = this.serviceProvider.getService( servicename );
             if ( service ) {
-                var serviceData = services[servicename];
+                const serviceData = services[servicename];
 
                 try {
-                    for ( var key in serviceData ) {
+                    for ( const key in serviceData ) {
                         if ( conversionInfo && conversionInfo[servicename] && conversionInfo[servicename][key] ) {
                             // convert property, remember type for when a client-server conversion will be needed
                             if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
-                            serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key], undefined )
+                            serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key], undefined );
                             this.serviceScopesConversionInfo[servicename][key] = conversionInfo[servicename][key];
                         } else if ( this.serviceScopesConversionInfo[servicename] && this.serviceScopesConversionInfo[servicename][key] ) {
                             delete this.serviceScopesConversionInfo[servicename][key];
@@ -51,8 +51,7 @@ export class ServicesService {
 
                         service[key] = serviceData[key];
                     }
-                }
-                catch ( ex ) {
+                } catch ( ex ) {
                     this.log.error(ex);
                 }
             }

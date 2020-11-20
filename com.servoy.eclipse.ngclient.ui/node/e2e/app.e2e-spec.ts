@@ -1,6 +1,6 @@
 import { AppPage } from './app.po';
 
-describe('formtest App', () => {
+describe('ngclient2 App', () => {
   let page: AppPage;
 
   beforeEach(() => {

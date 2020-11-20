@@ -1,4 +1,4 @@
-import {CustomEventEmitter,CustomEvent} from '../util/eventemitter'
+import {CustomEventEmitter,CustomEvent} from '../util/eventemitter';
 
 
 export class ReconnectingWebSocket {
@@ -8,7 +8,7 @@ export class ReconnectingWebSocket {
      */
    public static debugAll = false;
 
-    
+
     /** Whether this instance should log debug messages. */
    public  debug = false;
 
@@ -17,10 +17,10 @@ export class ReconnectingWebSocket {
 
     /** The number of milliseconds to delay before attempting to reconnect. */
    private reconnectInterval = 1000;
-    
+
     /** The maximum number of milliseconds to delay a reconnection attempt. */
    private maxReconnectInterval = 30000;
-   
+
     /** The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist. */
    private reconnectDecay = 1.5;
 
@@ -29,22 +29,22 @@ export class ReconnectingWebSocket {
 
     /** The maximum number of reconnection attempts to make. Unlimited if null. */
    private maxReconnectAttempts = null;
-   
+
    /** The number of attempted reconnects since starting, or the last successful connection. Read only. */
    private reconnectAttempts = 0;
-   
-   private url:string|Function
-   
-   private ws:WebSocket;
+
+   private url: string|Function;
+
+   private ws: WebSocket;
    private forcedClose = false;
    private timedOut = false;
-   
+
    private id =Math.random();
 
-   
+
    private eventTarget = new CustomEventEmitter();
 
-   
+
    /**
     * The current state of the connection.
     * Can be one of: WebSocket.CONNECTING, WebSocket.OPEN, WebSocket.CLOSING, WebSocket.CLOSED
@@ -52,9 +52,9 @@ export class ReconnectingWebSocket {
     */
    private readyState = WebSocket.CONNECTING;
 
-   constructor(url:string|Function, options?:{[property:string]:string|number|boolean}) {
+   constructor(url: string|Function, options?: {[property: string]: string|number|boolean}) {
        // Default settings
-       var settings = {
+       const settings = {
 
            /** Whether this instance should log debug messages. */
            debug: false,
@@ -74,10 +74,12 @@ export class ReconnectingWebSocket {
 
            /** The maximum number of reconnection attempts to make. Unlimited if null. */
            maxReconnectAttempts: null
-       }
-       if (!options) { options = {}; }
+       };
+       if (!options) {
+ options = {};
+}
        // Overwrite and define settings with options if they exist.
-       for (var key in settings) {
+       for (const key in settings) {
            if (typeof options[key] !== 'undefined') {
                this[key] = options[key];
            } else {
@@ -85,41 +87,41 @@ export class ReconnectingWebSocket {
            }
        }
        this.url = url;
-       
+
        // Wire up "on*" properties as event handlers
 
-      this.eventTarget.addEventListener('open',  (event:WebsocketCustomEvent)=> this.onopen(event));
-      this.eventTarget.addEventListener('close',  (event:WebsocketCustomEvent)=> this.onclose(event));
-      this.eventTarget.addEventListener('connecting', (event:WebsocketCustomEvent)=> this.onconnecting(event));
-      this.eventTarget.addEventListener('message',    (event:WebsocketCustomEvent)=> this.onmessage(event) );
-      this.eventTarget.addEventListener('error',      (event:WebsocketCustomEvent)=> this.onerror(event));
-      
+      this.eventTarget.addEventListener('open',  (event: WebsocketCustomEvent)=> this.onopen(event));
+      this.eventTarget.addEventListener('close',  (event: WebsocketCustomEvent)=> this.onclose(event));
+      this.eventTarget.addEventListener('connecting', (event: WebsocketCustomEvent)=> this.onconnecting(event));
+      this.eventTarget.addEventListener('message',    (event: WebsocketCustomEvent)=> this.onmessage(event) );
+      this.eventTarget.addEventListener('error',      (event: WebsocketCustomEvent)=> this.onerror(event));
+
       // Whether or not to create a websocket upon instantiation
       if (this.automaticOpen == true) {
           this.open(false);
       }
    }
-   
+
    /** The URL as resolved by the constructor, or a function to return the current url. This is always an absolute URL. Read only. */
-   private getUrl():string {
+   private getUrl(): string {
        return typeof(this.url) === 'function' ? this.url(): this.url;
    }
-   
+
     /**
-    * Additional public API method to refresh the connection if still open (close, re-open).
-    * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
-    */
+     * Additional public API method to refresh the connection if still open (close, re-open).
+     * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
+     */
    public refresh() {
        if (this.ws) {
            this.ws.close();
        }
    }
-   
+
    /**
     * Closes the WebSocket connection or connection attempt, if any.
     * If the connection is already CLOSED, this method does nothing.
     */
-   public close(code?:number, reason?:string) {
+   public close(code?: number, reason?: string) {
        // Default CLOSE_NORMAL code
        if (typeof code == 'undefined') {
            code = 1000;
@@ -129,7 +131,7 @@ export class ReconnectingWebSocket {
            this.ws.close(code, reason);
        }
    }
-   
+
    /**
     * Transmits data to the server over the WebSocket connection.
     *
@@ -146,7 +148,7 @@ export class ReconnectingWebSocket {
        }
    };
 
-   
+
    public open(reconnectAttempt) {
 
        if (reconnectAttempt) {
@@ -165,7 +167,7 @@ export class ReconnectingWebSocket {
        this.ws = new WebSocket(this.getUrl());
        const self = this;
        const localWs = this.ws;
-       var timeout = setTimeout(function() {
+       const timeout = setTimeout(function() {
            if (this.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl());
            }
@@ -195,7 +197,7 @@ export class ReconnectingWebSocket {
               self.eventTarget.dispatchEvent(new WebsocketCustomEvent('close'));
            } else {
                self.readyState = WebSocket.CONNECTING;
-               var e = new WebsocketCustomEvent('connecting');
+               const e = new WebsocketCustomEvent('connecting');
                e.code = event.code;
                e.reason = event.reason;
                e.wasClean = event.wasClean;
@@ -220,7 +222,7 @@ export class ReconnectingWebSocket {
            if (self.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'onmessage', self.getUrl(), event.data);
            }
-           var e = new WebsocketCustomEvent('message');
+           const e = new WebsocketCustomEvent('message');
            e.data = event.data;
            self.eventTarget.dispatchEvent(e);
        };
@@ -231,27 +233,27 @@ export class ReconnectingWebSocket {
            self.eventTarget.dispatchEvent(new WebsocketCustomEvent('error'));
        };
    }
-   
+
    /**
     * An event listener to be called when the WebSocket connection's readyState changes to OPEN;
     * this indicates that the connection is ready to send and receive data.
     */
-   public onopen(event:WebsocketCustomEvent) {};
+   public onopen(event: WebsocketCustomEvent) {};
    /** An event listener to be called when the WebSocket connection's readyState changes to CLOSED. */
-   public onclose(event:WebsocketCustomEvent) {};
+   public onclose(event: WebsocketCustomEvent) {};
    /** An event listener to be called when a connection begins being attempted. */
-   public onconnecting(event:WebsocketCustomEvent) { };
+   public onconnecting(event: WebsocketCustomEvent) { };
    /** An event listener to be called when a message is received from the server. */
-   public onmessage(event:WebsocketCustomEvent) {};
+   public onmessage(event: WebsocketCustomEvent) {};
    /** An event listener to be called when an error occurs. */
-   public onerror(event:WebsocketCustomEvent) {};
+   public onerror(event: WebsocketCustomEvent) {};
 
 }
 
 export class WebsocketCustomEvent extends CustomEvent {
-    public isReconnect:boolean;
-    public code:number;
-    public reason:string;
-    public wasClean:boolean;
-    public data:any;
+    public isReconnect: boolean;
+    public code: number;
+    public reason: string;
+    public wasClean: boolean;
+    public data: any;
 }

@@ -48,7 +48,7 @@ export class FoundsetConverter implements IConverter {
     // see if this is an update or whole value and handle it
     if (!serverJSONValue) {
       newValue = undefined; // set it to nothing
-      if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue: currentClientValue, newValue: newValue };
+      if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue: currentClientValue, newValue };
       const oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state
       if (oldInternalState) this.sabloDeferHelper.cancelAll(oldInternalState);
 
@@ -190,7 +190,7 @@ export class FoundsetConverter implements IConverter {
         Object.keys(serverJSONValue).forEach((prop) => {
           newValue[prop] = serverJSONValue[prop];
         });
-        if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue: currentClientValue, newValue: newValue };
+        if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue: currentClientValue, newValue };
         const internalState = newValue.state;
 
         internalState.rowPrototype = {};
@@ -335,7 +335,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * loadRecordsAsync requested with (' + startIndex + ', ' + size + ')')));
     if (isNaN(startIndex) || isNaN(size)) throw new Error('loadRecordsAsync: start or size are not numbers (' + startIndex + ',' + size + ')');
 
-    const req = { newViewPort: { startIndex: startIndex, size: size } };
+    const req = { newViewPort: { startIndex, size } };
     const requestID = this.sabloDeferHelper.getNewDeferId(this.state);
     req[FoundsetConverter.ID_KEY] = requestID;
     this.state.requests.push(req);
@@ -375,7 +375,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
     if (this.state.requests.length > 0) this.state.notifyChangeListener();
   }
 
-  public sort(columns: Array<{ name: string, direction: ('asc' | 'desc') }>): Promise<any> {
+  public sort(columns: Array<{ name: string; direction: ('asc' | 'desc') }>): Promise<any> {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * sort requested with ' + JSON.stringify(columns))));
     const req = { sort: columns };
     const requestID = this.sabloDeferHelper.getNewDeferId(this.state);
@@ -389,7 +389,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * setPreferredViewportSize called with (' + size + ', ' +
      sendSelectionViewportInitially + ', ' + initialSelectionViewportCentered + ')')));
     if (isNaN(size)) throw new Error('setPreferredViewportSize(...): illegal argument; size is not a number (' + size + ')');
-    const request = { 'preferredViewportSize': size };
+    const request = { preferredViewportSize: size };
     if (sendSelectionViewportInitially !== undefined) request['sendSelectionViewportInitially'] = !!sendSelectionViewportInitially;
     if (initialSelectionViewportCentered !== undefined) request['initialSelectionViewportCentered'] = !!initialSelectionViewportCentered;
     this.state.requests.push(request);
@@ -471,14 +471,14 @@ export class Foundset implements IChangeAwareValue, IFoundset {
 }
 
 // TODO can we further improve this to also have the conversion function??
-type FoundsetRow = {
+interface FoundsetRow {
   _svyRowId?: string;
   foundsetId?: number;
-};
+}
 
 class FoundsetState extends FoundsetViewportState implements IDeferedState {
 
-  deferred: { [key: string]: { defer: Deferred<any>, timeoutId: any } };
+  deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
   currentMsgId: number;
   timeoutRejectLogPrefix: string;
   changeListeners: ChangeListener[];
@@ -486,7 +486,7 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
   selectionUpdateDefer: Deferred<any>;
   push_to_server: any = undefined;
 
-  init(deferred: { [key: string]: { defer: Deferred<any>, timeoutId: any } }, currentMsgId: number, timeoutRejectLogPrefix: string) {
+  init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, currentMsgId: number, timeoutRejectLogPrefix: string) {
     this.deferred = deferred;
     this.currentMsgId = currentMsgId;
     this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
@@ -525,18 +525,18 @@ export interface FoundsetChangeEvent extends ViewportChangeEvent {
   // value's listeners registered to itself
   // NOTE: it might be easier to rely just on a shallow $watch of the foundset value (to catch even the
   // null to non-null scenario that you still need) and not use NOTIFY_FULL_VALUE_CHANGED at all
-  fullValueChanged?: { oldValue: Foundset, newValue: Foundset };
+  fullValueChanged?: { oldValue: Foundset; newValue: Foundset };
 
   // the following keys appear if each of these got updated from server; the names of those
   // keys suggest what it was that changed; oldValue and newValue are the values for what changed
   // (e.g. new server size and old server size) so not the whole foundset property new/old value
-  serverFoundsetSizeChanged?: { oldValue: number, newValue: number };
-  hasMoreRowsChanged?: { oldValue: boolean, newValue: boolean };
-  multiSelectChanged?: { oldValue: boolean, newValue: boolean };
-  columnFormatsChanged?: { oldValue: Record<string, object>, newValue: Record<string, object> };
-  sortColumnsChanged?: { oldValue: string, newValue: string };
-  selectedRowIndexesChanged?: { oldValue: number[], newValue: number[] };
-  viewPortStartIndexChanged?: { oldValue: number, newValue: number };
-  viewPortSizeChanged?: { oldValue: number, newValue: number };
+  serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
+  hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
+  multiSelectChanged?: { oldValue: boolean; newValue: boolean };
+  columnFormatsChanged?: { oldValue: Record<string, object>; newValue: Record<string, object> };
+  sortColumnsChanged?: { oldValue: string; newValue: string };
+  selectedRowIndexesChanged?: { oldValue: number[]; newValue: number[] };
+  viewPortStartIndexChanged?: { oldValue: number; newValue: number };
+  viewPortSizeChanged?: { oldValue: number; newValue: number };
   userSetSelection?: boolean;
 }

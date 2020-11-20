@@ -42,8 +42,8 @@ describe('Directive: DecimalKeyConverter', () => {
 
     it('should insert numpad decimal (nl == ,)', waitForAsync(inject([LocaleService], (locationService: LocaleService) => {
         component.format = {
-            'uppercase': true, 'allowedCharacters': null, 'isMask': false, 'isRaw': false, 'edit': null,
-            'display': null, 'type': 'NUMBER', 'placeHolder': null, 'isNumberValidator': false
+            uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
+            display: null, type: 'NUMBER', placeHolder: null, isNumberValidator: false
         };
         fixture.detectChanges();
         locationService.setLocale('nl', 'NL');
@@ -53,7 +53,7 @@ describe('Directive: DecimalKeyConverter', () => {
             component.elementRef.nativeElement.value = '12';
             fixture.detectChanges();
 
-            inputEl.triggerEventHandler('keydown', { 'keyCode': 110, 'which': 110 });
+            inputEl.triggerEventHandler('keydown', { keyCode: 110, which: 110 });
             fixture.detectChanges();
 
             expect(inputEl.nativeElement.value).toEqual('12,');
@@ -61,15 +61,15 @@ describe('Directive: DecimalKeyConverter', () => {
     })));
 
     it ('should insert comma decimal (en == .)', fakeAsync(() => {
-        component.format = {'uppercase': true, 'allowedCharacters': null, 'isMask': false, 'isRaw': false, 'edit': null,
-                             'display': null, 'type': 'NUMBER', 'placeHolder': null, 'isNumberValidator': false};
+        component.format = {uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
+                             display: null, type: 'NUMBER', placeHolder: null, isNumberValidator: false};
         fixture.detectChanges();
 
         component.elementRef.nativeElement.value = '12';
         fixture.detectChanges();
         tick();
 
-        inputEl.triggerEventHandler('keydown', {'keyCode': 110, 'which': 110});
+        inputEl.triggerEventHandler('keydown', {keyCode: 110, which: 110});
         fixture.detectChanges();
         tick();
         expect(inputEl.nativeElement.value).toEqual('12.');

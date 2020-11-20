@@ -1,6 +1,6 @@
 import {Component, Renderer2, ChangeDetectorRef} from '@angular/core';
-import {FormattingService} from "../../ngclient/servoy_public";
-import {ServoyDefaultBaseField} from "../basefield";
+import {FormattingService} from '../../ngclient/servoy_public';
+import {ServoyDefaultBaseField} from '../basefield';
 @Component({
   selector: 'servoydefault-password',
   templateUrl: './password.html'

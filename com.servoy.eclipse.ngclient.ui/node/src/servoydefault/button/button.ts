@@ -1,6 +1,6 @@
 import { Component, Directive,ChangeDetectorRef,Renderer2 } from '@angular/core';
 
-import {ServoyDefaultBaseLabel} from  '../baselabel'
+import {ServoyDefaultBaseLabel} from  '../baselabel';
 
 @Component( {
     selector: 'servoydefault-button',

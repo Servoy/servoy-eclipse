@@ -1,13 +1,13 @@
 import { Component, ViewChild, Input, Output, EventEmitter, Renderer2 , ElementRef, ChangeDetectorRef} from '@angular/core';
 
-import { BaseTabpanel, Tab } from "./basetabpanel"
+import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
+import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public';
 
-import { WindowRefService } from '../../sablo/util/windowref.service'
-import { LoggerFactory } from '../../sablo/logger.service'
+import { WindowRefService } from '../../sablo/util/windowref.service';
+import { LoggerFactory } from '../../sablo/logger.service';
 
-import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
+import { NgbTabset, NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component( {
@@ -17,8 +17,8 @@ import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     @ViewChild( 'tabset')
     private tabset: NgbTabset;
-    
-    constructor( windowRefService: WindowRefService, log : LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
+
+    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( windowRefService, log, renderer, cdRef );
     }
 
@@ -38,7 +38,6 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
         const tabIndex = this.getRealTabIndex();
         if (tabIndex > 0) {
             return this.tabs[tabIndex]._id;
-        }
-        else if (this.tabs && this.tabs.length > 0) return this.tabs[0]._id;
+        } else if (this.tabs && this.tabs.length > 0) return this.tabs[0]._id;
     }
 }

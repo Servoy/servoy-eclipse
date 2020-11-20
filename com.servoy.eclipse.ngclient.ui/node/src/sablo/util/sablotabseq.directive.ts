@@ -13,7 +13,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
     designChildTabSeq = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
     runtimeChildIndexes = {}; // map designChildIndex[i] -> runtimeIndex for child or designChildIndex[i] -> [runtimeIndex1, runtimeIndex2] in case there are multiple equal design time indexes
     runtimeIndex;
-    initializing:boolean;
+    initializing: boolean;
     isEnabled: boolean;
 
     constructor(private _elemRef: ElementRef) {
@@ -33,16 +33,16 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
 
         if (this.designTabSeq != -2 && !(this.config && this.config.root)) {
-            this.trigger(this._elemRef.nativeElement.parentNode, "registerCSTS", [this.designTabSeq, this.runtimeIndex]);
+            this.trigger(this._elemRef.nativeElement.parentNode, 'registerCSTS', [this.designTabSeq, this.runtimeIndex]);
         }
 
         // check to see if this is the top-most tabSeq container
         if (this.config && this.config.root) {
             // it's root tab seq container (so no parent); just emit on self to do initial tree calculation
-            this.trigger(this._elemRef.nativeElement, "recalculatePSTS", [0, true]);
+            this.trigger(this._elemRef.nativeElement, 'recalculatePSTS', [0, true]);
         } else {
             if (this.designTabSeq != -2) {
-                this.trigger(this._elemRef.nativeElement.parentNode, "recalculatePSTS", [this.designTabSeq ? this.designTabSeq : 0, false]);
+                this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [this.designTabSeq ? this.designTabSeq : 0, false]);
             }
         }
     }
@@ -54,34 +54,31 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
             this.runtimeIndex.nextAvailableIndex = this.runtimeIndex.startIndex;
             this.runtimeIndex.startIndex = -1;
-        }
-        else if (this.designTabSeq === 0) {
+        } else if (this.designTabSeq === 0) {
             // this element doesn't set any tabIndex attribute (default behavior)
             this.runtimeIndex.nextAvailableIndex = this.runtimeIndex.startIndex;
             this.runtimeIndex.startIndex = 0;
-        }
-        else if (this.runtimeIndex.startIndex === 0) {
+        } else if (this.runtimeIndex.startIndex === 0) {
             this.runtimeIndex.nextAvailableIndex = 0;
-        }
-        else if (this.runtimeIndex.nextAvailableIndex === -1) {
+        } else if (this.runtimeIndex.nextAvailableIndex === -1) {
             var reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
             this.runtimeIndex.nextAvailableIndex = this.runtimeIndex.startIndex + reservedGap;
         }
 
         if (posInDesignArray === 0) this.updateCurrentDomElTabIndex();
 
-        var recalculateStartIndex = this.runtimeIndex.startIndex;
+        let recalculateStartIndex = this.runtimeIndex.startIndex;
         if (posInDesignArray > 0 && posInDesignArray - 1 < this.designChildTabSeq.length) {
-            var runtimeCI = this.runtimeChildIndexes[this.designChildTabSeq[posInDesignArray - 1]]; // this can be an array in case of multiple equal design indexes being siblings
+            const runtimeCI = this.runtimeChildIndexes[this.designChildTabSeq[posInDesignArray - 1]]; // this can be an array in case of multiple equal design indexes being siblings
             recalculateStartIndex = runtimeCI.push ? runtimeCI[runtimeCI.length - 1].nextAvailableIndex : runtimeCI.nextAvailableIndex;
         }
 
-        for (var i = posInDesignArray; i < this.designChildTabSeq.length; i++) {
-            var childRuntimeIndex = this.runtimeChildIndexes[this.designChildTabSeq[i]];
+        for (let i = posInDesignArray; i < this.designChildTabSeq.length; i++) {
+            const childRuntimeIndex = this.runtimeChildIndexes[this.designChildTabSeq[i]];
             if (childRuntimeIndex.push) {
                 // multiple equal design time indexes as siblings
-                var max = recalculateStartIndex;
-                for (var k in childRuntimeIndex) {
+                let max = recalculateStartIndex;
+                for (const k in childRuntimeIndex) {
                     childRuntimeIndex[k].startIndex = recalculateStartIndex;
                     childRuntimeIndex[k].sablotabseq.recalculateChildRuntimeIndexesStartingAt(0, true); // call recalculate on whole child; normally it only makes sense for same index siblings if they are not themselfes containers, just apply the given value
                     if (max < childRuntimeIndex[k].nextAvailableIndex)
@@ -97,9 +94,9 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
         if (this.initializing) this.initializing = undefined; // it's now considered initialized as first runtime index caluculation is done
 
-        var parentRecalculateNeeded;
+        let parentRecalculateNeeded;
         if (this.runtimeIndex.startIndex !== 0 && this.runtimeIndex.startIndex !== -1) {
-            var ownTabIndexBump = this.hasOwnTabIndex() ? 1 : 0;
+            const ownTabIndexBump = this.hasOwnTabIndex() ? 1 : 0;
             parentRecalculateNeeded = (this.runtimeIndex.nextAvailableIndex < recalculateStartIndex + ownTabIndexBump);
             var reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
             if (parentRecalculateNeeded) this.runtimeIndex.nextAvailableIndex = recalculateStartIndex + reservedGap + ownTabIndexBump;
@@ -109,7 +106,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
         }
 
         // if this container now needs more tab indexes than it was reserved; a recalculate on parent needs to be triggered in this case
-        if (parentRecalculateNeeded && !triggeredByParent) this.trigger(this._elemRef.nativeElement.parentNode, "recalculatePSTS", [this.designTabSeq, false]);
+        if (parentRecalculateNeeded && !triggeredByParent) this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [this.designTabSeq, false]);
     }
 
     hasOwnTabIndex(): boolean {
@@ -118,12 +115,9 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
     updateCurrentDomElTabIndex(): void {
         if (this.hasOwnTabIndex()) {
-            if (this.runtimeIndex.startIndex !== 0)
-            {
+            if (this.runtimeIndex.startIndex !== 0) {
                 this.setDOMTabIndex(this.runtimeIndex.startIndex);
-            }
-            else 
-            {	
+            } else {
                 this.setDOMTabIndex(undefined);
             }
         }
@@ -144,7 +138,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
         }
 
         // insert it sorted
-        var posInDesignArray = 0;
+        let posInDesignArray = 0;
         for (var tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < designChildIndex; tz++) {
             posInDesignArray = tz + 1;
         }
@@ -175,13 +169,13 @@ export class SabloTabseq implements OnInit, OnDestroy {
             return false;
         }
 
-        var posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
+        const posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
         if (posInDesignArray != undefined) {
-            var keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
-            var multipleEqualDesignValues = this.runtimeChildIndexes[keyInRuntimeArray].push;
+            const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
+            const multipleEqualDesignValues = this.runtimeChildIndexes[keyInRuntimeArray].push;
             if (!multipleEqualDesignValues) {
                 delete this.designChildIndexToArrayPosition[designChildIndex];
-                for (var tmp in this.designChildIndexToArrayPosition) {
+                for (const tmp in this.designChildIndexToArrayPosition) {
                     if (this.designChildIndexToArrayPosition[tmp] > posInDesignArray) this.designChildIndexToArrayPosition[tmp]--;
                 }
                 this.designChildTabSeq.splice(posInDesignArray, 1);
@@ -206,7 +200,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
         if (!this.initializing) {
             // a new child is ready/linked; recalculate tab indexes for it and after it
-            var startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] != undefined) ? this.designChildIndexToArrayPosition[designChildIndex] : 0;
+            const startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] != undefined) ? this.designChildIndexToArrayPosition[designChildIndex] : 0;
             this.recalculateChildRuntimeIndexesStartingAt(startIdx, false);
         } else if (initialRootRecalculate) {
             // this is $rootScope (one $parent extra cause the directive creates it); we always assume a sabloTabseq directive is bound to it;
@@ -217,7 +211,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
         event.stopPropagation();
         return false;
-    }    
+    }
 
     @HostListener('disableTabseq', ['$event'])
     disableTabseq(event): boolean {
@@ -225,15 +219,15 @@ export class SabloTabseq implements OnInit, OnDestroy {
         this.recalculateChildRuntimeIndexesStartingAt(0, true);
         event.stopPropagation();
         return false;
-    }    
+    }
 
     @HostListener('enableTabseq', ['$event'])
     enableTabseq(event): boolean {
         this.isEnabled = true;
-        this.trigger(this._elemRef.nativeElement.parentNode, "recalculatePSTS", [0, false]);
+        this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [0, false]);
         event.stopPropagation();
         return false;
-    }    
+    }
 
     trigger(target, event: string, arg): void {
         const customEvent = new CustomEvent(event, {
@@ -246,7 +240,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         // unregister current tabSeq from parent tabSeq container
         if(this._elemRef.nativeElement.parentNode) {
-            this.trigger(this._elemRef.nativeElement.parentNode, "unregisterCSTS", [this.designTabSeq, this.runtimeIndex]);
+            this.trigger(this._elemRef.nativeElement.parentNode, 'unregisterCSTS', [this.designTabSeq, this.runtimeIndex]);
         }
     }
 }

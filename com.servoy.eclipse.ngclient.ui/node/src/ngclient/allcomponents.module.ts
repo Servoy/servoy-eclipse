@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
-import { ServoyBootstrapComponentsModule } from "../bootstrapcomponents/servoybootstrap.module";
+import { ServoyBootstrapComponentsModule } from '../bootstrapcomponents/servoybootstrap.module';
 import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 
 /**
@@ -9,9 +9,9 @@ import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
  * This will list all the component modules that can or will be used in a solution.
  */
 @NgModule({
-  
+
   imports: [
-    ServoyDefaultComponentsModule, 
+    ServoyDefaultComponentsModule,
     ServoyBootstrapComponentsModule,
     ServoyExtraComponentsModule
   ],

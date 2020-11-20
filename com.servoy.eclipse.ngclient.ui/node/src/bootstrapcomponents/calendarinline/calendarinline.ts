@@ -12,26 +12,24 @@ export class ServoyBootstrapCalendarinline extends ServoyBootstrapBasefield {
     min: Date;
     max: Date;
 
-    constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) { 
+    constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
 
-    public disableDays(dateArray : Number[]) {
-      this.filter = (d: moment.Moment): boolean => {
-          return dateArray.includes(d.day());
-      }
+    public disableDays(dateArray: Number[]) {
+      this.filter = (d: moment.Moment): boolean => dateArray.includes(d.day());
     }
 
     public disableDates(dateArray: Date[]) {
       this.filter = (d: moment.Moment): boolean => {
         let result = true;
         dateArray.forEach(el => {
-          if (el.toString() === d.toDate().toString()) { 
+          if (el.toString() === d.toDate().toString()) {
               result = false;
           }
         });
         return result;
-      }      
+      };
     }
 
     public setMinMaxDate(minDate: Date, maxDate: Date) {

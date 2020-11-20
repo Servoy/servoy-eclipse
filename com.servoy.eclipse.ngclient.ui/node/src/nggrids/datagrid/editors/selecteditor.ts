@@ -22,8 +22,8 @@ export class SelectEditor extends DatagridEditor {
                 v = v.displayValue;
             }
             const _this = this;
-            vl.filterList("").subscribe(valuelistValues => {
-                valuelistValues.forEach(function (value) {
+            vl.filterList('').subscribe(valuelistValues => {
+                valuelistValues.forEach(function(value) {
                     const option = document.createElement('option');
                     option.value = value.realValue == null ? '_SERVOY_NULL' : value.realValue;
                     option.text = value.displayValue;
@@ -46,19 +46,19 @@ export class SelectEditor extends DatagridEditor {
 
     // returns the new value after editing
     getValue(): any {
-        const displayValue = this.elementRef.nativeElement.selectedIndex > -1 ? this.elementRef.nativeElement.options[this.elementRef.nativeElement.selectedIndex].text : "";
+        const displayValue = this.elementRef.nativeElement.selectedIndex > -1 ? this.elementRef.nativeElement.options[this.elementRef.nativeElement.selectedIndex].text : '';
         const realValue = this.elementRef.nativeElement.value == '_SERVOY_NULL' ? null : this.elementRef.nativeElement.value;
-        return displayValue != realValue ? { displayValue: displayValue, realValue: realValue } : realValue;
+        return displayValue != realValue ? { displayValue, realValue } : realValue;
     }
 
-    @HostListener("keydown", ["$event"]) onKeyDown(e: KeyboardEvent) {
+    @HostListener('keydown', ['$event']) onKeyDown(e: KeyboardEvent) {
         const isNavigationKey = e.keyCode === 38 || e.keyCode === 40;
         if (isNavigationKey) {
             e.stopPropagation();
         }
     }
 
-    @HostListener("mousedown", ["$event"]) onMouseDown(e: MouseEvent) {
+    @HostListener('mousedown', ['$event']) onMouseDown(e: MouseEvent) {
         e.stopPropagation();
     }
 }

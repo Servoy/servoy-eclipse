@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { LocalStorageService } from '../../../sablo/webstorage/localstorage.service';
 import { SabloService } from '../../../sablo/sablo.service';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'; 
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   templateUrl: './default-login-window.component.html',
@@ -11,7 +11,7 @@ export class DefaultLoginWindowComponent {
 
   username: string;
   password: string;
-  remember: boolean = true;
+  remember = true;
   message: string;
 
   constructor(
@@ -21,16 +21,16 @@ export class DefaultLoginWindowComponent {
   ) { }
 
   doLogin() {
-    var promise = this.sabloService.callService("applicationServerService", "login",
-      {'username' : this.username, 'password' : this.password, 'remember': this.remember }, false);
+    const promise = this.sabloService.callService('applicationServerService', 'login',
+      {username : this.username, password : this.password, remember: this.remember }, false);
     promise.then((ok) =>{
 			if(ok) {
-        if(ok.username) this.localStorageService.set("servoy_username", ok.username);
-        if(ok.password) this.localStorageService.set("servoy_password", ok.password);
+        if(ok.username) this.localStorageService.set('servoy_username', ok.username);
+        if(ok.password) this.localStorageService.set('servoy_password', ok.password);
         this.activeModal.close(ok);
 			} else {
 				this.message = 'Invalid username or password, try again';
 			}
-    })
+    });
   }
 }

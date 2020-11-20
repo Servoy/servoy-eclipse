@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform } from "@angular/core";
-import { IValuelist } from "../../sablo/spectypes.service";
+import { Pipe, PipeTransform } from '@angular/core';
+import { IValuelist } from '../../sablo/spectypes.service';
 
 @Pipe({name: 'showDisplayValue'})
 export class ShowDisplayValuePipe implements PipeTransform {
@@ -11,7 +11,7 @@ export class ShowDisplayValuePipe implements PipeTransform {
         const noParsedDisplayValue = args[2];
 
         if (valuelist) {
-            if (input && input.hasOwnProperty("realValue")) {
+            if (input && input.hasOwnProperty('realValue')) {
                 realValue = input.realValue;
             }
             for (let i = 0; i < valuelist.length; i++) {

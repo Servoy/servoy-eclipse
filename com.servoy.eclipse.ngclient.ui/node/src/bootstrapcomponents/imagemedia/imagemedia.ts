@@ -10,13 +10,13 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield{
 
     @Input() media;
     @Input() alternate;
-    
-    imageURL: string = "bootstrapcomponents/imagemedia/images/empty.gif";
-    
+
+    imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';
+
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
-    
+
     svyOnChanges(changes: SimpleChanges): void {
         if (changes) {
             for ( const property of Object.keys(changes) ) {
@@ -33,17 +33,17 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield{
             super.svyOnChanges(changes);
         }
     }
-    
+
     private updateImageURL(media: any, dataProvider: any) {
         if (media || this.media) {
             if (media) this.imageURL = media;
             // do nothing if data provider changed but media is defined
         } else if(dataProvider && dataProvider.url) {
-            this.imageURL = dataProvider.url
+            this.imageURL = dataProvider.url;
         } else if (!dataProvider && this.servoyApi.isInDesigner()) {
-            this.imageURL = "bootstrapcomponents/imagemedia/media.png"
+            this.imageURL = 'bootstrapcomponents/imagemedia/media.png';
         } else if (!dataProvider){
-            this.imageURL = "bootstrapcomponents/imagemedia/images/empty.gif"
+            this.imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';
         } else {
             this.imageURL = dataProvider;
         }

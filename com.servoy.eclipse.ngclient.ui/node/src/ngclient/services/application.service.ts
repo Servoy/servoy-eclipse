@@ -148,14 +148,14 @@ export class ApplicationService {
 
     public showDefaultLogin() {
         if (this.localStorageService.get('servoy_username') && this.localStorageService.get('servoy_password')) {
-            const promise = this.sabloService.callService('applicationServerService', 'login', {'username' : this.localStorageService.get('servoy_username'), 'password' : this.localStorageService.get('servoy_password'), 'encrypted': true}, false);
+            const promise = this.sabloService.callService('applicationServerService', 'login', {username : this.localStorageService.get('servoy_username'), password : this.localStorageService.get('servoy_password'), encrypted: true}, false);
             promise.then((ok) => {
                 if (!ok) {
                     this.localStorageService.remove('servoy_username');
                     this.localStorageService.remove('servoy_password');
                     this.showDefaultLoginWindow();
                 }
-            })
+            });
         } else {
             this.showDefaultLoginWindow();
         }

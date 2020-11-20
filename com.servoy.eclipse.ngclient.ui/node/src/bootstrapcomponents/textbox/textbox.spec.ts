@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTextbox } from './textbox';
-import { FormattingService } from "../../ngclient/servoy_public";
+import { FormattingService } from '../../ngclient/servoy_public';
 
 describe('TextboxComponent', () => {
   let component: ServoyBootstrapTextbox;
@@ -9,7 +9,7 @@ describe('TextboxComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapTextbox ], 
+      declarations: [ ServoyBootstrapTextbox ],
       providers: [FormattingService]
     })
     .compileComponents();

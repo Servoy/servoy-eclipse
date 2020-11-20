@@ -1,6 +1,6 @@
 import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, AfterViewInit, Input } from '@angular/core';
-import { FormattingService } from "../../ngclient/servoy_public";
-import { ServoyDefaultBaseChoice } from "../basechoice";
+import { FormattingService } from '../../ngclient/servoy_public';
+import { ServoyDefaultBaseChoice } from '../basechoice';
 
 @Component( {
     selector: 'servoydefault-check',
@@ -10,14 +10,14 @@ import { ServoyDefaultBaseChoice } from "../basechoice";
 export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
     @Input() horizontalAlignment;
 
-    selected: boolean = false;
+    selected = false;
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef,  formattingService: FormattingService ) {
         super( renderer, cdRef, formattingService );
     }
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachEventHandlers( this.getNativeElement(), 0 )
+        this.attachEventHandlers( this.getNativeElement(), 0 );
     }
 
     svyOnChanges( changes: SimpleChanges ) {
@@ -29,11 +29,9 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
         if ( halign != -1 ) {
             if ( halign == 0 ) {
                 renderer.setStyle( element, 'justify-content', 'center' );
-            }
-            else if ( halign == 4 ) {
+            } else if ( halign == 4 ) {
                 renderer.setStyle( element, 'justify-content', 'flex-end' );
-            }
-            else {
+            } else {
                 renderer.setStyle( element, 'justify-content', 'flex-start' );
             }
         }
@@ -54,8 +52,8 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
 
         if ( this.valuelistID && this.valuelistID[0] )
             this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
-        else if ( typeof this.dataProviderID === "string" )
-            this.dataProviderID = this.dataProviderID == "1" ? "0" : "1";
+        else if ( typeof this.dataProviderID === 'string' )
+            this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
         else
             this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
         super.baseItemClicked( event, true, this.dataProviderID );
@@ -66,8 +64,8 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
             return false;
         if ( this.valuelistID && this.valuelistID[0] ) {
             return this.dataProviderID == this.valuelistID[0].realValue;
-        } else if ( typeof this.dataProviderID === "string" ) {
-            return this.dataProviderID == "1";
+        } else if ( typeof this.dataProviderID === 'string' ) {
+            return this.dataProviderID == '1';
         } else {
             return this.dataProviderID > 0;
         }

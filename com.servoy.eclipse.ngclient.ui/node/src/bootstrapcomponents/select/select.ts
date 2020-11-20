@@ -38,9 +38,11 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
   }
 
   showPlaceholder() {
-    if (!this.placeholderText || this.placeholderText.length === 0) { return false; }
+    if (!this.placeholderText || this.placeholderText.length === 0) {
+ return false;
+}
     const displayValue = this.showDisplayValuePipe.transform(this.dataProviderID, this.valuelistID, true, true);
-    return displayValue == null || (displayValue == "" && this.dataProviderID === null);
+    return displayValue == null || (displayValue == '' && this.dataProviderID === null);
   }
 
   isDPinValuelist() {
@@ -71,7 +73,7 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
           if (this.selectedValues.indexOf(this.valuelistID[i].displayValue) != -1) {
               if (value == null) value = [];
               value.push(this.valuelistID[i].realValue);
-            } 
+            }
         } else {
           if (this.dataProviderID == this.valuelistID[i].displayValue) {
             value = this.valuelistID[i].realValue;

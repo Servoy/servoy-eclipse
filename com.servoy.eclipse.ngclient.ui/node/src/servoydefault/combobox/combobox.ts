@@ -42,14 +42,10 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
   setData() {
     if (this.valuelistID) {
       const options: Select2OptionWithReal[] = [];
-      let formatter = ( value ) => {
-          return value;
-      };
+      let formatter = ( value ) => value;
       if (this.valuelistID.isRealValueDate() ) {
           const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
-          formatter = ( value ) => {
-              return this.formattingService.format(value, dateFormat , 'DATETIME');
-          };
+          formatter = ( value ) => this.formattingService.format(value, dateFormat , 'DATETIME');
       }
       for (let i = 0; i < this.valuelistID.length; i++) {
           options.push({

@@ -109,21 +109,21 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
   public diplayValueReq: object;
   public hasRealValues: boolean;
 
-  deferred: { [key: string]: { defer: Deferred<any>, timeoutId: any } };
+  deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
   currentMsgId: number;
   timeoutRejectLogPrefix: string;
 
-  init(deferred: { [key: string]: { defer: Deferred<any>, timeoutId: any } }, currentMsgId: number, timeoutRejectLogPrefix: string) {
+  init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, currentMsgId: number, timeoutRejectLogPrefix: string) {
     this.deferred = deferred;
     this.currentMsgId = currentMsgId;
     this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
   }
 }
 
-export class Valuelist extends Array<{ displayValue: string, realValue: object }> implements IValuelist, IChangeAwareValue {
+export class Valuelist extends Array<{ displayValue: string; realValue: object }> implements IValuelist, IChangeAwareValue {
 
   constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private realValueIsDate: boolean,
-              public state: ValuelistState, values?: Array<{ displayValue: string, realValue: object }>) {
+              public state: ValuelistState, values?: Array<{ displayValue: string; realValue: object }>) {
     super();
     if (values) this.push(...values);
     // see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3

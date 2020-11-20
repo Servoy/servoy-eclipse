@@ -1,6 +1,6 @@
-import { Subject } from "rxjs";
-import { Injectable, NgZone } from "@angular/core";
-import { LoggerFactory, LoggerService } from "../../logger.service";
+import { Subject } from 'rxjs';
+import { Injectable, NgZone } from '@angular/core';
+import { LoggerFactory, LoggerService } from '../../logger.service';
 
 export interface ICustomLoadingIndicator {
     showLoading(): void;
@@ -8,20 +8,20 @@ export interface ICustomLoadingIndicator {
 }
 
 @Injectable()
-export class LoadingIndicatorService { 
-    
+export class LoadingIndicatorService {
+
     showLoadingIndicator: Subject<boolean> = new Subject<boolean>();
     customLoadingIndicator: ICustomLoadingIndicator;
     log: LoggerService;
     private showCounter = 0;
     private timeoutShow = null;
     private timeoutHide = null;
-    
-    constructor(private logFactory : LoggerFactory ) {
+
+    constructor(private logFactory: LoggerFactory ) {
        this.customLoadingIndicator = null;
-       this.log = logFactory.getLogger("LoadingIndicatorService");
+       this.log = logFactory.getLogger('LoadingIndicatorService');
     }
-    
+
     public showLoading() {
         this.showCounter++;
         if (this.showCounter == 1) {
@@ -40,7 +40,7 @@ export class LoadingIndicatorService {
             }
         }
     }
-    
+
     public hideLoading() {
         this.showCounter--;
         if (this.showCounter == 0) {
@@ -55,13 +55,13 @@ export class LoadingIndicatorService {
                     this.showLoadingIndicator.next(false);
                 }
             }, 50);
-        } 
+        }
     }
-    
+
     isShowing() {
         return this.showCounter > 0;
     }
-    
+
     public setCustomLoadingIndicator(customLoadingIndicator: ICustomLoadingIndicator) {
         if (customLoadingIndicator.hideLoading == undefined || customLoadingIndicator.showLoading == undefined) {
             this.log.warn(this.log.buildMessage(() => ('a custom loading indicator is defined but does not have the 2 functions: showLoading or hideLoading')));

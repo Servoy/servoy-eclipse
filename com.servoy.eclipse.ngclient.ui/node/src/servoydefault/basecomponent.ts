@@ -43,7 +43,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
 
     protected attachHandlers() {
       if ( this.onRightClickMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; });
+        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
+ this.onRightClickMethodID( e ); return false;
+});
       }
     }
 

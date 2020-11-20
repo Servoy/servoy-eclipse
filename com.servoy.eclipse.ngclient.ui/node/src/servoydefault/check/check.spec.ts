@@ -1,18 +1,18 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
-import {SabloModule} from "../../sablo/sablo.module";
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
-import { FormattingService, ServoyApi, TooltipService} from "../../ngclient/servoy_public";
-import {FormsModule} from "@angular/forms";
+import {SabloModule} from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { FormattingService, ServoyApi, TooltipService} from '../../ngclient/servoy_public';
+import {FormsModule} from '@angular/forms';
 
 describe('CheckComponent', () => {
   let component: ServoyDefaultCheck;
   let fixture: ComponentFixture<ServoyDefaultCheck>;
   let servoyApi;
-  let input, label,span;
+  let input; let label; let span;
   beforeEach(waitForAsync(() => {
-  servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+  servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultCheck ],
       imports: [SabloModule, FormsModule, ServoyPublicModule],
@@ -25,7 +25,7 @@ describe('CheckComponent', () => {
     fixture = TestBed.createComponent(ServoyDefaultCheck);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
     component = fixture.componentInstance;
-    component.text = "Check me";
+    component.text = 'Check me';
     component.enabled = true;
     component.editable = true;
 
@@ -39,11 +39,11 @@ describe('CheckComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  
+
   it('should click change value', () => {
       expect(input.checked).toBeFalsy(); // default state
       input.click();
-      
+
       fixture.detectChanges();
       expect(input.checked).toBeTruthy(); // state after click
 
@@ -64,32 +64,32 @@ describe('CheckComponent', () => {
     clickOnElement(label, fixture, input, true);
     clickOnElement(label, fixture, input, false);
   }));
-  
+
   it('should getSelectionFromDP', () => {
       component.dataProviderID = 1;
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
-      
+
       component.dataProviderID = '1';
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
-      
+
       component.dataProviderID = 0;
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
-      
+
       component.dataProviderID = '0';
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
-      
+
       component.dataProviderID = '';
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
       component.dataProviderID = 'something';
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
-      
+
       component.dataProviderID = null;
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
       component.dataProviderID = undefined;
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
-  })
+  });
 
 });
 

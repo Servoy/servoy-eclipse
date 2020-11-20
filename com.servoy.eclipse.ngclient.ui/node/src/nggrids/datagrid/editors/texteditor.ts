@@ -22,7 +22,7 @@ export class TextEditor extends DatagridEditor {
             this.initialValue = this.initialValue.displayValue;
         }
         let v = this.initialValue;
-        let column = this.dataGrid.getColumn(params.column.getColId());
+        const column = this.dataGrid.getColumn(params.column.getColId());
         if(column && column.format) {
             this.format = column.format;
             if (this.format.maxLength) {
@@ -34,7 +34,7 @@ export class TextEditor extends DatagridEditor {
                 //v = $formatterUtils.format(v, editFormat, this.format.type);
             }
 
-            if (v && this.format.type == "TEXT") {
+            if (v && this.format.type == 'TEXT') {
                 if (this.format.uppercase) v = v.toUpperCase();
                 else if (this.format.lowercase) v = v.toLowerCase();
             }
@@ -43,7 +43,7 @@ export class TextEditor extends DatagridEditor {
         this.initialDisplayValue = v;
     }
 
-    @HostListener("keydown",["$event"]) onKeyDown(e:KeyboardEvent) {
+    @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {
         if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing != 'NONE') {
             const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
             const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
@@ -53,7 +53,7 @@ export class TextEditor extends DatagridEditor {
                 if(isNavigationUpDownEntertKey) {
                     let newEditingNode = null;
                     const columnToCheck = this.params.column;
-                    const mustBeEditable = this.dataGrid.arrowsUpDownMoveWhenEditing == 'NEXTEDITABLECELL'
+                    const mustBeEditable = this.dataGrid.arrowsUpDownMoveWhenEditing == 'NEXTEDITABLECELL';
                     if( e.keyCode == 38) { // UP
                         if(this.params.rowIndex > 0) {
                             const _this = this;
@@ -62,10 +62,9 @@ export class TextEditor extends DatagridEditor {
                                     (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
                                 }
-                            });	
+                            });
                         }
-                    }
-                    else if (e.keyCode == 13 || e.keyCode == 40) { // ENTER/DOWN
+                    } else if (e.keyCode == 13 || e.keyCode == 40) { // ENTER/DOWN
                         if( this.params.rowIndex < this.dataGrid.agGrid.api.getModel().getRowCount() - 1) {
                             const _this = this;
                             this.dataGrid.agGrid.api.forEachNode( function(node) {
@@ -73,7 +72,7 @@ export class TextEditor extends DatagridEditor {
                                     !newEditingNode && (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
                                 }
-                            });	
+                            });
                         }
                     }
                     this.dataGrid.agGrid.api.stopEditing();
@@ -86,8 +85,7 @@ export class TextEditor extends DatagridEditor {
                                 rowIndex: newEditingNode.rowIndex,
                                 colKey: columnToCheck.getColId()
                             });
-                        }
-                        else {
+                        } else {
                             this.dataGrid.agGrid.api.setFocusedCell(newEditingNode.rowIndex, columnToCheck.getColId());
                         }
                     }
@@ -98,10 +96,10 @@ export class TextEditor extends DatagridEditor {
         }
     }
 
-    @HostListener("keypress",["$event"]) onKeyPress(e:KeyboardEvent) {
+    @HostListener('keypress',['$event']) onKeyPress(e: KeyboardEvent) {
         const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
         const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
-        
+
         //TODO: formatterUtils
         // if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && $formatterUtils.testForNumbersOnly && this.format) {
         //     return $formatterUtils.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format);
@@ -119,7 +117,7 @@ export class TextEditor extends DatagridEditor {
         const editFormat = this.format.edit ? this.format.edit : this.format.display;
         if(this.format && editFormat && this.format.isMask) {
             const settings = {};
-            settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : " ";
+            settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
             if (this.format.allowedCharacters)
                 settings['allowedCharacters'] = this.format.allowedCharacters;
 
@@ -138,13 +136,13 @@ export class TextEditor extends DatagridEditor {
                 //TODO: formatterUtils
                 //displayValue = $formatterUtils.unformat(displayValue, editFormat, this.format.type, this.initialValue);
             }
-            if (this.format.type == "TEXT" && (this.format.uppercase || this.format.lowercase)) {
+            if (this.format.type == 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
                 if (this.format.uppercase) displayValue = displayValue.toUpperCase();
                 else if (this.format.lowercase) displayValue = displayValue.toLowerCase();
             }
         }
-        let realValue = displayValue;
+        const realValue = displayValue;
 
-        return {displayValue: displayValue, realValue: realValue};
+        return {displayValue, realValue};
     }
 }

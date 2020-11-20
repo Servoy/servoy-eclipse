@@ -55,7 +55,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
     let returnValue = '';
     this.selection.forEach((element, index) => {
       if (element === true)
-        returnValue += this.valuelistID[index + this.allowNullinc].realValue + '\n'
+        returnValue += this.valuelistID[index + this.allowNullinc].realValue + '\n';
     });
     returnValue = returnValue.replace(/\n$/, ''); // remove the last \n
     if (returnValue === '') returnValue = null;

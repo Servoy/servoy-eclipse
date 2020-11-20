@@ -77,12 +77,13 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
     }
   }
 
-  isValueListNull = function (item) {
+  isValueListNull = function(item) {
     return (item.realValue == null || item.realValue === '') && item.displayValue === '';
   };
 
   /**
    * Gets the selected values (real values from valuelist) as array. The form element should have a dataProviderID assigned in order for this to work.
+   *
    * @example var values = %%prefix%%%%elementName%%.getSelectedElements();
    * @return array with selected values
    */

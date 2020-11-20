@@ -64,7 +64,7 @@ export class FormattingService {
 
         const initialData = data;
         let patchedFormat = servoyFormat; // patched format for numeraljs format
-        let i, j;
+        let i; let j;
         let prefix = '';
         let sufix = '';
 

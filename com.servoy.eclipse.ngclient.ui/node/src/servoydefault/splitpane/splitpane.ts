@@ -1,8 +1,8 @@
 import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
 
-import { ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public';
 
-import { Tab } from '../tabpanel/basetabpanel'
+import { Tab } from '../tabpanel/basetabpanel';
 
 @Component( {
     selector: 'servoydefault-splitpane',
@@ -25,7 +25,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent {
     @Input() styleClass;
     @Input() tabOrientation;
     @Input() tabSeq;
-    @Input() tabs: Array<Tab>
+    @Input() tabs: Array<Tab>;
     @Input() transparent;
     @Input() visible;
 
@@ -33,20 +33,20 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent {
     @Output() divLocationChange = new EventEmitter();
     @Input() divSize;
     @Input() pane1MinSize;
-    @Input() pane2MinSize
-    @Input() resizeWeight; 
+    @Input() pane2MinSize;
+    @Input() resizeWeight;
 
 
     @ContentChild( TemplateRef, {static: true} )
     templateRef: TemplateRef<any>;
-    
-    private leftTab:Tab;
-    private rightTab:Tab;
 
-    constructor(renderer:Renderer2, cdRef: ChangeDetectorRef) {
+    private leftTab: Tab;
+    private rightTab: Tab;
+
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
-    
+
     svyOnInit() {
         if (this.resizeWeight == undefined) this.resizeWeight = 0;
         if (this.pane1MinSize == undefined) this.pane1MinSize = 30;
@@ -54,31 +54,30 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent {
         if (this.divSize == undefined) this.divSize = 5;
         super.svyOnInit();
     }
-    
+
     svyOnChanges(changes: SimpleChanges) {
-        if(changes["tabs"])
-        {
+        if(changes['tabs']) {
             this.leftTab = this.tabSwitch(this.leftTab, this.tabs?this.tabs[0]:null);
             this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null);
         }
         super.svyOnChanges(changes);
     }
-    
+
     onChange( location ) {
         this.divLocation = location;
         this.divLocationChange.emit(this.divLocation);
-        if (this.onChangeMethodID) this.onChangeMethodID(-1, new Event("change"));
+        if (this.onChangeMethodID) this.onChangeMethodID(-1, new Event('change'));
     }
-    
+
     getRightTab() {
         return this.rightTab?this.rightTab.containsFormId:null;
     }
-    
+
     getLeftTab() {
         return this.leftTab?this.leftTab.containsFormId:null;
     }
-    
-    private tabSwitch(oldTab:Tab,newTab:Tab):Tab {
+
+    private tabSwitch(oldTab: Tab,newTab: Tab): Tab {
         if (oldTab && newTab) {
             const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName);
             promise.then((ok) => {
@@ -86,12 +85,10 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent {
                     // a splitpane can't block the hide so show should be called
                     this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName);
                 }
-            })
-        }
-        else if (oldTab) {
+            });
+        } else if (oldTab) {
             this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName);
-        }
-        else if (newTab) {
+        } else if (newTab) {
             this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName);
         }
         return newTab;

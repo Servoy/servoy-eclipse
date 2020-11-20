@@ -1,10 +1,10 @@
-import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform,ChangeDetectorRef } from "@angular/core";
-import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
+import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform,ChangeDetectorRef } from '@angular/core';
+import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
 
 @Component({
     selector: 'bootstrapcomponents-datalabel',
     templateUrl: './datalabel.html',
-    styleUrls: ['./datalabel.scss'] 
+    styleUrls: ['./datalabel.scss']
 })
 export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
 
@@ -30,17 +30,18 @@ export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
                         innerThis.timeoutID = window.setTimeout(function() {
                             innerThis.timeoutID = null;
                             innerThis.onActionMethodID( e );
-                        }, 250); }
+                        }, 250);
+}
                  });
             } else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => { 
+                this.renderer.listen( this.getNativeElement(), 'click', e => {
                     this.onActionMethodID(e);
                 });
             }
         }
         if ( this.onRightClickMethodID ) {
-          this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { 
-              this.onRightClickMethodID( e ); return false; 
+          this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
+              this.onRightClickMethodID( e ); return false;
             });
         }
         if ( this.onDoubleClickMethodID ) {
@@ -54,9 +55,8 @@ export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
 @Pipe( { name: 'designFilter'} )
 export class DesignFilterPipe implements PipeTransform {
     transform(input: any, inDesigner: boolean) {
-        if (inDesigner)
-        {
-            return "DataLabel"
+        if (inDesigner) {
+            return 'DataLabel';
         }
         return input;
     }

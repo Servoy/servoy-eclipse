@@ -5,7 +5,7 @@ import { WebStorage } from './webstorage.interface';
 export class SessionStorageService implements WebStorage {
 
     hasSessionStorage: boolean;
-    prefix: string = '';
+    prefix = '';
 
     constructor() {
         this.hasSessionStorage = this.isSupported();
@@ -37,7 +37,7 @@ export class SessionStorageService implements WebStorage {
     get(key: string) {
         if (this.hasSessionStorage) {
 			try {
-				var value = sessionStorage.getItem(this.prefix + key);
+				const value = sessionStorage.getItem(this.prefix + key);
 				return value && JSON.parse(value);
 			} catch (e) {
 				console.log(e);
@@ -69,7 +69,7 @@ export class SessionStorageService implements WebStorage {
 		if (!!this.prefix) {
 			const prefixLength = this.prefix.length;
 			try {
-				for (let key in sessionStorage) {
+				for (const key in sessionStorage) {
 					if (key.substr(0, prefixLength) === this.prefix) {
 						sessionStorage.removeItem(key);
 					}

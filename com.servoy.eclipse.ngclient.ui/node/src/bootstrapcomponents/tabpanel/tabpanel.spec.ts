@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTabpanel } from './tabpanel';
-import { WindowRefService } from '../../sablo/util/windowref.service'
+import { WindowRefService } from '../../sablo/util/windowref.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyApi } from '../../ngclient/servoy_public'
+import { ServoyApi } from '../../ngclient/servoy_public';
 
 describe('TabpanelComponent', () => {
   let component: ServoyBootstrapTabpanel;

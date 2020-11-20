@@ -38,9 +38,7 @@ export class I18NProvider {
                         retValue[key] = result[key];
                     }
                     return retValue;
-                }, (error) => {
-                    return Promise.reject(error);
-                });
+                }, (error) => Promise.reject(error));
                 return promiseB;
             } else {
                 const defered = new Deferred<{}> ();
@@ -56,9 +54,9 @@ export class I18NProvider {
                                   if (promise['reject']) {
                                       return Promise.reject(result);
                                   } else {
-                                      let value = result[key];
+                                      const value = result[key];
                                       this.cachedPromises[key] = {
-                                              value: value
+                                              value
                                       };
                                       return value;
                                   }
@@ -71,7 +69,7 @@ export class I18NProvider {
                               }
                            );
                 this.cachedPromises[key] = {
-                    promise: promise
+                    promise
                 };
             }
             // return the value when available otherwise {{'mykey' | translate }} does not display anything
@@ -87,7 +85,7 @@ export class I18NProvider {
 
        public flush() {
             this.cachedMessages = {};
-            for (let key in this.cachedPromises) {
+            for (const key in this.cachedPromises) {
                 if (this.cachedPromises.hasOwnProperty(key) && this.cachedPromises[key].promise) {
                     this.cachedPromises[key].promise['reject'] = true;
                 }

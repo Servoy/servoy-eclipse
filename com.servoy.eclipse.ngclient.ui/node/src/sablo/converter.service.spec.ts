@@ -2,10 +2,10 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { ConverterService } from './converter.service';
 
-import {SpecTypesService} from '../sablo/spectypes.service'
+import {SpecTypesService} from '../sablo/spectypes.service';
 
-import {LoggerService, LoggerFactory} from './logger.service'
-import {WindowRefService} from './util/windowref.service'
+import {LoggerService, LoggerFactory} from './logger.service';
+import {WindowRefService} from './util/windowref.service';
 
 
 describe('ConverterService', () => {

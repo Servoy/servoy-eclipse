@@ -97,9 +97,7 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
     }
 
     public disableDays(dateArray: Number[]) {
-        this.filter = (d: moment.Moment): boolean => {
-            return !dateArray.includes(d.day());
-        };
+        this.filter = (d: moment.Moment): boolean => !dateArray.includes(d.day());
     }
 
     public disableDates(dateArray: Date[]) {

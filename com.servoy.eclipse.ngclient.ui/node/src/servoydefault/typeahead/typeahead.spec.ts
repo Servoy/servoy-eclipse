@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angul
 import { TestScheduler, } from 'rxjs/testing';
 import { ServoyDefaultTypeahead } from './typeahead';
 import { FormattingService, TooltipService, ServoyApi, Format} from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {IValuelist} from '../../sablo/spectypes.service';

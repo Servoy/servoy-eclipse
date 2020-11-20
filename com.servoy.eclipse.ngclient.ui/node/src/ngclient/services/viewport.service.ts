@@ -73,7 +73,7 @@ export class ViewportService {
           } else {
             // key/value pairs in each row
             // this might be a partial update (so only a column changed for example) - don't drop all other columns, just update the ones we received
-            // tslint:disable-next-line:forin
+            // eslint-disable-next-line guard-for-in
             for (dpName in rowUpdate.rows[relIdx]) {
               // update value
               viewPort[j][dpName] = rowUpdate.rows[relIdx][dpName];

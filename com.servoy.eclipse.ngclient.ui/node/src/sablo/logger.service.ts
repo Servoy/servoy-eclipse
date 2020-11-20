@@ -17,7 +17,7 @@ export class LogConfiguration {
 }
 
 declare global {
-    interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {}; console: Console; } // extend the existing window interface with the new log provider property
+    interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {}; console: Console } // extend the existing window interface with the new log provider property
 }
 
 const noop = (): any => undefined;
@@ -90,7 +90,7 @@ export class LoggerService {
     }
 
     private getTime(): string {
-        let time = new Date();
+        const time = new Date();
         return time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds();
     }
  }

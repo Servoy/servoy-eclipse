@@ -13,8 +13,8 @@ import { DatagridEditor } from './datagrideditor';
 export class FormEditor extends DatagridEditor implements OnDestroy {
 
     editForm;
-    width: number = 300;
-    height: number = 200;
+    width = 300;
+    height = 200;
 
     constructor(private cdRef: ChangeDetectorRef) {
         super();

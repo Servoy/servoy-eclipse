@@ -10,15 +10,17 @@ import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter'
 @Injectable()
 export class FoundsetLinkedConverter implements IConverter {
 
+    /* eslint-disable */
+    public static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
+
     private static readonly SINGLE_VALUE = 'sv';
     private static readonly SINGLE_VALUE_UPDATE = 'svu';
     private static readonly VIEWPORT_VALUE = 'vp';
     private static readonly VIEWPORT_VALUE_UPDATE = 'vpu';
     private static readonly PROPERTY_CHANGE = 'propertyChange';
     private static readonly PUSH_TO_SERVER = 'w'; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
-
-    public static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
     private static readonly ID_FOR_FOUNDSET = 'idForFoundset';
+    /* eslint-enable */
 
     private log: LoggerService;
 
@@ -54,8 +56,8 @@ export class FoundsetLinkedConverter implements IConverter {
                 internalState.recordLinked = true;
 
                 this.viewportService.updateViewportGranularly(newValue, internalState, serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE],
-                        this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY, FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE),
-                         propertyContext, true);
+                    this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY, FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE),
+                    propertyContext, true);
                 this.log.spam('svy foundset linked * firing change listener: granular updates...');
                 internalState.fireChanges(serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE]);
             } else {
@@ -68,7 +70,7 @@ export class FoundsetLinkedConverter implements IConverter {
                     const conversionInfo = this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY,
                         serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ? FoundsetLinkedConverter.SINGLE_VALUE : FoundsetLinkedConverter.SINGLE_VALUE_UPDATE);
                     const singleValue = serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ?
-                    serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
+                        serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
                     internalState.singleValueState = new SingleValueState(this, propertyContext, conversionInfo);
                     wholeViewport = internalState.handleSingleValue(singleValue);
                     conversionInfos = internalState.singleValueState.conversionInfos;
@@ -97,7 +99,7 @@ export class FoundsetLinkedConverter implements IConverter {
                 if (wholeViewport !== undefined) this.updateWholeViewport(newValue, internalState, wholeViewport, conversionInfos, propertyContext);
                 else if (!didSomething) {
                     this.log.error(this.log.buildMessage(() => 'Can\'t interpret foundset linked prop. server update correctly: '
-                    + JSON.stringify(serverJSONValue, undefined, 2)));
+                        + JSON.stringify(serverJSONValue, undefined, 2)));
                 }
             }
         }
@@ -118,7 +120,7 @@ export class FoundsetLinkedConverter implements IConverter {
         for (let tz = 0; tz < rows.length; tz++) {
             if (instanceOfChangeAwareValue(rows[tz])) {
                 rows[tz].getStateHolder().setChangeListener(() => {
-                propValue.dataChanged(tz, rows[tz]);
+                    propValue.dataChanged(tz, rows[tz]);
                 });
             }
             propValue.push(rows[tz]);
@@ -155,7 +157,7 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 }
 
-export class FoundsetLinked extends Array<Object> implements IChangeAwareValue {
+export class FoundsetLinked extends Array<object> implements IChangeAwareValue {
     state: FoundsetLinkedState;
     idForFoundset: string;
 
@@ -241,10 +243,10 @@ class SingleValueState {
     }
 
     public updateWholeViewport(propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[]) {
-        this.converter.updateWholeViewport(propValue, internalState, wholeViewport, this.conversionInfos, this.propertyContext );
+        this.converter.updateWholeViewport(propValue, internalState, wholeViewport, this.conversionInfos, this.propertyContext);
     }
 
-    public generateWholeViewportFromOneValue(singleValue: any)  {
+    public generateWholeViewportFromOneValue(singleValue: any) {
         const wholeViewport = Array(this.viewPortSize).fill(singleValue);
         this.conversionInfos = this.conversionInfo ? Array(this.viewPortSize).fill(this.conversionInfo) : undefined;
         return wholeViewport;

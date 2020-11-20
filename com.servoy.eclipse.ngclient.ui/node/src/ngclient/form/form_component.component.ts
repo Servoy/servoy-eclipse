@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
+        TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache, ListFormComponentCache } from '../form.service';
 
@@ -10,8 +11,10 @@ import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ServoyApi } from '../servoy_api';
 
 @Component({
+    // eslint-disable-next-line
     selector: 'svy-form',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    /* eslint-disable max-len */
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" svyAutosave> <!-- main div -->
            <div *ngFor="let part of formCache.parts" [config]="part"> <!-- part div -->
@@ -111,6 +114,7 @@ import { ServoyApi } from '../servoy_api';
 <ng-template #servoyextraYoutubevideoembedder let-state="state"><servoyextra-youtubevideoembedder  [allowFullScreen]="state.model.allowFullScreen" [servoyAttributes]="state.model.servoyAttributes" [autoPlay]="state.model.autoPlay" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" [embeddedVideoURL]="state.model.embeddedVideoURL" [location]="state.model.location" [modestBranding]="state.model.modestBranding" [showControls]="state.model.showControls" [showRelatedVideosAtEnd]="state.model.showRelatedVideosAtEnd" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [videoHeight]="state.model.videoHeight" [videoWidth]="state.model.videoWidth" *ngIf="state.model.visible" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoyextra-youtubevideoembedder></ng-template>
      <!-- component template generate end -->
    `
+   /* eslint-enable max-len */
 })
 
 export class FormComponent implements OnInit, OnDestroy, OnChanges {
@@ -148,7 +152,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoyextraImagelabel', { static: true }) readonly servoyextraImagelabel: TemplateRef<any>;
     @ViewChild('servoyextraFileupload', { static: true }) readonly servoyextraFileupload: TemplateRef<any>;
 
-    
+
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsButton', { static: true }) readonly bootstrapcomponentsButton: TemplateRef<any>;
@@ -275,11 +279,13 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         if (func == null) {
             if (item.handlers instanceof Array && item.handlers.indexOf(handler) >= 0) {
                 const me = this;
+                // eslint-disable-next-line
                 func = function(e) {
-                return me.formservice.executeEvent(me.name, item.name, handler, arguments);
+                    return me.formservice.executeEvent(me.name, item.name, handler, arguments);
                 };
                 itemCache[handler] = func;
             } else if (item.handlers && item.handlers[handler]) {
+                // eslint-disable-next-line
                 func = function(e) {
                     item.handlers[handler]();
                 };

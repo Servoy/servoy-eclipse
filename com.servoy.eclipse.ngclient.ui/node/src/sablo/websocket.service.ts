@@ -1,14 +1,14 @@
 import { Injectable, EventEmitter } from '@angular/core';
 
-import { Subscription, interval, Subject } from "rxjs";
+import { Subscription, interval, Subject } from 'rxjs';
 
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
-import { WindowRefService } from './util/windowref.service'
-import { Deferred } from './util/deferred'
-import { ServicesService } from './services.service'
-import { ConverterService } from './converter.service'
-import { LoggerService, LogLevel, LoggerFactory } from './logger.service'
+import { WindowRefService } from './util/windowref.service';
+import { Deferred } from './util/deferred';
+import { ServicesService } from './services.service';
+import { ConverterService } from './converter.service';
+import { LoggerService, LogLevel, LoggerFactory } from './logger.service';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 
 @Injectable()
@@ -27,62 +27,61 @@ export class WebsocketService {
     private converterService: ConverterService,
     private logFactory: LoggerFactory,
     private loadingIndicatorService: LoadingIndicatorService) {
-    this.log = logFactory.getLogger("WebsocketService");
+    this.log = logFactory.getLogger('WebsocketService');
   }
 
   private generateURL(context, args, queryArgs, websocketUri) {
-    var new_uri;
-    if (this.windowRef.nativeWindow.location.protocol === "https:") {
-      new_uri = "wss:";
+    let new_uri;
+    if (this.windowRef.nativeWindow.location.protocol === 'https:') {
+      new_uri = 'wss:';
     } else {
-      new_uri = "ws:";
+      new_uri = 'ws:';
     }
-    new_uri += "//" + this.windowRef.nativeWindow.location.host;
-    var pathname = this.getPathname();
-    var lastIndex = pathname.lastIndexOf("/");
+    new_uri += '//' + this.windowRef.nativeWindow.location.host;
+    let pathname = this.getPathname();
+    var lastIndex = pathname.lastIndexOf('/');
     if (lastIndex > 0) {
       pathname = pathname.substring(0, lastIndex);
     }
     if (context && context.length > 0) {
       var lastIndex = pathname.lastIndexOf(context);
       if (lastIndex >= 0) {
-        pathname = pathname.substring(0, lastIndex) + pathname.substring(lastIndex + context.length)
+        pathname = pathname.substring(0, lastIndex) + pathname.substring(lastIndex + context.length);
       }
     }
     new_uri += pathname + (websocketUri ? websocketUri : '/websocket');
     for (var a in args) {
       if (args.hasOwnProperty(a)) {
-        new_uri += '/' + args[a]
+        new_uri += '/' + args[a];
       }
     }
 
-    new_uri += "?connectNr=" + Math.floor((Math.random() * 10000000000000)) + "&";
+    new_uri += '?connectNr=' + Math.floor((Math.random() * 10000000000000)) + '&';
 
     for (var a in queryArgs) {
       if (queryArgs.hasOwnProperty(a)) {
-        new_uri += a + "=" + queryArgs[a] + "&";
+        new_uri += a + '=' + queryArgs[a] + '&';
       }
     }
 
     if (this.lastServerMessageNumber != null) {
-      new_uri += "lastServerMessageNumber=" + this.lastServerMessageNumber + "&";
+      new_uri += 'lastServerMessageNumber=' + this.lastServerMessageNumber + '&';
     }
 
-    var queryString = this.getQueryString();
+    let queryString = this.getQueryString();
     if (queryString) {
-      var index = queryString.indexOf(WebsocketConstants.CLEAR_SESSION_PARAM);
+      const index = queryString.indexOf(WebsocketConstants.CLEAR_SESSION_PARAM);
       if (index >= 0) {
-        var params_arr = queryString.split("&");
-        for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+        const params_arr = queryString.split('&');
+        for (let i = params_arr.length - 1; i >= 0; i -= 1) {
           if (params_arr[i].indexOf(WebsocketConstants.CLEAR_SESSION_PARAM) == 0) {
             params_arr.splice(i, 1);
           }
         }
-        queryString = params_arr.join("&");
+        queryString = params_arr.join('&');
       }
       new_uri += queryString;
-    }
-    else {
+    } else {
       new_uri = new_uri.substring(0, new_uri.length - 1);
     }
     return new_uri;
@@ -91,17 +90,15 @@ export class WebsocketService {
   public connect(context, args, queryArgs, websocketUri): WebsocketSession {
 
     this.connectionArguments = {
-      context: context,
-      args: args,
-      queryArgs: queryArgs,
-      websocketUri: websocketUri
-    }
+      context,
+      args,
+      queryArgs,
+      websocketUri
+    };
 
     // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-    const websocket = new ReconnectingWebSocket(() => {
-      return this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
-        this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']);
-    });
+    const websocket = new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
+        this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']));
 
     this.wsSession = new WebsocketSession(websocket, this, this.services, this.windowRef, this.converterService, this.logFactory, this.loadingIndicatorService);
     // todo should we just merge $websocket and $services into $sablo that just has all
@@ -110,7 +107,7 @@ export class WebsocketService {
     if (this.wsSessionDeferred != null) {
       this.wsSessionDeferred.resolve(this.wsSession);
     }
-    return this.wsSession
+    return this.wsSession;
   }
 
   // update query arguments for next reconnect-call
@@ -139,7 +136,7 @@ export class WebsocketService {
   }
 
   public getURLParameter(name: string): string {
-    return decodeURIComponent((new RegExp('[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ""])[1].replace(/\+/g, '%20')) || null
+    return decodeURIComponent((new RegExp('[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
   }
 
   public setPathname(name: string) {
@@ -159,7 +156,7 @@ export class WebsocketService {
       return this.queryString;
     }
 
-    var search = this.windowRef.nativeWindow.location.search;
+    const search = this.windowRef.nativeWindow.location.search;
     if (search && search.indexOf('?') == 0) {
       return search.substring(1);
     }
@@ -182,16 +179,16 @@ export class WebsocketSession {
   private connected = 'INITIAL';
   private heartbeatMonitor: Subscription = null;
   private lastHeartbeat: number;
-  private onOpenHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array()
-  private onErrorHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array()
-  private onCloseHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array()
-  private onMessageObjectHandlers: Array<(msg: any, conversionInfo: any) => any> = new Array()
+  private onOpenHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
+  private onErrorHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
+  private onCloseHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
+  private onMessageObjectHandlers: Array<(msg: any, conversionInfo: any) => any> = new Array();
 
   private functionsToExecuteAfterIncommingMessageWasHandled = undefined;
 
   private deferredEvents: Array<Deferred<any>> = new Array();
 
-  private pendingMessages = undefined
+  private pendingMessages = undefined;
 
   private currentEventLevelForServer;
 
@@ -206,32 +203,32 @@ export class WebsocketSession {
     private converterService: ConverterService,
     private logFactory: LoggerFactory,
     private loadingIndicatorService: LoadingIndicatorService) {
-    this.log = logFactory.getLogger("WebsocketSession");
+    this.log = logFactory.getLogger('WebsocketSession');
     const me = this;
     this.websocket.onopen = (evt) => {
       me.setConnected();
       me.startHeartbeat();
-      for (let handler in me.onOpenHandlers) {
+      for (const handler in me.onOpenHandlers) {
         me.onOpenHandlers[handler](evt);
       }
-    }
+    };
     this.websocket.onerror = (evt) => {
       me.stopHeartbeat();
-      for (let handler in me.onErrorHandlers) {
+      for (const handler in me.onErrorHandlers) {
         me.onErrorHandlers[handler](evt);
       }
-    }
+    };
     this.websocket.onclose = (evt) => {
       me.stopHeartbeat();
       if (me.connected != 'CLOSED') {
         me.connected = 'RECONNECTING';
         this.websocketService.reconnectingEmitter.next(true);
-        this.log.spam(this.log.buildMessage(() => ("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")")));
+        this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (' + new Date().getTime() + ')')));
       }
-      for (var handler in me.onCloseHandlers) {
+      for (const handler in me.onCloseHandlers) {
         me.onCloseHandlers[handler](evt);
       }
-    }
+    };
     this.websocket.onconnecting = (evt) => {
       // this event indicates we are trying to reconnect, the event has the close code and reason from the disconnect.
       if (evt.code && evt.code != WsCloseCodes.CLOSED_ABNORMALLY && evt.code != WsCloseCodes.SERVICE_RESTART) {
@@ -246,30 +243,29 @@ export class WebsocketSession {
 
         // server disconnected, do not try to reconnect
         me.connected = 'CLOSED';
-        this.log.spam(this.log.buildMessage(() => ("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")")));
+        this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onconnecting got a server disconnect/close with reason ' + evt.reason + '): ... CLOSED (' + new Date().getTime() + ')')));
       }
-    }
+    };
     this.websocket.onmessage = (message) => {
       me.handleHeartbeat(message) || me.handleMessage(message);
-    }
+    };
   }
   // api
-  public callService( serviceName: string, methodName: string, argsObject, async: boolean ) : Promise<any> {
-    var cmd = {
+  public callService( serviceName: string, methodName: string, argsObject, async: boolean ): Promise<any> {
+    const cmd = {
       service: serviceName,
       methodname: methodName,
       args: argsObject
     };
     if (async) {
       this.sendMessageObject(cmd);
-    }
-    else {
-      var deferred = new Deferred<any>();
-      var cmsgid = this.getNextMessageId()
-      this.deferredEvents[cmsgid] = deferred
+    } else {
+      const deferred = new Deferred<any>();
+      const cmsgid = this.getNextMessageId();
+      this.deferredEvents[cmsgid] = deferred;
       this.loadingIndicatorService.showLoading();
-      cmd['cmsgid'] = cmsgid
-      this.sendMessageObject(cmd)
+      cmd['cmsgid'] = cmsgid;
+      this.sendMessageObject(cmd);
       return deferred.promise;
     }
   }
@@ -279,30 +275,29 @@ export class WebsocketSession {
     if (this.getCurrentEventLevelForServer()) {
       obj.prio = this.getCurrentEventLevelForServer();
     }
-    var msg = JSON.stringify(obj)
+    const msg = JSON.stringify(obj);
     if (this.isConnected()) {
-      this.log.spam(this.log.buildMessage(() => ("sbl * Sending message to server: " + msg)));
-      this.websocket.send(msg)
-    }
-    else {
-      this.log.spam(this.log.buildMessage(() => ("sbl * Disconnected; will add the following to pending messages to be sent to server: " + msg)));
-      this.pendingMessages = this.pendingMessages || []
-      this.pendingMessages.push(msg)
+      this.log.spam(this.log.buildMessage(() => ('sbl * Sending message to server: ' + msg)));
+      this.websocket.send(msg);
+    } else {
+      this.log.spam(this.log.buildMessage(() => ('sbl * Disconnected; will add the following to pending messages to be sent to server: ' + msg)));
+      this.pendingMessages = this.pendingMessages || [];
+      this.pendingMessages.push(msg);
     }
 
   }
 
   public onopen(handler) {
-    this.onOpenHandlers.push(handler)
+    this.onOpenHandlers.push(handler);
   }
   public onerror(handler) {
-    this.onErrorHandlers.push(handler)
+    this.onErrorHandlers.push(handler);
   }
   public onclose(handler) {
-    this.onCloseHandlers.push(handler)
+    this.onCloseHandlers.push(handler);
   }
   public onMessageObject(handler: (message: any, conversionInfo: any) => void) {
-    this.onMessageObjectHandlers.push(handler)
+    this.onMessageObjectHandlers.push(handler);
   }
 
   public isConnected() {
@@ -317,7 +312,7 @@ export class WebsocketSession {
     if (this.websocket) {
       this.websocket.close();
       this.connected = 'CLOSED';
-      this.log.spam(this.log.buildMessage(() => ("sbl * Connection mode (disconnect): ... CLOSED (" + new Date().getTime() + ")")));
+      this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (disconnect): ... CLOSED (' + new Date().getTime() + ')')));
     }
   }
 
@@ -337,26 +332,26 @@ export class WebsocketSession {
 
   private setConnected() {
     this.connected = 'CONNECTED';
-    this.log.spam(this.log.buildMessage(() => ("sbl * Connection mode: ... CONNECTED (" + new Date().getTime() + ")")));
+    this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode: ... CONNECTED (' + new Date().getTime() + ')')));
 
     if (this.pendingMessages) {
-      for (let i in this.pendingMessages) {
-        this.log.spam(this.log.buildMessage(() => ("sbl * Connected; sending pending message to server: " + this.pendingMessages[i])));
-        this.websocket.send(this.pendingMessages[i])
+      for (const i in this.pendingMessages) {
+        this.log.spam(this.log.buildMessage(() => ('sbl * Connected; sending pending message to server: ' + this.pendingMessages[i])));
+        this.websocket.send(this.pendingMessages[i]);
       }
-      this.pendingMessages = undefined
+      this.pendingMessages = undefined;
     }
   }
 
   private startHeartbeat() {
     if (this.heartbeatMonitor == null) {
-      this.log.spam(this.log.buildMessage(() => ("sbl * Starting heartbeat... (" + new Date().getTime() + ")")));
+      this.log.spam(this.log.buildMessage(() => ('sbl * Starting heartbeat... (' + new Date().getTime() + ')')));
 
       this.lastHeartbeat = new Date().getTime();
       this.heartbeatMonitor = interval(4000).subscribe(() => {
-        this.log.spam(this.log.buildMessage(() => ("sbl * Sending heartbeat... (" + new Date().getTime() + ")")));
+        this.log.spam(this.log.buildMessage(() => ('sbl * Sending heartbeat... (' + new Date().getTime() + ')')));
         if (new Date().getTime() - this.lastHeartbeat >= 4000) {
-          this.websocket.send("P"); // ping
+          this.websocket.send('P'); // ping
           if (this.isConnected() && new Date().getTime() - this.lastHeartbeat > 8000) {
             // no response within 8 seconds
             if (this.connected !== 'RECONNECTING') {
@@ -365,13 +360,13 @@ export class WebsocketSession {
             }
           }
         }
-      })
+      });
     }
   }
 
   private stopHeartbeat() {
     if (this.heartbeatMonitor != null) {
-      this.log.spam(this.log.buildMessage(() => ("sbl * Stopping heartbeat... (" + new Date().getTime() + ")")));
+      this.log.spam(this.log.buildMessage(() => ('sbl * Stopping heartbeat... (' + new Date().getTime() + ')')));
       this.heartbeatMonitor.unsubscribe();
       this.heartbeatMonitor = undefined;
     }
@@ -382,28 +377,28 @@ export class WebsocketSession {
   }
 
   private handleHeartbeat(message) {
-    this.log.spam(this.log.buildMessage(() => ("sbl * Received heartbeat... (" + new Date().getTime() + ")")));
+    this.log.spam(this.log.buildMessage(() => ('sbl * Received heartbeat... (' + new Date().getTime() + ')')));
     this.lastHeartbeat = new Date().getTime(); // something is received, the server connection is up
     if (this.isReconnecting()) {
-      this.log.spam("sbl * Heartbeat received, connection re-established...");
+      this.log.spam('sbl * Heartbeat received, connection re-established...');
       this.setConnected();
     }
-    if (message.data == "P") {
-      this.websocket.send("p");
+    if (message.data == 'P') {
+      this.websocket.send('p');
     }
-    return message.data == "p" || message.data == "P"; // pong or ping
+    return message.data == 'p' || message.data == 'P'; // pong or ping
   }
 
   private handleMessage(message) {
-    var obj
-    var responseValue
+    let obj;
+    let responseValue;
     this.functionsToExecuteAfterIncommingMessageWasHandled = [];
 
     try {
-      this.log.spam(this.log.buildMessage(() => ("sbl * Received message from server: " + JSON.stringify(message))));
+      this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server: ' + JSON.stringify(message))));
 
       var message_data = message.data;
-      var separator = message_data.indexOf('#');
+      const separator = message_data.indexOf('#');
       if (separator >= 0 && separator < 5) {
         // the json is prefixed with a message number: 123#{bla: "hello"}
         this.websocketService.setLastServerMessageNumber(message_data.substring(0, separator));
@@ -416,9 +411,9 @@ export class WebsocketSession {
       if (obj.services) {
         // services call, first process the once with the flag 'apply_first'
         if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].services) {
-          obj.services = this.converterService.convertFromServerToClient(obj.services, obj[ConverterService.TYPES_KEY].services, undefined, undefined)
+          obj.services = this.converterService.convertFromServerToClient(obj.services, obj[ConverterService.TYPES_KEY].services, undefined, undefined);
         }
-        // tslint:disable-next-line:forin
+        // eslint-disable-next-line guard-for-in
         for (var index in obj.services) {
           var service = obj.services[index];
           if (service['pre_data_service_call']) {
@@ -437,22 +432,21 @@ export class WebsocketSession {
 
       // data got back from the server
       if (obj.cmsgid) { // response to event
-        var deferredEvent = this.deferredEvents[obj.cmsgid];
+        const deferredEvent = this.deferredEvents[obj.cmsgid];
         if (deferredEvent != null) {
           if (obj.exception) {
             // something went wrong
             if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception) {
-              obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined)
+              obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
             }
             deferredEvent.reject(obj.exception);
           } else {
             if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret) {
-              obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined)
+              obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
             }
             deferredEvent.resolve(obj.ret);
           }
-        }
-        else this.log.warn("Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.");
+        } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
         delete this.deferredEvents[obj.cmsgid];
         //                $sabloTestability.testEvents();
         this.loadingIndicatorService.hideLoading();
@@ -460,12 +454,12 @@ export class WebsocketSession {
 
       // message
       if (obj.msg) {
-        // tslint:disable-next-line:forin
+        // eslint-disable-next-line guard-for-in
         for (var handler in this.onMessageObjectHandlers) {
-          var ret = this.onMessageObjectHandlers[handler](obj.msg, obj[ConverterService.TYPES_KEY] ? obj[ConverterService.TYPES_KEY].msg : undefined)
+          const ret = this.onMessageObjectHandlers[handler](obj.msg, obj[ConverterService.TYPES_KEY] ? obj[ConverterService.TYPES_KEY].msg : undefined);
           if (ret) responseValue = ret;
 
-          this.log.spam("sbl * Checking if any form scope changes need to be digested (obj.msg).");
+          this.log.spam('sbl * Checking if any form scope changes need to be digested (obj.msg).');
         }
       }
 
@@ -475,7 +469,7 @@ export class WebsocketSession {
 
       if (obj.services) {
         // normal services call
-        // tslint:disable-next-line:forin
+        // eslint-disable-next-line guard-for-in
         for (var index in obj.services) {
           var service = obj.services[index];
           if (!service['pre_data_service_call']) {
@@ -488,12 +482,12 @@ export class WebsocketSession {
       // delayed calls
       if (obj.calls) {
         for (var i = 0; i < obj.calls.length; i++) {
-          // tslint:disable-next-line:forin
+          // eslint-disable-next-line guard-for-in
           for (var handler in this.onMessageObjectHandlers) {
             this.onMessageObjectHandlers[handler](obj.calls[i], (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].calls) ? obj[ConverterService.TYPES_KEY].calls[i] : undefined);
           }
 
-          this.log.spam("sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).");
+          this.log.spam('sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).');
         }
       }
       if (obj && obj.smsgid) {
@@ -513,9 +507,9 @@ export class WebsocketSession {
           //                    else this.log.debug(this.log.buildMessage(() => ("sbl * Call from server with smsgid '" + obj.smsgid + "' returned: -" + ret + "-. Sending value back to server...")));
 
           // success
-          var response = {
+          const response = {
             smsgid: obj.smsgid
-          }
+          };
           if (ret != undefined) {
             response['ret'] = this.converterService.convertClientObject(ret);
           }
@@ -529,10 +523,10 @@ export class WebsocketSession {
           //                    this.log.error(this.log.buildMessage(() => ("Error (follows below) in parsing/processing this message with smsgid '" + obj.smsgid + "' (async): " + message_data)));
           //                    this.log.error(reason);
           // server wants a response; send failure so that browser side script doesn't hang
-          var response = {
+          const response = {
             smsgid: obj.smsgid,
-            err: "Error while executing ($q deferred) client side code. Please see browser console for more info. Error: " + reason
-          }
+            err: 'Error while executing ($q deferred) client side code. Please see browser console for more info. Error: ' + reason
+          };
           if (hideIndicator) {
             this.loadingIndicatorService.showLoading();
           }
@@ -541,26 +535,26 @@ export class WebsocketSession {
       }
     } catch (e) {
       console.log(e);
-      this.log.error(this.log.buildMessage(() => ("Error (follows below) in parsing/processing this message: " + message_data)));
+      this.log.error(this.log.buildMessage(() => ('Error (follows below) in parsing/processing this message: ' + message_data)));
       this.log.error(e);
       if (obj && obj.smsgid) {
         // server wants a response; send failure so that browser side script doesn't hang
-        var response = {
+        const response = {
           smsgid: obj.smsgid,
-          err: "Error while executing client side code. Please see browser console for more info. Error: " + e
-        }
+          err: 'Error while executing client side code. Please see browser console for more info. Error: ' + e
+        };
         if (hideIndicator) {
           this.loadingIndicatorService.showLoading();
         }
         this.sendMessageObject(response);
       }
     } finally {
-      var err;
+      let err;
       for (var i = 0; i < this.functionsToExecuteAfterIncommingMessageWasHandled.length; i++) {
         try {
           this.functionsToExecuteAfterIncommingMessageWasHandled[i]();
         } catch (e) {
-          this.log.error(this.log.buildMessage(() => ("Error (follows below) in executing PostIncommingMessageHandlingTask: " + this.functionsToExecuteAfterIncommingMessageWasHandled[i])));
+          this.log.error(this.log.buildMessage(() => ('Error (follows below) in executing PostIncommingMessageHandlingTask: ' + this.functionsToExecuteAfterIncommingMessageWasHandled[i])));
           this.log.error(e);
           err = e;
         }
@@ -590,7 +584,7 @@ class WsCloseCodes {
   static readonly TRY_AGAIN_LATER: 1013; // indicates that the service is experiencing overload
 }
 export class WebsocketConstants {
-  static readonly CLEAR_SESSION_PARAM = "sabloClearSession"
+  static readonly CLEAR_SESSION_PARAM = 'sabloClearSession';
 }
 
 export class SabloUtils {
@@ -601,7 +595,7 @@ export class SabloUtils {
 
   // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
   // usage as handler arg. for example where we don't know the arg. types on client)
-  static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = "_dctsf";
+  static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = '_dctsf';
 
   /**
    * Makes a clone of "obj" (new object + iterates on properties and copies them over (so shallow clone)) that will have it's [[Prototype]] set to "newPrototype".
@@ -610,9 +604,9 @@ export class SabloUtils {
   public static cloneWithDifferentPrototype(obj, newPrototype) {
     // instead of using this impl., we could use Object.setPrototypeOf(), but that is slower in the long run due to missing JS engine optimizations for accessing props.
     // accorging to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
-    let clone = Object.create(newPrototype);
+    const clone = Object.create(newPrototype);
 
-    Object.keys(obj).forEach(function (prop) {
+    Object.keys(obj).forEach(function(prop) {
       clone[prop] = obj[prop];
     });
 

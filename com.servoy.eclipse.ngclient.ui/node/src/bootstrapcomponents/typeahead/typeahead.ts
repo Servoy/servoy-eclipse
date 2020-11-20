@@ -35,32 +35,32 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield  {
 
       return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelistID)
       : this.valuelistID.filterList(term))));
-    }
+    };
 
     isEditable() {
       return this.valuelistID && !this.valuelistID.hasRealValues();
     }
 
-  resultFormatter = (result: {displayValue: string, realValue: object}) => {
+  resultFormatter = (result: {displayValue: string; realValue: object}) => {
       if (result.displayValue === null) return '';
       return this.formatService.format(result.displayValue, this.format.display, this.format.type);
-  }
+  };
 
   inputFormatter = (result: any) => {
     if (result === null) return '';
     if (result.displayValue !== undefined) result = result.displayValue;
     else if (this.valuelistID.hasRealValues()) {
       // on purpose test with == so that "2" equals to 2
-      // tslint:disable-next-line: triple-equals
+      // eslint-disable-next-line eqeqeq
       const value = this.valuelistID.find((item) => item.realValue == result);
       if (value) {
         result = value.displayValue;
       }
     }
     return this.formatService.format(result, this.format.display, this.format.type);
-  }
+  };
 
-  valueChanged(value: {displayValue: string, realValue: object}) {
+  valueChanged(value: {displayValue: string; realValue: object}) {
       if (value && value.realValue) this.dataProviderID = value.realValue;
       else if (value) this.dataProviderID = value;
       else this.dataProviderID = null;
