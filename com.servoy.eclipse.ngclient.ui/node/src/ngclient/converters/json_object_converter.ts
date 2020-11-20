@@ -45,7 +45,7 @@ export class JSONObjectConverter implements IConverter {
                 if (instanceOfChangeAwareValue(elem)) {
                     // child is able to handle it's own change mechanism
                     elem.getStateHolder().setChangeListener(() => {
-                        internalState.getChangedKeys().push(c);
+                        internalState.getChangedKeys().add(c);
                         internalState.notifyChangeListener();
                     });
                 }
@@ -88,7 +88,7 @@ export class JSONObjectConverter implements IConverter {
                     if (instanceOfChangeAwareValue(currentClientValue[key])) {
                         // child is able to handle it's own change mechanism
                         currentClientValue[key].getStateHolder().setChangeListener(() => {
-                            internalState.getChangedKeys().push(key);
+                            internalState.getChangedKeys().add(key);
                             internalState.notifyChangeListener();
                         });
                     }
@@ -117,7 +117,7 @@ export class JSONObjectConverter implements IConverter {
 
         if ( newClientData ) {
             const internalState = newClientData.getStateHolder();
-            if ( internalState.getChangedKeys().length > 0 || internalState.allChanged ) {
+            if ( internalState.getChangedKeys().size > 0 || internalState.allChanged ) {
                 var changes = {};
 
                 let noContentVersionYet = false; // if we have changed keys on an object that was fully set from client but it didn't get a CONTENT_VERSION back from server

@@ -59,7 +59,7 @@ describe( 'JSONObjectConverter', () => {
         expect( tab instanceof Tab ).toBeTruthy( "tab should be instance of Tab" );
         expect( tab.name ).toBe( "test", "name should be test" );
         expect( tab.myvalue ).toBe( "test", "myvalue should be test" );
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
 
         const update = {};
         update[KEY] = "myvalue";
@@ -69,17 +69,17 @@ describe( 'JSONObjectConverter', () => {
         json[CONTENT_VERSION] = 1;
         tab = converterService.convertFromServerToClient( json, "JSON_obj", tab );
         expect( tab.myvalue ).toBe( "test2", "myvalue should be test2" );
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
     } );
 
     it( 'object created and changed from client side', () => {
         let tab: Tab = createTabObjectFromServer();
         tab.name = "test2";
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes because name is not monitored" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes because name is not monitored" );
         tab.myvalue = "test";
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes because of same assignment" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes because of same assignment" );
         tab.myvalue = "test2";
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 1, "should have changes because of  assignment" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 1, "should have changes because of  assignment" );
         const changes = converterService.convertFromClientToServer( tab, "JSON_obj" );
         expect( changes ).toBeDefined( "change object should be generated" );
         expect( changes[CONTENT_VERSION] ).toBe( 1 );
@@ -87,7 +87,7 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
         expect( changes[UPDATES][0][KEY] ).toBe( "myvalue" );
         expect( changes[UPDATES][0][VALUE] ).toBe( "test2" );
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
     } );
 
     it( 'create object in scripting', () => {
@@ -100,7 +100,7 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[VALUE] ).toBeDefined( "change object  shoulld have a value" );
         expect( changes[VALUE].name ).toBe( "test" );
         expect( changes[VALUE].myvalue ).toBe( "test2" );
-        expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
 
     } );
 
@@ -118,14 +118,14 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[VALUE].tab2[VALUE] ).toBeDefined();
         expect( changes[VALUE].tab2[VALUE].name ).toBe( "test" );
         expect( changes[VALUE].tab2[VALUE].myvalue ).toBe( "test" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
-        expect( tabHolder.tab2.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
+        expect( tabHolder.tab2.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
 
         tabHolder.tab2.name = "test2";
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
         tabHolder.tab2.myvalue = "test2";
-        expect( tabHolder.tab2.getStateHolder().getChangedKeys().length ).toBe( 1, "should have changes" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 1, "should have changes" );
+        expect( tabHolder.tab2.getStateHolder().getChangedKeys().size ).toBe( 1, "should have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 1, "should have changes" );
 
         // although it only has changes, if it it sent back to server again it should still send whole value as it didn't yet get the content-version from server
         changes = converterService.convertFromClientToServer( tabHolder, "JSON_obj" )
@@ -135,8 +135,8 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[VALUE].tab2[VALUE] ).toBeDefined();
         expect( changes[VALUE].tab2[VALUE].name ).toBe( "test2" );
         expect( changes[VALUE].tab2[VALUE].myvalue ).toBe( "test2" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
-        expect( tabHolder.tab2.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
+        expect( tabHolder.tab2.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
 
         // ok now simulate an initialize + content version set for the new value comming from the server
         let msgFromServer = {};
@@ -169,8 +169,8 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[UPDATES][0][VALUE][VALUE] ).toBeDefined();
         expect( changes[UPDATES][0][VALUE][VALUE].name ).toBe( "test" );
         expect( changes[UPDATES][0][VALUE][VALUE].myvalue ).toBe( "test" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
-        expect( tabHolder.tab3.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
+        expect( tabHolder.tab3.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
 
         // ok now simulate an initialize + content version set for the new value comming from the server
         msgFromServer = {};
@@ -187,7 +187,7 @@ describe( 'JSONObjectConverter', () => {
         converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder );
         expect( tabHolder.getStateHolder()[CONTENT_VERSION] ).toBe( 1, "it got the new version from server" );
         expect( tabHolder.tab3.getStateHolder()[CONTENT_VERSION] ).toBe( 3, "it got the new version from server" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "it should have no more outgoing changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "it should have no more outgoing changes" );
     } );
 
     it( 'nested objects - if somehow marked as allchanged == true should send full values in-depth', () => {
@@ -198,7 +198,7 @@ describe( 'JSONObjectConverter', () => {
         tabHolder.tab.myvalue = "test";
         expect( tabHolder.getStateHolder().allChanged ).toBe( true, "should have changes as it is new" );
         let changes = converterService.convertFromClientToServer( tabHolder, "JSON_obj" )
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "it should have no more outgoing changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "it should have no more outgoing changes" );
 
         // simulate init from server so that they have content versions (so that lack of content versions will not determine them to send themselves fully)
         const msgFromServer = {};
@@ -219,7 +219,7 @@ describe( 'JSONObjectConverter', () => {
 
         // now make only one prop. change in nested tab
         tabHolder.tab.myvalue = "test1";
-        expect( tabHolder.tab.getStateHolder().getChangedKeys().length ).toBe( 1, "we just changed myvalue" );
+        expect( tabHolder.tab.getStateHolder().getChangedKeys().size ).toBe( 1, "we just changed myvalue" );
         expect( tabHolder.tab.getStateHolder().allChanged ).toBe( false, "we just changed myvalue, not the whole thing" );
 
         // simulate that it should be sent fully
@@ -232,8 +232,8 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[VALUE].tab[VALUE] ).toBeDefined();
         expect( changes[VALUE].tab[VALUE].name ).toBe( "test" );
         expect( changes[VALUE].tab[VALUE].myvalue ).toBe( "test1" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
-        expect( tabHolder.tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
+        expect( tabHolder.tab.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
         expect( tabHolder.getStateHolder().allChanged ).toBe( false, "should not have changes" );
         expect( tabHolder.tab.getStateHolder().allChanged ).toBe( false, "should not have changes" );
     } );
@@ -247,15 +247,15 @@ describe( 'JSONObjectConverter', () => {
         json[ConverterService.TYPES_KEY] = { "tab": "JSON_obj", "tab2": "JSON_obj" };
         const tabHolder: TabHolder = converterService.convertFromServerToClient( json, "JSON_obj" );
 
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
-        expect( tabHolder.tab2.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
+        expect( tabHolder.tab2.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
         expect( tabHolder.getStateHolder().allChanged ).toBe( false, "should not have changes" );
         expect( tabHolder.tab2.getStateHolder().allChanged ).toBe( false, "should not have changes" );
 
         tabHolder.tab2.name = "test2";
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "should not have changes" );
         tabHolder.tab2.myvalue = "test2";
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 1, "should have changes" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 1, "should have changes" );
 
         const changes = converterService.convertFromClientToServer( tabHolder, "JSON_obj" )
         expect( changes[UPDATES] ).toBeDefined( "change object  should have an update value" );
@@ -305,11 +305,11 @@ describe( 'JSONObjectConverter', () => {
         expect( tabHolder.tab3.getStateHolder()[CONTENT_VERSION] ).toBe( 4, "it got the new version from server" );
 
         // ok now everything is 'stable': has versions and no changes
-        expect( tabHolder.tab2.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
-        expect( tabHolder.tab3.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.tab2.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
+        expect( tabHolder.tab3.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.tab2.getStateHolder().allChanged ).toBe( false, "no change expected" );
         expect( tabHolder.tab3.getStateHolder().allChanged ).toBe( false, "no change expected" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.getStateHolder().allChanged ).toBe( false, "no change expected" );
 
         // simulate that tab is tab3 gets the value of tab2 (so tab3's value is no longer used)
@@ -328,17 +328,17 @@ describe( 'JSONObjectConverter', () => {
         expect( changes[UPDATES][1][KEY] ).toBe( "tab2" );
         expect( changes[UPDATES][1][VALUE] ).toBeNull( "tab2 was set to null" );
 
-        expect( tabHolder.tab3.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.tab3.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.tab3.getStateHolder().allChanged ).toBe( false, "no change expected" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.getStateHolder().allChanged ).toBe( false, "no change expected" );
 
         // changing something in old tab3'v value should not trigger any changes as that value is no longer used
         obsoleteTab3.myvalue = "aha";
 
-        expect( tabHolder.tab3.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.tab3.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.tab3.getStateHolder().allChanged ).toBe( false, "no change expected" );
-        expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "no change expected" );
+        expect( tabHolder.getStateHolder().getChangedKeys().size ).toBe( 0, "no change expected" );
         expect( tabHolder.getStateHolder().allChanged ).toBe( false, "no change expected" );
     } );
 } );

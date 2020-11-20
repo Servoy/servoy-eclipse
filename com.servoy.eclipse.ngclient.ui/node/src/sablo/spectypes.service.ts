@@ -404,13 +404,13 @@ export class BaseCustomObjectState extends ChangeAwareState {
     private change = 0;
     private hash = BaseCustomObjectState.counter++;
 
-    private changedKeys = new Array<string | number>();
+    private changedKeys = new Set<string | number>();
 
     public conversionInfo = {};
     public ignoreChanges = false;
 
     hasChanges() {
-        return super.hasChanges() || this.getChangedKeys().length > 0; // leave this as a method call as some subclasses might compute the changedKeys inside getChangedKeys()
+        return super.hasChanges() || this.getChangedKeys().size > 0; // leave this as a method call as some subclasses might compute the changedKeys inside getChangedKeys()
     }
 
     private setChangeListenerToSubValueIfNeeded( value: any, changeListener: () => void ): void {
@@ -449,21 +449,21 @@ export class BaseCustomObjectState extends ChangeAwareState {
         return false;
     }
 
-    public getChangedKeys(): Array<string | number> {
+    public getChangedKeys(): Set<string | number> {
         return this.changedKeys;
     }
 
     public clearChanges() {
-        this.changedKeys = new Array<string | number>();
+        this.changedKeys.clear();
         this._allChanged = false;
     }
 
     private pushChange( propertyName ) {
         if ( this.ignoreChanges ) return;
-        if ( this.changedKeys.length == 0 ) this.change++;
+        if ( this.changedKeys.size == 0 ) this.change++;
 
-        if (this.changedKeys.indexOf(propertyName) < 0) {
-            this.changedKeys.push( propertyName );
+        if (!this.changedKeys.has(propertyName)) {
+            this.changedKeys.add( propertyName );
             this.notifyChangeListener();
         }
     }
@@ -508,22 +508,18 @@ export class ArrayState extends BaseCustomObjectState {
         this.initDiffer();
     }
 
-    public getChangedKeys(): Array<string | number> {
-        const changes = super.getChangedKeys();
+    public getChangedKeys(): Set<string | number> {
+        let changes = super.getChangedKeys();
         const arrayChanges = this.differ.diff( this.array );
         if ( arrayChanges ) {
             let addedOrRemoved = 0;
             arrayChanges.forEachAddedItem(( record ) => {
                 addedOrRemoved++;
-                if ( changes.indexOf( record.currentIndex ) == -1 ) {
-                    changes.push( record.currentIndex );
-                }
+                changes.add( record.currentIndex );
             } );
             arrayChanges.forEachRemovedItem(( record ) => {
                 addedOrRemoved--;
-                if ( changes.indexOf( record.previousIndex ) == -1 ) {
-                    changes.push( record.previousIndex );
-                }
+                changes.add( record.previousIndex );
             } );
 
             arrayChanges.forEachMovedItem(( record ) => {
@@ -535,9 +531,11 @@ export class ArrayState extends BaseCustomObjectState {
                 // size changed, for now send whole array
                 this.markAllChanged( false );
             } else {
-                changes.sort(( a: number, b: number ) => {
+                const changesArray = Array.from(changes);
+                changesArray.sort(( a: number, b: number ) => {
                     return a - b;
                 } );
+                changes = new Set(changesArray);
             }
         }
         return changes;

@@ -47,10 +47,7 @@ export class JSONArrayConverter implements IConverter {
             if (instanceOfChangeAwareValue(elem)) {
               // child is able to handle it's own change mechanism
               elem.getStateHolder().setChangeListener(() => {
-                const changedKeys = state.getChangedKeys();
-                if(changedKeys.indexOf(c) == -1) {
-                  changedKeys.push(c);
-                }
+                state.getChangedKeys().add(c);
                 state.notifyChangeListener();
               });
             }
@@ -98,7 +95,7 @@ export class JSONArrayConverter implements IConverter {
               if (instanceOfChangeAwareValue(val)) {
                 // child is able to handle it's own change mechanism
                 val.getStateHolder().setChangeListener(() => {
-                  state.getChangedKeys().push(idx);
+                  state.getChangedKeys().add(idx);
                   state.notifyChangeListener();
                 });
               }
@@ -126,7 +123,7 @@ export class JSONArrayConverter implements IConverter {
               if (instanceOfChangeAwareValue(val)) {
                 // child is able to handle it's own change mechanism
                 val.getStateHolder().setChangeListener(() => {
-                  state.getChangedKeys().push(idx);
+                  state.getChangedKeys().add(idx);
                   state.notifyChangeListener();
                 });
               }
@@ -160,7 +157,7 @@ export class JSONArrayConverter implements IConverter {
     let internalState: ArrayState;
     if (newClientData && (internalState = newClientData.getStateHolder())) {
       const arrayChanges = internalState.getChangedKeys();
-      if (arrayChanges.length > 0 || internalState.allChanged) {
+      if (arrayChanges.size > 0 || internalState.allChanged) {
         const changes = {};
 
         if (internalState[JSONArrayConverter.CONTENT_VERSION]) changes[JSONArrayConverter.CONTENT_VERSION] = internalState[JSONArrayConverter.CONTENT_VERSION];
