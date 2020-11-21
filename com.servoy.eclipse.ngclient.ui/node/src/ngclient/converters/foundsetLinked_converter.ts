@@ -157,7 +157,7 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 }
 
-export class FoundsetLinked extends Array<object> implements IChangeAwareValue {
+export class FoundsetLinked extends Array<any> implements IChangeAwareValue {
     state: FoundsetLinkedState;
     idForFoundset: string;
 
