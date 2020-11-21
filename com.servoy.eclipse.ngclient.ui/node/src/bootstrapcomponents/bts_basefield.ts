@@ -1,19 +1,20 @@
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
-import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Directive, Input, Output, EventEmitter, SimpleChanges, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { PropertyUtils } from '../ngclient/servoy_public';
 
 @Directive()
+// eslint-disable-next-line
 export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
 
-    @Input() onDataChangeMethodID;
-    @Input() onFocusGainedMethodID;
-    @Input() onFocusLostMethodID;
+    @Input() onDataChangeMethodIDL: (e: Event) => void;
+    @Input() onFocusGainedMethodID: (e: Event) => void;
+    @Input() onFocusLostMethodID: (e: Event) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
-    @Input() dataProviderID;
-    @Input() readOnly;
-    @Input() editable;
-    @Input() placeholderText;
+    @Input() dataProviderID: any;
+    @Input() readOnly: boolean;
+    @Input() editable: boolean;
+    @Input() placeholderText: string;
 
     storedTooltip: any;
 

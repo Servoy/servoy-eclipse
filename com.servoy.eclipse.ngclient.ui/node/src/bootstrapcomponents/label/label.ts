@@ -8,11 +8,43 @@ import { Component, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
 })
 export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel {
 
-    @Input() labelFor;
-    @Input() styleClassExpression;
+    @Input() labelFor: string;
+    @Input() styleClassExpression: string;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
+    }
+
+    attachHandlers() {
+        if (this.onActionMethodID) {
+            if (this.onDoubleClickMethodID) {
+                const innerThis: ServoyBootstrapLabel = this;
+                this.renderer.listen(this.getNativeElement(), 'click', e => {
+                    if (innerThis.timeoutID) {
+                        window.clearTimeout(innerThis.timeoutID);
+                        innerThis.timeoutID = null;
+                        // double click, do nothing
+                    } else {
+                        innerThis.timeoutID = window.setTimeout(() => {
+                            innerThis.timeoutID = null;
+                            innerThis.onActionMethodID(e, innerThis.getDataTarget(e));
+                        }, 250);
+                    }
+                });
+            } else {
+                this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID(e, this.getDataTarget(e)));
+            }
+        }
+        if (this.onRightClickMethodID) {
+            this.renderer.listen(this.getNativeElement(), 'contextmenu', e => {
+                this.onRightClickMethodID(e, this.getDataTarget(e)); return false;
+            });
+        }
+        if (this.onDoubleClickMethodID) {
+            this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
+                this.onDoubleClickMethodID(e, this.getDataTarget(e));
+            });
+        }
     }
 
     private getDataTarget(event): any {
@@ -23,35 +55,4 @@ export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel {
         return null;
     }
 
-    attachHandlers() {
-        if ( this.onActionMethodID ) {
-            if (this.onDoubleClickMethodID) {
-                const innerThis: ServoyBootstrapLabel = this;
-                this.renderer.listen( this.getNativeElement(), 'click', e => {
-                    if (innerThis.timeoutID) {
-                        window.clearTimeout(innerThis.timeoutID);
-                        innerThis.timeoutID = null;
-                        // double click, do nothing
-                    } else {
-                        innerThis.timeoutID = window.setTimeout(function() {
-                            innerThis.timeoutID = null;
-                            innerThis.onActionMethodID(e, innerThis.getDataTarget(e));
-                        }, 250);
-}
-                 });
-            } else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID(e, this.getDataTarget(e)));
-            }
-        }
-        if ( this.onRightClickMethodID ) {
-          this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
-              this.onRightClickMethodID(e, this.getDataTarget(e)); return false;
-});
-        }
-        if ( this.onDoubleClickMethodID ) {
-            this.renderer.listen( this.elementRef.nativeElement, 'dblclick', ( e ) => {
-                this.onDoubleClickMethodID(e, this.getDataTarget(e));
-            } );
-        }
-    }
 }

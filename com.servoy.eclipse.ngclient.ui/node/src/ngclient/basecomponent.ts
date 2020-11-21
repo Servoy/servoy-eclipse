@@ -1,14 +1,15 @@
 import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef } from '@angular/core';
-import {ComponentContributor} from '../ngclient/component_contributor.service';
+import { ComponentContributor } from '../ngclient/component_contributor.service';
 import { ServoyApi } from './servoy_api';
 
 @Directive()
+// eslint-disable-next-line
 export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
-    @Input() name;
+    @Input() name: string;
     @Input() servoyApi: ServoyApi;
-    @Input() servoyAttributes;
+    @Input() servoyAttributes: Array<{ key: string; value: string }>;
 
-    @ViewChild('element', {static: false}) elementRef: ElementRef;
+    @ViewChild('element', { static: false }) elementRef: ElementRef;
 
     readonly self: ServoyBaseComponent;
     private viewStateListeners: Set<IViewStateListener> = new Set();
@@ -30,31 +31,31 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
     ngAfterViewInit() {
         this.initializeComponent();
         if (this.elementRef && this.changes) {
-            this.svyOnChanges( this.changes );
+            this.svyOnChanges(this.changes);
             this.changes = null;
         }
         this.cdRef.detectChanges();
     }
 
     // final method, do not override
-    ngOnChanges( changes: SimpleChanges ) {
+    ngOnChanges(changes: SimpleChanges) {
         this.initializeComponent();
-        if ( !this.elementRef ) {
-            if ( this.changes == null ) {
+        if (!this.elementRef) {
+            if (this.changes == null) {
                 this.changes = changes;
             } else {
-                for ( const property of Object.keys(changes) ) {
+                for (const property of Object.keys(changes)) {
                     this.changes[property] = changes[property];
                 }
             }
         } else {
-            if ( this.changes == null ) {
-                this.svyOnChanges( changes );
+            if (this.changes == null) {
+                this.svyOnChanges(changes);
             } else {
-                for ( const property of Object.keys(changes) ) {
+                for (const property of Object.keys(changes)) {
                     this.changes[property] = changes[property];
                 }
-                this.svyOnChanges( this.changes );
+                this.svyOnChanges(this.changes);
                 this.changes = null;
             }
         }
@@ -72,18 +73,6 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
 
     }
 
-    protected initializeComponent() {
-        if (!this.initialized && this.elementRef) {
-            this.initialized = true;
-            this.svyOnInit();
-        }
-    }
-
-    protected addAttributes() {
-        if (!this.servoyAttributes) return;
-        this.servoyAttributes.forEach( attribute => this.renderer.setAttribute(this.getNativeElement(), attribute.key,  attribute.value));
-    }
-
     /**
      * this should return the main native element (like the first div)
      */
@@ -91,10 +80,10 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
         return this.elementRef ? this.elementRef.nativeElement : null;
     }
 
-   /**
-    * sub classes can return a different native child then the default main element.
-    * used currently only for horizontal aligment
-    */
+    /**
+     * sub classes can return a different native child then the default main element.
+     * used currently only for horizontal aligment
+     */
     public getNativeChild(): any {
         return this.elementRef.nativeElement;
     }
@@ -126,8 +115,20 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
     public removeViewStateListener(listener: IViewStateListener) {
         this.viewStateListeners.delete(listener);
     }
+
+    protected initializeComponent() {
+        if (!this.initialized && this.elementRef) {
+            this.initialized = true;
+            this.svyOnInit();
+        }
+    }
+
+    protected addAttributes() {
+        if (!this.servoyAttributes) return;
+        this.servoyAttributes.forEach(attribute => this.renderer.setAttribute(this.getNativeElement(), attribute.key, attribute.value));
+    }
 }
 
 export interface IViewStateListener {
-    afterViewInit();
+    afterViewInit(): void;
 }

@@ -66,7 +66,7 @@ describe('ServoyDefaultRectangle', () => {
 
   it ('should check border styles from ngOnChanges (shapetype)', () => {
       component.shapeType = '3';
-      component.size = {width: 4};
+      component.size = {width: 4, height: 0};
       component.ngOnChanges({
           shapeType: new SimpleChange(null, component.shapeType, true),
           size: new SimpleChange(null, component.size, true)

@@ -1,33 +1,34 @@
 import { Input, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
 
-import {Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
+import { Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
 
 @Directive()
+// eslint-disable-next-line
 export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
 
-    @Input() onActionMethodID;
-    @Input() onRightClickMethodID;
-    @Input() onDoubleClickMethodID;
+    @Input() onActionMethodID: (e: Event, data?: any) => void;
+    @Input() onRightClickMethodID: (e: Event, data?: any) => void;
+    @Input() onDoubleClickMethodID: (e: Event, data?: any) => void;
 
-    @Input() background;
-    @Input() borderType;
-    @Input() dataProviderID;
-    @Input() displaysTags;
-    @Input() enabled;
-    @Input() fontType;
-    @Input() foreground;
+    @Input() background: string;
+    @Input() borderType: string;
+    @Input() dataProviderID: any;
+    @Input() displaysTags: boolean;
+    @Input() enabled: boolean;
+    @Input() fontType: string;
+    @Input() foreground: string;
     @Input() format: Format;
     @Input() horizontalAlignment;
-    @Input() location;
+    @Input() location: { x: number; y: number };
     @Input() margin;
-    @Input() size;
-    @Input() styleClass;
-    @Input() tabSeq;
-    @Input() text;
-    @Input() toolTipText;
-    @Input() transparent;
-    @Input() visible;
+    @Input() size: { width: number; height: number };
+    @Input() styleClass: string;
+    @Input() tabSeq: number;
+    @Input() text: string;
+    @Input() toolTipText: string;
+    @Input() transparent: boolean;
+    @Input() visible: boolean;
     @Input() scrollbars;
 
     timeoutID: number;
@@ -39,14 +40,6 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
     svyOnInit() {
         super.svyOnInit();
         this.attachHandlers();
-    }
-
-    protected attachHandlers() {
-      if ( this.onRightClickMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
- this.onRightClickMethodID( e ); return false;
-});
-      }
     }
 
     getFocusElement(): any {
@@ -74,54 +67,63 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
         return true;
     }
 
-    svyOnChanges( changes: SimpleChanges ) {
-      if (changes) {
-        for ( const property of Object.keys(changes) ) {
-            const change = changes[property];
-            switch ( property ) {
-                case 'borderType':
-                    PropertyUtils.setBorder( this.getNativeElement(), this.renderer , change.currentValue);
-                    break;
-                case 'background':
-                case 'transparent':
-                    this.renderer.setStyle(this.getNativeElement(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue );
-                    break;
-                case 'foreground':
-                    this.renderer.setStyle(this.getNativeElement(), 'color', change.currentValue );
-                    break;
-                case 'fontType':
-                    PropertyUtils.setFont( this.getNativeElement(), this.renderer , change.currentValue);
-                    break;
-                case 'horizontalAlignment':
-                    PropertyUtils.setHorizontalAlignment(  this.getNativeChild(), this.renderer , change.currentValue);
-                    break;
-                case 'scrollbars':
-                    if (this.needsScrollbarInformation() && change.currentValue) {
-                        PropertyUtils.setScrollbars(this.getNativeChild(), this.renderer, change.currentValue);
-                    }
-                    break;
-                case 'enabled':
-                    if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getNativeElement(),  'disabled' );
-                    else
-                        this.renderer.setAttribute(this.getNativeElement(),  'disabled', 'disabled' );
-                    break;
-                case 'margin':
-                    if ( change.currentValue ) {
-                        for (const  style of Object.keys(change.currentValue)) {
-                            this.renderer.setStyle(this.getNativeElement(), style, change.currentValue[style] );
+    svyOnChanges(changes: SimpleChanges) {
+        if (changes) {
+            for (const property of Object.keys(changes)) {
+                const change = changes[property];
+                switch (property) {
+                    case 'borderType':
+                        PropertyUtils.setBorder(this.getNativeElement(), this.renderer, change.currentValue);
+                        break;
+                    case 'background':
+                    case 'transparent':
+                        this.renderer.setStyle(this.getNativeElement(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue);
+                        break;
+                    case 'foreground':
+                        this.renderer.setStyle(this.getNativeElement(), 'color', change.currentValue);
+                        break;
+                    case 'fontType':
+                        PropertyUtils.setFont(this.getNativeElement(), this.renderer, change.currentValue);
+                        break;
+                    case 'horizontalAlignment':
+                        PropertyUtils.setHorizontalAlignment(this.getNativeChild(), this.renderer, change.currentValue);
+                        break;
+                    case 'scrollbars':
+                        if (this.needsScrollbarInformation() && change.currentValue) {
+                            PropertyUtils.setScrollbars(this.getNativeChild(), this.renderer, change.currentValue);
                         }
-                    }
-                    break;
-                case 'styleClass':
-                    if (change.previousValue)
-                        this.renderer.removeClass(this.getNativeElement(), change.previousValue );
-                    if ( change.currentValue)
-                        this.renderer.addClass( this.getNativeElement(), change.currentValue );
-                    break;
+                        break;
+                    case 'enabled':
+                        if (change.currentValue)
+                            this.renderer.removeAttribute(this.getNativeElement(), 'disabled');
+                        else
+                            this.renderer.setAttribute(this.getNativeElement(), 'disabled', 'disabled');
+                        break;
+                    case 'margin':
+                        if (change.currentValue) {
+                            for (const style of Object.keys(change.currentValue)) {
+                                this.renderer.setStyle(this.getNativeElement(), style, change.currentValue[style]);
+                            }
+                        }
+                        break;
+                    case 'styleClass':
+                        if (change.previousValue)
+                            this.renderer.removeClass(this.getNativeElement(), change.previousValue);
+                        if (change.currentValue)
+                            this.renderer.addClass(this.getNativeElement(), change.currentValue);
+                        break;
+                }
             }
         }
-      }
-      super.svyOnChanges(changes);
+        super.svyOnChanges(changes);
     }
+
+    protected attachHandlers() {
+        if (this.onRightClickMethodID) {
+            this.renderer.listen(this.getNativeElement(), 'contextmenu', e => {
+                this.onRightClickMethodID(e); return false;
+            });
+        }
+    }
+
 }

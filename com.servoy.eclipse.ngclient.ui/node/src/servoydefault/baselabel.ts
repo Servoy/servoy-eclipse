@@ -1,12 +1,12 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectorRef, SimpleChanges,
-        Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
+import { Input, ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
 
-import {PropertyUtils, FormattingService} from '../ngclient/servoy_public';
+import { PropertyUtils } from '../ngclient/servoy_public';
 
-import {ServoyDefaultBaseComponent} from './basecomponent';
+import { ServoyDefaultBaseComponent } from './basecomponent';
 
 @Directive()
-export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
+// eslint-disable-next-line
+export class ServoyDefaultBaseLabel extends ServoyDefaultBaseComponent {
 
     @Input() hideText;
     @Input() imageMediaID;
@@ -24,44 +24,16 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
         super(renderer, cdRef);
     }
 
-    protected attachHandlers() {
-        super.attachHandlers();
-        if ( this.onActionMethodID ) {
-            if (this.onDoubleClickMethodID) {
-                const innerThis: ServoyDefaultBaseComponent = this;
-                this.renderer.listen( this.getNativeElement(), 'click', e => {
-                    if (innerThis.timeoutID) {
-                        window.clearTimeout(innerThis.timeoutID);
-                        innerThis.timeoutID = null;
-                        // double click, do nothing
-                    } else {
-                        innerThis.timeoutID = window.setTimeout(function() {
-                            innerThis.timeoutID = null;
-                            innerThis.onActionMethodID( e );
-                        }, 250);
-}
-                 });
-            } else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
-            }
-        }
-        if ( this.onDoubleClickMethodID ) {
-            this.renderer.listen( this.elementRef.nativeElement, 'dblclick', ( e ) => {
-                this.onDoubleClickMethodID( e );
-            } );
-        }
-    }
-
-    svyOnChanges( changes: SimpleChanges ) {
-        for ( const property of Object.keys(changes) ) {
+    svyOnChanges(changes: SimpleChanges) {
+        for (const property of Object.keys(changes)) {
             const change = changes[property];
-            switch ( property ) {
+            switch (property) {
                 case 'rolloverCursor':
-                    this.renderer.setStyle(this.elementRef.nativeElement,  'cursor', change.currentValue == 12 ? 'pointer' : 'default' );
+                    this.renderer.setStyle(this.elementRef.nativeElement, 'cursor', change.currentValue === 12 ? 'pointer' : 'default');
                     break;
                 case 'mnemonic':
-                    if ( change.currentValue ) this.renderer.setAttribute(this.elementRef.nativeElement,   'accesskey', change.currentValue );
-                    else  this.renderer.removeAttribute(this.elementRef.nativeElement,  'accesskey' );
+                    if (change.currentValue) this.renderer.setAttribute(this.elementRef.nativeElement, 'accesskey', change.currentValue);
+                    else this.renderer.removeAttribute(this.elementRef.nativeElement, 'accesskey');
                     break;
                 case 'textRotation':
                     if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue, this.size);
@@ -73,5 +45,33 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
 
     public getNativeChild() {
         return this.child.nativeElement;
+    }
+
+    protected attachHandlers() {
+        super.attachHandlers();
+        if (this.onActionMethodID) {
+            if (this.onDoubleClickMethodID) {
+                const innerThis: ServoyDefaultBaseComponent = this;
+                this.renderer.listen(this.getNativeElement(), 'click', (e: Event) => {
+                    if (innerThis.timeoutID) {
+                        window.clearTimeout(innerThis.timeoutID);
+                        innerThis.timeoutID = null;
+                        // double click, do nothing
+                    } else {
+                        innerThis.timeoutID = window.setTimeout(() => {
+                            innerThis.timeoutID = null;
+                            innerThis.onActionMethodID(e);
+                        }, 250);
+                    }
+                });
+            } else {
+                this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID(e));
+            }
+        }
+        if (this.onDoubleClickMethodID) {
+            this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
+                this.onDoubleClickMethodID(e);
+            });
+        }
     }
 }
