@@ -207,9 +207,7 @@ public class ScriptingUtils
 						});
 						if (hasReturnStatement[0])
 						{
-
 							return true;
-
 						}
 
 					}
