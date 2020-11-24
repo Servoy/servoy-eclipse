@@ -3206,7 +3206,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							dataSource = null;
 						}
 					}
-					return new ListSelectCellEditor(parent, "Select form",
+					return new ListSelectCellEditor(parent, "Select form component",
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
@@ -3281,11 +3281,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 										}
 										else if (persistContext.getPersist() instanceof AbstractContainer)
-										{
-											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-												persistContext.getPersist().getID(),
-												new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
-										}
+									{
+										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+											persistContext.getPersist().getID(),
+											new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
+									}
 									}
 									catch (RepositoryException e)
 									{
