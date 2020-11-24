@@ -90,6 +90,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -650,7 +651,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			}
 			else if (!full_refresh && formParent != null && formParent.isFormComponent().booleanValue())
 			{
-				if (hasFormReference(flattenedSolution, getForm(), formParent))
+				if (hasFormReference(flattenedSolution, getForm(), formParent, new HashSet<String>()))
 				{
 					full_refresh = true;
 				}
@@ -669,7 +670,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 	}
 
-	private static boolean hasFormReference(final FlattenedSolution fs, Form form, final Form formRef)
+	private static boolean hasFormReference(final FlattenedSolution fs, Form form, final Form formRef, Set<String> recursionCheck)
 	{
 		final boolean hasFormReference[] = { false };
 		Form flattenedForm = fs.getFlattenedForm(form);
@@ -682,7 +683,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				{
 					IFormElement formElement = (IFormElement)o;
 					FormElement fe = FormElementHelper.INSTANCE.getFormElement(formElement, fs, null, true);
-					if (hasFormReference(fs, fe, formRef))
+					if (hasFormReference(fs, fe, formRef, recursionCheck))
 					{
 						hasFormReference[0] = true;
 						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
@@ -695,7 +696,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		return hasFormReference[0];
 	}
 
-	private static boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form formRef)
+	private static boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form formRef, Set<String> recursionCheck)
 	{
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
@@ -707,10 +708,17 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				{
 					Object propertyValue = formElement.getPropertyValue(pd.getName());
 					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
-					if (frm != null && (frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef)))
+					if (frm == null) continue;
+					if (!recursionCheck.add(frm.getName()))
+					{
+						Debug.error("recursive reference found between (List)FormComponents: " + recursionCheck); //$NON-NLS-1$
+						continue;
+					}
+					if ((frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef, recursionCheck)))
 					{
 						return true;
 					}
+					recursionCheck.remove(frm.getName());
 				}
 			}
 		}
