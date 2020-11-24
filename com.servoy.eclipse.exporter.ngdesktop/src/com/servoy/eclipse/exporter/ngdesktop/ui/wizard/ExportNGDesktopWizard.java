@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -37,6 +38,7 @@ import com.servoy.eclipse.exporter.ngdesktop.utils.NgDesktopClientConnection;
 import com.servoy.eclipse.exporter.ngdesktop.utils.NgDesktopServiceMonitor;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Utils;
@@ -93,16 +95,39 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return false;
 		}
 
+		final String[] loginToken = { logIn() };
+		if (loginToken[0] == null)
+			return false; //no login
+
+		exportSettings.put("login_token", loginToken[0]);
 
 		final IRunnableWithProgress job = monitor -> {
 			if (errorMsg.length() > 0) return;
 			final NgDesktopServiceMonitor serviceMonitor = new NgDesktopServiceMonitor(monitor);
 			exportPage.getSelectedPlatforms().forEach((platform) -> {
-				final int retCode = processPlatform(platform, exportSettings, serviceMonitor, errorMsg, cancel.get());
+				exportSettings.put("platform", platform);
+				final int retCode = processPlatform(exportSettings, serviceMonitor, errorMsg, cancel.get());
+				while (retCode == NgDesktopClientConnection.ACCESS_DENIED)
+				{
+					ServoyLoginDialog.clearSavedInfo(); //else we would get again the wrong login
+					loginToken[0] = logIn();
+					if (loginToken[0] == null)
+						return;
+					exportSettings.put("login_token", loginToken[0]);
+
+				}
 				if (retCode == PROCESS_CANCELLED) cancel.set(true);
 			});
 		};
 		return runContainer(job, errorMsg);
+	}
+
+	private String logIn()
+	{
+		String loginToken = ServoyLoginDialog.getLoginToken();
+		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+
+		return loginToken;
 	}
 
 	private boolean runContainer(IRunnableWithProgress job, StringBuilder errorMsg)
@@ -122,10 +147,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		return true;
 	}
 
-	private int processPlatform(String platform, IDialogSettings settings, NgDesktopServiceMonitor monitor, StringBuilder errorMsg,
+	private int processPlatform(IDialogSettings settings, NgDesktopServiceMonitor monitor, StringBuilder errorMsg,
 		boolean processAlreadyCancelled)
 	{
+		int retCode = PROCESS_FINISHED;
 		if (processAlreadyCancelled) return PROCESS_CANCELLED;
+		final String platform = settings.get("platform");
 		if (platform.equals(ExportPage.MACOS_PLATFORM) || platform.equals(ExportPage.LINUX_PLATFORM))
 		{
 			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
@@ -135,13 +162,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final File archiveFile = new File(saveDir + archiveName);
 			downloadArchive(archiveFile, monitor, errorMsg);
 		}
-		else processWindowsPlatform(monitor, settings, errorMsg);
+		else
+			retCode = processWindowsPlatform(monitor, settings, errorMsg);
 		if (monitor.isCanceled())
 		{
 			monitor.done();
-			return PROCESS_CANCELLED;
+			retCode = PROCESS_CANCELLED;
 		}
-		return PROCESS_FINISHED;
+		return retCode;
 	}
 
 	private void downloadArchive(File archiveFile, IProgressMonitor monitor, StringBuilder errorMsg)
@@ -162,14 +190,19 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 	}
 
-	private void processWindowsPlatform(NgDesktopServiceMonitor monitor, IDialogSettings settings, StringBuilder errorMsg)
+	private int processWindowsPlatform(NgDesktopServiceMonitor monitor, IDialogSettings settings, StringBuilder errorMsg)
 	{
+		int retCode = PROCESS_FINISHED;
 		try (NgDesktopClientConnection serviceConn = new NgDesktopClientConnection())
 		{
 			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
 			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			final String tokenId = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
-			int status = NgDesktopClientConnection.OK;
+			final JSONObject response = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
+			int status = response.getInt("statusCode");
+			if (status == NgDesktopClientConnection.ACCESS_DENIED) 
+				return status;
+			final String tokenId = response.getString("tokenId");
+			status = NgDesktopClientConnection.OK;
 			monitor.startChase("Waiting...", serviceConn.getNgDesktopBuildRefSize(), serviceConn.getNgDesktopBuildRefDuration());
 			while (!monitor.isCanceled())
 			{
@@ -182,6 +215,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			{
 				serviceConn.cancel(tokenId);
 				monitor.endChase();
+				retCode = PROCESS_CANCELLED;
 			}
 			if (!monitor.isCanceled() && NgDesktopClientConnection.READY == status)
 			{
@@ -194,6 +228,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			errorMsg.append(e.getMessage());
 		}
+		return retCode;
 
 	}
 

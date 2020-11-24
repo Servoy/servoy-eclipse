@@ -23,8 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import org.eclipse.equinox.security.storage.ISecurePreferences;
-import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
@@ -562,18 +560,7 @@ public class TutorialView extends ViewPart
 
 	private String getLoginToken()
 	{
-		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
-		ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
-		String loginToken = null;
-
-		try
-		{
-			loginToken = node.get(ServoyLoginDialog.SERVOY_LOGIN_TOKEN, null);
-		}
-		catch (Exception e)
-		{
-			Debug.error(e);
-		}
+		String loginToken = ServoyLoginDialog.getLoginToken();
 		if (loginToken == null)
 		{
 			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
