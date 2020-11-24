@@ -194,7 +194,7 @@ public class FormContentProvider implements ITreeContentProvider
 									{
 										continue;
 									}
-									if (options.showTemplates && childForm.isFormComponent().booleanValue())
+									if (options.showTemplates && childForm != null && childForm.isFormComponent().booleanValue())
 									{
 										// check for recursion.
 										Set<String> usedFormComponents = new HashSet<>();
