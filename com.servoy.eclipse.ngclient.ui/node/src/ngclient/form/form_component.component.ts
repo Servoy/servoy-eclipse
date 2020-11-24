@@ -151,6 +151,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoyextraHtmlarea', { static: true }) readonly servoyextraHtmlarea: TemplateRef<any>;
     @ViewChild('servoyextraImagelabel', { static: true }) readonly servoyextraImagelabel: TemplateRef<any>;
     @ViewChild('servoyextraFileupload', { static: true }) readonly servoyextraFileupload: TemplateRef<any>;
+    @ViewChild('servoyextraSlider', { static: true }) readonly servoyextraSlider: TemplateRef<any>;
 
 
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;

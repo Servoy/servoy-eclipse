@@ -3,6 +3,7 @@ import { ServoyExtraTable } from './table/table';
 import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
+import { ServoyExtraSlider } from './slider/slider';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -12,13 +13,15 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { FileUploadModule } from 'ng2-file-upload';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
 @NgModule({
     declarations: [
         ServoyExtraTable,
         ServoyExtraHtmlarea,
         ServoyExtraImageLabel,
-        ServoyExtraFileUpload
+        ServoyExtraFileUpload,
+        ServoyExtraSlider
     ],
     imports: [
         ServoyPublicModule,
@@ -29,14 +32,16 @@ import { FileUploadModule } from 'ng2-file-upload';
         ScrollingModule,
         NgbModule,
         AngularEditorModule,
-        FileUploadModule
+        FileUploadModule,
+        NgxSliderModule
     ],
     providers: [AsyncPipe
     ],
     exports: [ServoyExtraTable,
               ServoyExtraHtmlarea,
               ServoyExtraImageLabel,
-              ServoyExtraFileUpload
+              ServoyExtraFileUpload,
+              ServoyExtraSlider
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
