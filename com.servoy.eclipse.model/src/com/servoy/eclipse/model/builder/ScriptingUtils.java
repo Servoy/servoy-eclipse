@@ -179,33 +179,44 @@ public class ScriptingUtils
 			Expression exp = ((VoidExpression)statements.get(0)).getExpression();
 			if (exp instanceof FunctionStatement)
 			{
-				boolean[] hasReturnStatement = new boolean[] { false };
-				try
+				if (exp.getDocumentation() != null && exp.getDocumentation().getText().contains("@constructor"))
 				{
-					((FunctionStatement)exp).getBody().traverse(new ASTVisitor()
+					return false;
+				}
+				if (exp.getDocumentation() == null || !exp.getDocumentation().getText().contains("@return"))
+				{
+					boolean[] hasReturnStatement = new boolean[] { false };
+					try
 					{
-						@Override
-						public boolean visitGeneral(ASTNode node) throws Exception
+						((FunctionStatement)exp).getBody().traverse(new ASTVisitor()
 						{
-							if (node instanceof ReturnStatement)
+							@Override
+							public boolean visitGeneral(ASTNode node) throws Exception
 							{
-								hasReturnStatement[0] = true;
+								if (node instanceof ReturnStatement && ((ReturnStatement)node).getValue() != null)
+								{
+									hasReturnStatement[0] = true;
+								}
+								if (node instanceof FunctionStatement)
+								{
+									return false;
+								}
+								return super.visitGeneral(node);
 							}
-							return super.visitGeneral(node);
+
+						});
+						if (hasReturnStatement[0])
+						{
+
+							return true;
+
 						}
 
-					});
-					if (hasReturnStatement[0])
-					{
-						if (exp.getDocumentation() != null && !exp.getDocumentation().getText().contains("@return"))
-						{
-							return true;
-						}
 					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
 		}
