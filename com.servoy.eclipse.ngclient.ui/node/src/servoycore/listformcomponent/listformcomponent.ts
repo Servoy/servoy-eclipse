@@ -1,12 +1,11 @@
-import { Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2, HostListener, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef, EventEmitter, Output, OnDestroy } from '@angular/core';
-import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
+import { Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2, HostListener, ChangeDetectorRef, EventEmitter, Output, OnDestroy, Inject, NgZone, AfterViewChecked } from '@angular/core';
+import { ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
-import { ListFormComponentCache, StructureCache, ComponentCache, FormComponentCache } from '../../ngclient/form.service';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ComponentConverter } from '../../ngclient/converters/component_converter';
+import { ComponentConverter, ComponentType } from '../../ngclient/converters/component_converter';
 import { ServoyBaseComponent } from '../../ngclient/basecomponent';
 import { Foundset, FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
-import { constants } from 'buffer';
+import { FormComponentType } from '../../ngclient/converters/formcomponent_converter';
 
 @Component({
   selector: 'servoycore-listformcomponent',
@@ -15,8 +14,10 @@ import { constants } from 'buffer';
 })
 export class ListFormComponent extends ServoyBaseComponent implements AfterViewInit, OnDestroy {
 
-  @Input() parentForm: FormComponent;
-  @Input() listFormComponent: ListFormComponentCache;
+  @Input() containedForm: FormComponentType;
+  @Input() foundset: Foundset;
+  @Input() selectionClass: string; 
+  @Input() styleClass: string;
   @Input() responsivePageSize: number;
   @Input() pageLayout: string;
   @Input() onSelectionChanged;
@@ -32,15 +33,16 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   selectionChangedByKey = false;
   changeListener: (change: FoundsetChangeEvent) => void;
 
-  constructor(protected readonly renderer: Renderer2, cdRef: ChangeDetectorRef) {
+  constructor(protected readonly renderer: Renderer2,
+     cdRef: ChangeDetectorRef,
+     @Inject(FormComponent) private parent: FormComponent) {
     super(renderer, cdRef);
   }
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    const foundset = this.getFoundset();
-    if (!foundset.multiSelect && event.key == 'ArrowUp' || event.key == 'ArrowDown') {
-      let selectedRowIndex = foundset.selectedRowIndexes[0];
+    if (!this.foundset.multiSelect && event.key == 'ArrowUp' || event.key == 'ArrowDown') {
+      let selectedRowIndex = this.foundset.selectedRowIndexes[0];
       if (event.key == 'ArrowUp') {
         // move to the previous page if the first element (not from the first page) is selected
         if (this.page != 0 && selectedRowIndex / (this.page) == this.responsivePageSize) {
@@ -55,18 +57,18 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
         }
       }
       // do not move the selection for the first or last element
-      if (selectedRowIndex >= 0 && selectedRowIndex < foundset.serverSize) {
-        foundset.requestSelectionUpdate([selectedRowIndex]);
-        this.foundsetChange.emit(foundset);
+      if (selectedRowIndex >= 0 && selectedRowIndex < this.foundset.serverSize) {
+        this.foundset.requestSelectionUpdate([selectedRowIndex]);
         this.selectionChangedByKey = true;
       }
     }
   }
+
   onRowClick(row: any) {
-    for ( let i = 0; i < this.getFoundset().viewPort.rows.length; i++ ) {
-      if (this.getFoundset().viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] == row['_svyRowId']) {
-        this.getFoundset().requestSelectionUpdate([i + this.getFoundset().viewPort.startIndex]);
-        this.foundsetChange.emit(this.getFoundset());
+    for ( let i = 0; i < this.foundset.viewPort.rows.length; i++ ) {
+      if (this.foundset.viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] == row['_svyRowId']) {
+        this.foundset.requestSelectionUpdate([i + this.foundset.viewPort.startIndex]);
+        this.foundsetChange.emit(this.foundset);
         break;
       }
     }
@@ -74,7 +76,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
   svyOnInit() {
     super.svyOnInit();
-    this.changeListener = this.getFoundset().addChangeListener((event: FoundsetChangeEvent) => {
+    this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
       let shouldUpdatePagingControls = false;
       if (event.selectedRowIndexesChanged) {
         this.updateSelection(event.selectedRowIndexesChanged.newValue, event.selectedRowIndexesChanged.oldValue);
@@ -99,34 +101,35 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   }
 
   ngOnDestroy() {
-    this.getFoundset().removeChangeListener(this.changeListener);
-  }
-
-  getFoundset(): Foundset {
-    return this.listFormComponent.getFoundset();
+    this.foundset.removeChangeListener(this.changeListener);
   }
 
   getViewportRows(): ViewPortRow[] {
-    return this.getFoundset().viewPort.rows;
+    return this.foundset.viewPort.rows;
   }
 
   getStyleClasses(): string[] {
-    return this.listFormComponent.formComponentProperties.classes;
+    const classes: Array<string> = new Array();
+    if (this.styleClass) {
+      classes.push(this.styleClass);
+    }
+    return classes;
   }
 
   getRowHeight(): number {
-    return this.listFormComponent.getFormComponentType().formHeight;
+    return this.containedForm.getStateHolder().formHeight;
   }
 
   getRowWidth(): string {
-      if (this.pageLayout == 'listview') {
-          return '100%';
-      }
-      return this.listFormComponent.getFormComponentType().formWidth + 'px';
+      if (this.pageLayout == 'listview')
+      {
+          return "100%";
+      }    
+      return this.containedForm.getStateHolder().formWidth + 'px';
   }
-
-  getRowItems(): Array<StructureCache | ComponentCache | FormComponentCache> {
-    return this.listFormComponent.items;
+  
+  getRowItems(): Array<ComponentType> {
+    return this.containedForm.getStateHolder().childElements;
   }
 
   moveLeft() {
@@ -148,24 +151,25 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
       }
   }
 
-  getRowItemTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
-    return this.parentForm.getTemplate(item);
+  getRowItemTemplate(item: ComponentType): TemplateRef<any> { 
+    return this.parent.getTemplateForLFC(item.getStateHolder());
   }
 
-  getRowItemState(item: StructureCache | ComponentCache | FormComponentCache, rowIndex: number) {
-    let rowItem: any = item;
-    if (item instanceof ComponentCache) {
-      for (const element of this.listFormComponent.getFormComponentType().childElements) {
-        if (element.name == item.name) {
-          rowItem = Object.assign({}, element);
-          if (element.foundsetConfig && element.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array && rowIndex < rowItem[ComponentConverter.MODEL_VIEWPORT].length) {
-            (element.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
+  getRowItemState(item: ComponentType, rowIndex: number) {
+    let rowItem:any = item;
+    if(item instanceof ComponentType) {
+      for(let element of this.containedForm.getStateHolder().childElements) {
+        const state = element.getStateHolder();
+        if(state.name == item.getStateHolder().name) {
+          rowItem = Object.assign({}, state);
+          if (state.foundsetConfig && state.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array && rowIndex < rowItem[ComponentConverter.MODEL_VIEWPORT].length) {
+            (state.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
               rowItem.model[p] = rowItem[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
             });
           }
           rowItem.handlers = {};
-          const rowId = this.getFoundset().viewPort.rows[rowIndex][ViewportService.ROW_ID_COL_KEY];
-          Object.entries(element.handlers).forEach(([k, v]) => {
+          const rowId = this.foundset.viewPort.rows[rowIndex][ViewportService.ROW_ID_COL_KEY];
+          Object.entries(state.handlers).forEach(([k, v]) => {
             const wrapperF: any = v;
             rowItem.handlers[k] = wrapperF.selectRecordHandler(rowId);
           });
@@ -181,69 +185,61 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
       if (this.numberOfCells <= 0 ) {
           const parentWidth = this.elementRef.nativeElement.offsetWidth;
           const parentHeight = this.elementRef.nativeElement.offsetHeight;
-          const height = this.listFormComponent.getFormComponentType().formHeight;
-          const width = this.listFormComponent.getFormComponentType().formWidth;
-          const numberOfColumns =  (this.pageLayout == 'listview') ? 1 : Math.floor(parentWidth / width);
-          const numberOfRows = Math.floor(parentHeight / height);
+          const height = this.containedForm.getStateHolder().formHeight;
+          const width = this.containedForm.getStateHolder().formWidth; 
+          const numberOfColumns =  (this.pageLayout == 'listview') ? 1 : Math.floor(parentWidth/width);
+          const numberOfRows = Math.floor(parentHeight/height);
           this.numberOfCells  = numberOfRows * numberOfColumns;
           // always just render 1
           if (this.numberOfCells < 1) this.numberOfCells = 1;
       }
       const startIndex = this.page * this.numberOfCells;
-      const foundset = this.getFoundset();
-      let shouldEmitFoundsetChange = false;
+      const foundset = this.foundset;
       if (foundset.viewPort.startIndex != startIndex) {
           foundset.loadRecordsAsync(startIndex, this.numberOfCells);
-          shouldEmitFoundsetChange = true;
       } else {
           if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
               foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size));
-              shouldEmitFoundsetChange = true;
           } else if (foundset.viewPort.size > this.numberOfCells) {
               // the (initial) viewport  is bigger then the numberOfCells we have created rows for, adjust the viewport to be smaller.
               foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size);
-              shouldEmitFoundsetChange = true;
           }
       }
-      if (shouldEmitFoundsetChange) this.foundsetChange.emit(foundset);
       this.updatePagingControls();
       foundset.setPreferredViewportSize(this.numberOfCells);
   }
 
   updatePagingControls() {
-    const foundset = this.getFoundset();
     this.renderer.setStyle(  this.elementFirstRef.nativeElement, 'visibility' , this.page > 0 ? 'visible' : 'hidden' );
     this.renderer.setStyle(  this.elementLeftRef.nativeElement, 'visibility' , this.page > 0 ? 'visible' : 'hidden' );
-    const hasMorePages = foundset.hasMoreRows || (foundset.serverSize - (this.page * this.numberOfCells + Math.min(this.numberOfCells, foundset.viewPort.rows.length))) > 0 ;
+    const hasMorePages = this.foundset.hasMoreRows || (this.foundset.serverSize - (this.page * this.numberOfCells + Math.min(this.numberOfCells, this.foundset.viewPort.rows.length))) > 0 ;
     this.renderer.setStyle(  this.elementRightRef.nativeElement, 'visibility' , hasMorePages ? 'visible' : 'hidden' );
   }
 
   updateSelection(newValue, oldValue) {
-    const foundset = this.getFoundset();
-    const selectionClass = this.listFormComponent.model.selectionClass;
-    if (selectionClass) {
+    if (this.selectionClass) {
       const children = this.elementRef.nativeElement.children;
       if (oldValue) {
         for (let k = 0; k < oldValue.length; k++) {
-          const idx = oldValue[k] - foundset.viewPort.startIndex;
+          const idx = oldValue[k] - this.foundset.viewPort.startIndex;
           if (idx > -1 && idx < children.length - 1) {
-            this.renderer.removeClass(this.elementRef.nativeElement.children[idx + 1], selectionClass);
+            this.renderer.removeClass(this.elementRef.nativeElement.children[idx + 1], this.selectionClass);
           }
         }
       } else {
         for (let k = 1; k < children.length; k++) {
-          this.renderer.removeClass(this.elementRef.nativeElement.children[k], selectionClass);
+          this.renderer.removeClass(this.elementRef.nativeElement.children[k], this.selectionClass);
         }
       }
       for (let k = 0; k < newValue.length; k++) {
-        const idx = newValue[k] - foundset.viewPort.startIndex;
+        const idx = newValue[k] - this.foundset.viewPort.startIndex;
         if (idx > -1 && idx < children.length - 1) {
-          this.renderer.addClass(this.elementRef.nativeElement.children[idx + 1], selectionClass);
+          this.renderer.addClass(this.elementRef.nativeElement.children[idx + 1], this.selectionClass);
         }
       }
     }
 
-    const selectedRowIndex = this.getFoundset().selectedRowIndexes[0];
+    const selectedRowIndex = this.foundset.selectedRowIndexes[0];
     const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.responsivePageSize * this.page : selectedRowIndex];
     if (element && !element.contains(document.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
       element.focus();
@@ -251,3 +247,4 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     }
   }
 }
+

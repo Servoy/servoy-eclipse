@@ -2,7 +2,7 @@ import { IConverter, PropertyContext, ConverterService } from '../../sablo/conve
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ViewportService } from '../services/viewport.service';
 import { FoundsetChangeEvent, FoundsetConverter } from './foundset_converter';
-import { ViewportRowUpdates, IComponentType } from '../../sablo/spectypes.service';
+import { ViewportRowUpdates, IComponentType, IChangeAwareValue, ChangeAwareState, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
 import { Deferred } from '../../sablo/util/deferred';
 
@@ -28,7 +28,7 @@ export class ComponentConverter implements IConverter {
         let newValue = currentClientData;
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
-        const hasListeners = (currentClientData && currentClientData[ConverterService.INTERNAL_IMPL].viewportChangeListeners.length > 0);
+        const hasListeners = (currentClientData && currentClientData.getStateHolder().viewportChangeListeners.length > 0);
         const notificationParamForListeners: FoundsetChangeEvent = hasListeners ?  {} : undefined;
 
         let childChangedNotifierGenerator;
@@ -36,8 +36,8 @@ export class ComponentConverter implements IConverter {
             // granular updates received
             childChangedNotifierGenerator = this.getBeanPropertyChangeNotifierGenerator(currentClientData);
 
-            var internalState = currentClientData[ConverterService.INTERNAL_IMPL];
-            const beanUpdate = serverSentData[ComponentConverter.PROPERTY_UPDATES_KEY];
+            var internalState: any = currentClientData.getStateHolder();
+            var beanUpdate = serverSentData[ComponentConverter.PROPERTY_UPDATES_KEY];
 
             const modelBeanUpdate = beanUpdate[ComponentConverter.MODEL_KEY];
             const wholeViewportUpdate = beanUpdate[ComponentConverter.MODEL_VIEWPORT_KEY];
@@ -45,7 +45,7 @@ export class ComponentConverter implements IConverter {
             let done = false;
 
             if (modelBeanUpdate) {
-                var beanModel = currentClientData[ComponentConverter.MODEL_KEY];
+                var beanModel = internalState[ComponentConverter.MODEL_KEY];
 
                 // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
                 const beanLayout = internalState.beanLayout;
@@ -61,17 +61,17 @@ export class ComponentConverter implements IConverter {
 
             // if component is linked to a foundset, then record - dependent property values are sent over as as viewport representing values for the foundset property's viewport
             if (wholeViewportUpdate) {
-                const oldRows = currentClientData[ComponentConverter.MODEL_VIEWPORT];
-                if (oldRows == undefined) currentClientData[ComponentConverter.MODEL_VIEWPORT] = [];
+                const oldRows = internalState[ComponentConverter.MODEL_VIEWPORT];
+                if (oldRows == undefined) internalState[ComponentConverter.MODEL_VIEWPORT] = [];
 
-                currentClientData[ComponentConverter.MODEL_VIEWPORT] = this.viewportService.updateWholeViewport(currentClientData[ComponentConverter.MODEL_VIEWPORT],
+                internalState[ComponentConverter.MODEL_VIEWPORT] = this.viewportService.updateWholeViewport(internalState[ComponentConverter.MODEL_VIEWPORT],
                         internalState, wholeViewportUpdate, beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] ?
                                 beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
                 if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: currentClientData[ComponentConverter.MODEL_VIEWPORT] };
                 done = true;
             } else if (viewportUpdate) {
-                const oldSize = currentClientData[ComponentConverter.MODEL_VIEWPORT].length;
-                this.viewportService.updateViewportGranularly(currentClientData[ComponentConverter.MODEL_VIEWPORT], internalState, viewportUpdate,
+                const oldSize = internalState[ComponentConverter.MODEL_VIEWPORT].length;
+                this.viewportService.updateViewportGranularly(internalState[ComponentConverter.MODEL_VIEWPORT], internalState, viewportUpdate,
                         beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] ?
                                 beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] : undefined, propertyContext, false);
                 if (hasListeners) {
@@ -88,19 +88,16 @@ export class ComponentConverter implements IConverter {
         } else if (serverSentData == undefined || !serverSentData[ComponentConverter.NO_OP]) {
             if (serverSentData) {
                 // full contents received
-                newValue = new ComponentType(
-                    serverSentData.componentDirectiveName,
+                internalState = new ComponentState(serverSentData.componentDirectiveName,
                     serverSentData.forFoundset,
                     serverSentData.foundsetConfig,
                     serverSentData.handlers,
                     serverSentData.model,
                     serverSentData.model_vp,
-                    serverSentData.name);
+                    serverSentData.name)
+                newValue = new ComponentType(internalState);
 
-                this.converterService.prepareInternalState(newValue, {});
                 childChangedNotifierGenerator = this.getBeanPropertyChangeNotifierGenerator(newValue);
-
-                var internalState = newValue[ConverterService.INTERNAL_IMPL];
 
                 if (serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] != undefined) {
                     // if it's linked to a foundset, keep that info in internal state; viewport.js needs it
@@ -126,25 +123,16 @@ export class ComponentConverter implements IConverter {
                         args: newargs,
                         rowId: row
                     }});
-                    if (internalState.changeNotifier) internalState.changeNotifier();
+                    internalState.notifyChangeListener();
                     // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
                     return defered.promise;
                 };
-
-                // implement what $sabloConverters need to make this work
-                internalState.setChangeNotifier = function(changeNotifier) {
-                    internalState.changeNotifier = changeNotifier;
-                };
-                internalState.isChanged = function() {
- return internalState.requests && (internalState.requests.length > 0);
-};
-
                 // private impl
                 internalState.requests = [];
                 internalState.beanLayout = null; // not really useful right now; just to be able to reuse existing form code
 
                 // even if it's a completely new value, keep listeners from old one if there is an old value
-                internalState.viewportChangeListeners = (currentClientData && currentClientData[ConverterService.INTERNAL_IMPL] ? currentClientData[ConverterService.INTERNAL_IMPL].viewportChangeListeners : []);
+                internalState.viewportChangeListeners = (currentClientData && currentClientData.getStateHolder() ? currentClientData.getStateHolder().viewportChangeListeners : []);
 
                 /**
                  * Adds a change listener that will get triggered when server sends granular or full modelViewport changes for this component.
@@ -236,7 +224,7 @@ export class ComponentConverter implements IConverter {
                         req.svyStartEdit[ComponentConverter.PROPERTY_NAME_KEY] = property;
 
                         internalState.requests.push(req);
-                        if (internalState.changeNotifier) internalState.changeNotifier();
+                        internalState.notifyChangeListener();
                     },
 
                     apply(property, modelOfComponent, rowId) {
@@ -258,7 +246,7 @@ export class ComponentConverter implements IConverter {
                         req.svyApply[ComponentConverter.VALUE_KEY] = propertyValue;
 
                         internalState.requests.push(req);
-                        if (internalState.changeNotifier) internalState.changeNotifier();
+                        internalState.notifyChangeListener();
                     }
                 };
             }
@@ -267,16 +255,16 @@ export class ComponentConverter implements IConverter {
         if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
             // if (this.log.debugEnabled && this.log.debugLevel === this.log.SPAM) this.log.debug("svy component * firing founset listener notifications: " + JSON.stringify(Object.keys(notificationParamForListeners)));
             // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
-            currentClientData[ConverterService.INTERNAL_IMPL].fireChanges(notificationParamForListeners);
+            currentClientData.getStateHolder().fireChanges(notificationParamForListeners);
         }
 
         return newValue;
     }
 
-    fromClientToServer(newClientData: Object, oldClientData: Object): Object {
+    fromClientToServer(newClientData: ComponentType, oldClientData: ComponentType): Object {
         if (newClientData) {
-            const internalState = newClientData[ConverterService.INTERNAL_IMPL];
-            if (internalState.isChanged()) {
+            const internalState = newClientData.getStateHolder();
+            if (internalState.hasChanges()) {
                 const tmp = internalState.requests;
                 internalState.requests = [];
                 return tmp;
@@ -285,32 +273,32 @@ export class ComponentConverter implements IConverter {
         return [];
     }
 
-	private getBeanPropertyChangeNotifierGenerator(propertyValue) {
+	private getBeanPropertyChangeNotifierGenerator(propertyValue: ComponentType) {
         const componentThis = this;
 		return function beanPropertyChangeNotifierGenerator(propertyName) {
 			if (!propertyValue) return undefined;
 
-			const internalState = propertyValue[ConverterService.INTERNAL_IMPL];
+			const internalState = propertyValue.getStateHolder();
 			return function beanPropertyChangeNotifier(oldValue, newValue, dumb) { // oldValue, newValue and dumb are only set when called from bean model in-depth/shallow watch; not set for smart properties
 				if (dumb !== true) {
 					// so smart property - no watch involved (it notifies itself as changed)
 					oldValue = newValue = propertyValue[ComponentConverter.MODEL_KEY][propertyName];
 				}
 				internalState.requests.push({ propertyChanges : componentThis.getChildPropertyChanges(propertyValue, oldValue, newValue, propertyName) });
-				if (internalState.changeNotifier) internalState.changeNotifier();
+				internalState.notifyChangeListener();
 			};
 		};
     }
-
-    private getChildPropertyChanges(componentState, oldPropertyValue, newPropertyValue, propertyName) {
-		const internalState = componentState[ConverterService.INTERNAL_IMPL];
-		const beanConversionInfo = this.converterService.getInDepthProperty(internalState, ConverterService.TYPES_KEY);
-
+    
+    private getChildPropertyChanges(component: ComponentType, oldPropertyValue, newPropertyValue, propertyName) {
+		const internalState = component.getStateHolder();
+		var beanConversionInfo = this.converterService.getInDepthProperty(internalState, ConverterService.TYPES_KEY);
+		
 		// just dummy stuff - currently the parent controls layout, but getComponentChanges needs such args...
 		const containerSize = {width: 0, height: 0};
 
 		return this.getComponentChanges(newPropertyValue, oldPropertyValue, beanConversionInfo,
-            internalState.beanLayout, containerSize, propertyName, componentState.model);
+            internalState.beanLayout, containerSize, propertyName, component.getStateHolder().model);
     }
 
     private applyBeanData(beanModel, beanLayout, beanData, containerSize, changeNotifierGenerator, beanConversionInfo, newConversionInfo, propertyContext: PropertyContext) {
@@ -332,16 +320,17 @@ export class ComponentConverter implements IConverter {
 
                 // if the value changed and it wants to be in control of it's changes, or if the conversion info for this value changed (thus possibly preparing an old value for being change-aware without changing the value reference)
                 if ((oldModelValueForKey !== beanData[key] || oldConversionInfoForKey !== newConversionInfo[key])
-                        && beanData[key] && beanData[key][ConverterService.INTERNAL_IMPL] && beanData[key][ConverterService.INTERNAL_IMPL].setChangeNotifier) {
+                        && beanData[key] && instanceOfChangeAwareValue(beanData[key])) {
                     // setChangeNotifier can be called now after the new conversion info and value are set (changeNotifierGenerator(key) will probably use the values in model and that has to point to the new value if reference was changed)
                     // as setChangeNotifier on smart property types might end up calling the change notifier right away to announce it already has changes (because for example
                     // the convertFromServerToClient on that property type above might have triggered some listener to the component that uses it which then requested
                     // another thing from the property type and it then already has changes...) // TODO should we decouple this scenario? if we are still processing server to client changes when change notifier is called we could trigger the change notifier later/async for sending changes back to server...
                     const changeNotfier = changeNotifierGenerator(key);
-                    beanData[key][ConverterService.INTERNAL_IMPL].setChangeNotifier(changeNotfier);
-
+                    beanData[key].getStateHolder().setChangeListener(() => {
+                        changeNotfier();
+                    })
                     // we check for changes anyway in case a property type doesn't do it itself as described in the comment above
-                    if (beanData[key][ConverterService.INTERNAL_IMPL].isChanged && beanData[key][ConverterService.INTERNAL_IMPL].isChanged()) changeNotfier();
+                    if (beanData[key].getStateHolder().hasChanges()) changeNotfier();
                 }
             } else if (beanConversionInfo && beanConversionInfo[key] != undefined) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
         }
@@ -397,8 +386,14 @@ export class ComponentConverter implements IConverter {
 	}
 }
 
-export class ComponentType implements IComponentType {
+export class ComponentState extends ChangeAwareState {
 
+    beanLayout = {};
+    requests = [];
+    viewportChangeListeners: any;
+    fireChanges: (viewportChanges: any) => void;
+    modelUnwatch: any;
+    viewportConversions: Record<string, object>[];
     constructor(
         public componentDirectiveName: string,
         public forFoundset: string,
@@ -408,7 +403,17 @@ export class ComponentType implements IComponentType {
         public modelViewport: any[],
         public name: string
         ) {
-        }
+        super();
+    }
+}
+
+export class ComponentType implements IComponentType, IChangeAwareValue {
+
+    constructor( private state: ComponentState ) {}
+
+    getStateHolder(): ComponentState {
+        return this.state;
+    }
 
     addViewportChangeListener(listener: any) {
         throw new Error('Method not implemented.');

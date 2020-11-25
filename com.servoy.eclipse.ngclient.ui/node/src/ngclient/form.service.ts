@@ -3,14 +3,10 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred } from '../sablo/util/deferred';
-
 import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../sablo/logger.service';
-
 import { ServoyService, FormSettings } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
-import { FormComponentType } from './converters/formcomponent_converter';
-import { Foundset } from './converters/foundset_converter';
 import { get } from 'lodash';
 
 
@@ -139,15 +135,16 @@ export class FormComponentCache implements IComponentCache {
     public items: Array<StructureCache | ComponentCache | FormComponentCache>;
 
     constructor(
-        public readonly name: string,
-        public readonly model: { [property: string]: any },
-        public readonly responsive: boolean,
-        public readonly layout: { [property: string]: string },
-        public readonly formComponentProperties: FormComponentProperties,
-        items?: Array<StructureCache | ComponentCache | FormComponentCache>) {
-        if (!items) this.items = [];
-        else this.items = items;
-    }
+            public readonly name: string,
+            public readonly model: { [property: string]: any },
+            public readonly responsive: boolean,
+            public readonly layout: { [property: string]: string },
+            public readonly formComponentProperties: FormComponentProperties,
+            public readonly hasFoundset,
+            items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
+            if ( !items ) this.items = [];
+            else this.items = items;
+        }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache): FormComponentCache {
         if (child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator') return null;
@@ -435,9 +432,7 @@ export class FormService {
                         formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                     }
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
-                    const structure = elem.model.foundset ?
-                        new ListFormComponentCache(elem.name, elem.model, elem.responsive, elem.position, formComponentProperties) :
-                        new FormComponentCache(elem.name, elem.model, elem.responsive, elem.position, formComponentProperties);
+                    const structure = new FormComponentCache(elem.name, elem.model, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                     this.walkOverChildren(elem.children, formCache, structure);
                     formCache.addFormComponent(structure);
                     if (parent != null) {
@@ -507,22 +502,3 @@ export class FormService {
 
 }
 
-export class ListFormComponentCache extends FormComponentCache {
-    constructor(
-        public readonly name: string,
-        public readonly model: { [property: string]: any },
-        public readonly responsive: boolean,
-        public readonly layout: { [property: string]: string },
-        public readonly formComponentProperties: FormComponentProperties,
-        items?: Array<StructureCache | ComponentCache | FormComponentCache>,) {
-        super(name, model, responsive, layout, formComponentProperties, items);
-    }
-
-    public getFormComponentType(): FormComponentType {
-        return this.model.containedForm;
-    }
-
-    public getFoundset(): Foundset {
-        return this.model.foundset;
-    }
-}

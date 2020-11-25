@@ -1,4 +1,4 @@
-<div class="svy-listformcomponent" [ngClass]='getStyleClasses()' #element>
+<div class="svy-listformcomponent" [ngClass]='styleClass' #element>
 	<div tabindex="-1" (click)="onRowClick(row)" *ngFor="let row of getViewportRows(); let i = index" class="svy-listformcomponent-row" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}">
 		<div *ngFor="let item of getRowItems()" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
 			<ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, i) }"></ng-template>  <!-- component  -->

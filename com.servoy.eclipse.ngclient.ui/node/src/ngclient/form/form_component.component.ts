@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
         TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
-import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache, ListFormComponentCache } from '../form.service';
+import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache } from '../form.service';
 
 import { ServoyService } from '../servoy.service';
 
@@ -9,6 +9,7 @@ import { SabloService } from '../../sablo/sablo.service';
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 
 import { ServoyApi } from '../servoy_api';
+import { ComponentState } from '../converters/component_converter';
 
 @Component({
     // eslint-disable-next-line
@@ -201,12 +202,20 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         this.ngOnInit();
     }
 
+    ngOnInit() {
+        this.formCache = this.formservice.getFormCache(this);
+        this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+    }
+
+    ngOnDestroy() {
+        this.formservice.destroy(this);
+    }
+
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
-        } else if (item instanceof ListFormComponentCache) {
-            return this.servoycoreListformcomponent;
         } else if (item instanceof FormComponentCache ) {
+            if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
             if (this[item.type] === undefined && item.type !== undefined) {
@@ -216,13 +225,16 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         }
     }
 
-    ngOnInit() {
-        this.formCache = this.formservice.getFormCache(this);
-        this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
-    }
-
-    ngOnDestroy() {
-        this.formservice.destroy(this);
+    getTemplateForLFC(state: ComponentState): TemplateRef<any> {
+        if (state.componentDirectiveName.includes("formcomponent")) {
+            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
+        } else { 
+            // TODO: this has to be replaced with a type property on the state object
+            let compDirectiveName = state.componentDirectiveName;
+            const index = compDirectiveName.indexOf("-");
+            compDirectiveName =  compDirectiveName.replace("-","");
+            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
+        }
     }
 
     public getAbsoluteFormStyle() {
@@ -260,13 +272,9 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     datachange(component: string, property: string, value) {
-        const model = (!component.includes('formcomponent')) ? this.formCache.getComponent(component).model : this.formCache.getFormComponent(component).model;
+        const model = this.formCache.getComponent(component).model
         const oldValue = model[property];
-        if (!component.includes('formcomponent')) {
-            this.formCache.getComponent(component).model[property] = value;
-        } else {
-            this.formCache.getFormComponent(component).model[property] = value;
-        }
+        this.formCache.getComponent(component).model[property] = value;
         this.formservice.sendChanges(this.name, component, property, value, oldValue);
     }
 

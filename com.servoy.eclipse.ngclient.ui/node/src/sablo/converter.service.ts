@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory } from './logger.service';
+import { instanceOfChangeAwareValue } from './spectypes.service';
 
 
 class SwingModifiers {
@@ -40,8 +41,8 @@ export class ConverterService {
   private log: LoggerService;
 
   public static isChanged(now, prev, conversionInfo) {
-    if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && now && now[ConverterService.INTERNAL_IMPL] && now[ConverterService.INTERNAL_IMPL].isChanged) {
-      return now[ConverterService.INTERNAL_IMPL].isChanged();
+    if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && instanceOfChangeAwareValue(now)) {
+      return now.getStateHolder().hasChanges();
     }
 
     if (now === prev) return false;
@@ -145,21 +146,6 @@ export class ConverterService {
     return value;
   }
 
-  public prepareInternalState(propertyValue, internalStateValue) {
-    if (!propertyValue.hasOwnProperty(ConverterService.INTERNAL_IMPL)) {
-      if (Object.defineProperty) {
-        // try to avoid unwanted iteration/non-intended interference over the private property state
-        Object.defineProperty(propertyValue, ConverterService.INTERNAL_IMPL, {
-          configurable: false,
-          enumerable: false,
-          writable: false,
-          value: internalStateValue
-        });
-      } else propertyValue[ConverterService.INTERNAL_IMPL] = internalStateValue;
-    }
-    //       else $log.warn("An attempt to prepareInternalState on value '" + propertyValue + "' which already has internal state was ignored.");
-  }
-
   /**
    * Receives variable arguments. First is the object obj and the others (for example a, b, c) are used to
    * return obj[a][b][c] making sure that if any does not exist or is null (for example b) it will be set to {}.
@@ -249,4 +235,5 @@ export interface IConverter {
   fromServerToClient(serverSentData: Object, currentClientData: Object, propertyContext: PropertyContext): Object;
   fromClientToServer(newClientData: Object, oldClientData: Object): Object;
 }
+
 
