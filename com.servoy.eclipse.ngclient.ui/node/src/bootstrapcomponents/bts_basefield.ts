@@ -6,7 +6,7 @@ import { PropertyUtils } from '../ngclient/servoy_public';
 // eslint-disable-next-line
 export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
 
-    @Input() onDataChangeMethodIDL: (e: Event) => void;
+    @Input() onDataChangeMethodID: (e: Event) => void;
     @Input() onFocusGainedMethodID: (e: Event) => void;
     @Input() onFocusLostMethodID: (e: Event) => void;
 
