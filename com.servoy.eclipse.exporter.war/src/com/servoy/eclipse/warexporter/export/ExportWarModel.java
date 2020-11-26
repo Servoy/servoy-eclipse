@@ -114,6 +114,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean exportNoneActiveSolutions;
 	private Set<String> exportedComponentPackages = new HashSet<>();
 	private Set<String> exportedServicePackages = new HashSet<>();
+	private String contextFileName;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
@@ -187,6 +188,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
 		upgradeRepository = Utils.getAsBoolean(settings.get("export.upgradeRepository"));
 
+		contextFileName = settings.get("export.tomcat.contextFileName");
 		createTomcatContextXML = Utils.getAsBoolean(settings.get("export.tomcat.createTomcatContextXML"));
 		antiResourceLocking = Utils.getAsBoolean(settings.get("export.tomcat.antiResourceLocking"));
 		clearReferencesStatic = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStatic"));
@@ -385,6 +387,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
 		settings.put("export.upgradeRepository", upgradeRepository);
+		settings.put("export.tomcat.contextFileName", contextFileName);
 		settings.put("export.tomcat.createTomcatContextXML", createTomcatContextXML);
 		settings.put("export.tomcat.antiResourceLocking", antiResourceLocking);
 		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
@@ -875,6 +878,21 @@ public class ExportWarModel extends AbstractWarExportModel
 	public boolean isAutomaticallyUpgradeRepository()
 	{
 		return upgradeRepository;
+	}
+
+	@Override
+	public String getTomcatContextXMLFileName()
+	{
+		return contextFileName;
+	}
+
+	/**
+	 * @param contextFileName the contextFileName to set
+	 */
+	public void setTomcatContextXMLFileName(String contextFileName)
+	{
+		this.contextFileName = contextFileName;
+		if (this.createTomcatContextXML) this.createTomcatContextXML = contextFileName != null;
 	}
 
 	public boolean isCreateTomcatContextXML()

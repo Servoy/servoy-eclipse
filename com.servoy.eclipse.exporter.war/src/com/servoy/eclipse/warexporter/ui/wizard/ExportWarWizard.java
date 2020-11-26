@@ -554,13 +554,14 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
 		else sb.append("sh");
 
+		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
+
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 
 		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
 		File warFile = new File(warFilePath);
 		appendToBuilder(sb, " -o ", warFile.getParentFile() != null ? warFile.getParentFile().getPath() : " . ");
 
-		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
 		appendToBuilder(sb, " -defaultAdminPassword ", exportModel.getDefaultAdminPassword());
 		appendToBuilder(sb, " -p ", exportModel.getServoyPropertiesFileName());
@@ -625,7 +626,11 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -updateSequence", exportModel.isUpdateSequences());
 		appendToBuilder(sb, " -upgradeRepository", exportModel.isAutomaticallyUpgradeRepository());
 
-		if (exportModel.isCreateTomcatContextXML())
+		if (exportModel.getTomcatContextXMLFileName() != null)
+		{
+			appendToBuilder(sb, " -contextFileName ", exportModel.getTomcatContextXMLFileName());
+		}
+		else if (exportModel.isCreateTomcatContextXML())
 		{
 			appendToBuilder(sb, " -antiResourceLocking", exportModel.isAntiResourceLocking());
 			appendToBuilder(sb, " -clearReferencesStatic", exportModel.isClearReferencesStatic());

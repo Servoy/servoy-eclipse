@@ -425,6 +425,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public String getTomcatContextXMLFileName()
+		{
+			return configuration.getTomcatContextXMLFileName();
+		}
+
+		@Override
 		public boolean isCreateTomcatContextXML()
 		{
 			return configuration.isCreateTomcatContextXML();

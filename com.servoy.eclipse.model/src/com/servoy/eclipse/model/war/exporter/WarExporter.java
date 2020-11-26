@@ -956,29 +956,55 @@ public class WarExporter
 		}
 	}
 
-	protected void createTomcatContextXML(File tmpWarDir)
+	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
 	{
-		if (!exportModel.isCreateTomcatContextXML()) return;
-		try
+		String fileName = exportModel.getTomcatContextXMLFileName();
+		if (fileName != null)
 		{
-			File metaDir = new File(tmpWarDir, "META-INF");
-			metaDir.mkdir();
-			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
-			contextFile.createNewFile();
-			try (FileWriter writer = new FileWriter(contextFile))
+			File source = new File(fileName);
+			if (source.exists())
 			{
-				String fileContent = "<Context ";
-				if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
-				if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
-				if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
-				if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
-				fileContent += "></Context>";
-				writer.write(fileContent);
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				try
+				{
+					FileUtils.copyFile(source, contextFile);
+				}
+				catch (IOException e)
+				{
+					throw new ExportException("Can't copy tomcat context file: " + fileName, e);
+				}
+			}
+			else
+			{
+				throw new ExportException("Given tomcat context file does not exists: " + fileName);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			ServoyLog.logError(e);
+			if (!exportModel.isCreateTomcatContextXML()) return;
+			try
+			{
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				contextFile.createNewFile();
+				try (FileWriter writer = new FileWriter(contextFile))
+				{
+					String fileContent = "<Context ";
+					if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
+					if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
+					if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
+					if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
+					fileContent += "></Context>";
+					writer.write(fileContent);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 
