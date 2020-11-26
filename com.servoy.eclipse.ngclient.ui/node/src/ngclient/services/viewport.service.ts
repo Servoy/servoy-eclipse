@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloUtils } from '../../sablo/websocket.service';
-import { ColumnRef, ChangeType, ChangeAwareState } from '../../sablo/spectypes.service';
+import { ColumnRef, ChangeType, ChangeAwareState, isChanged } from '../../sablo/spectypes.service';
 import { Foundset } from '../converters/foundset_converter';
 
 
@@ -158,7 +158,7 @@ export class ViewportService {
     if (newValue !== oldValue) {
       /* this doesn't seem to work correctly for 2 identical Date objects in Chrome when debugging; but it should */
       if (typeof newValue === 'object') {
-        return ConverterService.isChanged(newValue, oldValue, conversionInfo ? (columnName ? conversionInfo[columnName] : conversionInfo) : undefined);
+        return isChanged(newValue, oldValue, conversionInfo ? (columnName ? conversionInfo[columnName] : conversionInfo) : undefined);
       }
       return true;
     }

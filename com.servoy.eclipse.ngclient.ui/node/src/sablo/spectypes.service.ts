@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 
-import { ConverterService } from './converter.service';
-
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -61,6 +59,49 @@ export class SpecTypesService {
         return guess;
     }
 }
+
+ export function isChanged(now, prev, conversionInfo) {
+    if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && instanceOfChangeAwareValue(now)) {
+      return now.getStateHolder().hasChanges();
+    }
+
+    if (now === prev) return false;
+    if (now && prev) {
+      if (now instanceof Array) {
+        if (prev instanceof Array) {
+          if (now.length !== prev.length) return true;
+        } else {
+          return true;
+        }
+      }
+      if (now instanceof Date) {
+        if (prev instanceof Date) {
+          return now.getTime() !== prev.getTime();
+        }
+        return true;
+      }
+
+      if ((now instanceof Object) && (prev instanceof Object)) {
+        // first build up a list of all the properties both have.
+        const fulllist = this.getCombinedPropertyNames(now, prev);
+        for (const prop in fulllist) {
+          // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
+          if (prev[prop] !== now[prop]) {
+            if (prop === '$$hashKey') continue;
+            if (typeof now[prop] === 'object') {
+              if (isChanged(now[prop], prev[prop], conversionInfo ? conversionInfo[prop] : undefined)) {
+                return true;
+              }
+            } else {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+    return true;
+  }
 
 export function instanceOfChangeAwareValue( obj: any ): obj is IChangeAwareValue {
     return obj != null && ( <IChangeAwareValue>obj ).getStateHolder instanceof Function;
@@ -474,7 +515,7 @@ export class BaseCustomObjectState extends ChangeAwareState {
             if ( instanceOfChangeAwareValue( newObject ) ) {
                 return newObject.getStateHolder().hasChanges();
             } else {
-                return ConverterService.isChanged( newObject, oldObject, this.conversionInfo[propertyName] );
+                return isChanged( newObject, oldObject, this.conversionInfo[propertyName] );
             }
         }
         return false;

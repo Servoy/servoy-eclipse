@@ -2,7 +2,7 @@ import { IConverter, PropertyContext, ConverterService } from '../../sablo/conve
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ViewportService } from '../services/viewport.service';
 import { FoundsetChangeEvent, FoundsetConverter } from './foundset_converter';
-import { ViewportRowUpdates, IComponentType, IChangeAwareValue, ChangeAwareState, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
+import { ViewportRowUpdates, IComponentType, IChangeAwareValue, ChangeAwareState, instanceOfChangeAwareValue, isChanged } from '../../sablo/spectypes.service';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
 import { Deferred } from '../../sablo/util/deferred';
 
@@ -360,7 +360,7 @@ export class ComponentConverter implements IConverter {
 			for (prop in fulllist) {
 				var changed;
 				if (prev && now) {
-					changed = ConverterService.isChanged(now[prop], prev[prop], beanConversionInfo ? beanConversionInfo[prop] : undefined);
+					changed = isChanged(now[prop], prev[prop], beanConversionInfo ? beanConversionInfo[prop] : undefined);
 				} else {
 					changed = true; // true if just one of them is undefined; both cannot be undefined at this point if we are already iterating on combined property names
 				}
