@@ -1,4 +1,3 @@
-
 import { ServoyBaseComponent } from '../ngclient/servoy_public';
 import { Directive, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
@@ -27,6 +26,8 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     svyOnInit() {
         super.svyOnInit();
         this.attachHandlers();
+        var x = "test"; 
+        console.log(x);
     }
 
     svyOnChanges(changes: SimpleChanges) {
