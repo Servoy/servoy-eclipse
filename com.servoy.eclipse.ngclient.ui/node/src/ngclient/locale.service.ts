@@ -14,6 +14,8 @@ export class LocaleService {
     private locale = 'en';
     private loadedLocale: Deferred<any>;
 
+    private readonly localeMap = { "en": "en-US" };
+
     constructor(private sabloService: SabloService,
         private i18nProvider: I18NProvider,
         private sessionStorageService: SessionStorageService) {
@@ -27,7 +29,7 @@ export class LocaleService {
         return this.locale;
     }
 
-    public setLocale(language, country, initializing?) {
+    public setLocale(language: string, country: string, initializing?: boolean) {
         // TODO angular $translate and our i18n service
         //            $translate.refresh();
         this.loadedLocale = new Deferred<any>();
@@ -39,35 +41,51 @@ export class LocaleService {
                 this.sessionStorageService.set('locale', language + '-' + country);
             }
             this.locale = localeId;
-            Promise.all([this.setMomentLocale(localeId), this.setNumbroLocale(localeId)]).then( () =>
+            const full = language + (country ? "-" + country.toUpperCase() : "");
+            // numbro wants with upper case counter but moment is all lower case
+            Promise.all([this.setMomentLocale(full.toLowerCase(), true), this.setNumbroLocale(full, true)]).then(() =>
                 this.loadedLocale.resolve(localeId)
-                ).catch( () => this.loadedLocale.resolve(localeId));
+            ).catch(() => this.loadedLocale.resolve(localeId));
         }, () => {
             this.loadedLocale.reject('Could not set Locale because angular locale could not be loaded.');
         });
     }
 
-    private setMomentLocale(localeId: string): Promise<void> {
+    private makeFullLocale(localeId: string): string {
+        let locale = this.localeMap[localeId];
+        if (!locale) locale = localeId + '-' + localeId.toUpperCase();
+        return locale;
+    }
+
+    private setMomentLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
+        if (moment.locale() == localeId) return Promise.resolve();
         return import(`../../node_modules/moment/src/locale/${localeId}`).then(
             module => {
                 if (moment.locale() !== localeId)
                     moment.defineLocale(localeId, module);
             }).catch(e => {
-                if (localeId.indexOf('-') === -1) {
-                    return this.setMomentLocale(localeId + '-' + localeId.toUpperCase());
+                const index = localeId.indexOf('-');
+                if (index === -1) {
+                    return this.setMomentLocale(this.makeFullLocale(localeId), false);
+                } else if (tryOnlyLanguage) {
+                    return this.setMomentLocale(localeId.substring(0, index), false);
                 } else {
                     console.log('moment locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
                 }
             });
     }
 
-    private setNumbroLocale(localeId: string): Promise<void> {
+    private setNumbroLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
+        if (numbro.language() == localeId) return Promise.resolve();
         return import(`numbro/languages/${localeId}`).then(module => {
             numbro.registerLanguage(module.default);
             numbro.setLanguage(localeId);
         }).catch(e => {
-            if (localeId.indexOf('-') === -1) {
-                return this.setNumbroLocale(localeId + '-' + localeId.toUpperCase());
+            const index = localeId.indexOf('-');
+            if (index === -1) {
+                return this.setNumbroLocale(this.makeFullLocale(localeId), false);
+            } else if (tryOnlyLanguage) {
+                return this.setNumbroLocale(localeId.substring(0, index), false);
             } else {
                 console.log('numbro locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
             }
