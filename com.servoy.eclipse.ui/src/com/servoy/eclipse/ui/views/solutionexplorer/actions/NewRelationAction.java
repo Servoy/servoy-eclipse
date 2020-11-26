@@ -18,9 +18,11 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.base.query.IJoinConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -28,6 +30,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.dialogs.ModuleListSelectionDialog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -78,21 +81,35 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 	@Override
 	public void run()
 	{
+
+		final Shell shell = viewer.getSite().getShell();
+
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		String solutionName = null;
-		if (node.getRealObject() instanceof IPersist)
+
+		ModuleListSelectionDialog moduleSelDialog = new ModuleListSelectionDialog(shell, "Please select a module for the relation");
+
+		final int resultCode = moduleSelDialog.open();
+		if (resultCode == IDialogConstants.OK_ID)
 		{
-			solutionName = ((Solution)((IPersist)node.getRealObject()).getRootObject()).getName();
-		}
-		else
-		{
-			SimpleUserNode solutionNode = node.getAncestorOfType(ServoyProject.class);
-			if (solutionNode != null)
-			{
-				solutionName = ((ServoyProject)solutionNode.getRealObject()).getSolution().getName();
-			}
+			solutionName = moduleSelDialog.getFirstResult().toString();
 		}
 
+		if (solutionName == null)
+		{
+			if (node.getRealObject() instanceof IPersist)
+			{
+				solutionName = ((Solution)((IPersist)node.getRealObject()).getRootObject()).getName();
+			}
+			else
+			{
+				SimpleUserNode solutionNode = node.getAncestorOfType(ServoyProject.class);
+				if (solutionNode != null)
+				{
+					solutionName = ((ServoyProject)solutionNode.getRealObject()).getSolution().getName();
+				}
+			}
+		}
 		if (solutionName != null)
 		{
 			createRelation(solutionName, "untitled", node);

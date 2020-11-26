@@ -78,6 +78,8 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	boolean isAutomaticallyUpgradeRepository();
 
+	String getTomcatContextXMLFileName();
+
 	boolean isCreateTomcatContextXML();
 
 	boolean isAntiResourceLocking();

@@ -82,6 +82,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -421,7 +422,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				ghost = true;
 			}
 			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
-				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
+				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>());
 		}
 		else
 		{
@@ -729,7 +730,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
-		FlattenedSolution fs)
+		FlattenedSolution fs, HashSet<String> forms)
 	{
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
@@ -742,14 +743,20 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					Object propertyValue = formElement.getPropertyValue(pd.getName());
 					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 					if (frm == null) continue;
+					if (!forms.add(frm.getName()))
+					{
+						Debug.error("recursive reference found between (List)FormComponents: " + forms);
+						continue;
+					}
 					updatedFormComponentsDesignId.add(
 						formElement.getName(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName()));
 					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, (JSONObject)propertyValue, frm, fs);
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs);
+						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms);
 					}
+					forms.remove(frm.getName());
 				}
 			}
 		}

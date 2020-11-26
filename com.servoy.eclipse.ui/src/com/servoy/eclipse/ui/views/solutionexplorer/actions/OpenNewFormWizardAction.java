@@ -20,12 +20,14 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IWorkbenchWizard;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
+import com.servoy.j2db.persistence.Form;
 
 /**
  * Action for opening the new form wizard. It is only enabled on the active solution node if there is an active solution.
@@ -34,10 +36,18 @@ import com.servoy.eclipse.ui.wizards.NewFormWizard;
  */
 public class OpenNewFormWizardAction extends OpenWizardAction implements ISelectionChangedListener
 {
+	private Form newForm;
+	private boolean openDesigner = true;
 
 	public OpenNewFormWizardAction()
 	{
 		super(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("new_form_wizard.png"), "Create new form");
+	}
+
+	public OpenNewFormWizardAction(boolean openDesigner)
+	{
+		this();
+		this.openDesigner = openDesigner;
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -62,5 +72,27 @@ public class OpenNewFormWizardAction extends OpenWizardAction implements ISelect
 			return false;
 		}
 		else return super.isEnabled();
+	}
+
+	@Override
+	public void handleWizardReturnValue(IWorkbenchWizard wizard)
+	{
+		super.handleWizardReturnValue(wizard);
+		newForm = ((NewFormWizard)wizard).getForm();
+	}
+
+	@Override
+	public void initWizard(IWorkbenchWizard wizard)
+	{
+		super.initWizard(wizard);
+		((NewFormWizard)wizard).setOpenDesigner(openDesigner);
+	}
+
+	/**
+	 * @return the newForm
+	 */
+	public Form getNewForm()
+	{
+		return newForm;
 	}
 }

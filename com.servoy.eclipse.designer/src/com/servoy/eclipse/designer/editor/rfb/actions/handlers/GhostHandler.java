@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -372,7 +373,7 @@ public class GhostHandler implements IServerService
 
 			private void writeGhostForPersist(IPersist o)
 			{
-				writeGhostForPersist(o, null, null);
+				writeGhostForPersist(o, null, null, new HashSet<String>());
 			}
 
 			private boolean isInShowedContainer(IPersist o)
@@ -390,7 +391,8 @@ public class GhostHandler implements IServerService
 				return parent != null;
 			}
 
-			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath)
+			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath,
+				HashSet<String> recursiveCheck)
 			{
 				if (o instanceof TabPanel && isInShowedContainer(o))
 				{
@@ -546,6 +548,11 @@ public class GhostHandler implements IServerService
 								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 								if (frm == null) continue;
+								if (!recursiveCheck.add(frm.getName()))
+								{
+									Debug.error("recursive reference found between (List)FormComponents: " + recursiveCheck);
+									continue;
+								}
 								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
 									fs);
 								ArrayList<IBasicWebComponent> newParentFormComponentPath;
@@ -563,9 +570,10 @@ public class GhostHandler implements IServerService
 									IPersist p = element.getPersistIfAvailable();
 									if (p instanceof IFormElement)
 									{
-										writeGhostForPersist(p, ((IFormElement)p).getName(), newParentFormComponentPath);
+										writeGhostForPersist(p, ((IFormElement)p).getName(), newParentFormComponentPath, recursiveCheck);
 									}
 								}
+								recursiveCheck.remove(frm.getName());
 							}
 						}
 					}

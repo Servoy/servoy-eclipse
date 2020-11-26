@@ -58,6 +58,7 @@ public class NgDesktopClientConnection implements Closeable
 	public final static int NOT_FOUND = 9;
 	public final static int ALREADY_STARTED = 10;
 	public final static int OK = 11; // no error
+	public final static int ACCESS_DENIED = 12; //authorization failed
 	// END sync
 
 	public NgDesktopClientConnection() throws MalformedURLException
@@ -105,7 +106,7 @@ public class NgDesktopClientConnection implements Closeable
 	 * @return tokenId - string id to be used in future queries
 	 * @throws IOException
 	 */
-	public String startBuild(String platform, IDialogSettings settings) throws IOException
+	public JSONObject startBuild(String platform, IDialogSettings settings) throws IOException
 	{
 
 		JSONObject jsonObj = new JSONObject();
@@ -129,6 +130,8 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("includeUpdate", settings.get("include_update"));
 		if (settings.get("update_url") != null && settings.get("update_url").trim().length() > 0)
 			jsonObj.put("updateUrl", settings.get("update_url"));
+		if (settings.get("login_token") != null)
+			jsonObj.put("loginToken", settings.get("login_token"));
 
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
@@ -137,10 +140,12 @@ public class NgDesktopClientConnection implements Closeable
 		postRequest.setEntity(input);
 		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 		jsonObj = processRequest(postRequest);
+
 		buildRefSize = jsonObj.optInt("buildRefSize", 0);
 		buildRefDuration = jsonObj.optInt("buildRefDuration", 0);
 
-		return jsonObj.getString("tokenId");
+		//return jsonObj.getString("tokenId");
+		return jsonObj;
 	}
 
 	/**

@@ -449,8 +449,15 @@
 										],
 										"additionalProperties": false
 									}
+								},
+								"private": {
+											"type": "boolean"
+								},
+								"ignoreNGBlockDuplicateEvents": {
+											"type": "boolean"
 								}
-							}
+							},
+							"additionalProperties": false
 						}
 					]
 				}
