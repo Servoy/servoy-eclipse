@@ -26,8 +26,6 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     svyOnInit() {
         super.svyOnInit();
         this.attachHandlers();
-        var x = "test"; 
-        console.log(x);
     }
 
     svyOnChanges(changes: SimpleChanges) {
