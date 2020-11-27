@@ -429,6 +429,12 @@ export class FormService {
                     }
                     if (elem.model[ConverterService.TYPES_KEY] != null) {
                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => elem.model ? elem.model[property] : elem.model);
+                        for (const prop in elem.model) {
+                            const value = elem.model[prop];
+                            if (instanceOfChangeAwareValue(value)) {
+                                value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, elem.name, prop, value));
+                            }
+                        }
                         formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                     }
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
