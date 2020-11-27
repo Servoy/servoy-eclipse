@@ -757,7 +757,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			dataSourceViewer.setContentProvider(new TableContentProvider());
 			dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
+			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
 			dataSourceViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
@@ -786,13 +786,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				protected Object determineValue(String contents)
 				{
 					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
-					Form form = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
-					if (form != null)
+					Form frm = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
+					if (frm != null)
 					{
-						if (servoyProject.getEditingSolution().getAllObjectsAsList().contains(form))
-						{
-							return new Integer(form.getID());
-						}
+						return new Integer(frm.getID());
 					}
 					return null;
 				}

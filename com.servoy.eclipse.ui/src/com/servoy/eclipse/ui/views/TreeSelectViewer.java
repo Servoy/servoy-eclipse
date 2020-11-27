@@ -437,13 +437,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		if (contentProposal != null)
 		{
 			String contents = text.getText();
-			Object value = determineValue(contents);
-			setValid(value != null && getSelectionFilter().select(value));
-			if (value != null)
-			{
-				setSelection(new StructuredSelection(value));
-			}
-			else if (contents.trim().length() == 0)
+			if (contents.trim().length() == 0)
 			{
 				// user made field empty, show proposals
 				contentProposal.openProposalPopup();
@@ -573,6 +567,21 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 				};
 				text.addModifyListener(textModifyListener);
 				createContentProposalAdapter();
+
+				text.addFocusListener(new FocusAdapter()
+				{
+					@Override
+					public void focusLost(FocusEvent e)
+					{
+						String contents = text.getText();
+						Object value = determineValue(contents);
+						setValid(value != null && getSelectionFilter().select(value));
+						if (value != null)
+						{
+							setSelection(new StructuredSelection(value));
+						}
+					}
+				});
 			}
 		}
 	}
