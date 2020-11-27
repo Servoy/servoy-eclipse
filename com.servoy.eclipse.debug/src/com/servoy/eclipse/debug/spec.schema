@@ -455,6 +455,12 @@
 								},
 								"ignoreNGBlockDuplicateEvents": {
 											"type": "boolean"
+								},
+								"doc": {
+											"type": "string"
+								},
+								"code": {
+											"type": "string"
 								}
 							},
 							"additionalProperties": false
