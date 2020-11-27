@@ -178,6 +178,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
@@ -935,6 +936,21 @@ public class TypeCreator extends TypeCache
 				{
 					((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
 				}
+				serverManager.addServerListener(new IServerListener()
+				{
+
+					@Override
+					public void serverRemoved(IServerInternal s)
+					{
+						s.removeTableListener(tableListener);
+					}
+
+					@Override
+					public void serverAdded(IServerInternal s)
+					{
+						s.addTableListener(tableListener);
+					}
+				});
 			}
 		}
 
