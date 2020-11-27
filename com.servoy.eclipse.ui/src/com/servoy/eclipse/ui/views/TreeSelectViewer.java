@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -574,11 +575,14 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 					public void focusLost(FocusEvent e)
 					{
 						String contents = text.getText();
-						Object value = determineValue(contents);
-						setValid(value != null && getSelectionFilter().select(value));
-						if (value != null)
+						if (!Strings.isEmpty(contents))
 						{
-							setSelection(new StructuredSelection(value));
+							Object value = determineValue(contents);
+							setValid(value != null && getSelectionFilter().select(value));
+							if (value != null)
+							{
+								setSelection(new StructuredSelection(value));
+							}
 						}
 					}
 				});
