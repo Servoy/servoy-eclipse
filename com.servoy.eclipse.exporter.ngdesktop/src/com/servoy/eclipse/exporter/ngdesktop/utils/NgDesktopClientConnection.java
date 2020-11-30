@@ -48,17 +48,21 @@ public class NgDesktopClientConnection implements Closeable
 
 	// START sync - this block need to be identical with the similar error codes
 	// from the NgDesktopMonitor in ngdesktop-service project
+	public final static int RUNNING = 0;
+	public final static int NOT_RUNNING = 1;
 	public final static int REQUESTS_FULL = 2;
 	public final static int BUILDS_FULL = 3;
 	public final static int PROCESSING = 4; // installer is currently created
 	public final static int ERROR = 5; // creating installer process has run into an error
+	public final static int WARNING = 12;
 	public final static int READY = 6; // installer is ready for download
 	public final static int WAITING = 7; // waiting in the requests queue
 	public final static int CANCELED = 8; // the build has been cancelled
 	public final static int NOT_FOUND = 9;
 	public final static int ALREADY_STARTED = 10;
 	public final static int OK = 11; // no error
-	public final static int ACCESS_DENIED = 12; //authorization failed
+	public final static int ACCESS_DENIED = 13; //authorization failed
+	public final static int DOWNLOAD_ARCHIVE = 14; //Build not supported. Download binary instead.
 	// END sync
 
 	public NgDesktopClientConnection() throws MalformedURLException
@@ -106,12 +110,12 @@ public class NgDesktopClientConnection implements Closeable
 	 * @return tokenId - string id to be used in future queries
 	 * @throws IOException
 	 */
-	public JSONObject startBuild(String platform, IDialogSettings settings) throws IOException
+	public JSONObject startBuild(IDialogSettings settings) throws IOException
 	{
 
 		JSONObject jsonObj = new JSONObject();
-		if (platform != null)
-			jsonObj.put("platform", platform);
+		if (settings.get("platform") != null && settings.get("platform").trim().length() > 0)
+			jsonObj.put("platform", settings.get("platform"));
 		if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0)
 			jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
 		if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
@@ -155,12 +159,12 @@ public class NgDesktopClientConnection implements Closeable
 	 *         errors; ready - build is ready to download
 	 * @throws IOException
 	 */
-	public int getStatus(String tokenId) throws IOException
+	public JSONObject getStatus(String tokenId) throws IOException
 	{
 		final JSONObject jsonObj = processRequest(new HttpGet(service_url + STATUS_ENDPOINT + tokenId));
 		buildCurrentSize = jsonObj.optInt("buildCurrentSize", 0);
 		statusMessage = jsonObj.getString("statusMessage");
-		return jsonObj.getInt("statusCode");
+		return jsonObj;
 	}
 
 	public String getStatusMessage()
