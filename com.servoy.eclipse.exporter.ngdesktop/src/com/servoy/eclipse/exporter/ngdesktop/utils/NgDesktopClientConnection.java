@@ -179,17 +179,17 @@ public class NgDesktopClientConnection implements Closeable
 		downloadSize = jsonObj.optInt("binarySize", 0); // size in MB; value contain also update size if requested
 
 		monitor.beginTask("Download...", downloadSize);
-		int downloadedBytes = downloadFile(binaryName, tokenId, savePath, monitor, false);
+		int downloadedMBytes = downloadFile(binaryName, tokenId, savePath, monitor, false);
 		if (updateName != null)
 		{
-			downloadedBytes += downloadFile(updateName, tokenId, savePath, monitor, true);
-			downloadedBytes += downloadFile(yamlName, tokenId, savePath, monitor, true);
-			downloadedBytes += downloadFile(readmeName, tokenId, savePath, monitor, true);
+			downloadedMBytes += downloadFile(updateName, tokenId, savePath, monitor, true);
+			downloadedMBytes += downloadFile(yamlName, tokenId, savePath, monitor, true);
+			downloadedMBytes += downloadFile(readmeName, tokenId, savePath, monitor, true);
 		}
 		monitor.fillRemainingSteps();
 		monitor.done();
-		ServoyLog.logInfo("Downloaded (Mb): " + downloadedBytes);
-		return downloadedBytes;
+		ServoyLog.logInfo("Downloaded (Mb): " + downloadedMBytes);
+		return downloadedMBytes;
 	}
 
 	private int downloadFile(String fileName,
@@ -214,9 +214,7 @@ public class NgDesktopClientConnection implements Closeable
 		{
 
 			final byte[] inputFile = new byte[BUFFER_SIZE];
-
 			int readBytes = is.read(inputFile, 0, BUFFER_SIZE);
-			bytesCountForMonitor += readBytes;
 			while (readBytes != -1)
 			{
 				if (monitor.isCanceled())
@@ -230,14 +228,16 @@ public class NgDesktopClientConnection implements Closeable
 				{
 					fos.write(inputFile, 0, readBytes);
 					totalBytesRead += readBytes;
+					bytesCountForMonitor += readBytes;
 				}
 				readBytes = is.read(inputFile, 0, BUFFER_SIZE);
-				bytesCountForMonitor += readBytes;
 
-				final int bytesToMegaBytes = Math.round((float)bytesCountForMonitor / (1024 * 1024));// bytes => MB
-				if (bytesToMegaBytes > 0)
+				final float countMB = (float)bytesCountForMonitor / (1024 * 1024);// bytes => MB;
+				final float fractionalMB = countMB % 1;
+				final int decimalMB = Math.round(countMB - fractionalMB);
+				if (decimalMB > 0)
 				{
-					monitor.worked(bytesToMegaBytes);
+					monitor.worked(decimalMB);
 					bytesCountForMonitor = 0;
 				}
 			}
