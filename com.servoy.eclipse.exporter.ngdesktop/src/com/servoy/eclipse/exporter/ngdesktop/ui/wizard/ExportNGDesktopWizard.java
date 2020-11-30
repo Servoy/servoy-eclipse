@@ -32,7 +32,6 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.handlers.StartNGDesktopClientHandler;
 import com.servoy.eclipse.exporter.ngdesktop.Activator;
 import com.servoy.eclipse.exporter.ngdesktop.utils.NgDesktopClientConnection;
 import com.servoy.eclipse.exporter.ngdesktop.utils.NgDesktopServiceMonitor;
@@ -107,14 +106,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			exportPage.getSelectedPlatforms().forEach((platform) -> {
 				exportSettings.put("platform", platform);
 				final int retCode = processPlatform(exportSettings, serviceMonitor, errorMsg, cancel.get());
-				while (retCode == NgDesktopClientConnection.ACCESS_DENIED)
+				if (retCode == NgDesktopClientConnection.ACCESS_DENIED)
 				{
-					ServoyLoginDialog.clearSavedInfo(); //else we would get again the wrong login
-					loginToken[0] = logIn();
-					if (loginToken[0] == null)
-						return;
-					exportSettings.put("login_token", loginToken[0]);
-
+					ServoyLoginDialog.clearSavedInfo(); //force a new login on the next attempt
+					errorMsg.append("Access denied");
 				}
 				if (retCode == PROCESS_CANCELLED) cancel.set(true);
 			});
@@ -152,33 +147,65 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		int retCode = PROCESS_FINISHED;
 		if (processAlreadyCancelled) return PROCESS_CANCELLED;
-		final String platform = settings.get("platform");
-		if (platform.equals(ExportPage.MACOS_PLATFORM) || platform.equals(ExportPage.LINUX_PLATFORM))
+		try (NgDesktopClientConnection serviceConn = new NgDesktopClientConnection())
 		{
 			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
 			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			final String archiveName = StartNGDesktopClientHandler.NGDESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform +
-				".tar.gz";
-			final File archiveFile = new File(saveDir + archiveName);
-			downloadArchive(archiveFile, monitor, errorMsg);
+			final JSONObject response = serviceConn.startBuild(settings);
+			int status = response.getInt("statusCode");
+			if (status == NgDesktopClientConnection.ACCESS_DENIED)
+				return status;
+			final String tokenId = response.getString("tokenId");
+			status = NgDesktopClientConnection.OK;
+			monitor.startChase("Waiting...", serviceConn.getNgDesktopBuildRefSize(), serviceConn.getNgDesktopBuildRefDuration());
+			while (!monitor.isCanceled())
+			{
+				Thread.sleep(POLLING_INTERVAL);
+				status = getStatus(serviceConn, monitor, tokenId, errorMsg);
+				if (status == NgDesktopClientConnection.ERROR ||
+					status == NgDesktopClientConnection.NOT_FOUND ||
+					status == NgDesktopClientConnection.READY ||
+					status == NgDesktopClientConnection.DOWNLOAD_ARCHIVE)
+					break;
+			}
+			if (monitor.isCanceled())
+			{
+				serviceConn.cancel(tokenId);
+				monitor.endChase();
+				retCode = PROCESS_CANCELLED;
+			}
+			else
+			{
+				switch (status)
+				{
+					case NgDesktopClientConnection.READY :
+						serviceConn.download(tokenId, saveDir, monitor);
+						break;
+					case NgDesktopClientConnection.DOWNLOAD_ARCHIVE :
+						final String archiveUrl = getDownloadUrl(serviceConn, tokenId, errorMsg);
+						downloadArchive(saveDir, archiveUrl, monitor, errorMsg);
+						break;
+				}
+				serviceConn.delete(tokenId);
+				monitor.done();
+			}
 		}
-		else
-			retCode = processWindowsPlatform(monitor, settings, errorMsg);
-		if (monitor.isCanceled())
+		catch (IOException | InterruptedException e)
 		{
-			monitor.done();
-			retCode = PROCESS_CANCELLED;
+			errorMsg.append(e.getMessage());
 		}
 		return retCode;
 	}
 
-	private void downloadArchive(File archiveFile, IProgressMonitor monitor, StringBuilder errorMsg)
+	private void downloadArchive(String saveDir, String archiveUrl, IProgressMonitor monitor, StringBuilder errorMsg)
 	{
+		final int index = archiveUrl.lastIndexOf("/");
+		final File archiveFile = new File(saveDir + archiveUrl.substring(index + 1));
 		archiveFile.getParentFile().mkdirs();
 		try
 		{
 			if (archiveFile.exists()) archiveFile.delete();
-			final URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveFile.getName());
+			final URL fileUrl = new URL(archiveUrl);
 			monitor.beginTask("Exporting " + archiveFile.getName() + "...", getRemoteSize(fileUrl));
 			createTar(fileUrl.openStream(), archiveFile, this.getDialogSettings(), monitor);
 			if (monitor.isCanceled()) archiveFile.delete();
@@ -190,51 +217,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 	}
 
-	private int processWindowsPlatform(NgDesktopServiceMonitor monitor, IDialogSettings settings, StringBuilder errorMsg)
-	{
-		int retCode = PROCESS_FINISHED;
-		try (NgDesktopClientConnection serviceConn = new NgDesktopClientConnection())
-		{
-			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
-			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			final JSONObject response = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
-			int status = response.getInt("statusCode");
-			if (status == NgDesktopClientConnection.ACCESS_DENIED) 
-				return status;
-			final String tokenId = response.getString("tokenId");
-			status = NgDesktopClientConnection.OK;
-			monitor.startChase("Waiting...", serviceConn.getNgDesktopBuildRefSize(), serviceConn.getNgDesktopBuildRefDuration());
-			while (!monitor.isCanceled())
-			{
-				Thread.sleep(POLLING_INTERVAL);
-				status = getStatus(serviceConn, monitor, tokenId, errorMsg);
-				if (status == NgDesktopClientConnection.ERROR || status == NgDesktopClientConnection.NOT_FOUND || status == NgDesktopClientConnection.READY)
-					break;
-			}
-			if (monitor.isCanceled())
-			{
-				serviceConn.cancel(tokenId);
-				monitor.endChase();
-				retCode = PROCESS_CANCELLED;
-			}
-			if (!monitor.isCanceled() && NgDesktopClientConnection.READY == status)
-			{
-				serviceConn.download(tokenId, saveDir, monitor);
-				serviceConn.delete(tokenId);
-				monitor.done();
-			}
-		}
-		catch (IOException | InterruptedException e)
-		{
-			errorMsg.append(e.getMessage());
-		}
-		return retCode;
-
-	}
-
 	private int getStatus(NgDesktopClientConnection conn, NgDesktopServiceMonitor monitor, String tokenId, StringBuilder errorMsg) throws IOException
 	{
-		final int status = conn.getStatus(tokenId);
+		final JSONObject response = conn.getStatus(tokenId);
+		final int status = response.getInt("statusCode");
 		switch (status)
 		{
 			case NgDesktopClientConnection.WAITING :
@@ -252,6 +238,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				errorMsg.append("Build does not exist: " + tokenId);
 				break;
 			case NgDesktopClientConnection.READY :
+			case NgDesktopClientConnection.DOWNLOAD_ARCHIVE :
 				monitor.endChase();
 				monitor.done();
 				break;
@@ -259,6 +246,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				return -1;// unknown status
 		}
 		return status;
+	}
+
+	private String getDownloadUrl(NgDesktopClientConnection conn, String tokenId, StringBuilder errorMsg) throws IOException
+	{
+		final JSONObject response = conn.getStatus(tokenId);
+		final int status = response.getInt("statusCode");
+		if (status == NgDesktopClientConnection.DOWNLOAD_ARCHIVE) return response.optString("archiveUrl", null);
+		return null;
 	}
 
 	private int getRemoteSize(URL url)
