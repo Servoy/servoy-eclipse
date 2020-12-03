@@ -20,6 +20,8 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
 	@Input() tabIndex;
 	@Output() tabIndexChange = new EventEmitter();
 
+	@ViewChild('nav') nav;
+
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
 		super(renderer, cdRef, windowRefService);
 	}
