@@ -124,7 +124,7 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     }
 
     setFormVisible(tab: Tab) {
-        if (tab.containedForm) this.servoyApi.formWillShow(tab.containedForm, tab.relationName);
+        if (tab.containedForm) this.servoyApi.formWillShow(tab.containedForm, tab.relationName).finally(() => this.cdRef.markForCheck());
         const oldSelected = this.selectedTab;
         this.selectedTab = tab;
 		this.selectedTabID = tab._id;
