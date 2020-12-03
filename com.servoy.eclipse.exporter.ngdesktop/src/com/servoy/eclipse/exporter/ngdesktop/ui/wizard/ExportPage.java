@@ -302,8 +302,8 @@ public class ExportPage extends WizardPage
 		sizeGroup.setLayoutData(gd);
 
 		final Label srcVersionLabel = new Label(composite, SWT.NONE);
-		srcVersionLabel.setText("Source version:");
-		srcVersionLabel.setToolTipText("NG Desktop source version");
+		srcVersionLabel.setText("Version:");
+		srcVersionLabel.setToolTipText("NG Desktop version");
 
 		versionGroup = new Group(composite, SWT.NONE);
 		versionGroup.setLayout(new GridLayout(2, false));
