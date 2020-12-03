@@ -5,7 +5,9 @@ import { DatagridEditor } from './datagrideditor';
 @Component({
     selector: 'datagrid-texteditor',
     template: `
+    <div class="ag-input-wrapper">
       <input class="ag-cell-edit-input" [value]="initialDisplayValue" [svyDecimalKeyConverter]="format" [maxLength]="maxLength" #element>
+    </div>
     `
 })
 export class TextEditor extends DatagridEditor {
@@ -28,17 +30,12 @@ export class TextEditor extends DatagridEditor {
             if (this.format.maxLength) {
                 this.maxLength = this.format.maxLength;
             }
-            const editFormat = this.format.edit ? this.format.edit : this.format.display;
-            if(editFormat) {
-                //TODO: formatterUtils
-                //v = $formatterUtils.format(v, editFormat, this.format.type);
+            if(this.format.edit) {
+                v = this.dataGrid.formattingService.format(v, this.format, true);
             }
-
-            if (v && this.format.type == 'TEXT') {
-                if (this.format.uppercase) v = v.toUpperCase();
-                else if (this.format.lowercase) v = v.toLowerCase();
+            else if(this.format.display) {
+                v = this.dataGrid.formattingService.format(v, this.format, false);
             }
-
         }
         this.initialDisplayValue = v;
     }
@@ -100,13 +97,10 @@ export class TextEditor extends DatagridEditor {
         const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
         const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
-        //TODO: formatterUtils
-        // if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && $formatterUtils.testForNumbersOnly && this.format) {
-        //     return $formatterUtils.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format);
-        // }
-        // else return true;
-
-        return true;
+        if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && this.format) {
+            return this.dataGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
+        }
+        else return true;
     }
 
     // focus and select can be done after the gui is attached
@@ -133,8 +127,7 @@ export class TextEditor extends DatagridEditor {
         if(this.format) {
             const editFormat = this.format.edit ? this.format.edit : this.format.display;
             if(editFormat) {
-                //TODO: formatterUtils
-                //displayValue = $formatterUtils.unformat(displayValue, editFormat, this.format.type, this.initialValue);
+                displayValue = this.dataGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
             }
             if (this.format.type == 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
                 if (this.format.uppercase) displayValue = displayValue.toUpperCase();

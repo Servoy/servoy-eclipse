@@ -57,7 +57,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
 
   resultFormatter = (result: { displayValue: string; realValue: object }) => {
     if (result.displayValue === null) return '';
-    return this.formattingService.format(result.displayValue, this.format.display, this.format.type);
+    return this.formattingService.format(result.displayValue, this.format, false);
   };
 
   inputFormatter = (result: any) => {
@@ -71,7 +71,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
         result = value.displayValue;
       }
     }
-    return this.formattingService.format(result, this.format.display, this.format.type);
+    return this.formattingService.format(result, this.format, false);
   };
 
   valueChanged(value: { displayValue: string; realValue: object }) {

@@ -1,5 +1,5 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild} from '@angular/core';
-import { FormattingService } from '../../ngclient/servoy_public';
+import { Format, FormattingService } from '../../ngclient/servoy_public';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -45,13 +45,16 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
       let formatter = ( value ) => value;
       if (this.valuelistID.isRealValueDate() ) {
           const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
-          formatter = ( value ) => this.formattingService.format(value, dateFormat , 'DATETIME');
+          const format = new Format();
+          format.display = dateFormat;
+          format.type = 'DATETIME';
+          formatter = ( value ) => this.formattingService.format(value, format, false);
       }
       for (let i = 0; i < this.valuelistID.length; i++) {
           options.push({
               value: formatter(this.valuelistID[i].realValue),
               realValue: this.valuelistID[i].realValue,
-              label: this.formattingService.format(this.valuelistID[i].displayValue, this.format.display, this.format.type)
+              label: this.formattingService.format(this.valuelistID[i].displayValue, this.format, false)
           });
       }
       this.data = options;
@@ -79,8 +82,11 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
     if (changes['dataProviderID']) {
         // if the real value is a date and the
         const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
+        const format = new Format();
+        format.display = dateFormat;
+        format.type = 'DATETIME';
         this.filteredDataProviderId = this.valuelistID.isRealValueDate() ?
-            this.formattingService.format(this.dataProviderID, dateFormat , 'DATETIME') :
+            this.formattingService.format(this.dataProviderID, format, false) :
             this.dataProviderID;
     }
     super.svyOnChanges(changes);

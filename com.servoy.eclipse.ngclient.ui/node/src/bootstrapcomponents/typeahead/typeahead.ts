@@ -43,7 +43,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield  {
 
   resultFormatter = (result: {displayValue: string; realValue: object}) => {
       if (result.displayValue === null) return '';
-      return this.formatService.format(result.displayValue, this.format.display, this.format.type);
+      return this.formatService.format(result.displayValue, this.format, false);
   };
 
   inputFormatter = (result: any) => {
@@ -57,7 +57,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield  {
         result = value.displayValue;
       }
     }
-    return this.formatService.format(result, this.format.display, this.format.type);
+    return this.formatService.format(result, this.format, false);
   };
 
   valueChanged(value: {displayValue: string; realValue: object}) {

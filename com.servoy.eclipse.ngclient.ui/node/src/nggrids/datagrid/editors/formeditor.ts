@@ -42,7 +42,7 @@ export class FormEditor extends DatagridEditor implements OnDestroy {
         this.dataGrid.agGrid.api.setFocusedCell(this.params.node.rowIndex, this.params.column.getColId());
     }
 
-    isPopup?(): boolean {
+    isPopup(): boolean {
         return true;
     }
 

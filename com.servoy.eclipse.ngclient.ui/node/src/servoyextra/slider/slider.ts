@@ -1,5 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { Format, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
 import { Options, ChangeContext, LabelType } from '@angular-slider/ngx-slider';
 import { FormattingService } from '../../ngclient/servoy_public';
@@ -226,7 +226,10 @@ export class ServoyExtraSlider extends ServoyBaseComponent {
 			return this.formattingFunctionParsed(value, label);
 		}
 		if (this.numberFormat) {
-			return this.formatService.format(value, this.numberFormat, 'NUMBER');
+			const format = new Format();
+			format.display = this.numberFormat;
+			format.type = 'NUMBER';
+			return this.formatService.format(value, format, false);
 		}
 		return value.toString();
 	}

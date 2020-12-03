@@ -11,4 +11,5 @@
 @import "servoyextra/servoyextra.css";
 
 @import "~ag-grid-enterprise/dist/styles/ag-grid.css";
-@import "~ag-grid-enterprise/dist/styles/ag-theme-alpine.css";
+@import "~ag-grid-enterprise/dist/styles/ag-theme-bootstrap.css";
+@import "nggrids/ag-grid-custom.css";

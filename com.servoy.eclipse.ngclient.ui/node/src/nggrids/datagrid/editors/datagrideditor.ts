@@ -1,5 +1,5 @@
 import { Directive, ElementRef, ViewChild } from '@angular/core';
-import { ICellEditorAngularComp } from 'ag-grid-angular/public-api';
+import { ICellEditorAngularComp } from 'ag-grid-angular';
 import { ICellEditorParams } from 'ag-grid-community';
 import { DataGrid } from '../datagrid';
 
@@ -10,6 +10,11 @@ export class DatagridEditor implements ICellEditorAngularComp {
     dataGrid: DataGrid;
     params: ICellEditorParams;
     initialValue;
+    instance: any;
+
+    constructor() {
+        this.instance = this;
+    }
 
     agInit(params: ICellEditorParams): void {
         // create the cell
@@ -20,5 +25,9 @@ export class DatagridEditor implements ICellEditorAngularComp {
 
     getValue() {
         throw new Error('Method not implemented.');
+    }
+
+    getFrameworkComponentInstance(): any {
+        return this.instance;
     }
 }

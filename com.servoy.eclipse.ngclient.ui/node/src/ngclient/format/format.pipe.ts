@@ -9,6 +9,6 @@ export class FormatFilterPipe implements PipeTransform {
 
     transform( input: any, format: Format): any {
         if (!format) return input;
-        return this.formatService.format(input, format.display ? format.display : format.edit, format.type);
+        return this.formatService.format(input, format, !format.display);
     }
 }

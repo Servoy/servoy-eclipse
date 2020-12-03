@@ -52,8 +52,11 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
         if (changes['dataProviderID']) {
             // if the real value is a date and the
             const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyBootstrapCombobox.DATEFORMAT;
+            const format = new Format();
+            format.display = dateFormat;
+            format.type = 'DATETIME';
             this.filteredDataProviderId = this.valuelistID.isRealValueDate() ?
-                this.formatService.format(this.dataProviderID, dateFormat, 'DATETIME') :
+                this.formatService.format(this.dataProviderID, format, false) :
                 this.dataProviderID;
         }
         super.svyOnChanges(changes);
@@ -65,13 +68,16 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
             let formatter = (value) => value;
             if (this.valuelistID.isRealValueDate()) {
                 const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyBootstrapCombobox.DATEFORMAT;
-                formatter = (value) => this.formatService.format(value, dateFormat, 'DATETIME');
+                const format = new Format();
+                format.display = dateFormat;
+                format.type = 'DATETIME';
+                formatter = (value) => this.formatService.format(value, format, false);
             }
             for (let i = 0; i < this.valuelistID.length; i++) {
                 options.push({
                     value: formatter(this.valuelistID[i].realValue),
                     realValue: this.valuelistID[i].realValue,
-                    label: this.formatService.format(this.valuelistID[i].displayValue, this.format.display, this.format.type)
+                    label: this.formatService.format(this.valuelistID[i].displayValue, this.format, false)
                 });
             }
             this.data = options;

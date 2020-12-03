@@ -4,7 +4,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { GridOptions } from 'ag-grid-community';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ServoyApi } from '../../ngclient/servoy_public';
+import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { IFoundset } from '../../sablo/spectypes.service';
 import { Deferred } from '../../sablo/util/deferred';
@@ -59,6 +59,9 @@ export class DataGrid {
     @Input() arrowsUpDownMoveWhenEditing;
     @Input() _internalExpandedState;
     @Input() _internalFormEditorValue;
+    @Input() enableSorting;
+    @Input() enableColumnResize;
+    @Input() visible;
 
 
     @Input() servoyApi: ServoyApi;
@@ -118,7 +121,7 @@ export class DataGrid {
 
     selectionEvent;
 
-    constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef) {
+    constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         this.log = logFactory.getLogger('DataGrid');
         this.gridOptions = <GridOptions> {
             context: {
@@ -129,9 +132,94 @@ export class DataGrid {
     }
 
     ngOnInit() {
+        this.gridOptions.defaultColDef = {
+            width: 0,
+            filter: false,
+            valueGetter: this.displayValueGetter,
+            valueFormatter: this.displayValueFormatter,
+            sortable: this.enableSorting,
+            resizable: this.enableColumnResize
+        }
         this.gridOptions.columnDefs = this.getColumnDefs();
+        const _this = this;
+        this.gridOptions.onGridReady = function(){
+            _this.sizeHeaderAndColumnsToFit();
+        };
+        // TODO this makes the date editor to close instanttly, because its popup steals the focus
+        // this.gridOptions.stopEditingWhenGridLosesFocus = true;
+
+        this.gridOptions.suppressAnimationFrame = true;
+        this.gridOptions.animateRows = false;
+        this.gridOptions.singleClickEdit = false;
         // the group manager
         this.groupManager = new GroupManager(this);
+    }
+
+    displayValueGetter(params) {
+        const field = params.colDef.field;
+        if (field && params.data) {
+            let value = params.data[field];
+
+            if (value == null) {
+                value = NULL_VALUE; // need to use an object for null, else grouping won't work in ag grid
+            }
+            return value;
+        }
+
+        return undefined;				
+    }
+
+    displayValueFormatter(params): string {
+        const field = params.colDef.field;
+        if (!params.data) {
+            return undefined;
+        }
+        let value = params.data[field];
+        if (value && value.displayValue != undefined) {
+            value = value.displayValue;
+        }
+        // skip format for pinned rows (footer), they are always text
+        if(!params.node.rowPinned) {
+            const dataGrid = params.context.componentParent;
+            const column = dataGrid.getColumn(params.column.colId);
+
+            if (column && column.format ) {
+                value = dataGrid.formattingService.format(value, column.format, false);
+            }
+        }
+
+        if (value == null && params.value == NULL_VALUE) {
+            value = '';
+        }
+
+        return value;
+    }
+
+    /**`
+     * Resize header and all columns so they can fit the horizontal space
+     *  */
+    sizeHeaderAndColumnsToFit() {
+        this.agGrid.api.sizeColumnsToFit();
+        this.sizeHeader();
+    }
+
+    /**
+     * Update header height based on cells content height
+     */
+    sizeHeader() {
+        // TODO
+        // var headerCell = $element.find('.ag-header-cell');
+        // var paddingTop = headerCell.length ? parseInt(headerCell.css('padding-top'), 10) : 0;
+        // var paddinBottom = headerCell.length ? parseInt(headerCell.css('padding-bottom'), 10) : 0;
+        // var headerCellLabels = $element.find('.ag-header-cell-text');
+        const minHeight = this.gridOptions.headerHeight >= 0 ? this.gridOptions.headerHeight : 25;
+
+        // if(minHeight > 0) {
+        //     for(var i = 0; i < headerCellLabels.length; i++) {
+        //         minHeight = Math.max(minHeight, headerCellLabels[i].scrollHeight + paddingTop + paddinBottom);
+        //     }
+        // }
+        this.agGrid.api.setHeaderHeight(minHeight);
     }
 
     ngAfterViewInit() {
@@ -961,11 +1049,11 @@ export class DataGrid {
         //					}
     }
 
-    getValuelist(params, asCodeString?): any {
-        return this.getValuelistEx(params.node.data, params.column.colId, asCodeString);
+    getValuelist(params): any {
+        return this.getValuelistEx(params.node.data, params.column.colId);
     }
 
-    getValuelistEx(row, colId, asCodeString): any {
+    getValuelistEx(row, colId): any {
         let column;
         let foundsetRows;
 
@@ -1013,13 +1101,13 @@ export class DataGrid {
                     break;
                 }
 
-            if (idxInFoundsetViewport >= 0 && idxInFoundsetViewport < column.valuelist.length) return asCodeString ? '.valuelist[' + idxInFoundsetViewport + ']' : column.valuelist[idxInFoundsetViewport];
-            else if (!column.valuelist.state['recordLinked'] && column.valuelist.length > 0) return asCodeString ? '.valuelist[0]' : column.valuelist[0];
+            if (idxInFoundsetViewport >= 0 && idxInFoundsetViewport < column.valuelist.length) return column.valuelist[idxInFoundsetViewport];
+            else if (!column.valuelist.state['recordLinked'] && column.valuelist.length > 0) return column.valuelist[0];
             else {
                 this.log.error('Cannot find the valuelist entry for the row that was clicked.');
                 return null;
             }
-        } else return asCodeString ? '.valuelist' : column.valuelist;
+        } else return column.valuelist;
     }
 
     /**
@@ -1574,7 +1662,7 @@ class FoundsetDatasource {
             if (groupKeys[i] == NULL_VALUE) {
                 groupKeys[i] = null;	// reset to real null, so we use the right value for grouping
             } else {
-                const vl = this.dataGrid.getValuelistEx(params.parentNode.data, rowGroupCols[i]['id'], false);
+                const vl = this.dataGrid.getValuelistEx(params.parentNode.data, rowGroupCols[i]['id']);
                 if(vl) {
                     filterPromises.push(vl.filterList(groupKeys[i]));
                     const idx = i;

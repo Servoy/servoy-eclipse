@@ -9,8 +9,8 @@ import { ICellEditorParams } from 'ag-grid-community';
   selector: 'datagrid-datepicker',
   template: `
       <div class="input-group ag-cell-edit-input">
-        <input class="form-control" [owlDateTime]="datetime" (dateTimeChange)="dateChanged($event)" [value]="initialValue" #element>
-        <span class="input-group-text input-group-append" [owlDateTimeTrigger]="datetime"><span class="far fa-calendar-alt"></span></span>
+        <input class="form-control" style="height: 100%;" [owlDateTime]="datetime" (dateTimeChange)="dateChanged($event)" [value]="initialValue" #element>
+        <span tabindex="-1" class="input-group-text input-group-append ag-custom-component-popup" style="height: 100%;" [owlDateTimeTrigger]="datetime"><span class="far fa-calendar-alt"></span></span>
         <owl-date-time #datetime [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
       </div>
     `,
@@ -56,13 +56,13 @@ export class DatePicker extends DatagridEditor {
   }
 
   ngAfterViewInit(): void {
-    this.elementRef.nativeElement.focus();
-    this.elementRef.nativeElement.select();
+    // this.elementRef.nativeElement.focus();
+    // this.elementRef.nativeElement.select();
   }
 
   // returns the new value after editing
   getValue(): any {
-    this.selectedValue;
+    return this.selectedValue;
   }
 
   dateChanged(e): any {
