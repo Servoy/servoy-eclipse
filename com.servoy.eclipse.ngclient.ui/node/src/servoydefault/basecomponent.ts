@@ -28,7 +28,6 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
     @Input() text: string;
     @Input() toolTipText: string;
     @Input() transparent: boolean;
-    @Input() visible: boolean;
     @Input() scrollbars;
 
     timeoutID: number;

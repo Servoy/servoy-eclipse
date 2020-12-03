@@ -7,7 +7,7 @@ import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
 
-import { NgbTabset, NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component( {
@@ -15,14 +15,12 @@ import { NgbTabset, NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
     templateUrl: './tabpanel.html'
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
-    @ViewChild( 'tabset')
-    private tabset: NgbTabset;
 
     constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( windowRefService, log, renderer, cdRef );
     }
 
-    onTabChange( event: NgbTabChangeEvent ) {
+    onTabChange( event: NgbNavChangeEvent ) {
         // do prevent it by default, so that hte server side can decide of the swich can happen.
         event.preventDefault();
         for ( let i = 0; i < this.tabs.length; i++ ) {

@@ -27,7 +27,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @Input() sortStyleClass: string;
     @Input() sortdownClass = 'table-servoyextra-sort-down';
     @Input() sortupClass = 'table-servoyextra-sort-up';
-    @Input() visible: boolean;
     @Input() styleClass: string;
     @Input() servoyApi;
     @Input() minRowHeight: any;

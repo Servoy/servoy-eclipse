@@ -27,7 +27,6 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent {
     @Input() tabSeq;
     @Input() tabs: Array<Tab>;
     @Input() transparent;
-    @Input() visible;
 
     @Input() divLocation;
     @Output() divLocationChange = new EventEmitter();

@@ -15,7 +15,6 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     @Input() tabSeq: number;
     @Input() text: string;
     @Input() toolTipText: string;
-    @Input() visible: boolean;
 
     timeoutID: number;
 

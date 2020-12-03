@@ -37,7 +37,6 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
     @Input() uploadNotSupportedText;
     @Input() uploadNotSupportedFileText;
     @Input() toolTipText;
-    @Input() visible;
 
     uploader: FileUploader;
     hasBaseDropZoneOver: boolean;

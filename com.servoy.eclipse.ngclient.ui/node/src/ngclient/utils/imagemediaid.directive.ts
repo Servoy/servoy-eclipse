@@ -55,7 +55,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     }
 
     private setImageStyle(): void {
-        if (this.media && this.media.visible) {
+        if (this.media) {
             const componentSize = this.media.componentSize;
             const mediaOptions = this.media.mediaOptions;
             if (this.media.rollOverImg) {

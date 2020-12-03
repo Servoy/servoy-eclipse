@@ -14,7 +14,6 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent {
     @Input() enabled;
     @Input() styleClass;
     @Input() tabSeq;
-    @Input() visible;
     @Input() media;
 
     imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';

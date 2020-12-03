@@ -7,7 +7,6 @@ import { BaseCustomObject } from '../sablo/spectypes.service';
 export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     @Input() onChangeMethodID;
 
-    @Input() visible;
     @Input() height;
     @Input() tabs: Array<Tab>;
 
@@ -18,6 +17,7 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     templateRef: TemplateRef<any>;
 
     private selectedTab: Tab;
+	public selectedTabID: string;
 
     private waitingForServerVisibility = {};
     private lastSelectedTab: Tab;
@@ -55,7 +55,9 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     }
 
     select(tab: Tab) {
-        if (!this.visible) return;
+		if (this.tabs && this.tabs.length > 0 && !this.tabs[0]._id) {
+            this.generateIDs();
+        }
         if (this.isValidTab(tab)) {
             if ((tab != undefined && this.selectedTab != undefined && tab.containedForm == this.selectedTab.containedForm && tab.relationName == this.selectedTab.relationName) || (tab == this.selectedTab)) return;
             if (this.selectedTab) {

@@ -1,21 +1,21 @@
-<ngb-tabset  #tabset  [activeId]="getSelectedTabId()" (tabChange)="onTabChange($event)"  [class]='(styleClass ? styleClass : "")  + " svy-tabpanel"'  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reserverGap: 50}">
-    <ngb-tab *ngFor="let tab of tabs" [disabled]="tab.disabled || !enabled || !tab.containsFormId" [id]="tab._id">
-      <ng-template  svy-mnemonic='tab.mnemonic' ngbTabTitle>
-      	<img ng-hide="tab.imageMediaID == ''"  ng-src='tab.imageMediaID'/>
-        <span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
-        	  [innerHTML]='tab?.text'></span>
-      </ng-template>
-      <ng-template ngbTabContent>
-      <div #element style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
-      	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
-      </div>
-      
-<!--      
-	 <div ng-include="getForm(tab)" sablo-tabseq='1' sablo-tabseq-config="{container: true}" ng-style='getTabsHeight()' style="position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;"></div>
- -->
-      </ng-template>
-    </ngb-tab>
-</ngb-tabset>
+<ul ngbNav #nav="ngbNav" class="nav-tabs" [activeId]="getSelectedTabId()" (navChange)="onTabChange($event)"
+	[class]='(styleClass ? styleClass : "")  + " svy-tabpanel"' [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq"
+	[sabloTabseqConfig]="{container: true, reserverGap: 50}">
+	<li *ngFor="let tab of tabs" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId"
+		[id]="tab._id">
+		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
+			<img ng-hide="tab.imageMediaID == ''" ng-src='tab.imageMediaID' />
+			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
+				[innerHTML]='tab?.text'></span>
+		</a>
+		<ng-template ngbNavContent>
+			<div #element style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
+				<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
+				</ng-template>
+			</div>
+		</ng-template>
+	</li>
+</ul>
 
 
 

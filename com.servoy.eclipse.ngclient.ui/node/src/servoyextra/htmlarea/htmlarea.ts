@@ -26,7 +26,6 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     @Input() tabSeq;
     @Input() text;
     @Input() toolTipText;
-    @Input() visible;
     @Input() scrollbars;
 
     @ViewChild(AngularEditorComponent) editor: AngularEditorComponent;
