@@ -12,11 +12,11 @@
 			</div>
 		</a>
 		<ng-template ngbNavContent>
-			<div style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;"
-				[ngStyle]="{'min-height': height + 'px'}">
+			<div style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
 				<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
 				</ng-template>
 			</div>
 		</ng-template>
 	</li>
 </ul>
+<div [ngbNavOutlet]="nav" class="mt-2"></div>

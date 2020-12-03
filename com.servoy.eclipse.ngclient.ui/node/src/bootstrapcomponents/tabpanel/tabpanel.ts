@@ -19,7 +19,6 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
 
 	@Input() tabIndex;
 	@Output() tabIndexChange = new EventEmitter();
-	@ViewChild('nav') nav;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
 		super(renderer, cdRef, windowRefService);
@@ -148,10 +147,5 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
 			}
 		}
 		return -1;
-	}
-	
-	setFormVisible(tab: Tab){
-		super.setFormVisible(tab);
-		this.nav.select(tab._id);
 	}
 }

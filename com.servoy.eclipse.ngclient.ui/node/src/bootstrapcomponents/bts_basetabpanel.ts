@@ -127,6 +127,7 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
         if (tab.containedForm) this.servoyApi.formWillShow(tab.containedForm, tab.relationName);
         const oldSelected = this.selectedTab;
         this.selectedTab = tab;
+		this.selectedTabID = tab._id;
         this.tabIndex = this.getTabIndex(this.selectedTab);
         this.tabIndexChange.emit(this.tabIndex);
         if (oldSelected && oldSelected != tab && this.onChangeMethodID) {
