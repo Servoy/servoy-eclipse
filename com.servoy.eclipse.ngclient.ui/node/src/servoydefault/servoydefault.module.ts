@@ -18,6 +18,7 @@ import { ServoyDefaultCalendar } from './calendar/calendar';
 import { ServoyDefaultCombobox } from './combobox/combobox';
 import { ServoyDefaultTypeahead } from './typeahead/typeahead';
 import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
+import { ServoyDefaultRadio } from './radio/radio';
 import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 import { ServoyDefaultCheck } from './check/check';
 import { ServoyDefaultPassword } from './password/password';
@@ -54,6 +55,7 @@ import { Select2Module } from 'ng-select2-component';
     ServoyDefaultCombobox,
     ServoyDefaultTypeahead,
     ServoyDefaultCheckGroup,
+    ServoyDefaultRadio,
     ServoyDefaultRadiogroup,
     ServoyDefaultCheck,
     ServoyDefaultPassword,
@@ -91,6 +93,7 @@ import { Select2Module } from 'ng-select2-component';
             ServoyDefaultCombobox,
             ServoyDefaultTypeahead,
             ServoyDefaultCheckGroup,
+            ServoyDefaultRadio,
             ServoyDefaultRadiogroup,
             ServoyDefaultCheck,
             ServoyDefaultPassword,
