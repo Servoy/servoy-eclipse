@@ -1,4 +1,4 @@
-import { Component, Directive,ChangeDetectorRef,Renderer2 } from '@angular/core';
+import { Component,ChangeDetectorRef,Renderer2 } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 

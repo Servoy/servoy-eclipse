@@ -1,12 +1,12 @@
-import { Component,OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { DomSanitizer,SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-import { ServoyService} from '../../ngclient/servoy.service';
+import { ServoyService } from '../../ngclient/servoy.service';
 
 @Component({
-  selector: 'session-view',
-  templateUrl: './session-view.html',
+    selector: 'session-view',
+    templateUrl: './session-view.html',
 })
 export class SessionView implements OnInit {
 
@@ -18,20 +18,20 @@ export class SessionView implements OnInit {
     ngOnInit() {
         const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
         const headers = new HttpHeaders({
-          'Content-Type':  'text/plain',
+            'Content-Type': 'text/plain',
         });
         const request = this.http.get(sessionProblem.viewUrl, {
-          headers,
-          responseType: 'text'
-        }).subscribe(res =>{
- this.htmlString = this.sanitizer.bypassSecurityTrustHtml(res.replace('{{redirectUrl}}',sessionProblem.redirectUrl).replace('ng-href','href'));
-});
+            headers,
+            responseType: 'text'
+        }).subscribe(res => {
+            this.htmlString = this.sanitizer.bypassSecurityTrustHtml(res.replace('{{redirectUrl}}', sessionProblem.redirectUrl).replace('ng-href', 'href'));
+        });
 
-        if(sessionProblem.redirectTimeout >=0){
-            window.setTimeout(function(){
+        if (sessionProblem.redirectTimeout >= 0) {
+            window.setTimeout(function() {
                 window.location.href = sessionProblem.redirectUrl;
-            },sessionProblem.redirectTimeout*1000);
+            }, sessionProblem.redirectTimeout * 1000);
         }
 
-      }
+    }
 }

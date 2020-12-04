@@ -1,10 +1,10 @@
-import { Input, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
+import { Input, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
 
 import { Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
 
 @Directive()
-// eslint-disable-next-line
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
 
     @Input() onActionMethodID: (e: Event, data?: any) => void;

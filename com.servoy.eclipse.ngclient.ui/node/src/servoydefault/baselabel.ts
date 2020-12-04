@@ -5,7 +5,7 @@ import { PropertyUtils } from '../ngclient/servoy_public';
 import { ServoyDefaultBaseComponent } from './basecomponent';
 
 @Directive()
-// eslint-disable-next-line
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseLabel extends ServoyDefaultBaseComponent {
 
     @Input() hideText;
