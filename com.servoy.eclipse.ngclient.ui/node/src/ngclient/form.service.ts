@@ -7,7 +7,7 @@ import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 import { ServoyService, FormSettings } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
-import { get } from 'lodash';
+import { get } from 'lodash-es';
 
 
 export class FormCache {
