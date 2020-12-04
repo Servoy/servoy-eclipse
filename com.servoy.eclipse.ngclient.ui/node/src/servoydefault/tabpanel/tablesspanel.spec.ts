@@ -33,7 +33,6 @@ describe( 'ServoyDefaultTabpanel', () => {
         const fixture = TestBed.createComponent( ServoyDefaultTablesspanel );
 
         fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
-        fixture.componentInstance.visible = true;
 
         const tabs = [];
         let tab = new Tab();

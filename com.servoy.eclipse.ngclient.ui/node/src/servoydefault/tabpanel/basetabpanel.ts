@@ -43,6 +43,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent {
 	private lastSelectedTab: Tab;
 
 	protected selectedTab: Tab;
+	public selectedTabID: string;
 	private log: LoggerService;
 
 	constructor(private windowRefService: WindowRefService, private logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
@@ -50,6 +51,11 @@ export abstract class BaseTabpanel extends ServoyBaseComponent {
 		this.log = logFactory.getLogger('BaseTabpanel');
 	}
 
+	ngOnInit() {
+		super.ngOnInit();
+		this.initTabID();
+	}
+	
 	svyOnChanges(changes: SimpleChanges) {
 		if (changes['tabs']) {
 			// quickly generate the id's for a the tab html id (and selecting it)
@@ -149,6 +155,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent {
 		this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
 		const oldSelected = this.selectedTab;
 		this.selectedTab = tab;
+		this.selectedTabID = tab._id;
 		this.tabIndex = this.getTabIndex(this.selectedTab);
 		this.tabIndexChange.emit(this.tabIndex);
 		if (oldSelected && oldSelected != tab && this.onChangeMethodID) {

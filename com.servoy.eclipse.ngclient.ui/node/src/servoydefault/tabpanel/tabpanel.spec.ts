@@ -1,5 +1,5 @@
 import { Directive, Input, SimpleChanges, SimpleChange } from '@angular/core';
-import { TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@angular/core/testing';
 import { ServoyDefaultTabpanel } from './tabpanel';
 import { Tab } from './basetabpanel';
 
@@ -32,7 +32,6 @@ describe( 'ServoyDefaultTabpanel', () => {
         const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
 
         fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
-        fixture.componentInstance.visible = true;
 
         const tabs = [];
         let tab = new Tab();
@@ -86,6 +85,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
+		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
       } ) );
@@ -100,6 +100,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
+		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
       } ) );
