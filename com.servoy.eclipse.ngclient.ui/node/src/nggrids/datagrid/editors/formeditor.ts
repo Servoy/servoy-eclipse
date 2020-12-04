@@ -1,5 +1,5 @@
+import { ICellEditorParams } from '@ag-grid-enterprise/all-modules';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { ICellEditorParams } from 'ag-grid-community';
 import { DatagridEditor } from './datagrideditor';
 
 @Component({

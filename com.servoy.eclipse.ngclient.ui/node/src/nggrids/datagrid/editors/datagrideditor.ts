@@ -1,6 +1,7 @@
+import { ICellEditorAngularComp } from '@ag-grid-community/angular';
+import { ICellEditorParams } from '@ag-grid-enterprise/all-modules';
 import { Directive, ElementRef, ViewChild } from '@angular/core';
-import { ICellEditorAngularComp } from 'ag-grid-angular';
-import { ICellEditorParams } from 'ag-grid-community';
+
 import { DataGrid } from '../datagrid';
 
 @Directive()

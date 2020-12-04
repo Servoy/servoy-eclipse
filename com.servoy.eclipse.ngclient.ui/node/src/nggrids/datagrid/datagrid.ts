@@ -1,7 +1,7 @@
+import { AgGridAngular } from '@ag-grid-community/angular';
+import { GridOptions } from '@ag-grid-enterprise/all-modules';
 import { ChangeDetectorRef, ContentChild, Input, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import { AgGridAngular } from 'ag-grid-angular';
-import { GridOptions } from 'ag-grid-community';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';

@@ -1,6 +1,6 @@
 import { Component, HostListener } from '@angular/core';
-import { ICellEditorParams } from 'ag-grid-community';
 import { DatagridEditor } from './datagrideditor';
+import { ICellEditorParams } from '@ag-grid-enterprise/all-modules'
 
 @Component({
     selector: 'datagrid-selecteditor',

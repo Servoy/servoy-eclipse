@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { LocaleService } from '../../../ngclient/servoy_public';
 import { DatagridEditor } from './datagrideditor';
+import { ICellEditorParams } from '@ag-grid-enterprise/all-modules'
 import * as moment from 'moment';
-import { ICellEditorParams } from 'ag-grid-community';
 
 @Component({
   selector: 'datagrid-datepicker',

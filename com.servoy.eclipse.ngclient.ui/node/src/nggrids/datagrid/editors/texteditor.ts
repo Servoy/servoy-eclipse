@@ -1,5 +1,5 @@
+import { ICellEditorParams } from '@ag-grid-enterprise/all-modules';
 import { Component, HostListener, Input } from '@angular/core';
-import { ICellEditorParams } from 'ag-grid-community';
 import { DatagridEditor } from './datagrideditor';
 
 @Component({
