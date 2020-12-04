@@ -137,6 +137,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoydefaultTypeahead', { static: true }) readonly servoydefaultTypeahead: TemplateRef<any>;
     @ViewChild('servoydefaultCheck', { static: true }) readonly servoydefaultCheck: TemplateRef<any>;
     @ViewChild('servoydefaultCheckgroup', { static: true }) readonly servoydefaultCheckgroup: TemplateRef<any>;
+    @ViewChild('servoydefaultRadio', { static: true }) readonly servoydefaultRadio: TemplateRef<any>;
     @ViewChild('servoydefaultRadiogroup', { static: true }) readonly servoydefaultRadiogroup: TemplateRef<any>;
     @ViewChild('servoydefaultPassword', { static: true }) readonly servoydefaultPassword: TemplateRef<any>;
     @ViewChild('servoydefaultHtmlarea', { static: true }) readonly servoydefaultHtmlarea: TemplateRef<any>;
