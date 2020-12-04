@@ -1,10 +1,10 @@
 import { Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2, HostListener, ChangeDetectorRef, EventEmitter, Output, OnDestroy, Inject, NgZone, AfterViewChecked } from '@angular/core';
-import { ViewPortRow } from '../../sablo/spectypes.service';
+import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ComponentConverter, ComponentType } from '../../ngclient/converters/component_converter';
 import { ServoyBaseComponent } from '../../ngclient/basecomponent';
-import { Foundset, FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
+import { Foundset, FoundsetChangeEvent, FoundsetConverter } from '../../ngclient/converters/foundset_converter';
 import { FormComponentType } from '../../ngclient/converters/formcomponent_converter';
 
 @Component({
@@ -78,14 +78,15 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     super.svyOnInit();
     this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
       let shouldUpdatePagingControls = false;
-      if (event.selectedRowIndexesChanged) {
-        this.updateSelection(event.selectedRowIndexesChanged.newValue, event.selectedRowIndexesChanged.oldValue);
-        if (this.onSelectionChanged) {
-          this.renderer.listen( this.elementRef.nativeElement, 'onselectionchanged', (e) => {
-            this.onSelectionChanged(e);
-          });
-        }
+
+      if (event.viewportRowsCompletelyChanged) {
+        this.calculateCells();
+      } else if (event.fullValueChanged) {
+        this.foundset = event.fullValueChanged.newValue;
+        this.calculateCells();
+        return;
       }
+
       if (event.serverFoundsetSizeChanged) {
         shouldUpdatePagingControls = true;
       }
@@ -93,6 +94,74 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
       if (shouldUpdatePagingControls) {
         this.updatePagingControls();
       }
+
+      if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize) && this.foundset.viewPort.size == 0 && this.numberOfCells > 0) {
+        this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells); 
+        this.calculateCells();
+      } else {
+        let viewportSizeAfterShiftingIsDone = this.foundset.viewPort.size;
+          if (event.viewPortStartIndexChanged) {
+            // an insert/delete before current page made viewport start index no longer match page start index; adjust
+            const shiftedPageDelta = this.page * this.numberOfCells - this.foundset.viewPort.startIndex; // can be negative (insert) or positive(delete)
+            if (shiftedPageDelta != 0) {
+              const wantedVPSize = this.foundset.viewPort.size;
+              const wantedVPStartIndex = this.page * this.numberOfCells;
+              const serverSize = this.foundset.serverSize;
+              
+              // so shifting means loading "shiftedPageDelta" more/less in one end of the viewport and "shiftedPageDelta" less/more at the other end
+              
+              // when load extra would request more records after, there might not be enough records in the foundset (deleted before)
+              let loadExtraCorrected = shiftedPageDelta;
+              if (loadExtraCorrected > 0 /*so shift right*/ && wantedVPStartIndex + wantedVPSize > serverSize)
+                loadExtraCorrected -= (wantedVPStartIndex + wantedVPSize - serverSize);
+              if (loadExtraCorrected != 0) {
+                this.foundset.loadExtraRecordsAsync(loadExtraCorrected, true); 
+                viewportSizeAfterShiftingIsDone += Math.abs(loadExtraCorrected);
+              }
+              
+              // load less if it happens at the end - might need to let more records slide-in the viewport if available (insert before)
+              let loadLessCorrected = shiftedPageDelta;
+              if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) // 
+                loadLessCorrected += Math.min(serverSize - wantedVPStartIndex - wantedVPSize, this.numberOfCells - wantedVPSize);
+              if (loadLessCorrected != 0) {
+                this.foundset.loadLessRecordsAsync(loadLessCorrected, true);
+                viewportSizeAfterShiftingIsDone -= Math.abs(loadLessCorrected);
+              }
+            }
+            this.updateSelection(this.foundset.selectedRowIndexes);
+          }
+          
+          // ok now we know startIndex is corrected if needed already; check is size needs to be corrected as well
+          if (event.viewPortSizeChanged) {
+            // see if the new viewport size is larger or smaller then expected
+            
+            // sometimes - due to custom components and services that show forms but they do not properly wait for the formWillShow promise to resolve
+            // before showing the form in the DOM - list form component might end up showing in a container that changed size so numberOfCells is now different
+            // (let's say decreased) but having old foundset viewport data (meanwhile solution server side might have changed foundset); then what happened
+            // is that browser-side list-form-component requested less records based on old foundset data while server-side already had only 1 or 2 records now
+            // in foundset => it got back a viewport of size 0
+            
+            // so although this would not normally happen (viewport size getting changed incorrectly as if the component requested that) we check this to be
+            // resilient to such components/services as well; for example popupWindow used to show forms quickly before getting the updates from server before showing
+            // (a second show of a pop-up window with decreased size and also less records in the foundset); there are other components that could do this for example
+            // bootstrap tabless panel with waitForData property set to false
+            
+            const vpStartIndexForCurrentCalcs = this.page * this.numberOfCells; // this might have already been requested in previous code; might not be the actual present one in browser
+            const vpSizeForCurrentCalcs = viewportSizeAfterShiftingIsDone; // this might have already been requested in previous code; might not be the actual present one in browser
+            
+            const deltaSize = this.numberOfCells - vpSizeForCurrentCalcs;
+            if (deltaSize > 0) {
+              // we could show more records then currently in viewport; see if more are available
+              const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs)
+              if (availableExtraRecords > 0) this.foundset.loadExtraRecordsAsync(Math.min(deltaSize, availableExtraRecords), true);
+            } else if (deltaSize < 0) {
+              // we need to show less records
+              this.foundset.loadLessRecordsAsync(-deltaSize, true);
+            } // else it's already ok
+          }
+          
+          this.foundset.notifyChanged(); // let foundset send it's pending requests to server if any
+        }
     });
   }
 
@@ -216,7 +285,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     this.renderer.setStyle(  this.elementRightRef.nativeElement, 'visibility' , hasMorePages ? 'visible' : 'hidden' );
   }
 
-  updateSelection(newValue, oldValue) {
+  updateSelection(newValue, oldValue?) {
     if (this.selectionClass) {
       const children = this.elementRef.nativeElement.children;
       if (oldValue) {
