@@ -21,12 +21,7 @@
     "paths": {
      "core-js/es7/reflect": ["../node_modules/core-js/proposals/reflect-metadata"]
     },
-	"outDir": "./out-tsc/app",
-	"plugins": [
-      {
-        "name": "typescript-eslint-language-service"
-      }
-    ]
+	"outDir": "./out-tsc/app"
   },
 	"buildOnSave": true
 }
