@@ -564,12 +564,19 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         if (this.currentSortClass.length <= column || this.currentSortClass[column] !== sortClass) {
             if (this.sortClassUpdateTimer) window.clearTimeout(this.sortClassUpdateTimer);
 
-            this.sortClassUpdateTimer = window.setTimeout(() => {
-                const tbody = this.elementRef !== undefined ? this.getNativeElement().getElementsByTagName('tbody') : undefined;
-                if (tbody) {
-                    if (tbody) this.updateTBodyStyle(tbody[0]);
-                }
-            }, 50);
+           this.sortClassUpdateTimer = window.setTimeout(() => {
+				const tbody = this.elementRef !== undefined ? this.getNativeElement().getElementsByTagName('tbody') : undefined;
+				if (tbody) {
+					if (tbody[0].clientHeight > 0) {
+						this.updateTBodyStyle(tbody[0]);
+					}
+					else {
+						this.sortClassUpdateTimer = window.setTimeout(() => {
+							this.updateTBodyStyle(tbody[0]);
+						}, 200)
+					}
+				}
+			}, 100);
             this.currentSortClass[column] = sortClass;
         }
         return sortClass;
