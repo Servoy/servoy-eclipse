@@ -44,5 +44,9 @@ module.exports = function (config) {
           ],
       },
     },
+    captureTimeout: 90000,
+    browserDisconnectTolerance: 7,
+    browserDisconnectTimeout : 50000,
+    browserNoActivityTimeout : 50000
   });
 };
