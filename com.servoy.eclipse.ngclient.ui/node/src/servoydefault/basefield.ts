@@ -99,9 +99,14 @@ export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
 
     public getSelectedText(): string {
         const selection = window.getSelection();
-        if (selection.anchorNode === this.getFocusElement()) {
-            return selection.toString();
+        let node = selection.anchorNode;
+        while (node) {
+            if (node === this.getFocusElement()) {
+                return selection.toString();
+            }
+            node = node.parentNode;
         }
+        return '';
     }
 
     public replaceSelectedText(text: string) {
