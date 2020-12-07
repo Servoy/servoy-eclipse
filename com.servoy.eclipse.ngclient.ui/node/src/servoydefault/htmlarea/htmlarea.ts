@@ -74,6 +74,10 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
     }
     super.svyOnChanges(changes);
   }
+  
+  requestFocus() {
+      this.editor.focus();
+  }
 
   public getScrollX(): number {
     return this.getNativeElement().scrollLeft;
