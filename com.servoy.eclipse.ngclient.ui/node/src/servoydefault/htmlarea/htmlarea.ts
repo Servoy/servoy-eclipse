@@ -79,6 +79,14 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
       this.editor.focus();
   }
 
+  public selectAll() {
+    const range = document.createRange();
+    range.selectNodeContents(this.editor.textArea.nativeElement);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
   public getScrollX(): number {
     return this.getNativeElement().scrollLeft;
   }
