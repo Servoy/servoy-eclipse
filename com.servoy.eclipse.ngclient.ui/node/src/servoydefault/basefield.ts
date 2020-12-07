@@ -94,15 +94,18 @@ export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
     }
 
     public selectAll() {
-        this.getNativeElement().select();
+        this.getFocusElement().select();
     }
 
     public getSelectedText(): string {
-        return window.getSelection().toString();
+        const selection = window.getSelection();
+        if (selection.anchorNode === this.getFocusElement()) {
+            return selection.toString();
+        }
     }
 
     public replaceSelectedText(text: string) {
-        const elem = this.getNativeElement();
+        const elem = this.getFocusElement();
         const startPos = elem.selectionStart;
         const endPos = elem.selectionEnd;
 
