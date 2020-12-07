@@ -101,7 +101,7 @@ export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
         const selection = window.getSelection();
         let node = selection.anchorNode;
         while (node) {
-            if (node === this.getFocusElement()) {
+            if (node === this.getFocusElement() || node === this.getFocusElement().parentNode) {
                 return selection.toString();
             }
             node = node.parentNode;
