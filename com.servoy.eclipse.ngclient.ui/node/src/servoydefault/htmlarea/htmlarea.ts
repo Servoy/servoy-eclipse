@@ -61,7 +61,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
             break;
           case 'scrollbars':
             if (change.currentValue) {
-              const element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
+              const element = this.getNativeChild().textArea;
               PropertyUtils.setScrollbars(element, this.renderer, change.currentValue);
             }
             break;
