@@ -11,6 +11,7 @@
 
 	<properties>
 		<tycho.version>2.0.0</tycho.version>
+		 <eclipse.url>http://download.eclipse.org/eclipse/updates/4.17/</eclipse.url>
 	</properties>
 
 	<repositories>
@@ -19,6 +20,11 @@
 			<name>developer_repo</name>
 			<url>http://developer.servoy.com/mvn_repository/</url>
 		</repository>
+		<repository>
+            <id>servoy</id>
+            <url>${eclipse.url}</url>
+            <layout>p2</layout>
+        </repository>
 	</repositories>
 
 	<build>
@@ -34,13 +40,6 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
-					<target>
-						<artifact>
-							<groupId>com.servoy</groupId>
-							<artifactId>com.servoy.eclipse.target</artifactId>
-							<version>${project.version}</version>
-						</artifact>
-					</target>
 					<pomDependencies>consider</pomDependencies>
 					<resolver>p2</resolver>
 					<environments>
@@ -260,7 +259,7 @@
 		<dependency>
 			<groupId>de.inetsoftware</groupId>
 			<artifactId>jlessc</artifactId>
-			<version>1.10.0.s3</version>
+			<version>1.10.0.s4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ua-parser</groupId>
