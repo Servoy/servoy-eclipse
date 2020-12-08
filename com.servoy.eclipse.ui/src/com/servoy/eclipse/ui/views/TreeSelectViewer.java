@@ -785,7 +785,15 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 		private TreeSelectContentProposalAdapter(Control control)
 		{
-			super(control, new TextContentAdapter(), null, null, null);
+			super(control, new TextContentAdapter()
+			{
+				@Override
+				public void setControlContents(Control cntrl, String text, int cursorPosition)
+				{
+					super.setControlContents(cntrl, text, cursorPosition);
+					setValid(true);
+				}
+			}, null, null, null);
 			setPropagateKeys(true);
 			setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 			addContentProposalListener(this);

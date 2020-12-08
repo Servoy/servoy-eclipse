@@ -307,8 +307,12 @@ public class GhostHandler implements IServerService
 					writer.key("height").value(basicWebComponent.getSize().height);
 					writer.endObject();
 				}
-				Object uuid = parentFormComponentPath != null && !parentFormComponentPath.isEmpty() ? "_" + basicWebComponent.getName().replaceAll("-", "_")
-					: basicWebComponent.getUUID();
+				String uuid = parentFormComponentPath != null && !parentFormComponentPath.isEmpty() ? basicWebComponent.getName().replaceAll("-", "_")
+					: basicWebComponent.getUUID().toString();
+				if (Character.isDigit(uuid.charAt(0)))
+				{
+					uuid = "_" + uuid;
+				}
 				writer.key("uuid").value(uuid);
 				writer.key("class").value(inherited ? " inherited_element" : "");
 				writer.key("containerPositionInComp").value(propYCount);
