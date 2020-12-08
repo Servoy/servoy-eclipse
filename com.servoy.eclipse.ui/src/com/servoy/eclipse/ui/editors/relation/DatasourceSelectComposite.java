@@ -74,7 +74,7 @@ public class DatasourceSelectComposite extends Composite
 		sourceTable.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		sourceTable.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
 
-		sourceTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false));
+		sourceTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false, false));
 		sourceTable.setEditable(true);
 
 		destinationTable = new TreeSelectViewer(this, SWT.NONE, TableValueEditor.INSTANCE);
@@ -83,7 +83,7 @@ public class DatasourceSelectComposite extends Composite
 		destinationTable.setContentProvider(new TableContentProvider());
 		destinationTable.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		destinationTable.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
-		destinationTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false));
+		destinationTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false, false));
 		destinationTable.setEditable(true);
 
 		Label glue = new Label(this, SWT.NONE);
@@ -93,17 +93,20 @@ public class DatasourceSelectComposite extends Composite
 			groupLayout.createSequentialGroup().add(6, 6, 6).add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
 				groupLayout.createSequentialGroup().add(sourceLabel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE).add(76, 76, 76)).add(
 					groupLayout.createSequentialGroup().add(sourceTableControl, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE).addPreferredGap(
-						LayoutStyle.RELATED).add(glue, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED))).add(6,
-							6, 6).add(
-								groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(destinationTableControl,
-									GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE).addContainerGap()).add(
-										groupLayout.createSequentialGroup().add(destinationLabel, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE).add(28, 28,
-											28)))));
+						LayoutStyle.RELATED).add(glue, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED)))
+				.add(6,
+					6, 6)
+				.add(
+					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(destinationTableControl,
+						GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE).addContainerGap()).add(
+							groupLayout.createSequentialGroup().add(destinationLabel, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE).add(28, 28,
+								28)))));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(glue).add(groupLayout.createSequentialGroup().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceLabel).add(destinationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceTableControl).add(destinationTableControl)))).addContainerGap(10,
-						Short.MAX_VALUE)));
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceTableControl).add(destinationTableControl))))
+			.addContainerGap(10,
+				Short.MAX_VALUE)));
 		setLayout(groupLayout);
 
 	}
