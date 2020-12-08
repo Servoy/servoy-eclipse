@@ -63,6 +63,12 @@ export class DataGrid {
     @Input() enableColumnResize;
     @Input() visible;
 
+    @Input() toolPanelConfig;
+    @Input() iconConfig;
+    @Input() localeText;
+    @Input() mainMenuItemsConfig;
+    @Input() gridOptions;
+    @Input() showColumnsMenuTab;
 
     @Input() servoyApi: ServoyApi;
 
@@ -80,7 +86,7 @@ export class DataGrid {
     @Input() onColumnFormEditStarted;
 
     log: LoggerService;
-    gridOptions: GridOptions;
+    agGridOptions: GridOptions;
     foundset: FoundsetManager;
     groupManager: GroupManager;
 
@@ -121,9 +127,12 @@ export class DataGrid {
 
     selectionEvent;
 
+    agMainMenuItemsConfig;
+    agArrowsUpDownMoveWhenEditing;
+
     constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         this.log = logFactory.getLogger('DataGrid');
-        this.gridOptions = <GridOptions> {
+        this.agGridOptions = <GridOptions> {
             context: {
                 componentParent: this
             },
@@ -132,25 +141,99 @@ export class DataGrid {
     }
 
     ngOnInit() {
-        this.gridOptions.defaultColDef = {
+
+        // if nggrids service is present read its defaults
+        let toolPanelConfig = null;
+        let iconConfig = null;
+        let userGridOptions = null
+        let localeText = null;
+
+        // TODO NGGrids services
+        // if($injector.has('ngDataGrid')) {
+        //     var groupingtableDefaultConfig = $services.getServiceScope('ngDataGrid').model;
+        //     if(groupingtableDefaultConfig.toolPanelConfig) {
+        //         toolPanelConfig = groupingtableDefaultConfig.toolPanelConfig;
+        //     }
+        //     if(groupingtableDefaultConfig.iconConfig) {
+        //         iconConfig = groupingtableDefaultConfig.iconConfig;
+        //     }
+        //     if(groupingtableDefaultConfig.gridOptions) {
+        //         userGridOptions = groupingtableDefaultConfig.gridOptions;
+        //     }
+        //     if(groupingtableDefaultConfig.localeText) {
+        //         localeText = groupingtableDefaultConfig.localeText;
+        //     }
+        //     if(groupingtableDefaultConfig.mainMenuItemsConfig) {
+        //         this.agMainMenuItemsConfig = groupingtableDefaultConfig.mainMenuItemsConfig;
+        //     }
+        //     if(groupingtableDefaultConfig.arrowsUpDownMoveWhenEditing) {
+        //         this.agArrowsUpDownMoveWhenEditing = groupingtableDefaultConfig.arrowsUpDownMoveWhenEditing;
+        //     }
+        // }
+
+        toolPanelConfig = this.mergeConfig(toolPanelConfig, this.toolPanelConfig);
+        iconConfig = this.mergeConfig(iconConfig, this.iconConfig);
+        userGridOptions = this.mergeConfig(userGridOptions, this.gridOptions);
+        localeText = this.mergeConfig(localeText, this.localeText);
+        this.agMainMenuItemsConfig = this.mergeConfig(this.agMainMenuItemsConfig, this.mainMenuItemsConfig);
+
+        if(this.arrowsUpDownMoveWhenEditing) {
+            this.agArrowsUpDownMoveWhenEditing = this.arrowsUpDownMoveWhenEditing;
+        }
+
+        const vMenuTabs = ['generalMenuTab', 'filterMenuTab'];
+        if(this.showColumnsMenuTab) vMenuTabs.push('columnsMenuTab');
+        
+        let sideBar;
+        if (toolPanelConfig && toolPanelConfig.suppressSideButtons === true) {
+            sideBar = false;
+        } else {
+            sideBar = {
+                    toolPanels: [
+                    {
+                        id: 'columns',
+                        labelDefault: 'Columns',
+                        labelKey: 'columns',
+                        iconKey: 'columns',
+                        toolPanel: 'agColumnsToolPanel',
+                        toolPanelParams: {
+                            suppressRowGroups: toolPanelConfig ? toolPanelConfig.suppressRowGroups : false,
+                            suppressValues: true,
+                            suppressPivots: true,
+                            suppressPivotMode: true,
+                            suppressSideButtons: toolPanelConfig ? toolPanelConfig.suppressSideButtons : false,
+                            suppressColumnFilter: toolPanelConfig ? toolPanelConfig.suppressColumnFilter : false,
+                            suppressColumnSelectAll: toolPanelConfig ? toolPanelConfig.suppressColumnSelectAll : false,
+                            suppressColumnExpandAll: toolPanelConfig ? toolPanelConfig.suppressColumnExpandAll : false
+                        }
+                    }
+                ]
+            }
+        }
+
+        this.agGridOptions.defaultColDef = {
             width: 0,
             filter: false,
+            menuTabs: vMenuTabs,
             valueGetter: this.displayValueGetter,
             valueFormatter: this.displayValueFormatter,
             sortable: this.enableSorting,
             resizable: this.enableColumnResize
         }
-        this.gridOptions.columnDefs = this.getColumnDefs();
+        this.agGridOptions.columnDefs = this.getColumnDefs();
         const _this = this;
-        this.gridOptions.onGridReady = function(){
+        this.agGridOptions.onGridReady = function(){
             _this.sizeHeaderAndColumnsToFit();
         };
         // TODO this makes the date editor to close instanttly, because its popup steals the focus
         // this.gridOptions.stopEditingWhenGridLosesFocus = true;
 
-        this.gridOptions.suppressAnimationFrame = true;
-        this.gridOptions.animateRows = false;
-        this.gridOptions.singleClickEdit = false;
+        this.agGridOptions.suppressAnimationFrame = true;
+        this.agGridOptions.animateRows = false;
+        this.agGridOptions.singleClickEdit = false;
+        this.agGridOptions.sideBar = sideBar;
+        this.agGridOptions.getMainMenuItems = this.getMainMenuItems;
+
         // the group manager
         this.groupManager = new GroupManager(this);
     }
@@ -212,7 +295,7 @@ export class DataGrid {
         // var paddingTop = headerCell.length ? parseInt(headerCell.css('padding-top'), 10) : 0;
         // var paddinBottom = headerCell.length ? parseInt(headerCell.css('padding-bottom'), 10) : 0;
         // var headerCellLabels = $element.find('.ag-header-cell-text');
-        const minHeight = this.gridOptions.headerHeight >= 0 ? this.gridOptions.headerHeight : 25;
+        const minHeight = this.agGridOptions.headerHeight >= 0 ? this.agGridOptions.headerHeight : 25;
 
         // if(minHeight > 0) {
         //     for(var i = 0; i < headerCellLabels.length; i++) {
@@ -235,6 +318,38 @@ export class DataGrid {
         const datasource = new FoundsetDatasource(this, foundsetServer);
         this.agGrid.api.setServerSideDatasource(datasource);
         this.isSelectionReady = false;
+    }
+
+    getMainMenuItems(params) {
+        // default items
+        //					pinSubMenu: Submenu for pinning. Always shown.
+        //					valueAggSubMenu: Submenu for value aggregation. Always shown.
+        //					autoSizeThis: Auto-size the current column. Always shown.
+        //					autoSizeAll: Auto-size all columns. Always shown.
+        //					rowGroup: Group by this column. Only shown if column is not grouped.
+        //					rowUnGroup: Un-group by this column. Only shown if column is grouped.
+        //					resetColumns: Reset column details. Always shown.
+        //					expandAll: Expand all groups. Only shown if grouping by at least one column.
+        //					contractAll: Contract all groups. Only shown if grouping by at least one column.
+        //					toolPanel: Show the tool panel.
+        const dataGrid = params.context.componentParent;
+        let items;
+        if(dataGrid.agMainMenuItemsConfig && Object.keys(dataGrid.agMainMenuItemsConfig).length != 0) {
+            items = [];
+            for (let key in dataGrid.agMainMenuItemsConfig) {
+                if(dataGrid.agMainMenuItemsConfig[key]) items.push(key);
+            }
+        }
+        else {
+            items = ['rowGroup', 'rowUnGroup'];
+        }
+        const menuItems = [];
+        params.defaultItems.forEach(function(item) {
+            if (items.indexOf(item) > -1) {
+                menuItems.push(item);
+            }
+        });
+        return menuItems;
     }
 
     getColumnDefs() {
@@ -549,7 +664,7 @@ export class DataGrid {
      * Returns table's rowGroupColumns
      * */
     getRowGroupColumns(): any {
-        const rowGroupCols = this.gridOptions.columnApi ? this.gridOptions.columnApi.getRowGroupColumns() : null;
+        const rowGroupCols = this.agGridOptions.columnApi ? this.agGridOptions.columnApi.getRowGroupColumns() : null;
         return rowGroupCols ? rowGroupCols : [];
     }
 
@@ -1205,10 +1320,35 @@ class GroupedInfo {
  */
 class FoundsetManager {
 
+    foundsetListener;
+
     constructor(public dataGrid: DataGrid, public foundset: IFoundset, public foundsetUUID: string, public isRoot: boolean) {
         if (!isRoot) {
             // add the change listener to the component
-            foundset.addChangeListener(this.foundsetListener);
+            const _this = this;
+            foundset.addChangeListener(this.foundsetListener = function (change: FoundsetChangeEvent) {
+                dataGrid.log.debug('child foundset changed listener ' + foundset);
+        
+                if (change.sortColumnsChanged) {
+                    const newSort = change.sortColumnsChanged.newValue;
+                    const oldSort = change.sortColumnsChanged.oldValue;
+        
+                    // sort changed
+                    dataGrid.log.debug('Change Group Sort Model ' + newSort);
+                    return;
+                }
+        
+                if (change.sortColumnsChanged) {
+                    dataGrid.selectedRowIndexesChanged(_this);
+                }
+        
+                if (change.viewportRowsUpdated) {
+                    const updates = change.viewportRowsUpdated;
+                    dataGrid.log.debug(updates);
+                    dataGrid.updateRows(updates, null, null);
+                }
+        
+            });
         }
     }
 
@@ -1356,30 +1496,6 @@ class FoundsetManager {
         return -1;
     }
 
-    foundsetListener(change: FoundsetChangeEvent) {
-        this.dataGrid.log.debug('child foundset changed listener ' + this.foundset);
-
-        if (change.sortColumnsChanged) {
-            const newSort = change.sortColumnsChanged.newValue;
-            const oldSort = change.sortColumnsChanged.oldValue;
-
-            // sort changed
-            this.dataGrid.log.debug('Change Group Sort Model ' + newSort);
-            return;
-        }
-
-        if (change.sortColumnsChanged) {
-            this.dataGrid.selectedRowIndexesChanged(this);
-        }
-
-        if (change.viewportRowsUpdated) {
-            const updates = change.viewportRowsUpdated;
-            this.dataGrid.log.debug(updates);
-            this.dataGrid.updateRows(updates, null, null);
-        }
-
-    }
-
     destroy() {
         this.dataGrid.log.debug('destroy ' + this.foundsetUUID);
 
@@ -1519,7 +1635,7 @@ class FoundsetServer {
                 // check sort columns in both the reques and model, because it is disable in the grid, it will be only in the model
                 const sortColumns = sortModel.concat(_this.dataGrid.getSortModel());
                 for(let i = 0; i < sortColumns.length; i++) {
-                    const col = _this.dataGrid.gridOptions.columnApi.getColumn(sortColumns[i].colId);
+                    const col = _this.dataGrid.agGridOptions.columnApi.getColumn(sortColumns[i].colId);
                     if(col && col.getColDef().sortable) {
                         isColumnSortable = true;
                         break;
@@ -1622,7 +1738,7 @@ class FoundsetServer {
         function getFoundsetRefError(e) {
             _this.dataGrid.log.error(e);
             _this.dataGrid.isDataLoading = false;
-            _this.dataGrid.gridOptions.columnApi.setRowGroupColumns([]);
+            _this.dataGrid.agGridOptions.columnApi.setRowGroupColumns([]);
         }
     }; // End getData
 }
@@ -1664,15 +1780,17 @@ class FoundsetDatasource {
             } else {
                 const vl = this.dataGrid.getValuelistEx(params.parentNode.data, rowGroupCols[i]['id']);
                 if(vl) {
-                    filterPromises.push(vl.filterList(groupKeys[i]));
+                    const filterDeferred = new Deferred(); 
+                    filterPromises.push(filterDeferred.promise);
                     const idx = i;
-                    filterPromises[filterPromises.length - 1].then(function(valuelistValues) {
+                    vl.filterList(groupKeys[i]).subscribe((valuelistValues) => {
                         handleFilterCallback(groupKeys, idx, valuelistValues);
                         if(_this.dataGrid.removeAllFoundsetRef) {
                             _this.dataGrid.groupManager.removeFoundsetRefAtLevel(0);
                         }
+                        filterDeferred.resolve(true);
                     });
-                    removeAllFoundsetRefPostponed = true;
+                    removeAllFoundsetRefPostponed = true;                    
                 }
             }
         }
@@ -1861,6 +1979,7 @@ class GroupManager {
         const groupLevels = rowGroupCols.length;
 
         // create groups starting from index 0
+        const _this = this;
         getRowColumnHashFoundset(0);
 
         function getRowColumnHashFoundset(index) {
@@ -1868,17 +1987,17 @@ class GroupManager {
             const groupCols = rowGroupCols.slice(0, index + 1);
             const keys = groupKeys.slice(0, index + 1);
 
-            this.dataGrid.log.debug(groupCols);
-            this.dataGrid.log.debug(keys);
+            _this.dataGrid.log.debug(groupCols);
+            _this.dataGrid.log.debug(keys);
 
             // get a foundset for each grouped level, resolve promise when got to the last level
 
             // TODO loop over columns
             let columnId = groupCols[groupCols.length - 1].field; //
-            columnIndex = this.dataGrid.getColumnIndex(columnId);
+            columnIndex = _this.dataGrid.getColumnIndex(columnId);
 
             // get the foundset Reference
-            const foundsetHash = this.dataGrid.hashTree.getCachedFoundset(groupCols, keys);
+            const foundsetHash = _this.hashTree.getCachedFoundset(groupCols, keys);
             if (foundsetHash) { // the foundsetReference is already cached
                 if (index === rowGroupCols.length - 1) { // resolve when last rowColumn foundset has been loaded
                     resultPromise.resolve(foundsetHash);
@@ -1896,16 +2015,16 @@ class GroupManager {
                 const groupColumnIndexes = [];
                 for (let idx = 0; idx < groupCols.length; idx++) {
                     columnId = rowGroupCols[idx].field;
-                    columnIndex = this.dataGrid.getColumnIndex(columnId);
+                    columnIndex = _this.dataGrid.getColumnIndex(columnId);
                     groupColumnIndexes.push(columnIndex);
                 }
 
                 if (index === groupLevels - 1) { // if is the last level, ask for the foundset hash
-                    const promise = this.getHashFoundset(groupColumnIndexes, keys, sort);
+                    const promise = _this.getHashFoundset(groupColumnIndexes, keys, sort);
                     promise.then(getHashFoundsetSuccess);
                     promise.catch(promiseError);
                 } else { // set null inner foundset
-                    this.dataGrid.hashTree.setCachedFoundset(groupCols, keys, null);
+                    _this.hashTree.setCachedFoundset(groupCols, keys, null);
                     getRowColumnHashFoundset(index + 1);
                 }
             }
@@ -1916,10 +2035,10 @@ class GroupManager {
             function getHashFoundsetSuccess(foundsetUUID) {
 
                 if (!foundsetUUID) {
-                    this.dataGrid.log.error('why i don\'t have a foundset ref ?');
+                    _this.dataGrid.log.error('why i don\'t have a foundset ref ?');
                     return;
                 } else {
-                    this.dataGrid.debug('Get hashed foundset success ' + foundsetUUID);
+                    _this.dataGrid.log.debug('Get hashed foundset success ' + foundsetUUID);
                 }
 
                 // the hash of the parent foundset
@@ -1927,9 +2046,9 @@ class GroupManager {
                 // var foundsetRef = childFoundset.foundsetRef;
 
                 // cache the foundsetRef
-                this.dataGrid.hashTree.setCachedFoundset(groupCols, keys, foundsetUUID);
+                _this.hashTree.setCachedFoundset(groupCols, keys, foundsetUUID);
 
-                this.dataGrid.log.debug('success ' + foundsetUUID);
+                _this.dataGrid.log.debug('success ' + foundsetUUID);
 
                 if (index === rowGroupCols.length - 1) { // resolve when last rowColumn foundset has been loaded
                     resultPromise.resolve(foundsetUUID);
