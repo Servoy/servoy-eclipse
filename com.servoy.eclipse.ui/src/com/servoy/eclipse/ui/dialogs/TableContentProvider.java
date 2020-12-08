@@ -91,7 +91,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			if (options.serverName == null)
 			{
 				lst.add(new InMemServerWrapper());
-				lst.add(new ViewFoundsetServerWrapper());
+				if (options.includeViewFS) lst.add(new ViewFoundsetServerWrapper());
 			}
 			else if (options.serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
@@ -203,6 +203,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 
 		public final TableListType type;
 		public final boolean includeNone;
+		public final boolean includeViewFS;
 		public final String serverName;
 
 		public TableListOptions(TableListType type, boolean includeNone)
@@ -210,6 +211,15 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			this.type = type;
 			this.includeNone = includeNone;
 			this.serverName = null;
+			this.includeViewFS = true;
+		}
+
+		public TableListOptions(TableListType type, boolean includeNone, boolean includeView)
+		{
+			this.type = type;
+			this.includeNone = includeNone;
+			this.serverName = null;
+			this.includeViewFS = includeView;
 		}
 
 		public TableListOptions(TableListType type, boolean includeNone, String serverName)
@@ -217,6 +227,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			this.type = type;
 			this.includeNone = includeNone;
 			this.serverName = serverName;
+			this.includeViewFS = true;
 		}
 	}
 

@@ -266,7 +266,7 @@ public class ValueListEditor extends PersistEditor
 				refresh();
 			}
 		};
-		tableSelect.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false));
+		tableSelect.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false, false));
 		tableSelect.setEditable(true);
 		Control tableSelectControl = tableSelect.getControl();
 		disableInMobileControls.add(tableSelectControl);
