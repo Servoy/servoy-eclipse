@@ -27,6 +27,11 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
     if (ret === '') ret = null;
     return ret;
   }
+  
+  requestFocus() {
+      const checkboxLabel = this.getFocusElement().children[0];
+      checkboxLabel.children[0].focus();
+  }
 
   setSelectionFromDataprovider() {
     this.selection = [];

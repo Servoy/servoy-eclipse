@@ -37,6 +37,11 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseChoice {
         }
     }
 
+    requestFocus() {
+        const radioInput = this.getFocusElement().children[0];
+        radioInput.focus();
+    }
+
     attachEventHandlers( element: any ) {
         if ( !element )
             element = this.getNativeElement();
