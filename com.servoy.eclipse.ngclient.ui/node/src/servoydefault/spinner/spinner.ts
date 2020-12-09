@@ -21,6 +21,11 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
     super.svyOnInit();
   }
 
+  requestFocus() {
+      const spinnerDiv = this.getFocusElement().children[0];
+      spinnerDiv.children[0].focus();
+  }
+  
   svyOnChanges(changes: SimpleChanges) {
     for ( const property in changes ) {
       switch (property) {
