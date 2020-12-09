@@ -4,6 +4,7 @@ import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
 import { ServoyExtraSlider } from './slider/slider';
+import { ServoyExtraSplitpane } from './splitpane/splitpane';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -14,6 +15,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { FileUploadModule } from 'ng2-file-upload';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
+import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
 
 @NgModule({
     declarations: [
@@ -21,7 +24,10 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
         ServoyExtraHtmlarea,
         ServoyExtraImageLabel,
         ServoyExtraFileUpload,
-        ServoyExtraSlider
+        ServoyExtraSlider,
+		ServoyExtraSplitpane,
+		BGSplitter,
+    	BGPane
     ],
     imports: [
         ServoyPublicModule,
@@ -41,7 +47,8 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
               ServoyExtraHtmlarea,
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,
-              ServoyExtraSlider
+              ServoyExtraSlider,
+			  ServoyExtraSplitpane
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
