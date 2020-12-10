@@ -48,4 +48,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
     super.attachEventHandlers(element, index);
   }
 
+  getSelectedElements() {
+      return [this.value];
+    }
 }
