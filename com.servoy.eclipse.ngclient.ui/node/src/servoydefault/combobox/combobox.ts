@@ -78,7 +78,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
     }
 
     svyOnChanges(changes: SimpleChanges) {
-        // this change should be ignored for the combobox.
+        // this change should be ignored
         delete changes['editable'];
         if (changes['valuelistID']) {
             this.setData();

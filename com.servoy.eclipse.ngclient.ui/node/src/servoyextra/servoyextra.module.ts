@@ -5,6 +5,7 @@ import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
 import { ServoyExtraSlider } from './slider/slider';
 import { ServoyExtraSplitpane } from './splitpane/splitpane';
+import { ServoyExtraSelect2Tokenizer } from './select2tokenizer/select2tokenizer';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -17,6 +18,7 @@ import { FileUploadModule } from 'ng2-file-upload';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
 import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
+import { Select2Module } from 'ng-select2-component';
 
 @NgModule({
     declarations: [
@@ -26,6 +28,7 @@ import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
         ServoyExtraFileUpload,
         ServoyExtraSlider,
 		ServoyExtraSplitpane,
+		ServoyExtraSelect2Tokenizer,
 		BGSplitter,
     	BGPane
     ],
@@ -39,7 +42,8 @@ import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
         NgbModule,
         AngularEditorModule,
         FileUploadModule,
-        NgxSliderModule
+        NgxSliderModule,
+		Select2Module
     ],
     providers: [AsyncPipe
     ],
@@ -48,7 +52,8 @@ import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,
               ServoyExtraSlider,
-			  ServoyExtraSplitpane
+			  ServoyExtraSplitpane,
+			  ServoyExtraSelect2Tokenizer
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA

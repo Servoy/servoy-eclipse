@@ -1,0 +1,14 @@
+<div #element [sabloTabseq]="tabSeq" (focus)="requestFocus()"> 
+    <select2  
+        [multiple]="true"
+        style="width:100%;height:100%;overflow:hidden"
+        [data]="data"
+        [id]="servoyApi.getMarkupId()"
+        [svyTooltip]="toolTipText"
+        [value]="filteredDataProviderId"
+        (update)="updateValue($event)"
+        [minCountForSearch]="0"
+		[placeholder]="placeholderText"
+        #select2>
+    </select2>
+</div> 
