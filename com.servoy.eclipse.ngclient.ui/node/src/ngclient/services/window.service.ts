@@ -71,6 +71,7 @@ export class WindowService {
                         this.create(window.name, window.type);
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
+                        this.setUndecorated(window.name, window.undecorated);
                         this.setCSSClassName(window.name, window.cssClassName);
                         this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
                           // in order to show all the windows the counter must be reset
@@ -332,6 +333,12 @@ export class WindowService {
     }
 
     public setUndecorated(name: string, undecorated: boolean ) {
+        const currentWindow = 'window' + this.windowCounter;
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (storedWindow && !storedWindow.title) {
+            storedWindow.undecorated = undecorated;
+            this.sessionStorageService.set(currentWindow, storedWindow);
+        }
         if ( this.instances[name] ) {
             this.instances[name].undecorated = undecorated;
         }
