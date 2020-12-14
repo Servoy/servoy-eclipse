@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -337,7 +338,7 @@ public class ExportPage extends WizardPage
 
 		final Label updateUrlLabel = new Label(composite, SWT.NONE);
 		updateUrlLabel.setText("Update location:");
-		updateUrlLabel.setToolTipText("URL location of the update(s)");
+		updateUrlLabel.setToolTipText("URL location of the update files.\nOpen context help for details.");
 
 		updateUrlText = new Text(composite, SWT.BORDER);
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
@@ -533,5 +534,11 @@ public class ExportPage extends WizardPage
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
 		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
 		settings.put("update_url", updateUrlText.getText().trim());
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_ngdesktop_solution");
 	}
 }
