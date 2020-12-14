@@ -47,7 +47,10 @@
     <topic href="https://servoy.github.io/servoy_documentation/201903/form_editor.html" label="Form Editor"/>
  </context>
 
-   <context id="export_solution_module_selection" title="Module Selection">
+ <context id="export_ngdesktop_solution" title="NgDesktop Export">
+    <topic href="https://servoy.github.io/servoy_documentation/202003/export_ngdesktop_solution.html" label="NgDesktop Export"/>
+ </context>
+ <context id="export_solution_module_selection" title="Module Selection">
     <topic href="https://servoy.github.io/servoy_documentation/201903/export_solution_module_selection.html" label="Module Selection"/>
  </context>
    <context id="export_solution_file_selection" title="File Selection">
