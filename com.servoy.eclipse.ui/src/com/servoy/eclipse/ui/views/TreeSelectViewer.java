@@ -323,6 +323,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 			selection = newSelection;
 			internalRefresh(null);
 			fireSelectionChanged(new SelectionChangedEvent(TreeSelectViewer.this, getSelection()));
+			setValid(getValue() != null && getSelectionFilter().select(getValue()));
 		}
 	}
 
