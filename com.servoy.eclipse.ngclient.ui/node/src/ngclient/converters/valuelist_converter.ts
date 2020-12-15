@@ -11,18 +11,29 @@ export class ValuelistConverter implements IConverter {
 
   public static readonly FILTER = 'filter';
   private static readonly HANDLED = 'handledID';
-  public static readonly ID_KEY = 'id';
   private static readonly VALUE_KEY = 'value';
-  public static readonly DISPLAYVALUE = 'getDisplayValue';
+  private static readonly DISPLAYVALUE = 'getDisplayValue';
 
 
   constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper) {
   }
 
-  fromServerToClient(serverJSONValue, currentClientValue?: Valuelist, propertyContext?: PropertyContext): IValuelist {
+  fromServerToClient(serverJSONValue:
+        {
+            values?: Array<{ displayValue: any; realValue: any }>;
+            vl?: Valuelist;
+            valuelistid?: string;
+            hasRealValues?: boolean;
+            realValueAreDates?: boolean;
+            displayValueAreDates?: boolean;
+            getDisplayValue?: string;
+            id?: number;
+            handledID?: {id: number};
+        },
+        currentClientValue?: Valuelist, _propertyContext?: PropertyContext): IValuelist {
     let newValue: Valuelist = currentClientValue;
     let state: ValuelistState = null;
-    let deferredValue;
+    let deferredValue: any;
 
     if (serverJSONValue) {
 
@@ -31,9 +42,8 @@ export class ValuelistConverter implements IConverter {
       // it is possible that foundsetLinked.js generates the whole viewport of the foundset using the same value comming from the server => this conversion will be called multiple times
       // with the same serverJSONValue so serverJSONValue.values might already be initialized... so skip it then
       if (serverJSONValue.values) {
-        newValue = serverJSONValue.values;
-        deferredValue = newValue;
-        if (newValue.state === undefined) {
+        newValue = serverJSONValue.vl;
+        if (!newValue) {
           // initialize
           //                $sabloConverters.prepareInternalState(newValue); - no need
           state = new ValuelistState();
@@ -55,23 +65,25 @@ export class ValuelistConverter implements IConverter {
             });
           }
           newValue = new Valuelist(this.sabloService, this.sabloDeferHelper, serverJSONValue.realValueAreDates, state, serverJSONValue.values);
+          serverJSONValue.vl = newValue;
+          deferredValue = newValue;
         }
-      } else if (serverJSONValue[ValuelistConverter.DISPLAYVALUE]) {
+      } else if (serverJSONValue.getDisplayValue) {
         // this is the GETDISPLAYVALUE
         newValue = currentClientValue;
         state = currentClientValue.state;
-        deferredValue = serverJSONValue[ValuelistConverter.DISPLAYVALUE];
+        deferredValue = serverJSONValue.getDisplayValue;
       }
 
       // if we have a deferred filter request, notify that the new value has arrived
-      if (serverJSONValue[ValuelistConverter.HANDLED]) {
-        const handledIDAndState = serverJSONValue[ValuelistConverter.HANDLED]; // { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
-        const defer: Deferred<any> = this.sabloDeferHelper.retrieveDeferForHandling(handledIDAndState[ValuelistConverter.ID_KEY], newValue.state);
+      if (serverJSONValue.handledID) {
+        const handledIDAndState = serverJSONValue.handledID; // { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
+        const defer: Deferred<any> = this.sabloDeferHelper.retrieveDeferForHandling(handledIDAndState.id, newValue.state);
         if (defer) {
           if (handledIDAndState[ValuelistConverter.VALUE_KEY]) {
             defer.resolve(deferredValue);
           } else
-            defer.reject('No value for ' + handledIDAndState[ValuelistConverter.ID_KEY]);
+            defer.reject('No value for ' + handledIDAndState.id);
         }
       }
     } else {
@@ -105,8 +117,8 @@ export class ValuelistConverter implements IConverter {
 class ValuelistState extends ChangeAwareState implements IDeferedState {
   public realToDisplayCache = new Map<string, Observable<object>>();
   public valuelistid: string;
-  public filterStringReq: object;
-  public diplayValueReq: object;
+  public filterStringReq: {filter: string; id: number};
+  public diplayValueReq: {getDisplayValue: string; id: number};
   public hasRealValues: boolean;
 
   deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
@@ -117,6 +129,10 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
     this.deferred = deferred;
     this.currentMsgId = currentMsgId;
     this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
+  }
+
+  public isChanged() {
+    return this.filterStringReq || this.diplayValueReq;
   }
 }
 
@@ -141,10 +157,11 @@ export class Valuelist extends Array<{ displayValue: string; realValue: object }
 
   filterList(filterString: string): Observable<any> {
     // only block once
-    this.state.filterStringReq = {};
-    this.state.filterStringReq[ValuelistConverter.FILTER] = filterString;
-    this.state.filterStringReq[ValuelistConverter.ID_KEY] = this.sabloDeferHelper.getNewDeferId(this.state);
-    const promise = this.state.deferred[this.state.filterStringReq[ValuelistConverter.ID_KEY]].defer.promise;
+    this.state.filterStringReq = {
+        filter: filterString,
+        id:this.sabloDeferHelper.getNewDeferId(this.state)
+    };
+    const promise = this.state.deferred[this.state.filterStringReq.id].defer.promise;
     this.state.notifyChangeListener();
     return from(promise);
   }
@@ -162,10 +179,11 @@ export class Valuelist extends Array<{ displayValue: string; realValue: object }
         if (this.state.realToDisplayCache[key] !== undefined) {
           return from(this.state.realToDisplayCache[key]);
         }
-        this.state.diplayValueReq = {};
-        this.state.diplayValueReq[ValuelistConverter.DISPLAYVALUE] = realValue;
-        this.state.diplayValueReq[ValuelistConverter.ID_KEY] = this.sabloDeferHelper.getNewDeferId(this.state);
-        this.state.realToDisplayCache[key] = this.state.deferred[this.state.diplayValueReq[ValuelistConverter.ID_KEY]].defer.promise.then( (val)  => {
+        this.state.diplayValueReq = {
+            getDisplayValue: realValue,
+            id: this.sabloDeferHelper.getNewDeferId(this.state)
+        };
+        this.state.realToDisplayCache[key] = this.state.deferred[this.state.diplayValueReq.id].defer.promise.then( (val)  => {
           this.state.realToDisplayCache[key] = val;
           return val;
         });
