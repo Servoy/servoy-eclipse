@@ -412,21 +412,18 @@ export interface ViewPortRow extends Record<string, any> {
 
 export class ChangeAwareState {
 
-    private changeListener: () => void;
+    public allChanged = false;
 
-    protected _allChanged = true;
+    private changeListener: () => void;
+    private inNotify = false;
 
     markAllChanged( notifyListener: boolean ): void {
-        this._allChanged = true;
+        this.allChanged = true;
         if ( notifyListener ) this.notifyChangeListener();
     }
 
     hasChanges(): boolean {
-        return this._allChanged;
-    }
-
-    get allChanged() {
-        return this._allChanged;
+        return this.allChanged || this.inNotify;
     }
 
     setChangeListener( callback: () => void ): void {
@@ -434,7 +431,9 @@ export class ChangeAwareState {
     }
 
     public notifyChangeListener(): void {
+        this.inNotify = true;
         if ( this.changeListener ) this.changeListener();
+        this.inNotify = false;
     }
 
 }
