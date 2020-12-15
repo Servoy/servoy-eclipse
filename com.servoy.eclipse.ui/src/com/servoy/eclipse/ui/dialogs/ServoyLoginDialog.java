@@ -32,15 +32,18 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -136,9 +139,9 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		{
 			try
 			{
-				ServoyLoginDialog.servoyLoginListener.onLogin(node.get(SERVOY_LOGIN_USERNAME, null), node.get(SERVOY_LOGIN_TOKEN, null));
+				ServoyLoginDialog.servoyLoginListener.onLogin(username, loginToken);
 			}
-			catch (StorageException ex)
+			catch (Exception ex)
 			{
 				ServoyLog.logError(ex);
 			}
@@ -300,10 +303,30 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				}
 			}
 		});
-		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
 		gd.horizontalIndent = 10;
 		lbl.setLayoutData(gd);
 		lbl.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+		if (Util.isMac())
+		{
+			Label lbl2 = new Label(parent, SWT.NONE);
+			lbl2.setText("Having issues storing credentials?");
+			lbl2.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			lbl2.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseUp(MouseEvent e)
+				{
+					SecureStorageInfoDialog infoDialog = new SecureStorageInfoDialog(parent.getShell());
+					infoDialog.open();
+				}
+			});
+			GridData gd2 = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
+			gd2.horizontalIndent = 10;
+			lbl2.setLayoutData(gd2);
+			lbl2.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+		}
+
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		return control;
 	}
@@ -344,6 +367,48 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			ServoyLog.logError(ex);
 		}
 		return loginToken;
+	}
+
+	private class SecureStorageInfoDialog extends Dialog
+	{
+
+		public SecureStorageInfoDialog(Shell parentShell)
+		{
+			super(parentShell);
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			Composite container = (Composite)super.createDialogArea(parent);
+			Label text = new Label(container, SWT.BEGINNING);
+			text.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
+				false));
+			text.setText("Please follow these steps so that the login credentials can be stored." +
+				"   \n\n" +
+				"	1st Step: Go to Preferences -> General -> Security -> Secure Storage" +
+				"   \n\n" +
+				"	2nd Step: Within \"Master password providers\" section select \"OS X Keystore Integration\" option." +
+				"   \n\n" +
+				"	3rd Step: Select \"Change Password...\" and provide a password hint." +
+				"   \n\n" +
+				"   Try to log in, your credentials should be stored now.");
+			return container;
+		}
+
+		@Override
+		protected void configureShell(Shell newShell)
+		{
+			super.configureShell(newShell);
+			newShell.setText("Login credentials storing issue");
+		}
+
+		@Override
+		protected Point getInitialSize()
+		{
+			return new Point(600, 250);
+		}
+
 	}
 }
 
