@@ -14,7 +14,6 @@ import { JSONArrayConverter } from './converters/json_array_converter';
 import { ValuelistConverter } from './converters/valuelist_converter';
 import { FoundsetConverter } from './converters/foundset_converter';
 import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter';
-import { I18NProvider } from './services/i18n_provider.service';
 import { ViewportService } from './services/viewport.service';
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
@@ -24,6 +23,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
 import { FormcomponentConverter } from './converters/formcomponent_converter';
 import { ComponentConverter } from './converters/component_converter';
 import { LocaleService } from './locale.service';
+import { FormSettings } from './types';
 
 class UIProperties {
   private uiProperties;
@@ -85,8 +85,8 @@ export class ServoyService {
     specTypesService: SpecTypesService,
     sabloDeferHelper: SabloDeferHelper,
     iterableDiffers: IterableDiffers,
-    private logFactory: LoggerFactory,
-    private viewportService: ViewportService) {
+    logFactory: LoggerFactory,
+    viewportService: ViewportService) {
 
     this.log = logFactory.getLogger('ServoyService');
     this.uiProperties = new UIProperties(sessionStorageService);
@@ -193,11 +193,6 @@ class AnchorConstants {
   public static readonly EAST = 2;
   public static readonly SOUTH = 4;
   public static readonly WEST = 8;
-}
-
-export class FormSettings {
-  public name: String;
-  public size: { width: number; height: number };
 }
 
 export class SessionProblem {
