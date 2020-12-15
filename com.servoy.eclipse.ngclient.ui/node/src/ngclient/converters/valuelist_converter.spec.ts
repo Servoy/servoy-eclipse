@@ -135,7 +135,7 @@ describe('ValuelistConverter', () => {
   }));
 
   it( 'should filter list', <any>fakeAsync(() => {
-      const serverJSONValue = createDefaultValuelist();
+      let serverJSONValue = createDefaultValuelist();
       let val: IValuelist = converterService.convertFromServerToClient(serverJSONValue , 'valuelist' );
       expect( val ).toBeDefined();
       expect( val.length ).toBe(3, 'valuelist length should be \'3\' ');
@@ -158,6 +158,7 @@ describe('ValuelistConverter', () => {
       expect(convertedValueForServer).toBe(null, 'convertedValueForServer should be \'null\' because there is no change on the valuelist');
 
       // simulate answer from server
+      serverJSONValue = {};
       serverJSONValue[HANDLED] = {id: 1, value: true};
       serverJSONValue[VALUES] = [{displayValue: 'abbba', realValue: 1}, {displayValue: 'caaabbc', realValue: 3}];
 
@@ -179,6 +180,7 @@ describe('ValuelistConverter', () => {
       expect(convertedValueForServer.id).toBe(2, 'valuelist filter defer id should be \'2\'');
       expect(isFiltered).not.toBeDefined('filter promise should still not be resolved.');
 
+      serverJSONValue = {};
       serverJSONValue[HANDLED] = {id: 2, value: true};
       serverJSONValue[VALUES] = [];
 
@@ -198,6 +200,7 @@ describe('ValuelistConverter', () => {
       expect(convertedValueForServer.id).toBe(3, 'valuelist filter defer id should be \'3\'');
 
       // assume the server did not filter the valuelist
+      serverJSONValue = {};
       serverJSONValue[HANDLED] = {id: 3, value: false};
       val = converterService.convertFromServerToClient(serverJSONValue , 'valuelist', val );
       tick(1);
