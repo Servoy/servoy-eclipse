@@ -407,7 +407,7 @@ export interface ViewPort  {
 
 export interface ViewPortRow extends Record<string, any> {
     _svyRowId: string;
-    _cache: Map<string,any>;
+    _cache?: Map<string,any>;
 }
 
 export class ChangeAwareState {
