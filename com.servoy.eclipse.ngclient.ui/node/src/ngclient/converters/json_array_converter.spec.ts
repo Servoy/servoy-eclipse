@@ -40,24 +40,24 @@ describe( 'JSONArrayConverter', () => {
     } );
 
 
-    function createDefaultArrayJSON() {
+    const createDefaultArrayJSON = () => {
         const data = ['test1', 'test2', 'test3'];
         const json = {};
         json[VALUE] = data;
         json[CONTENT_VERSION] = 1;
         return json;
-    }
+    };
 
-    function createTabJSON( val ) {
+    const createTabJSON = ( val: string ) => {
         const data = { name: val, myvalue: val };
         const json = {};
         json[VALUE] = data;
         json[REAL_TYPE] = 'Tab';
         json[CONTENT_VERSION] = 1;
         return json;
-    }
+    };
 
-    function createTabHolderJSONWithFilledArray( val ) {
+    const createTabHolderJSONWithFilledArray = ( val: string ) => {
         const data = { name: val, tabs: createtArrayWithJSONObjet() };
         const json = {};
         json[VALUE] = data;
@@ -65,26 +65,16 @@ describe( 'JSONArrayConverter', () => {
         json[CONTENT_VERSION] = 1;
         json[ConverterService.TYPES_KEY] = { tabs: 'JSON_arr' };
         return json;
-    }
+    };
 
-    function createTabHolderJSON( val ) {
-        const data = { name: val };
-        const json = {};
-        json[VALUE] = data;
-        json[REAL_TYPE] = 'TabHolder';
-        json[CONTENT_VERSION] = 1;
-        json[ConverterService.TYPES_KEY] = { tabs: 'JSON_arr' };
-        return json;
-    }
-
-    function createtArrayWithJSONObjet() {
+    const createtArrayWithJSONObjet = () => {
         const data = [createTabJSON( 'test1' ), createTabJSON( 'test2' ), createTabJSON( 'test3' )];
         const json = {};
         json[VALUE] = data;
         json[CONTENT_VERSION] = 1;
         json[ConverterService.TYPES_KEY] = ['JSON_obj', 'JSON_obj', 'JSON_obj'];
         return json;
-    }
+    };
 
     it( 'type should be created an array from server to client', () => {
         const val: Array<string> = converterService.convertFromServerToClient( createDefaultArrayJSON(), 'JSON_arr' );
@@ -422,6 +412,11 @@ class Tab extends BaseCustomObject {
     name: string;
 
     private _myvalue: string;
+
+    constructor() {
+        super();
+        this.getStateHolder().allChanged = true;
+    }
 
     get myvalue(): string {
         return this._myvalue;
