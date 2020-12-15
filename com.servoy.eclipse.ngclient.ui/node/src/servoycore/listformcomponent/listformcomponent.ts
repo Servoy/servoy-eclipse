@@ -1,11 +1,15 @@
-import { Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2, HostListener, ChangeDetectorRef, EventEmitter, Output, OnDestroy, Inject, NgZone, AfterViewChecked } from '@angular/core';
-import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
+import { Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
+        HostListener, ChangeDetectorRef, EventEmitter, Output, OnDestroy, Inject } from '@angular/core';
+import { ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ComponentConverter, ComponentType } from '../../ngclient/converters/component_converter';
+import { ComponentConverter, ComponentModel } from '../../ngclient/converters/component_converter';
 import { ServoyBaseComponent } from '../../ngclient/basecomponent';
-import { Foundset, FoundsetChangeEvent, FoundsetConverter } from '../../ngclient/converters/foundset_converter';
-import { FormComponentType } from '../../ngclient/converters/formcomponent_converter';
+import { Foundset, FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
+import { FormComponentState } from '../../ngclient/converters/formcomponent_converter';
+import { ServoyApi } from '../../ngclient/servoy_public';
+import { FormService } from '../../ngclient/form.service';
+import { ServoyService } from '../../ngclient/servoy.service';
 
 @Component({
   selector: 'servoycore-listformcomponent',
@@ -14,14 +18,13 @@ import { FormComponentType } from '../../ngclient/converters/formcomponent_conve
 })
 export class ListFormComponent extends ServoyBaseComponent implements AfterViewInit, OnDestroy {
 
-  @Input() containedForm: FormComponentType;
+  @Input() containedForm: FormComponentState;
   @Input() foundset: Foundset;
-  @Input() selectionClass: string; 
+  @Input() selectionClass: string;
   @Input() styleClass: string;
   @Input() responsivePageSize: number;
   @Input() pageLayout: string;
   @Input() onSelectionChanged;
-  @Output() foundsetChange = new EventEmitter();
 
   @ViewChild('element', {static: true}) elementRef: ElementRef;
   @ViewChild('firstelement', {static: true}) elementFirstRef: ElementRef;
@@ -34,25 +37,27 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   changeListener: (change: FoundsetChangeEvent) => void;
 
   constructor(protected readonly renderer: Renderer2,
-     cdRef: ChangeDetectorRef,
-     @Inject(FormComponent) private parent: FormComponent) {
+        private formservice: FormService,
+        private servoyService: ServoyService,
+        cdRef: ChangeDetectorRef,
+        @Inject(FormComponent) private parent: FormComponent) {
     super(renderer, cdRef);
   }
 
-  @HostListener('window:keydown', ['$event'])
+  @HostListener('keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    if (!this.foundset.multiSelect && event.key == 'ArrowUp' || event.key == 'ArrowDown') {
+    if (!this.foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       let selectedRowIndex = this.foundset.selectedRowIndexes[0];
-      if (event.key == 'ArrowUp') {
+      if (event.key === 'ArrowUp') {
         // move to the previous page if the first element (not from the first page) is selected
-        if (this.page != 0 && selectedRowIndex / (this.page) == this.responsivePageSize) {
+        if (this.page !== 0 && selectedRowIndex / (this.page) === this.responsivePageSize) {
           this.moveLeft();
         }
         selectedRowIndex--;
-      } else if (event.key == 'ArrowDown') { // keydown
+      } else if (event.key === 'ArrowDown') { // keydown
           selectedRowIndex++;
           // move to the next page if the last element (not from the last page) is selected
-        if (selectedRowIndex / (this.page + 1) == this.responsivePageSize) {
+        if (selectedRowIndex / (this.page + 1) === this.responsivePageSize) {
           this.moveRight();
         }
       }
@@ -66,9 +71,8 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
   onRowClick(row: any) {
     for ( let i = 0; i < this.foundset.viewPort.rows.length; i++ ) {
-      if (this.foundset.viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] == row['_svyRowId']) {
+      if (this.foundset.viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] === row['_svyRowId']) {
         this.foundset.requestSelectionUpdate([i + this.foundset.viewPort.startIndex]);
-        this.foundsetChange.emit(this.foundset);
         break;
       }
     }
@@ -95,64 +99,85 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
         this.updatePagingControls();
       }
 
-      if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize) && this.foundset.viewPort.size == 0 && this.numberOfCells > 0) {
-        this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells); 
+      if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize) && this.foundset.viewPort.size === 0 && this.numberOfCells > 0) {
+        this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
         this.calculateCells();
+      }
+      if (event.viewportRowsUpdated){
+        // copy the viewport data over to the cell
+        // TODO this only is working for "updates", what happens with deletes or inserts?
+        const changes = event.viewportRowsUpdated;
+        changes.forEach(change => {
+            const vpRows = this.foundset.viewPort.rows;
+            for (let row = change.startIndex; row <= change.endIndex; row++) {
+                const cache = vpRows[row]._cache;
+                if (!cache) continue;
+                this.containedForm.childElements.forEach(cm => {
+                    const cell: Cell = cache.get(cm.name);
+                    if (cell) {
+                        const mvp = cm.modelViewport[row];
+                        for(const key of Object.keys(mvp)) {
+                            cell.model[key] = mvp[key];
+                        }
+                    }
+                });
+            }
+        });
       } else {
         let viewportSizeAfterShiftingIsDone = this.foundset.viewPort.size;
           if (event.viewPortStartIndexChanged) {
             // an insert/delete before current page made viewport start index no longer match page start index; adjust
             const shiftedPageDelta = this.page * this.numberOfCells - this.foundset.viewPort.startIndex; // can be negative (insert) or positive(delete)
-            if (shiftedPageDelta != 0) {
+            if (shiftedPageDelta !== 0) {
               const wantedVPSize = this.foundset.viewPort.size;
               const wantedVPStartIndex = this.page * this.numberOfCells;
               const serverSize = this.foundset.serverSize;
-              
+
               // so shifting means loading "shiftedPageDelta" more/less in one end of the viewport and "shiftedPageDelta" less/more at the other end
-              
+
               // when load extra would request more records after, there might not be enough records in the foundset (deleted before)
               let loadExtraCorrected = shiftedPageDelta;
               if (loadExtraCorrected > 0 /*so shift right*/ && wantedVPStartIndex + wantedVPSize > serverSize)
                 loadExtraCorrected -= (wantedVPStartIndex + wantedVPSize - serverSize);
-              if (loadExtraCorrected != 0) {
-                this.foundset.loadExtraRecordsAsync(loadExtraCorrected, true); 
+              if (loadExtraCorrected !== 0) {
+                this.foundset.loadExtraRecordsAsync(loadExtraCorrected, true);
                 viewportSizeAfterShiftingIsDone += Math.abs(loadExtraCorrected);
               }
-              
+
               // load less if it happens at the end - might need to let more records slide-in the viewport if available (insert before)
               let loadLessCorrected = shiftedPageDelta;
-              if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) // 
+              if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) //
                 loadLessCorrected += Math.min(serverSize - wantedVPStartIndex - wantedVPSize, this.numberOfCells - wantedVPSize);
-              if (loadLessCorrected != 0) {
+              if (loadLessCorrected !== 0) {
                 this.foundset.loadLessRecordsAsync(loadLessCorrected, true);
                 viewportSizeAfterShiftingIsDone -= Math.abs(loadLessCorrected);
               }
             }
-            this.updateSelection(this.foundset.selectedRowIndexes);
+            this.updateSelection();
           }
-          
+
           // ok now we know startIndex is corrected if needed already; check is size needs to be corrected as well
           if (event.viewPortSizeChanged) {
             // see if the new viewport size is larger or smaller then expected
-            
+
             // sometimes - due to custom components and services that show forms but they do not properly wait for the formWillShow promise to resolve
             // before showing the form in the DOM - list form component might end up showing in a container that changed size so numberOfCells is now different
             // (let's say decreased) but having old foundset viewport data (meanwhile solution server side might have changed foundset); then what happened
             // is that browser-side list-form-component requested less records based on old foundset data while server-side already had only 1 or 2 records now
             // in foundset => it got back a viewport of size 0
-            
+
             // so although this would not normally happen (viewport size getting changed incorrectly as if the component requested that) we check this to be
             // resilient to such components/services as well; for example popupWindow used to show forms quickly before getting the updates from server before showing
             // (a second show of a pop-up window with decreased size and also less records in the foundset); there are other components that could do this for example
             // bootstrap tabless panel with waitForData property set to false
-            
+
             const vpStartIndexForCurrentCalcs = this.page * this.numberOfCells; // this might have already been requested in previous code; might not be the actual present one in browser
             const vpSizeForCurrentCalcs = viewportSizeAfterShiftingIsDone; // this might have already been requested in previous code; might not be the actual present one in browser
-            
+
             const deltaSize = this.numberOfCells - vpSizeForCurrentCalcs;
             if (deltaSize > 0) {
               // we could show more records then currently in viewport; see if more are available
-              const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs)
+              const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs);
               if (availableExtraRecords > 0) this.foundset.loadExtraRecordsAsync(Math.min(deltaSize, availableExtraRecords), true);
             } else if (deltaSize < 0) {
               // we need to show less records
@@ -174,6 +199,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   }
 
   getViewportRows(): ViewPortRow[] {
+    if (this.numberOfCells === 0) return [];
     return this.foundset.viewPort.rows;
   }
 
@@ -190,14 +216,13 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   }
 
   getRowWidth(): string {
-      if (this.pageLayout == 'listview')
-      {
-          return "100%";
-      }    
+      if (this.pageLayout === 'listview') {
+          return '100%';
+      }
       return this.containedForm.getStateHolder().formWidth + 'px';
   }
-  
-  getRowItems(): Array<ComponentType> {
+
+  getRowItems(): Array<ComponentModel> {
     return this.containedForm.getStateHolder().childElements;
   }
 
@@ -214,57 +239,82 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
   }
 
   firstPage() {
-      if (this.page != 0) {
+      if (this.page !== 0) {
           this.page = 0;
           this.calculateCells();
       }
   }
 
-  getRowItemTemplate(item: ComponentType): TemplateRef<any> { 
-    return this.parent.getTemplateForLFC(item.getStateHolder());
+  getRowItemTemplate(item: ComponentModel): TemplateRef<any> {
+    return this.parent.getTemplateForLFC(item);
   }
 
-  getRowItemState(item: ComponentType, rowIndex: number) {
-    let rowItem:any = item;
-    if(item instanceof ComponentType) {
-      for(let element of this.containedForm.getStateHolder().childElements) {
-        const state = element.getStateHolder();
-        if(state.name == item.getStateHolder().name) {
-          rowItem = Object.assign({}, state);
-          if (state.foundsetConfig && state.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array && rowIndex < rowItem[ComponentConverter.MODEL_VIEWPORT].length) {
-            (state.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
-              rowItem.model[p] = rowItem[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
-            });
-          }
-          rowItem.handlers = {};
-          const rowId = this.foundset.viewPort.rows[rowIndex][ViewportService.ROW_ID_COL_KEY];
-          Object.entries(state.handlers).forEach(([k, v]) => {
-            const wrapperF: any = v;
-            rowItem.handlers[k] = wrapperF.selectRecordHandler(rowId);
-          });
-          break;
-        }
-      }
+  getRowItemState(item: ComponentModel, row: ViewPortRow, rowIndex: number): Cell {
+    if (row._cache){
+        const cache = row._cache.get(item.name);
+        if (cache)  return cache;
     }
+
+    // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+    function Model() {
+    }
+    Model.prototype = item.model;
+
+    const rowId = row[ViewportService.ROW_ID_COL_KEY];
+    const model = new Model();
+    const handlers = {};
+    const rowItem = new Cell(item,model, handlers, rowId);
+    if (item.foundsetConfig && item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array) {
+        (item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
+            rowItem.model[p] = item[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
+        });
+    }
+    item.mappedHandlers.forEach( (value, key) => {
+        rowItem.handlers[key] = value.selectRecordHandler(rowId);
+    });
+
+    if (!row._cache) row._cache = new Map();
+    row._cache.set(item.name,rowItem);
     return rowItem;
   }
 
+    getHandler(cell: Cell, name: string) {
+        return cell.handlers[name];
+    }
+
+    getServoyApi(cell: Cell) {
+        if (cell.api == null) {
+            cell.api = new ServoyApi(cell.state, cell.state.name, this.containedForm.absoluteLayout, this.formservice, this.servoyService);
+            cell.api.startEdit = (property) => cell.state.startEdit(property, cell.rowId);
+        }
+        return cell.api;
+    }
+
+    datachange(component: Cell, property: string, value: any) {
+       component.state.apply(property, value, component.rowId);
+    }
+
   calculateCells() {
-      this.numberOfCells = this.responsivePageSize;
+      this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
       if (this.numberOfCells <= 0 ) {
-          const parentWidth = this.elementRef.nativeElement.offsetWidth;
-          const parentHeight = this.elementRef.nativeElement.offsetHeight;
-          const height = this.containedForm.getStateHolder().formHeight;
-          const width = this.containedForm.getStateHolder().formWidth; 
-          const numberOfColumns =  (this.pageLayout == 'listview') ? 1 : Math.floor(parentWidth/width);
-          const numberOfRows = Math.floor(parentHeight/height);
-          this.numberOfCells  = numberOfRows * numberOfColumns;
-          // always just render 1
-          if (this.numberOfCells < 1) this.numberOfCells = 1;
+          if (this.servoyApi.isInAbsoluteLayout()) {
+              const parentWidth = this.elementRef.nativeElement.offsetWidth;
+              const parentHeight = this.elementRef.nativeElement.offsetHeight;
+              const height = this.containedForm.getStateHolder().formHeight;
+              const width = this.containedForm.getStateHolder().formWidth;
+              const numberOfColumns =  (this.pageLayout === 'listview') ? 1 : Math.floor(parentWidth/width);
+              const numberOfRows = Math.floor(parentHeight/height);
+              this.numberOfCells  = numberOfRows * numberOfColumns;
+              // always just render 1
+              if (this.numberOfCells < 1) this.numberOfCells = 1;
+          } else {
+            console.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormname());
+        }
+
       }
       const startIndex = this.page * this.numberOfCells;
       const foundset = this.foundset;
-      if (foundset.viewPort.startIndex != startIndex) {
+      if (foundset.viewPort.startIndex !== startIndex) {
           foundset.loadRecordsAsync(startIndex, this.numberOfCells);
       } else {
           if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
@@ -276,6 +326,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
       }
       this.updatePagingControls();
       foundset.setPreferredViewportSize(this.numberOfCells);
+      this.cdRef.detectChanges();
   }
 
   updatePagingControls() {
@@ -285,29 +336,16 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     this.renderer.setStyle(  this.elementRightRef.nativeElement, 'visibility' , hasMorePages ? 'visible' : 'hidden' );
   }
 
-  updateSelection(newValue, oldValue?) {
+  getRowClasses(index: number) {
     if (this.selectionClass) {
-      const children = this.elementRef.nativeElement.children;
-      if (oldValue) {
-        for (let k = 0; k < oldValue.length; k++) {
-          const idx = oldValue[k] - this.foundset.viewPort.startIndex;
-          if (idx > -1 && idx < children.length - 1) {
-            this.renderer.removeClass(this.elementRef.nativeElement.children[idx + 1], this.selectionClass);
-          }
+        if (this.foundset.selectedRowIndexes.indexOf(this.foundset.viewPort.startIndex + index) !== -1) {
+            return 'svy-listformcomponent-row ' + this.selectionClass;
         }
-      } else {
-        for (let k = 1; k < children.length; k++) {
-          this.renderer.removeClass(this.elementRef.nativeElement.children[k], this.selectionClass);
-        }
-      }
-      for (let k = 0; k < newValue.length; k++) {
-        const idx = newValue[k] - this.foundset.viewPort.startIndex;
-        if (idx > -1 && idx < children.length - 1) {
-          this.renderer.addClass(this.elementRef.nativeElement.children[idx + 1], this.selectionClass);
-        }
-      }
     }
+    return 'svy-listformcomponent-row';
+  }
 
+  updateSelection() {
     const selectedRowIndex = this.foundset.selectedRowIndexes[0];
     const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.responsivePageSize * this.page : selectedRowIndex];
     if (element && !element.contains(document.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
@@ -315,5 +353,13 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
       this.selectionChangedByKey = false;
     }
   }
+}
+
+class Cell  {
+    api: ServoyApi;
+    constructor(public readonly state: ComponentModel, public readonly model: any,
+                public readonly handlers: any, public readonly rowId: any) {
+    }
+
 }
 
