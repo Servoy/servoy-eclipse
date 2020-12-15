@@ -13,6 +13,8 @@ import { FormEditor } from './editors/formeditor';
 import { SelectEditor } from './editors/selecteditor';
 import { TextEditor } from './editors/texteditor';
 import { TypeaheadEditor } from './editors/typeaheadeditor';
+import { RadioFilter } from './filters/radiofilter';
+import { ValuelistFilter } from './filters/valuelistfilter';
 
 const COLUMN_PROPERTIES_DEFAULTS = {
     headerTitle: { colDefProperty: 'headerName', default: null },
@@ -39,8 +41,7 @@ const NULL_VALUE = {displayValue: '', realValue: null};
 
 @Component({
     selector: 'aggrid-groupingtable',
-    templateUrl: './datagrid.html',
-    styleUrls: ['./datagrid.css']
+    templateUrl: './datagrid.html'
 })
 export class DataGrid {
 
@@ -233,6 +234,16 @@ export class DataGrid {
         this.agGridOptions.singleClickEdit = false;
         this.agGridOptions.sideBar = sideBar;
         this.agGridOptions.getMainMenuItems = this.getMainMenuItems;
+
+
+        this.agGridOptions.rowSelection = this.myFoundset && (this.myFoundset.multiSelect === true) ? 'multiple' : 'single';
+        this.agGridOptions.rowDeselection = this.myFoundset && (this.myFoundset.multiSelect === true);
+        this.agGridOptions.suppressCellSelection = true;
+        this.agGridOptions.enableRangeSelection = false;
+
+        this.agGridOptions.getRowNodeId = function(data) {
+            return data._svyFoundsetUUID + '_' + data._svyFoundsetIndex;
+        }
 
         // the group manager
         this.groupManager = new GroupManager(this);
@@ -436,25 +447,26 @@ export class DataGrid {
                 // }
             }
 
-            //TODO: add filters
-            // if (column.filterType) {
-            //     colDef.suppressFilter = false;
-            //     colDef.filterParams = { applyButton: true, clearButton: true, newRowsAction: 'keep', suppressAndOrCondition: true, caseSensitive: false };
+            if (column.filterType) {
+                colDef.suppressFilter = false;
+                colDef.filterParams = { applyButton: true, clearButton: true, newRowsAction: 'keep', suppressAndOrCondition: true, caseSensitive: false };
 
-            //     if(column.filterType == 'TEXT') {
-            //         colDef.filter = 'agTextColumnFilter';
-            //     }
-            //     else if(column.filterType == 'NUMBER') {
-            //         colDef.filter = 'agNumberColumnFilter';
-            //     }
-            //     else if(column.filterType == 'DATE') {
-            //         colDef.filter = 'agDateColumnFilter';
-            //     }
-            //     else if(column.filterType == 'VALUELIST' || column.filterType == 'RADIO') {
-            //         colDef.filter = getValuelistFilter();
-            //         colDef.filterParams.svyFilterType = column.filterType;
-            //     }
-            // }
+                if(column.filterType == 'TEXT') {
+                    colDef.filter = 'agTextColumnFilter';
+                }
+                else if(column.filterType == 'NUMBER') {
+                    colDef.filter = 'agNumberColumnFilter';
+                }
+                else if(column.filterType == 'DATE') {
+                    colDef.filter = 'agDateColumnFilter';
+                }
+                else if(column.filterType == 'VALUELIST') {
+                    colDef.filterFramework = ValuelistFilter;
+                }
+                else if(column.filterType == 'RADIO') {
+                    colDef.filterFramework = RadioFilter;
+                }
+            }
 
             //TODO: get tooltip
             //colDef.tooltipValueGetter = this.getTooltip;
@@ -855,9 +867,63 @@ export class DataGrid {
     //     }
     // }
 
-    //TODO
     selectedRowIndexesChanged(foundsetManager?): boolean {
-        return false;
+        // FIXME can't select the record when is not in viewPort. Need to synchornize with viewPort record selection
+        this.log.debug(' - 2.1 Request selection changes');
+
+        // Disable selection when table is grouped
+        if (this.isTableGrouped()) {
+            return  false;;
+        }
+
+        let isSelectedRowIndexesChanged = false;
+        // old selection
+        const oldSelectedNodes = this.agGrid.api.getSelectedNodes();
+
+        // CHANGE Seleciton
+        if (!foundsetManager) {
+            foundsetManager = this.foundset;
+        }
+
+        const selectedNodes = new Array();
+        for(let i = 0; i < foundsetManager.foundset.selectedRowIndexes.length; i++) {
+
+            const rowIndex = foundsetManager.foundset.selectedRowIndexes[i] - foundsetManager.foundset.viewPort.startIndex;
+            // find rowid
+            if (rowIndex > -1 && foundsetManager.foundset.viewPort.rows[rowIndex]) {
+                //rowIndex >= foundsetManager.foundset.viewPort.startIndex && rowIndex <= foundsetManager.foundset.viewPort.size + foundsetManager.foundset.viewPort.startIndex) {
+                if (!foundsetManager.foundset.viewPort.rows[rowIndex]) {
+                    this.log.error('how is possible there is no rowIndex ' + rowIndex + ' on viewPort size ' + foundsetManager.foundset.viewPort.rows.length);
+                    // TODO deselect node
+                    continue;
+                }
+
+                const node = this.agGrid.api.getRowNode(foundsetManager.foundsetUUID + "_" + foundsetManager.foundset.selectedRowIndexes[i]);
+                if (node) {
+                    selectedNodes.push(node);
+                }
+            } else {
+                // TODO selected record is not in viewPort: how to render it ?
+            }
+        }
+
+        for (let i = 0; i < oldSelectedNodes.length; i++) {
+            if(selectedNodes.indexOf(oldSelectedNodes[i]) == -1) {
+                this.selectionEvent = null;
+                oldSelectedNodes[i].setSelected(false);
+                isSelectedRowIndexesChanged = true;
+            }
+        }
+
+        for (let i = 0; i < selectedNodes.length; i++) {
+            if(oldSelectedNodes.indexOf(selectedNodes[i]) == -1) {
+                this.selectionEvent = null;
+                selectedNodes[i].setSelected(true);
+                isSelectedRowIndexesChanged = true;
+            }
+        }
+
+        return isSelectedRowIndexesChanged;
     }
 
     /**

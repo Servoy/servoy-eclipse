@@ -12,6 +12,8 @@ import { TypeaheadEditor } from './datagrid/editors/typeaheadeditor';
 import { AgGridModule } from '@ag-grid-community/angular';
 import { LicenseManager } from '@ag-grid-enterprise/core';
 import { ColumnsToolPanelModule, MenuModule, ModuleRegistry, RowGroupingModule, ServerSideRowModelModule, SideBarModule } from '@ag-grid-enterprise/all-modules';
+import { ValuelistFilter } from './datagrid/filters/valuelistfilter';
+import { RadioFilter } from './datagrid/filters/radiofilter';
 
 @NgModule({
     declarations: [
@@ -20,7 +22,9 @@ import { ColumnsToolPanelModule, MenuModule, ModuleRegistry, RowGroupingModule, 
         DatePicker,
         FormEditor,
         SelectEditor,
-        TypeaheadEditor
+        TypeaheadEditor,
+        ValuelistFilter,
+        RadioFilter
     ],
     imports: [
         CommonModule,

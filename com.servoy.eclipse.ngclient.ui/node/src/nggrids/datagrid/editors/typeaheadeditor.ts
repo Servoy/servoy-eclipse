@@ -28,12 +28,12 @@ export class TypeaheadEditor extends DatagridEditor {
   click$ = new Subject<string>();
 
   @Input() initialDisplayValue;
-  @Input() format;
   @Input() maxLength = 524288;
 
   width: number;
   valuelist;
   hasRealValues: boolean;
+  format;
 
   constructor(private formatService: FormattingService, config: NgbTypeaheadConfig) {
     super();

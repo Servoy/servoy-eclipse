@@ -13,3 +13,4 @@
 @import "~@ag-grid-enterprise/all-modules/dist/styles/ag-grid.css";
 @import "~@ag-grid-enterprise/all-modules/dist/styles/ag-theme-bootstrap.css";
 @import "nggrids/ag-grid-custom.css";
+@import "nggrids/datagrid/datagrid.css";
