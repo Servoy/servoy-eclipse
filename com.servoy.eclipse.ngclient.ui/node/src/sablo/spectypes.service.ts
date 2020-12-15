@@ -393,6 +393,10 @@ export enum ChangeType {
 export class BaseCustomObject implements ICustomObject {
     private state = new BaseCustomObjectState();
 
+    constructor() {
+        this.state.allChanged = true;
+    }
+
     public getStateHolder() {
         return this.state;
     }
@@ -533,6 +537,7 @@ export class ArrayState extends BaseCustomObjectState {
 
     constructor( private array: Array<any>, private iterableDiffers: IterableDiffers ) {
         super();
+        this.allChanged = true;
     }
 
     public initDiffer() {
