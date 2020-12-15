@@ -309,7 +309,7 @@ public class GhostHandler implements IServerService
 				}
 				String uuid = parentFormComponentPath != null && !parentFormComponentPath.isEmpty() ? basicWebComponent.getName().replaceAll("-", "_")
 					: basicWebComponent.getUUID().toString();
-				if (Character.isDigit(uuid.charAt(0)))
+				if (parentFormComponentPath != null && !parentFormComponentPath.isEmpty() && Character.isDigit(uuid.charAt(0)))
 				{
 					uuid = "_" + uuid;
 				}
