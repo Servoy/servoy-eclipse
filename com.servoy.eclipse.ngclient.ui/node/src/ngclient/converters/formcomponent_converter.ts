@@ -1,42 +1,41 @@
 import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { ChangeAwareState, IChangeAwareValue, IFormComponentType, instanceOfChangeAwareValue,  } from '../../sablo/spectypes.service';
-import { ComponentState, ComponentType } from './component_converter';
+import { ChangeAwareState, IChangeAwareValue, instanceOfChangeAwareValue,  } from '../../sablo/spectypes.service';
+import { ComponentModel } from './component_converter';
 
 export class FormcomponentConverter implements IConverter {
 
-    constructor( private converterService: ConverterService) {       
-    } 
-    fromServerToClient(serverSentData: FormComponentState, currentClientData: FormComponentType, propertyContext: PropertyContext): IFormComponentType {
+    constructor( private converterService: ConverterService) {
+    }
+    fromServerToClient(serverSentData: any, currentClientData: FormComponentState, propertyContext: PropertyContext): FormComponentState {
         let conversionInfo = null;
-        let realValue = currentClientData;
-        let state: FormComponentState = new FormComponentState(serverSentData.absoluteLayout,
+        let state = currentClientData;
+        if ( state == null ) {
+            state = new FormComponentState(serverSentData.absoluteLayout,
             serverSentData.childElements,
             serverSentData.formHeight,
             serverSentData.formWidth,
             serverSentData.startName,
-            serverSentData.svy_types, 
-            serverSentData.useCssPosition, 
+            serverSentData[ConverterService.TYPES_KEY],
+            serverSentData.useCssPosition,
             serverSentData.uuid);
-        if ( realValue == null ) {
-            realValue = new FormComponentType(state); 
         }
         if ( serverSentData[ConverterService.TYPES_KEY] ) {
             conversionInfo = serverSentData[ConverterService.TYPES_KEY];
         }
         if ( conversionInfo ) {
-            for ( const key in conversionInfo ) {
-                let elem = serverSentData[key]; 
+            for ( const key of Object.keys(conversionInfo) ) {
+                let elem = serverSentData[key];
                 state.conversionInfo[key] = conversionInfo[key];
-                realValue[key] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo[key], currentClientData ? currentClientData[key] : undefined, propertyContext );
-                
+                state[key] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo[key], currentClientData ? currentClientData[key] : undefined, propertyContext );
+
                 if (instanceOfChangeAwareValue(elem)) {
                     // child is able to handle it's own change mechanism
                     elem.getStateHolder().setChangeListener(() => {
                       state.notifyChangeListener();
                     });
                 }
-                if ( key == 'childElements' && elem ) {
-                    for ( let i = 0; i < elem.length; i++ ) {
+                if ( key === 'childElements' && elem ) {
+                    for ( const i of Object.keys(elem)) {
                         const comp = elem[i];
                         if (instanceOfChangeAwareValue(comp)) {
                             comp.getStateHolder().setChangeListener(() => {
@@ -47,39 +46,36 @@ export class FormcomponentConverter implements IConverter {
                 }
             }
         }
-        return realValue;
+        return state;
     }
 
-    fromClientToServer(newClientData: FormComponentType, oldClientData: FormComponentType): Object {
+    fromClientToServer(newClientData: FormComponentState, oldClientData: FormComponentState): any {
         if ( !newClientData ) return null;
         // only childElements are pushed.
-        const internalState = newClientData.getStateHolder();
-        let changes = this.converterService.convertFromClientToServer( newClientData["childElements"], internalState.conversionInfo["childElements"], oldClientData ? oldClientData["childElements"] : null );
+        const formState = newClientData.getStateHolder();
+        const changes = this.converterService.convertFromClientToServer( newClientData['childElements'], formState.conversionInfo['childElements'],
+                                                                            oldClientData ? oldClientData['childElements'] : null );
         return changes;
     }
 }
 
-class FormComponentState extends ChangeAwareState {
+export class FormComponentState extends ChangeAwareState implements IChangeAwareValue {
 
     conversionInfo: any = {};
     constructor(
         public absoluteLayout: boolean,
-        public childElements: ComponentType[], 
+        public childElements: ComponentModel[],
         public formHeight: number,
         public formWidth: number,
         public startName: string,
-        public svy_types: any[],
+        public svyTypes: any[],
         public useCssPosition: boolean,
         public uuid: string) {
         super();
     }
-}
-
-export class FormComponentType implements IFormComponentType, IChangeAwareValue {
-
-    constructor(private state: FormComponentState) {}
 
     getStateHolder(): FormComponentState {
-        return this.state;
+        return this;
     }
 }
+
