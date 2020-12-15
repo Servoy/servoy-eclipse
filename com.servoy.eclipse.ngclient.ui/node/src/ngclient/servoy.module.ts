@@ -17,7 +17,7 @@ import { DefaultLoginWindowComponent } from './services/default-login-window/def
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
 import { HttpClientModule } from '@angular/common/http';
-import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
+import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import { I18NProvider } from './services/i18n_provider.service';
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';

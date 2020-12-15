@@ -1,5 +1,6 @@
-import { FormService, ComponentCache } from '../ngclient/form.service';
+import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
+import { ComponentCache } from './types';
 
 export class ServoyApi {
     constructor( private item: ComponentCache, private formname: string, private absolute: boolean, private formservice: FormService, private servoyService: ServoyService ) {

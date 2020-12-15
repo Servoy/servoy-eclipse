@@ -442,23 +442,18 @@ export class BaseCustomObjectState extends ChangeAwareState {
 
     // provide a hash that lets arrays that contain custom objects know that the object has changed or not
     private static counter = 0;
+
+    public conversionInfo = {};
+    public ignoreChanges = false;
+
+
     private change = 0;
     private hash = BaseCustomObjectState.counter++;
 
     private changedKeys = new Set<string | number>();
 
-    public conversionInfo = {};
-    public ignoreChanges = false;
-
     hasChanges() {
         return super.hasChanges() || this.getChangedKeys().size > 0; // leave this as a method call as some subclasses might compute the changedKeys inside getChangedKeys()
-    }
-
-    private setChangeListenerToSubValueIfNeeded( value: any, changeListener: () => void ): void {
-        if ( instanceOfChangeAwareValue( value ) ) {
-            // child is able to handle it's own change mechanism
-            value.getStateHolder().setChangeListener( changeListener );
-        }
     }
 
     public setPropertyAndHandleChanges( _thisBaseCustoomObject, internalPropertyName, propertyName, value ) {
@@ -481,6 +476,14 @@ export class BaseCustomObjectState extends ChangeAwareState {
         if ( !this.ignoreChanges && instanceOfChangeAwareValue( value ) ) value.getStateHolder().markAllChanged( false );
     }
 
+    public getChangedKeys(): Set<string | number> {
+        return this.changedKeys;
+    }
+
+    public clearChanges() {
+        this.changedKeys.clear();
+        this.allChanged = false;
+    }
 
     protected markIfChanged( propertyName: string | number, newObject: any, oldObject: any ) {
         if ( this.testChanged( propertyName, newObject, oldObject ) ) {
@@ -490,13 +493,11 @@ export class BaseCustomObjectState extends ChangeAwareState {
         return false;
     }
 
-    public getChangedKeys(): Set<string | number> {
-        return this.changedKeys;
-    }
-
-    public clearChanges() {
-        this.changedKeys.clear();
-        this._allChanged = false;
+    private setChangeListenerToSubValueIfNeeded( value: any, changeListener: () => void ): void {
+        if ( instanceOfChangeAwareValue( value ) ) {
+            // child is able to handle it's own change mechanism
+            value.getStateHolder().setChangeListener( changeListener );
+        }
     }
 
     private pushChange( propertyName ) {

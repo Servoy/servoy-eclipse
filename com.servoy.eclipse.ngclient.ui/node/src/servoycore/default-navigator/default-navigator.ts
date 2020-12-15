@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { FormService, ComponentCache } from '../../ngclient/form.service';
+import { FormService } from '../../ngclient/form.service';
+import { ComponentCache } from '../../ngclient/types';
 
 @Component({
   selector: 'svy-default-navigator',
@@ -8,7 +9,7 @@ import { FormService, ComponentCache } from '../../ngclient/form.service';
 })
 export class DefaultNavigator {
 
-  @Input() readonly name;
+  @Input() readonly name: string;
   navigatorComponentCache: ComponentCache;
   sliderValue: number;
 

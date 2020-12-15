@@ -31,7 +31,7 @@ export class SabloDeferHelper {
         return defer;
     }
 
-    public getNewDeferId(state: IDeferedState) {
+    public getNewDeferId(state: IDeferedState): number {
         // if (Object.keys(internalState.deferred).length == 0) $sabloTestability.block(true);
 
         const newMsgID = ++state.currentMsgId;
