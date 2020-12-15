@@ -404,10 +404,10 @@ export class FormService {
                 const structure = new StructureCache(elem.styleclass);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
-                    formCache.mainStructure = structure;
-                } else {
-                    parent.addChild(structure);
+                    parent  = new StructureCache(null);
+                    formCache.mainStructure = parent;
                 }
+                parent.addChild(structure);
             } else
                 if (elem.formComponent === true) {
                     const classes: Array<string> = new Array();
