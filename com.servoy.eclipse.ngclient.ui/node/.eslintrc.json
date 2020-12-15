@@ -24,6 +24,9 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+       "@typescript-eslint/naming-convention": ["error",
+        { "selector": "property", "modifiers": ["readonly","static"], "format": ["UPPER_CASE"] }
+        ],
         "@angular-eslint/component-class-suffix": "off",
         "@angular-eslint/component-selector": [
           "error",
@@ -33,7 +36,8 @@
               "servoydefault",
               "bootstrapcomponents",
               "servoycore",
-              "servoyextra"
+              "servoyextra",
+              "svy"
             ],
             "style": "kebab-case"
           }
@@ -46,7 +50,8 @@
               "servoydefault",
               "bootstrapcomponents",
               "servoycore",
-              "servoyextra"
+              "servoyextra",
+              "svy"
             ],
             "style": "camelCase"
           }
