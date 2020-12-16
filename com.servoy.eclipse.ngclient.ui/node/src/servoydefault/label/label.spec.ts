@@ -11,7 +11,7 @@ describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
     let fixture: ComponentFixture<ServoyDefaultLabel>;
     let element;
-    const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
+    const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','registerComponent']);
 
     beforeEach( waitForAsync(() => {
         TestBed.configureTestingModule( {

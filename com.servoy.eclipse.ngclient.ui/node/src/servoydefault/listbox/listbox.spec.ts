@@ -31,7 +31,7 @@ describe('ServoyDefaultListBox', () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
   let debugEl: DebugElement;
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner','registerComponent']);
 
   beforeEach(waitForAsync(() => {
 

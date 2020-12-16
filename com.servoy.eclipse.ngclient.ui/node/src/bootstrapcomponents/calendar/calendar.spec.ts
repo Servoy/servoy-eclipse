@@ -31,6 +31,7 @@ describe('CalendarComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapCalendar);
     component = fixture.componentInstance;
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent']);
     fixture.detectChanges();
   });
 

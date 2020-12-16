@@ -18,7 +18,7 @@ describe('ServoyExtraSplitpane', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraSplitpane);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

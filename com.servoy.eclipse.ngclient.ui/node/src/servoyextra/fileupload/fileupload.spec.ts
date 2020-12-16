@@ -16,7 +16,7 @@ describe('FileUploadComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraFileUpload);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

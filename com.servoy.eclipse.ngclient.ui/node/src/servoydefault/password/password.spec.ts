@@ -17,7 +17,7 @@ describe('PasswordComponent', () => {
   let directiveInstance: TooltipDirective;
 
   beforeEach(() => {
-      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
       TestBed.configureTestingModule({
         declarations: [ServoyDefaultPassword, TooltipDirective],
         imports: [SabloModule, FormsModule, ServoyPublicModule],

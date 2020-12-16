@@ -18,10 +18,11 @@ describe('TextareaComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapTextarea);
     component = fixture.componentInstance;
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent']);
     fixture.detectChanges();
   });
 
-  xit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });

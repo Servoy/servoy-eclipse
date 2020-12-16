@@ -18,7 +18,7 @@ describe('SelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapSelect);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

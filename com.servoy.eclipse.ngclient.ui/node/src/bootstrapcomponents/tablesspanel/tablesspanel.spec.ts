@@ -20,7 +20,7 @@ describe('TablesspanelComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapTablesspanel);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

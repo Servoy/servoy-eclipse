@@ -12,7 +12,7 @@ describe('CheckComponent', () => {
   let servoyApi;
   let input; let label; let span;
   beforeEach(waitForAsync(() => {
-  servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+  servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultCheck ],
       imports: [SabloModule, FormsModule, ServoyPublicModule],

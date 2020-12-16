@@ -24,6 +24,7 @@ describe('TypeaheadComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapTypeahead);
     component = fixture.componentInstance;
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent']);
     fixture.detectChanges();
   });
 

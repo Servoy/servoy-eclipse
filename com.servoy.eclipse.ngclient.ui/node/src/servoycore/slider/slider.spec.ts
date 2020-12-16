@@ -23,7 +23,7 @@ describe('ServoyCoreSlider', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreSlider);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

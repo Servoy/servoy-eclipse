@@ -12,7 +12,7 @@ describe('HtmlareaComponent', () => {
   let component: ServoyExtraHtmlarea;
   let fixture: ComponentFixture<ServoyExtraHtmlarea>;
 
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner','registerComponent']);
 
     beforeEach(waitForAsync(() => {
 

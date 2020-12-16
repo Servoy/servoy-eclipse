@@ -23,6 +23,7 @@ describe('ComboboxComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapCombobox);
     component = fixture.componentInstance;
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent']);
     fixture.detectChanges();
   });
 

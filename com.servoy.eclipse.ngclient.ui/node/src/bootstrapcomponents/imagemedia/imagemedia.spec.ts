@@ -16,7 +16,7 @@ describe('ImagemediaComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapImageMedia);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

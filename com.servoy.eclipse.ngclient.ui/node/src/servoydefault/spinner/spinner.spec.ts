@@ -31,7 +31,7 @@ describe('ServoyDefaultCheckGroup', () => {
   let servoyApi;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId']);
+    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','registerComponent']);
 
     TestBed.configureTestingModule({
       declarations: [ServoyDefaultSpinner],

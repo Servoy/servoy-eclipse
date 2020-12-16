@@ -16,7 +16,7 @@ describe('ImageLabelComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRadio);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
     fixture.detectChanges();
   });
 

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormattingService } from '../../ngclient/servoy_public';
 
 import { ServoyExtraSlider } from './slider';
-import { NgxSliderModule } from '@angular-slider/ngx-slider'
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 describe('ServoyExtraSlider', () => {
@@ -21,7 +21,7 @@ describe('ServoyExtraSlider', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraSlider);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
 	component.ceil = 0;
 	component.floor = 0;
     fixture.detectChanges();

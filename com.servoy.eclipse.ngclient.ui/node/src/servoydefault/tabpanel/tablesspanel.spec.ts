@@ -16,7 +16,7 @@ import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
     beforeEach( () => {
-        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm'] );
+        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm','registerComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );
         servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
         servoyApi.hideForm.and.returnValue( Promise.resolve( true ) );

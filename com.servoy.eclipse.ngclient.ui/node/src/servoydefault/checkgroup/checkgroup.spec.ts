@@ -30,7 +30,7 @@ describe('ServoyDefaultCheckGroup', () => {
   let servoyApi;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml']);
+    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','registerComponent']);
     mockData.hasRealValues = () => true;
 
     TestBed.configureTestingModule({

@@ -28,7 +28,7 @@ describe('ServoyDefaultTextArea', () => {
     fixture = TestBed.createComponent(ServoyDefaultTextArea);
     textArea = fixture.debugElement.query(By.css('textarea'));
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent']);
     fixture.detectChanges();
   });
 
