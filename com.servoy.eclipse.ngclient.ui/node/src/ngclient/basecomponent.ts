@@ -11,14 +11,12 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
 
     @ViewChild('element', { static: false }) elementRef: ElementRef;
 
-    readonly self: ServoyBaseComponent;
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
     private initialized: boolean;
     private changes: SimpleChanges;
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
-        this.self = this;
         this.componentContributor = new ComponentContributor();
     }
 

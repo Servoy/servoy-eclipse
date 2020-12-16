@@ -2,7 +2,7 @@
 		type="text"
 		class='bts-typeahead'
 		[svyStartEdit]="'dataProviderID'"
-		[hostComponent]="self"
+		[hostComponent]="this"
 		[(ngModel)]="dataProviderID"
 		(change)="pushUpdate()"
 		(selectItem)="valueChanged($event.item)"

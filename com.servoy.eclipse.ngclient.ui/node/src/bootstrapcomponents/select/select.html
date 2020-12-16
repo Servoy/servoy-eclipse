@@ -8,7 +8,7 @@
     [sabloTabseq]="tabSeq"
     [(ngModel)]="selectedValues"
     [svyStartEdit]="'dataProviderID'"
-    [hostComponent]="self"
+    [hostComponent]="this"
     [disabled]="readOnly || !enabled"
     [size]="selectSize"
     multiple
@@ -32,7 +32,7 @@
     [sabloTabseq]="tabSeq"
     [(ngModel)]="dataProviderID"
     [svyStartEdit]="'dataProviderID'"
-    [hostComponent]="self"
+    [hostComponent]="this"
     [disabled]="readOnly || !enabled"
     >
     <ng-template [ngTemplateOutlet]="commonOptions"></ng-template>

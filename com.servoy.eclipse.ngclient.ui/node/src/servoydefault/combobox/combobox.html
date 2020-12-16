@@ -6,7 +6,7 @@
         [id]="servoyApi.getMarkupId()"
         [svyFormat]="format"
         [svyStartEdit]="'dataProviderID'"
-        [hostComponent]="self"
+        [hostComponent]="this"
         [svyTooltip]="toolTipText"
         [value]="filteredDataProviderId"
         (update)="updateValue($event)"

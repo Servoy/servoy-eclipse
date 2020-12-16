@@ -12,7 +12,7 @@ export class StartEditDirective {
 
   private log: LoggerService;
 
-  public constructor(private logFactory: LoggerFactory, private viewContainer: ViewContainerRef) {
+  public constructor(logFactory: LoggerFactory) {
     this.log = logFactory.getLogger('StartEditDirective');
   }
 

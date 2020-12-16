@@ -9,7 +9,7 @@
       [svyFormat]="format"
       (change)="pushUpdate()"
       [svyStartEdit]="'dataProviderID'"
-      [hostComponent]="self"
+      [hostComponent]="this"
       [sabloTabseq]="tabSeq"
       #inputElement/>
 		<span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;" [hidden]="readOnly || !enabled || findmode"><span class="far fa-calendar-alt"></span></span>

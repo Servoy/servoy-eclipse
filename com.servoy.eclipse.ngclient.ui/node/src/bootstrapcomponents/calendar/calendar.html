@@ -7,7 +7,7 @@
 		[svyFormat]="format"
     	(change)="pushUpdate()"
      	[svyStartEdit]="'dataProviderID'"
-      	[hostComponent]="self"
+      	[hostComponent]="this"
       	[disabled]="readOnly || !enabled"
      	#inputElement/>
     <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;"><span class="far fa-calendar-alt"></span></span>
