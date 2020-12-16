@@ -9,46 +9,50 @@ export class SpecTypesService {
 
     private registeredTypes = new Map<string, typeof BaseCustomObject>();
 
-    createType( name: string ): BaseCustomObject {
-        const classRef = this.registeredTypes.get( name );
-        if ( classRef ) {
+    createType(name: string): BaseCustomObject {
+        const classRef = this.registeredTypes.get(name);
+        if (classRef) {
             return new classRef();
         }
-        console.log( 'returning just the basic custom object for  ' + name + ' none of the properties will be monitored' );
+        console.log('returning just the basic custom object for  ' + name + ' none of the properties will be monitored');
         return new BaseCustomObject();
     }
 
-    enhanceArrayType<T>( array: Array<T>, iterableDiffers: IterableDiffers ): ICustomArray<T> {
-        if ( !instanceOfChangeAwareValue( array ) ) {
-            array['stateHolder'] = new ArrayState( array, iterableDiffers );
-            Object.defineProperty( array, 'getStateHolder', {
+    enhanceArrayType<T>(array: Array<T>, iterableDiffers: IterableDiffers): ICustomArray<T> {
+        if (!instanceOfChangeAwareValue(array)) {
+            array['stateHolder'] = new ArrayState(array, iterableDiffers);
+            Object.defineProperty(array, 'getStateHolder', {
                 enumerable: false,
-                value: function() { return this.stateHolder; }
-            } );
-            Object.defineProperty( array, 'markForChanged', {
+                value() {
+                    return this.stateHolder;
+                }
+            });
+            Object.defineProperty(array, 'markForChanged', {
                 enumerable: false,
-                value: function() { this.stateHolder.notifyChangeListener(); }
-            } );
+                value() {
+                    this.stateHolder.notifyChangeListener();
+                }
+            });
             array['stateHolder'].initDiffer();
         }
         return <ICustomArray<T>>array;
     }
 
-    registerType( name: string, classRef: typeof BaseCustomObject, specProperties: Array<string> ) {
-        this.registeredTypes.set( name, classRef );
+    registerType(name: string, classRef: typeof BaseCustomObject, specProperties: Array<string>) {
+        this.registeredTypes.set(name, classRef);
         classRef['__specProperties'] = specProperties;
     }
 
-    getProperties( classRef ): Array<string> {
+    getProperties(classRef): Array<string> {
         return classRef['__specProperties'];
     }
 
-    guessType( val: any ): string {
+    guessType(val: any): string {
         let guess = null;
 
-        if ( instanceOfCustomArray( val ) ) {
+        if (instanceOfCustomArray(val)) {
             guess = 'JSON_arr';
-        } else if ( instanceOfBaseCustomObject( val ) ) {
+        } else if (instanceOfBaseCustomObject(val)) {
             guess = 'JSON_obj';
         } // else TODO do any other types need guessing?
         //        else { // try to find it in types?
@@ -60,60 +64,60 @@ export class SpecTypesService {
     }
 }
 
- export function isChanged(now, prev, conversionInfo) {
+export function isChanged(now, prev, conversionInfo) {
     if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && instanceOfChangeAwareValue(now)) {
-      return now.getStateHolder().hasChanges();
+        return now.getStateHolder().hasChanges();
     }
 
     if (now === prev) return false;
     if (now && prev) {
-      if (now instanceof Array) {
-        if (prev instanceof Array) {
-          if (now.length !== prev.length) return true;
-        } else {
-          return true;
-        }
-      }
-      if (now instanceof Date) {
-        if (prev instanceof Date) {
-          return now.getTime() !== prev.getTime();
-        }
-        return true;
-      }
-
-      if ((now instanceof Object) && (prev instanceof Object)) {
-        // first build up a list of all the properties both have.
-        const fulllist = this.getCombinedPropertyNames(now, prev);
-        for (const prop in fulllist) {
-          // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
-          if (prev[prop] !== now[prop]) {
-            if (prop === '$$hashKey') continue;
-            if (typeof now[prop] === 'object') {
-              if (isChanged(now[prop], prev[prop], conversionInfo ? conversionInfo[prop] : undefined)) {
-                return true;
-              }
+        if (now instanceof Array) {
+            if (prev instanceof Array) {
+                if (now.length !== prev.length) return true;
             } else {
-              return true;
+                return true;
             }
-          }
         }
-        return false;
-      }
+        if (now instanceof Date) {
+            if (prev instanceof Date) {
+                return now.getTime() !== prev.getTime();
+            }
+            return true;
+        }
+
+        if ((now instanceof Object) && (prev instanceof Object)) {
+            // first build up a list of all the properties both have.
+            const fulllist = this.getCombinedPropertyNames(now, prev);
+            for (const prop in fulllist) {
+                // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
+                if (prev[prop] !== now[prop]) {
+                    if (prop === '$$hashKey') continue;
+                    if (typeof now[prop] === 'object') {
+                        if (isChanged(now[prop], prev[prop], conversionInfo ? conversionInfo[prop] : undefined)) {
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
     return true;
-  }
-
-export function instanceOfChangeAwareValue( obj: any ): obj is IChangeAwareValue {
-    return obj != null && ( <IChangeAwareValue>obj ).getStateHolder instanceof Function;
 }
 
-export function instanceOfCustomArray<T>( obj: any ): obj is ICustomArray<T> {
-    return instanceOfChangeAwareValue( obj ) && ( <ICustomArray<T>>obj ).markForChanged instanceof Function;
-}
+export const instanceOfChangeAwareValue = (obj: any): obj is IChangeAwareValue =>
+    obj != null && (obj).getStateHolder instanceof Function;
 
-export function instanceOfBaseCustomObject( obj: any ): obj is BaseCustomObject {
-    return instanceOfChangeAwareValue( obj ) && ( <BaseCustomObject>obj ).getStateHolder() instanceof BaseCustomObjectState;
-}
+
+export const instanceOfCustomArray = <T>(obj: any): obj is ICustomArray<T> =>
+    instanceOfChangeAwareValue(obj) && (obj as ICustomArray<T>).markForChanged instanceof Function;
+
+
+export const instanceOfBaseCustomObject = (obj: any): obj is BaseCustomObject =>
+    instanceOfChangeAwareValue(obj) && (obj).getStateHolder() instanceof BaseCustomObjectState;
+
 
 export interface IChangeAwareValue {
     getStateHolder(): ChangeAwareState;
@@ -128,7 +132,7 @@ export interface ICustomArray<T> extends Array<T>, IChangeAwareValue {
     markForChanged(): void;
 }
 
-export interface IValuelist extends Array<{displayValue: string, realValue: any}>  {
+export interface IValuelist extends Array<{ displayValue: string; realValue: any }> {
     filterList(filterString: string): Observable<any>;
     getDisplayValue(realValue: any): Observable<any>;
     hasRealValues(): boolean;
@@ -138,33 +142,33 @@ export interface IValuelist extends Array<{displayValue: string, realValue: any}
 export interface IFoundset {
 
     /**
-	 * the size of the foundset on server (so not necessarily the total record count
-	 * in case of large DB tables)
-	 */
-	serverSize: number;
+     * the size of the foundset on server (so not necessarily the total record count
+     * in case of large DB tables)
+     */
+    serverSize: number;
 
-	/**
-	 * this is the data you need to have loaded on client (just request what you need via provided
-	 * loadRecordsAsync or loadExtraRecordsAsync)
-	 */
-	viewPort: ViewPort;
+    /**
+     * this is the data you need to have loaded on client (just request what you need via provided
+     * loadRecordsAsync or loadExtraRecordsAsync)
+     */
+    viewPort: ViewPort;
 
-	/**
-	 * array of selected records in foundset; indexes can be out of current
+    /**
+     * array of selected records in foundset; indexes can be out of current
      * viewPort as well
      */
-	selectedRowIndexes: number[];
+    selectedRowIndexes: number[];
 
-	/**
-	 * sort string of the foundset, the same as the one used in scripting for
+    /**
+     * sort string of the foundset, the same as the one used in scripting for
      * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
      */
-	sortColumns: string;
+    sortColumns: string;
 
-	/**
-	 * the multiselect mode of the server's foundset; if this is false,
+    /**
+     * the multiselect mode of the server's foundset; if this is false,
      * selectedRowIndexes can only have one item in it
-	 */
+     */
     multiSelect: boolean;
 
     /**
@@ -197,9 +201,9 @@ export interface IFoundset {
      * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      */
-     loadRecordsAsync(startIndex: number, size: number): Promise<any>;
+    loadRecordsAsync(startIndex: number, size: number): Promise<any>;
 
-     /**
+    /**
      * Request more records for your viewPort; if the argument is positive more records will be
      * loaded at the end of the 'viewPort', when negative more records will be loaded at the beginning
      * of the 'viewPort' - asynchronously.
@@ -216,9 +220,9 @@ export interface IFoundset {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-     loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
+    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
 
-     /**
+    /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
      * shrink, when it is negative then the end of the viewport will shrink - asynchronously.
      *
@@ -234,16 +238,16 @@ export interface IFoundset {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-     loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
+    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
 
-     /**
-      * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
-      * then you can - in the end - send all these requests to server (if any are queued) by calling
-      * this method. If no requests are queued, calling this method will have no effect.
-      */
-     notifyChanged(): void;
+    /**
+     * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
+     * then you can - in the end - send all these requests to server (if any are queued) by calling
+     * this method. If no requests are queued, calling this method will have no effect.
+     */
+    notifyChanged(): void;
 
-     /**
+    /**
      * Sort the foundset by the dataproviders/columns identified by sortColumns.
      *
      * The name property of each sortColumn can be filled with the dataprovider name the foundset provides
@@ -261,9 +265,9 @@ export interface IFoundset {
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
      */
-     sort(sortColumns: Array<{ name: string, direction: ('asc' | 'desc') }>): Promise<any>;
+    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): Promise<any>;
 
-     /**
+    /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
      * when the client receives the updated selection from the server. If successful, the array
      * selectedRowIndexes will also be updated. If the server does not allow the selection change,
@@ -274,9 +278,9 @@ export interface IFoundset {
      * for the parameter serverRows.
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
      */
-     requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
+    requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
 
-     /**
+    /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
      * (initial or new) load will automatically return that many rows, even without any of the loadXYZ
      * methods above being called.
@@ -301,9 +305,9 @@ export interface IFoundset {
      *                                           selected row (here the page size is assumed to be
      *                                           preferredSize).
      */
-     setPreferredViewportSize(preferredSize: number, sendViewportWithSelection: boolean, centerViewportOnSelected: boolean): void;
+    setPreferredViewportSize(preferredSize: number, sendViewportWithSelection: boolean, centerViewportOnSelected: boolean): void;
 
-     /**
+    /**
      * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
      * and gives a Record reference, an object
      * which can be resolved server side to the exact Record via the 'record' property type;
@@ -323,20 +327,21 @@ export interface IFoundset {
      *
      * This method has been added in Servoy 8.3.
      */
-     getRecordRefByRowID(rowId: string): void;
+    getRecordRefByRowID(rowId: string): void;
 
-     /**
-      * Adds a change listener that will get triggered when server sends changes for this foundset.
-      *
-      * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
-      * @param changeListener the listener to register.
-      */
-     addChangeListener(changeListener: ChangeListener): () => void;
-     removeChangeListener(changeListener: ChangeListener): void;
+    /**
+     * Adds a change listener that will get triggered when server sends changes for this foundset.
+     *
+     * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
+     * @param changeListener the listener to register.
+     */
+    addChangeListener(changeListener: ChangeListener): () => void;
+    removeChangeListener(changeListener: ChangeListener): void;
 
     /**
      * Mark the foundset data as changed on the client.
      * If push to server is allowed for this foundset then the changes will be sent to the server, othwerwise the changes are ignored.
+     *
      * @param index is the row index (relative to the viewport) where the data change occurred
      * @param columnID the name of the column
      * @param newValue the new value
@@ -349,7 +354,7 @@ export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    viewportRowsCompletelyChanged?:  { oldValue: object[], newValue: object[] };
+    viewportRowsCompletelyChanged?: { oldValue: object[]; newValue: object[] };
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
@@ -363,30 +368,30 @@ export interface ViewportChangeEvent {
 
 export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
 
-export interface ViewportRowUpdate { type: ChangeType, startIndex: number, endIndex: number }
+export interface ViewportRowUpdate { type: ChangeType; startIndex: number; endIndex: number }
 export type ViewportRowUpdates = ViewportRowUpdate[];
 
 export enum ChangeType {
     ROWS_CHANGED = 0,
 
     /**
-    * When an INSERT happened but viewport size remained the same, it is
-    * possible that some of the rows that were previously at the end of the viewport
-    * slided out of it;
-    * NOTE: insert signifies an insert into the client viewport, not necessarily
-    * an insert in the foundset itself; for example calling "loadExtraRecordsAsync"
-    * can result in an insert notification + bigger viewport size notification
-    */
+     * When an INSERT happened but viewport size remained the same, it is
+     * possible that some of the rows that were previously at the end of the viewport
+     * slided out of it;
+     * NOTE: insert signifies an insert into the client viewport, not necessarily
+     * an insert in the foundset itself; for example calling "loadExtraRecordsAsync"
+     * can result in an insert notification + bigger viewport size notification
+     */
     ROWS_INSERTED,
 
     /**
-    * When a DELETE happened inside the viewport but there were more rows available in the
-    * foundset after current viewport, it is possible that some of those rows
-    * slided into the viewport;
-    * NOTE: delete signifies a delete from the client viewport, not necessarily
-    * a delete in the foundset itself; for example calling "loadLessRecordsAsync" can
-    * result in a delete notification + smaller viewport size notification
-    */
+     * When a DELETE happened inside the viewport but there were more rows available in the
+     * foundset after current viewport, it is possible that some of those rows
+     * slided into the viewport;
+     * NOTE: delete signifies a delete from the client viewport, not necessarily
+     * a delete in the foundset itself; for example calling "loadLessRecordsAsync" can
+     * result in a delete notification + smaller viewport size notification
+     */
     ROWS_DELETED
 }
 
@@ -403,7 +408,7 @@ export class BaseCustomObject implements ICustomObject {
 
 }
 
-export interface ViewPort  {
+export interface ViewPort {
     startIndex: number;
     size: number;
     rows: ViewPortRow[];
@@ -411,7 +416,7 @@ export interface ViewPort  {
 
 export interface ViewPortRow extends Record<string, any> {
     _svyRowId: string;
-    _cache?: Map<string,any>;
+    _cache?: Map<string, any>;
 }
 
 export class ChangeAwareState {
@@ -421,22 +426,22 @@ export class ChangeAwareState {
     private changeListener: () => void;
     private inNotify = false;
 
-    markAllChanged( notifyListener: boolean ): void {
+    markAllChanged(notifyListener: boolean): void {
         this.allChanged = true;
-        if ( notifyListener ) this.notifyChangeListener();
+        if (notifyListener) this.notifyChangeListener();
     }
 
     hasChanges(): boolean {
         return this.allChanged || this.inNotify;
     }
 
-    setChangeListener( callback: () => void ): void {
+    setChangeListener(callback: () => void): void {
         this.changeListener = callback;
     }
 
     public notifyChangeListener(): void {
         this.inNotify = true;
-        if ( this.changeListener ) this.changeListener();
+        if (this.changeListener) this.changeListener();
         this.inNotify = false;
     }
 
@@ -460,24 +465,24 @@ export class BaseCustomObjectState extends ChangeAwareState {
         return super.hasChanges() || this.getChangedKeys().size > 0; // leave this as a method call as some subclasses might compute the changedKeys inside getChangedKeys()
     }
 
-    public setPropertyAndHandleChanges( _thisBaseCustoomObject, internalPropertyName, propertyName, value ) {
+    public setPropertyAndHandleChanges(_thisBaseCustoomObject, internalPropertyName, propertyName, value) {
         const oldValue = _thisBaseCustoomObject[internalPropertyName];
 
         // if the value of this property is changed, mark it as such and notify if needed
-        this.markIfChanged( propertyName, value, oldValue );
+        this.markIfChanged(propertyName, value, oldValue);
 
         // unregister as listener to old value if needed
-        this.setChangeListenerToSubValueIfNeeded( oldValue, undefined );
+        this.setChangeListenerToSubValueIfNeeded(oldValue, undefined);
 
         _thisBaseCustoomObject[internalPropertyName] = value;
 
         // register as listener to new value if needed
-        this.setChangeListenerToSubValueIfNeeded( value, () => {
-            this.markIfChanged( propertyName, value, value );
-        } );
+        this.setChangeListenerToSubValueIfNeeded(value, () => {
+            this.markIfChanged(propertyName, value, value);
+        });
 
         // this value has changed by reference; so it needs to be fully sent to server - except for when it now arrived from the server and is being set (in which case ignoreChanges is true)
-        if ( !this.ignoreChanges && instanceOfChangeAwareValue( value ) ) value.getStateHolder().markAllChanged( false );
+        if (!this.ignoreChanges && instanceOfChangeAwareValue(value)) value.getStateHolder().markAllChanged(false);
     }
 
     public getChangedKeys(): Set<string | number> {
@@ -489,38 +494,38 @@ export class BaseCustomObjectState extends ChangeAwareState {
         this.allChanged = false;
     }
 
-    protected markIfChanged( propertyName: string | number, newObject: any, oldObject: any ) {
-        if ( this.testChanged( propertyName, newObject, oldObject ) ) {
-            this.pushChange( propertyName );
+    protected markIfChanged(propertyName: string | number, newObject: any, oldObject: any) {
+        if (this.testChanged(propertyName, newObject, oldObject)) {
+            this.pushChange(propertyName);
             return true;
         }
         return false;
     }
 
-    private setChangeListenerToSubValueIfNeeded( value: any, changeListener: () => void ): void {
-        if ( instanceOfChangeAwareValue( value ) ) {
+    private setChangeListenerToSubValueIfNeeded(value: any, changeListener: () => void): void {
+        if (instanceOfChangeAwareValue(value)) {
             // child is able to handle it's own change mechanism
-            value.getStateHolder().setChangeListener( changeListener );
+            value.getStateHolder().setChangeListener(changeListener);
         }
     }
 
-    private pushChange( propertyName ) {
-        if ( this.ignoreChanges ) return;
-        if ( this.changedKeys.size == 0 ) this.change++;
+    private pushChange(propertyName) {
+        if (this.ignoreChanges) return;
+        if (this.changedKeys.size == 0) this.change++;
 
         if (!this.changedKeys.has(propertyName)) {
-            this.changedKeys.add( propertyName );
+            this.changedKeys.add(propertyName);
             this.notifyChangeListener();
         }
     }
 
-    private testChanged( propertyName: string | number, newObject: any, oldObject: any ) {
-        if ( newObject !== oldObject ) return true;
-        if ( typeof newObject == 'object' ) {
-            if ( instanceOfChangeAwareValue( newObject ) ) {
+    private testChanged(propertyName: string | number, newObject: any, oldObject: any) {
+        if (newObject !== oldObject) return true;
+        if (typeof newObject == 'object') {
+            if (instanceOfChangeAwareValue(newObject)) {
                 return newObject.getStateHolder().hasChanges();
             } else {
-                return isChanged( newObject, oldObject, this.conversionInfo[propertyName] );
+                return isChanged(newObject, oldObject, this.conversionInfo[propertyName]);
             }
         }
         return false;
@@ -535,19 +540,19 @@ export class BaseCustomObjectState extends ChangeAwareState {
 export class ArrayState extends BaseCustomObjectState {
     private differ: IterableDiffer<Array<any>>;
 
-    constructor( private array: Array<any>, private iterableDiffers: IterableDiffers ) {
+    constructor(private array: Array<any>, private iterableDiffers: IterableDiffers) {
         super();
         this.allChanged = true;
     }
 
     public initDiffer() {
-        this.differ = this.iterableDiffers.find( this.array ).create(( index: number, item: any ) => {
-            if ( instanceOfBaseCustomObject( item ) ) {
+        this.differ = this.iterableDiffers.find(this.array).create((index: number, item: any) => {
+            if (instanceOfBaseCustomObject(item)) {
                 return item.getStateHolder().getHashKey();
             }
             return item;
-        } );
-        this.differ.diff( this.array );
+        });
+        this.differ.diff(this.array);
     }
 
     public clearChanges() {
@@ -557,31 +562,29 @@ export class ArrayState extends BaseCustomObjectState {
 
     public getChangedKeys(): Set<string | number> {
         let changes = super.getChangedKeys();
-        const arrayChanges = this.differ.diff( this.array );
-        if ( arrayChanges ) {
+        const arrayChanges = this.differ.diff(this.array);
+        if (arrayChanges) {
             let addedOrRemoved = 0;
-            arrayChanges.forEachAddedItem(( record ) => {
+            arrayChanges.forEachAddedItem((record) => {
                 addedOrRemoved++;
-                changes.add( record.currentIndex );
-            } );
-            arrayChanges.forEachRemovedItem(( record ) => {
+                changes.add(record.currentIndex);
+            });
+            arrayChanges.forEachRemovedItem((record) => {
                 addedOrRemoved--;
-                changes.add( record.previousIndex );
-            } );
+                changes.add(record.previousIndex);
+            });
 
-            arrayChanges.forEachMovedItem(( record ) => {
-                if ( instanceOfChangeAwareValue( record.item ) ) {
-                    return record.item.getStateHolder().markAllChanged( false );
+            arrayChanges.forEachMovedItem((record) => {
+                if (instanceOfChangeAwareValue(record.item)) {
+                    return record.item.getStateHolder().markAllChanged(false);
                 }
-            } );
-            if ( addedOrRemoved != 0 ) {
+            });
+            if (addedOrRemoved != 0) {
                 // size changed, for now send whole array
-                this.markAllChanged( false );
+                this.markAllChanged(false);
             } else {
                 const changesArray = Array.from(changes);
-                changesArray.sort(( a: number, b: number ) => {
-                    return a - b;
-                } );
+                changesArray.sort((a: number, b: number) => a - b);
                 changes = new Set(changesArray);
             }
         }

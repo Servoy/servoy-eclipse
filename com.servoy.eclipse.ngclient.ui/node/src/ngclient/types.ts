@@ -1,3 +1,4 @@
+
 export class FormSettings {
   public name: string;
   public size: { width: number; height: number };
@@ -76,11 +77,18 @@ export class FormCache {
     }
 }
 
-export interface IFormComponent {
+export interface IFormComponent extends IApiExecutor {
     name: string;
     detectChanges(): void;
-    callApi(componentName: string, apiName: string, args: Array<any>): any;
 }
+
+export interface IApiExecutor {
+ callApi(componentName: string, apiName: string, args: Array<any>, path?: string[]): any;
+}
+
+export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
+    obj != null && (obj).callApi instanceof Function;
+
 
 export interface IComponentCache {
     name: string;

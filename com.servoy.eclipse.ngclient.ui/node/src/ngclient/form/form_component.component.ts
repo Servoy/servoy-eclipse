@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
         TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, IApiExecutor, instanceOfApiExecutor } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
@@ -11,6 +11,7 @@ import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ServoyApi } from '../servoy_api';
 import { ComponentModel } from '../converters/component_converter';
 import { FormService } from '../form.service';
+import { ServoyBaseComponent } from '../basecomponent';
 
 @Component({
     // eslint-disable-next-line
@@ -125,6 +126,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
     @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
     // component template generate start
+    @ViewChild('aggridGroupingtable', { static: true }) readonly aggridGroupingtable: TemplateRef<any>;
+
     @ViewChild('servoydefaultTextfield', { static: true }) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild('servoydefaultTextarea', { static: true }) readonly servoydefaultTextarea: TemplateRef<any>;
     @ViewChild('servoydefaultButton', { static: true }) readonly servoydefaultButton: TemplateRef<any>;
@@ -134,7 +137,6 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoydefaultTablesspanel', { static: true }) readonly servoydefaultTablesspanel: TemplateRef<any>;
     @ViewChild('servoydefaultSplitpane', { static: true }) readonly servoydefaultSplitpane: TemplateRef<any>;
     @ViewChild('servoydefaultCalendar', { static: true }) readonly servoydefaultCalendar: TemplateRef<any>;
-
     @ViewChild('servoydefaultCombobox', { static: true }) readonly servoydefaultCombobox: TemplateRef<any>;
     @ViewChild('servoydefaultTypeahead', { static: true }) readonly servoydefaultTypeahead: TemplateRef<any>;
     @ViewChild('servoydefaultCheck', { static: true }) readonly servoydefaultCheck: TemplateRef<any>;
@@ -147,6 +149,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoydefaultHtmlview', { static: true }) readonly servoydefaultHtmlview: TemplateRef<any>;
     @ViewChild('servoydefaultListbox', { static: true }) readonly servoydefaultListbox: TemplateRef<any>;
     @ViewChild('servoydefaultImagemedia', { static: true }) readonly servoydefaultImagemedia: TemplateRef<any>;
+
     @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
     @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
@@ -178,9 +181,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('bootstrapcomponentsTypeahead', { static: true }) readonly bootstrapcomponentsTypeahead: TemplateRef<any>;
     // component template generate end
 
-    @ViewChild('aggridGroupingtable', { static: true }) readonly aggridGroupingtable: TemplateRef<any>;
 
-    @ViewChildren('cmp') readonly components: QueryList<Component>;
 
     @Input() readonly name;
 
@@ -188,13 +189,12 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     private handlerCache: { [property: string]: { [property: string]: (e) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
+    private componentCache: { [property: string]: ServoyBaseComponent } = {};
     private log: LoggerService;
-    private self: FormComponent;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
-                private servoyService: ServoyService, private logFactory: LoggerFactory,
+                private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef) {
-        this.self = this;
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -317,14 +317,25 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return api;
     }
 
-    public callApi(componentName: string, apiName: string, args: object): any {
-        const comp = this.components.find(item => item['name'] == componentName);
-        const proto = Object.getPrototypeOf(comp);
-        if (proto[apiName]) {
-            return proto[apiName].apply(comp, args);
+    public callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
+        if (path && path.length > 0) {
+            const comp = this.componentCache[path[0]];
+            if (instanceOfApiExecutor(comp)) {
+                comp.callApi(path[1], apiName, args, path.slice(2));
+            } else {
+                this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
+                 ', but comp: ' + (comp == null?' is not found':comp.name + ' doesnt implement IApiExecutor') );
+            }
+
         } else {
-            this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
-            return null;
+            const comp = this.componentCache[componentName];
+            const proto = Object.getPrototypeOf(comp);
+            if (proto[apiName]) {
+                return proto[apiName].apply(comp, args);
+            } else {
+                this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
+                return null;
+            }
         }
     }
 }
