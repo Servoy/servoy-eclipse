@@ -300,10 +300,18 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return func;
     }
 
+    registerComponent(component: ServoyBaseComponent): void {
+        this.componentCache[component.name] = component;
+    }
+
+    unRegisterComponent(component: ServoyBaseComponent): void {
+        delete this.componentCache[component.name];
+    }
+
     getServoyApi(item: ComponentCache) {
         let api = this.servoyApiCache[item.name];
         if (api == null) {
-            api = new ServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService);
+            api = new FormComponentServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService, this);
             this.servoyApiCache[item.name] = api;
         }
         return api;
@@ -318,6 +326,25 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
             this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
             return null;
         }
+    }
+}
+
+class FormComponentServoyApi extends ServoyApi {
+    constructor(item: ComponentCache,
+                formname: string,
+                absolute: boolean,
+                formservice: FormService,
+                servoyService: ServoyService,
+                private fc: FormComponent) {
+        super(item,formname,absolute,formservice,servoyService);
+    }
+
+    registerComponent(comp: ServoyBaseComponent) {
+     this.fc.registerComponent(comp);
+    }
+
+    unRegisterComponent(comp: ServoyBaseComponent) {
+     this.fc.unRegisterComponent(comp);
     }
 }
 

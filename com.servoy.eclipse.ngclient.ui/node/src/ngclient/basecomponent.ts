@@ -1,10 +1,10 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef } from '@angular/core';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ComponentContributor } from '../ngclient/component_contributor.service';
 import { ServoyApi } from './servoy_api';
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
+export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name: string;
     @Input() servoyApi: ServoyApi;
     @Input() servoyAttributes: Array<{ key: string; value: string }>;
@@ -23,6 +23,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
     // final method, do not override
     ngOnInit() {
         this.initializeComponent();
+        this.servoyApi.registerComponent(this);
     }
 
     // final method, do not override
@@ -57,6 +58,10 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
                 this.changes = null;
             }
         }
+    }
+
+    ngOnDestroy() {
+        this.servoyApi.unRegisterComponent(this);
     }
 
     // our init event that is called when dom is ready

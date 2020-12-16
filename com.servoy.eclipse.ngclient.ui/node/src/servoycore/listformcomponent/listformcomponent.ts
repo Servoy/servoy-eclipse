@@ -284,8 +284,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
     getServoyApi(cell: Cell) {
         if (cell.api == null) {
-            cell.api = new ServoyApi(cell.state, cell.state.name, this.containedForm.absoluteLayout, this.formservice, this.servoyService);
-            cell.api.startEdit = (property) => cell.state.startEdit(property, cell.rowId);
+            cell.api = new ListFormComponentServoyApi(cell, cell.state.name, this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
         }
         return cell.api;
     }
@@ -345,14 +344,21 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     return 'svy-listformcomponent-row';
   }
 
-  updateSelection() {
-    const selectedRowIndex = this.foundset.selectedRowIndexes[0];
-    const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.responsivePageSize * this.page : selectedRowIndex];
-    if (element && !element.contains(document.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
-      element.focus();
-      this.selectionChangedByKey = false;
+    registerComponent(component: ServoyBaseComponent, rowIndex: number): void {
+        let rowComponents = this.componentCache[rowIndex];
+        if (!rowComponents) {
+            rowComponents = {};
+            this.componentCache[rowIndex] = rowComponents;
+        }
+        rowComponents[component.name] = component;
     }
-  }
+
+    unRegisterComponent(component: ServoyBaseComponent, rowIndex: number): void {
+        const rowComponents = this.componentCache[rowIndex];
+        if (rowComponents) {
+            delete rowComponents[component.name];
+        }
+    }
 }
 
 class Cell  {
@@ -361,5 +367,28 @@ class Cell  {
                 public readonly handlers: any, public readonly rowId: any) {
     }
 
+}
+
+class ListFormComponentServoyApi extends ServoyApi {
+    constructor(private cell: Cell,
+                formname: string,
+                absolute: boolean,
+                formservice: FormService,
+                servoyService: ServoyService,
+                private fc: ListFormComponent) {
+        super(cell.state,formname,absolute,formservice,servoyService);
+    }
+
+    registerComponent(comp: ServoyBaseComponent) {
+     this.fc.registerComponent(comp,this.cell.rowIndex);
+    }
+
+    unRegisterComponent(comp: ServoyBaseComponent) {
+     this.fc.unRegisterComponent(comp,this.cell.rowIndex);
+    }
+
+    startEdit(property: string) {
+        this.cell.state.startEdit(property, this.cell.rowId);
+    }
 }
 
