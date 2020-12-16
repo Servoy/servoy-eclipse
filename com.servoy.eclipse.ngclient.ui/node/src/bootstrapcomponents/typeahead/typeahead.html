@@ -10,6 +10,7 @@
 		[editable]="isEditable()"
 		[svyTooltip]="toolTipText"
 		[ngbTypeahead]="filterValues"
+        container="body"
 		[resultFormatter]="resultFormatter"
 		[inputFormatter]="inputFormatter"
 		(focus)="focus$.next('')"
