@@ -58,14 +58,14 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
             let selectedRowIndex = this.foundset.selectedRowIndexes[0];
             if (event.key === 'ArrowUp') {
                 // move to the previous page if the first element (not from the first page) is selected
-                if (this.page !== 0 && selectedRowIndex / (this.page) === this.responsivePageSize) {
+                if (this.page !== 0 && selectedRowIndex / (this.page) === this.numberOfCells) {
                     this.moveLeft();
                 }
                 selectedRowIndex--;
             } else if (event.key === 'ArrowDown') { // keydown
                 selectedRowIndex++;
                 // move to the next page if the last element (not from the last page) is selected
-                if (selectedRowIndex / (this.page + 1) === this.responsivePageSize) {
+                if (selectedRowIndex / (this.page + 1) === this.numberOfCells) {
                     this.moveRight();
                 }
             }
@@ -90,6 +90,15 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
         super.svyOnInit();
         this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
             let shouldUpdatePagingControls = false;
+
+            if (event.selectedRowIndexesChanged) {
+                this.updateSelection();
+                if (this.onSelectionChanged) {
+                  this.renderer.listen( this.elementRef.nativeElement, 'onselectionchanged', (e) => {
+                    this.onSelectionChanged(e);
+                  });
+                }
+            }
 
             if (event.viewportRowsCompletelyChanged) {
                 this.calculateCells();
@@ -382,7 +391,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
     updateSelection() {
         const selectedRowIndex = this.foundset.selectedRowIndexes[0];
-        const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.responsivePageSize * this.page : selectedRowIndex];
+        const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.numberOfCells * this.page : selectedRowIndex];
         if (element && !element.contains(document.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
             element.focus();
             this.selectionChangedByKey = false;
