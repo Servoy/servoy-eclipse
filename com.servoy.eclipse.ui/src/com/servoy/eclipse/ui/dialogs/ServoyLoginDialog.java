@@ -123,7 +123,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 					node.put(SERVOY_LOGIN_PASSWORD, password, true);
 					node.put(SERVOY_LOGIN_TOKEN, loginToken, true);
 				}
-				catch (StorageException ex)
+				catch (Exception ex)
 				{
 					ServoyLog.logError(ex);
 				}
