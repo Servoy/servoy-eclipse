@@ -220,6 +220,7 @@ export class FormService {
     }
 
     private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
+        const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
         const formData = msg.forms[formname];
         for (const beanname of Object.keys(formData)) {
@@ -240,6 +241,11 @@ export class FormService {
                     if (instanceOfChangeAwareValue(value)) {
                         value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, beanname, property, value));
                     }
+                    if (comp.model[property] === value) {
+                      // this value didn't realy change but it was changed internally
+                      // but we want to let the component know that this is still a (nested) change.
+                      formComponent.propertyChanged(beanname,property, value);
+                    }
                 }
                 comp.model[property] = value;
             }
@@ -247,7 +253,6 @@ export class FormService {
                 servoyService.setFindMode(formname, formData[beanname]['findmode']);
             }
         }
-        const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         formComponent.detectChanges();
     }
 

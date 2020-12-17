@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
-        TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+        TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, IApiExecutor, instanceOfApiExecutor } from '../types';
 
@@ -200,6 +200,15 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     public detectChanges() {
         this.changeHandler.markForCheck();
+    }
+
+    propertyChanged(componentName: string, property: string, value: any): void {
+        const comp = this.componentCache[componentName];
+        if (comp) {
+            const change = {};
+            change[property] = new SimpleChange(value,value,false);
+            comp.ngOnChanges(change);
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {

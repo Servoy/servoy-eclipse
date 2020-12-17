@@ -79,7 +79,10 @@ export class FormCache {
 
 export interface IFormComponent extends IApiExecutor {
     name: string;
+    // called when there are changed pushed to this form, so this form can trigger a detection change
     detectChanges(): void;
+    // called when a model property is updated for the given compponent, but the value itself didn't change  (only nested)
+    propertyChanged(componentName: string, property: string, value: any): void;
 }
 
 export interface IApiExecutor {
