@@ -43,7 +43,7 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField {
 
     svyOnChanges(changes: SimpleChanges): void {
         super.svyOnChanges(changes);
-        this.updateImageURL(changes.dataProviderID.currentValue);
+        if (changes.dataProviderID) this.updateImageURL(changes.dataProviderID.currentValue);
     }
 
     private updateImageURL(dp) {
