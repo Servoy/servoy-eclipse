@@ -348,7 +348,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
     getServoyApi(cell: Cell) {
         if (cell.api == null) {
-            cell.api = new ListFormComponentServoyApi(cell, cell.state.name, this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
+            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormname(), this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
         }
         return cell.api;
     }
