@@ -52,7 +52,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
 	timeoutID: number;
 	lastClicked: number;
 	sortColumnIndex: number;
-	private log: LoggerService;
 	columnStyleCache: Array<object> = [];
 	autoColumnPercentage: any;
 	tableWidth = 0;
@@ -69,7 +68,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
 	currentSortClass: any[] = [];
 	sortClassUpdateTimer: any;
 	currentPage = 1;
-	changeListener: (change: FoundsetChangeEvent) => void;
 	rendered: boolean;
 	scrollToSelectionNeeded = true;
 	averageRowHeight: number;
@@ -78,6 +76,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
 	idx: number;
 	changedPage = false;
 	prevPage: number;
+    private log: LoggerService;
+    private removeListenerFunction: () => void;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) {
 		super(renderer, cdRef);
@@ -97,7 +97,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
 		}
 		this.attachHandlers();
 
-		this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+		this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
 			if (event.sortColumnsChanged) {
 				this.sortColumnsChanged(event);
 			}
@@ -284,7 +284,11 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
 	}
 
 	ngOnDestroy(): void {
-		this.foundset.removeChangeListener(this.changeListener);
+		if (this.removeListenerFunction != null) {
+            this.removeListenerFunction();
+            this.removeListenerFunction = null;
+        }
+
 	}
 
 	attachHandlers() {

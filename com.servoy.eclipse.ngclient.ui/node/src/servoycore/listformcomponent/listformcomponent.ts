@@ -38,7 +38,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     page = 0;
     numberOfCells = 0;
     selectionChangedByKey = false;
-    changeListener: (change: FoundsetChangeEvent) => void;
+    removeListenerFunction: () => void;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent }> = [];
     private log: LoggerService;
 
@@ -88,7 +88,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
 
     svyOnInit() {
         super.svyOnInit();
-        this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+        this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
             let shouldUpdatePagingControls = false;
 
             if (event.selectedRowIndexesChanged) {
@@ -213,7 +213,10 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     }
 
     ngOnDestroy() {
-        this.foundset.removeChangeListener(this.changeListener);
+        if (this.removeListenerFunction != null) {
+            this.removeListenerFunction();
+            this.removeListenerFunction = null;
+        }
     }
 
     getViewportRows(): ViewPortRow[] {

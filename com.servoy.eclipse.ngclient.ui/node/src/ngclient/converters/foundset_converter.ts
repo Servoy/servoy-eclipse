@@ -448,8 +448,9 @@ export class Foundset implements IChangeAwareValue, IFoundset {
    * all properties that were linked to this foundset get their changes applied
    * you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
    * @param listener the listener to register.
+   * @returns the deregister function.
    */
-  public addChangeListener(listener: ChangeListener) {
+  public addChangeListener(listener: ChangeListener): () => void {
     return this.state.addChangeListener(listener);
   }
   public removeChangeListener(listener: ChangeListener) {
@@ -492,7 +493,7 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
     this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
   }
 
-  public addChangeListener(listener: (change: FoundsetChangeEvent) => void) {
+  public addChangeListener(listener: (change: FoundsetChangeEvent) => void): () => void {
     this.changeListeners.push(listener);
     return () => this.removeChangeListener(listener);
   }

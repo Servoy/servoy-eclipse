@@ -133,12 +133,12 @@ export class DataGrid {
 
     constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         this.log = logFactory.getLogger('DataGrid');
-        this.agGridOptions = <GridOptions> {
+        this.agGridOptions = {
             context: {
                 componentParent: this
             },
             rowModelType: 'serverSide'
-        };
+        } as GridOptions;
     }
 
     ngOnInit() {
@@ -146,7 +146,7 @@ export class DataGrid {
         // if nggrids service is present read its defaults
         let toolPanelConfig = null;
         let iconConfig = null;
-        let userGridOptions = null
+        let userGridOptions = null;
         let localeText = null;
 
         // TODO NGGrids services
@@ -184,7 +184,7 @@ export class DataGrid {
 
         const vMenuTabs = ['generalMenuTab', 'filterMenuTab'];
         if(this.showColumnsMenuTab) vMenuTabs.push('columnsMenuTab');
-        
+
         let sideBar;
         if (toolPanelConfig && toolPanelConfig.suppressSideButtons === true) {
             sideBar = false;
@@ -209,7 +209,7 @@ export class DataGrid {
                         }
                     }
                 ]
-            }
+            };
         }
 
         this.agGridOptions.defaultColDef = {
@@ -220,10 +220,10 @@ export class DataGrid {
             valueFormatter: this.displayValueFormatter,
             sortable: this.enableSorting,
             resizable: this.enableColumnResize
-        }
+        };
         this.agGridOptions.columnDefs = this.getColumnDefs();
         const _this = this;
-        this.agGridOptions.onGridReady = function(){
+        this.agGridOptions.onGridReady = () => {
             _this.sizeHeaderAndColumnsToFit();
         };
         // TODO this makes the date editor to close instanttly, because its popup steals the focus
@@ -241,9 +241,7 @@ export class DataGrid {
         this.agGridOptions.suppressCellSelection = true;
         this.agGridOptions.enableRangeSelection = false;
 
-        this.agGridOptions.getRowNodeId = function(data) {
-            return data._svyFoundsetUUID + '_' + data._svyFoundsetIndex;
-        }
+        this.agGridOptions.getRowNodeId = (data) =>  data._svyFoundsetUUID + '_' + data._svyFoundsetIndex;
 
         // the group manager
         this.groupManager = new GroupManager(this);
@@ -260,7 +258,7 @@ export class DataGrid {
             return value;
         }
 
-        return undefined;				
+        return undefined;
     }
 
     displayValueFormatter(params): string {
@@ -347,15 +345,14 @@ export class DataGrid {
         let items;
         if(dataGrid.agMainMenuItemsConfig && Object.keys(dataGrid.agMainMenuItemsConfig).length != 0) {
             items = [];
-            for (let key in dataGrid.agMainMenuItemsConfig) {
+            for (const key in dataGrid.agMainMenuItemsConfig) {
                 if(dataGrid.agMainMenuItemsConfig[key]) items.push(key);
             }
-        }
-        else {
+        } else {
             items = ['rowGroup', 'rowUnGroup'];
         }
         const menuItems = [];
-        params.defaultItems.forEach(function(item) {
+        params.defaultItems.forEach((item) => {
             if (items.indexOf(item) > -1) {
                 menuItems.push(item);
             }
@@ -453,17 +450,13 @@ export class DataGrid {
 
                 if(column.filterType == 'TEXT') {
                     colDef.filter = 'agTextColumnFilter';
-                }
-                else if(column.filterType == 'NUMBER') {
+                } else if(column.filterType == 'NUMBER') {
                     colDef.filter = 'agNumberColumnFilter';
-                }
-                else if(column.filterType == 'DATE') {
+                } else if(column.filterType == 'DATE') {
                     colDef.filter = 'agDateColumnFilter';
-                }
-                else if(column.filterType == 'VALUELIST') {
+                } else if(column.filterType == 'VALUELIST') {
                     colDef.filterFramework = ValuelistFilter;
-                }
-                else if(column.filterType == 'RADIO') {
+                } else if(column.filterType == 'RADIO') {
                     colDef.filterFramework = RadioFilter;
                 }
             }
@@ -898,7 +891,7 @@ export class DataGrid {
                     continue;
                 }
 
-                const node = this.agGrid.api.getRowNode(foundsetManager.foundsetUUID + "_" + foundsetManager.foundset.selectedRowIndexes[i]);
+                const node = this.agGrid.api.getRowNode(foundsetManager.foundsetUUID + '_' + foundsetManager.foundset.selectedRowIndexes[i]);
                 if (node) {
                     selectedNodes.push(node);
                 }
@@ -1386,34 +1379,34 @@ class GroupedInfo {
  */
 class FoundsetManager {
 
-    foundsetListener;
+    private removeListenerFunction;
 
     constructor(public dataGrid: DataGrid, public foundset: IFoundset, public foundsetUUID: string, public isRoot: boolean) {
         if (!isRoot) {
             // add the change listener to the component
             const _this = this;
-            foundset.addChangeListener(this.foundsetListener = function (change: FoundsetChangeEvent) {
+            this.removeListenerFunction = foundset.addChangeListener((change: FoundsetChangeEvent) => {
                 dataGrid.log.debug('child foundset changed listener ' + foundset);
-        
+
                 if (change.sortColumnsChanged) {
                     const newSort = change.sortColumnsChanged.newValue;
                     const oldSort = change.sortColumnsChanged.oldValue;
-        
+
                     // sort changed
                     dataGrid.log.debug('Change Group Sort Model ' + newSort);
                     return;
                 }
-        
+
                 if (change.sortColumnsChanged) {
                     dataGrid.selectedRowIndexesChanged(_this);
                 }
-        
+
                 if (change.viewportRowsUpdated) {
                     const updates = change.viewportRowsUpdated;
                     dataGrid.log.debug(updates);
                     dataGrid.updateRows(updates, null, null);
                 }
-        
+
             });
         }
     }
@@ -1566,7 +1559,7 @@ class FoundsetManager {
         this.dataGrid.log.debug('destroy ' + this.foundsetUUID);
 
         // remove the listener
-        this.foundset.removeChangeListener(this.foundsetListener);
+        this.removeListenerFunction();
 
         // persistently remove the foundset from other cached objects (model.hashedFoundsets, state.foundsetManager);
         this.dataGrid.removeFoundSetByFoundsetUUID(this.foundsetUUID);
@@ -1846,7 +1839,7 @@ class FoundsetDatasource {
             } else {
                 const vl = this.dataGrid.getValuelistEx(params.parentNode.data, rowGroupCols[i]['id']);
                 if(vl) {
-                    const filterDeferred = new Deferred(); 
+                    const filterDeferred = new Deferred();
                     filterPromises.push(filterDeferred.promise);
                     const idx = i;
                     vl.filterList(groupKeys[i]).subscribe((valuelistValues) => {
@@ -1856,7 +1849,7 @@ class FoundsetDatasource {
                         }
                         filterDeferred.resolve(true);
                     });
-                    removeAllFoundsetRefPostponed = true;                    
+                    removeAllFoundsetRefPostponed = true;
                 }
             }
         }
