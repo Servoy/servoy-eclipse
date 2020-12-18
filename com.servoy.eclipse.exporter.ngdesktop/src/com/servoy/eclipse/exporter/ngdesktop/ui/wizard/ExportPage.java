@@ -81,6 +81,7 @@ public class ExportPage extends WizardPage
 	private Group versionGroup;
 	private Combo srcVersionCombo;
 	private Button includeUpdateBtn;
+	private Text appNameText;
 	private Text updateUrlText;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
@@ -336,6 +337,20 @@ public class ExportPage extends WizardPage
 		gd.verticalSpan = 1;
 		versionGroup.setLayoutData(gd);
 
+		final Label appNameLabel = new Label(composite, SWT.NONE);
+		appNameLabel.setText("Application name:");
+		appNameLabel.setToolTipText("Name of the application");
+
+		appNameText = new Text(composite, SWT.BORDER);
+		appNameText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.APP_NAME_LENGTH + " chars");
+		appNameText.setEditable(true);
+		appNameText.setVisible(true);
+		appNameText.setEnabled(isUpdateSupported());
+		appNameText.setText(getAppName());
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		appNameText.setLayoutData(gd);
+
 		final Label updateUrlLabel = new Label(composite, SWT.NONE);
 		updateUrlLabel.setText("Update location:");
 		updateUrlLabel.setToolTipText("URL location of the update files.\nOpen context help for details.");
@@ -344,7 +359,7 @@ public class ExportPage extends WizardPage
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 		updateUrlText.setEditable(true);
 		updateUrlText.setVisible(true);
-		updateUrlText.setEnabled(isUpdateUrl());
+		updateUrlText.setEnabled(isUpdateSupported());
 		updateUrlText.setText(getUpdateUrl());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -375,7 +390,8 @@ public class ExportPage extends WizardPage
 	private void srcVersionListener(SelectionEvent event)
 	{
 		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		updateUrlText.setEnabled(isUpdateUrl());
+		updateUrlText.setEnabled(isUpdateSupported());
+		appNameText.setEnabled(isUpdateSupported());
 	}
 
 	private List<String> getAvailableVersions()
@@ -480,6 +496,13 @@ public class ExportPage extends WizardPage
 		return urlStr;
 	}
 
+	private String getAppName()
+	{
+		String appName = exportElectronWizard.getDialogSettings().get("application_name");
+		if (appName == null || appName.trim().length() == 0) appName = "ngdesktop";
+		return appName;
+	}
+
 	private String getDlgInitPath(String value)
 	{
 		if (value != null && value.trim().length() > 0 && new File(value).exists()) return value;
@@ -509,7 +532,7 @@ public class ExportPage extends WizardPage
 		return false;
 	}
 
-	private boolean isUpdateUrl()
+	private boolean isUpdateSupported()
 	{
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result >= 0)
@@ -533,6 +556,7 @@ public class ExportPage extends WizardPage
 		settings.put("ngdesktop_height", heightText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
 		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
+		settings.put("application_name", appNameText.getText().trim());
 		settings.put("update_url", updateUrlText.getText().trim());
 	}
 

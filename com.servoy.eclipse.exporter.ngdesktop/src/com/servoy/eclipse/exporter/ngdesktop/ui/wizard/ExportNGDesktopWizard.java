@@ -18,6 +18,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.wicket.validation.validator.UrlValidator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -52,6 +53,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	public final static int LOGO_SIZE = 256; // KB;
 	public final static int IMG_SIZE = 512; // KB;
 	public final static int COPYRIGHT_LENGTH = 128; // chars
+	public final static int APP_NAME_LENGTH = 20; // chars
 	private final static int PROCESS_CANCELLED = 1;
 	private final static int PROCESS_FINISHED = 0;
 	private final AtomicBoolean cancel = new AtomicBoolean(false);
@@ -330,13 +332,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final boolean osxPlatform = settings.getBoolean("osx_export");
 		final boolean linuxPlatform = settings.getBoolean("linux_export");
 		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected");
-		String value = settings.get("save_dir");
-		if (value.length() == 0)
+		String strValue = settings.get("save_dir");
+		if (strValue.length() == 0)
 		{
 			errorMsg.append("Export path must to be specified");
 			return errorMsg;
 		}
-		final File f = new File(value);
+		final File f = new File(strValue);
 		if (!f.exists() && !f.mkdirs())
 		{
 			errorMsg.append("Export path can't be created (permission issues?)");
@@ -368,33 +370,33 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 		}
 
-		value = settings.get("copyright");
-		if (value.toCharArray().length > COPYRIGHT_LENGTH)
+		strValue = settings.get("copyright");
+		if (strValue.toCharArray().length > COPYRIGHT_LENGTH)
 		{
-			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + value.toCharArray().length);
+			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length);
 			return errorMsg;
 		}
 
 		int intValue;
 		try
 		{
-			value = settings.get("ngdesktop_width");
-			if (value.length() > 0)
+			strValue = settings.get("ngdesktop_width");
+			if (strValue.length() > 0)
 			{
-				intValue = Integer.parseInt(value);
+				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid width size: " + value);
+					errorMsg.append("Invalid width size: " + strValue);
 					return errorMsg;
 				}
 			}
-			value = settings.get("ngdesktop_height");
-			if (value.length() > 0)
+			strValue = settings.get("ngdesktop_height");
+			if (strValue.length() > 0)
 			{
-				intValue = Integer.parseInt(value);
+				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid height size: " + value);
+					errorMsg.append("Invalid height size: " + strValue);
 					return errorMsg;
 				}
 			}
@@ -405,8 +407,24 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 
 		}
+
+		strValue = settings.get("update_url");
+		if (strValue.trim().length() > 0)
+		{
+			final UrlValidator urlValidator = new UrlValidator();
+			if (!urlValidator.isValid(strValue))
+			{
+				errorMsg.append("Invalid URL: " + strValue);
+				return errorMsg;
+			}
+		}
+
+		strValue = settings.get("application_name");
+		if (strValue.toCharArray().length > APP_NAME_LENGTH)
+		{
+			errorMsg.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length);
+			return errorMsg;
+		}
 		return errorMsg;
 	}
-
-
 }
