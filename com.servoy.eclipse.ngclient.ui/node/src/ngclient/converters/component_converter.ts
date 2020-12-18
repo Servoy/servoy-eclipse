@@ -176,7 +176,7 @@ export class ComponentConverter implements IConverter {
         return newValue;
     }
 
-    fromClientToServer(newClientData: ComponentModel, _oldClientData: ComponentModel): any {
+    fromClientToServer(newClientData: ComponentModel, oldClientData: ComponentModel): any {
         let retValue = [];
         if (newClientData) {
             const internalState = newClientData.getStateHolder();
@@ -190,7 +190,7 @@ export class ComponentConverter implements IConverter {
                 const propertyChanges = {propertyChanges: {}};
                 let hasChanges = false;
                 for (const property of Object.keys(model.svy_types)) {
-                    const changes = this.converterService.convertFromClientToServer(model[property], model.svy_types[property]);
+                    const changes = this.converterService.convertFromClientToServer(model[property], model.svy_types[property], oldClientData?oldClientData.model[property]:null);
                     if (changes) {
                        if (!hasChanges) {
                           hasChanges = true;
