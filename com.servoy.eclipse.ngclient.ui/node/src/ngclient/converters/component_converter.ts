@@ -47,12 +47,11 @@ export class ComponentConverter implements IConverter {
 
                 // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
                 const beanLayout = componentModel.layout;
-                const containerSize = {width: 0, height: 0};
 
                 const modelUpdateConversionInfo = modelBeanUpdate[ConverterService.TYPES_KEY] ? this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY)
                         : this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
-                this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, containerSize, componentModel,
+                this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, componentModel,
                     modelUpdateConversionInfo, modelBeanUpdate[ConverterService.TYPES_KEY], propertyContext);
                 done = true;
             }
@@ -134,14 +133,11 @@ export class ComponentConverter implements IConverter {
                 const beanModel: any = {};
                 serverSentData[ComponentConverter.MODEL_KEY] = beanModel;
 
-                // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
-                const containerSize = {width: 0, height: 0};
-
                 const currentConversionInfo = beanData[ConverterService.TYPES_KEY] ?
                     this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY) :
                         this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
-                this.applyBeanData(beanModel, componentModel.layout, beanData, containerSize, componentModel,
+                this.applyBeanData(beanModel, componentModel.layout, beanData, componentModel,
                     currentConversionInfo, beanData[ConverterService.TYPES_KEY], propertyContext);
 
                 // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
@@ -237,7 +233,7 @@ export class ComponentConverter implements IConverter {
         return wrapper;
     }
 
-    private applyBeanData(beanModel: any, beanLayout: any, beanData: any, containerSize: any, component: ComponentModel, beanConversionInfo, newConversionInfo, propertyContext: PropertyContext) {
+    private applyBeanData(beanModel: any, beanLayout: any, beanData: any, component: ComponentModel, beanConversionInfo: any, newConversionInfo: any, propertyContext: PropertyContext) {
         if (newConversionInfo) { // then means beanConversionInfo should also be defined - we assume that
             // beanConversionInfo will be granularly updated in the loop below
             // (to not drop other property conversion info when only one property is being applied granularly to the bean)
@@ -276,17 +272,6 @@ export class ComponentConverter implements IConverter {
                 }
             } else if (beanConversionInfo && beanConversionInfo[key] !== undefined) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
         }
-
-        // if the model had a change notifier call it now after everything is set.
-        const modelChangeFunction = beanModel.modelChangeNotifier;
-        if (modelChangeFunction) {
-            for (const key of Object.keys(beanData)) {
-                modelChangeFunction(key, beanModel[key]);
-            }
-        }
-
-        //TODO
-        //applyBeanLayout(beanModel, beanLayout, beanData, containerSize, true,useAnchoring,formname)
     }
 }
 

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory } from './logger.service';
-import { instanceOfChangeAwareValue } from './spectypes.service';
 
 
 class SwingModifiers {
@@ -113,10 +112,8 @@ export class ConverterService {
 
     let ret = arguments[0];
     if (ret === undefined || ret === null || arguments.length === 1) return ret;
-    let p;
-    let i;
-    for (i = 1; i < arguments.length; i++) {
-      p = ret;
+    for (let i = 1; i < arguments.length; i++) {
+      const p = ret;
       ret = ret[arguments[i]];
       if (ret === undefined || ret === null) {
         ret = {};

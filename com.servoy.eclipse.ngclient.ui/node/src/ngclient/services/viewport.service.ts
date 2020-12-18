@@ -7,8 +7,9 @@ import { Foundset } from '../converters/foundset_converter';
 
 @Injectable()
 export class ViewportService {
-  private static readonly CHANGED_IN_LINKED_PROPERTY = 9;
   public static readonly ROW_ID_COL_KEY = '_svyRowId';
+
+  private static readonly CHANGED_IN_LINKED_PROPERTY = 9;
 
   constructor(private converterService: ConverterService) { }
 
@@ -31,7 +32,7 @@ export class ViewportService {
   }
 
   public updateViewportGranularly(viewPort: any[], internalState: FoundsetViewportState, rowUpdates, rowUpdateConversions,
-    propertyContext: (propertyName: string) => any, simpleRowValue: boolean, rowPrototype?: any) {
+    propertyContext: PropertyContext, simpleRowValue: boolean, rowPrototype?: any) {
     // partial row updates (remove/insert/update)
 
     // {
@@ -44,12 +45,10 @@ export class ViewportService {
     // }
 
     // apply them one by one
-    let i: number;
-    let j: number;
-    for (i = 0; i < rowUpdates.length; i++) {
+    for (let i = 0; i < rowUpdates.length; i++) {
       const rowUpdate = rowUpdates[i];
       if (rowUpdate.type === ChangeType.ROWS_CHANGED) {
-        for (j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
+        for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
           let dpName: string;
           const relIdx = j - rowUpdate.startIndex;
 
@@ -93,12 +92,13 @@ export class ViewportService {
           }
         }
       } else if (rowUpdate.type === ChangeType.ROWS_INSERTED) {
-        if (rowUpdateConversions && rowUpdateConversions[i]) this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], propertyContext, undefined);
+        if (rowUpdateConversions && rowUpdateConversions[i])
+            this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], null,propertyContext);
         if (internalState.viewportConversions === undefined) {
           internalState.viewportConversions = [];
         }
 
-        for (j = rowUpdate.rows.length - 1; j >= 0; j--) {
+        for (let j = rowUpdate.rows.length - 1; j >= 0; j--) {
           viewPort.splice(rowUpdate.startIndex, 0, rowUpdate.rows[j]);
           if (rowPrototype) rowUpdate.rows[j] = SabloUtils.cloneWithDifferentPrototype(rowUpdate.rows[j], rowPrototype);
           if (rowUpdateConversions && rowUpdateConversions[i]) {
@@ -108,12 +108,13 @@ export class ViewportService {
         }
         rowUpdate.endIndex = rowUpdate.startIndex + rowUpdate.rows.length - 1; // prepare rowUpdate.endIndex for listener notifications
       } else if (rowUpdate.type === ChangeType.ROWS_DELETED) {
-        if (rowUpdateConversions && rowUpdateConversions[i]) this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], propertyContext, undefined);
+        if (rowUpdateConversions && rowUpdateConversions[i])
+            this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], null, propertyContext);
 
         const oldLength = viewPort.length;
         if (internalState.viewportConversions) {
           // delete conversion info for deleted rows
-          for (j = rowUpdate.startIndex; j < oldLength; j++) {
+          for (let j = rowUpdate.startIndex; j < oldLength; j++) {
             if (j + (rowUpdate.endIndex - rowUpdate.startIndex) < oldLength) {
               internalState.viewportConversions[j] = internalState.viewportConversions[j + (rowUpdate.endIndex - rowUpdate.startIndex)];
             } else {
@@ -168,7 +169,7 @@ export class ViewportService {
 
 
 export class FoundsetViewportState extends ChangeAwareState {
-  viewportConversions: Record<string, object>[] = [];
+  viewportConversions: Record<string, any>[] = [];
   forFoundset: () => Foundset;
   requests = [];
 }
