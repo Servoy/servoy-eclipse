@@ -26,6 +26,10 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
         super(renderer, cdRef);
     }
 
+    requestFocus() {
+        this.select2.toggleOpenAndClose();
+    }
+    
     attachFocusListeners() {
         if (this.onFocusGainedMethodID) {
             this.select2.focus.subscribe(() => {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Renderer2, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -13,6 +13,9 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
   @Input() findmode;
   @Input() valuelistID: IValuelist;
   @Input() showAs;
+  
+  @ViewChild('input') input: Input;
+  
   selection: any[] = [];
   allowNullinc = 0;
 
@@ -38,6 +41,11 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
     super.svyOnChanges(changes);
   }
 
+  requestFocus() {
+      const choiceInput = this.input;
+      choiceInput.nativeElement.focus();
+  }
+  
   setHandlersAndTabIndex() {
     for (let i = 0; i < this.getNativeElement().children.length; i++) {
         const elm: HTMLLabelElement = this.getNativeElement().children[i];

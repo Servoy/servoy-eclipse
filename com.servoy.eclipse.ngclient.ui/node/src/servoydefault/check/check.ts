@@ -36,11 +36,6 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
             }
         }
     }
-
-    requestFocus() {
-        const checkInput = this.getFocusElement().children[0];
-        checkInput.focus();
-    }
     
     attachEventHandlers( element, index ) {
         if ( !element )

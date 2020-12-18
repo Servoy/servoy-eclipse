@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -10,6 +10,8 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
 
   @Input() showAs;
 
+  @ViewChild('input') input: Input;
+  
   selected = false;
 
   constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
@@ -33,6 +35,11 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
     super.svyOnChanges(changes);
   }
 
+  requestFocus() {
+      const checkInput = this.input;
+      checkInput.nativeElement.focus();
+  }
+  
   attachEventHandlers(element: any) {
     if (!element)
         element = this.getNativeElement();
