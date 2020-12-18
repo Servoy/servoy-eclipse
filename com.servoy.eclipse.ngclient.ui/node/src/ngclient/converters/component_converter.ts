@@ -52,7 +52,7 @@ export class ComponentConverter implements IConverter {
                 const modelUpdateConversionInfo = modelBeanUpdate[ConverterService.TYPES_KEY] ? this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY)
                         : this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
-                this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, containerSize, componentModel.getStateHolder(),
+                this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, containerSize, componentModel,
                     modelUpdateConversionInfo, modelBeanUpdate[ConverterService.TYPES_KEY], propertyContext);
                 done = true;
             }
@@ -141,7 +141,7 @@ export class ComponentConverter implements IConverter {
                     this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY) :
                         this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
-                this.applyBeanData(beanModel, componentModel.layout, beanData, containerSize, componentModel.getStateHolder(),
+                this.applyBeanData(beanModel, componentModel.layout, beanData, containerSize, componentModel,
                     currentConversionInfo, beanData[ConverterService.TYPES_KEY], propertyContext);
 
                 // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
@@ -237,7 +237,7 @@ export class ComponentConverter implements IConverter {
         return wrapper;
     }
 
-    private applyBeanData(beanModel: any, beanLayout: any, beanData: any, containerSize: any, parentState: ChangeAwareState, beanConversionInfo, newConversionInfo, propertyContext: PropertyContext) {
+    private applyBeanData(beanModel: any, beanLayout: any, beanData: any, containerSize: any, component: ComponentModel, beanConversionInfo, newConversionInfo, propertyContext: PropertyContext) {
         if (newConversionInfo) { // then means beanConversionInfo should also be defined - we assume that
             // beanConversionInfo will be granularly updated in the loop below
             // (to not drop other property conversion info when only one property is being applied granularly to the bean)
@@ -247,6 +247,10 @@ export class ComponentConverter implements IConverter {
         // apply the new values and conversion info
         for (const key of Object.keys(beanData)) {
             const oldModelValueForKey = beanModel[key];
+            if (oldModelValueForKey === beanModel[key] && newConversionInfo && newConversionInfo[key] && component.nestedPropertyChange) {
+                // this was a nested updated
+                component.nestedPropertyChange(key, oldModelValueForKey);
+            }
             beanModel[key] = beanData[key];
 
             // remember conversion info for when it will be sent back to server - it might need special conversion as well
@@ -265,10 +269,10 @@ export class ComponentConverter implements IConverter {
                     // another thing from the property type and it then already has changes...) // TODO should we decouple this scenario?  if we are still processing server to client changes
                     // when change notifier is called we could trigger the change notifier later/async for sending changes back to server...
                     beanData[key].getStateHolder().setChangeListener(() => {
-                        parentState.notifyChangeListener();
+                        component.getStateHolder().notifyChangeListener();
                     });
                     // we check for changes anyway in case a property type doesn't do it itself as described in the comment above
-                    if (beanData[key].getStateHolder().hasChanges()) parentState.notifyChangeListener();
+                    if (beanData[key].getStateHolder().hasChanges()) component.getStateHolder().notifyChangeListener();
                 }
             } else if (beanConversionInfo && beanConversionInfo[key] !== undefined) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
         }
@@ -288,6 +292,7 @@ export class ComponentConverter implements IConverter {
 
 export class ComponentModel extends ComponentCache implements IChangeAwareValue {
 
+    public nestedPropertyChange: (property: string, value: any) => void;
     public readonly mappedHandlers = new Map<string,{ (): Promise<any>;selectRecordHandler(rowId: any): () => Promise<any>}>();
     private readonly stateHolder = new ComponentState();
 

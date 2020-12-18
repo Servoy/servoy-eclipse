@@ -1,6 +1,6 @@
 import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject
+    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange
 } from '@angular/core';
 import { ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
@@ -217,6 +217,9 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
             this.removeListenerFunction();
             this.removeListenerFunction = null;
         }
+        if (this.containedForm.childElements) {
+            this.containedForm.childElements.forEach(component => component.nestedPropertyChange = null);
+        }
     }
 
     getViewportRows(): ViewPortRow[] {
@@ -276,6 +279,19 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
             if (cache) return cache;
         }
 
+        if (!item.nestedPropertyChange) {
+            item.nestedPropertyChange = (property: string, value: any) => {
+                // should we really see if this was a foundset based property so for the selected index?
+                this.componentCache.forEach(rowObject => {
+                    const ui = rowObject[item.name];
+                    if (ui) {
+                        const change = {};
+                        change[property] = new SimpleChange(value,value,false);
+                        ui.ngOnChanges(change);
+                    }
+                });
+            };
+        }
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         function Model() {
         }
