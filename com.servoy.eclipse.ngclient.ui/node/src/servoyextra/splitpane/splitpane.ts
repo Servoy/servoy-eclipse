@@ -72,13 +72,15 @@ export class ServoyExtraSplitpane extends ServoyBaseComponent {
             promise.then((ok) => {
                 if (!ok) {
                     // a splitpane can't block the hide so show should be called
-                    this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName);
+                    this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
+                        finally( () => this.cdRef.detectChanges());
                 }
             });
         } else if (oldTab) {
             this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName);
         } else if (newTab) {
-            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName);
+            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
+                        finally( () => this.cdRef.detectChanges());
         }
         return newTab;
     }
