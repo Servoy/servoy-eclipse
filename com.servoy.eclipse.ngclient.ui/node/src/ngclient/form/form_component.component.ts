@@ -121,10 +121,11 @@ import { ServoyBaseComponent } from '../basecomponent';
    /* eslint-enable max-len */
 })
 
-export class FormComponent implements OnInit, OnDestroy, OnChanges {
+export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
     @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
+
     // component template generate start
     @ViewChild('aggridGroupingtable', { static: true }) readonly aggridGroupingtable: TemplateRef<any>;
 
@@ -212,12 +213,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.ngOnInit();
-    }
-
-    ngOnInit() {
-        this.formCache = this.formservice.getFormCache(this);
-        this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+        if (changes.name) {
+            this.formCache = this.formservice.getFormCache(this);
+            this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+        }
     }
 
     ngOnDestroy() {
