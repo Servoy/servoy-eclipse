@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -391,6 +392,7 @@ public class TypeCreator extends TypeCache
 	protected static final List<String> objectMethods = Arrays.asList(
 		new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
+	private boolean jfxInitialized = false;
 
 	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
 	{
@@ -548,6 +550,28 @@ public class TypeCreator extends TypeCache
 				Class< ? > clz = null;
 				try
 				{
+					if (!jfxInitialized && name.startsWith("javafx."))
+					{
+						jfxInitialized = true;
+						try
+						{
+							// special supprt for jfx because classes can't be loaded before jfx is initialzied correctly.
+							DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+							IServoyBeanFactory factory = (IServoyBeanFactory)application.getBeanManager()
+								.createInstance("com.servoy.extensions.beans.jfxpanel.JFXPanel");
+							if (factory != null)
+							{
+								SwingUtilities.invokeAndWait(() -> {
+									factory.getBeanInstance(IClientPluginAccess.CLIENT, (IClientPluginAccess)application.getPluginAccess(), null);
+								});
+							}
+						}
+						catch (Throwable e)
+						{
+							// ignores
+						}
+
+					}
 					clz = Class.forName(name);
 				}
 				catch (Exception e)
