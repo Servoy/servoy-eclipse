@@ -15,7 +15,7 @@ describe('ServoyDefaultRectangle', () => {
   let rectangle;
 
   beforeEach(waitForAsync(() => {
-      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
+      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
       TestBed.configureTestingModule({
         declarations: [ ServoyDefaultRectangle ],
         imports: [SabloModule, FormsModule, ServoyPublicModule],

@@ -51,7 +51,7 @@ describe('ComboboxComponent', () => {
   let converterService: ConverterService;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','registerComponent']);
+    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
 
 
     TestBed.configureTestingModule({
@@ -75,7 +75,7 @@ describe('ComboboxComponent', () => {
 
     component = fixture.componentInstance;
     component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(), 'valuelist');
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
     component.dataProviderID = 3;
     component.format = new Format();
     component.format.type = 'TEXT';

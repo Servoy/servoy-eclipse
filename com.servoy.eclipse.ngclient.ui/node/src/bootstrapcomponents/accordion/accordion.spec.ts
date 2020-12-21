@@ -10,7 +10,7 @@ import { ServoyApi } from '../../ngclient/servoy_public'
 describe('AccordionComponent', () => {
   let component: ServoyBootstrapAccordion;
   let fixture: ComponentFixture<ServoyBootstrapAccordion>;
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({

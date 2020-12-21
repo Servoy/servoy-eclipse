@@ -21,7 +21,7 @@ describe('ServoyExtraSlider', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraSlider);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
 	component.ceil = 0;
 	component.floor = 0;
     fixture.detectChanges();

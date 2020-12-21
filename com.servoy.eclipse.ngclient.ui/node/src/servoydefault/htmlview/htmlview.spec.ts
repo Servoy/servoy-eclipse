@@ -11,7 +11,7 @@ import { By } from '@angular/platform-browser';
 describe('ServoyDefaultHTMLView', () => {
   let component: ServoyDefaultHTMLView;
   let fixture: ComponentFixture<ServoyDefaultHTMLView>;
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','registerComponent']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({

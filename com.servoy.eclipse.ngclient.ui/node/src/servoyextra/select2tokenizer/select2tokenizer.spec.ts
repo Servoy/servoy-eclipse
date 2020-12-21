@@ -18,7 +18,7 @@ describe('ServoyExtraSelect2Tokenizer', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraSelect2Tokenizer);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
     fixture.detectChanges();
   });
 

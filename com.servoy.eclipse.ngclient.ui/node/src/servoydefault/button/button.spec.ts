@@ -10,7 +10,7 @@ describe('SvyButton', () => {
   let component: ServoyDefaultButton;
   let fixture: ComponentFixture<ServoyDefaultButton>;
 
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({

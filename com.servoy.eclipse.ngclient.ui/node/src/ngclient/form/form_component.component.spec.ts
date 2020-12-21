@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, SimpleChange } from '@angular/core';
 
 import { FormComponent, AddAttributeDirective } from './form_component.component';
 
@@ -50,6 +50,7 @@ describe('FormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
+    component.ngOnChanges({name:new SimpleChange(null,'test',true)});
     fixture.detectChanges();
   });
 

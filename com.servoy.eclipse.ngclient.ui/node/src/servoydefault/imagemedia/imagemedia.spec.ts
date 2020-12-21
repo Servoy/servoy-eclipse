@@ -33,7 +33,7 @@ describe('ServoyDefaultImageMedia', () => {
   beforeEach(() => {
 
     applicationService = jasmine.createSpyObj('ApplicationService', ['showFileOpenDialog']);
-    servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'getFormname','registerComponent']);
+    servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'getFormname','registerComponent','unRegisterComponent']);
 
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultImageMedia, UploadDirective],
