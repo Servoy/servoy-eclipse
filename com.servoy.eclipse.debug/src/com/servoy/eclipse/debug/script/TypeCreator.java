@@ -133,7 +133,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
-import com.servoy.j2db.IServoyBeanFactory2;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -198,7 +197,6 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
@@ -831,43 +829,44 @@ public class TypeCreator extends TypeCache
 				}
 			}
 		}
-		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
-		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
-		for (Class< ? > beanClass : allBeanClasses)
-		{
-			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
-			{
-				try
-				{
-					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-					Class< ? > realBeanClass = null;
-					if (IServoyBeanFactory2.class.isAssignableFrom(beanClass))
-					{
-						realBeanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
-					}
-					else
-					{
-						ServoyLog.logWarning("Found bean class: " + beanClass + ", that implements IServoyBeanFactory and not IServoyBeanFactory2", null);
-						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
-							new Object[] { "developer", "developer", null });
-						realBeanClass = beanInstance.getClass();
-					}
-					addType(beanClass.getSimpleName(), realBeanClass);
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("error creating bean for in the js type provider", e);
-				}
-				catch (NoClassDefFoundError e)
-				{
-					ServoyLog.logError("error creating bean for in the js type provider", e);
-				}
-			}
-			else
-			{
-				addType(beanClass.getSimpleName(), beanClass);
-			}
-		}
+		// removed this for now, beans should be done on demand when they are really used on the forms
+//		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
+//		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
+//		for (Class< ? > beanClass : allBeanClasses)
+//		{
+//			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+//			{
+//				try
+//				{
+//					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+//					Class< ? > realBeanClass = null;
+//					if (IServoyBeanFactory2.class.isAssignableFrom(beanClass))
+//					{
+//						realBeanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
+//					}
+//					else
+//					{
+//						ServoyLog.logWarning("Found bean class: " + beanClass + ", that implements IServoyBeanFactory and not IServoyBeanFactory2", null);
+//						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+//							new Object[] { "developer", "developer", null });
+//						realBeanClass = beanInstance.getClass();
+//					}
+//					addType(beanClass.getSimpleName(), realBeanClass);
+//				}
+//				catch (Exception e)
+//				{
+//					ServoyLog.logError("error creating bean for in the js type provider", e);
+//				}
+//				catch (NoClassDefFoundError e)
+//				{
+//					ServoyLog.logError("error creating bean for in the js type provider", e);
+//				}
+//			}
+//			else
+//			{
+//				addType(beanClass.getSimpleName(), beanClass);
+//			}
+//		}
 
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
@@ -4735,6 +4734,7 @@ public class TypeCreator extends TypeCache
 								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
 								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types
 								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+								addType(beanClassName.substring(beanClassName.lastIndexOf('.') + 1), persistClass);
 							}
 						}
 						elementType = getElementType(context, persistClass);
