@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, ElementRef, AfterViewInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -10,7 +10,7 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
 
   @Input() showAs;
 
-  @ViewChild('input') input: Input;
+  @ViewChild('input') input: ElementRef;
   
   selected = false;
 

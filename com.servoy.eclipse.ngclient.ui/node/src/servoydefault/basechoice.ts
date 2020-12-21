@@ -1,4 +1,4 @@
-import { Renderer2, ViewChild, SimpleChanges, Directive, Input, ChangeDetectorRef } from '@angular/core';
+import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, Input, ChangeDetectorRef } from '@angular/core';
 import { FormattingService, PropertyUtils } from '../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from './basefield';
 
@@ -8,7 +8,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
   selection: any[] = [];
   allowNullinc = 0;
 
-  @ViewChild('input') input: Input;
+  @ViewChild('input') input: ElementRef;
   
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Renderer2, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Renderer2, ElementRef, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -14,7 +14,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
   @Input() valuelistID: IValuelist;
   @Input() showAs;
   
-  @ViewChild('input') input: Input;
+  @ViewChild('input') input: ElementRef;
   
   selection: any[] = [];
   allowNullinc = 0;
