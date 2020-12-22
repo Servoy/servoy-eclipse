@@ -36,7 +36,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
               const change = changes[property];
               switch ( property ) {
                   case 'editable':
-                      if ( change.currentValue )
+                      if ( change.currentValue && !this.readOnly)
                           this.renderer.removeAttribute(this.getFocusElement(),  'readonly' );
                       else
                           this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
