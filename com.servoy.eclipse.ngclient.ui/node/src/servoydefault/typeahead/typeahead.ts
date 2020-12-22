@@ -40,6 +40,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
 
   svyOnChanges(changes: SimpleChanges) {
     super.svyOnChanges(changes);
+    if (changes.readOnly || changes.enabled) {
+        this.instance.setDisabledState(this.readOnly || !this.enabled);
+    }
   }
 
   values = (text$: Observable<string>) => {
