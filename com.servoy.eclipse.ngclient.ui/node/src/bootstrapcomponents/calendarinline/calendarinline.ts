@@ -13,6 +13,9 @@ export class ServoyBootstrapCalendarinline extends ServoyBootstrapBasefield {
     min: Date;
     max: Date;
 
+    globalDayArray: Number[];
+    globalDateArray: Date[];
+
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
@@ -24,18 +27,45 @@ export class ServoyBootstrapCalendarinline extends ServoyBootstrapBasefield {
         super.pushUpdate();
     }
 
-    public disableDays(dateArray: number[]) {
-        this.filter = (d: Moment): boolean => dateArray.includes(d.day());
+    public disableDays(dateArray: Number[]) {
+        this.globalDayArray = dateArray;
+        this.filter = ( d: moment.Moment ): boolean => {
+            if ( this.globalDateArray ) {
+                let result = true;
+                this.globalDateArray.forEach( el => {
+                    let year = d.toDate().getUTCFullYear().toString();
+                    let month = d.toDate().getUTCMonth().toString();
+                    let day = d.toDate().getUTCDate() + 1;
+                    if ( el.getUTCFullYear().toString() === year &&
+                        el.getUTCMonth().toString() === month &&
+                        el.getUTCDate() === day ) {
+                        result = false;
+                    }
+                } );
+
+                return result && !this.globalDayArray.includes( d.day() );
+            }
+            return !dateArray.includes( d.day() );
+        };
     }
 
-    public disableDates(dateArray: Date[]) {
-        this.filter = (d: Moment): boolean => {
+    public disableDates( dateArray: Date[] ) {
+        this.globalDateArray = dateArray;
+        this.filter = ( d: moment.Moment ): boolean => {
             let result = true;
-            dateArray.forEach(el => {
-                if (el.toString() === d.toDate().toString()) {
+            dateArray.forEach( el => {
+                let year = d.toDate().getUTCFullYear().toString();
+                let month = d.toDate().getUTCMonth().toString();
+                let day = d.toDate().getUTCDate() + 1;
+                if ( el.getUTCFullYear().toString() === year &&
+                    el.getUTCMonth().toString() === month &&
+                    el.getUTCDate() === day ) {
                     result = false;
                 }
-            });
+            } );
+            if ( this.globalDayArray ) {
+                return result && !this.globalDayArray.includes( d.day() );
+            }
             return result;
         };
     }
