@@ -367,3 +367,12 @@ div.svy-label-with-focus:focus{
   max-height: 300px;
   overflow-y: scroll;
 }
+
+.owl-dt-inline-container {
+    box-shadow: none; 
+    width: 15.5em;
+}
+
+.owl-dt-inline-container .owl-dt-calendar, .owl-dt-popup-container .owl-dt-calendar {
+    height: 17.25em;
+}
