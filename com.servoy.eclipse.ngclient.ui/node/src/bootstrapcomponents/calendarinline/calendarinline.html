@@ -5,6 +5,7 @@
         [pickerType]="'calendar'" 
         [min]="min" 
         [max]="max" 
+        [disabled]="readOnly || !enabled"
         [owlDateTimeFilter]="filter">
     </owl-date-time-inline>
 </div>

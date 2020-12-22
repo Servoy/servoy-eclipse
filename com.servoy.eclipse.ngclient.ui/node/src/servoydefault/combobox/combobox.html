@@ -11,6 +11,7 @@
         [value]="filteredDataProviderId"
         (update)="updateValue($event)"
         [minCountForSearch]="0"
+        [disabled]="readOnly || !enabled"
         #select2>
     </select2>
 </div> 
