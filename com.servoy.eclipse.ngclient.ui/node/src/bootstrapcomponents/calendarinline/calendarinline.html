@@ -1,7 +1,7 @@
-<div #element>
+<div #element [id]="servoyApi.getMarkupId()">
     <owl-date-time-inline 
-        [(ngModel)]="dataProviderID" 
-        (change)="pushUpdate()" 
+        [ngModel]="dataProviderID" 
+        (ngModelChange)="dateChanged($event)" 
         [pickerType]="'calendar'" 
         [min]="min" 
         [max]="max" 
