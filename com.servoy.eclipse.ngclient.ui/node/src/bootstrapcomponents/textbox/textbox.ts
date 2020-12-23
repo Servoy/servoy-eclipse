@@ -11,7 +11,6 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
 
     @Input() format: Format;
     @Input() inputType: string;
-    @Input() selectOnEnter;
     @Input() autocomplete: string;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {

@@ -15,6 +15,8 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     @Input() readOnly: boolean;
     @Input() editable: boolean;
     @Input() placeholderText: string;
+    @Input() selectOnEnter: boolean;
+
 
     storedTooltip: any;
 
