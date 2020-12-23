@@ -62,7 +62,7 @@ export class LocaleService {
         return import(`../../node_modules/moment/src/locale/${localeId}`).then(
             module => {
                 if (moment.locale() !== localeId)
-                    moment.defineLocale(localeId, module);
+                    moment.defineLocale(localeId, module.default._config);
             }).catch(e => {
                 const index = localeId.indexOf('-');
                 if (index === -1) {
