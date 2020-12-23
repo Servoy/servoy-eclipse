@@ -14,6 +14,7 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
     @ViewChild('inputElement') inputElementRef: ElementRef;
     @ViewChild(OwlDateTimeComponent) datetime: OwlDateTimeComponent<any>;
     @Input() format;
+    @Input() pickerOnly;
 
     public pickerType = 'both';
     public showSecondsTimer = false;

@@ -10,7 +10,7 @@
      	[svyStartEdit]="'dataProviderID'"
       	[hostComponent]="this"
         [disabled]="!enabled"
-        [readonly]="readOnly"
+        [readonly]="readOnly || pickerOnly"
      	#inputElement/>
     <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;" [hidden]="readOnly || !enabled"><span class="far fa-calendar-alt"></span></span>
     <owl-date-time #datetime [disabled]="readOnly || !enabled" [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
