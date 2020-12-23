@@ -1,8 +1,7 @@
 import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges } from '@angular/core';
-import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
-import * as moment from 'moment';
-import { FormattingService, I18NProvider, LocaleService } from '../../ngclient/servoy_public';
+import { I18NProvider, LocaleService } from '../../ngclient/servoy_public';
+import { ServoyBootstrapBaseCalendar } from './basecalendar';
 
 @Component({
     selector: 'bootstrapcomponents-calendar',
@@ -10,21 +9,12 @@ import { FormattingService, I18NProvider, LocaleService } from '../../ngclient/s
     styleUrls: ['./calendar.scss'],
     providers: [OwlDateTimeIntl]
 })
-export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
+export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
 
     @ViewChild('inputElement') inputElementRef: ElementRef;
     @ViewChild(OwlDateTimeComponent) datetime: OwlDateTimeComponent<any>;
     @Input() format;
 
-    public filter: any;
-    min: Date;
-    max: Date;
-    
-    globalDayArray: Number[];
-    globalDateArray: Date[];
-
-    public firstDayOfWeek = 1;
-    public hour12Timer = false;
     public pickerType = 'both';
     public showSecondsTimer = false;
 
@@ -35,17 +25,12 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
         localeService: LocaleService,
         dateTimeAdapter: DateTimeAdapter<any>,
         owlDateTimeIntl: OwlDateTimeIntl) {
-        super(renderer, cdRef);
-        dateTimeAdapter.setLocale(localeService.getLocale());
+        super(renderer, cdRef, localeService, dateTimeAdapter);
         i18nProvider.getI18NMessages('servoy.button.ok', 'servoy.button.cancel').then((val) => {
             if (val['servoy.button.ok']) owlDateTimeIntl.setBtnLabel = val['servoy.button.ok'];
             if (val['servoy.button.cancel']) owlDateTimeIntl.cancelBtnLabel = val['servoy.button.cancel'];
         });
 
-        const ld = moment.localeData();
-        this.firstDayOfWeek = ld.firstDayOfWeek();
-        const lts = ld.longDateFormat('LTS');
-        this.hour12Timer = lts.indexOf('a') >= 0 || lts.indexOf('A') >= 0;
     }
 
 
@@ -97,53 +82,5 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
 
     getStyleClassElement(): any {
         return this.inputElementRef.nativeElement;
-    }
-
-    public disableDays(dateArray: Number[]) {
-        this.globalDayArray = dateArray;
-        this.filter = ( d: moment.Moment ): boolean => {
-            if ( this.globalDateArray ) {
-                let result = true;
-                this.globalDateArray.forEach( el => {
-                    let year = d.toDate().getUTCFullYear().toString();
-                    let month = d.toDate().getUTCMonth().toString();
-                    let day = d.toDate().getUTCDate() + 1;
-                    if ( el.getUTCFullYear().toString() === year &&
-                        el.getUTCMonth().toString() === month &&
-                        el.getUTCDate() === day ) {
-                        result = false;
-                    }
-                } );
-
-                return result && !this.globalDayArray.includes( d.day() );
-            }
-            return !dateArray.includes( d.day() );
-        };
-    }
-
-    public disableDates( dateArray: Date[] ) {
-        this.globalDateArray = dateArray;
-        this.filter = ( d: moment.Moment ): boolean => {
-            let result = true;
-            dateArray.forEach( el => {
-                let year = d.toDate().getUTCFullYear().toString();
-                let month = d.toDate().getUTCMonth().toString();
-                let day = d.toDate().getUTCDate() + 1;
-                if ( el.getUTCFullYear().toString() === year &&
-                    el.getUTCMonth().toString() === month &&
-                    el.getUTCDate() === day ) {
-                    result = false;
-                }
-            } );
-            if ( this.globalDayArray ) {
-                return result && !this.globalDayArray.includes( d.day() );
-            }
-            return result;
-        };
-    }
-
-    public setMinMaxDate(minDate: Date, maxDate: Date) {
-        if (minDate) this.min = minDate;
-        if (maxDate) this.max = maxDate;
     }
 }
