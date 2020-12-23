@@ -1,8 +1,7 @@
-<div #element class="bts-combobox"> 
+<div #element class="bts-combobox"  [id]="servoyApi.getMarkupId()"> 
     <select2  
         [multiple]="false"
         [data]="data"
-        [id]="servoyApi.getMarkupId()"
         [svyFormat]="format"
         [svyStartEdit]="'dataProviderID'"
         [hostComponent]="this"
