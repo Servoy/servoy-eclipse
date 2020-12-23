@@ -15,6 +15,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield {
 
     @Input() format: Format;
     @Input() valuelistID: IValuelist;
+    @Input() appendToBody: boolean;
 
     @ViewChild('instance') instance: NgbTypeahead;
     focus$ = new Subject<string>();
