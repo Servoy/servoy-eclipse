@@ -16,8 +16,9 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
     @ViewChild(Select2) select2: Select2;
 
     @Input() format: Format;
-    @Input() showAs;
+    @Input() showAs: string;
     @Input() valuelistID: IValuelist;
+    @Input() appendToBody: boolean;
 
     data: Select2OptionWithReal[] = [];
     filteredDataProviderId: any;

@@ -1,4 +1,5 @@
 import { Component, ChangeDetectorRef, Renderer2, Input, SimpleChanges } from '@angular/core';
+import { Format } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -8,10 +9,10 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
 })
 export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
 
-    @Input() format;
-    @Input() inputType;
+    @Input() format: Format;
+    @Input() inputType: string;
     @Input() selectOnEnter;
-    @Input() autocomplete;
+    @Input() autocomplete: string;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

@@ -1,6 +1,6 @@
 import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
-import { I18NProvider, LocaleService } from '../../ngclient/servoy_public';
+import { Format, I18NProvider, LocaleService } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBaseCalendar } from './basecalendar';
 
 @Component({
@@ -13,8 +13,8 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
 
     @ViewChild('inputElement') inputElementRef: ElementRef;
     @ViewChild(OwlDateTimeComponent) datetime: OwlDateTimeComponent<any>;
-    @Input() format;
-    @Input() pickerOnly;
+    @Input() format: Format;
+    @Input() pickerOnly: boolean;
 
     public pickerType = 'both';
     public showSecondsTimer = false;
