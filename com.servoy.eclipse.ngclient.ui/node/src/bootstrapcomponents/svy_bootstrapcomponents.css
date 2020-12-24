@@ -25,6 +25,7 @@
 	padding: 0 12px;
 	line-height: 0;
 	text-overflow: ellipsis;
+	font-size: 14px;
 }
 
 .svy-wrapper>*>.bts-textarea {
@@ -106,4 +107,28 @@
 .svy-wrapper > * > .bts-list input {
 	height: 100%;
 	padding: 0px 5px;
+}
+
+.svy-wrapper > *> .form-control, .svy-wrapper > * > * > .form-control, .svy-ngbdropdownitem {
+   font-size: 14px;
+}
+
+.svy-dropdown::after {
+    float: right;
+    margin-top: 8px;
+}
+
+.svy-dropdown {
+    height: 100%;
+    text-align: left;
+    padding: 1px 5px;
+}
+
+.svy-dropdown-text {
+    text-overflow: clip;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 15px);
 }
