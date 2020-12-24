@@ -1,4 +1,4 @@
-import { Injectable, NgModule } from '@angular/core';
+import { Injectable, NgModule, NgZone } from '@angular/core';
 import { ConverterService } from '../sablo/converter.service';
 import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
@@ -32,12 +32,13 @@ export class TestWebsocketService extends WebsocketService {
       private serv: ServicesService,
       private conv: ConverterService,
       private logFac: LoggerFactory,
-      private loading: LoadingIndicatorService) {
-     super(ref, serv, conv, logFac, loading);
+      private loading: LoadingIndicatorService,
+      private zone: NgZone) {
+     super(ref, serv, conv, logFac, loading,zone);
     }
 
   connect(): WebsocketSession {
-      return new WebsocketSession({} as ReconnectingWebSocket, this, this.serv, this.ref, this.conv, this.logFac, this.loading);
+      return new WebsocketSession({} as ReconnectingWebSocket, this, this.serv, this.ref, this.conv, this.logFac, this.loading, this.zone);
   }
 }
 
