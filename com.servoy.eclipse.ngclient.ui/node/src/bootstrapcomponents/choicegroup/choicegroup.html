@@ -16,7 +16,7 @@
                 *ngIf="showAs != 'html' && showAs != 'trusted_html'">
              </span>
             <span 
-                [innerHtml]="item.displayValue | htmlFilter | trustAsHtml:servoyApi.isTrustedHTML()"
+                [innerHtml]="item.displayValue | htmlFilter | trustAsHtml: servoyApi.trustAsHtml()"
                 *ngIf="showAs == 'html' || showAs == 'trusted_html'">
             </span>
     </label>
