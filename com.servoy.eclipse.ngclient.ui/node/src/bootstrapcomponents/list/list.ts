@@ -41,7 +41,7 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
   updateDataprovider() {
       let listValue = this.elementRef.nativeElement.value;
       if (this.valuelistID) {
-          for (let i = 0; i < this.valuelistID.length; i++) {
+          for (const i of Object.keys(this.valuelistID)) {
               let displayValue = this.valuelistID[i].displayValue;
               if (!displayValue || displayValue === '') {
                   displayValue = ' ';

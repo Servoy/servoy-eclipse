@@ -51,16 +51,15 @@ export class ServoyDefaultBaseLabel extends ServoyDefaultBaseComponent {
         super.attachHandlers();
         if (this.onActionMethodID) {
             if (this.onDoubleClickMethodID) {
-                const innerThis: ServoyDefaultBaseComponent = this;
                 this.renderer.listen(this.getNativeElement(), 'click', (e: Event) => {
-                    if (innerThis.timeoutID) {
-                        window.clearTimeout(innerThis.timeoutID);
-                        innerThis.timeoutID = null;
+                    if (this.timeoutID) {
+                        window.clearTimeout(this.timeoutID);
+                        this.timeoutID = null;
                         // double click, do nothing
                     } else {
-                        innerThis.timeoutID = window.setTimeout(() => {
-                            innerThis.timeoutID = null;
-                            innerThis.onActionMethodID(e);
+                        this.timeoutID = window.setTimeout(() => {
+                            this.timeoutID = null;
+                            this.onActionMethodID(e);
                         }, 250);
                     }
                 });

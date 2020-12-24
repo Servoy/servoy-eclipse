@@ -27,7 +27,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
   }
   
   svyOnChanges(changes: SimpleChanges) {
-    for ( const property in changes ) {
+        for (const property of Object.keys(changes)) {
       switch (property) {
         case 'dataProviderID':
           this.selection = this.getSelectionFromDataprovider();
@@ -46,7 +46,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
     this.renderer.listen(spinnerButtons[0], 'click', e => this.increment());
     this.renderer.listen(spinnerButtons[1], 'click', e => this.decrement());
 
-    for (let i = 0; i < spinnerButtons.length; i++) {
+        for (const i of Object.keys(spinnerButtons)) {
         if (this.onActionMethodID)
           this.renderer.listen(spinnerButtons[i], 'click', e => this.onActionMethodID(e));
 
@@ -59,7 +59,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
   }
 
   // copied from angularui timepicker
-  isScrollingUp(e) {
+    isScrollingUp(e): boolean {
     if (e.originalEvent) {
       e = e.originalEvent;
     }
@@ -70,22 +70,23 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
 
   scrollCallback(e) {
     if (!this.isDisabled()) {
-      this.isScrollingUp(e) ? this.increment() : this.decrement();
+            if (this.isScrollingUp(e))this.increment();
+            else this.decrement();
     }
     e.preventDefault();
   }
 
   keydownKeypressCallback(e) {
     if (!this.isDisabled()) {
-      if (e.which == 40)
+            if (e.which === 40)
         this.decrement();
-      if (e.which == 38)
+            if (e.which === 38)
         this.increment();
     }
   }
 
   isDisabled() {
-    return this.enabled == false || this.editable == false;
+        return this.enabled === false || this.editable === false;
   }
 
   increment() {
@@ -112,7 +113,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
 
     for (let i = 0; i < this.valuelistID.length; i++) {
       const item = this.valuelistID[i];
-      if (item && item.realValue && this.dataProviderID == item.realValue) {
+            if (item && item.realValue && this.dataProviderID === item.realValue) {
         let displayFormat;
         let type;
         if (this.format && this.format.display)

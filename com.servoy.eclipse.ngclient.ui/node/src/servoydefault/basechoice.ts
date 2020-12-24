@@ -1,14 +1,16 @@
-import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, Input, ChangeDetectorRef } from '@angular/core';
-import { FormattingService, PropertyUtils } from '../ngclient/servoy_public';
+import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef } from '@angular/core';
+import { FormattingService } from '../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from './basefield';
 
 @Directive()
-export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
+export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTMLDivElement> {
+
+    @ViewChild('input') input: ElementRef<HTMLInputElement>;
 
   selection: any[] = [];
   allowNullinc = 0;
 
-  @ViewChild('input') input: ElementRef;
   
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
@@ -22,8 +24,6 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
       const inputComponent = this.input;
       inputComponent.nativeElement.focus();
   }
-
-  abstract setSelectionFromDataprovider();
 
   svyOnChanges(changes: SimpleChanges) {
     for (const property of Object.keys(changes)) {
@@ -84,9 +84,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
     }
   }
 
-  isValueListNull = function(item) {
-    return (item.realValue == null || item.realValue === '') && item.displayValue === '';
-  };
+    isValueListNull = (item) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
 
   /**
    * Gets the selected values (real values from valuelist) as array. The form element should have a dataProviderID assigned in order for this to work.
@@ -101,5 +99,9 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField {
       })
       .filter(item => item !== null);
   }
+
+    abstract setSelectionFromDataprovider(): void;
+
+
 
 }
