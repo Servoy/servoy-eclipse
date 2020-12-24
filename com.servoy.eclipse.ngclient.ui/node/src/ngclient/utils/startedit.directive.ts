@@ -8,7 +8,7 @@ import { ServoyBaseComponent } from '../servoy_public';
 export class StartEditDirective {
 
   @Input('svyStartEdit') dataProviderID: string;
-  @Input() hostComponent: ServoyBaseComponent;
+  @Input() hostComponent: ServoyBaseComponent<HTMLElement>;
 
   private log: LoggerService;
 

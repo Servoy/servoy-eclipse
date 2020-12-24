@@ -5,7 +5,7 @@ import {ServoyDefaultBaseField} from '../basefield';
   selector: 'servoydefault-password',
   templateUrl: './password.html'
 })
-export class ServoyDefaultPassword extends ServoyDefaultBaseField{
+export class ServoyDefaultPassword extends ServoyDefaultBaseField<HTMLInputElement> {
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
   }

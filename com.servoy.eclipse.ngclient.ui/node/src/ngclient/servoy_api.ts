@@ -59,11 +59,11 @@ export class ServoyApi {
         return this.formname;
     }
 
-    public registerComponent(_component: ServoyBaseComponent) {
+    public registerComponent(_component: ServoyBaseComponent<any>) {
         // these are overwritten by components that needs this.
     }
 
-    public unRegisterComponent(_component: ServoyBaseComponent) {
+    public unRegisterComponent(_component: ServoyBaseComponent<any>) {
         // these are overwritten by components that needs this.
     }
 }

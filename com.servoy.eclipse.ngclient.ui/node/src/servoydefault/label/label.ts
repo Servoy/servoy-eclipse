@@ -6,7 +6,7 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
     selector: 'servoydefault-label',
     templateUrl: './label.html'
 } )
-export class ServoyDefaultLabel extends ServoyDefaultBaseLabel {
+export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 
     @Input() labelFor;
 

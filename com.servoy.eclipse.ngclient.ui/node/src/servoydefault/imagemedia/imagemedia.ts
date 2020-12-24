@@ -8,7 +8,7 @@ import {ServoyDefaultBaseField} from  '../basefield';
     selector: 'servoydefault-imagemedia',
     templateUrl: './imagemedia.html'
 } )
-export class ServoyDefaultImageMedia extends ServoyDefaultBaseField {
+export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivElement> {
 
     public static readonly EMPTY = 'data:image/gif;base64,R0lGODlhEAAQALMAAAAAAP///1dzWYCcgoOehZq1nKfCqbnVu8biyPLy8s/Pz3p6emxsbA0NDcDAwAAAACH5BAEAAA4ALAAAAAAQABAAAAQR0MlJq7046827/2AojmRpThEAOw==';
     public static readonly NOT_EMPTY = 'data:image/gif;base64,R0lGODlhMgAQAKECAAAAAAAAhP///////yH5BAEKAAMALAAAAAAyABAAAAJOnI+py+0PFZg02muA2GLi72icBoBmQpLByp6gyAWcsLpYOskxbVvwJpvQWr0HDqCb8YohZZCiCTBDUKQSOL08KcssJDmTer+ssniMTjcKADs=';

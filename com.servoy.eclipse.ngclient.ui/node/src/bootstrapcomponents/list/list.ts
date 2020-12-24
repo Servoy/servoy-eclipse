@@ -8,7 +8,7 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })
-export class ServoyBootstrapList extends ServoyBootstrapBasefield {
+export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLDivElement> {
 
   @Input() valuelistID: IValuelist;
 
@@ -39,7 +39,7 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
   }
 
   updateDataprovider() {
-      let listValue = this.elementRef.nativeElement.value;
+      let listValue = (this.elementRef.nativeElement as HTMLInputElement).value;
       if (this.valuelistID) {
           for (const i of Object.keys(this.valuelistID)) {
               let displayValue = this.valuelistID[i].displayValue;

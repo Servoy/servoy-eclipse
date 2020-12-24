@@ -20,7 +20,7 @@ import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
     templateUrl: './listformcomponent.html',
     styleUrls: ['./listformcomponent.css']
 })
-export class ListFormComponent extends ServoyBaseComponent implements AfterViewInit, OnDestroy, IApiExecutor {
+export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
     @Input() containedForm: FormComponentState;
     @Input() foundset: Foundset;
@@ -39,7 +39,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
     numberOfCells = 0;
     selectionChangedByKey = false;
     removeListenerFunction: () => void;
-    private componentCache: Array<{ [property: string]: ServoyBaseComponent }> = [];
+    private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
 
     constructor(protected readonly renderer: Renderer2,
@@ -417,7 +417,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
         }
     }
 
-    registerComponent(component: ServoyBaseComponent, rowIndex: number): void {
+    registerComponent(component: ServoyBaseComponent<any>, rowIndex: number): void {
         let rowComponents = this.componentCache[rowIndex];
         if (!rowComponents) {
             rowComponents = {};
@@ -426,7 +426,7 @@ export class ListFormComponent extends ServoyBaseComponent implements AfterViewI
         rowComponents[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent, rowIndex: number): void {
+    unRegisterComponent(component: ServoyBaseComponent<any>, rowIndex: number): void {
         const rowComponents = this.componentCache[rowIndex];
         if (rowComponents) {
             delete rowComponents[component.name];
@@ -454,11 +454,11 @@ class ListFormComponentServoyApi extends ServoyApi {
         super(cell.state,formname,absolute,formservice,servoyService);
     }
 
-    registerComponent(comp: ServoyBaseComponent) {
+    registerComponent(comp: ServoyBaseComponent<any>) {
      this.fc.registerComponent(comp,this.cell.rowIndex);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent) {
+    unRegisterComponent(comp: ServoyBaseComponent<any>) {
      this.fc.unRegisterComponent(comp,this.cell.rowIndex);
     }
 

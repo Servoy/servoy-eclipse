@@ -9,7 +9,7 @@ import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap';
   templateUrl: './accordion.html',
   styleUrls: ['./accordion.scss']
 })
-export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel {
+export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel<HTMLDivElement> {
 
     private panelHeight: number;
 

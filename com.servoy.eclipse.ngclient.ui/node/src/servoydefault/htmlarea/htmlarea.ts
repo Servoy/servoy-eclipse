@@ -7,7 +7,7 @@ import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-edi
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
 })
-export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
+export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
     @ViewChild(AngularEditorComponent) editor: AngularEditorComponent;
 
@@ -42,8 +42,8 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
         const nativeElement = this.getNativeElement();
         const componentHeight = nativeElement.offsetHeight;
         // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        const initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
-        const initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
+        const initialContentHeight = (nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement).offsetHeight;
+        const initialEditorHeight = (nativeElement.childNodes[0].childNodes[0]as HTMLElement).offsetHeight;
 
         this.renderer.setStyle(nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', (initialContentHeight + componentHeight - initialEditorHeight) + 'px');
     }

@@ -6,7 +6,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './textarea.html',
   styleUrls: ['./textarea.scss']
 })
-export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield{
+export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield<HTMLTextAreaElement> {
 
     @Input() maxLength: number;
 

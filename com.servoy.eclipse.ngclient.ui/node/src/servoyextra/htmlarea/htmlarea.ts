@@ -7,7 +7,7 @@ import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-edi
     selector: 'servoyextra-htmlarea',
     templateUrl: './htmlarea.html',
 } )
-export class ServoyExtraHtmlarea extends ServoyBaseComponent {
+export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
@@ -58,8 +58,8 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
         const nativeElement = this.getNativeElement();
         const componentHeight = nativeElement.offsetHeight;
         // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        const initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
-        const initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
+        const initialContentHeight = (nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement).offsetHeight;
+        const initialEditorHeight = (nativeElement.childNodes[0].childNodes[0] as HTMLElement).offsetHeight;
 
         this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
 
@@ -135,7 +135,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     protected attachHandlers() {
         if ( this.onActionMethodID ) {
 
-            if ( this.getNativeElement().tagName === 'TEXTAREA' || this.getNativeElement().type === 'text' ) {
+            if ( this.getNativeElement().tagName === 'TEXTAREA' /*|| this.getNativeElement().type === 'text' */ ) {
                 this.renderer.listen( this.getNativeElement(), 'keydown', e => {
                     if ( e.keyCode === 13 ) this.onActionMethodID( e );
                 } );

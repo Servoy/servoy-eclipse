@@ -6,7 +6,7 @@ import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
     selector: 'servoyextra-imagelabel',
     templateUrl: './imagelabel.html'
 } )
-export class ServoyExtraImageLabel extends ServoyBaseComponent {
+export class ServoyExtraImageLabel extends ServoyBaseComponent<HTMLImageElement> {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;

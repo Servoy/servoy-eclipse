@@ -7,7 +7,7 @@ import { IValuelist } from '../../sablo/spectypes.service';
     selector: 'servoyextra-select2tokenizer',
     templateUrl: './select2tokenizer.html'
 })
-export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent {
+export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElement> {
 
  	@Input() onDataChangeMethodID: (e: Event, data?: any) => void;
     @Input() onFocusGainedMethodID: (e: Event, data?: any) => void;

@@ -3,7 +3,7 @@ import { Input, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyBootstrapBaseLabel extends ServoyBootstrapBaseComponent {
+export class ServoyBootstrapBaseLabel<T extends HTMLElement> extends ServoyBootstrapBaseComponent<T> {
 
     @Input() imageStyleClass: string;
     @Input() showAs: string;

@@ -4,7 +4,7 @@ import { PropertyUtils } from '../ngclient/servoy_public';
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
+export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBootstrapBaseComponent<T> {
 
     @Input() onDataChangeMethodID: (e: Event) => void;
     @Input() onFocusGainedMethodID: (e: Event) => void;
@@ -56,7 +56,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
         }
     }
 
-    attachFocusListeners(nativeElement: any) {
+    attachFocusListeners(nativeElement: HTMLElement) {
           if (this.onFocusGainedMethodID)
               this.renderer.listen( nativeElement, 'focus', ( e ) => {
                   this.onFocusGainedMethodID(e);
@@ -70,8 +70,8 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     onDataChangeCallback(event, returnval) {
         const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
+            this.renderer.removeClass(this.getFocusElement(), 'ng-valid');
+            this.renderer.addClass(this.getFocusElement(), 'ng-invalid');
             if (stringValue) {
                 if (this.storedTooltip === false) {
                     this.storedTooltip = this.toolTipText;
@@ -79,8 +79,8 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
                 this.toolTipText = returnval;
             }
         } else {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
+            this.renderer.removeClass(this.getFocusElement(), 'ng-invalid');
+            this.renderer.addClass(this.getFocusElement(), 'ng-valid');
             if (this.storedTooltip !== false) this.toolTipText = this.storedTooltip;
             this.storedTooltip = false;
         }
@@ -91,7 +91,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     }
 
     public selectAll() {
-        this.getNativeElement().select();
+        (this.getFocusElement() as HTMLInputElement).select();
     }
 
     public getSelectedText(): string {
@@ -99,7 +99,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     }
 
     public replaceSelectedText(text: string) {
-        const elem = this.getNativeElement();
+        const elem = this.getFocusElement()  as HTMLInputElement;
         const startPos =  elem.selectionStart;
         const endPos = elem.selectionEnd;
 

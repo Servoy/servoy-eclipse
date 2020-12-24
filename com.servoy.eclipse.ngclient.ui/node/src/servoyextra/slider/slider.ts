@@ -8,7 +8,7 @@ import { FormattingService } from '../../ngclient/servoy_public';
 	selector: 'servoyextra-slider',
 	templateUrl: './slider.html'
 })
-export class ServoyExtraSlider extends ServoyBaseComponent {
+export class ServoyExtraSlider extends ServoyBaseComponent<HTMLDivElement> {
 
 	@Input() onDataChangeMethodID;
 	@Input() onDataChangeHigh;

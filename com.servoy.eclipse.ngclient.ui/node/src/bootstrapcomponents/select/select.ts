@@ -8,7 +8,7 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
   templateUrl: './select.html',
   styleUrls: ['./select.scss']
 })
-export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
+export class ServoyBootstrapSelect extends ServoyBootstrapBasefield<HTMLSelectElement> {
 
   @Input() valuelistID: IValuelist;
   @Input() multiselect;

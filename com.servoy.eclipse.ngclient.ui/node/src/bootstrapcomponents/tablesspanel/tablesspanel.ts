@@ -8,7 +8,7 @@ import { SabloService } from '../../sablo/sablo.service';
 	templateUrl: './tablesspanel.html',
 	styleUrls: ['./tablesspanel.scss']
 })
-export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
+export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HTMLDivElement> {
 
 	@Input() containedForm: any;
 	@Input() relationName: any;

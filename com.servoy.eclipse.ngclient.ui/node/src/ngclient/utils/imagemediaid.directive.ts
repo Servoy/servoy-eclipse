@@ -8,7 +8,7 @@ import { IViewStateListener } from '../basecomponent';
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 
     @Input('svyImageMediaId') media: any;
-    @Input() hostComponent: ServoyBaseComponent;
+    @Input() hostComponent: ServoyBaseComponent<HTMLElement>;
 
     private imgStyle: Map<string, any>;
     private rollOverImgStyle: Map<string, any>;

@@ -6,7 +6,7 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 
 @Directive()
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
-export class ServoyDefaultBaseLabel extends ServoyDefaultBaseComponent {
+export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
     @Input() hideText;
     @Input() imageMediaID;

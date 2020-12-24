@@ -13,7 +13,7 @@ import { ServoyDefaultBaseComponent } from '../basecomponent';
 
 
 @Directive()
-export abstract class BaseTabpanel extends ServoyBaseComponent {
+export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
 	@Input() onChangeMethodID;
 

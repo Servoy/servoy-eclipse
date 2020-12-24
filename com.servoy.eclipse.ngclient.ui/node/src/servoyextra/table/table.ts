@@ -14,7 +14,7 @@ import { AsyncPipe } from '@angular/common';
     templateUrl: './table.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy {
+export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implements OnDestroy {
 
     // this is a hack for test, so that this has a none static child ref because the child is in a nested template
     @ViewChild('child', { static: false }) child: ElementRef;

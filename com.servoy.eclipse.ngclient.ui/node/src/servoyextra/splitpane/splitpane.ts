@@ -7,7 +7,7 @@ import { BaseCustomObject } from '../../sablo/spectypes.service';
     selector: 'servoyextra-splitpane',
     templateUrl: './splitpane.html'
 } )
-export class ServoyExtraSplitpane extends ServoyBaseComponent {
+export class ServoyExtraSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() onChangeMethodID;
 

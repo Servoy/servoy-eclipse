@@ -13,7 +13,7 @@ import * as moment from 'moment';
     templateUrl: './calendar.html',
         providers: [OwlDateTimeIntl]
 } )
-export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
+export class ServoyDefaultCalendar extends  ServoyDefaultBaseField<HTMLDivElement> {
 
     @ViewChild( 'inputElement') inputElementRef: ElementRef;
     @ViewChild(OwlDateTimeComponent) datetime: OwlDateTimeComponent<any>;

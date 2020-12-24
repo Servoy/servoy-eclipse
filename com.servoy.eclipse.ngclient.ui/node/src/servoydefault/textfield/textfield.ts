@@ -8,7 +8,7 @@ import {ServoyDefaultBaseField} from '../basefield';
     selector: 'servoydefault-textfield',
     templateUrl: './textfield.html'
 } )
-export class ServoyDefaultTextField extends ServoyDefaultBaseField {
+export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef , formattingService: FormattingService) {
         super(renderer, cdRef, formattingService);

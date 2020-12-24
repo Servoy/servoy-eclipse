@@ -7,7 +7,7 @@ import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
     templateUrl: './button.html',
     styleUrls: ['./button.scss']
 } )
-export class ServoyBootstrapButton extends ServoyBootstrapBaseLabel {
+export class ServoyBootstrapButton extends ServoyBootstrapBaseLabel<HTMLButtonElement> {
 
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

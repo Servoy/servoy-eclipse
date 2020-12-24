@@ -9,7 +9,7 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 	templateUrl: './tabpanel.html',
 	styleUrls: ['./tabpanel.scss']
 })
-export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
+export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLUListElement> {
 
 	@Input() onTabClickedMethodID;
 	@Input() onTabCloseMethodID;

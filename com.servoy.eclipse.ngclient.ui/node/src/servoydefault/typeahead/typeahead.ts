@@ -9,7 +9,7 @@ import { map, debounceTime, distinctUntilChanged, filter, take, switchMap } from
   selector: 'servoydefault-typeahead',
   templateUrl: './typeahead.html'
 })
-export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
+export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
   // this is a hack so that this can be none static access because this references in this component to a conditional template
   @ViewChild('instance', { static: true }) instance: NgbTypeahead;
   focus$ = new Subject<string>();

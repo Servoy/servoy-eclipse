@@ -190,7 +190,7 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     private handlerCache: { [property: string]: { [property: string]: (e) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
-    private componentCache: { [property: string]: ServoyBaseComponent } = {};
+    private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
@@ -308,11 +308,11 @@ export class FormComponent implements OnDestroy, OnChanges {
         return func;
     }
 
-    registerComponent(component: ServoyBaseComponent): void {
+    registerComponent(component: ServoyBaseComponent<any> ): void {
         this.componentCache[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent): void {
+    unRegisterComponent(component: ServoyBaseComponent<any> ): void {
         delete this.componentCache[component.name];
     }
 
@@ -358,11 +358,11 @@ class FormComponentServoyApi extends ServoyApi {
         super(item,formname,absolute,formservice,servoyService);
     }
 
-    registerComponent(comp: ServoyBaseComponent) {
+    registerComponent(comp: ServoyBaseComponent<any> ) {
      this.fc.registerComponent(comp);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent) {
+    unRegisterComponent(comp: ServoyBaseComponent<any> ) {
      this.fc.unRegisterComponent(comp);
     }
 }

@@ -3,14 +3,14 @@ import { Directive, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
+export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyBaseComponent<T> {
 
     @Input() onActionMethodID: (e: Event, data?: any) => void;
     @Input() onRightClickMethodID: (e: Event, data?: any) => void;
-    @Input() onDoubleClickMethodID: (e: Event,data?: any) => void;
+    @Input() onDoubleClickMethodID: (e: Event, data?: any) => void;
 
     @Input() enabled: boolean;
-    @Input() size: {width: number; height: number};
+    @Input() size: { width: number; height: number };
     @Input() styleClass: string;
     @Input() tabSeq: number;
     @Input() text: string;
@@ -54,7 +54,7 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
         super.svyOnChanges(changes);
     }
 
-    public getFocusElement(): any {
+    public getFocusElement(): HTMLElement {
         return this.getNativeElement();
     }
 
@@ -65,7 +65,8 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     public requestFocus() {
         this.getFocusElement().focus();
     }
-        public getScrollX(): number {
+
+    public getScrollX(): number {
         return this.getNativeElement().scrollLeft;
     }
 
@@ -85,32 +86,31 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent {
     protected attachHandlers() {
         if (this.onActionMethodID) {
             if (this.onDoubleClickMethodID) {
-                const innerThis: ServoyBootstrapBaseComponent = this;
-                this.renderer.listen(this.getNativeElement(), 'click', e => {
-                    if (innerThis.timeoutID) {
-                        window.clearTimeout(innerThis.timeoutID);
-                        innerThis.timeoutID = null;
+                this.renderer.listen(this.getFocusElement(), 'click', e => {
+                    if (this.timeoutID) {
+                        window.clearTimeout(this.timeoutID);
+                        this.timeoutID = null;
                         // double click, do nothing
                     } else {
-                        innerThis.timeoutID = window.setTimeout(() => {
-                            innerThis.timeoutID = null;
-                            innerThis.onActionMethodID(e);
+                        this.timeoutID = window.setTimeout(() => {
+                            this.timeoutID = null;
+                            this.onActionMethodID(e);
                         }, 250);
                     }
                 });
             } else {
-                if (this.getNativeElement().tagName === 'TEXTAREA' || this.getNativeElement().type === 'text') {
-                    this.renderer.listen(this.getNativeElement(), 'keydown', e => {
+                if (this.getFocusElement().tagName === 'TEXTAREA' /* || this.getNativeElement().type === 'text' */) {
+                    this.renderer.listen(this.getFocusElement(), 'keydown', e => {
                         if (e.keyCode === 13) this.onActionMethodID(e);
                     });
                 } else {
-                    this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID(e));
+                    this.renderer.listen(this.getFocusElement(), 'click', e => this.onActionMethodID(e));
                 }
 
             }
         }
         if (this.onRightClickMethodID) {
-            this.renderer.listen(this.getNativeElement(), 'contextmenu', e => {
+            this.renderer.listen(this.getFocusElement(), 'contextmenu', e => {
                 this.onRightClickMethodID(e); return false;
             });
         }

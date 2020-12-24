@@ -8,7 +8,7 @@ import { IValuelist } from '../sablo/spectypes.service';
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
+export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
     @Input() onDataChangeMethodID: (e: Event, data?: any) => void;
     @Input() onFocusGainedMethodID: (e: Event, data?: any) => void;
@@ -94,7 +94,7 @@ export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
     }
 
     public selectAll() {
-        this.getFocusElement().select();
+        (this.getFocusElement() as HTMLInputElement).select();
     }
 
     public getSelectedText(): string {
@@ -110,7 +110,7 @@ export class ServoyDefaultBaseField extends ServoyDefaultBaseComponent {
     }
 
     public replaceSelectedText(text: string) {
-        const elem = this.getFocusElement();
+        const elem = this.getFocusElement() as HTMLInputElement
         const startPos = elem.selectionStart;
         const endPos = elem.selectionEnd;
 

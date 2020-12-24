@@ -6,7 +6,7 @@ import { Component, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
     templateUrl: './label.html',
     styleUrls: ['./label.scss']
 })
-export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel {
+export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel<HTMLSpanElement> {
 
     @Input() labelFor: string;
     @Input() styleClassExpression: string;

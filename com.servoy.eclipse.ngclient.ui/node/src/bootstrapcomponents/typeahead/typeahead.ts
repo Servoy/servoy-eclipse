@@ -11,7 +11,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
     templateUrl: './typeahead.html',
     styleUrls: ['./typeahead.scss']
 })
-export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield {
+export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInputElement> {
 
     @Input() format: Format;
     @Input() valuelistID: IValuelist;

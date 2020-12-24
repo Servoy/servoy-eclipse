@@ -7,7 +7,7 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-combobox',
     templateUrl: './combobox.html'
 })
-export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
+export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 
     private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
 

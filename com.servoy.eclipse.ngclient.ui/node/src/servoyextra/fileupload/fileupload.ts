@@ -8,7 +8,7 @@ import { FileUploadModule, FileSelectDirective, FileUploader } from 'ng2-file-up
     templateUrl: './fileupload.html',
     styleUrls: ['./fileupload.css']
 } )
-export class ServoyExtraFileUpload extends ServoyBaseComponent {
+export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() onDataChangeMethodID;
     @Input() onFileUploadedMethodID;

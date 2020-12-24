@@ -8,7 +8,7 @@ import {ServoyDefaultBaseField} from  '../basefield';
     selector: 'servoydefault-htmlview',
     templateUrl: './htmlview.html'
 } )
-export class ServoyDefaultHTMLView extends ServoyDefaultBaseField {
+export class ServoyDefaultHTMLView extends ServoyDefaultBaseField<HTMLDivElement> {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService ) {
         super(renderer, cdRef, formattingService);

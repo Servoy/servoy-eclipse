@@ -4,7 +4,7 @@ import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { BaseCustomObject } from '../sablo/spectypes.service';
 
 @Directive()
-export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
+export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBootstrapBaseComponent<T> {
 	@Input() onChangeMethodID;
 
 	@Input() height;

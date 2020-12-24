@@ -5,7 +5,7 @@ import { Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_p
 
 @Directive()
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
-export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
+export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBaseComponent<T> {
 
     @Input() onActionMethodID: (e: Event, data?: any) => void;
     @Input() onRightClickMethodID: (e: Event, data?: any) => void;
@@ -41,7 +41,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
         this.attachHandlers();
     }
 
-    getFocusElement(): any {
+    getFocusElement(): HTMLElement {
         return this.getNativeElement();
     }
 

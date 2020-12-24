@@ -8,7 +8,7 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-listbox',
     templateUrl: './listbox.html'
 } )
-export class ServoyDefaultListBox extends ServoyDefaultBaseField {
+export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
     @Input() multiselectListbox;
 
     selectedValues: any[];

@@ -6,7 +6,7 @@ import {ServoyDefaultBaseComponent} from '../../servoydefault/basecomponent';
     selector: 'servoycore-slider',
     templateUrl: './slider.html'
 } )
-export class ServoyCoreSlider extends ServoyDefaultBaseComponent {
+export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElement> {
     @Input() onChangeMethodID;
     @Input() onCreateMethodID;
     @Input() onSlideMethodID;

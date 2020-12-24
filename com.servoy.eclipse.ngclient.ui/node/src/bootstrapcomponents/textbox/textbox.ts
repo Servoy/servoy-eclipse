@@ -7,7 +7,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
     templateUrl: './textbox.html',
     styleUrls: ['./textbox.scss']
 })
-export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
+export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield<HTMLInputElement> {
 
     @Input() format: Format;
     @Input() inputType: string;

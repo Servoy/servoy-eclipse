@@ -6,7 +6,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
     templateUrl: './checkbox.html',
     styleUrls: ['./checkbox.scss']
 })
-export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
+export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivElement> {
 
     @Input() showAs: string;
 

@@ -6,7 +6,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './imagemedia.html',
   styleUrls: ['./imagemedia.scss']
 })
-export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield{
+export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield<HTMLImageElement> {
 
     @Input() media;
     @Input() alternate;

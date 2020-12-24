@@ -7,14 +7,14 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
     templateUrl: './choicegroup.html',
     styleUrls: ['./choicegroup.scss']
 })
-export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
+export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDivElement> {
 
     @Input() inputType: string;
     @Input() findmode: boolean;
     @Input() valuelistID: IValuelist;
     @Input() showAs: string;
 
-    @ViewChild('input') input: ElementRef;
+    @ViewChild('input') input: ElementRef<HTMLInputElement>;
 
     selection: any[] = [];
     allowNullinc = 0;
@@ -48,8 +48,8 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
 
     setHandlersAndTabIndex() {
         for (let i = 0; i < this.getNativeElement().children.length; i++) {
-            const elm: HTMLLabelElement = this.getNativeElement().children[i];
-            this.attachEventHandlers(elm.children[0], i);
+            const elm = this.getNativeElement().children[i];
+            this.attachEventHandlers(elm.children[0] as HTMLElement, i);
         }
     }
 
@@ -110,7 +110,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
         event.target.blur();
     }
 
-    attachEventHandlers(element: Element, index: number) {
+    attachEventHandlers(element: HTMLElement, index: number) {
         if (element) {
             this.renderer.listen(element, 'click', (event) => {
                 if (!this.readOnly && this.enabled) {

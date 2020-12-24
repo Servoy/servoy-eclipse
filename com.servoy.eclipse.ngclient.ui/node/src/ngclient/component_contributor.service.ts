@@ -5,7 +5,7 @@ import { ServoyBaseComponent } from './servoy_public';
 export class ComponentContributor {
     private static listeners: Set<IComponentContributorListener> = new Set();
 
-    public componentCreated(component: ServoyBaseComponent) {
+    public componentCreated(component: ServoyBaseComponent<any>) {
         ComponentContributor.listeners.forEach(listener => listener.componentCreated(component));
     }
 
@@ -16,6 +16,6 @@ export class ComponentContributor {
 
 export interface IComponentContributorListener {
 
-    componentCreated(component: ServoyBaseComponent);
+    componentCreated(component: ServoyBaseComponent<any>):void;
 
 }

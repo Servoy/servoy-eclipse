@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import { LocaleService } from '../../ngclient/servoy_public';
 import { DateTimeAdapter } from '@danielmoncada/angular-datetime-picker';
 
-export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield {
+export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDivElement> {
 
     public filter: any;
     public min: Date;

@@ -4,7 +4,7 @@ import {ServoyDefaultBaseComponent} from '../basecomponent';
   selector: 'servoydefault-rectangle',
   templateUrl: './rectangle.html'
 })
-export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent{
+export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
     @Input() lineSize;
     @Input() roundedRadius;
     @Input() shapeType;

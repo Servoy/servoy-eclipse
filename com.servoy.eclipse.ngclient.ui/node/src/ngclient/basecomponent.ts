@@ -4,12 +4,12 @@ import { ServoyApi } from './servoy_api';
 
 @Directive()
 // eslint-disable-next-line
-export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
+export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name: string;
     @Input() servoyApi: ServoyApi;
     @Input() servoyAttributes: Array<{ key: string; value: string }>;
 
-    @ViewChild('element', { static: false }) elementRef: ElementRef;
+    @ViewChild('element', { static: false }) elementRef: ElementRef<T>;
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
@@ -79,7 +79,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges, On
     /**
      * this should return the main native element (like the first div)
      */
-    public getNativeElement(): any {
+    public getNativeElement(): T {
         return this.elementRef ? this.elementRef.nativeElement : null;
     }
 
@@ -96,19 +96,19 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges, On
     }
 
     public getWidth(): number {
-        return this.getNativeElement().parentNode.parentNode.offsetWidth;
+        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetWidth;
     }
 
     public getHeight(): number {
-        return this.getNativeElement().parentNode.parentNode.offsetHeight;
+        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetHeight;
     }
 
     public getLocationX(): number {
-        return this.getNativeElement().parentNode.parentNode.offsetLeft;
+        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetLeft;
     }
 
     public getLocationY(): number {
-        return this.getNativeElement().parentNode.parentNode.offsetTop;
+        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetTop;
     }
 
     public addViewStateListener(listener: IViewStateListener) {

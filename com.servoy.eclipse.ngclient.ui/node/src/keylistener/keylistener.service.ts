@@ -20,7 +20,7 @@ export class KeyListener implements IComponentContributorListener {
         this._callbacks = callbacks;
     }
 
-    public componentCreated(component: ServoyBaseComponent) {
+    public componentCreated(component: ServoyBaseComponent<any>) {
         const element = component.getNativeChild();
         const renderer = component.getRenderer();
         const attribute = element.getAttribute('keylistener');

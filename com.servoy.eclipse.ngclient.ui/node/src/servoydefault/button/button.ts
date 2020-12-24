@@ -7,7 +7,7 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
     templateUrl: './button.html',
     styleUrls: ['./style.scss']
 } )
-export class ServoyDefaultButton extends ServoyDefaultBaseLabel {
+export class ServoyDefaultButton extends ServoyDefaultBaseLabel<HTMLButtonElement> {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

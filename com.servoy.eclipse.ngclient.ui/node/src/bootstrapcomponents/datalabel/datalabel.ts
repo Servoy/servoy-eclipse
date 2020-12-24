@@ -6,7 +6,7 @@ import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
     templateUrl: './datalabel.html',
     styleUrls: ['./datalabel.scss']
 })
-export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
+export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel<HTMLSpanElement> {
 
     @Input() dataProviderID;
     @Input() styleClassExpression;
