@@ -824,7 +824,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		{
 			throw new RepositoryException("A table with name " + tableName + " already exists");
 		}
-		if (SQLKeywords.checkIfKeyword(tableName))
+		if (SQLKeywords.checkIfKeyword(tableName, getDatabaseType()))
 		{
 			throw new RepositoryException("The name " + tableName + " is an reserved sql word");
 		}
@@ -1073,7 +1073,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#isTableInvalidInDeveloperBecauseNoPk(java.lang.String)
 	 */
 	@Override
@@ -1263,5 +1263,11 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			return !memoryVersion.equals(driveColumns);
 		}
 		else return true;
+	}
+
+	@Override
+	public String getDatabaseType()
+	{
+		return "inmem";
 	}
 }
