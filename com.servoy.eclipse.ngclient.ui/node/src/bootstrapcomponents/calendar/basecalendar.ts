@@ -32,11 +32,13 @@ export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield {
     public disableDays(dateArray: number[]) {
         this.globalDayArray = dateArray;
         this.filter = this.globalDateArray || this.globalDayArray ? this.filterImpl : null;
+        this.cdRef.detectChanges();
     }
 
     public disableDates(dateArray: Date[]) {
         this.globalDateArray = dateArray;
         this.filter = this.globalDateArray || this.globalDayArray ? this.filterImpl : null;
+        this.cdRef.detectChanges();
     }
 
     public setMinMaxDate(minDate: Date, maxDate: Date) {
@@ -44,7 +46,7 @@ export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield {
         if (maxDate) this.max = maxDate;
     }
 
-    private filterImpl(d: Moment): boolean {
+    private filterImpl = (d: Moment): boolean => {
         let result = true;
         if (this.globalDateArray) {
             this.globalDateArray.forEach(el => {
