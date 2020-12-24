@@ -8,23 +8,23 @@ describe('DateConverter', () => {
           dateConverter = new DateConverter();
   });
 
-  function offsetString(wantedOffset) {
-      let offsetString = '';
+  const offsetString = (wantedOffset) => {
+      let offsetStr = '';
       const offset = currentOffset+wantedOffset;
       if (offset < 0) {
           if (offset > -10){
-              offsetString = '-0' + Math.abs(offset) + ':00';
+              offsetStr = '-0' + Math.abs(offset) + ':00';
           } else {
-              offsetString =offset + ':00';
+              offsetStr =offset + ':00';
           }
       } else {
           if (offset > 10){
-              offsetString = '+' + offset + ':00';
+              offsetStr = '+' + offset + ':00';
           } else {
-              offsetString = '+0' + offset + ':00';
+              offsetStr = '+0' + offset + ':00';
           }
       }
-      return offsetString;
+      return offsetStr;
   }
 
   it('should parse date string from server without timezone',  () => {
@@ -76,7 +76,7 @@ describe('DateConverter', () => {
       date.setFullYear(2018, 0, 1);
       date.setHours(0, 0, 0, 0);
     const dateString = dateConverter.fromClientToServer(date);
-    expect(dateString).toBe('2018-01-01T00:00:00' + offsetString(0));
+    expect(dateString).toBe('2018-01-01T00:00:00.000' + offsetString(0));
   });
 
 });

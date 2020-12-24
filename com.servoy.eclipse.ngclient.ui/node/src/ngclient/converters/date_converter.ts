@@ -15,7 +15,7 @@ export class DateConverter implements IConverter {
         let r = newClientData;
         if ( typeof newClientData === 'string' || typeof newClientData === 'number' ) r = new Date( newClientData as string );
         if ( isNaN( r.getTime() ) ) throw new Error( 'Invalid date/time value: ' + newClientData );// what should happen in this scenario , should we return null;
-        return moment( r ).format();
+        return moment( r ).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     }
 
 }
