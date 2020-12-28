@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.SwingUtilities;
+
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -45,7 +47,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
-import com.servoy.j2db.IServoyBeanFactory2;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.documentation.persistence.docs.DocsButton;
@@ -494,30 +495,29 @@ public class ElementUtil
 					beanClass = bcl.loadClass(beanClassName);
 					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
 					{
-						try
-						{
-							Form form = (Form)bean.getParent();
-							IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-							if (beanFactory instanceof IServoyBeanFactory2)
+						// these beans are always swing and or web, try to make them in the even thread then
+						final Class< ? >[] retValue = new Class[1];
+						final Class< ? > bc = beanClass;
+						SwingUtilities.invokeAndWait(() -> {
+							try
 							{
-								beanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
-							}
-							else
-							{
+								Form form = (Form)bean.getParent();
+								IServoyBeanFactory beanFactory = (IServoyBeanFactory)bc.newInstance();
 								Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
 									(IClientPluginAccess)application.getPluginAccess(),
 									new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-								beanClass = beanInstance.getClass();
+								retValue[0] = beanInstance.getClass();
 								if (beanInstance instanceof IScriptObject)
 								{
-									ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+									ScriptObjectRegistry.registerScriptObjectForClass(retValue[0], (IScriptObject)beanInstance);
 								}
 							}
-						}
-						catch (Throwable t)
-						{
-							Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t);
-						}
+							catch (Throwable t)
+							{
+								Debug.error("Error loading bean: " + bean.getName() + " clz: " + bc, t);
+							}
+						});
+						beanClass = retValue[0];
 					}
 					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 				}
