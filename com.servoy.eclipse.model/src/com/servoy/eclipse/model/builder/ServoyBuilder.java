@@ -132,6 +132,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -2529,6 +2530,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			ServoyLog.logError(ex);
 		}
 		hasDeletedMarkers = false;
+		ScriptNameValidator columnnameValidator = new ScriptNameValidator(getServoyModel().getFlattenedSolution());
+
 		String[] array = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, true);
 		for (String serverName : array)
 		{
@@ -2813,7 +2816,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										getServoyModel().getServoyProject(
 											project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE_MODULE) &&
 										serverNames.contains(serverName) &&
-										DataSourceUtils.getServerTablenames(dataSources, serverName).contains(tableName) && column.hasBadNaming(true))
+										DataSourceUtils.getServerTablenames(dataSources, serverName).contains(tableName) &&
+										column.hasBadNaming(columnnameValidator, true))
 									{
 										ServoyMarker mk = MarkerMessages.ReservedWindowObjectColumn.fill(column.getName());
 										addMarker(res, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_COLUMN, IMarker.PRIORITY_NORMAL, null,

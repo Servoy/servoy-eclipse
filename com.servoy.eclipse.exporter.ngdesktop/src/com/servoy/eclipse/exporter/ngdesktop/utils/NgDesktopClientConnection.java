@@ -136,6 +136,8 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("updateUrl", settings.get("update_url"));
 		if (settings.get("login_token") != null)
 			jsonObj.put("loginToken", settings.get("login_token"));
+		if (settings.get("application_name") != null)
+			jsonObj.put("applicationName", settings.get("application_name"));
 
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");

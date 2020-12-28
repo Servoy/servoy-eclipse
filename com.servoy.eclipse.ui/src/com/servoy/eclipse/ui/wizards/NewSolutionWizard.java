@@ -582,7 +582,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				DatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
 				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
 				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
-				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass());
+				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
+				origConfig.getQuoteList());
 			try
 			{
 				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
@@ -797,7 +798,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass());
+						origConfig.getDialectClass(), origConfig.getQuoteList());
 
 					EditorUtil.openServerEditor(config, true);
 				}

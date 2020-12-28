@@ -62,6 +62,7 @@ import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.NgDesktopPreferences;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -74,7 +75,7 @@ import com.servoy.j2db.util.Utils;
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 
-    public static final String NGDESKTOP_VERSION = "2020.12.0"; //version as specified in ngdesktop (electron-builder/app/package.json -> version)
+    public static String NGDESKTOP_VERSION = "2020.12.0"; //version as specified in ngdesktop (electron-builder/app/package.json -> version)
     public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
     public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
     protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
@@ -86,8 +87,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
     static
     {
         if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
-        DOWNLOAD_URL += NGDESKTOP_VERSION + "/";
-
     }
 
     public static ITagResolver noReplacementResolver = new ITagResolver()
@@ -111,6 +110,16 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
     @Override
     public Object execute(ExecutionEvent event)
     {
+        // UI display version may have a two numbers format (i.e. 2020.12) while the real version is ALWAYS three
+        // numbers format (i.e. 2020.12.0
+        NgDesktopPreferences prefs = new NgDesktopPreferences();
+        NGDESKTOP_VERSION = prefs.getNgDesktopVersionKey();
+        final String srcNumbers[] = NGDESKTOP_VERSION.split(".");
+        if (srcNumbers.length < 3)
+        {
+        	NGDESKTOP_VERSION += ".0";
+        }
+        NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 
         Job job = new Job("NGDesktop client launch")
         {
@@ -158,7 +167,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
             {
                 if (archiveUpdateNeeded())
                 {
-                    URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_PREFIX + PLATFORM + ".tar.gz");
+                    URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + NGDESKTOP_PREFIX + PLATFORM + ".tar.gz");
                     String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM : LOCAL_PATH;
                     deleteVersionFile();
                     downloadCancelled = downloadArchive(archiveUrl, savePath);
@@ -185,7 +194,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
         File currentVersionFile = new File(LOCAL_PATH + versionFilename);
         if (!currentVersionFile.exists())
             return true;
-        URL remoteVersionURL = new URL(DOWNLOAD_URL + versionFilename);
+        URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
         try (InputStream remoteStream = remoteVersionURL.openStream();
             InputStream localStream = new FileInputStream(currentVersionFile))
         {
@@ -245,7 +254,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
     {
         File versionFilename = new File(NGDESKTOP_PREFIX + "-archive.version");
         File currentVersionFile = new File(LOCAL_PATH + versionFilename);
-        URL remoteVersionURL = new URL(DOWNLOAD_URL + versionFilename);
+        URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
         try (InputStream remoteStream = remoteVersionURL.openStream();
             OutputStream localStream = new FileOutputStream(currentVersionFile))
         {

@@ -448,6 +448,12 @@
             name="Automatic Naming Strategies">
       </page>
       <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.NGDesktopConfiguration"
+            id="com.servoy.eclipse.ui.ngdesktop"
+            name="NG Desktop">
+      </page>
+      <page
             category="org.eclipse.dltk.javascript.ui.EditorPreferences"
 			class="com.servoy.eclipse.ui.preferences.JSFileExternalizeNLSRemoverConfigurationPage"
 			id="org.eclipse.dltk.javascript.editor.preferences.removeNLS"

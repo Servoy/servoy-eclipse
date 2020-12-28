@@ -381,7 +381,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							DatabaseUtils.getPostgresServerUrl(sc, name),
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass());
+							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
+							sc.getQuoteList());
 						if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
 						{
 							// something is wrong
