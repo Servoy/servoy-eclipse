@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -1096,14 +1097,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class //
+			String.class, List.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass" });
-
+			"dialectClass", "quoteList" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew())
@@ -1474,7 +1474,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == ServerConfig.CONNECTION_QUERY_VALIDATION);
 
-		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
+		logServerButton
+			.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
 
 		logTableName.setText(ApplicationServerRegistry.get().getServerManager().getLogTableName());
 
@@ -1583,7 +1584,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			{
 				createLogTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
-				createLogTableButton.setToolTipText("Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
+				createLogTableButton
+					.setToolTipText("Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
