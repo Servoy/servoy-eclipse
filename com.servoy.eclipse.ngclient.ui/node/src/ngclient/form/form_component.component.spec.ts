@@ -12,6 +12,9 @@ import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault
 import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 
 import { ServoyPublicModule } from '../servoy_public.module';
+import { ServoyExtraComponentsModule } from '../../servoyextra/servoyextra.module';
+import { ServoyBootstrapComponentsModule } from '../../bootstrapcomponents/servoybootstrap.module';
+import { SabloModule } from '../../sablo/sablo.module';
 
 
 describe('FormComponent', () => {
@@ -34,7 +37,7 @@ describe('FormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean ],
       imports: [
-                ServoyDefaultComponentsModule, ServoyPublicModule
+                ServoyDefaultComponentsModule, ServoyExtraComponentsModule, ServoyBootstrapComponentsModule, ServoyPublicModule, SabloModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },

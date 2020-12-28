@@ -10,18 +10,8 @@ import { UploadDirective } from '../../ngclient/utils/upload.directive';
 import { DebugElement, NgModule } from '@angular/core';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { By } from '@angular/platform-browser';
-import { FileUploadWindowComponent } from '../../ngclient/services/file-upload-window/file-upload-window.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { FormService } from '../../ngclient/form.service';
-
-@NgModule({
-  declarations: [FileUploadWindowComponent],
-  entryComponents: [
-    FileUploadWindowComponent,
-  ]
-})
-class TestModule {}
-
 
 describe('ServoyDefaultImageMedia', () => {
   let component: ServoyDefaultImageMedia;

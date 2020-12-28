@@ -1,7 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTextbox } from './textbox';
-import { FormattingService } from '../../ngclient/servoy_public';
+import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { SabloModule } from '../../sablo/sablo.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
 
 describe('TextboxComponent', () => {
   let component: ServoyBootstrapTextbox;
@@ -10,7 +14,8 @@ describe('TextboxComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTextbox ],
-      providers: [FormattingService]
+      imports: [SabloModule, ServoyPublicModule, FormsModule],
+      providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
     })
     .compileComponents();
   }));

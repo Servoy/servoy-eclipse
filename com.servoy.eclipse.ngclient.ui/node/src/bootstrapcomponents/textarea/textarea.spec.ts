@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { SabloModule } from '../../sablo/sablo.module';
 
 import { ServoyBootstrapTextarea } from './textarea';
 
@@ -10,7 +13,8 @@ describe('TextareaComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTextarea ],
-      imports: [FormsModule]
+      imports: [SabloModule, ServoyPublicModule, FormsModule],
+      providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
     })
     .compileComponents();
   });

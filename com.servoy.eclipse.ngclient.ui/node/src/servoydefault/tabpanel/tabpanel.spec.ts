@@ -28,7 +28,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         } ).compileComponents();
     } ) );
 
-    function createComponentWithTabs() {
+    const createComponentWithTabs = () => {
         const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
 
         fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
@@ -47,9 +47,9 @@ describe( 'ServoyDefaultTabpanel', () => {
 
         fixture.componentInstance.tabs = tabs;
         return fixture;
-    }
+    };
     it( 'should create the tabpanel component', waitForAsync(() => {
-        const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
+        const fixture = createComponentWithTabs();
         const app = fixture.debugElement.componentInstance;
         expect( app ).toBeTruthy();
     } ) );

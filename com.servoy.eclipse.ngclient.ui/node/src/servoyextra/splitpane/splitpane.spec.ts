@@ -2,6 +2,11 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyExtraSplitpane } from './splitpane';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { BGSplitter } from './bg_splitter/bg_splitter.component';
+import { BGPane } from './bg_splitter/bg_pane.component';
+import { SabloModule } from '../../sablo/sablo.module';
+import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
+
 
 describe('ServoyExtraSplitpane', () => {
   let component: ServoyExtraSplitpane;
@@ -9,8 +14,9 @@ describe('ServoyExtraSplitpane', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyExtraSplitpane ],
- 	  imports: [ ServoyPublicModule]
+      declarations: [ ServoyExtraSplitpane, BGPane, BGSplitter ],
+      imports: [SabloModule, ServoyPublicModule],
+      providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
     })
     .compileComponents();
   }));

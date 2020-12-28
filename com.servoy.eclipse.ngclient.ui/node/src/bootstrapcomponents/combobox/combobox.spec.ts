@@ -5,7 +5,7 @@ import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
 import { FormattingService, TooltipService } from '../../ngclient/servoy_public';
 import { FormsModule } from '@angular/forms';
-import { Select2Module } from 'ng-select2-component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe('ComboboxComponent', () => {
   let component: ServoyBootstrapCombobox;
@@ -15,7 +15,7 @@ describe('ComboboxComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapCombobox ],
       providers: [ FormattingService, TooltipService],
-      imports: [ServoyPublicModule, SabloModule, Select2Module, FormsModule]
+      imports: [ServoyPublicModule, SabloModule, NgbModule, FormsModule]
     })
     .compileComponents();
   });

@@ -7,6 +7,7 @@ import { ServoyDefaultTextField } from './textfield';
 import { FormattingService, TooltipService, LocaleService, I18NProvider, Format} from '../../ngclient/servoy_public';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { SabloTabseq } from '../../sablo/util/sablotabseq.directive';
 
 
 describe('ServoyDefaultTextField', () => {
