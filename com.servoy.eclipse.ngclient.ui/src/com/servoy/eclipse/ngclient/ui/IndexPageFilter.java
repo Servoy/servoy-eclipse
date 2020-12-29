@@ -29,11 +29,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 
+import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.util.MimeTypes;
-import com.servoy.j2db.util.Settings;
 
 /**
  * @author jcomp
@@ -65,12 +66,7 @@ public class IndexPageFilter implements Filter
 			{
 				File file = new File(distFolder, "index.html");
 				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
-				final String path = Settings.getInstance().getProperty("servoy.context.path", request.getContextPath() + '/');
-				indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"" + path + "\">");
-				servletResponse.setCharacterEncoding("UTF-8");
-				servletResponse.setContentType("text/html");
-				servletResponse.setContentLengthLong(indexHtml.length());
-				servletResponse.getWriter().write(indexHtml);
+				AngularIndexPageWriter.writeIndexPage(indexHtml, request, (HttpServletResponse)servletResponse, solutionName);
 				return;
 			}
 			else
