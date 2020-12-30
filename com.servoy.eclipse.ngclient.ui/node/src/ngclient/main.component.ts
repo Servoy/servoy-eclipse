@@ -6,6 +6,7 @@ import { FormService } from './form.service';
 import { I18NProvider } from './servoy_public';
 import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
+import { ServerDataService } from './services/serverdata.service';
 
 @Component({
   selector: 'svy-main',
@@ -17,11 +18,14 @@ export class MainComponent implements OnInit {
   i18n_reconnecting_feedback: string;
 
   constructor(private servoyService: ServoyService,
-          private allService: AllServiceService,
           private i18nProvider: I18NProvider,
           private formservice: FormService,
           public websocketService: WebsocketService,
-          public loadingIndicatorService: LoadingIndicatorService) {
+          public loadingIndicatorService: LoadingIndicatorService,
+          allService: AllServiceService,
+          serverData: ServerDataService) {
+    allService.init();
+    serverData.init();
     this.servoyService.connect();
   }
 
@@ -43,7 +47,7 @@ export class MainComponent implements OnInit {
     if (this.sessionProblem) return null;
     const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm;
     if (navigatorForm && navigatorForm.name &&
-        navigatorForm.name.lastIndexOf('default_navigator_container.html') == -1)
+        navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1)
         return navigatorForm.name;
     return null;
   }

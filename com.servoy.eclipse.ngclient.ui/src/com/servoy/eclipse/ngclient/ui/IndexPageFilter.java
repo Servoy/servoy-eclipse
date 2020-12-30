@@ -69,6 +69,11 @@ public class IndexPageFilter implements Filter
 				AngularIndexPageWriter.writeIndexPage(indexHtml, request, (HttpServletResponse)servletResponse, solutionName);
 				return;
 			}
+			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
+			{
+				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
+				return;
+			}
 			else
 			{
 				File file = new File(distFolder, requestURI);

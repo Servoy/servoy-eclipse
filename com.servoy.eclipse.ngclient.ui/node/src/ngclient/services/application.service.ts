@@ -12,6 +12,7 @@ import { DefaultLoginWindowComponent } from './default-login-window/default-logi
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component';
 import { LocalStorageService } from '../../sablo/webstorage/localstorage.service';
 import { LocaleService } from '../locale.service';
+import { ServerDataService } from './serverdata.service';
 
 @Injectable()
 export class ApplicationService {
@@ -23,7 +24,8 @@ export class ApplicationService {
                             private windowRefService: WindowRefService,
                             private sabloService: SabloService,
                             @Inject(DOCUMENT) private doc,
-                            private modalService: NgbModal) {
+                            private modalService: NgbModal,
+                            private serverData: ServerDataService) {
     }
 
     public setLocale(language, country ) {
@@ -125,8 +127,8 @@ export class ApplicationService {
             userAgent : userAgent.userAgent,
             platform : userAgent.platform,
             locale : locale.full,
-            remote_ipaddress : this.windowRefService.nativeWindow['servoy_remoteaddr'],
-            remote_host : this.windowRefService.nativeWindow['servoy_remotehost'],
+            remote_ipaddress : this.serverData.getIPAdress(),
+            remote_host : this.serverData.getHostAdress(),
             utcOffset : (new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0).getTimezoneOffset() / -60), utcDstOffset: (new Date(new Date().getFullYear(), 6, 1, 0, 0, 0, 0).getTimezoneOffset() / -60)
         };
     }

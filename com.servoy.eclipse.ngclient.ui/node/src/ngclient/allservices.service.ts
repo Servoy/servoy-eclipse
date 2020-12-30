@@ -17,6 +17,7 @@ import { TypesRegisterService } from '../servoydefault/types_register.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
+import { ServerDataService } from './services/serverdata.service';
 // generated services end
 
 
@@ -43,15 +44,20 @@ export class AllServiceService implements ServiceProvider {
     getService( name: string ) {
         return this[name];
     }
+
+    init() {
+        // just here is it can be called on.
+    }
+
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SvyUtilsService, SessionService,
-                KeyListener,
+    providers: [AllServiceService, ApplicationService, WindowService, SvyUtilsService, SessionService, ServerDataService,
                 // generated services start
                 NGUtilsService,
                 TypesRegisterService,
                 BSWindow,
+                KeyListener,
                 BSWindowManager
                 // generated services end
                 ],
