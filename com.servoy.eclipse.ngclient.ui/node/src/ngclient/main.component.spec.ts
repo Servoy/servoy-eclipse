@@ -7,6 +7,7 @@ import { FormService } from './form.service';
 import { I18NProvider } from './servoy_public';
 import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
+import { ServerDataService } from './services/serverdata.service';
 
 describe('MainComponent', () => {
   const servicesService = jasmine.createSpyObj('ServoyService', ['connect']);
@@ -16,11 +17,12 @@ describe('MainComponent', () => {
         MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
       ],
       providers:    [ {provide: ServoyService, useValue: servicesService },
-        { provide:AllServiceService, useValue: {} },
+        { provide:AllServiceService, useValue: {init: ()=>{}} },
         { provide:FormService, useValue: {} },
         { provide:I18NProvider, useValue: {} },
         { provide:WebsocketService, useValue: {} },
-        { provide:LoadingIndicatorService, useValue: {}}]
+        { provide:LoadingIndicatorService, useValue: {}},
+        { provide:ServerDataService, useValue: {init: ()=>{}}}]
     }).compileComponents();
   }));
   it('should create the main component', waitForAsync(() => {
