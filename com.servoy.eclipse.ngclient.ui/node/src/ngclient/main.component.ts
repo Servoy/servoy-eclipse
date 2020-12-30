@@ -8,7 +8,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 
 @Component({
-  selector: 'servoy-main',
+  selector: 'svy-main',
   templateUrl: './main.component.html'
 })
 
