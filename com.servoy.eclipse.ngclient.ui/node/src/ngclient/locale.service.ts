@@ -14,7 +14,7 @@ export class LocaleService {
     private locale = 'en';
     private loadedLocale: Deferred<any>;
 
-    private readonly localeMap = { "en": "en-US" };
+    private readonly localeMap = { en: 'en-US' };
 
     constructor(private sabloService: SabloService,
         private i18nProvider: I18NProvider,
@@ -41,7 +41,7 @@ export class LocaleService {
                 this.sessionStorageService.set('locale', language + '-' + country);
             }
             this.locale = localeId;
-            const full = language + (country ? "-" + country.toUpperCase() : "");
+            const full = language + (country ? '-' + country.toUpperCase() : '');
             // numbro wants with upper case counter but moment is all lower case
             Promise.all([this.setMomentLocale(full.toLowerCase(), true), this.setNumbroLocale(full, true)]).then(() =>
                 this.loadedLocale.resolve(localeId)
@@ -58,7 +58,7 @@ export class LocaleService {
     }
 
     private setMomentLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
-        if (moment.locale() == localeId) return Promise.resolve();
+        if (moment.locale() === localeId) return Promise.resolve();
         return import(`../../node_modules/moment/src/locale/${localeId}`).then(
             module => {
                 if (moment.locale() !== localeId)
@@ -76,7 +76,7 @@ export class LocaleService {
     }
 
     private setNumbroLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
-        if (numbro.language() == localeId) return Promise.resolve();
+        if (numbro.language() === localeId) return Promise.resolve();
         return import(`numbro/languages/${localeId}`).then(module => {
             numbro.registerLanguage(module.default);
             numbro.setLanguage(localeId);
