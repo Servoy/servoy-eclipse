@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { Format, FormattingService } from '../../ngclient/servoy_public';
@@ -28,6 +28,14 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
 
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService) {
         super(renderer, cdRef);
+    }
+    
+    @HostListener('keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            // stop propagation when using list form component (to not break the selection)
+            event.stopPropagation();
+        }
     }
 
     getFocusElement() {

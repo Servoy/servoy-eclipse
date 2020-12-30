@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
@@ -29,6 +29,14 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
         super.svyOnChanges(changes);
         if (changes.readOnly || changes.enabled) {
             this.instance.setDisabledState(this.readOnly || !this.enabled);
+        }
+    }
+
+    @HostListener('keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            // stop propagation when using list form component (to not break the selection)
+            event.stopPropagation();
         }
     }
 

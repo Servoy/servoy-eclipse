@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener } from '@angular/core';
 import { Observable, merge, Subject, of, Subscriber } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
@@ -18,6 +18,14 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
     formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
+  }
+
+  @HostListener('keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+          // stop propagation when using list form component (to not break the selection)
+          event.stopPropagation();
+      }
   }
 
   scroll($event: any) {

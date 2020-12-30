@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
@@ -30,6 +30,14 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
+    }
+
+    @HostListener('keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            // stop propagation when using list form component (to not break the selection)
+            event.stopPropagation();
+        }
     }
 
 	svyOnInit() {

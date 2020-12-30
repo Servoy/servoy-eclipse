@@ -54,10 +54,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     @HostListener('keydown', ['$event'])
     handleKeyDown(event: any) {
-        if (!this.foundset.multiSelect && (event.key === 'ArrowUp' || event.key === 'ArrowDown')
-        // do not move the selection if typeahead or combobox is selected
-        && !event.target.className.includes("bts-typeahead")
-        && !event.target.className.includes("bts-combobox")) {
+        if (!this.foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             let selectedRowIndex = this.foundset.selectedRowIndexes[0];
             if (event.key === 'ArrowUp') {
                 // move to the previous page if the first element (not from the first page) is selected

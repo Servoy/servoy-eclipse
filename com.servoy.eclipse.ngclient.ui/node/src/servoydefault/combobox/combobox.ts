@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener } from '@angular/core';
 import { Format, FormattingService } from '../../ngclient/servoy_public';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -19,6 +19,14 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
         formattingService: FormattingService) {
         super(renderer, cdRef, formattingService);
+    }
+
+    @HostListener('keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            // stop propagation when using list form component (to not break the selection)
+            event.stopPropagation();
+        }
     }
 
     attachFocusListeners() {
