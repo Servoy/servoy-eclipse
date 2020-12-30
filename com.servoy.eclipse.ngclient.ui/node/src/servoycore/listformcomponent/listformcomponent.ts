@@ -2,7 +2,7 @@ import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
     HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange
 } from '@angular/core';
-import { ViewPortRow } from '../../sablo/spectypes.service';
+import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ComponentConverter, ComponentModel } from '../../ngclient/converters/component_converter';
@@ -28,7 +28,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() styleClass: string;
     @Input() responsivePageSize: number;
     @Input() pageLayout: string;
-    @Input() onSelectionChanged: (event:any) => void;
+    @Input() onSelectionChanged: (event: any) => void;
 
     @ViewChild('element', { static: true }) elementRef: ElementRef;
     @ViewChild('firstelement', { static: true }) elementFirstRef: ElementRef;
@@ -49,7 +49,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         logFactory: LoggerFactory,
         @Inject(FormComponent) private parent: FormComponent) {
         super(renderer, cdRef);
-         this.log = logFactory.getLogger('ListFormComponent');
+        this.log = logFactory.getLogger('ListFormComponent');
     }
 
     @HostListener('keydown', ['$event'])
@@ -89,59 +89,51 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     svyOnInit() {
         super.svyOnInit();
         this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-            let shouldUpdatePagingControls = false;
-
             if (event.selectedRowIndexesChanged) {
                 this.updateSelection();
                 if (this.onSelectionChanged) {
-                  this.renderer.listen( this.elementRef.nativeElement, 'onselectionchanged', (e) => {
-                    this.onSelectionChanged(e);
-                  });
+                    this.renderer.listen(this.elementRef.nativeElement, 'onselectionchanged', (e) => {
+                        this.onSelectionChanged(e);
+                    });
                 }
             }
 
-            if (event.viewportRowsCompletelyChanged) {
-                this.calculateCells();
-            } else if (event.fullValueChanged) {
-                this.foundset = event.fullValueChanged.newValue;
-                this.calculateCells();
-                return;
-            }
-
-            if (event.serverFoundsetSizeChanged) {
-                shouldUpdatePagingControls = true;
-            }
-
-            if (shouldUpdatePagingControls) {
-                this.updatePagingControls();
-            }
-
-            if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize)
-                    && this.foundset.viewPort.size === 0 && this.numberOfCells > 0) {
-                this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
-                this.calculateCells();
-            }
             if (event.viewportRowsUpdated) {
                 // copy the viewport data over to the cell
                 // TODO this only is working for "updates", what happens with deletes or inserts?
                 const changes = event.viewportRowsUpdated;
                 changes.forEach(change => {
-                    const vpRows = this.foundset.viewPort.rows;
-                    for (let row = change.startIndex; row <= change.endIndex; row++) {
-                        const cache = vpRows[row]._cache;
-                        if (!cache) continue;
-                        this.containedForm.childElements.forEach(cm => {
-                            const cell: Cell = cache.get(cm.name);
-                            if (cell) {
-                                const mvp = cm.modelViewport[row];
-                                for (const key of Object.keys(mvp)) {
-                                    cell.model[key] = mvp[key];
+                    if (change.type === ChangeType.ROWS_CHANGED) {
+                        const vpRows = this.foundset.viewPort.rows;
+                        for (let row = change.startIndex; row <= change.endIndex; row++) {
+                            const cache = vpRows[row]._cache;
+                            if (!cache) continue;
+                            this.containedForm.childElements.forEach(cm => {
+                                const cell: Cell = cache.get(cm.name);
+                                if (cell) {
+                                    const mvp = cm.modelViewport[row];
+                                    for (const key of Object.keys(mvp)) {
+                                        cell.model[key] = mvp[key];
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 });
             } else {
+                if (event.serverFoundsetSizeChanged) {
+                    this.updatePagingControls();
+                }
+
+                if (event.viewportRowsCompletelyChanged) {
+                    this.calculateCells();
+                    return;
+                } else if (event.fullValueChanged) {
+                    this.foundset = event.fullValueChanged.newValue;
+                    this.calculateCells();
+                    return;
+                }
+
                 let viewportSizeAfterShiftingIsDone = this.foundset.viewPort.size;
                 if (event.viewPortStartIndexChanged) {
                     // an insert/delete before current page made viewport start index no longer match page start index; adjust
@@ -173,6 +165,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                     this.updateSelection();
                 }
+
+                if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize)
+                    && this.foundset.viewPort.size === 0 && this.numberOfCells > 0) {
+                    this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
+                    this.calculateCells();
+                    return;
+                }
+
 
                 // ok now we know startIndex is corrected if needed already; check is size needs to be corrected as well
                 if (event.viewPortSizeChanged) {
@@ -286,7 +286,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     const ui = rowObject[item.name];
                     if (ui) {
                         const change = {};
-                        change[property] = new SimpleChange(value,value,false);
+                        change[property] = new SimpleChange(value, value, false);
                         ui.ngOnChanges(change);
                     }
                 });
@@ -315,18 +315,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return rowItem;
     }
 
-    callApi(componentName: string, apiName: string, args: any, path?: string[]): any  {
+    callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
         if (path && componentName === 'containedForm' && path[0] === 'childElements') {
             const compModel = this.containedForm.childElements[parseInt(path[1], 10)];
             const selectedIndex = this.foundset.selectedRowIndexes[0];
-            const row  = this.componentCache[selectedIndex];
+            const row = this.componentCache[selectedIndex];
             const uiComp = row[compModel.name];
             if (path.length > 2) {
-                 if (instanceOfApiExecutor(uiComp)) {
+                if (instanceOfApiExecutor(uiComp)) {
                     uiComp.callApi(path[3], apiName, args, path.slice(3));
-                    } else {
-                        this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
-                         ', but comp: ' + (uiComp == null?' is not found':uiComp.name + ' doesnt implement IApiExecutor') );
+                } else {
+                    this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
+                        ', but comp: ' + (uiComp == null ? ' is not found' : uiComp.name + ' doesnt implement IApiExecutor'));
                 }
             } else {
                 const proto = Object.getPrototypeOf(uiComp);
@@ -338,7 +338,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             }
         } else {
-           this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);
+            this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);
         }
     }
 
@@ -438,7 +438,7 @@ class Cell {
     api: ServoyApi;
     name: string;
     constructor(public readonly state: ComponentModel, public readonly model: any,
-        public readonly handlers: any, public readonly rowId: any,  public readonly rowIndex: number) {
+        public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
         this.name = state.name;
     }
 
@@ -446,20 +446,20 @@ class Cell {
 
 class ListFormComponentServoyApi extends ServoyApi {
     constructor(private cell: Cell,
-                formname: string,
-                absolute: boolean,
-                formservice: FormService,
-                servoyService: ServoyService,
-                private fc: ListFormComponent) {
-        super(cell.state,formname,absolute,formservice,servoyService);
+        formname: string,
+        absolute: boolean,
+        formservice: FormService,
+        servoyService: ServoyService,
+        private fc: ListFormComponent) {
+        super(cell.state, formname, absolute, formservice, servoyService);
     }
 
     registerComponent(comp: ServoyBaseComponent<any>) {
-     this.fc.registerComponent(comp,this.cell.rowIndex);
+        this.fc.registerComponent(comp, this.cell.rowIndex);
     }
 
     unRegisterComponent(comp: ServoyBaseComponent<any>) {
-     this.fc.unRegisterComponent(comp,this.cell.rowIndex);
+        this.fc.unRegisterComponent(comp, this.cell.rowIndex);
     }
 
     startEdit(property: string) {
