@@ -496,6 +496,7 @@ public class ColumnComposite extends Composite
 	private TableColumn allowNullColumn;
 	private TableColumn seqType;
 	private TableColumn delColumn;
+	private ColumnAllowNullEditingSupport colomnAllowNullEditingSupport;
 
 	private void createTableColumns(final ITable table)
 	{
@@ -533,7 +534,8 @@ public class ColumnComposite extends Composite
 		allowNullColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_ALLOW_NULL);
 		allowNullColumn.setText("Allow Null");
 		TableViewerColumn allowNullViewerColumn = new TableViewerColumn(tableViewer, allowNullColumn);
-		allowNullViewerColumn.setEditingSupport(new ColumnAllowNullEditingSupport(tableViewer));
+		colomnAllowNullEditingSupport = new ColumnAllowNullEditingSupport(tableViewer);
+		allowNullViewerColumn.setEditingSupport(colomnAllowNullEditingSupport);
 		allowNullColumn.setToolTipText("Modifying allow null after table is created in database may break existing tables at deployment.");
 
 		seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
@@ -757,6 +759,11 @@ public class ColumnComposite extends Composite
 		{
 			nameEditor.checkValidState();
 		}
+	}
+
+	public boolean shouldDropTable()
+	{
+		return colomnAllowNullEditingSupport.getAndResetDropTable();
 	}
 
 	public boolean isDataProviderIdDisplayed()

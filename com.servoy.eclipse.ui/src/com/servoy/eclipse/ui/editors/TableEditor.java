@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -748,6 +749,17 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (columnComposite != null)
 				{
 					columnComposite.checkValidState();
+				}
+				if (columnComposite != null && table instanceof Table && columnComposite.shouldDropTable())
+				{
+					try
+					{
+						server.dropTable((Table)table);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 				if (propertiesComposite != null)
 				{

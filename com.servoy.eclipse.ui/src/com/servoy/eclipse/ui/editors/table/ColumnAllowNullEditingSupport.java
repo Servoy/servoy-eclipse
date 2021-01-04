@@ -22,16 +22,13 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class ColumnAllowNullEditingSupport extends EditingSupport
 {
 	private final CellEditor editor;
+	private boolean dropTable = false;
 
 	public ColumnAllowNullEditingSupport(TableViewer tv)
 	{
@@ -54,16 +51,7 @@ public class ColumnAllowNullEditingSupport extends EditingSupport
 						"All data in table will be lost. This could be a problem if this table is already in production and it has data, then we are not able to update that column. " +
 						"Can we drop the existing table ? (save action will recreate it)"))
 				{
-					IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-					IServerInternal server = (IServerInternal)serverManager.getServer(column.getTable().getServerName(), true, true);
-					try
-					{
-						server.dropTable((Table)column.getTable());
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
+					dropTable = true;
 				}
 				else
 				{
@@ -101,4 +89,12 @@ public class ColumnAllowNullEditingSupport extends EditingSupport
 	{
 		return true;
 	}
+
+	public boolean getAndResetDropTable()
+	{
+		boolean oldDropTable = dropTable;
+		dropTable = false;
+		return oldDropTable;
+	}
+
 }
