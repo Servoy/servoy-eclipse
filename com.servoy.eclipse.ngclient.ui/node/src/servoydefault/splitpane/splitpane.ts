@@ -77,19 +77,20 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     }
 
     private tabSwitch(oldTab: Tab,newTab: Tab): Tab {
-        if (oldTab && newTab) {
+        if (oldTab && oldTab.containsFormId && newTab && newTab.containsFormId) {
             const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName);
             promise.then((ok) => {
                 if (!ok) {
                     // a splitpane can't block the hide so show should be called
                     this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
-                        finally( () => this.cdRef.detectChanges())
+                        finally( () => this.cdRef.detectChanges());
                 }
             });
-        } else if (oldTab) {
+        } else if (oldTab && oldTab.containsFormId) {
             this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName);
-        } else if (newTab) {
-            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).finally( () => this.cdRef.detectChanges());
+        } else if (newTab && newTab.containsFormId) {
+            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
+                        finally( () => this.cdRef.detectChanges());
         }
         return newTab;
     }

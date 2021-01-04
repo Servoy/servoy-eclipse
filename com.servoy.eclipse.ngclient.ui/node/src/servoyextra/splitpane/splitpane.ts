@@ -67,7 +67,7 @@ export class ServoyExtraSplitpane extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     private tabSwitch(oldTab: Pane,newTab: Pane): Pane {
-        if (oldTab && newTab) {
+        if (oldTab && oldTab.containsFormId && newTab && newTab.containsFormId) {
             const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName);
             promise.then((ok) => {
                 if (!ok) {
@@ -76,9 +76,9 @@ export class ServoyExtraSplitpane extends ServoyBaseComponent<HTMLDivElement> {
                         finally( () => this.cdRef.detectChanges());
                 }
             });
-        } else if (oldTab) {
+        } else if (oldTab && oldTab.containsFormId) {
             this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName);
-        } else if (newTab) {
+        } else if (newTab && newTab.containsFormId) {
             this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
                         finally( () => this.cdRef.detectChanges());
         }
