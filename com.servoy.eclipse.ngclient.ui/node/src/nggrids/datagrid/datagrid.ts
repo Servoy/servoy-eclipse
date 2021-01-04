@@ -1,6 +1,6 @@
 import { AgGridAngular } from '@ag-grid-community/angular';
 import { GridOptions } from '@ag-grid-enterprise/all-modules';
-import { ChangeDetectorRef, ContentChild, Input, TemplateRef } from '@angular/core';
+import { ChangeDetectorRef, ContentChild, ElementRef, Input, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
@@ -49,6 +49,7 @@ export class DataGrid {
     templateRef: TemplateRef<any>;
 
     @ViewChild('agGrid') agGrid: AgGridAngular;
+    @ViewChild('agGrid', { read: ElementRef }) agGridElementRef: ElementRef;
 
     @Input() myFoundset: IFoundset;
     @Input() columns;
@@ -130,6 +131,9 @@ export class DataGrid {
 
     agMainMenuItemsConfig;
     agArrowsUpDownMoveWhenEditing;
+
+    // position of cell with invalid data as reported by the return of onColumnDataChange
+    invalidCellDataIndex = { rowIndex: -1, colKey: ''};
 
     constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         this.log = logFactory.getLogger('DataGrid');
@@ -242,6 +246,34 @@ export class DataGrid {
         this.agGridOptions.enableRangeSelection = false;
 
         this.agGridOptions.getRowNodeId = (data) =>  data._svyFoundsetUUID + '_' + data._svyFoundsetIndex;
+
+        this.agGridOptions.onCellEditingStopped = function(event) {
+            // don't allow escape if cell data is invalid
+            // if(onColumnDataChangePromise == null) {
+            //     const rowIndex = event.rowIndex;
+            //     const colId = event.column.getColId();
+            //     if(_this.invalidCellDataIndex.rowIndex == rowIndex  && _this.invalidCellDataIndex.colKey == colId) {
+            //         _this.agGrid.api.startEditingCell({
+            //             rowIndex: rowIndex,
+            //             colKey: colId
+            //         });
+            //     }
+            // }
+        };
+        this.agGridOptions.onCellEditingStarted = function(event) {
+            // don't allow editing another cell if we have an invalidCellData
+            if(_this.invalidCellDataIndex.rowIndex != -1 && _this.invalidCellDataIndex.colKey != '') {
+                const rowIndex = event.rowIndex;
+                const colId = event.column.getColId();
+                if(_this.invalidCellDataIndex.rowIndex != rowIndex  || _this.invalidCellDataIndex.colKey != colId) {
+                    _this.agGrid.api.stopEditing();
+                    _this.agGrid.api.startEditingCell({
+                        rowIndex: _this.invalidCellDataIndex.rowIndex,
+                        colKey: _this.invalidCellDataIndex.colKey
+                    });
+                }
+            }
+        };
 
         // the group manager
         this.groupManager = new GroupManager(this);
@@ -442,6 +474,7 @@ export class DataGrid {
                 //         _this.updateFoundsetRecord(params);
                 //     }
                 // }
+                colDef.onCellValueChanged = this.updateFoundsetRecord;
             }
 
             if (column.filterType) {
@@ -933,101 +966,102 @@ export class DataGrid {
     }
 
     updateFoundsetRecord(params) {
-        // var rowIndex = params.node.rowIndex;
-        // var colId = params.column.colId;
+        const _this = params.context.componentParent;
+        const rowIndex = params.node.rowIndex;
+        const colId = params.column.colId;
 
-        // // if we have an invalid cell data, ignore any updates for other cells
-        // if((invalidCellDataIndex.rowIndex != -1 && invalidCellDataIndex.rowIndex != rowIndex)
-        //     || (invalidCellDataIndex.colKey != '' && invalidCellDataIndex.colKey != colId)) {
-        //     return;
-        // }
+        // if we have an invalid cell data, ignore any updates for other cells
+        if((_this.invalidCellDataIndex.rowIndex != -1 && _this.invalidCellDataIndex.rowIndex != rowIndex)
+            || (_this.invalidCellDataIndex.colKey != '' && _this.invalidCellDataIndex.colKey != colId)) {
+            return;
+        }
 
-        // var row = params.data;
-        // var foundsetManager = getFoundsetManagerByFoundsetUUID(row._svyFoundsetUUID);
-        // if (!foundsetManager) foundsetManager = foundset;
-        // var foundsetRef = foundsetManager.foundset;
-        // var newValue = params.newValue;
-        // if(newValue && newValue.realValue !== undefined) {
-        //     newValue = newValue.realValue;
-        // }
-        // var oldValue = params.oldValue;
-        // if(oldValue && oldValue.realValue !== undefined) {
-        //     oldValue = oldValue.realValue;
-        // }
-        // var oldValueStr = oldValue;
-        // if(oldValueStr == null) oldValueStr = "";
+        const row = params.data;
+        let foundsetManager = _this.getFoundsetManagerByFoundsetUUID(row._svyFoundsetUUID);
+        if (!foundsetManager) foundsetManager = _this.foundset;
+        const foundsetRef = foundsetManager.foundset;
+        let newValue = params.newValue;
+        if(newValue && newValue.realValue !== undefined) {
+            newValue = newValue.realValue;
+        }
+        let oldValue = params.oldValue;
+        if(oldValue && oldValue.realValue !== undefined) {
+            oldValue = oldValue.realValue;
+        }
+        let oldValueStr = oldValue;
+        if(oldValueStr == null) oldValueStr = "";
 
-        // var col = getColumn(params.colDef.field);
-        // // ignore types in compare only for non null values ("200"/200 are equals, but ""/0 is not)
-        // var isValueChanged = newValue != oldValueStr || (!newValue && newValue !== oldValueStr);
-        // if(isValueChanged && newValue instanceof Date && oldValue instanceof Date) {
-        //     isValueChanged = newValue.toISOString() != oldValue.toISOString();
-        // }
-        // if(col && col.dataprovider && col.dataprovider.idForFoundset && (isValueChanged || invalidCellDataIndex.rowIndex != -1)) {
-        //     if(isValueChanged) {
-        //         foundsetRef.updateViewportRecord(row._svyRowId, col.dataprovider.idForFoundset, newValue, oldValue);
-        //         if($scope.handlers.onColumnDataChange) {
-        //             var currentEditCells = gridOptions.api.getEditingCells();
-        //             onColumnDataChangePromise = $scope.handlers.onColumnDataChange(
-        //                 getFoundsetIndexFromEvent(params),
-        //                 getColumnIndex(params.column.colId),
-        //                 oldValue,
-        //                 newValue,
-        //                 createJSEvent()
-        //             );
-        //             onColumnDataChangePromise.then(function(r) {
-        //                 if(r == false) {
-        //                     // if old value was reset, clear invalid state
-        //                     var currentValue = gridOptions.api.getValue(colId, params.node);
-        //                     if(currentValue && currentValue.realValue !== undefined) {
-        //                         currentValue = currentValue.realValue;
-        //                     }
-        //                     if(oldValue === currentValue) {
-        //                         invalidCellDataIndex.rowIndex = -1;
-        //                         invalidCellDataIndex.colKey = '';
-        //                     }
-        //                     else {
-        //                         invalidCellDataIndex.rowIndex = rowIndex;
-        //                         invalidCellDataIndex.colKey = colId;
-        //                     }
-        //                     var editCells = gridOptions.api.getEditingCells();
-        //                     if(isSelectionReady && (!editCells.length || (editCells[0].rowIndex != rowIndex || editCells[0].column.colId != colId))) {
-        //                         gridOptions.api.stopEditing();
-        //                         gridOptions.api.startEditingCell({
-        //                             rowIndex: rowIndex,
-        //                             colKey: colId
-        //                         });
-        //                         setTimeout(function() {
-        //                             selectionEvent = null;
-        //                             gridOptions.api.forEachNode( function(node) {
-        //                                 if (node.rowIndex === rowIndex) {
-        //                                     node.setSelected(true, true);
-        //                                 }
-        //                             });
-        //                         }, 0);
-        //                     }
-        //                 }
-        //                 else {
-        //                     invalidCellDataIndex.rowIndex = -1;
-        //                     invalidCellDataIndex.colKey = '';
-        //                     var editCells = gridOptions.api.getEditingCells();
-        //                     if(isSelectionReady && editCells.length == 0 && currentEditCells.length != 0) {
-        //                         gridOptions.api.startEditingCell({
-        //                             rowIndex: currentEditCells[0].rowIndex,
-        //                             colKey: currentEditCells[0].column.colId
-        //                         });
-        //                     }
-        //                 }
-        //                 onColumnDataChangePromise = null;
-        //             }).catch(function(e) {
-        //                 $log.error(e);
-        //                 invalidCellDataIndex.rowIndex = -1;
-        //                 invalidCellDataIndex.colKey = '';
-        //                 onColumnDataChangePromise = null;
-        //             });
-        //         }
-        //     }
-        // }
+        const col = _this.getColumn(params.colDef.field);
+        // ignore types in compare only for non null values ("200"/200 are equals, but ""/0 is not)
+        let isValueChanged = newValue != oldValueStr || (!newValue && newValue !== oldValueStr);
+        if(isValueChanged && newValue instanceof Date && oldValue instanceof Date) {
+            isValueChanged = newValue.toISOString() != oldValue.toISOString();
+        }
+        if(col && col.dataprovider && col.dataprovider.idForFoundset && (isValueChanged || _this.invalidCellDataIndex.rowIndex != -1)) {
+            if(isValueChanged) {
+                foundsetRef.updateViewportRecord(row._svyRowId, col.dataprovider.idForFoundset, newValue, oldValue);
+                if(_this.onColumnDataChange) {
+                    const currentEditCells =  _this.agGrid.api.getEditingCells();
+                    let onColumnDataChangePromise = _this.onColumnDataChange(
+                        _this.getFoundsetIndexFromEvent(params),
+                        _this.getColumnIndex(params.column.colId),
+                        oldValue,
+                        newValue,
+                        _this.createJSEvent()
+                    );
+                    onColumnDataChangePromise.then(function(r) {
+                        if(r == false) {
+                            // if old value was reset, clear invalid state
+                            let currentValue = _this.agGrid.api.getValue(colId, params.node);
+                            if(currentValue && currentValue.realValue !== undefined) {
+                                currentValue = currentValue.realValue;
+                            }
+                            if(oldValue === currentValue) {
+                                _this.invalidCellDataIndex.rowIndex = -1;
+                                _this.invalidCellDataIndex.colKey = '';
+                            }
+                            else {
+                                _this.invalidCellDataIndex.rowIndex = rowIndex;
+                                _this.invalidCellDataIndex.colKey = colId;
+                            }
+                            const editCells = _this.agGrid.api.getEditingCells();
+                            if(_this.isSelectionReady && (!editCells.length || (editCells[0].rowIndex != rowIndex || editCells[0].column.colId != colId))) {
+                                _this.agGrid.api.stopEditing();
+                                _this.agGrid.api.startEditingCell({
+                                    rowIndex: rowIndex,
+                                    colKey: colId
+                                });
+                                setTimeout(function() {
+                                    _this.selectionEvent = null;
+                                    _this.agGrid.api.forEachNode( function(node) {
+                                        if (node.rowIndex === rowIndex) {
+                                            node.setSelected(true, true);
+                                        }
+                                    });
+                                }, 0);
+                            }
+                        }
+                        else {
+                            _this.invalidCellDataIndex.rowIndex = -1;
+                            _this.invalidCellDataIndex.colKey = '';
+                            const editCells = _this.agGrid.api.getEditingCells();
+                            if(_this.isSelectionReady && editCells.length == 0 && currentEditCells.length != 0) {
+                                _this.agGrid.api.startEditingCell({
+                                    rowIndex: currentEditCells[0].rowIndex,
+                                    colKey: currentEditCells[0].column.colId
+                                });
+                            }
+                        }
+                        onColumnDataChangePromise = null;
+                    }).catch(function(e) {
+                        this.log.error(e);
+                        this.invalidCellDataIndex.rowIndex = -1;
+                        this.invalidCellDataIndex.colKey = '';
+                        onColumnDataChangePromise = null;
+                    });
+                }
+            }
+        }
     }
 
     /**
@@ -1327,6 +1361,21 @@ export class DataGrid {
     }
 
     editCellAtWithTimeout(foundsetindex, columnindex) {
+    }
+
+    /**
+     * Create a JSEvent
+     *
+     * @return {JSEvent}
+     * */
+    createJSEvent() {
+        const element = this.agGridElementRef.nativeElement;
+        const x = element.offsetLeft;
+        const y = element.offsetTop;
+
+        const event = document.createEvent("MouseEvents");
+        event.initMouseEvent("click", false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
+        return event;
     }
 }
 
