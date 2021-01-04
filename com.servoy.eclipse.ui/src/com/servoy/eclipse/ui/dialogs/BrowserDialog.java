@@ -187,7 +187,7 @@ public class BrowserDialog extends Dialog
 							: "https://" + importSample).openStream())
 						{
 							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-							if (importSample.endsWith("webpackage.json"))
+							if (importSample.endsWith(".json"))
 							{
 								String content = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 								if (content != null && content.startsWith("{"))
