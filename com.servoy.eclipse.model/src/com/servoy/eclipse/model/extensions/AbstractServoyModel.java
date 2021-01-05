@@ -78,7 +78,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	protected DataModelManager dataModelManager;
 	private volatile Map<String, ServoyProject> servoyProjectCache;
 
-	private FlattenedSolution flattenedSolution;
+	private volatile FlattenedSolution flattenedSolution;
 	private IActiveSolutionHandler activeSolutionHandler;
 
 	private final EclipseMessages messagesManager;
@@ -86,6 +86,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	private BaseNGPackageManager ngPackageManager;
 
 	private final AtomicIntegerWithListener resourceChangesHandlerCounter = new AtomicIntegerWithListener();
+	private volatile boolean mainSolutionLoaded = false;
 
 	public AbstractServoyModel()
 	{
@@ -408,6 +409,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 		if (flattenedSolution == null)
 		{
 			flattenedSolution = createFlattenedSolution();
+			mainSolutionLoaded = flattenedSolution != null && flattenedSolution.isMainSolutionLoaded();
 
 			if (getActiveProject() != null && getActiveProject().getSolution() != null)
 			{
@@ -415,6 +417,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 				try
 				{
 					flattenedSolution.setSolution(getActiveProject().getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
+					mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
 				}
 				catch (RepositoryException e)
 				{
@@ -433,24 +436,35 @@ public abstract class AbstractServoyModel implements IServoyModel
 	{
 		if (flattenedSolution != null)
 		{
-			try
+			synchronized (flattenedSolution)
 			{
-				flattenedSolution.close(null);
-				if (activeProject != null && activeProject.getSolution() != null)
+				if (activeProject != null && flattenedSolution.getSolution() != null && flattenedSolution.getSolution().equals(activeProject.getSolution()))
+					return;
+				try
 				{
-					flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
+					flattenedSolution.close(null);
+					mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
+					if (activeProject != null && activeProject.getSolution() != null)
+					{
+						flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
+						mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
+		}
+		else
+		{
+			mainSolutionLoaded = false;
 		}
 	}
 
 	public boolean isFlattenedSolutionLoaded()
 	{
-		return flattenedSolution != null && flattenedSolution.isMainSolutionLoaded();
+		return mainSolutionLoaded;
 	}
 
 	public BaseNGPackageManager getNGPackageManager()
