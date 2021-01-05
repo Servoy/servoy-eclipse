@@ -129,6 +129,27 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 		}
 	}
 
+	 selectTabAt( selectionIndex: number ) {
+	        if ( selectionIndex >= 0 && selectionIndex <= this.tabs.length ) {
+	            let tabToSelect = this.tabs[selectionIndex];
+	            if ( tabToSelect.disabled == true ) {
+	                return;
+	            }
+	            if (this.onTabClickedMethodID) {
+	                /*var dataTargetAttr = $(event.target).closest('[data-target]');
+	                var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
+	                const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, selectionIndex, null);
+	                promise.then((ok) => {
+	                    if (ok) {
+	                        this.select(tabToSelect);
+	                    }
+	                });
+	            } else {
+	                this.select(tabToSelect);
+	            }
+	        }
+	    }
+	 
 	getFirstEnabledTabIndexNotAtIndex(skipIndex: number) {
 		for (let i = 0; this.tabs && i < this.tabs.length; i++) {
 			const tab = this.tabs[i];
