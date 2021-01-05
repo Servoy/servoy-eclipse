@@ -1,6 +1,6 @@
 {
   "name": "ngclient2",
-  "version": "2021.3.0.3640_rc",
+  "version": "2021.3.0.3640",
   "license": "GNU Affero General Public License",
   "scripts": {
     "ng": "ng",
