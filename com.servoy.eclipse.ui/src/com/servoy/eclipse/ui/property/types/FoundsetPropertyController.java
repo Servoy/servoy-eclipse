@@ -29,7 +29,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
@@ -55,7 +54,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.dataprocessing.IFoundSet;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -303,6 +302,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						return new ServoyJSONArray();
 					}
 				});
+
 			}
 
 			return PropertyController.applySequencePropertyComparator(propertyDescriptors.toArray(new IPropertyDescriptor[propertyDescriptors.size()]));
@@ -331,10 +331,10 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						try
 						{
-							IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector);
-							if (foundset != null)
+							Iterator<Form> it = flattenedSolution.getFormsForNamedFoundset(foundsetSelector);
+							if (it.hasNext())
 							{
-								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundset.getDataSource());
+								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(it.next().getDataSource());
 							}
 						}
 						catch (Exception ex)
@@ -410,7 +410,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 									// drop the 'dp' prefix from dp0, dp1, ...
 									int idx = Integer.parseInt(key.substring(DP_PREFIX.length()));
 									if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
-										Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+										!hasNamedFoundset(flattenedSolution, foundsetSelector))
 									{
 										// then it's a relation
 										dpValue = foundsetSelector + "." + dpValue;
@@ -444,7 +444,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 								// drop the 'dp' prefix from dp0, dp1, ...
 								if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
-									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+									!hasNamedFoundset(flattenedSolution, foundsetSelector))
 								{
 									// then it's a relation
 									dpValue = foundsetSelector + "." + dpValue;
@@ -540,7 +540,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							try
 							{
 								if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
-									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+									!hasNamedFoundset(flattenedSolution, foundsetSelector))
 								{
 									// then it's a relation
 									dp = dp.substring(foundsetSelector.length() + 1);
@@ -569,7 +569,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							try
 							{
 								if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
-									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+									!hasNamedFoundset(flattenedSolution, foundsetSelector))
 								{
 									// then it's a relation
 									dp = dp.substring(foundsetSelector.length() + 1);
@@ -593,6 +593,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 			return editableValue;
 		}
+
 	}
 
 	@Override
@@ -619,4 +620,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		propertySource.defaultResetProperty(getId());
 	}
 
+	private static boolean hasNamedFoundset(FlattenedSolution flattenedSolution, String namedFoundset)
+	{
+		return namedFoundset != null && flattenedSolution.getFormsForNamedFoundset(namedFoundset).hasNext();
+	}
 }

@@ -51,7 +51,6 @@ import org.sablo.specification.property.ICustomType;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
@@ -64,9 +63,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IForm;
-import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -135,7 +132,6 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScopesUtils;
-import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -358,19 +354,10 @@ public class ServoyFormBuilder
 											}
 											else
 											{
-												IFoundSet foundset;
-												try
+												Iterator<Form> it = fs.getFormsForNamedFoundset(foundsetValue);
+												if (it.hasNext())
 												{
-													foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
-														foundsetValue);
-													if (foundset != null)
-													{
-														datasource = foundset.getDataSource();
-													}
-												}
-												catch (ServoyException e)
-												{
-													ServoyLog.logError(e);
+													datasource = it.next().getDataSource();
 												}
 											}
 										}
@@ -603,12 +590,12 @@ public class ServoyFormBuilder
 					}
 					if (namedFoundset != null && namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
 					{
-						BuilderDependencies.getInstance().addNamedFoundsetDependency(namedFoundset, form);
-						List<Form> forms = BuilderDependencies.getInstance().getNamedFoundsetDependency(namedFoundset);
-						if (forms != null)
+						Iterator<Form> it = fs.getFormsForNamedFoundset(namedFoundset);
+						if (it != null)
 						{
-							for (Form defineForm : forms)
+							while (it.hasNext())
 							{
+								Form defineForm = it.next();
 								if (Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
 									!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
 								{
@@ -634,10 +621,6 @@ public class ServoyFormBuilder
 								}
 							}
 						}
-					}
-					else
-					{
-						BuilderDependencies.getInstance().removeNamedFoundsetDependency(form);
 					}
 
 					addFormVariablesHideTableColumn(markerResource, form, table);
@@ -1753,18 +1736,9 @@ public class ServoyFormBuilder
 										invalid = relationSequence == null;
 										if (invalid)
 										{
-											IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
-											try
+											if (flattenedSolution.getFormsForNamedFoundset(fs).hasNext())
 											{
-												if (serviceProvider != null &&
-													serviceProvider.getFoundSetManager().getNamedFoundSet(fs) != null)
-												{
-													invalid = false;
-												}
-											}
-											catch (ServoyException e)
-											{
-												ServoyLog.logError(e);
+												invalid = false;
 											}
 										}
 										else
