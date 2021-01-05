@@ -5,4 +5,4 @@ Bundle-SymbolicName: com.servoy.eclipse.nodejs.macosx.cocoa.x86_64;singleton:=tr
 Bundle-Version: 2021.3.0.3640_rc
 Bundle-Vendor: Servoy
 Eclipse-PlatformFilter: (& (osgi.ws=cocoa)(osgi.os=macosx)(osgi.arch=x86_64))
-Require-Bundle: com.servoy.eclipse.ngclient.ui;bundle-version="8.5.0"
+Require-Bundle: com.servoy.eclipse.ngclient.ui
