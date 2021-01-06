@@ -331,7 +331,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						try
 						{
-							Iterator<Form> it = flattenedSolution.getFormsForNamedFoundset(foundsetSelector);
+							Iterator<Form> it = flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetSelector);
 							if (it.hasNext())
 							{
 								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(it.next().getDataSource());
@@ -622,6 +622,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 	private static boolean hasNamedFoundset(FlattenedSolution flattenedSolution, String namedFoundset)
 	{
-		return namedFoundset != null && flattenedSolution.getFormsForNamedFoundset(namedFoundset).hasNext();
+		return namedFoundset != null && flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + namedFoundset).hasNext();
 	}
 }

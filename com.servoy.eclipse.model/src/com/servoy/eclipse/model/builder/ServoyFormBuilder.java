@@ -354,7 +354,7 @@ public class ServoyFormBuilder
 											}
 											else
 											{
-												Iterator<Form> it = fs.getFormsForNamedFoundset(foundsetValue);
+												Iterator<Form> it = fs.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
 												if (it.hasNext())
 												{
 													datasource = it.next().getDataSource();
@@ -1736,7 +1736,7 @@ public class ServoyFormBuilder
 										invalid = relationSequence == null;
 										if (invalid)
 										{
-											if (flattenedSolution.getFormsForNamedFoundset(fs).hasNext())
+											if (flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + fs).hasNext())
 											{
 												invalid = false;
 											}
