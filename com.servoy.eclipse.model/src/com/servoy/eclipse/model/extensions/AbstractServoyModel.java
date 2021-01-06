@@ -86,7 +86,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 	private BaseNGPackageManager ngPackageManager;
 
 	private final AtomicIntegerWithListener resourceChangesHandlerCounter = new AtomicIntegerWithListener();
-	private volatile boolean mainSolutionLoaded = false;
 
 	public AbstractServoyModel()
 	{
@@ -409,7 +408,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 		if (flattenedSolution == null)
 		{
 			flattenedSolution = createFlattenedSolution();
-			mainSolutionLoaded = flattenedSolution != null && flattenedSolution.isMainSolutionLoaded();
 
 			if (getActiveProject() != null && getActiveProject().getSolution() != null)
 			{
@@ -417,7 +415,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 				try
 				{
 					flattenedSolution.setSolution(getActiveProject().getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
-					mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
 				}
 				catch (RepositoryException e)
 				{
@@ -443,11 +440,9 @@ public abstract class AbstractServoyModel implements IServoyModel
 				try
 				{
 					flattenedSolution.close(null);
-					mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
 					if (activeProject != null && activeProject.getSolution() != null)
 					{
 						flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
-						mainSolutionLoaded = flattenedSolution.isMainSolutionLoaded();
 					}
 				}
 				catch (Exception e)
@@ -456,15 +451,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 				}
 			}
 		}
-		else
-		{
-			mainSolutionLoaded = false;
-		}
 	}
 
 	public boolean isFlattenedSolutionLoaded()
 	{
-		return mainSolutionLoaded;
+		return flattenedSolution != null && flattenedSolution.isMainSolutionLoaded();
 	}
 
 	public BaseNGPackageManager getNGPackageManager()
