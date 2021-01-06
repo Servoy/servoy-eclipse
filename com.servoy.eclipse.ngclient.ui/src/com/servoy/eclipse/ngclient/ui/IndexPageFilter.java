@@ -74,7 +74,7 @@ public class IndexPageFilter implements Filter
 				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
 				return;
 			}
-			else if (handleDeeplink(request, (HttpServletResponse)servletResponse))
+			else if (AngularIndexPageWriter.handleDeeplink(request, (HttpServletResponse)servletResponse))
 			{
 				return;
 			}
@@ -111,45 +111,5 @@ public class IndexPageFilter implements Filter
 			return possibleSolutionName;
 		}
 		return null;
-	}
-
-	private boolean handleDeeplink(HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		String url = request.getRequestURL().toString();
-		int index = url.indexOf(SOLUTIONS_PATH);
-		if (index >= 0)
-		{
-			String solutionAndRest = url.substring(index + SOLUTIONS_PATH.length());
-			int solutionEnd = solutionAndRest.indexOf('/');
-			String rest = solutionAndRest.substring(solutionEnd + 1);
-			if (rest.indexOf('/') != -1)
-			{
-				// it has deeplinks, need to rewrite url.
-				StringBuffer redirectUrl = new StringBuffer(url.subSequence(0, index + SOLUTIONS_PATH.length() + solutionEnd));
-				redirectUrl.append("/index.html");
-				String queryString = request.getQueryString();
-				String[] args = rest.split("/");
-
-				if (args.length != 0 || queryString != null)
-				{
-					redirectUrl.append("?");
-					if (queryString != null) redirectUrl.append(queryString);
-
-					if (args.length % 2 == 0)
-					{
-						int i = 0;
-						while (i < args.length - 1)
-						{
-							if (redirectUrl.indexOf("=") > 0) redirectUrl.append("&");
-							redirectUrl.append(args[i] + "=" + args[i + 1]);
-							i += 2;
-						}
-					}
-					response.sendRedirect(redirectUrl.toString());
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 }
