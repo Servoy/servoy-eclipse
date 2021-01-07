@@ -53,7 +53,7 @@ import com.servoy.j2db.util.Utils;
 public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
 	private final Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
-	private final ConcurrentMap<String, Set<Form>> formCacheByNamedFoundset = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, List<Form>> formCacheByNamedFoundset = new ConcurrentHashMap<>();
 	private final Map<UUID, List<IPersist>> duplicatesUUIDs = new HashMap<UUID, List<IPersist>>();
 	private final Map<String, Map<String, List<IPersist>>> duplicateNames = new HashMap<String, Map<String, List<IPersist>>>();
 	private final Map<Form, String> formToDataSource = new HashMap<>();
@@ -93,13 +93,13 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				String namedFoundset = f.getNamedFoundSet();
 				if (namedFoundset != null)
 				{
-					set = formCacheByNamedFoundset.get(namedFoundset);
-					if (set == null)
+					List<Form> list = formCacheByNamedFoundset.get(namedFoundset);
+					if (list == null)
 					{
-						set = new TreeSet<>(NameComparator.INSTANCE);
-						formCacheByNamedFoundset.put(namedFoundset, set);
+						list = new ArrayList<Form>();
+						formCacheByNamedFoundset.put(namedFoundset, list);
 					}
-					set.add(f);
+					list.add(f);
 				}
 			}
 			return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -183,19 +183,19 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		return datasourceSet;
 	}
 
-	Set<Form> getFormsByNamedFoundset(String namedFoundset)
+	List<Form> getFormsByNamedFoundset(String namedFoundset)
 	{
 		if (namedFoundset != null)
 		{
-			Set<Form> namedFoundsetSet = formCacheByNamedFoundset.get(namedFoundset);
+			List<Form> namedFoundsetSet = formCacheByNamedFoundset.get(namedFoundset);
 			if (namedFoundsetSet == null)
 			{
-				namedFoundsetSet = new TreeSet<Form>(NameComparator.INSTANCE);
+				namedFoundsetSet = new ArrayList<Form>();
 				formCacheByNamedFoundset.put(namedFoundset, namedFoundsetSet);
 			}
-			return namedFoundsetSet;
+			return new ArrayList<Form>(namedFoundsetSet);
 		}
-		return null;
+		return new ArrayList<Form>();
 	}
 
 	/**

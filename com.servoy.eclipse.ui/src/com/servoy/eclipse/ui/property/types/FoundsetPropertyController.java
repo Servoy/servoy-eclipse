@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property.types;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -331,10 +332,10 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						try
 						{
-							Iterator<Form> it = flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetSelector);
-							if (it.hasNext())
+							List<Form> forms = flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetSelector);
+							if (forms.size() > 0)
 							{
-								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(it.next().getDataSource());
+								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(forms.get(0).getDataSource());
 							}
 						}
 						catch (Exception ex)
@@ -622,6 +623,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 	private static boolean hasNamedFoundset(FlattenedSolution flattenedSolution, String namedFoundset)
 	{
-		return namedFoundset != null && flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + namedFoundset).hasNext();
+		return namedFoundset != null && flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + namedFoundset).size() > 0;
 	}
 }

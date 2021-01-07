@@ -354,10 +354,10 @@ public class ServoyFormBuilder
 											}
 											else
 											{
-												Iterator<Form> it = fs.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
-												if (it.hasNext())
+												List<Form> forms = fs.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
+												if (forms.size() > 0)
 												{
-													datasource = it.next().getDataSource();
+													datasource = forms.get(0).getDataSource();
 												}
 											}
 										}
@@ -590,37 +590,30 @@ public class ServoyFormBuilder
 					}
 					if (namedFoundset != null && namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
 					{
-						Iterator<Form> it = fs.getFormsForNamedFoundset(namedFoundset);
-						if (it != null)
-						{
-							while (it.hasNext())
-							{
-								Form defineForm = it.next();
-								if (Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
-									!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
-								{
-									ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
-										defineForm.getName());
-									ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH,
-										IMarker.PRIORITY_NORMAL, null,
-										form);
-									IResource defineFormFile = ServoyBuilderUtils.getPersistResource(defineForm);
-									ServoyBuilder.deleteMarkers(defineFormFile, ServoyBuilder.NAMED_FOUNDSET_DATASOURCE);
+						fs.getFormsForNamedFoundset(namedFoundset).stream()
+							.filter(defineForm -> Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
+								!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
+							.forEach(defineForm -> {
+								ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+									namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
+									defineForm.getName());
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH,
+									IMarker.PRIORITY_NORMAL, null,
+									form);
+								IResource defineFormFile = ServoyBuilderUtils.getPersistResource(defineForm);
+								ServoyBuilder.deleteMarkers(defineFormFile, ServoyBuilder.NAMED_FOUNDSET_DATASOURCE);
 
-									mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
-										form.getName());
-									ServoyBuilder.addMarker(defineFormFile, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
-										defineForm);
+								mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+									namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
+									form.getName());
+								ServoyBuilder.addMarker(defineFormFile, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
+									defineForm);
 
-									BuilderDependencies.getInstance().addDependency(form, defineForm);
-									BuilderDependencies.getInstance().addDependency(defineForm, form);
-								}
-							}
-						}
+								BuilderDependencies.getInstance().addDependency(form, defineForm);
+								BuilderDependencies.getInstance().addDependency(defineForm, form);
+							});
 					}
 
 					addFormVariablesHideTableColumn(markerResource, form, table);
@@ -1736,7 +1729,7 @@ public class ServoyFormBuilder
 										invalid = relationSequence == null;
 										if (invalid)
 										{
-											if (flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + fs).hasNext())
+											if (flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + fs).size() > 0)
 											{
 												invalid = false;
 											}

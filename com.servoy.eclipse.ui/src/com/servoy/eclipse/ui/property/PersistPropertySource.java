@@ -3019,10 +3019,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 							else
 							{
-								Iterator<Form> it = flattenedEditingSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
-								if (it.hasNext())
+								List<Form> forms = flattenedEditingSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
+								if (forms.size() > 0)
 								{
-									forFoundsetTable = dsm.getDataSource(it.next().getDataSource());
+									forFoundsetTable = dsm.getDataSource(forms.get(0).getDataSource());
 								}
 							}
 						}

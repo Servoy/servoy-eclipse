@@ -180,9 +180,9 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	}
 
 	@Override
-	public Iterator<Form> getFormsForNamedFoundset(String namedFoundset)
+	public List<Form> getFormsForNamedFoundset(String namedFoundset)
 	{
-		return ((DeveloperPersistIndex)getIndex()).getFormsByNamedFoundset(namedFoundset).iterator();
+		return ((DeveloperPersistIndex)getIndex()).getFormsByNamedFoundset(namedFoundset);
 	}
 
 	public Map<UUID, List<IPersist>> getDuplicateUUIDList()
