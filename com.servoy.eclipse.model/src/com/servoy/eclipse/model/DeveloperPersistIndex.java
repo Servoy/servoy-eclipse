@@ -154,7 +154,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		}
 		if (form.getNamedFoundSet() != null)
 		{
-			getFormsByNamedFoundset(form.getNamedFoundSet()).add(form);
+			getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
 		}
 	}
 
@@ -183,19 +183,26 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		return datasourceSet;
 	}
 
-	List<Form> getFormsByNamedFoundset(String namedFoundset)
+	public List<Form> getFormsByNamedFoundset(String namedFoundset)
+	{
+		List<Form> list = getFormsByNamedFoundsetImpl(namedFoundset, false);
+		if (list == null) return Collections.emptyList();
+		return Collections.unmodifiableList(list);
+	}
+
+	private List<Form> getFormsByNamedFoundsetImpl(String namedFoundset, boolean create)
 	{
 		if (namedFoundset != null)
 		{
 			List<Form> namedFoundsetSet = formCacheByNamedFoundset.get(namedFoundset);
-			if (namedFoundsetSet == null)
+			if (namedFoundsetSet == null && create)
 			{
-				namedFoundsetSet = new ArrayList<Form>();
+				namedFoundsetSet = new ArrayList<Form>(6);
 				formCacheByNamedFoundset.put(namedFoundset, namedFoundsetSet);
 			}
-			return new ArrayList<Form>(namedFoundsetSet);
+			return namedFoundsetSet;
 		}
-		return new ArrayList<Form>();
+		return null;
 	}
 
 	/**
@@ -230,7 +237,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			getFormsByDatasource(ds, false).add(form);
 			if (form.getNamedFoundSet() != null)
 			{
-				getFormsByNamedFoundset(form.getNamedFoundSet()).add(form);
+				getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
 			}
 		}
 	}
@@ -247,7 +254,8 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
 			if (form.getNamedFoundSet() != null)
 			{
-				getFormsByNamedFoundset(form.getNamedFoundSet()).remove(form);
+				List<Form> lst = getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), false);
+				if (lst != null) lst.remove(form);
 			}
 			if (form.isFormComponent().booleanValue())
 			{
