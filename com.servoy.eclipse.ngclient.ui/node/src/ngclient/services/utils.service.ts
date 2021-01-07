@@ -2,13 +2,22 @@ import { Injectable, Inject } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT } from '@angular/common';
 import { FormService } from '../form.service';
+import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Injectable()
 export class SvyUtilsService {
+    private log: LoggerService;
 
-    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document, private formservice: FormService) {}
+    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document, private formservice: FormService,  logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('SvyUtilsService');
+    }
 
     public createJSEvent(event: KeyboardEvent, eventType: string, contextFilter?: string, contextFilterElement?: any) {
+        if (!event) {
+            if (contextFilter || contextFilterElement) return null;
+            this.log.error("event is undefined, returning default event");
+            return  {svyType: 'JSEvent', eventType: eventType, "timestamp": new Date().getTime()}; 
+        }
         const targetEl = event.target as Element;
         let form;
         let parent = targetEl;
