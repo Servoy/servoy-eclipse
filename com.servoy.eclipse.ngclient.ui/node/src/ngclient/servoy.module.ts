@@ -33,6 +33,11 @@ import { ListFormComponent } from '../servoycore/listformcomponent/listformcompo
 
 import { LocaleService } from './locale.service';
 import { NGGridsModule } from '../nggrids/nggrids.module';
+import { SvyUtilsService } from './services/utils.service';
+import { ServerDataService } from './services/serverdata.service';
+import { TypesRegisterService } from '../servoydefault/types_register.service';
+import { BSWindow } from './services/bootstrap-window/bswindow.service';
+import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 
 @NgModule( {
     declarations: [
@@ -61,6 +66,7 @@ import { NGGridsModule } from '../nggrids/nggrids.module';
         NGGridsModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
+					SvyUtilsService,ServerDataService,TypesRegisterService, BSWindow, BSWindowManager,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],
