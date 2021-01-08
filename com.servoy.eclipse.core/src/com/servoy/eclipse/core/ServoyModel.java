@@ -1180,7 +1180,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 						try
 						{
-							updateFlattenedSolution();
+							updateFlattenedSolution(false);
 						}
 						finally
 						{
@@ -1239,7 +1239,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// should be there because of the above fireActiveProjectChanged(); that forces load of the packages.
 						PersistIndexCache.flush();
 						resetActiveEditingFlattenedSolutions();
-						updateFlattenedSolution();
+						updateFlattenedSolution(false);
 
 						progressMonitor.worked(1);
 
@@ -1870,7 +1870,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			return;
 		}
 		resetActiveEditingFlattenedSolutions();
-		updateFlattenedSolution();
+		updateFlattenedSolution(true);
 		getUserManager().reloadAllSecurityInformation();
 		fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED); // this will also eventually refresh JS build paths and working set
 	}

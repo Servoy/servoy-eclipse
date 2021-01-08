@@ -429,14 +429,18 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return flattenedSolution;
 	}
 
-	protected void updateFlattenedSolution()
+	protected void updateFlattenedSolution(boolean forceUpdate)
 	{
 		if (flattenedSolution != null)
 		{
 			synchronized (flattenedSolution)
 			{
-				if (activeProject != null && flattenedSolution.getSolution() != null && flattenedSolution.getSolution().equals(activeProject.getSolution()))
+				if (!forceUpdate && activeProject != null && flattenedSolution.getSolution() != null &&
+					flattenedSolution.getSolution().equals(activeProject.getSolution()))
+				{
+					flattenedSolution.reload();
 					return;
+				}
 				try
 				{
 					flattenedSolution.close(null);
