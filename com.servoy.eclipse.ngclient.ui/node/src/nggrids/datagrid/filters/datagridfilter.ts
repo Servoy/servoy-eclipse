@@ -1,5 +1,5 @@
 import { AgFilterComponent } from '@ag-grid-community/angular';
-import { IDoesFilterPassParams, Promise, IFilterParams } from '@ag-grid-enterprise/all-modules';
+import { IDoesFilterPassParams, IFilterParams } from '@ag-grid-enterprise/all-modules';
 import { Directive, ElementRef, ViewChild } from '@angular/core';
 import { DataGrid } from '../datagrid';
 
@@ -97,7 +97,7 @@ export class DatagridFilter implements AgFilterComponent {
         return this.model;
     }
 
-    setModel(model: any): void | Promise<void> {
+    setModel(model: any): void {
         this.model = model;
     }
 
