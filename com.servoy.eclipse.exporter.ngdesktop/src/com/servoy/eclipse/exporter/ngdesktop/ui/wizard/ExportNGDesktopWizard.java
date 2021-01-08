@@ -308,13 +308,28 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final String url = exportSettings.get("app_url");
 		final String width = exportSettings.get("ngdesktop_width");
 		final String height = exportSettings.get("ngdesktop_height");
+		final String appName = exportSettings.get("aplication_name");
 		final String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
 		final JSONObject configFile = new JSONObject(jsonFile);
-		final JSONObject options = (JSONObject)configFile.get("options");
-		options.put("url", url);
-		if (width.length() > 0) options.put("width", width);
-		if (height.length() > 0) options.put("height", height);
-		configFile.put("options", options);
+		final JSONObject options = configFile.optJSONObject("options");
+		if (options != null)
+		{//old archive (till 2020.12.0 inclusive)
+			options.put("url", url);
+			if (width.length() > 0) options.put("width", width);
+			if (height.length() > 0) options.put("height", height);
+			configFile.put("options", options);
+		}
+		else
+		{
+			configFile.put("url", url);
+			if (width.length() > 0) configFile.put("width", width);
+			if (height.length() > 0) configFile.put("height", height);
+			if (appName != null)
+			{
+				configFile.put("title", appName);
+				configFile.put("appName", appName);
+			}
+		}
 		return configFile.toString().getBytes(Charset.forName("UTF-8"));
 	}
 
@@ -420,6 +435,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 		strValue = settings.get("application_name");
+		if (strValue.trim().length() == 0)
+		{
+			errorMsg.append("Provide a name for the application ...");
+			return errorMsg;
+		}
 		if (strValue.toCharArray().length > APP_NAME_LENGTH)
 		{
 			errorMsg.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length);
