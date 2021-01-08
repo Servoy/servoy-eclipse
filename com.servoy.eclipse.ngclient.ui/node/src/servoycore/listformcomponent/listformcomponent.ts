@@ -73,14 +73,24 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             if (selectedRowIndex >= 0 && selectedRowIndex < this.foundset.serverSize) {
                 this.foundset.requestSelectionUpdate([selectedRowIndex]);
                 this.selectionChangedByKey = true;
+                if (this.onSelectionChanged) {
+                    this.onSelectionChanged(event);
+                }
             }
         }
     }
 
-    onRowClick(row: any) {
+    onRowClick(row: any, event: Event) {
         for (let i = 0; i < this.foundset.viewPort.rows.length; i++) {
             if (this.foundset.viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] === row['_svyRowId']) {
-                this.foundset.requestSelectionUpdate([i + this.foundset.viewPort.startIndex]);
+                const index = i + this.foundset.viewPort.startIndex;
+                const selected = this.foundset.selectedRowIndexes;
+                if (!selected || selected.indexOf(index) === -1) {
+                    this.foundset.requestSelectionUpdate([index]);
+                     if (this.onSelectionChanged) {
+                        this.onSelectionChanged(event);
+                    }
+                }
                 break;
             }
         }
@@ -89,15 +99,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     svyOnInit() {
         super.svyOnInit();
         this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-            if (event.selectedRowIndexesChanged) {
-                this.updateSelection();
-                if (this.onSelectionChanged) {
-                    this.renderer.listen(this.elementRef.nativeElement, 'onselectionchanged', (e) => {
-                        this.onSelectionChanged(e);
-                    });
-                }
-            }
-
             if (event.viewportRowsUpdated) {
                 // copy the viewport data over to the cell
                 // TODO this only is working for "updates", what happens with deletes or inserts?
@@ -464,6 +465,14 @@ class ListFormComponentServoyApi extends ServoyApi {
 
     startEdit(property: string) {
         this.cell.state.startEdit(property, this.cell.rowId);
+        if (this.fc.onSelectionChanged) {
+            let fire = true;
+            const selected = this.fc.foundset.selectedRowIndexes;
+            if (selected) {
+                fire = selected.indexOf(this.cell.rowIndex) === -1;
+            }
+            if (fire) this.fc.onSelectionChanged(new CustomEvent('SelectionChanged'));
+        }
     }
 }
 
