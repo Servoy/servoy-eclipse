@@ -6,3 +6,11 @@
     padding-left: 20px;
     padding-right: 20px;
 }
+
+.svy-wrapper > *> .form-control, .svy-wrapper > * > * > .form-control {
+    font-size: 14px;
+ }
+
+.table td, .table th {
+     padding: 8px;
+ }
