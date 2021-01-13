@@ -87,10 +87,6 @@
     margin: 0;
 }
 
-.checkbox input {
-	margin: 0 .25em 0 0;
-	outline: #5bc0de auto 5px;
-}
 
 .bts-check div {
     min-height: 20px;
@@ -132,3 +128,22 @@
     vertical-align: middle;
     max-width: calc(100% - 15px);
 }
+
+.svy-wrapper > * > .bts-radiogroup {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-break: break-all;
+    margin: 0;
+}
+
+.bts-radiogroup label {
+    display: block;
+    margin-bottom: 0px;
+}
+
+label input {
+	margin-right: 7px;
+}
+
