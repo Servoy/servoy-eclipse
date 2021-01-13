@@ -1,6 +1,6 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener } from '@angular/core';
-import { Format, FormattingService } from '../../ngclient/servoy_public';
-import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren } from '@angular/core';
+import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
+import { FormattingService } from '../../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
@@ -9,16 +9,16 @@ import { ServoyDefaultBaseField } from '../basefield';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 
-    private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
+    @ViewChildren(NgbDropdownItem) menuItems: QueryList<NgbDropdownItem>;
+    @ViewChild('input') input: ElementRef<HTMLButtonElement>;
 
-    @ViewChild(Select2) select2: Select2;
+    formattedValue: any;
+    valueComparator: (value: { displayValue: any; realValue: any }) => boolean;
+    openState = false;
+    private skipFocus = false;
 
-    data: Select2OptionWithReal[] = [];
-    filteredDataProviderId: any;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        formattingService: FormattingService) {
-        super(renderer, cdRef, formattingService);
+    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService) {
+        super(renderer, cdRef, formatService);
     }
 
     @HostListener('keydown', ['$event'])
@@ -29,82 +29,67 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         }
     }
 
-    attachFocusListeners() {
-        if (this.onFocusGainedMethodID) {
-            this.select2.focus.subscribe(() => {
-                this.onFocusGainedMethodID(new CustomEvent('focus'));
+    getFocusElement() {
+        return this.input.nativeElement;
+    }
+
+    attachFocusListeners(nativeElement: HTMLElement) {
+        if (this.onFocusGainedMethodID)
+            this.renderer.listen(nativeElement, 'focus', (e) => {
+                if (!this.skipFocus) this.onFocusGainedMethodID(e);
+                this.skipFocus = false;
             });
-        }
-
-        if (this.onFocusLostMethodID) {
-            this.select2.blur.subscribe(() => {
-                this.onFocusLostMethodID(new CustomEvent('blur'));
+        if (this.onFocusLostMethodID)
+            this.renderer.listen(nativeElement, 'blur', (e) => {
+                if (!this.openState) this.onFocusLostMethodID(e);
             });
-        }
     }
 
-    requestFocus() {
-        this.select2.toggleOpenAndClose();
-    }
-
-    svyOnInit() {
-        super.svyOnInit();
-        this.setData();
-    }
-    setData() {
-        if (this.valuelistID) {
-            const options: Select2OptionWithReal[] = [];
-            let formatter = (value) => value;
-            if (this.valuelistID.isRealValueDate()) {
-                const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
-                const format = new Format();
-                format.display = dateFormat;
-                format.type = 'DATETIME';
-                formatter = (value) => this.formattingService.format(value, format, false);
-            }
-            for (let i = 0; i < this.valuelistID.length; i++) {
-                options.push({
-                    value: formatter(this.valuelistID[i].realValue),
-                    realValue: this.valuelistID[i].realValue,
-                    label: this.formattingService.format(this.valuelistID[i].displayValue, this.format, false)
-                });
-            }
-            this.data = options;
-        }
-    }
-
-    updateValue(event: Select2UpdateEvent<any>) {
-        if (this.filteredDataProviderId !== event.value) {
-            this.filteredDataProviderId = event.value;
-            if (this.valuelistID.isRealValueDate() && event.value) {
-                const value = this.data.find(el => el.value === event.value);
-                this.dataProviderID = value.realValue;
-            } else this.dataProviderID = event.value;
-            this.dataProviderIDChange.emit(this.dataProviderID);
-            if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
+    openChange(state: boolean) {
+        this.openState = state;
+        if (state) {
+            this.skipFocus = true;
+            setTimeout(() => {
+                const item = this.menuItems.find((element) => element.elementRef.nativeElement.classList.contains('active'));
+                if (item) {
+                    item.elementRef.nativeElement.focus();
+                }
+            });
+        } else {
+            this.requestFocus();
         }
     }
 
     svyOnChanges(changes: SimpleChanges) {
-        // this change should be ignored
-        delete changes['editable'];
-        if (changes['valuelistID']) {
-            this.setData();
-        }
+        this.valueComparator = this.valuelistID.isRealValueDate()? this.dateValueCompare: this.valueCompare;
         if (changes['dataProviderID']) {
-            // if the real value is a date and the
-            const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
-            const format = new Format();
-            format.display = dateFormat;
-            format.type = 'DATETIME';
-            this.filteredDataProviderId = this.valuelistID.isRealValueDate() ?
-                this.formattingService.format(this.dataProviderID, format, false) :
-                this.dataProviderID;
+            // eslint-disable-next-line eqeqeq
+            const valueListElem = this.valuelistID.find(this.valueComparator);
+            if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format, false);
+            else {
+                if (!this.valuelistID.hasRealValues())
+                    this.formattedValue = this.formatService.format(this.dataProviderID, this.format, false);
+                else
+                    this.formattedValue = this.dataProviderID;
+            }
         }
+        delete changes['editable']; // ignore the editable property
         super.svyOnChanges(changes);
     }
+
+    updateValue(realValue: any) {
+        this.dataProviderID = realValue;
+        this.dataProviderIDChange.emit(this.dataProviderID);
+    }
+
+    // eslint-disable-next-line eqeqeq
+    private valueCompare = (valueListValue: { displayValue: any; realValue: any }): boolean  => valueListValue.realValue == this.dataProviderID;
+
+    private dateValueCompare = (valueListValue: { displayValue: any; realValue: Date }): boolean => {
+        if (this.dataProviderID){
+            return valueListValue.realValue.getTime() === this.dataProviderID.getTime();
+        }
+        return false;
+    };
 }
 
-interface Select2OptionWithReal extends Select2Option {
-    realValue: any;
-}
