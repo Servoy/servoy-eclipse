@@ -11,8 +11,6 @@ import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
 })
 export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivElement> {
 
-    private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
-
     @Input() format: Format;
     @Input() showAs: string;
     @Input() valuelistID: IValuelist;
@@ -67,10 +65,6 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
         } else {
             this.requestFocus();
         }
-    }
-
-    requestFocus() {
-        this.getFocusElement().focus();
     }
 
     svyOnChanges(changes: SimpleChanges) {
