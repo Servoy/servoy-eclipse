@@ -17,7 +17,10 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
     attachFocusListeners(nativeElement: any) {
         if (this.onFocusGainedMethodID)
             this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                this.onFocusGainedMethodID(e);
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( e );
+                }
+                this.mustExecuteOnFocus = true;
             } );
         if (this.onFocusLostMethodID)
             this.renderer.listen( nativeElement, 'blur', ( e ) => {

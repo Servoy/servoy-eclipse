@@ -45,7 +45,7 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
         return this.getNativeElement();
     }
 
-    public requestFocus() {
+    public requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.getFocusElement().focus();
     }
 

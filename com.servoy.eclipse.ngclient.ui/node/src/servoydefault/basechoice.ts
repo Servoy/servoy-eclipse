@@ -6,7 +6,7 @@ import { ServoyDefaultBaseField } from './basefield';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('input') input: ElementRef<HTMLInputElement>;
+    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
 
     selection: any[] = [];
     allowNullinc = 0;
@@ -20,9 +20,13 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
         this.onValuelistChange();
     }
 
-    requestFocus() {
-        const inputComponent = this.input;
-        inputComponent.nativeElement.focus();
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        ( this.getFocusElement() as HTMLElement ).focus();
+    }
+
+    getFocusElement(): HTMLElement {
+        return this.input.nativeElement;
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -67,7 +71,10 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 
         if (this.onFocusGainedMethodID) {
             this.renderer.listen(element, 'focus', (event) => {
-                this.onFocusGainedMethodID(event);
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( event );
+                }
+                this.mustExecuteOnFocus = true;
             });
         }
 

@@ -17,7 +17,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachEventHandlers(this.getNativeElement(), 0);
+        this.attachEventHandlers(this.getFocusElement(), 0);
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -46,6 +46,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
                 if (this.onActionMethodID) this.onActionMethodID(e);
             }
         });
+        super.attachEventHandlers(element, index);
     }
 
     itemClicked(event) {

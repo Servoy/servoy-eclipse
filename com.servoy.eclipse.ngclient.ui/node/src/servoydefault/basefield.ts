@@ -23,7 +23,9 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     @Input() valuelistID: IValuelist;
 
     storedTooltip: any;
-
+    
+    mustExecuteOnFocus: boolean;
+    
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         super(renderer, cdRef);
     }
@@ -35,15 +37,23 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
         }
     }
 
-    attachFocusListeners(nativeElement: any) {
-        if (this.onFocusGainedMethodID)
-            this.renderer.listen(nativeElement, 'focus', (e) => {
-                this.onFocusGainedMethodID(e);
-            });
-        if (this.onFocusLostMethodID)
-            this.renderer.listen(nativeElement, 'blur', (e) => {
-                this.onFocusLostMethodID(e);
-            });
+    attachFocusListeners( nativeElement: any ) {
+        if ( this.onFocusGainedMethodID )
+            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( e );
+                }
+                this.mustExecuteOnFocus = true;
+            } );
+        if ( this.onFocusLostMethodID )
+            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+                this.onFocusLostMethodID( e );
+            } );
+    }
+
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getFocusElement().focus();
     }
 
     onDataChangeCallback(event, returnval) {

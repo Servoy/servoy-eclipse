@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService } from '../../ngclient/servoy_public';
 
@@ -9,6 +9,8 @@ import { FormattingService } from '../../ngclient/servoy_public';
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
+    @ViewChild('child', { static: false }) child: ElementRef<HTMLInputElement>;
+    
     selection: any;
     private counter = 0;
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
@@ -21,9 +23,13 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
         super.svyOnInit();
     }
 
-    requestFocus() {
-        const spinnerDiv = this.getFocusElement().children[0];
-        (spinnerDiv.children[0] as HTMLElement).focus();
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        ( this.getFocusElement() as HTMLElement ).focus();
+    }
+
+    getFocusElement(): HTMLElement {
+        return this.child.nativeElement;
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -54,7 +60,12 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
                 this.renderer.listen(spinnerButtons[i], 'blur', e => this.onFocusLostMethodID(e));
 
             if (this.onFocusGainedMethodID)
-                this.renderer.listen(spinnerButtons[i], 'focus', e => this.onFocusGainedMethodID(e));
+                this.renderer.listen(spinnerButtons[i], 'focus', ( e ) => {
+                    if(this.mustExecuteOnFocus === true) {
+                        this.onFocusGainedMethodID(e);
+                    }
+                    this.mustExecuteOnFocus = true;
+                } );
         }
     }
 

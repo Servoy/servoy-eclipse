@@ -23,16 +23,19 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     attachFocusListeners() {
-        if (this.onFocusGainedMethodID) {
+        if ( this.onFocusGainedMethodID ) {
             this.editor.focusEvent.subscribe(() => {
-                this.onFocusGainedMethodID(new CustomEvent('focus'));
-            });
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
+                }
+                this.mustExecuteOnFocus = true;
+            } );
         }
 
         this.editor.blurEvent.subscribe(() => {
             this.pushUpdate();
-            if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
-        });
+            if ( this.onFocusLostMethodID ) this.onFocusLostMethodID( new CustomEvent( 'blur' ) );
+        } );
     }
 
     svyOnInit() {
@@ -80,8 +83,9 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         return this.editor.textArea.nativeElement;
     }
 
-    requestFocus() {
-        this.editor.focus();
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getFocusElement().focus();
     }
 
     public selectAll() {
