@@ -1,5 +1,5 @@
 import { AgFilterComponent } from '@ag-grid-community/angular';
-import { IDoesFilterPassParams, IFilterParams } from '@ag-grid-enterprise/all-modules';
+import { IFilterParams, IDoesFilterPassParams } from '@ag-grid-community/core';
 import { Directive, ElementRef, ViewChild } from '@angular/core';
 import { DataGrid } from '../datagrid';
 

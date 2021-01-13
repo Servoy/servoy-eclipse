@@ -13,6 +13,7 @@ import { WindowService as WindowPlugin} from '../window_service/window.service';
 // generated services start
 import { KeyListener } from '../keylistener/keylistener.service';
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
+import { DatagridService } from '../nggrids/datagrid/datagrid.service';
 // generated services end
 
 
@@ -32,7 +33,8 @@ export class AllServiceService implements ServiceProvider {
         // generated services start
         private ngclientutils: NGUtilsService,
         private keyListener: KeyListener,
-        private window: WindowPlugin
+        private window: WindowPlugin,
+        private ngDataGrid: DatagridService
         // generated services end
     ) {
         services.setServiceProvider( this );
@@ -52,6 +54,7 @@ export class AllServiceService implements ServiceProvider {
                 // generated services start (only for dynamic services (servoy plugins))
                 NGUtilsService,
                 KeyListener,
+                DatagridService
                 // generated services end
                 ],
 } )
