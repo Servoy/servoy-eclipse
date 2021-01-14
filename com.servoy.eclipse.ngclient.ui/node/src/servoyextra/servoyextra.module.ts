@@ -4,6 +4,7 @@ import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
 import { ServoyExtraSlider } from './slider/slider';
+import { ServoyExtraSpinner } from './spinner/spinner';
 import { ServoyExtraSplitpane } from './splitpane/splitpane';
 import { ServoyExtraSelect2Tokenizer } from './select2tokenizer/select2tokenizer';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
@@ -27,6 +28,7 @@ import { Select2Module } from 'ng-select2-component';
         ServoyExtraImageLabel,
         ServoyExtraFileUpload,
         ServoyExtraSlider,
+        ServoyExtraSpinner,
 		ServoyExtraSplitpane,
 		ServoyExtraSelect2Tokenizer,
 		BGSplitter,
@@ -52,6 +54,7 @@ import { Select2Module } from 'ng-select2-component';
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,
               ServoyExtraSlider,
+              ServoyExtraSpinner,
 			  ServoyExtraSplitpane,
 			  ServoyExtraSelect2Tokenizer
     ],
