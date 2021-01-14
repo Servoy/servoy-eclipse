@@ -136,4 +136,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public void setSkipDatabaseViewsUpdate(boolean skip);
 
 	public Set<String> getExportedPackages();
+
+	public boolean isExportNG2();
 }
