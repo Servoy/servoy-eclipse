@@ -1,6 +1,6 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 
-import { ServoyDefaultSpinner } from './spinner';
+import { ServoyExtraSpinner } from './spinner';
 import { SabloModule } from '../../sablo/sablo.module';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
@@ -25,8 +25,8 @@ const mockData = [
 ] as IValuelist;
 
 describe('ServoyDefaultCheckGroup', () => {
-  let component: ServoyDefaultSpinner;
-  let fixture: ComponentFixture<ServoyDefaultSpinner>;
+  let component: ServoyExtraSpinner;
+  let fixture: ComponentFixture<ServoyExtraSpinner>;
   let buttonUp: any; let buttonDown: any;
   let servoyApi;
 
@@ -34,14 +34,14 @@ describe('ServoyDefaultCheckGroup', () => {
     servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','registerComponent','unRegisterComponent']);
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultSpinner],
+      declarations: [ServoyExtraSpinner],
       imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ServoyDefaultSpinner);
+    fixture = TestBed.createComponent(ServoyExtraSpinner);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
     buttonUp = fixture.debugElement.queryAll(By.css('button'))[0];
