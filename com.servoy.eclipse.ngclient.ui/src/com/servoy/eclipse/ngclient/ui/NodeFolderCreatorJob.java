@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -111,7 +110,7 @@ public class NodeFolderCreatorJob extends Job
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError(e);
+				Activator.getInstance().getLog().error("Error copy file " + filename + "to node folder " + nodeFolder, e);
 			}
 		}
 		System.err.println("copied " + (System.currentTimeMillis() - time));
@@ -197,7 +196,7 @@ public class NodeFolderCreatorJob extends Job
 												}
 												catch (IOException e)
 												{
-													ServoyLog.logError(e);
+													Activator.getInstance().getLog().error("Error copy dir " + filename + " to " + target, e);
 												}
 											}
 										}
@@ -210,7 +209,7 @@ public class NodeFolderCreatorJob extends Job
 											}
 											catch (IOException e)
 											{
-												ServoyLog.logError(e);
+												Activator.getInstance().getLog().error("Error copying file " + filename, e);
 											}
 										}
 									}
@@ -229,7 +228,7 @@ public class NodeFolderCreatorJob extends Job
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError(e);
+				Activator.getInstance().getLog().error("Error creating a file watcher for location " + location, e);
 			}
 		}
 	}
@@ -266,7 +265,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 		catch (IOException e1)
 		{
-			ServoyLog.logError(e1);
+			Activator.getInstance().getLog().error("Error registering a watch on dir " + dir, e1);
 		}
 
 		File[] dirs = dir.listFiles(new FileFilter()
@@ -295,8 +294,7 @@ public class NodeFolderCreatorJob extends Job
 			}
 			catch (IOException e)
 			{
-				// TODO Auto-generated catch block
-				ServoyLog.logError(e);
+				Activator.getInstance().getLog().error("Error registering a watch on dir " + dir, e);
 			}
 		}
 		return registerWatch;
@@ -310,17 +308,10 @@ public class NodeFolderCreatorJob extends Job
 	 * @throws CoreException
 	 * @throws IOException
 	 */
-	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is)
+	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
 	{
 		File file = new File(nodeFolder, filename);
-		try
-		{
-			FileUtils.copyInputStreamToFile(is, file);
-		}
-		catch (IOException e)
-		{
-			ServoyLog.logError(e);
-		}
+		FileUtils.copyInputStreamToFile(is, file);
 	}
 
 }

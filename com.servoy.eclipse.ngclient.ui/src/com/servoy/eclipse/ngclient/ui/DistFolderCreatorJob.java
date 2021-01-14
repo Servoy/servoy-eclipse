@@ -29,8 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import com.servoy.eclipse.model.util.ServoyLog;
-
 /**
  * @author jcomp
  *
@@ -64,7 +62,7 @@ public class DistFolderCreatorJob extends Job
 		}
 		catch (IOException e1)
 		{
-			ServoyLog.logError(e1);
+			Activator.getInstance().getLog().error("Error creating the node filer 'dist' dir " + nodeFolder, e1);
 		}
 
 		String sourceFolder = includeSource ? "/node/" : "/node/dist/";
@@ -93,11 +91,12 @@ public class DistFolderCreatorJob extends Job
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError(e);
+				Activator.getInstance().getLog().error("Error copy " + filename + " to the node folder " + nodeFolder, e);
 			}
 		}
 		System.err.println("copied " + (System.currentTimeMillis() - time));
 		NodeFolderCreatorJob.createFileWatcher(nodeFolder, "/dist");
+		Activator.getInstance().stateLocationDone();
 		return Status.OK_STATUS;
 	}
 

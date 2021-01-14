@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -15,7 +16,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleContext;
 
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
@@ -32,6 +32,8 @@ public class Activator extends Plugin
 	private Job extractingNode;
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
+
+	private boolean statelocationDone = false;
 
 	public static Activator getInstance()
 	{
@@ -126,12 +128,12 @@ public class Activator extends Plugin
 				}
 				catch (IOException e)
 				{
-					ServoyLog.logError(e);
+					getInstance().getLog().error("Error extracting path from " + archiveUrl, e);
 				}
 			}
 			else
 			{
-				ServoyLog.logWarning("couldn't create nodejs install from plugin " + pluginId + " and archive: " + archive, null);
+				getInstance().getLog().info("couldn't create nodejs install from plugin " + pluginId + " and archive: " + archive);
 				return null;
 			}
 		}
@@ -140,7 +142,7 @@ public class Activator extends Plugin
 
 	public void executeNPMInstall()
 	{
-		waitFormNodeExtraction();
+		waitForNodeExtraction();
 		RunNPMCommand installCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, NGClientConstants.NPM_INSTALL);
 		installCommand.setUser(false);
 		createBuildCommand();
@@ -152,7 +154,7 @@ public class Activator extends Plugin
 	public void executeNPMBuild()
 	{
 		if (buildCommand != null) return; // already started?
-		waitFormNodeExtraction();
+		waitForNodeExtraction();
 		createBuildCommand();
 		buildCommand.schedule();
 	}
@@ -170,7 +172,7 @@ public class Activator extends Plugin
 	/**
 	 *
 	 */
-	private void waitFormNodeExtraction()
+	private void waitForNodeExtraction()
 	{
 		synchronized (plugin)
 		{
@@ -192,4 +194,47 @@ public class Activator extends Plugin
 	{
 		if (buildCommand != null) buildCommand.cancel();
 	}
+
+	/**
+	 *  exports the state location dir to the location given that should be a WAR layout
+	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
+	 * @throws IOException
+	 */
+	public void exportNG2ToWar(File location) throws IOException
+	{
+		waitForStateLocation();
+
+		File distFolder = new File(projectFolder, "dist");
+		FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
+
+		FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+	}
+
+	void stateLocationDone()
+	{
+		synchronized (plugin)
+		{
+			statelocationDone = true;
+			plugin.notifyAll();
+		}
+	}
+
+	private void waitForStateLocation()
+	{
+		synchronized (plugin)
+		{
+			while (!statelocationDone)
+			{
+				try
+				{
+					plugin.wait();
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		}
+	}
+
+
 }

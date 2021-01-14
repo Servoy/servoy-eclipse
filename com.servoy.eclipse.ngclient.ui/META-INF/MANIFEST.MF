@@ -9,15 +9,13 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.osgi,
- servoy_shared,
- com.servoy.eclipse.model,
- com.servoy.eclipse.core,
  org.tukaani.xz,
  javax.servlet,
  org.apache.tomcat,
  org.apache.commons.io,
  org.eclipse.jface,
- servoy_ngclient
+ servoy_ngclient,
+ servoy_shared
 Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui
 Export-Package: com.servoy.eclipse.ngclient.ui,
