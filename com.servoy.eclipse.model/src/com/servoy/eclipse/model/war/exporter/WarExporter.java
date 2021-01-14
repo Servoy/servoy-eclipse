@@ -108,6 +108,7 @@ import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
+import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -142,7 +143,8 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar" , "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar"};
+		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() +
+			".jar", "org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 
@@ -169,7 +171,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 39);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 40);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -219,7 +221,7 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 10 : 4);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
 			monitor.subTask("Copying NGClient components/services...");
@@ -231,6 +233,12 @@ public class WarExporter
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
+			monitor.worked(1);
+			if (exportModel.isExportNG2())
+			{
+				monitor.subTask("Copy NGClient2 resources");
+				copyNGClient2(tmpWarDir);
+			}
 			monitor.worked(1);
 		}
 		try
@@ -254,6 +262,22 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws IOException
+	 */
+	private void copyNGClient2(File tmpWarDir) throws ExportException
+	{
+		try
+		{
+			Activator.getInstance().exportNG2ToWar(tmpWarDir);
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Can't copy the NG2 resources to " + tmpWarDir, e);
+		}
 	}
 
 	/**

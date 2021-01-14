@@ -21,7 +21,8 @@ Require-Bundle: servoy_shared,
  org.apache.commons.io,
  org.eclipse.swt,
  org.eclipse.jface,
- com.servoy.eclipse.ngclient
+ com.servoy.eclipse.ngclient,
+ com.servoy.eclipse.ngclient.ui
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.export,
