@@ -17,7 +17,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachEventHandlers(this.getFocusElement(), 0);
+        this.attachEventHandlers(this.getNativeElement(), 0);
     }
 
     svyOnChanges(changes: SimpleChanges) {

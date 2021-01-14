@@ -17,7 +17,7 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseChoice {
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachEventHandlers( this.getFocusElement() );
+        this.attachEventHandlers( this.getNativeElement() );
     }
 
     svyOnChanges( changes: SimpleChanges ) {

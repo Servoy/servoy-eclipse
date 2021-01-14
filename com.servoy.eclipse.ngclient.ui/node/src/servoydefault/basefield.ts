@@ -28,6 +28,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         super(renderer, cdRef);
+        this.mustExecuteOnFocus = true;
     }
 
     svyOnInit() {
