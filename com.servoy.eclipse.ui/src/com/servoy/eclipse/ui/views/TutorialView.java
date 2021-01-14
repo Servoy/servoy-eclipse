@@ -22,19 +22,27 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.Bullet;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -46,6 +54,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
@@ -58,7 +67,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
- * @author lvostinar
+ * @author lvostinar, afara
  *
  */
 public class TutorialView extends ViewPart
@@ -404,15 +413,37 @@ public class TutorialView extends ViewPart
 			descriptor = descriptor.increaseHeight(6);
 			stepName.setFont(descriptor.createFont(parent.getDisplay()));
 
-			Label stepDescription = new Label(row, SWT.WRAP);
-			stepDescription.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			stepDescription.setText(rowData.optString("description"));
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.widthHint = widthHint - 70;
-			stepDescription.setLayoutData(gd);
-			descriptor = FontDescriptor.createFrom(stepDescription.getFont());
-			descriptor = descriptor.increaseHeight(2);
-			stepDescription.setFont(descriptor.createFont(parent.getDisplay()));
+			String description = rowData.optString("description");
+			// separate the code snippet from the description
+			while (description != null)
+			{
+				int startCodeIndex = description.indexOf("<code>");
+				int endCodeIndex = description.indexOf("</code>");
+				if (startCodeIndex == 0)
+				{
+					// description starts with code snippet
+					String codeSnippet = description.substring(startCodeIndex + 6, endCodeIndex);
+					description = endCodeIndex + 7 == description.length() ? null : description.substring(endCodeIndex + 7);
+
+					buildCodeSnippet(widthHint, row, codeSnippet);
+				}
+				else if (startCodeIndex > 0)
+				{
+					String text = description.substring(0, startCodeIndex);
+					String codeSnippet = description.substring(startCodeIndex + 6, endCodeIndex);
+					description = endCodeIndex + 7 == description.length() ? null : description.substring(endCodeIndex + 7);
+
+					buildDescriptionText(parent, widthHint, row, text);
+					buildCodeSnippet(widthHint, row, codeSnippet);
+
+				}
+				else
+				{
+					buildDescriptionText(parent, widthHint, row, description);
+					description = null;
+				}
+
+			}
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
 			gifURL.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -484,6 +515,195 @@ public class TutorialView extends ViewPart
 				}
 			});
 		}
+
+		/**
+		 * Builds the text description. It has support for bold, italic, links, bullet lists.
+		 */
+		private void buildDescriptionText(Composite parent, int widthHint, Composite row, String text)
+		{
+			ArrayList<Integer> boldStartIndex = new ArrayList<>();
+			ArrayList<Integer> boldEndIndex = new ArrayList<>();
+			ArrayList<Integer> italicStartIndex = new ArrayList<>();
+			ArrayList<Integer> italicEndIndex = new ArrayList<>();
+			ArrayList<Integer> listStartIndex = new ArrayList<>();
+			ArrayList<Integer> listEndIndex = new ArrayList<>();
+			Map<Integer, String> linkStartIndex = new LinkedHashMap<Integer, String>();
+			ArrayList<Integer> linkEndIndex = new ArrayList<>();
+
+
+			int numberOfHtmlChars = 0; // the number of html characters to be deleted from description
+			for (int i = 0, n = text.length(); i < n; i++)
+			{
+				if (text.charAt(i) == '<')
+				{
+					boolean isOpeningTag = (text.charAt(i + 1) != '/');
+					char nextChar = isOpeningTag ? text.charAt(i + 1) : text.charAt(i + 2);
+					switch (nextChar)
+					{
+						// bold
+						case 'b' :
+						{
+							if (isOpeningTag)
+							{
+								boldStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+								boldEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</b>", i + 3)).length()));
+							}
+							break;
+						}
+						// italic
+						case 'i' :
+						{
+							if (isOpeningTag)
+							{
+								italicStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+								italicEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</i>", i + 3)).length()));
+							}
+							break;
+						}
+						// list
+						case 'l' :
+						{
+							if (isOpeningTag)
+							{
+								listStartIndex.add(Integer.valueOf((text.substring(0, i)).split("\n").length));
+								listEndIndex.add(Integer.valueOf((text.substring(i + 1, text.indexOf("</l>", i + 1)).split("\n").length)));
+							}
+							break;
+						}
+						// link
+						case 'a' :
+						{
+							if (isOpeningTag)
+							{
+								// save the starting point of the link and also the URL
+								String href = text.substring(i, text.indexOf(">", i + 1));
+								int firstQuote = href.indexOf("'");
+								href = href.substring(firstQuote + 1, href.indexOf("'", firstQuote + 1));
+								linkStartIndex.put(Integer.valueOf(i - numberOfHtmlChars), href);
+								linkEndIndex.add(Integer.valueOf(text.substring(text.indexOf(">", i + 1) + 1, text.indexOf("</a>", i + 1)).length()));
+								numberOfHtmlChars = numberOfHtmlChars + (text.substring(i, text.indexOf(">", i + 1) + 1).length());
+							}
+							else
+							{
+								numberOfHtmlChars = numberOfHtmlChars + 4;
+							}
+							break;
+						}
+					}
+					if (nextChar != 'a') numberOfHtmlChars = isOpeningTag ? numberOfHtmlChars + 3 : numberOfHtmlChars + 4;
+				}
+			}
+
+			StyledText styledText = new StyledText(row, SWT.WRAP | SWT.READ_ONLY);
+			styledText.setText(removeHTMLTags(text));
+			FontDescriptor descriptor = FontDescriptor.createFrom(styledText.getFont());
+			descriptor = descriptor.increaseHeight(2);
+			styledText.setFont(descriptor.createFont(parent.getDisplay()));
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = widthHint - 70;
+			styledText.setLayoutData(gd);
+
+			for (int i = 0; i < boldStartIndex.size(); i++)
+			{
+				StyleRange styleRange = new StyleRange();
+				styleRange.start = boldStartIndex.get(i).intValue();
+				styleRange.length = boldEndIndex.get(i).intValue();
+				styleRange.fontStyle = SWT.BOLD;
+				styledText.setStyleRange(styleRange);
+			}
+
+			for (int i = 0; i < italicStartIndex.size(); i++)
+			{
+				StyleRange styleRange = new StyleRange();
+				styleRange.start = italicStartIndex.get(i).intValue();
+				styleRange.length = italicEndIndex.get(i).intValue();
+				styleRange.fontStyle = SWT.ITALIC;
+				styledText.setStyleRange(styleRange);
+			}
+
+			for (int i = 0; i < listStartIndex.size(); i++)
+			{
+				StyleRange bulletStyle = new StyleRange();
+				bulletStyle.metrics = new GlyphMetrics(0, 0, 40);
+				bulletStyle.foreground = getDisplay().getSystemColor(SWT.COLOR_BLACK);
+				Bullet bullet = new Bullet(bulletStyle);
+				styledText.setLineBullet(listStartIndex.get(i).intValue(), listEndIndex.get(i).intValue(), bullet);
+			}
+
+			int indexForLinkLength = 0;
+			boolean mouseDownListenerAdded = false;
+			for (Map.Entry<Integer, String> entry : linkStartIndex.entrySet())
+			{
+				StyleRange styleRange = new StyleRange();
+				styleRange.start = entry.getKey().intValue();
+				styleRange.length = linkEndIndex.get(indexForLinkLength++).intValue();
+				styleRange.underline = true;
+				styleRange.underlineStyle = SWT.UNDERLINE_LINK;
+				styleRange.data = entry.getValue();
+				styledText.setStyleRange(styleRange);
+
+				// add click event only once
+				if (!mouseDownListenerAdded) styledText.addListener(SWT.MouseDown, event -> {
+					int offset = styledText.getOffsetAtPoint(new Point(event.x, event.y));
+					if (offset != -1)
+					{
+						StyleRange range = null;
+						try
+						{
+							range = styledText.getStyleRangeAtOffset(offset);
+						}
+						catch (IllegalArgumentException e)
+						{
+							e.printStackTrace();
+						}
+						if (range != null && range.underline && range.underlineStyle == SWT.UNDERLINE_LINK)
+						{
+							try
+							{
+								PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL((String)range.data));
+							}
+							catch (PartInitException | MalformedURLException e)
+							{
+								e.printStackTrace();
+							}
+						}
+					}
+				});
+				mouseDownListenerAdded = true;
+			}
+		}
+
+		/**
+		 * Builds a code snippet.
+		 */
+		private void buildCodeSnippet(int widthHint, Composite row, String codeText)
+		{
+			Composite codeWrapper = new Composite(row, SWT.FILL);
+			codeWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			codeWrapper.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
+
+			GridLayout codeLayout = new GridLayout();
+			codeLayout.numColumns = 1;
+			codeWrapper.setLayout(codeLayout);
+
+			StyledText codeSnippet = new StyledText(codeWrapper, SWT.WRAP);
+			codeSnippet.setText(codeText);
+			GridData gdCode = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gdCode.widthHint = widthHint - 70;
+			codeSnippet.setLayoutData(gdCode);
+			int margin = 5;
+			codeSnippet.setMargins(margin, margin, margin, margin);
+			Font newFont = new Font(codeSnippet.getDisplay(), "Verdana", 13, SWT.NONE);
+			codeSnippet.setFont(newFont);
+			codeSnippet.addDisposeListener(new DisposeListener()
+			{
+				@Override
+				public void widgetDisposed(DisposeEvent e)
+				{
+					newFont.dispose();
+				}
+			});
+		}
 	}
 
 	private void loadDataModel(boolean loadDefaultTutorialList, String url)
@@ -548,7 +768,7 @@ public class TutorialView extends ViewPart
 		{
 			if (copyText.indexOf('<') != -1 && copyText.indexOf('>') != -1)
 			{
-				copyText = copyText.replace(copyText.substring(copyText.indexOf('<'), text.indexOf('>') + 1), "");
+				copyText = copyText.replace(copyText.substring(copyText.indexOf('<'), copyText.indexOf('>') + 1), "");
 			}
 			else
 			{
