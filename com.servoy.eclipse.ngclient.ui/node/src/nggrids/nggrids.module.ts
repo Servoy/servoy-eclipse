@@ -11,7 +11,7 @@ import { TextEditor } from './datagrid/editors/texteditor';
 import { TypeaheadEditor } from './datagrid/editors/typeaheadeditor';
 import { AgGridModule } from '@ag-grid-community/angular';
 import { LicenseManager } from '@ag-grid-enterprise/core';
-import { ColumnsToolPanelModule, MenuModule, ModuleRegistry, RowGroupingModule, ServerSideRowModelModule, SideBarModule } from '@ag-grid-enterprise/all-modules';
+import { ColumnsToolPanelModule, FiltersToolPanelModule, MenuModule, ModuleRegistry, RowGroupingModule, ServerSideRowModelModule, SideBarModule } from '@ag-grid-enterprise/all-modules';
 import { ValuelistFilter } from './datagrid/filters/valuelistfilter';
 import { RadioFilter } from './datagrid/filters/radiofilter';
 
@@ -40,6 +40,6 @@ import { RadioFilter } from './datagrid/filters/radiofilter';
 export class NGGridsModule {
     constructor() {
         LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=200,AssetReference=AG-010463,ExpiryDate=11_October_2021_[v2]_MTYzMzkwNjgwMDAwMA==4c6752fe4cb2066ab1f0e9c572bc7491');
-        ModuleRegistry.registerModules([ServerSideRowModelModule, RowGroupingModule, SideBarModule, ColumnsToolPanelModule, MenuModule]);
+        ModuleRegistry.registerModules([ServerSideRowModelModule, RowGroupingModule, SideBarModule, ColumnsToolPanelModule, MenuModule, FiltersToolPanelModule]);
     }
 }
