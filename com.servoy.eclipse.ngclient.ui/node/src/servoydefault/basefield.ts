@@ -24,11 +24,10 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     storedTooltip: any;
     
-    mustExecuteOnFocus: boolean;
+    mustExecuteOnFocus = true;
     
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
         super(renderer, cdRef);
-        this.mustExecuteOnFocus = true;
     }
 
     svyOnInit() {

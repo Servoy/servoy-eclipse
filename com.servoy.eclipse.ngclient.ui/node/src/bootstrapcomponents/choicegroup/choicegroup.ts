@@ -41,7 +41,8 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
         super.svyOnChanges(changes);
     }
 
-    requestFocus() {
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
         const choiceInput = this.input;
         choiceInput.nativeElement.focus();
     }

@@ -43,8 +43,9 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
     attachFocusListeners(nativeElement: HTMLElement) {
         if (this.onFocusGainedMethodID)
             this.renderer.listen(nativeElement, 'focus', (e) => {
-                if (!this.skipFocus) this.onFocusGainedMethodID(e);
+                if (!this.skipFocus && this.mustExecuteOnFocus) this.onFocusGainedMethodID(e);
                 this.skipFocus = false;
+                this.mustExecuteOnFocus = true;
             });
         if (this.onFocusLostMethodID)
             this.renderer.listen(nativeElement, 'blur', (e) => {
@@ -63,7 +64,7 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
                 }
             });
         } else {
-            this.requestFocus();
+            this.requestFocus(this.mustExecuteOnFocus);
         }
     }
 

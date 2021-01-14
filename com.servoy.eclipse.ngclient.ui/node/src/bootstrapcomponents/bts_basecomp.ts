@@ -62,7 +62,7 @@ export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyB
         return this.getNativeElement();
     }
 
-    public requestFocus() {
+    public requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.getFocusElement().focus();
     }
 

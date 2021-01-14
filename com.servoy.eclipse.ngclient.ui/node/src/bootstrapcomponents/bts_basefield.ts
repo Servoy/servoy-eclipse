@@ -17,6 +17,7 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
     @Input() placeholderText: string;
     @Input() selectOnEnter: boolean;
 
+    mustExecuteOnFocus = true;
 
     storedTooltip: any;
 
@@ -56,10 +57,18 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
         }
     }
 
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getFocusElement().focus();
+    }
+    
     attachFocusListeners(nativeElement: HTMLElement) {
           if (this.onFocusGainedMethodID)
               this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                  this.onFocusGainedMethodID(e);
+                  if ( this.mustExecuteOnFocus === true ) {
+                      this.onFocusGainedMethodID( e );
+                  }
+                  this.mustExecuteOnFocus = true;
               } );
           if (this.onFocusLostMethodID)
               this.renderer.listen( nativeElement, 'blur', ( e ) => {
