@@ -1,35 +1,36 @@
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, AfterViewInit, Input } from '@angular/core';
+import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { ServoyDefaultBaseChoice } from '../basechoice';
+import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
     selector: 'servoydefault-check',
     templateUrl: './check.html',
     styleUrls: ['./check.css']
 })
-export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
-    @Input() horizontalAlignment;
+export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
+    @Input() horizontalAlignment: number;
+    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
 
     selected = false;
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
         super(renderer, cdRef, formattingService);
     }
 
-    svyOnInit() {
-        super.svyOnInit();
-        this.attachEventHandlers(this.getNativeElement(), 0);
-    }
-
     svyOnChanges(changes: SimpleChanges) {
-        this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment);
         super.svyOnChanges(changes);
+        if(changes['horizontalAlignment'])
+            this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment);
+    }
+    
+    getFocusElement() {
+        return this.input.nativeElement;
     }
 
-    public setHorizontalAlignmentFlexbox(element: any, renderer: Renderer2, halign) {
+    public setHorizontalAlignmentFlexbox(element: any, renderer: Renderer2, halign: number) {
         if (halign !== -1) {
-            if (halign == 0) {
+            if (halign === 0) {
                 renderer.setStyle(element, 'justify-content', 'center');
-            } else if (halign == 4) {
+            } else if (halign === 4) {
                 renderer.setStyle(element, 'justify-content', 'flex-end');
             } else {
                 renderer.setStyle(element, 'justify-content', 'flex-start');
@@ -37,38 +38,40 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
         }
     }
 
-    attachEventHandlers(element, index) {
-        if (!element)
-            element = this.getNativeElement();
-        this.renderer.listen(element, 'click', (e) => {
+    attachHandlers() {
+        console.log("attaching");
+        console.log(this.getFocusElement());
+        this.renderer.listen( this.getFocusElement(), 'click', (e) => {
+            console.log(e);
             if (!this.readOnly && this.enabled) {
                 this.itemClicked(e);
                 if (this.onActionMethodID) this.onActionMethodID(e);
             }
         });
-        super.attachEventHandlers(element, index);
+        super.attachHandlers();
     }
 
-    itemClicked(event) {
-        if (event.target.localName === 'span' || event.target.localName === 'label')
+    itemClicked(event: any) {
+        if (event.target.localName === 'span' || event.target.localName === 'label') {
             this.selected = !this.selected;
+        }
 
         if (this.valuelistID && this.valuelistID[0])
-            this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
+            this.dataProviderID = this.dataProviderID === this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
         else if (typeof this.dataProviderID === 'string')
-            this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
+            this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
         else
             this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
-        super.baseItemClicked(event, true, this.dataProviderID);
+        this.pushUpdate();
     }
 
     getSelectionFromDataprovider() {
         if (!this.dataProviderID)
             return false;
         if (this.valuelistID && this.valuelistID[0]) {
-            return this.dataProviderID == this.valuelistID[0].realValue;
+            return this.dataProviderID === this.valuelistID[0].realValue;
         } else if (typeof this.dataProviderID === 'string') {
-            return this.dataProviderID == '1';
+            return this.dataProviderID === '1';
         } else {
             return this.dataProviderID > 0;
         }
