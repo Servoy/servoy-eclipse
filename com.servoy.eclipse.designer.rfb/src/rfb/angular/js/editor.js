@@ -440,7 +440,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getBeanModel = function(node) {
-				if (node) {
+				if (node && editorContentRootScope.getDesignFormControllerScope) {
 					var name = node.getAttribute("svy-id");
 					if (name) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
 				}
@@ -448,7 +448,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getBeanModelOrGhost = function(node) {
-				if (node) {
+				if (node && editorContentRootScope.getDesignFormControllerScope) {
 					var name = node.getAttribute("name");
 					if (name)
 						return editorContentRootScope.getDesignFormControllerScope().model(node.getAttribute("svy-id"), true);
