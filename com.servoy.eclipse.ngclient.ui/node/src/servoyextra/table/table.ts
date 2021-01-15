@@ -581,6 +581,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             }
         }
         this.scrollToSelectionNeeded = false; // we don't need to scroll to selection when we select a record by clicking on it
+        this.foundset.selectedRowIndexes = newSelection;
         this.foundset.requestSelectionUpdate(newSelection);
     }
 
