@@ -17,6 +17,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     }
 
     svyOnInit() {
+        super.svyOnInit();
         this.onValuelistChange();
     }
 
