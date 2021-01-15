@@ -39,8 +39,6 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
     }
 
     attachHandlers() {
-        console.log("attaching");
-        console.log(this.getFocusElement());
         this.renderer.listen( this.getFocusElement(), 'click', (e) => {
             console.log(e);
             if (!this.readOnly && this.enabled) {
