@@ -1,28 +1,29 @@
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, Input } from '@angular/core';
+import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { ServoyDefaultBaseChoice } from '../basechoice';
+import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
     selector: 'servoydefault-radio',
     templateUrl: './radio.html',
     styleUrls: ['./radio.css']
 } )
-export class ServoyDefaultRadio extends ServoyDefaultBaseChoice {
+export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: any;
 
+    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
+    
     selected = false;
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService ) {
         super( renderer, cdRef, formattingService );
     }
 
-    svyOnInit() {
-        super.svyOnInit();
-        this.attachEventHandlers( this.getNativeElement() );
-    }
-
     svyOnChanges( changes: SimpleChanges ) {
         this.setHorizontalAlignmentFlexbox( this.getNativeElement(), this.renderer, this.horizontalAlignment );
         super.svyOnChanges( changes );
+    }
+    
+    getFocusElement() {
+        return this.input.nativeElement;
     }
 
     public setHorizontalAlignmentFlexbox( element: any, renderer: Renderer2, halign: any ) {
@@ -37,15 +38,17 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseChoice {
         }
     }
 
-    attachEventHandlers( element: any ) {
-        if ( !element )
-            element = this.getNativeElement();
-        this.renderer.listen( element, 'click', ( e ) => {
-            this.itemClicked( e );
-            if ( this.onActionMethodID ) this.onActionMethodID( e );
-        } );
-        
-        super.attachEventHandlers(element, 0);
+    attachHandlers() {
+        console.log("attaching");
+        console.log(this.getFocusElement());
+        this.renderer.listen( this.getFocusElement(), 'click', (e) => {
+            console.log(e);
+            if (!this.readOnly && this.enabled) {
+                this.itemClicked(e);
+                if (this.onActionMethodID) this.onActionMethodID(e);
+            }
+        });
+        super.attachHandlers();
     }
 
     itemClicked( event: any ) {
@@ -58,7 +61,7 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseChoice {
             this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
         else
             this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
-        super.baseItemClicked( event, true, this.dataProviderID );
+        this.pushUpdate();
     }
 
     getSelectionFromDataprovider() {
