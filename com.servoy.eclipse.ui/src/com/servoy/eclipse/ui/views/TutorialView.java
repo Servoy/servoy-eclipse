@@ -40,11 +40,12 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -678,9 +679,10 @@ public class TutorialView extends ViewPart
 		 */
 		private void buildCodeSnippet(int widthHint, Composite row, String codeText)
 		{
+			Color color = new Color(new RGB(246, 248, 250));
 			Composite codeWrapper = new Composite(row, SWT.FILL);
 			codeWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			codeWrapper.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
+			codeWrapper.setBackground(color);
 
 			GridLayout codeLayout = new GridLayout();
 			codeLayout.numColumns = 1;
@@ -688,19 +690,21 @@ public class TutorialView extends ViewPart
 
 			StyledText codeSnippet = new StyledText(codeWrapper, SWT.WRAP);
 			codeSnippet.setText(codeText);
+			codeSnippet.setBackground(color);
 			GridData gdCode = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gdCode.widthHint = widthHint - 70;
 			codeSnippet.setLayoutData(gdCode);
 			int margin = 5;
 			codeSnippet.setMargins(margin, margin, margin, margin);
-			Font newFont = new Font(codeSnippet.getDisplay(), "Verdana", 13, SWT.NONE);
-			codeSnippet.setFont(newFont);
+			FontDescriptor descriptor = FontDescriptor.createFrom(codeSnippet.getFont());
+			descriptor = descriptor.increaseHeight(2);
+			codeSnippet.setFont(descriptor.createFont(codeWrapper.getDisplay()));
 			codeSnippet.addDisposeListener(new DisposeListener()
 			{
 				@Override
 				public void widgetDisposed(DisposeEvent e)
 				{
-					newFont.dispose();
+					color.dispose();
 				}
 			});
 		}
