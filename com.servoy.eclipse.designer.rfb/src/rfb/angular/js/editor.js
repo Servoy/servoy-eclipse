@@ -263,6 +263,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			function getRealContainerElement(uuid) {
 				var parent = $scope.ghostContainerElements[uuid];
 
+				if (!$scope.testElementTimeouts) $scope.testElementTimeouts = {};
 				if (parent == undefined) {
 					var defer = $q.defer();
 					function testElement() {
@@ -271,11 +272,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							parent = p[0];
 							$scope.ghostContainerElements[uuid] = parent;
 							defer.resolve(parent);
+							delete $scope.testElementTimeouts[uuid];
 						} else {
-							$timeout(testElement, 400);
-						}
+								$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
+							}
 					}
-					$timeout(testElement, 400);
+					if ($scope.testElementTimeouts[uuid] == undefined) {
+						$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
+					}
 					$scope.ghostContainerElements[uuid] = defer.promise;
 					return defer.promise;
 				}
