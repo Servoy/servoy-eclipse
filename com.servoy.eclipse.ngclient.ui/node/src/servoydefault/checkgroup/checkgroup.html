@@ -10,6 +10,8 @@
             [value]="item.realValue"
             [disabled]="!enabled || !editable"
             [tabindex]="mainTabIndex"
+            [svyBaseChoiceElement]="this"
+            [index]="i"
             #input />
     <span [innerHtml]="item.displayValue"></span>
   </label>

@@ -4,12 +4,14 @@
      [id]="servoyApi.getMarkupId()"
      [svyTooltip]="toolTipText"
      #element>
-  <label  class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty">
+  <label  class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
     <input type="radio"
            [checked]="value == item.realValue"
            [value]="item.realValue"
            [disabled]="!enabled || !editable"
            [sabloTabseq]="tabSeq"
+           [svyBaseChoiceElement]="this"
+            [index]="i"
            #input/>
     <span [innerHtml]="item.displayValue"></span>
   </label>

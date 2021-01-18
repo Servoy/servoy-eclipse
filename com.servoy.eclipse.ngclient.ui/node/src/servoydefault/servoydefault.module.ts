@@ -29,6 +29,8 @@ import { ServoyDefaultListBox } from './listbox/listbox';
 import { ServoyDefaultImageMedia } from './imagemedia/imagemedia';
 import {ServoyDefaultSpinner} from './spinner/spinner';
 
+import {ChoiceElementDirective} from './basechoice';
+
 import { SabloModule } from '../sablo/sablo.module';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 
@@ -65,6 +67,7 @@ import { Select2Module } from 'ng-select2-component';
     ServoyDefaultHTMLView,
     ServoyDefaultListBox,
     ServoyDefaultImageMedia,
+    ChoiceElementDirective,
     BGSplitter,
     BGPane,
     UploadDirective

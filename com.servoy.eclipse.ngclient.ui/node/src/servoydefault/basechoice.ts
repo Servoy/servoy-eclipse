@@ -1,4 +1,4 @@
-import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef } from '@angular/core';
+import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, Input, OnInit } from '@angular/core';
 import { FormattingService } from '../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from './basefield';
 
@@ -17,7 +17,6 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 
     svyOnInit() {
         super.svyOnInit();
-        this.onValuelistChange();
     }
 
     requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
@@ -35,23 +34,13 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
                 case 'dataProviderID':
                     this.setSelectionFromDataprovider();
                     break;
-
+                case 'valuelistID':
+                    if (this.valuelistID && this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0]))
+                        this.allowNullinc = 1;
+                    break;
             }
         }
         super.svyOnChanges(changes);
-    }
-
-    setHandlersAndTabIndex() {
-        for (let i = 0; i < this.getNativeElement().children.length; i++) {
-            const elm = this.getNativeElement().children[i];
-            this.attachEventHandlers(elm.children[0], i);
-        }
-    }
-
-    onValuelistChange() {
-        if (this.valuelistID)
-            if (this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc = 1;
-        this.setHandlersAndTabIndex();
     }
 
     baseItemClicked(event, changed, dp) {
@@ -72,7 +61,6 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     attachEventHandlers(element, index) {
         if (!element)
             element = this.getNativeElement();
-
         if (this.onFocusGainedMethodID) {
             this.renderer.listen(element, 'focus', (event) => {
                 if ( this.mustExecuteOnFocus === true ) {
@@ -112,7 +100,20 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     }
 
     abstract setSelectionFromDataprovider(): void;
+}
 
+@Directive({
+    selector: '[svyBaseChoiceElement]'
+})
+export class ChoiceElementDirective implements OnInit {
 
+    @Input() svyBaseChoiceElement: ServoyDefaultBaseChoice;
+    @Input() index: number;
 
+    constructor(private el: ElementRef) {
+    }
+    
+    ngOnInit(): void {
+        this.svyBaseChoiceElement.attachEventHandlers(this.el.nativeElement, this.index);
+    }
 }
