@@ -9,6 +9,8 @@ import {NotNullOrEmptyPipe} from '../../ngclient/pipes/pipes';
 import {By} from '@angular/platform-browser';
 import { IValuelist } from '../../sablo/spectypes.service';
 
+import {ChoiceElementDirective} from '../basechoice';
+
 const mockData = [
                           {
                             realValue: 3,
@@ -34,7 +36,7 @@ describe('ServoyDefaultCheckGroup', () => {
     mockData.hasRealValues = () => true;
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultCheckGroup],
+      declarations: [ServoyDefaultCheckGroup,ChoiceElementDirective],
       imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })

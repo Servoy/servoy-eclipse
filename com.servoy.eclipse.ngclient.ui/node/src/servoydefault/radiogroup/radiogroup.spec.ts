@@ -10,6 +10,8 @@ import { By } from '@angular/platform-browser';
 import { NotNullOrEmptyPipe } from '../../ngclient/pipes/pipes';
 import { DebugElement } from '@angular/core';
 
+import {ChoiceElementDirective} from '../basechoice';
+
 const mockData = [
                   {
                     realValue: 3,
@@ -32,7 +34,7 @@ describe('ServoyDefaultRadiogroup', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultRadiogroup],
+      declarations: [ ServoyDefaultRadiogroup,ChoiceElementDirective],
       imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })
