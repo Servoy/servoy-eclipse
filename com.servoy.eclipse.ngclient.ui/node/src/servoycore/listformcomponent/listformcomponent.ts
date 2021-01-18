@@ -14,6 +14,7 @@ import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { IApiExecutor, instanceOfApiExecutor } from '../../ngclient/types';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { isEmpty } from 'lodash-es';
 
 @Component({
     selector: 'servoycore-listformcomponent',
@@ -301,7 +302,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
         const model = new Model();
         const handlers = {};
-        const rowItem = new Cell(item, model, handlers, rowId, rowIndex);
+        const rowItem = new Cell(item, model, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
         if (item.foundsetConfig && item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array) {
             (item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
                 rowItem.model[p] = item[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
@@ -320,7 +321,22 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (path && componentName === 'containedForm' && path[0] === 'childElements') {
             const compModel = this.containedForm.childElements[parseInt(path[1], 10)];
             const selectedIndex = this.foundset.selectedRowIndexes[0];
-            const row = this.componentCache[selectedIndex];
+            let row = this.componentCache[selectedIndex];
+            if (!row) {
+                this.log.warn('calling api ' + apiName + ' on' + componentName + ' in LFC:' + this.name + ' but selected record '  + selectedIndex +
+                                    '  is not in the view' + this.foundset.viewPort + ' fallback to the nearest visible row');
+                let closestIndex = selectedIndex;
+                let difference = Number.MAX_VALUE;
+                Object.keys(this.componentCache).forEach(key => {
+                    const intKey = parseInt(key, 10);
+                    const dif = Math.abs(intKey-selectedIndex);
+                    if (dif < difference) {
+                        closestIndex = intKey; 
+                        difference = dif;
+                    }
+                });
+                row = this.componentCache[closestIndex];
+            }
             const uiComp = row[compModel.name];
             if (path.length > 2) {
                 if (instanceOfApiExecutor(uiComp)) {
@@ -431,6 +447,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const rowComponents = this.componentCache[rowIndex];
         if (rowComponents) {
             delete rowComponents[component.name];
+            if (isEmpty(rowComponents)) {
+                delete this.componentCache[rowIndex];
+            }
         }
     }
 }
