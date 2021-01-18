@@ -1,7 +1,8 @@
 import { AgGridAngular } from '@ag-grid-community/angular';
 import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SimpleChanges, TemplateRef } from '@angular/core';
+import { ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyService } from '../../ngclient/servoy.service';
@@ -46,6 +47,25 @@ const CHUNK_SIZE = 50;
 const CACHED_CHUNK_BLOCKS = 2;
 
 const NULL_VALUE = {displayValue: '', realValue: null};
+
+const COLUMN_KEYS_TO_CHECK_FOR_CHANGES = [
+    "headerTitle",
+    "headerStyleClass",
+    "headerTooltip",
+    "footerText",
+    "styleClass",
+    "visible",
+    "width",
+    "minWidth",
+    "maxWidth",
+    "enableRowGroup",
+    "enableSort",
+    "enableResize",
+    "enableToolPanel",
+    "autoResize",
+    "editType",
+    "id"
+];
 
 @Component({
     selector: 'aggrid-groupingtable',
@@ -181,7 +201,9 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     // root foundset change listener remover
     removeChangeListenerFunction = null;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, private servoyService: ServoyService, public formattingService: FormattingService, private datagridService: DatagridService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
+        private servoyService: ServoyService, public formattingService: FormattingService,
+        private datagridService: DatagridService, private sanitizer: DomSanitizer) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('DataGrid');
     }
@@ -387,7 +409,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 _this.storeColumnsState();
                 if(_this.isTableGrouped()) {
                     _this.removeAllFoundsetRef = true;
-                    _this.agGrid.api.purgeServerSideCache();
+                    _this.agGrid.api.refreshServerSideStore({purge: true});
                 }
                 if(_this.onSort) {
                     if(_this.sortHandlerTimeout) {
@@ -569,15 +591,18 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             } else {
                 this.isRendered = true;
             }
-        }        
-        // TODO:
-        // var gridDiv = $element.find('.ag-table')[0];
-        // gridDiv.addEventListener("click", function(e) {
-        //     if(e.target.parentNode.classList.contains("ag-selection-checkbox")) {
-        //         var rowIndex = $(e.target.parentNode).closest('[row-index]').attr('row-index');
-        //         selectionEvent = { type: 'click' , event: {ctrlKey: true, shiftKey: e.shiftKey}, rowIndex: parseInt(rowIndex)};
-        //     }
-        // });
+        }
+
+        this.agGridElementRef.nativeElement.addEventListener("click", function(e) {
+            if(e.target.parentNode.classList.contains("ag-selection-checkbox")) {
+                let t = e.target.parentNode;
+                while(t && !t.hasAttribute("row-index")) t = t.parentNode;
+                if(t) {
+                    const rowIndex = t.getAttribute("row-index");
+                    _this.selectionEvent = { type: 'click' , event: {ctrlKey: true, shiftKey: e.shiftKey}, rowIndex: parseInt(rowIndex)};
+                }
+            }
+        });
 
         // init the root foundset manager
         this.initRootFoundset();
@@ -629,8 +654,9 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 						const isChangedToEmpty = change.currentValue && change.previousValue && change.previousValue.serverSize == 0 && change.previousValue.serverSize > 0;
 						if(this.myFoundset.viewPort.size > 0 || isChangedToEmpty) {
 							// browser refresh
-							this.isRootFoundsetLoaded = true;
-							this.initRootFoundset();
+                            this.isRootFoundsetLoaded = true;
+                            // is init needed?
+							//this.initRootFoundset();
 						}
 						else {
 							// newly set foundset
@@ -643,78 +669,39 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 						this.removeChangeListenerFunction = this.myFoundset.addChangeListener((change) => { _this.changeListener(change) });
                         break;
                     case "columns":
-                        // TODO:
-                        // var columnWatches = [];
-                        // $scope.$watchCollection("model.columns", function(newValue, oldValue) {
-                        //     $log.debug('columns changed');
-                        //     if(newValue) {
-                        //         state.columns = {};
-                        //         for(var i = 0; i < columnWatches.length; i++) {
-                        //             columnWatches[i]();
-                        //         }
-                        //         columnWatches.length = 0;
-                        //         var columnKeysToWatch = [
-                        //             "headerTitle",
-                        //             "headerStyleClass",
-                        //             "headerTooltip",
-                        //             "footerText",
-                        //             "styleClass",
-                        //             "visible",
-                        //             "width",
-                        //             "minWidth",
-                        //             "maxWidth",
-                        //             "enableRowGroup",
-                        //             "enableSort",
-                        //             "enableResize",
-                        //             "enableToolPanel",
-                        //             "autoResize",
-                        //             "editType",
-                        //             "id"
-                        //         ];
-                        //         for(var i = 0; i < $scope.model.columns.length; i++) {
-                        //             for( var j = 0; j < columnKeysToWatch.length; j++) {
-                        //                 columnWatches.push(watchColumnModel(i, columnKeysToWatch[j]));
-                        //             }
-                        //         }					
-        
-                        //         if(newValue != oldValue) {
-                        //             updateColumnDefs();
-                        //         }
-                        //     }
-                        // });
-                        
-                        // var isColumnModelChangedBeforeGridReady = false;
-        
-                        // /**
-                        //  * @private 
-                        //  */
-                        // function watchColumnModel(index, property) {
-                        //     var columnWatch = $scope.$watch("model.columns[" + index + "]['" + property + "']",
-                        //     function(newValue, oldValue) {
-                        //         if(newValue != oldValue) {
-                        //             $log.debug('column property changed');
-                        //             if(isGridReady) {
-                        //                 if(property != "footerText") {
-                        //                     updateColumnDefs();
-                        //                     if(property != "visible" && property != "width") {
-                        //                         restoreColumnsState();
-                        //                     }
-                        //                 }
-                        //             }
-                        //             else {
-                        //                 isColumnModelChangedBeforeGridReady = true;
-                        //             }
-        
-                        //             if(property == "headerTitle") {
-                        //                 handleColumnHeaderTitle(newValue, oldValue);
-                        //             }
-                        //             else if (property == "footerText") {
-                        //                 handleColumnFooterText(newValue, oldValue);
-                        //             }
-                        //         }
-                        //     });
-                        //     return columnWatch;
-                        // }                        
+                        // need a better way to detect if columns array are changed
+                        if(change.currentValue != change.previousValue) {
+                            this.updateColumnDefs();
+                        }
+                        else {
+                            for(let i = 0; i < this.columns.length; i++) {
+                                for(const property of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                    const oldPropertyValue = change.previousValue[i][property];
+                                    const newPropertyValue = change.currentValue[i][property];
+                                    if(newPropertyValue != oldPropertyValue) {
+                                        this.log.debug('column property changed');
+                                        if(this.isGridReady) {
+                                            if(property != "footerText") {
+                                                this.updateColumnDefs();
+                                            }
+                                            if(property != "visible" && property != "width") {
+                                                this.restoreColumnsState();
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        this.isColumnModelChangedBeforeGridReady = true;
+                                    }
+
+                                    if(property == "headerTitle") {
+                                        this.handleColumnHeaderTitle(i, newPropertyValue);
+                                    }
+                                    else if (property == "footerText") {
+                                        this.handleColumnFooterText();
+                                    }
+                                }                                 
+                            }
+                        }
                         break;
                     case "_internalColumnState":
                         if(this.isGridReady && (change.currentValue !== "_empty")) {
@@ -807,19 +794,39 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * Update header height based on cells content height
      */
     sizeHeader() {
-        // TODO
-        // var headerCell = $element.find('.ag-header-cell');
-        // var paddingTop = headerCell.length ? parseInt(headerCell.css('padding-top'), 10) : 0;
-        // var paddinBottom = headerCell.length ? parseInt(headerCell.css('padding-bottom'), 10) : 0;
-        // var headerCellLabels = $element.find('.ag-header-cell-text');
-        const minHeight = this.agGridOptions.headerHeight >= 0 ? this.agGridOptions.headerHeight : 25;
+        const headerCell =  this.findChildNativeElement(this.agGridElementRef.nativeElement, "ag-header-cell");
+        const paddingTop = headerCell.length ? parseInt(this.getCSSProperty(headerCell, "padding-top"), 10) : 0;
+        const paddinBottom = headerCell.length ? parseInt(this.getCSSProperty(headerCell, "padding-bottom"), 10) : 0;
+        const headerCellLabels =  this.findChildNativeElement(this.agGridElementRef.nativeElement, "ag-header-cell-text");
+        let minHeight = this.agGridOptions.headerHeight >= 0 ? this.agGridOptions.headerHeight : 25;
 
-        // if(minHeight > 0) {
-        //     for(var i = 0; i < headerCellLabels.length; i++) {
-        //         minHeight = Math.max(minHeight, headerCellLabels[i].scrollHeight + paddingTop + paddinBottom);
-        //     }
-        // }
+        if(minHeight > 0) {
+            for(let i = 0; i < headerCellLabels.length; i++) {
+                minHeight = Math.max(minHeight, headerCellLabels[i].scrollHeight + paddingTop + paddinBottom);
+            }
+        }
         this.agGrid.api.setHeaderHeight(minHeight);
+    }
+
+    findChildNativeElement(el, className) {
+        const clazz = el.hasAttribute && el.hasAttribute("class") ? el.getAttribute("class") : null;
+        if(clazz == null) return null;
+        if(clazz.indexOf(className) != -1) {
+            return el;
+        }
+
+        if(el.childNodes.length == 0) return null;
+        let child = null;
+        for(let i = 0; i < el.childNodes.length; i++) {
+            child = this.findChildNativeElement(el.childNodes[i], className);
+            if(child) break;
+        }
+        return child;
+    }
+
+    getCSSProperty(el, cssProperty) {
+        const style = window.getComputedStyle(el);
+        return style.getPropertyValue(cssProperty);        
     }
 
     initRootFoundset() {
@@ -879,14 +886,14 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         for (let i = 0; this.columns && i < this.columns.length; i++) {
             column = this.columns[i];
 
+            const _this = this;
             const field = this.getColumnID(column, i);
             //create a column definition based on the properties defined at design time
             colDef = {
                 headerName: column.headerTitle ? column.headerTitle : '',
                 field,
-                headerTooltip: column.headerTooltip ? column.headerTooltip : null
-                //TODO: add cellRenderer support
-                //cellRenderer: cellRenderer
+                headerTooltip: column.headerTooltip ? column.headerTooltip : null,
+                cellRenderer: (params) => { return _this.cellRenderer(params) }
             };
 
             if(column.id) {
@@ -904,16 +911,14 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             // column grouping
             colDef.enableRowGroup = column.enableRowGroup;
             if (column.rowGroupIndex >= 0) colDef.rowGroupIndex = column.rowGroupIndex;
-            //TODO: width
-            //if (column.width || column.width === 0) colDef.width = column.width;
+            if (column.width || column.width === 0) colDef.width = column.width;
 
             // tool panel
             if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
 
             // column sizing
-            //TODO: min/max width
-            //if (column.maxWidth) colDef.maxWidth = column.maxWidth;
-            //if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
+            if (column.maxWidth) colDef.maxWidth = column.maxWidth;
+            if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
             if (column.visible === false) colDef.hide = true;
 
             // column resizing https://www.ag-grid.com/javascript-grid-resizing/
@@ -972,19 +977,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
 
-            //TODO: get tooltip
-            //colDef.tooltipValueGetter = this.getTooltip;
+            colDef.tooltipValueGetter = (args) => { return _this.getTooltip(args) };
 
 
-            let columnOptions = {};
-            //TODO: add support for NG Grids services
-            // if($injector.has('ngDataGrid')) {
-            //     var groupingtableDefaultConfig = $services.getServiceScope('ngDataGrid').model;
-            //     if(groupingtableDefaultConfig.columnOptions) {
-            //         columnOptions = groupingtableDefaultConfig.columnOptions;
-            //     }
-            // }
-
+            let columnOptions = this.datagridService.columnOptions ? this.datagridService.columnOptions : {};
             columnOptions = this.mergeConfig(columnOptions, column.columnDef);
 
             if(columnOptions) {
@@ -1236,110 +1232,110 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     /**
      * Callback used by ag-grid colDef.tooltip
      */
-    // getTooltip(args) {
-    //     let tooltip = "";
-    //     // skip pinned (footer) nodes
-    //     if(!args.node.rowPinned) {
-    //         if (!this.isTableGrouped()) {
-    //             let column = this.getColumn(args.colDef.field);
-    //             if (column && column.tooltip) {
-    //                 let index = args.node.rowIndex - foundset.foundset.viewPort.startIndex;
-    //                 tooltip = column.tooltip[index];
-    //             }
-    //         }
-    //         else {
-    //             let foundsetManager = getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
-    //             let index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
-    //             if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"] != undefined) {
-    //                 tooltip = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"];
-    //             }
-    //         }
-    //     }
-    //     return tooltip;
-    // }
+    getTooltip(args) {
+        let tooltip = "";
+        // skip pinned (footer) nodes
+        if(!args.node.rowPinned) {
+            if (!this.isTableGrouped()) {
+                let column = this.getColumn(args.colDef.field);
+                if (column && column.tooltip) {
+                    let index = args.node.rowIndex - this.foundset.foundset.viewPort.startIndex;
+                    tooltip = column.tooltip[index];
+                }
+            }
+            else {
+                let foundsetManager = this.getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
+                let index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
+                if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"] != undefined) {
+                    tooltip = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"];
+                }
+            }
+        }
+        return tooltip;
+    }
 
-    // cellRenderer(params) {
-    //     var isGroupColumn = false;
-    //     var colId = null;
-    //     if(params.colDef.field == undefined) {
-    //         isGroupColumn = true;
-    //         if(params.colDef.colId.indexOf("ag-Grid-AutoColumn-") == 0) {
-    //             colId = params.colDef.colId.substring("ag-Grid-AutoColumn-".length);
-    //         }
-    //     }
-    //     else {
-    //         colId = params.colDef.field;
-    //     }
+    cellRenderer(params) {
+        let isGroupColumn = false;
+        let colId = null;
+        if(params.colDef.field == undefined) {
+            isGroupColumn = true;
+            if(params.colDef.colId.indexOf("ag-Grid-AutoColumn-") == 0) {
+                colId = params.colDef.colId.substring("ag-Grid-AutoColumn-".length);
+            }
+        }
+        else {
+            colId = params.colDef.field;
+        }
 
-    //     var col = colId != null ? this.getColumn(colId) : null;
-    //     var value = params.value;
+        const col = colId != null ? this.getColumn(colId) : null;
+        let value = params.value;
 
-    //     var returnValueFormatted = false;
-    //     var checkboxEl = null;
+        let returnValueFormatted = false;
+        let checkboxEl = null;
 
-    //     if(col && col.editType == 'CHECKBOX' && !params.node.group) {
-    //         checkboxEl = document.createElement('i');
-    //         checkboxEl.className = getIconCheckboxEditor(parseInt(value));
-    //     }
-    //     else {
-    //         if(col != null && col.showAs == 'html') {
-    //             value =  value && value.displayValue != undefined ? value.displayValue : value;
-    //         } else if(col != null && col.showAs == 'sanitizedHtml') {
-    //             value = $sanitize(value && value.displayValue != undefined ? value.displayValue : value)
-    //         } else if (value && value.contentType && value.contentType.indexOf('image/') == 0 && value.url) {
-    //             value = '<img class="ag-table-image-cell" src="' + value.url + '">';
-    //         } else {
-    //             returnValueFormatted = true;
-    //         }
+        if(col && col.editType == 'CHECKBOX' && !params.node.group) {
+            checkboxEl = document.createElement('i');
+            checkboxEl.className = this.getIconCheckboxEditor(parseInt(value));
+        }
+        else {
+            if(col != null && col.showAs == 'html') {
+                value =  value && value.displayValue != undefined ? value.displayValue : value;
+            } else if(col != null && col.showAs == 'sanitizedHtml') {
+                value = this.sanitizer.sanitize(SecurityContext.HTML, value && value.displayValue != undefined ? value.displayValue : value);
+            } else if (value && value.contentType && value.contentType.indexOf('image/') == 0 && value.url) {
+                value = '<img class="ag-table-image-cell" src="' + value.url + '">';
+            } else {
+                returnValueFormatted = true;
+            }
 
-    //         if(value instanceof Date) returnValueFormatted = true;
-    //     }
+            if(value instanceof Date) returnValueFormatted = true;
+        }
 
-    //     var styleClassProvider = null;
-    //     if(!isGroupColumn) {
-    //         if(!params.node.rowPinned) {
-    //             if (!this.isTableGrouped()) {
-    //                 var column = this.getColumn(params.colDef.field);
-    //                 if (column && column.styleClassDataprovider) {
-    //                     var index = params.rowIndex - foundset.foundset.viewPort.startIndex;
-    //                     styleClassProvider = column.styleClassDataprovider[index];
-    //                 }
-    //             } else if (params.data && params.data._svyFoundsetUUID) {
-    //                     var foundsetManager = getFoundsetManagerByFoundsetUUID(params.data._svyFoundsetUUID);
-    //                     var index = foundsetManager.getRowIndex(params.data) - foundsetManager.foundset.viewPort.startIndex;
-    //                     if (index >= 0) {
-    //                         styleClassProvider = foundsetManager.foundset.viewPort.rows[index][params.colDef.field + "_styleClassDataprovider"];
-    //                     } else {
-    //                         $log.warn('cannot render styleClassDataprovider for row at index ' + index)
-    //                         $log.warn(params.data);
-    //                     }
-    //             }
-    //         } else if(col.footerStyleClass && params.node.rowPinned == "bottom") { // footer
-    //             styleClassProvider = col.footerStyleClass;
-    //         }
-    //     }
+        let styleClassProvider = null;
+        if(!isGroupColumn) {
+            if(!params.node.rowPinned) {
+                if (!this.isTableGrouped()) {
+                    const column = this.getColumn(params.colDef.field);
+                    if (column && column.styleClassDataprovider) {
+                        const index = params.rowIndex - this.foundset.foundset.viewPort.startIndex;
+                        styleClassProvider = column.styleClassDataprovider[index];
+                    }
+                } else if (params.data && params.data._svyFoundsetUUID) {
+                        const foundsetManager = this.getFoundsetManagerByFoundsetUUID(params.data._svyFoundsetUUID);
+                        const index = foundsetManager.getRowIndex(params.data) - foundsetManager.foundset.viewPort.startIndex;
+                        if (index >= 0) {
+                            styleClassProvider = foundsetManager.foundset.viewPort.rows[index][params.colDef.field + "_styleClassDataprovider"];
+                        } else {
+                            this.log.warn('cannot render styleClassDataprovider for row at index ' + index)
+                            this.log.warn(params.data);
+                        }
+                }
+            } else if(col.footerStyleClass && params.node.rowPinned == "bottom") { // footer
+                styleClassProvider = col.footerStyleClass;
+            }
+        }
 
-    //     if(styleClassProvider) {
-    //         var divContainer = document.createElement("div");
-    //         divContainer.className = styleClassProvider;
-    //         if(checkboxEl) {
-    //             divContainer.appendChild(checkboxEl);
-    //         }
-    //         else {
-    //             divContainer.innerHTML = returnValueFormatted ? params.valueFormatted : value;
-    //         }
+        if(styleClassProvider) {
+            const divContainer = document.createElement("div");
+            divContainer.className = styleClassProvider;
+            if(checkboxEl) {
+                divContainer.appendChild(checkboxEl);
+            }
+            else {
+                divContainer.innerHTML = returnValueFormatted ? params.valueFormatted : value;
+            }
 
-    //         return divContainer;
-    //     }
-    //     else {
-    //         if(checkboxEl) {
-    //             return checkboxEl;
-    //         }
-    //         else {
-    //             return returnValueFormatted ? document.createTextNode(params.valueFormatted) : value;
-    //         }
-    //     }
-    // }
+            return divContainer;
+        }
+        else {
+            if(checkboxEl) {
+                return checkboxEl;
+            }
+            else {
+                return returnValueFormatted ? document.createTextNode(params.valueFormatted) : value;
+            }
+        }
+    }
 
     selectedRowIndexesChanged(foundsetManager?): boolean {
         // FIXME can't select the record when is not in viewPort. Need to synchornize with viewPort record selection
@@ -1821,7 +1817,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             this.startEditColumnIndex = this.getColumnIndex(currentEditCells[0].column.getColId());
         }
 
-        this.agGrid.api.purgeServerSideCache();
+        this.agGrid.api.refreshServerSideStore({purge: true});
         this.dirtyCache = false;
         this.isSelectionReady = false;
         this.scrollToSelectionWhenSelectionReady = true;
@@ -2431,7 +2427,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         this.updateColumnHeaderTitle(colId, newValue);
     }
     
-    handleColumnFooterText(newValue, oldValue) {
+    handleColumnFooterText() {
         this.log.debug('footer text column property changed');
         this.agGrid.api.setPinnedBottomRowData(this.getFooterData());
     }
@@ -3075,7 +3071,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                     this.agGrid.api.setSortModel(this.getSortModel());
                 }
                 else {
-                    this.agGrid.api.purgeServerSideCache();
+                    this.agGrid.api.refreshServerSideStore({purge: true});
                 }
                 this.isSelectionReady = false;
                 this.scrollToSelectionWhenSelectionReady = true;
@@ -3771,7 +3767,7 @@ class FoundsetServer {
                     // set the grid sorting if foundset sort changed from the grid initialization (like doing foundset sort on form's onShow)
                     else {
                         _this.dataGrid.agGrid.api.setSortModel(_this.dataGrid.getSortModel());
-                        _this.dataGrid.agGrid.api.purgeServerSideCache();
+                        _this.dataGrid.agGrid.api.refreshServerSideStore({purge: true});
                     }
                 } else {
                     getDataFromFoundset(foundsetRefManager);
