@@ -34,6 +34,15 @@ window.onerror = function(message, source, lineno, colno, error) {
 		catchedErrors.catchedErrorsDiv = document.createElement('pre');
 		catchedErrors.catchedErrorsDiv.style.color = "red";
 		div.appendChild(catchedErrors.catchedErrorsDiv);
+		var close = document.createElement('a');
+		close.style.float="right";
+		close.href="#";
+		close.innerHTML="x"
+		catchedErrors.catchedErrorsDiv.appendChild(close);
+		close.addEventListener('click', function(e){
+			div.removeChild(catchedErrors.catchedErrorsDiv);
+		});
+		catchedErrors.catchedErrorsDiv.appendChild(document.createElement('br'));
 	}
 	if (!catchedErrors.textNodesCreated) {
 		catchedErrors.textNodesCreated = true;
