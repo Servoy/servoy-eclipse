@@ -11,7 +11,6 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     selection: any[] = [];
     allowNullinc = 0;
 
-
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
         super(renderer, cdRef, formattingService);
     }
@@ -64,6 +63,10 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
             this.pushUpdate();
         }
         event.target.blur();
+    }
+    
+    attachHandlers() {
+        // just ignore this.
     }
 
     attachEventHandlers(element, index) {

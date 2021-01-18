@@ -26,7 +26,6 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
     svyOnInit() {
         super.svyOnInit();
         this.onValuelistChange();
-        this.setHandlersAndTabIndex();
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -111,6 +110,10 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
         event.target.blur();
     }
 
+    attachHandlers() {
+        // just ignore this.
+    }
+    
     attachEventHandlers(element: HTMLElement, index: number) {
         if (element) {
             this.renderer.listen(element, 'click', (event) => {
