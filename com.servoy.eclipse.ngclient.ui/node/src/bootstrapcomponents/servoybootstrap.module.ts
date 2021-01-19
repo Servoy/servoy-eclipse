@@ -9,6 +9,7 @@ import { ServoyBootstrapLabel } from './label/label';
 import { CommonModule } from '@angular/common';
 import { ServoyBootstrapTextarea } from './textarea/textarea';
 import { FormsModule } from '@angular/forms';
+import { ChoiceElementDirective } from './choicegroup/choicegroup';
 import { ServoyBootstrapChoicegroup } from './choicegroup/choicegroup';
 import { ServoyBootstrapCheckbox } from './checkbox/checkbox';
 import { ServoyBootstrapTextbox } from './textbox/textbox';
@@ -36,6 +37,7 @@ import { Select2Module } from 'ng-select2-component';
       ServoyBootstrapLabel,
       ServoyBootstrapTextarea,
       ServoyBootstrapChoicegroup,
+      ChoiceElementDirective,
       ServoyBootstrapCheckbox,
       ServoyBootstrapTextbox,
       ServoyBootstrapDatalabel,

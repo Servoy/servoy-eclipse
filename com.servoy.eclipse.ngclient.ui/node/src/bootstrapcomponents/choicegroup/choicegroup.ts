@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Renderer2, ElementRef, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Renderer2, ElementRef, Directive, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -25,7 +25,6 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
 
     svyOnInit() {
         super.svyOnInit();
-        this.onValuelistChange();
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -33,6 +32,10 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
             switch (property) {
                 case 'dataProviderID':
                     this.setSelectionFromDataprovider();
+                    break;
+                case 'valuelistID':
+                    if (this.valuelistID && this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0]))
+                        this.allowNullinc = 1;
                     break;
 
             }
@@ -42,23 +45,13 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
 
     requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
-        const choiceInput = this.input;
-        choiceInput.nativeElement.focus();
+        ( this.getFocusElement() as HTMLElement ).focus();
     }
 
-    setHandlersAndTabIndex() {
-        for (let i = 0; i < this.getNativeElement().children.length; i++) {
-            const elm = this.getNativeElement().children[i];
-            this.attachEventHandlers(elm.children[0] as HTMLElement, i);
-        }
+    getFocusElement(): HTMLElement {
+        return this.input.nativeElement;
     }
-
-    onValuelistChange() {
-        if (this.valuelistID)
-            if (this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc = 1;
-        this.setHandlersAndTabIndex();
-    }
-
+    
     getDataproviderFromSelection() {
         let returnValue = '';
         this.selection.forEach((element, index) => {
@@ -124,5 +117,21 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
             });
             this.attachFocusListeners(element);
         }
+    }
+}
+
+@Directive({
+    selector: '[bootstrapBaseChoiceElement]'
+})
+export class ChoiceElementDirective implements OnInit {
+
+    @Input() bootstrapBaseChoiceElement: ServoyBootstrapChoicegroup;
+    @Input() index: number;
+
+    constructor(private el: ElementRef) {
+    }
+    
+    ngOnInit(): void {
+        this.bootstrapBaseChoiceElement.attachEventHandlers(this.el.nativeElement, this.index);
     }
 }
