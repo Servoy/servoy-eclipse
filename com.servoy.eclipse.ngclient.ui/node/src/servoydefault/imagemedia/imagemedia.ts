@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef} from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 
 import {FormattingService} from '../../ngclient/servoy_public';
 
@@ -6,7 +6,8 @@ import {ServoyDefaultBaseField} from  '../basefield';
 
 @Component( {
     selector: 'servoydefault-imagemedia',
-    templateUrl: './imagemedia.html'
+    templateUrl: './imagemedia.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivElement> {
 

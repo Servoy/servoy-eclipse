@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component,  SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { LocaleService, FormattingService, I18NProvider } from '../../ngclient/servoy_public';
 
@@ -11,7 +11,8 @@ import * as moment from 'moment';
 @Component( {
     selector: 'servoydefault-calendar',
     templateUrl: './calendar.html',
-        providers: [OwlDateTimeIntl]
+        providers: [OwlDateTimeIntl],
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultCalendar extends  ServoyDefaultBaseField<HTMLDivElement> {
 

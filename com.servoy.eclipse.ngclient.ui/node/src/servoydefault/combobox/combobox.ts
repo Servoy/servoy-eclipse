@@ -1,11 +1,12 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
     selector: 'servoydefault-combobox',
-    templateUrl: './combobox.html'
+    templateUrl: './combobox.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 

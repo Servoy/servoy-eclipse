@@ -1,8 +1,9 @@
-import {Component,Input, ChangeDetectorRef, Renderer2, SimpleChanges} from '@angular/core';
+import {Component,Input, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
   selector: 'servoydefault-rectangle',
-  templateUrl: './rectangle.html'
+  templateUrl: './rectangle.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
     @Input() lineSize;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -7,6 +7,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
 @Component({
     selector: 'session-view',
     templateUrl: './session-view.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionView implements OnInit {
 

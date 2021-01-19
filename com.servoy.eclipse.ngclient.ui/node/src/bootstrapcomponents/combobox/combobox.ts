@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener } from '@angular/core';
+import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { Format, FormattingService } from '../../ngclient/servoy_public';
@@ -7,7 +7,8 @@ import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
 @Component({
     selector: 'bootstrapcomponents-combobox',
     templateUrl: './combobox.html',
-    styleUrls: ['./combobox.scss']
+    styleUrls: ['./combobox.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivElement> {
 

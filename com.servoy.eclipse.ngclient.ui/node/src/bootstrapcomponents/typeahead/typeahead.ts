@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
@@ -9,7 +9,8 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
 @Component({
     selector: 'bootstrapcomponents-typeahead',
     templateUrl: './typeahead.html',
-    styleUrls: ['./typeahead.scss']
+    styleUrls: ['./typeahead.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInputElement> {
 

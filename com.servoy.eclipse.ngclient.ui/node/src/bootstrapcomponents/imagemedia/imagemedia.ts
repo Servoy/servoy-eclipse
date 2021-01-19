@@ -1,10 +1,11 @@
-import { Component, OnInit, Renderer2, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Renderer2, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
   selector: 'bootstrapcomponents-imagemedia',
   templateUrl: './imagemedia.html',
-  styleUrls: ['./imagemedia.scss']
+  styleUrls: ['./imagemedia.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield<HTMLImageElement> {
 

@@ -1,6 +1,6 @@
 import { AgGridAngular } from '@ag-grid-community/angular';
 import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
@@ -69,7 +69,8 @@ const COLUMN_KEYS_TO_CHECK_FOR_CHANGES = [
 
 @Component({
     selector: 'aggrid-groupingtable',
-    templateUrl: './datagrid.html'
+    templateUrl: './datagrid.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 

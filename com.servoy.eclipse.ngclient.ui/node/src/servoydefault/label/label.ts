@@ -1,10 +1,11 @@
-import { Component, Input,  Renderer2, ChangeDetectorRef  } from '@angular/core';
+import { Component, Input,  Renderer2, ChangeDetectorRef, ChangeDetectionStrategy  } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 
 @Component( {
     selector: 'servoydefault-label',
-    templateUrl: './label.html'
+    templateUrl: './label.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 

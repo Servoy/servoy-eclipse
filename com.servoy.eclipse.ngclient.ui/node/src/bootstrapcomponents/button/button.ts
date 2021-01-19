@@ -1,11 +1,12 @@
-import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
 
 @Component( {
     selector: 'bootstrapcomponents-button',
     templateUrl: './button.html',
-    styleUrls: ['./button.scss']
+    styleUrls: ['./button.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyBootstrapButton extends ServoyBootstrapBaseLabel<HTMLButtonElement> {
 

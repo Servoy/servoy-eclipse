@@ -1,12 +1,13 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
-import { FileUploadModule, FileSelectDirective, FileUploader } from 'ng2-file-upload';
+import { FileUploader } from 'ng2-file-upload';
 
 @Component( {
     selector: 'servoyextra-fileupload',
     templateUrl: './fileupload.html',
-    styleUrls: ['./fileupload.css']
+    styleUrls: ['./fileupload.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 

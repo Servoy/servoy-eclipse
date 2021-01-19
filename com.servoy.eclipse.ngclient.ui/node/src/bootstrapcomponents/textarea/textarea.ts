@@ -1,10 +1,11 @@
-import { Component, Input, ChangeDetectorRef, Renderer2 } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
   selector: 'bootstrapcomponents-textarea',
   templateUrl: './textarea.html',
-  styleUrls: ['./textarea.scss']
+  styleUrls: ['./textarea.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield<HTMLTextAreaElement> {
 

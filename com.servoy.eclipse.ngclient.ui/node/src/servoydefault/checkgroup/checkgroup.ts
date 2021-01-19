@@ -1,11 +1,12 @@
-import { Component, SimpleChanges, Renderer2, ViewChild, ElementRef, Input, OnInit, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, Renderer2, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { ServoyDefaultBaseChoice } from '../basechoice';
 
 @Component({
     selector: 'servoydefault-checkgroup',
     templateUrl: './checkgroup.html',
-    styleUrls: ['./checkgroup.css']
+    styleUrls: ['./checkgroup.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 

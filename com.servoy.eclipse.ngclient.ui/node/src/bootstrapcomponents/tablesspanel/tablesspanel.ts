@@ -1,12 +1,11 @@
-import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
-import { ServoyBootstrapBasefield } from '../bts_basefield';
+import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBaseComponent } from '../bts_basecomp';
-import { SabloService } from '../../sablo/sablo.service';
 
 @Component({
 	selector: 'bootstrapcomponents-tablesspanel',
 	templateUrl: './tablesspanel.html',
-	styleUrls: ['./tablesspanel.scss']
+	styleUrls: ['./tablesspanel.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HTMLDivElement> {
 

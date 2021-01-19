@@ -1,8 +1,6 @@
-import { Component, ViewChild, Input, Output, EventEmitter, Renderer2 , ElementRef, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
-
-import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public';
 
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
@@ -12,7 +10,8 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 @Component( {
     selector: 'servoydefault-tabpanel',
-    templateUrl: './tabpanel.html'
+    templateUrl: './tabpanel.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
 

@@ -1,4 +1,4 @@
-import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges } from '@angular/core';
+import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { Format, I18NProvider, LocaleService } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBaseCalendar } from './basecalendar';
@@ -7,7 +7,8 @@ import { ServoyBootstrapBaseCalendar } from './basecalendar';
     selector: 'bootstrapcomponents-calendar',
     templateUrl: './calendar.html',
     styleUrls: ['./calendar.scss'],
-    providers: [OwlDateTimeIntl]
+    providers: [OwlDateTimeIntl],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
 

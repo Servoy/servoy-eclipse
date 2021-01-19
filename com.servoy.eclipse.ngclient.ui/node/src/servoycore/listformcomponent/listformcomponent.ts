@@ -1,6 +1,6 @@
 import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange
+    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy
 } from '@angular/core';
 import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
@@ -19,7 +19,8 @@ import { isEmpty } from 'lodash-es';
 @Component({
     selector: 'servoycore-listformcomponent',
     templateUrl: './listformcomponent.html',
-    styleUrls: ['./listformcomponent.css']
+    styleUrls: ['./listformcomponent.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 

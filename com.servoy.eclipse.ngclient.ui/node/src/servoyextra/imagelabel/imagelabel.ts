@@ -1,10 +1,11 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Component( {
     selector: 'servoyextra-imagelabel',
-    templateUrl: './imagelabel.html'
+    templateUrl: './imagelabel.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraImageLabel extends ServoyBaseComponent<HTMLImageElement> {
 

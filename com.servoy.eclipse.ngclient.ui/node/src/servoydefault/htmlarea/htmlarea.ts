@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
 import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-editor';
@@ -6,6 +6,7 @@ import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-edi
 @Component({
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 

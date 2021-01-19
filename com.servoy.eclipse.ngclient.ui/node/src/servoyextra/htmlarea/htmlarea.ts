@@ -1,4 +1,4 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-editor';
@@ -6,6 +6,7 @@ import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-edi
 @Component( {
     selector: 'servoyextra-htmlarea',
     templateUrl: './htmlarea.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 

@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { Format, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
 import { Options, ChangeContext, LabelType } from '@angular-slider/ngx-slider';
@@ -6,7 +6,8 @@ import { FormattingService } from '../../ngclient/servoy_public';
 
 @Component({
 	selector: 'servoyextra-slider',
-	templateUrl: './slider.html'
+	templateUrl: './slider.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyExtraSlider extends ServoyBaseComponent<HTMLDivElement> {
 

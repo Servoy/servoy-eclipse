@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, Input, ElementRef, ChangeDetectorRef, AfterViewInit, SimpleChanges } from '@angular/core';
+import { Component, Renderer2, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormattingService } from '../../ngclient/servoy_public';
 
@@ -6,7 +6,8 @@ import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
     selector: 'servoydefault-listbox',
-    templateUrl: './listbox.html'
+    templateUrl: './listbox.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
     @Input() multiselectListbox;

@@ -1,10 +1,11 @@
-import { Component, OnInit, Renderer2, SimpleChanges, ElementRef, AfterViewInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, ElementRef, AfterViewInit, Input, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
     selector: 'bootstrapcomponents-checkbox',
     templateUrl: './checkbox.html',
-    styleUrls: ['./checkbox.scss']
+    styleUrls: ['./checkbox.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivElement> {
 

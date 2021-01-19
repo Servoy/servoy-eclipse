@@ -1,4 +1,4 @@
-import { Component, Renderer2, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 
 import {FormattingService} from '../../ngclient/servoy_public';
 
@@ -6,7 +6,8 @@ import {ServoyDefaultBaseField} from '../basefield';
 
 @Component( {
     selector: 'servoydefault-textfield',
-    templateUrl: './textfield.html'
+    templateUrl: './textfield.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 

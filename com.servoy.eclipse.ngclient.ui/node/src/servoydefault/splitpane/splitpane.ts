@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
+import { Component, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, SimpleChanges, Renderer2, ChangeDetectionStrategy} from '@angular/core';
 
 import { ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public';
 
@@ -6,7 +6,8 @@ import { Tab } from '../tabpanel/basetabpanel';
 
 @Component( {
     selector: 'servoydefault-splitpane',
-    templateUrl: './splitpane.html'
+    templateUrl: './splitpane.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 

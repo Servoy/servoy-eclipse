@@ -1,11 +1,12 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { Format, FormattingService, ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
 
 @Component({
     selector: 'servoyextra-spinner',
     templateUrl: './spinner.html',
-    styleUrls: ['./spinner.css']
+    styleUrls: ['./spinner.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyExtraSpinner extends ServoyBaseComponent<HTMLDivElement> {
 

@@ -1,10 +1,11 @@
-import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 
 import {ServoyDefaultBaseComponent} from '../../servoydefault/basecomponent';
 
 @Component( {
     selector: 'servoycore-slider',
-    templateUrl: './slider.html'
+    templateUrl: './slider.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElement> {
     @Input() onChangeMethodID;

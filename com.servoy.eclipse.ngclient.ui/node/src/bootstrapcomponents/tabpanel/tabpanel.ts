@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, Renderer2, Input, Output, EventEmitter, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 
 import { ServoyBootstrapBaseTabPanel, Tab } from '../bts_basetabpanel';
@@ -7,7 +7,8 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 @Component({
 	selector: 'bootstrapcomponents-tabpanel',
 	templateUrl: './tabpanel.html',
-	styleUrls: ['./tabpanel.scss']
+	styleUrls: ['./tabpanel.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLUListElement> {
 

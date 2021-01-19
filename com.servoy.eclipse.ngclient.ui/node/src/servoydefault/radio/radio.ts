@@ -1,11 +1,12 @@
-import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input } from '@angular/core';
+import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
     selector: 'servoydefault-radio',
     templateUrl: './radio.html',
-    styleUrls: ['./radio.css']
+    styleUrls: ['./radio.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: any;

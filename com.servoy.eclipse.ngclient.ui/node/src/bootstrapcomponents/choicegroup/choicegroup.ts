@@ -1,11 +1,12 @@
-import { Component, OnInit, Input, Renderer2, ElementRef, Directive, ViewChild, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Renderer2, ElementRef, Directive, ViewChild, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
     selector: 'bootstrapcomponents-choicegroup',
     templateUrl: './choicegroup.html',
-    styleUrls: ['./choicegroup.scss']
+    styleUrls: ['./choicegroup.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDivElement> {
 

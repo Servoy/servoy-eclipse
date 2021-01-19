@@ -1,10 +1,11 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
 import { UppyConfig, UppyAngularComponent } from 'uppy-angular';
 
 @Component({
     selector: 'servoyextra-multifileupload',
-    templateUrl: './multifileupload.html'
+    templateUrl: './multifileupload.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 

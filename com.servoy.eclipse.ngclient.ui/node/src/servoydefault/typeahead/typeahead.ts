@@ -1,13 +1,14 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener } from '@angular/core';
-import { Observable, merge, Subject, of, Subscriber } from 'rxjs';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { map, debounceTime, distinctUntilChanged, filter, take, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'servoydefault-typeahead',
-  templateUrl: './typeahead.html'
+  templateUrl: './typeahead.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
   // this is a hack so that this can be none static access because this references in this component to a conditional template

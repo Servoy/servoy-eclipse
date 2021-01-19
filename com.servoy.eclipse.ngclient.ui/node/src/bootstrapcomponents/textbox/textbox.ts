@@ -1,11 +1,12 @@
-import { Component, ChangeDetectorRef, Renderer2, Input, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Format } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
     selector: 'bootstrapcomponents-textbox',
     templateUrl: './textbox.html',
-    styleUrls: ['./textbox.scss']
+    styleUrls: ['./textbox.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield<HTMLInputElement> {
 

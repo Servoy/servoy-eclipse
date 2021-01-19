@@ -1,11 +1,12 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
 
 @Component({
     selector: 'servoyextra-select2tokenizer',
-    templateUrl: './select2tokenizer.html'
+    templateUrl: './select2tokenizer.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElement> {
 
