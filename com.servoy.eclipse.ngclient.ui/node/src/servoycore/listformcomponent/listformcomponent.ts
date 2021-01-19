@@ -466,6 +466,7 @@ class Cell {
 }
 
 class ListFormComponentServoyApi extends ServoyApi {
+    private markupId: string;
     constructor(private cell: Cell,
         formname: string,
         absolute: boolean,
@@ -473,6 +474,7 @@ class ListFormComponentServoyApi extends ServoyApi {
         servoyService: ServoyService,
         private fc: ListFormComponent) {
         super(cell.state, formname, absolute, formservice, servoyService);
+        this.markupId = super.getMarkupId() +'_' +this.cell.rowIndex;
     }
 
     registerComponent(comp: ServoyBaseComponent<any>) {
@@ -483,6 +485,9 @@ class ListFormComponentServoyApi extends ServoyApi {
         this.fc.unRegisterComponent(comp, this.cell.rowIndex);
     }
 
+    getMarkupId(): string {
+        return this.markupId;
+    }
     startEdit(property: string) {
         this.cell.state.startEdit(property, this.cell.rowId);
         if (this.fc.onSelectionChanged) {
