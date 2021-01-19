@@ -6,6 +6,8 @@ import { SabloModule } from '../../sablo/sablo.module';
 import { TooltipService, ComponentContributor, ServoyApi} from '../../ngclient/servoy_public';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
+import { runOnPushChangeDetection } from '../../testing';
+
 describe('SvyButton', () => {
   let component: ServoyDefaultButton;
   let fixture: ComponentFixture<ServoyDefaultButton>;
@@ -35,13 +37,14 @@ describe('SvyButton', () => {
   });
 
   it( 'should have called servoyApi.getMarkupId', () => {
+    runOnPushChangeDetection(fixture);
     expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
   });
 
   it( 'should render html', () => {
     servoyApi.trustAsHtml.and.returnValue( true );
     component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
-    fixture.detectChanges();
+    runOnPushChangeDetection(fixture);
     expect( component.child.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID);
   });
 });

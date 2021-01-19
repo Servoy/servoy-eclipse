@@ -7,8 +7,8 @@ import { ServoyDefaultTextField } from './textfield';
 import { FormattingService, TooltipService, LocaleService, I18NProvider, Format} from '../../ngclient/servoy_public';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { SabloTabseq } from '../../sablo/util/sablotabseq.directive';
 
+import { runOnPushChangeDetection } from '../../testing';
 
 describe('ServoyDefaultTextField', () => {
   let component: ServoyDefaultTextField;
@@ -45,7 +45,6 @@ describe('ServoyDefaultTextField', () => {
 
   it('should use start edit directive', () => {
       textField.triggerEventHandler('focus', null);
-      fixture.detectChanges();
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
@@ -53,7 +52,7 @@ describe('ServoyDefaultTextField', () => {
       locationService.setLocale('nl', 'NL');
       locationService.isLoaded().then(() => {
         component.dataProviderID = 1000;
-        fixture.detectChanges();
+        runOnPushChangeDetection(fixture);
         fixture.whenStable().then(() => {
         expect(component.getNativeElement().value).toBe('1.000,00');
       });
@@ -64,7 +63,6 @@ describe('ServoyDefaultTextField', () => {
     spyOn(component, 'pushUpdate');
     textField = fixture.debugElement.query(By.css('input'));
     textField.nativeElement.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
     expect(component.pushUpdate).toHaveBeenCalled();
   });
 
@@ -73,11 +71,9 @@ describe('ServoyDefaultTextField', () => {
       component.onFocusLostMethodID = jasmine.createSpy('onFocusLostMethodID');
       component.attachFocusListeners(component.getFocusElement());
       textField.triggerEventHandler('focus', null);
-      fixture.detectChanges();
       expect(component.onFocusGainedMethodID).toHaveBeenCalled();
       expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(0);
       textField.triggerEventHandler('blur', null);
-      fixture.detectChanges();
       expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(1);
   });
 });

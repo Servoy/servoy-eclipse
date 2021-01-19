@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SabloModule } from '../../sablo/sablo.module';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
@@ -9,6 +9,8 @@ import { StartEditDirective } from '../../ngclient/utils/startedit.directive';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+
+import { runOnPushChangeDetection } from '../../testing';
 
 describe('ServoyDefaultTextArea', () => {
   let component: ServoyDefaultTextArea;
@@ -42,13 +44,12 @@ describe('ServoyDefaultTextArea', () => {
 
   it('should use start edit directive', () => {
       textArea.triggerEventHandler('focus', null);
-      fixture.detectChanges();
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
   it('should have value test', waitForAsync(() => {
     component.dataProviderID = 'test';
-    fixture.detectChanges();
+    runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));
   }));
@@ -56,7 +57,6 @@ describe('ServoyDefaultTextArea', () => {
   it('should call update method', () => {
     spyOn(component, 'pushUpdate');
     textArea.nativeElement.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
     expect(component.pushUpdate).toHaveBeenCalled();
   });
 

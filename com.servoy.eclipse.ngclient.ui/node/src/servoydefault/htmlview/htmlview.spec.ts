@@ -8,6 +8,8 @@ import { ServoyDefaultHTMLView } from './htmlview';
 import { FormattingService, TooltipService, ServoyApi } from '../../ngclient/servoy_public';
 import { By } from '@angular/platform-browser';
 
+import { runOnPushChangeDetection } from '../../testing';
+
 describe('ServoyDefaultHTMLView', () => {
   let component: ServoyDefaultHTMLView;
   let fixture: ComponentFixture<ServoyDefaultHTMLView>;
@@ -35,8 +37,8 @@ describe('ServoyDefaultHTMLView', () => {
 
   it( 'should render markupid ', () => {
       servoyApi.getMarkupId.and.returnValue( 'myid');
+      runOnPushChangeDetection(fixture);
       const div = fixture.debugElement.query(By.css('div')).nativeElement;
-      fixture.detectChanges();
       expect(div.id).toBe('myid');
     });
 
@@ -46,9 +48,9 @@ describe('ServoyDefaultHTMLView', () => {
 
   it ('should test innerhtml', () => {
       component.dataProviderID = '<p>some text herre</p>';
-      fixture.detectChanges();
+       runOnPushChangeDetection(fixture);
       const spanEl = fixture.debugElement.query(By.css('span'));
-      expect(spanEl.nativeElement.innerHTML = '<p>some text herre</p>');
+      expect(spanEl.nativeElement.innerHTML).toBe('<p>some text herre</p>');
       expect(component.servoyApi.trustAsHtml).toHaveBeenCalled();
   });
 });

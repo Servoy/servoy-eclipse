@@ -13,6 +13,8 @@ import { SabloService } from '../../sablo/sablo.service';
 import { FormsModule } from '@angular/forms';
 const moment = require('moment');
 
+import { runOnPushChangeDetection } from '../../testing';
+
 describe('ServoyDefaultCalendar', () => {
     let component: ServoyDefaultCalendar;
     let fixture: ComponentFixture<ServoyDefaultCalendar>;
@@ -55,7 +57,7 @@ describe('ServoyDefaultCalendar', () => {
 
     it('should be showing a formatted a date', waitForAsync(() => {
         component.dataProviderID = new Date(2020, 10, 10);
-        fixture.detectChanges();
+        runOnPushChangeDetection(fixture);
         fixture.whenStable().then(() => {
             const input = fixture.debugElement.query(By.css('input'));
             const el = input.nativeElement;

@@ -7,6 +7,8 @@ import { TooltipService, ComponentContributor, ServoyApi, FormattingService} fro
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
 
+import { runOnPushChangeDetection } from '../../testing';
+
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
     let fixture: ComponentFixture<ServoyDefaultLabel>;
@@ -27,7 +29,7 @@ describe( 'SvLabel', () => {
         fixture = TestBed.createComponent( ServoyDefaultLabel );
         component = fixture.componentInstance;
         component.servoyApi = servoyApi;
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
 
         const de = fixture.debugElement.query(By.css('div'));
         element = de.nativeElement;
@@ -44,19 +46,19 @@ describe( 'SvLabel', () => {
     it( 'should render html', () => {
         servoyApi.trustAsHtml.and.returnValue( true );
         component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
         expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID );
     } );
     it( 'should not render html', () => {
         servoyApi.trustAsHtml.and.returnValue( false );
         component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
         expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
     } );
 
     it( 'should render markupid ', () => {
         servoyApi.getMarkupId.and.returnValue( 'myid');
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
         expect(element.id).toBe('myid');
     } );
 
@@ -66,7 +68,7 @@ describe( 'SvLabel', () => {
         component.ngOnChanges({
             mnemonic: new SimpleChange(null, 'l', false)
         });
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
 
         expect( component.child.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel');
         expect(element.getAttribute('accesskey')).toBe(component.mnemonic);
@@ -74,7 +76,7 @@ describe( 'SvLabel', () => {
 
     it( 'should switch to labelFor', () => {
         component.labelFor = true;
-        fixture.detectChanges();
+         runOnPushChangeDetection(fixture);
         const de = fixture.debugElement.query(By.css('label'));
         element = de.nativeElement;
         expect(element.tagName).toBe('LABEL');

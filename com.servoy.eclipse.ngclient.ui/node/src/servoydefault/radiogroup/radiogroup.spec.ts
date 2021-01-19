@@ -12,6 +12,8 @@ import { DebugElement } from '@angular/core';
 
 import {ChoiceElementDirective} from '../basechoice';
 
+import { runOnPushChangeDetection } from '../../testing';
+
 const mockData = [
                   {
                     realValue: 3,
@@ -55,17 +57,17 @@ describe('ServoyDefaultRadiogroup', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should click change value', () => {
+  it('should click change value',() => {
       input = fixture.debugElement.query(By.css('input'));
       expect(input.nativeElement.checked).toBeFalsy(); // default state
       input.nativeElement.dispatchEvent(new Event('click'));
-      fixture.detectChanges();
+      runOnPushChangeDetection(fixture);
       expect(input.nativeElement.checked).toBeTruthy(); // state after click
     });
 
   it('should call itemClicked', () => {
-      input = fixture.debugElement.query(By.css('input'));
       spyOn(component, 'itemClicked');
+      input = fixture.debugElement.query(By.css('input'));
       input.nativeElement.dispatchEvent(new Event('click'));
       fixture.detectChanges();
       expect(component.itemClicked).toHaveBeenCalled();

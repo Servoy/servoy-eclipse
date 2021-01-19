@@ -9,6 +9,8 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { TooltipDirective } from '../../ngclient/tooltip/tooltip.directive';
 
+import { runOnPushChangeDetection } from '../../testing';
+
 describe('PasswordComponent', () => {
   let component: ServoyDefaultPassword;
   let fixture: ComponentFixture<ServoyDefaultPassword>;
@@ -41,18 +43,17 @@ describe('PasswordComponent', () => {
       expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
   });
 
-  it('should have value test', waitForAsync(() => {
+  it('should have value test', () => {
     component.dataProviderID = 'test';
-    fixture.detectChanges();
+     runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));
-  }));
+  });
 
   it('should call update method', () => {
     spyOn(component, 'pushUpdate');
     inputEl = fixture.debugElement.query(By.css('input'));
     inputEl.nativeElement.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
     expect(component.pushUpdate).toHaveBeenCalled();
   });
 
@@ -62,7 +63,7 @@ describe('PasswordComponent', () => {
       inputEl = fixture.debugElement.query(By.css('input'));
       directiveInstance = inputEl.injector.get(TooltipDirective);
       component.placeholderText = 'placeholder';
-      fixture.detectChanges();
+       runOnPushChangeDetection(fixture);
       expect( inputEl.nativeElement.placeholder ).toEqual('placeholder');
   });
 
@@ -70,16 +71,13 @@ describe('PasswordComponent', () => {
       inputEl = fixture.debugElement.query(By.css('input'));
       directiveInstance = inputEl.injector.get(TooltipDirective);
       inputEl.nativeElement.dispatchEvent(new Event('mouseenter'));
-      fixture.detectChanges();
       expect(directiveInstance.isActive).toBe(false); // false because the text is undefined
       directiveInstance.tooltipText = 'Hi';
-      fixture.detectChanges();
       expect(directiveInstance.tooltipText).toBe('Hi');
   });
 
   it('should have class: svy-password form-control input-sm svy-padding-xs ng-untouched ng-pristine ng-valid', () => {
       inputEl = fixture.debugElement.query(By.css('input'));
-      fixture.detectChanges();
       expect( inputEl.nativeElement.getAttribute('class')).toBe('svy-password form-control input-sm svy-padding-xs ng-untouched ng-pristine ng-valid');
   });
 
