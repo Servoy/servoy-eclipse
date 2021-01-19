@@ -7,7 +7,6 @@ import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converte
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap } from 'rxjs/operators';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'servoyextra-table',

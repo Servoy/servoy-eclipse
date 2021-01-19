@@ -21,16 +21,15 @@ export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel<HTMLSpanE
     attachHandlers() {
         if ( this.onActionMethodID ) {
             if (this.onDoubleClickMethodID) {
-                const innerThis: ServoyBootstrapDatalabel = this;
                 this.renderer.listen( this.getNativeElement(), 'click', e => {
-                    if (innerThis.timeoutID) {
-                        window.clearTimeout(innerThis.timeoutID);
-                        innerThis.timeoutID = null;
+                    if (this.timeoutID) {
+                        window.clearTimeout(this.timeoutID);
+                        this.timeoutID = null;
                         // double click, do nothing
                     } else {
-                        innerThis.timeoutID = window.setTimeout(function() {
-                            innerThis.timeoutID = null;
-                            innerThis.onActionMethodID( e );
+                        this.timeoutID = window.setTimeout(() => {
+                            this.timeoutID = null;
+                            this.onActionMethodID( e );
                         }, 250);
 }
                  });

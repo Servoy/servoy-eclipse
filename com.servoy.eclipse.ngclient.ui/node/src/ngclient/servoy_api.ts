@@ -47,15 +47,15 @@ export class ServoyApi {
         return this.servoyService.getUIProperties().getUIProperty( 'trustDataAsHtml' );
     }
 
-    public isInAbsoluteLayout() {
+    public isInAbsoluteLayout(): boolean {
         return this.absolute;
     }
 
-    public getMarkupId() {
+    public getMarkupId(): string {
         return this.item.model.svyMarkupId;
     }
 
-    public getFormname() {
+    public getFormname(): string {
         return this.formname;
     }
 
