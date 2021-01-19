@@ -1,6 +1,6 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
-import { UppyConfig, UppyAngularComponent } from "uppy-angular/uppy-angular";
+import { UppyConfig, UppyAngularComponent } from "uppy-angular";
 
 @Component({
     selector: 'servoyextra-multifileupload',
