@@ -20,9 +20,9 @@ import { RadioFilter } from './filters/radiofilter';
 import { ValuelistFilter } from './filters/valuelistfilter';
 
 const TABLE_PROPERTIES_DEFAULTS = {
-    rowHeight: { gridOptionsProperty: "rowHeight", default: 25 },
-    groupUseEntireRow: { gridOptionsProperty: "groupUseEntireRow", default: true },
-    enableColumnMove: { gridOptionsProperty: "suppressMovableColumns", default: true } 
+    rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
+    groupUseEntireRow: { gridOptionsProperty: 'groupUseEntireRow', default: true },
+    enableColumnMove: { gridOptionsProperty: 'suppressMovableColumns', default: true }
 };
 
 const COLUMN_PROPERTIES_DEFAULTS = {
@@ -49,22 +49,22 @@ const CACHED_CHUNK_BLOCKS = 2;
 const NULL_VALUE = {displayValue: '', realValue: null};
 
 const COLUMN_KEYS_TO_CHECK_FOR_CHANGES = [
-    "headerTitle",
-    "headerStyleClass",
-    "headerTooltip",
-    "footerText",
-    "styleClass",
-    "visible",
-    "width",
-    "minWidth",
-    "maxWidth",
-    "enableRowGroup",
-    "enableSort",
-    "enableResize",
-    "enableToolPanel",
-    "autoResize",
-    "editType",
-    "id"
+    'headerTitle',
+    'headerStyleClass',
+    'headerTooltip',
+    'footerText',
+    'styleClass',
+    'visible',
+    'width',
+    'minWidth',
+    'maxWidth',
+    'enableRowGroup',
+    'enableSort',
+    'enableResize',
+    'enableToolPanel',
+    'autoResize',
+    'editType',
+    'id'
 ];
 
 @Component({
@@ -276,7 +276,6 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         // setup grid options
-        const _this = this;
         this.agGridOptions = {
             context: {
                 componentParent: this
@@ -286,35 +285,34 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             serverSideStoreType: 'partial',
             rowGroupPanelShow: 'onlyWhenGrouping', // TODO expose property,
             onGridReady: () => {
-                _this.log.debug("gridReady");
-                _this.isGridReady = true;
-                if(_this.isRendered) {
-                    if(_this._internalColumnState !== "_empty") {
-                        _this.columnState = _this._internalColumnState;
-                        _this.columnStateChange.emit(_this._internalColumnState);
+                this.log.debug('gridReady');
+                this.isGridReady = true;
+                if(this.isRendered) {
+                    if(this._internalColumnState !== '_empty') {
+                        this.columnState = this._internalColumnState;
+                        this.columnStateChange.emit(this._internalColumnState);
                         // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalColumnState again
-                        const emptyValue = "_empty";
-                        _this._internalColumnState = emptyValue;
-                        _this._internalColumnStateChange.emit(emptyValue);
+                        const emptyValue = '_empty';
+                        this._internalColumnState = emptyValue;
+                        this._internalColumnStateChange.emit(emptyValue);
                     }
-                    _this.restoreColumnsState();
+                    this.restoreColumnsState();
                 }
-                _this.agGridOptions.onDisplayedColumnsChanged = function(event) {
-                    _this.sizeHeaderAndColumnsToFit();
-                    _this.storeColumnsState();
+                this.agGridOptions.onDisplayedColumnsChanged = (event)=> {
+                    this.sizeHeaderAndColumnsToFit();
+                    this.storeColumnsState();
                 };
-                if(_this.onReady) {
-                    _this.onReady();
+                if(this.onReady) {
+                    this.onReady();
                 }
 
-                if(_this.isColumnModelChangedBeforeGridReady) {
-                    _this.updateColumnDefs();	
-                }
-                else {
+                if(this.isColumnModelChangedBeforeGridReady) {
+                    this.updateColumnDefs();
+                } else {
                     // without timeout the column don't fit automatically
-                    setTimeout(function() {
-                        _this.sizeHeaderAndColumnsToFit();
-                        _this.scrollToSelectionEx();
+                    setTimeout(() =>{
+                        this.sizeHeaderAndColumnsToFit();
+                        this.scrollToSelectionEx();
                         }, 150);
                 }
             },
@@ -327,7 +325,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 sortable: this.enableSorting,
                 resizable: this.enableColumnResize
             },
-            columnDefs: columnDefs,
+            columnDefs,
             // TODO this makes the date editor to close instanttly, because its popup steals the focus
             // stopEditingWhenGridLosesFocus: true,
             suppressAnimationFrame: true,
@@ -340,7 +338,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             autoSizePadding: 25,
             suppressFieldDotNotation: true,
 
-            sideBar: sideBar,
+            sideBar,
             getMainMenuItems: this.getMainMenuItems,
             rowHeight: this.rowHeight,
 
@@ -366,26 +364,26 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             maxConcurrentDatasourceRequests: 2,
             cacheBlockSize: CHUNK_SIZE,
             infiniteInitialRowCount: CHUNK_SIZE, // TODO should be the foundset default (also for grouping ?)
-            maxBlocksInCache: maxBlocksInCache,
+            maxBlocksInCache,
             purgeClosedRowNodes: true,
             enableBrowserTooltips: true,
             getRowNodeId: (data) =>  data._svyFoundsetUUID + '_' + data._svyFoundsetIndex,
             onGridSizeChanged: () => {
-                setTimeout(function() {
+                setTimeout(() => {
                     // if not yet destroyed
-                    if(_this.agGrid.gridOptions.onGridSizeChanged) {
-                        _this.sizeHeaderAndColumnsToFit();
+                    if(this.agGrid.gridOptions.onGridSizeChanged) {
+                        this.sizeHeaderAndColumnsToFit();
                     }
                 }, 150);
             },
             onCellEditingStopped: (event) => {
                 // don't allow escape if cell data is invalid
-                if(_this.onColumnDataChangePromise == null) {
+                if(this.onColumnDataChangePromise == null) {
                     const rowIndex = event.rowIndex;
                     const colId = event.column.getColId();
-                    if(_this.invalidCellDataIndex.rowIndex == rowIndex  && _this.invalidCellDataIndex.colKey == colId) {
-                        _this.agGrid.api.startEditingCell({
-                            rowIndex: rowIndex,
+                    if(this.invalidCellDataIndex.rowIndex === rowIndex  && this.invalidCellDataIndex.colKey === colId) {
+                        this.agGrid.api.startEditingCell({
+                            rowIndex,
                             colKey: colId
                         });
                     }
@@ -393,38 +391,40 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             },
             onCellEditingStarted: (event) => {
                 // don't allow editing another cell if we have an invalidCellData
-                if(_this.invalidCellDataIndex.rowIndex != -1 && _this.invalidCellDataIndex.colKey != '') {
+                if(this.invalidCellDataIndex.rowIndex !== -1 && this.invalidCellDataIndex.colKey !== '') {
                     const rowIndex = event.rowIndex;
                     const colId = event.column.getColId();
-                    if(_this.invalidCellDataIndex.rowIndex != rowIndex  || _this.invalidCellDataIndex.colKey != colId) {
-                        _this.agGrid.api.stopEditing();
-                        _this.agGrid.api.startEditingCell({
-                            rowIndex: _this.invalidCellDataIndex.rowIndex,
-                            colKey: _this.invalidCellDataIndex.colKey
+                    if(this.invalidCellDataIndex.rowIndex !== rowIndex  || this.invalidCellDataIndex.colKey !== colId) {
+                        this.agGrid.api.stopEditing();
+                        this.agGrid.api.startEditingCell({
+                            rowIndex: this.invalidCellDataIndex.rowIndex,
+                            colKey: this.invalidCellDataIndex.colKey
                         });
                     }
                 }
             },
-            onFilterChanged: () => { _this.storeColumnsState() },
+            onFilterChanged: () => {
+             this.storeColumnsState();
+            },
             onSortChanged: () => {
-                _this.storeColumnsState();
-                if(_this.isTableGrouped()) {
-                    _this.removeAllFoundsetRef = true;
-                    _this.agGrid.api.refreshServerSideStore({purge: true});
+                this.storeColumnsState();
+                if(this.isTableGrouped()) {
+                    this.removeAllFoundsetRef = true;
+                    this.agGrid.api.refreshServerSideStore({purge: true});
                 }
-                if(_this.onSort) {
-                    if(_this.sortHandlerTimeout) {
-                        clearTimeout(_this.sortHandlerTimeout);
+                if(this.onSort) {
+                    if(this.sortHandlerTimeout) {
+                        clearTimeout(this.sortHandlerTimeout);
                     }
-                    _this.sortHandlerTimeout = setTimeout(function() {
-                        _this.sortHandlerTimeout = null;
-                        _this.onSortHandler();
+                    this.sortHandlerTimeout = setTimeout(() =>{
+                        this.sortHandlerTimeout = null;
+                        this.onSortHandler();
                     }, 250);
                 }
             },
             onColumnResized: () => {
-                _this.sizeHeader();
-                _this.storeColumnsState();
+                this.sizeHeader();
+                this.storeColumnsState();
             },
             onColumnVisible: (event) => {
                 // workaround for ag-grid issue, when unchecking/checking all columns
@@ -437,61 +437,62 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                             hiddenColumns.push(event.columns[i]);
                         }
                     }
-                    _this.agGridOptions.columnApi.setColumnsVisible(hiddenColumns, false)
+                    this.agGridOptions.columnApi.setColumnsVisible(hiddenColumns, false);
                 }
             },
-            getContextMenuItems: () => { return _this.contextMenuItems },
-            navigateToNextCell: (params) => { return _this.keySelectionChangeNavigation(params) },
-            tabToNextCell: (params) => { return _this.tabSelectionChangeNavigation(params) },
-            onToolPanelVisibleChanged: () => {_this.sizeHeaderAndColumnsToFit() },
-            onCellKeyDown: (param:any) => {
+            getContextMenuItems: () => this.contextMenuItems,
+            navigateToNextCell: (params) => this.keySelectionChangeNavigation(params),
+            tabToNextCell: (params) => this.tabSelectionChangeNavigation(params),
+            onToolPanelVisibleChanged: () => {
+                this.sizeHeaderAndColumnsToFit();
+            },
+            onCellKeyDown: (param: any) => {
                 switch(param.event.keyCode) {
                     case 33: // PGUP
                     case 34: // PGDOWN
                     case 35: // END
                     case 36: // HOME
-                        const focusedCell = _this.agGrid.api.getFocusedCell();
+                        const focusedCell = this.agGrid.api.getFocusedCell();
                         if(focusedCell && !focusedCell.rowPinned && focusedCell.rowIndex != null) {
-                            const focusedRow = _this.agGrid.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
+                            const focusedRow = this.agGrid.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
                             if(focusedRow && !focusedRow.isSelected()) {
                                 if(focusedRow.id) { // row is already created
-                                    _this.selectionEvent = { type: 'key' };
+                                    this.selectionEvent = { type: 'key' };
                                     focusedRow.setSelected(true, true);
-                                }
-                                else {
+                                } else {
                                     // row is not yet created, postpone selection & focus
-                                    _this.postFocusCell = { rowIndex: focusedCell.rowIndex, colKey: focusedCell.column.getColId() };
+                                    this.postFocusCell = { rowIndex: focusedCell.rowIndex, colKey: focusedCell.column.getColId() };
                                 }
                             }
                         }
                 }
             },
             processRowPostCreate: (params) => {
-                if(_this.postFocusCell && _this.postFocusCell.rowIndex == params.rowIndex) {
-                    const rowIndex = _this.postFocusCell.rowIndex;
-                    const colKey = _this.postFocusCell.colKey;
+                if(this.postFocusCell && this.postFocusCell.rowIndex === params.rowIndex) {
+                    const rowIndex = this.postFocusCell.rowIndex;
+                    const colKey = this.postFocusCell.colKey;
                     const focusedRow = params.node;
-                    _this.postFocusCell = null;;
+                    this.postFocusCell = null;;
                     // need a timeout 0 because we can't call grid api during row creation
-                    setTimeout(function() {
-                        _this.agGrid.api.clearFocusedCell(); // start clean, this will force setting the focus on the postFocusCell
-                        _this.selectionEvent = { type: 'key' };
+                    setTimeout(() => {
+                        this.agGrid.api.clearFocusedCell(); // start clean, this will force setting the focus on the postFocusCell
+                        this.selectionEvent = { type: 'key' };
                         focusedRow.setSelected(true, true);
-                        _this.agGrid.api.setFocusedCell(rowIndex, colKey)
+                        this.agGrid.api.setFocusedCell(rowIndex, colKey);
                     }, 0);
                 }
-                if(_this.columnsToFitAfterRowsRendered) {
-                    _this.columnsToFitAfterRowsRendered = false;
-                    setTimeout(function() {
-                        _this.sizeHeaderAndColumnsToFit();
+                if(this.columnsToFitAfterRowsRendered) {
+                    this.columnsToFitAfterRowsRendered = false;
+                    setTimeout(()  =>{
+                        this.sizeHeaderAndColumnsToFit();
                     }, 0);
                 }
             }
         } as GridOptions;
 
         if(this.showGroupCount) {
-            this.agGridOptions.getChildCount = function(row) {
-                if(_this.showGroupCount && row && (row['svycount'] != undefined)) {
+            this.agGridOptions.getChildCount = (row) => {
+                if(this.showGroupCount && row && (row['svycount'] !== undefined)) {
                     return row['svycount'];
                 }
                 return undefined;
@@ -501,7 +502,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         // check if we have filters
         for(let i = 0; this.agGridOptions.sideBar && this.agGridOptions.sideBar['toolPanels'] && i < columnDefs.length; i++) {
             // suppress the side filter if the suppressColumnFilter is set to true
-            if (!(toolPanelConfig && toolPanelConfig.suppressColumnFilter == true)) {
+            if (!(toolPanelConfig && toolPanelConfig.suppressColumnFilter === true)) {
                 if(columnDefs[i].filter) {
                     this.agGridOptions.sideBar['toolPanels'].push({
                         id: 'filters',
@@ -509,12 +510,12 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         labelKey: 'filters',
                         iconKey: 'filter',
                         toolPanel: 'agFiltersToolPanel',
-                    })
+                    });
                     break;
                 }
             }
         }
-        
+
         const gridFooterData = this.getFooterData();
         if (gridFooterData) {
             this.agGridOptions.pinnedBottomRowData = gridFooterData;
@@ -528,29 +529,29 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         // set all custom icons
         if (iconConfig) {
             const icons = new Object();
-            
-            for (const iconName in iconConfig) {                	
+
+            for (const iconName of Object.keys(iconConfig)) {
                 let aggridIcon = iconName.slice(4);
                 aggridIcon = aggridIcon[0].toLowerCase() + aggridIcon.slice(1);
                 icons[aggridIcon] = this.getIconElement(iconConfig[iconName]);
             }
             this.agGridOptions.icons = icons;
         }
-        
+
         // set a fixed height if is in designer
         this.setHeight();
 
         // locale text
         if (localeText) {
-            this.agGridOptions['localeText'] = localeText; 
+            this.agGridOptions['localeText'] = localeText;
         }
 
         // fill user grid options properties
         if (userGridOptions) {
             const gridOptionsSetByComponent = {};
             for( const p in TABLE_PROPERTIES_DEFAULTS) {
-                if(TABLE_PROPERTIES_DEFAULTS[p]["default"] != this[p]) {
-                    gridOptionsSetByComponent[TABLE_PROPERTIES_DEFAULTS[p]["gridOptionsProperty"]] = true;
+                if(TABLE_PROPERTIES_DEFAULTS[p]['default'] !== this[p]) {
+                    gridOptionsSetByComponent[TABLE_PROPERTIES_DEFAULTS[p]['gridOptionsProperty']] = true;
                 }
             }
 
@@ -562,8 +563,8 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         // handle options that are dependent on gridOptions
-        if(this.agGridOptions["enableCharts"] && this.agGridOptions["enableRangeSelection"]) {
-            this.contextMenuItems.push("chartRange");
+        if(this.agGridOptions['enableCharts'] && this.agGridOptions['enableRangeSelection']) {
+            this.contextMenuItems.push('chartRange');
         }
 
         // the group manager
@@ -594,13 +595,13 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             }
         }
 
-        this.agGridElementRef.nativeElement.addEventListener("click", function(e) {
-            if(e.target.parentNode.classList.contains("ag-selection-checkbox")) {
+        this.agGridElementRef.nativeElement.addEventListener('click', (e) => {
+            if(e.target.parentNode.classList.contains('ag-selection-checkbox')) {
                 let t = e.target.parentNode;
-                while(t && !t.hasAttribute("row-index")) t = t.parentNode;
+                while(t && !t.hasAttribute('row-index')) t = t.parentNode;
                 if(t) {
-                    const rowIndex = t.getAttribute("row-index");
-                    _this.selectionEvent = { type: 'click' , event: {ctrlKey: true, shiftKey: e.shiftKey}, rowIndex: parseInt(rowIndex)};
+                    const rowIndex = t.getAttribute('row-index');
+                    _this.selectionEvent = { type: 'click' , event: {ctrlKey: true, shiftKey: e.shiftKey}, rowIndex: parseInt(rowIndex, 10)};
                 }
             }
         });
@@ -618,17 +619,29 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
         const _this = this;
         // register listener for selection changed
-        this.agGrid.api.addEventListener('selectionChanged', (params) => { _this.onSelectionChanged(params) });
+        this.agGrid.api.addEventListener('selectionChanged', (params) => {
+         _this.onSelectionChanged(params);
+        });
 
-        this.agGrid.api.addEventListener('cellClicked', (params) => { _this.cellClickHandler(params) });
-        this.agGrid.api.addEventListener('cellDoubleClicked', (params) => { _this.onCellDoubleClicked(params) });
-        this.agGrid.api.addEventListener('cellContextMenu', (params) => { _this.onCellContextMenu(params) });
+        this.agGrid.api.addEventListener('cellClicked', (params) => {
+         _this.cellClickHandler(params);
+        });
+        this.agGrid.api.addEventListener('cellDoubleClicked', (params) => {
+         _this.onCellDoubleClicked(params);
+        });
+        this.agGrid.api.addEventListener('cellContextMenu', (params) => {
+         _this.onCellContextMenu(params);
+        });
 
         // // listen to group changes
-        this.agGrid.api.addEventListener('columnRowGroupChanged', (params) => { _this.onColumnRowGroupChanged(params) });
+        this.agGrid.api.addEventListener('columnRowGroupChanged', (params) => {
+         _this.onColumnRowGroupChanged(params);
+        });
 
         // listen to group collapsed
-        this.agGrid.api.addEventListener('rowGroupOpened', (params) => { this.onRowGroupOpenedHandler(params) });
+        this.agGrid.api.addEventListener('rowGroupOpened', (params) => {
+         this.onRowGroupOpenedHandler(params);
+        });
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -636,10 +649,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             for (const property of Object.keys(changes)) {
                 const change = changes[property];
                 switch (property) {
-                    case "responsiveHeight":
+                    case 'responsiveHeight':
                         this.setHeight();
                         break;
-                    case "visible":
+                    case 'visible':
                         // if the table was never visible
                         if (this.isRendered === false && change.currentValue === true) {
                             // refresh the columnDefs since was null the first time
@@ -647,19 +660,18 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                             this.isRendered = true;
                         }
                         break;
-                    case "myFoundset":
+                    case 'myFoundset':
 						this.log.debug('myFoundset root changed');
 						if(this.isTableGrouped()) {
 							this.purge();
 						}
-						const isChangedToEmpty = change.currentValue && change.previousValue && change.previousValue.serverSize == 0 && change.previousValue.serverSize > 0;
+						const isChangedToEmpty = change.currentValue && change.previousValue && change.previousValue.serverSize === 0 && change.previousValue.serverSize > 0;
 						if(this.myFoundset.viewPort.size > 0 || isChangedToEmpty) {
 							// browser refresh
                             this.isRootFoundsetLoaded = true;
                             // is init needed?
 							//this.initRootFoundset();
-						}
-						else {
+						} else {
 							// newly set foundset
 							this.isRootFoundsetLoaded = false;
 						}
@@ -667,65 +679,63 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         if(this.removeChangeListenerFunction) this.removeChangeListenerFunction();
                         this.myFoundset.removeChangeListener(this.changeListener);
                         const _this = this;
-						this.removeChangeListenerFunction = this.myFoundset.addChangeListener((change) => { _this.changeListener(change) });
+						this.removeChangeListenerFunction = this.myFoundset.addChangeListener((ch) => {
+                         _this.changeListener(ch);
+                        });
                         break;
-                    case "columns":
+                    case 'columns':
                         // need a better way to detect if columns array are changed
-                        if(change.currentValue != change.previousValue) {
+                        if(change.currentValue !== change.previousValue) {
                             this.updateColumnDefs();
-                        }
-                        else {
+                        } else {
                             for(let i = 0; i < this.columns.length; i++) {
-                                for(const property of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
-                                    const oldPropertyValue = change.previousValue[i][property];
-                                    const newPropertyValue = change.currentValue[i][property];
-                                    if(newPropertyValue != oldPropertyValue) {
+                                for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                    const oldPropertyValue = change.previousValue[i][prop];
+                                    const newPropertyValue = change.currentValue[i][prop];
+                                    if(newPropertyValue !== oldPropertyValue) {
                                         this.log.debug('column property changed');
                                         if(this.isGridReady) {
-                                            if(property != "footerText") {
+                                            if(prop !== 'footerText') {
                                                 this.updateColumnDefs();
                                             }
-                                            if(property != "visible" && property != "width") {
+                                            if(prop !== 'visible' && prop !== 'width') {
                                                 this.restoreColumnsState();
                                             }
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         this.isColumnModelChangedBeforeGridReady = true;
                                     }
 
-                                    if(property == "headerTitle") {
+                                    if(prop === 'headerTitle') {
                                         this.handleColumnHeaderTitle(i, newPropertyValue);
-                                    }
-                                    else if (property == "footerText") {
+                                    } else if (prop === 'footerText') {
                                         this.handleColumnFooterText();
                                     }
-                                }                                 
+                                }
                             }
                         }
                         break;
-                    case "_internalColumnState":
-                        if(this.isGridReady && (change.currentValue !== "_empty")) {
+                    case '_internalColumnState':
+                        if(this.isGridReady && (change.currentValue !== '_empty')) {
                             this.columnState = change.currentValue;
                             this.columnStateChange.emit(this.columnState);
                             // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalColumnState again
-                            this._internalColumnState = "_empty";
+                            this._internalColumnState = '_empty';
                             this._internalColumnStateChange.emit(this._internalColumnState);
                             if(this.columnState) {
                                 this.restoreColumnsState();
-                            }
-                            else {
+                            } else {
                                 this.agGrid.columnApi.resetColumnState();
                             }
                         }
                         break;
-                    case "_internalAutoSizeState":
+                    case '_internalAutoSizeState':
                         if(this.isGridReady && (change.currentValue === true)) {
                             // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalAutoSizeState again
                             this._internalAutoSizeState = false;
                             this._internalAutoSizeStateChange.emit(this._internalAutoSizeState);
                             this.agGridOptions.columnApi.autoSizeAllColumns(false);
-                        }                        
+                        }
                         break;
                 }
             }
@@ -740,7 +750,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         if(this.removeChangeListenerFunction) this.removeChangeListenerFunction();
 
         // release grid resources
-        this.agGrid.api.destroy();        
+        this.agGrid.api.destroy();
     }
 
     displayValueGetter(params) {
@@ -763,7 +773,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             return undefined;
         }
         let value = params.data[field];
-        if (value && value.displayValue != undefined) {
+        if (value && value.displayValue !== undefined) {
             value = value.displayValue;
         }
         // skip format for pinned rows (footer), they are always text
@@ -795,10 +805,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * Update header height based on cells content height
      */
     sizeHeader() {
-        const headerCell =  this.findChildNativeElement(this.agGridElementRef.nativeElement, "ag-header-cell");
-        const paddingTop = headerCell.length ? parseInt(this.getCSSProperty(headerCell, "padding-top"), 10) : 0;
-        const paddinBottom = headerCell.length ? parseInt(this.getCSSProperty(headerCell, "padding-bottom"), 10) : 0;
-        const headerCellLabels =  this.findChildNativeElement(this.agGridElementRef.nativeElement, "ag-header-cell-text");
+        const headerCell =  this.findChildNativeElement(this.agGridElementRef.nativeElement, 'ag-header-cell');
+        const paddingTop = headerCell.length ? parseInt(this.getCSSProperty(headerCell, 'padding-top'), 10) : 0;
+        const paddinBottom = headerCell.length ? parseInt(this.getCSSProperty(headerCell, 'padding-bottom'), 10) : 0;
+        const headerCellLabels =  this.findChildNativeElement(this.agGridElementRef.nativeElement, 'ag-header-cell-text');
         let minHeight = this.agGridOptions.headerHeight >= 0 ? this.agGridOptions.headerHeight : 25;
 
         if(minHeight > 0) {
@@ -810,7 +820,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     findChildNativeElement(el, className) {
-        const clazz = el.hasAttribute && el.hasAttribute("class") ? el.getAttribute("class") : null;
+        const clazz = el.hasAttribute && el.hasAttribute('class') ? el.getAttribute('class') : null;
         if(clazz == null) return null;
         if(clazz.indexOf(className) != -1) {
             return el;
@@ -827,7 +837,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     getCSSProperty(el, cssProperty) {
         const style = window.getComputedStyle(el);
-        return style.getPropertyValue(cssProperty);        
+        return style.getPropertyValue(cssProperty);
     }
 
     initRootFoundset() {
@@ -894,7 +904,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 headerName: column.headerTitle ? column.headerTitle : '',
                 field,
                 headerTooltip: column.headerTooltip ? column.headerTooltip : null,
-                cellRenderer: (params) => { return _this.cellRenderer(params) }
+                cellRenderer: (params) => _this.cellRenderer(params)
             };
 
             if(column.id) {
@@ -978,7 +988,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
 
-            colDef.tooltipValueGetter = (args) => { return _this.getTooltip(args) };
+            colDef.tooltipValueGetter = (args) => _this.getTooltip(args);
 
 
             let columnOptions = this.datagridService.columnOptions ? this.datagridService.columnOptions : {};
@@ -1234,21 +1244,20 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * Callback used by ag-grid colDef.tooltip
      */
     getTooltip(args) {
-        let tooltip = "";
+        let tooltip = '';
         // skip pinned (footer) nodes
         if(!args.node.rowPinned) {
             if (!this.isTableGrouped()) {
-                let column = this.getColumn(args.colDef.field);
+                const column = this.getColumn(args.colDef.field);
                 if (column && column.tooltip) {
-                    let index = args.node.rowIndex - this.foundset.foundset.viewPort.startIndex;
+                    const index = args.node.rowIndex - this.foundset.foundset.viewPort.startIndex;
                     tooltip = column.tooltip[index];
                 }
-            }
-            else {
-                let foundsetManager = this.getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
-                let index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
-                if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"] != undefined) {
-                    tooltip = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_tooltip"];
+            } else {
+                const foundsetManager = this.getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
+                const index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
+                if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + '_tooltip'] != undefined) {
+                    tooltip = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + '_tooltip'];
                 }
             }
         }
@@ -1260,11 +1269,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         let colId = null;
         if(params.colDef.field == undefined) {
             isGroupColumn = true;
-            if(params.colDef.colId.indexOf("ag-Grid-AutoColumn-") == 0) {
-                colId = params.colDef.colId.substring("ag-Grid-AutoColumn-".length);
+            if(params.colDef.colId.indexOf('ag-Grid-AutoColumn-') == 0) {
+                colId = params.colDef.colId.substring('ag-Grid-AutoColumn-'.length);
             }
-        }
-        else {
+        } else {
             colId = params.colDef.field;
         }
 
@@ -1277,8 +1285,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         if(col && col.editType == 'CHECKBOX' && !params.node.group) {
             checkboxEl = document.createElement('i');
             checkboxEl.className = this.getIconCheckboxEditor(parseInt(value));
-        }
-        else {
+        } else {
             if(col != null && col.showAs == 'html') {
                 value =  value && value.displayValue != undefined ? value.displayValue : value;
             } else if(col != null && col.showAs == 'sanitizedHtml') {
@@ -1305,34 +1312,31 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         const foundsetManager = this.getFoundsetManagerByFoundsetUUID(params.data._svyFoundsetUUID);
                         const index = foundsetManager.getRowIndex(params.data) - foundsetManager.foundset.viewPort.startIndex;
                         if (index >= 0) {
-                            styleClassProvider = foundsetManager.foundset.viewPort.rows[index][params.colDef.field + "_styleClassDataprovider"];
+                            styleClassProvider = foundsetManager.foundset.viewPort.rows[index][params.colDef.field + '_styleClassDataprovider'];
                         } else {
-                            this.log.warn('cannot render styleClassDataprovider for row at index ' + index)
+                            this.log.warn('cannot render styleClassDataprovider for row at index ' + index);
                             this.log.warn(params.data);
                         }
                 }
-            } else if(col.footerStyleClass && params.node.rowPinned == "bottom") { // footer
+            } else if(col.footerStyleClass && params.node.rowPinned == 'bottom') { // footer
                 styleClassProvider = col.footerStyleClass;
             }
         }
 
         if(styleClassProvider) {
-            const divContainer = document.createElement("div");
+            const divContainer = document.createElement('div');
             divContainer.className = styleClassProvider;
             if(checkboxEl) {
                 divContainer.appendChild(checkboxEl);
-            }
-            else {
+            } else {
                 divContainer.innerHTML = returnValueFormatted ? params.valueFormatted : value;
             }
 
             return divContainer;
-        }
-        else {
+        } else {
             if(checkboxEl) {
                 return checkboxEl;
-            }
-            else {
+            } else {
                 return returnValueFormatted ? document.createTextNode(params.valueFormatted) : value;
             }
         }
@@ -1408,7 +1412,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      */
     updateRows(rowUpdates, foundsetManager) {
         let needPurge = false;
-					
+
         const rowUpdatesSorted = rowUpdates.sort(function(a, b) {
             return b.type - a.type;
         });
@@ -1435,20 +1439,22 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         if(needPurge) {
             this.purge();
         }
-        return needPurge; 
+        return needPurge;
     }
 
     /**
      * Update the uiGrid row with given viewPort index
-     * @param {Number} index
      *
-     *  */
+     * @param index
+     *
+     *
+     */
     updateRow(index, foundsetManager) {
         const rows = foundsetManager.getViewPortData(index, index + 1);
         const row = rows.length > 0 ? rows[0] : null;
         if (row) {
             const rowFoundsetIndex = foundsetManager.foundset.viewPort.startIndex + index;
-            const node = this.agGrid.api.getRowNode(row._svyFoundsetUUID + "_" + rowFoundsetIndex);
+            const node = this.agGrid.api.getRowNode(row._svyFoundsetUUID + '_' + rowFoundsetIndex);
             if(node) {
                 // check if row is really changed
                 let isRowChanged = false;
@@ -1519,13 +1525,11 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         this.agGrid.api.startEditingCell({rowIndex: index, colKey: editingColumnId});
                     }
                 }
+            } else {
+                this.log.warn('could not find row at index ' + index);
             }
-            else {
-                this.log.warn("could not find row at index " + index);	
-            }
-        }
-        else {
-            this.log.warn("could not update row at index " + index);
+        } else {
+            this.log.warn('could not update row at index ' + index);
         }
     }
 
@@ -1553,7 +1557,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             oldValue = oldValue.realValue;
         }
         let oldValueStr = oldValue;
-        if(oldValueStr == null) oldValueStr = "";
+        if(oldValueStr == null) oldValueStr = '';
 
         const col = _this.getColumn(params.colDef.field);
         // ignore types in compare only for non null values ("200"/200 are equals, but ""/0 is not)
@@ -1583,8 +1587,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                             if(oldValue === currentValue) {
                                 _this.invalidCellDataIndex.rowIndex = -1;
                                 _this.invalidCellDataIndex.colKey = '';
-                            }
-                            else {
+                            } else {
                                 _this.invalidCellDataIndex.rowIndex = rowIndex;
                                 _this.invalidCellDataIndex.colKey = colId;
                             }
@@ -1592,7 +1595,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                             if(_this.isSelectionReady && (!editCells.length || (editCells[0].rowIndex != rowIndex || editCells[0].column.colId != colId))) {
                                 _this.agGrid.api.stopEditing();
                                 _this.agGrid.api.startEditingCell({
-                                    rowIndex: rowIndex,
+                                    rowIndex,
                                     colKey: colId
                                 });
                                 setTimeout(function() {
@@ -1604,8 +1607,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                                     });
                                 }, 0);
                             }
-                        }
-                        else {
+                        } else {
                             _this.invalidCellDataIndex.rowIndex = -1;
                             _this.invalidCellDataIndex.colKey = '';
                             const editCells = _this.agGrid.api.getEditingCells();
@@ -1796,8 +1798,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             setTimeout(function() {
                 _this.purgeImpl();
             }, 250);
-        }
-        else {
+        } else {
             this.purgeImpl();
         }
     }
@@ -1942,15 +1943,16 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     /**
      * Create a JSEvent
      *
-     * @return {JSEvent}
-     * */
+     * @return
+     *
+     */
     createJSEvent() {
         const element = this.agGridElementRef.nativeElement;
         const x = element.offsetLeft;
         const y = element.offsetTop;
 
-        const event = document.createEvent("MouseEvents");
-        event.initMouseEvent("click", false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
+        const event = document.createEvent('MouseEvents');
+        event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
         return event;
     }
 
@@ -1969,11 +1971,11 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         const columnState = {
             columnState: agColumnState,
             rowGroupColumnsState: svyRowGroupColumnIds,
-            filterModel: filterModel,
-            sortModel: sortModel
-        }
+            filterModel,
+            sortModel
+        };
         const newColumnState = JSON.stringify(columnState);
-        
+
         if (newColumnState !== this.columnState) {
             this.columnState = newColumnState;
             this.columnStateChange.emit(newColumnState);
@@ -1989,11 +1991,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
             try {
                 columnStateJSON = JSON.parse(this.columnState);
-            }
-            catch(e) {
+            } catch(e) {
                 this.log.error(e);
             }
-            
+
             const restoreColumns = this.restoreStates == undefined || this.restoreStates.columns == undefined || this.restoreStates.columns;
 
             if (restoreColumns) {
@@ -2023,20 +2024,20 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
                 for(let i = 0; i < savedColumns.length; i++) {
                     let columnExist = false;
-                    let fieldToCompare = savedColumns[i];
-                    
+                    const fieldToCompare = savedColumns[i];
+
                     for (let j = 0; j < this.columns.length; j++) {
                         // TODO shall i simply check if column exists using gridOptions.columnApi.getColumn(fieldToCompare) instead ?
-                        
+
                         // check if fieldToCompare has a matching column id
                         if (this.columns[j].id && fieldToCompare == this.columns[j].id) {
                             columnExist = true;
                         } else if (fieldToCompare == this.getColumnID(this.columns[j], j)) {
                             // if no column id check if column has matching column identifier
-                            
+
                             // if a column id has been later set. Update the columnState
                             if (this.columns[j].id) {
-                                
+
                                 for (let k = 0; k < columnStateJSON.columnState.length; k++) {
                                     // find the column in columnState
                                     if (columnStateJSON.columnState[k].colId == savedColumns[i]) {
@@ -2090,7 +2091,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     haveAllColumnsUniqueIds() {
         const ids = [];
         for (let j = 0; j < this.columns.length; j++) {
-            var id = this.columns[j].id != undefined ? this.columns[j].id :
+            const id = this.columns[j].id != undefined ? this.columns[j].id :
                 (this.columns[j].dataprovider != undefined ? this.columns[j].dataprovider.idForFoundset :
                     (this.columns[j].styleClassDataprovider != undefined ? this.columns[j].styleClassDataprovider.idForFoundset : null));
             if(id == null || ids.indexOf(id) != -1) {
@@ -2104,7 +2105,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     isPlainObject(input) {
-        return null !== input && 
+        return null !== input &&
           typeof input === 'object' &&
           Object.getPrototypeOf(input).isPrototypeOf(Object);
     }
@@ -2112,15 +2113,15 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     keySelectionChangeNavigation(params) {
         const previousCell = params.previousCellPosition;
         const suggestedNextCell = params.nextCellPosition;
-        const isPinnedBottom = previousCell ? previousCell.rowPinned == "bottom" : false;
+        const isPinnedBottom = previousCell ? previousCell.rowPinned == 'bottom' : false;
         // Test isPinnedTop
-     
+
         const KEY_UP = 38;
         const KEY_DOWN = 40;
         const KEY_LEFT = 37;
         const KEY_RIGHT = 39;
-     
-        let newIndex, nextRow;
+
+        let newIndex; let nextRow;
 
         switch (params.key) {
             case KEY_DOWN:
@@ -2165,13 +2166,13 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             case KEY_RIGHT:
                 return suggestedNextCell;
             default:
-                throw "this will never happen, navigation is always on of the 4 keys above";
-        }					
+                throw 'this will never happen, navigation is always on of the 4 keys above';
+        }
     }
 
     tabSelectionChangeNavigation(params) {
         const suggestedNextCell = params.nextCellPosition;
-        const isPinnedBottom = suggestedNextCell ? suggestedNextCell.rowPinned == "bottom" : false;
+        const isPinnedBottom = suggestedNextCell ? suggestedNextCell.rowPinned == 'bottom' : false;
 
         // don't change selection if row is pinned to the bottom (footer)
         if(suggestedNextCell && !isPinnedBottom) {
@@ -2236,25 +2237,24 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
         this.agGrid.api.setColumnDefs(this.getColumnDefs());
         // selColumnDefs should redraw the grid, but it stopped doing so from v19.1.2
-        this.purge(); 
+        this.purge();
     }
 
-    scrollToSelectionEx(foundsetManager?)
-    {
+    scrollToSelectionEx(foundsetManager?) {
         // don't do anything if table is grouped.
         if (this.isTableGrouped()) {
             return;
         }
-        
+
         if (!foundsetManager) {
             foundsetManager = this.foundset;
         }
 
         if(foundsetManager.foundset.selectedRowIndexes.length) {
-            const model:any = this.agGrid.api.getModel();
+            const model: any = this.agGrid.api.getModel();
             if(model.rootNode.childrenCache) {
                 // virtual row count must be multiple of CHUNK_SIZE (limitation/bug of aggrid)
-                const offset = foundsetManager.foundset.selectedRowIndexes[0] % CHUNK_SIZE
+                const offset = foundsetManager.foundset.selectedRowIndexes[0] % CHUNK_SIZE;
                 const virtualRowCount = foundsetManager.foundset.selectedRowIndexes[0] + (CHUNK_SIZE - offset);
 
                 if(virtualRowCount > model.rootNode.childrenCache.getVirtualRowCount()) {
@@ -2270,7 +2270,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     /**
      * Return the icon element with the given font icon class
      *
-     * @return {String} <i class="iconStyleClass"/>
+     * @return <i class="iconStyleClass"/>
      */
     getIconElement(iconStyleClass): string {
         return '<i class="' + iconStyleClass + '"/>';
@@ -2293,26 +2293,26 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             //     // when responsive height is 0 or undefined, use 100% of the parent container.
             //     gridDiv.style.height = '100%';
             // }
-        } 
+        }
     }
 
     getFooterData() {
         const result = [];
         let hasFooterData = false;
-        const resultData = {}
+        const resultData = {};
         for (let i = 0; this.columns && i < this.columns.length; i++) {
             const column = this.columns[i];
             if (column.footerText) {
-                var	colId = this.getColumnID(column, i);
+                const	colId = this.getColumnID(column, i);
                 if (colId) {
                     resultData[colId] = column.footerText;
                     hasFooterData = true;
                 }
-                
+
             }
         }
         if (hasFooterData) {
-            result.push(resultData)
+            result.push(resultData);
         }
         return result;
     }
@@ -2321,14 +2321,14 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
         const _this = params.context.componentParent;
         // skip pinned (footer) nodes
-        if(params.node.rowPinned) return "";
-        
+        if(params.node.rowPinned) return '';
+
         const rowIndex = params.node.rowIndex;
         let styleClassProvider;
 
         // TODO:
         // make sure we remove non ag- classes, we consider those added by rowStyleClassDataprovider
-        // const rowElement = $element.find("[row-index='" + params.rowIndex + "']"); 
+        // const rowElement = $element.find("[row-index='" + params.rowIndex + "']");
         // if(rowElement.length) {
         //     const classes = rowElement.attr("class").split(/\s+/);
         //     for(let j = 0; j < classes.length; j++) {
@@ -2354,7 +2354,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
                 // check if all fields are fine
                 if (!parentNode.field && !parentNode.data) {
-                    _this.log.warn("cannot resolve rowStyleClassDataprovider for row at rowIndex " + rowIndex);
+                    _this.log.warn('cannot resolve rowStyleClassDataprovider for row at rowIndex ' + rowIndex);
                     // exit
                     return styleClassProvider;
                 }
@@ -2369,7 +2369,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
             // having groupKeys and rowGroupCols i can get the foundset.
 
-            const foundsetUUID = _this.groupManager.getCachedFoundsetUUID(rowGroupCols, groupKeys)
+            const foundsetUUID = _this.groupManager.getCachedFoundsetUUID(rowGroupCols, groupKeys);
             // got the hash, problem is that is async.
             const foundsetManager = _this.getFoundsetManagerByFoundsetUUID(foundsetUUID);
             if (foundsetManager && foundsetManager.foundset.viewPort.rows[0]['__rowStyleClassDataprovider']) {
@@ -2377,11 +2377,11 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 if (index >= 0 && index < foundsetManager.foundset.viewPort.size) {
                     styleClassProvider = foundsetManager.foundset.viewPort.rows[index]['__rowStyleClassDataprovider'];
                 } else {
-                    _this.log.warn('cannot render rowStyleClassDataprovider for row at index ' + index)
+                    _this.log.warn('cannot render rowStyleClassDataprovider for row at index ' + index);
                     _this.log.warn(params.data);
                 }
             } else {
-                _this.log.debug("Something went wrong for foundset hash " + foundsetUUID)
+                _this.log.debug('Something went wrong for foundset hash ' + foundsetUUID);
             }
         }
         return styleClassProvider;
@@ -2393,41 +2393,40 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     getIconRefreshData() {
         return this.iconConfig && this.iconConfig.iconRefreshData ?
-            this.iconConfig.iconRefreshData : "glyphicon glyphicon-refresh";
+            this.iconConfig.iconRefreshData : 'glyphicon glyphicon-refresh';
     }
 
     getIconCheckboxEditor(state) {
         let iconConfig = this.datagridService.iconConfig ? this.datagridService.iconConfig : null;
         iconConfig = this.mergeConfig(iconConfig, this.iconConfig);
         const checkboxEditorIconConfig = this.iconConfig ? iconConfig : this.iconConfig;
-        
+
         if(state) {
             return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorChecked ?
-            checkboxEditorIconConfig.iconEditorChecked : "glyphicon glyphicon-check";
-        }
-        else {
+            checkboxEditorIconConfig.iconEditorChecked : 'glyphicon glyphicon-check';
+        } else {
             return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorUnchecked ?
-            checkboxEditorIconConfig.iconEditorUnchecked : "glyphicon glyphicon-unchecked";
+            checkboxEditorIconConfig.iconEditorUnchecked : 'glyphicon glyphicon-unchecked';
         }
-    }    
+    }
 
     handleColumnHeaderTitle(index, newValue) {
         this.log.debug('header title column property changed');
-        
+
         // column id is either the id of the column
         const column = this.columns[index];
         let colId = column.id;
         if (!colId) {	// or column is retrieved by getColumnID !?
             colId = this.getColumnID(column, index);
         }
-        
+
         if (!colId) {
-            this.log.warn("cannot update header title for column at position index " + index);
+            this.log.warn('cannot update header title for column at position index ' + index);
             return;
         }
         this.updateColumnHeaderTitle(colId, newValue);
     }
-    
+
     handleColumnFooterText() {
         this.log.debug('footer text column property changed');
         this.agGrid.api.setPinnedBottomRowData(this.getFooterData());
@@ -2461,18 +2460,18 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     onSelectionChangedEx() {
         // Don't trigger foundset selection if table is grouping
         if (this.isTableGrouped()) {
-            
+
             // Trigger event on selection change in grouo mode
             if (this.onSelectedRowsChanged) {
                 this.onSelectedRowsChanged();
             }
-            
+
             return;
         }
 
         // set to true once the grid is ready and selection is set
         this.isSelectionReady = true;
-    
+
         // rows are rendered, if there was an editCell request, now it is the time to apply it
         if(this.startEditFoundsetIndex > -1 && this.startEditColumnIndex > -1) {
             this.editCellAtWithTimeout(this.startEditFoundsetIndex, this.startEditColumnIndex);
@@ -2488,12 +2487,12 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             if(this.foundset.foundset.multiSelect && this.selectionEvent.type == 'click' && this.selectionEvent.event &&
                 (this.selectionEvent.event.ctrlKey || this.selectionEvent.event.shiftKey)) {
                 foundsetIndexes = this.foundset.foundset.selectedRowIndexes.slice();
-                
+
                 if(this.selectionEvent.event.shiftKey) { // shifkey, select range of rows in multiselect
                     const firstRow = foundsetIndexes[0];
                     const lastRow = foundsetIndexes.length > 1 ? foundsetIndexes[foundsetIndexes.length - 1] : firstRow;
 
-                    let fillStart, fillEnd;
+                    let fillStart; let fillEnd;
                     if(this.selectionEvent.rowIndex < firstRow) {
                         fillStart = this.selectionEvent.rowIndex;
                         fillEnd = firstRow - 1;
@@ -2517,15 +2516,13 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                             node.setSelected(true);
                         }
                     });
-                }
-                else {	// ctrlKey pressed, include row in multiselect
-                
+                } else {	// ctrlKey pressed, include row in multiselect
+
                     const selectionIndex = foundsetIndexes.indexOf(this.selectionEvent.rowIndex);
                     if(selectionIndex == -1) foundsetIndexes.push(this.selectionEvent.rowIndex);
                     else foundsetIndexes.splice(selectionIndex, 1);
                 }
-            }
-            else {
+            } else {
                 foundsetIndexes = new Array();
                 const selectedNodes = this.agGrid.api.getSelectedNodes();
                 for(let i = 0; i < selectedNodes.length; i++) {
@@ -2535,7 +2532,9 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             }
 
             if(foundsetIndexes.length > 0) {
-                foundsetIndexes.sort(function(a, b){return a - b});
+                foundsetIndexes.sort(function(a, b){
+return a - b;
+});
                 // if single select don't send the old selection along with the new one, to the server
                 if(!this.foundset.foundset.multiSelect && foundsetIndexes.length > 1 &&
                     this.foundset.foundset.selectedRowIndexes.length > 0) {
@@ -2560,14 +2559,14 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         if (_this.onSelectedRowsChanged) {
                             _this.onSelectedRowsChanged();
                         }
-                        
+
                         //success
                     },
                     function(serverRows){
                         if(_this.requestSelectionPromises.shift() != requestSelectionPromise) {
                             _this.log.error('requestSelectionPromises out of sync');
                         }
-                        //canceled 
+                        //canceled
                         if (typeof serverRows === 'string'){
                             return;
                         }
@@ -2581,7 +2580,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 return;
             }
         }
-        this.log.debug("table must always have a selected record");
+        this.log.debug('table must always have a selected record');
         this.selectedRowIndexesChanged();
         if(this.scrollToSelectionWhenSelectionReady || this.postFocusCell) {
             this.scrollToSelection();
@@ -2592,26 +2591,23 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     cellClickHandler(params) {
         this.selectionEvent = { type: 'click', event: params.event, rowIndex: params.node.rowIndex };
         if(params.node.rowPinned) {
-            if (params.node.rowPinned == "bottom" && this.onFooterClick) {
+            if (params.node.rowPinned == 'bottom' && this.onFooterClick) {
                 const columnIndex = this.getColumnIndex(params.column.colId);
                 this.onFooterClick(columnIndex, params.event);
             }
-        }
-        else {
+        } else {
             if(this.onCellDoubleClick) {
                 if(this.clickTimer) {
                     clearTimeout(this.clickTimer);
                     this.clickTimer = null;
-                }
-                else {
+                } else {
                     const _this = this;
                     this.clickTimer = setTimeout(function() {
                         _this.clickTimer = null;
                         _this.onCellClicked(params);
                     }, 350);
                 }
-            }
-            else {
+            } else {
                 const _this = this;
                 // Added setTimeOut to enable onColumnDataChangeEvent to go first; must be over 250, so selection is sent first
                 setTimeout(function() {
@@ -2626,7 +2622,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         const col = params.colDef.field ? this.getColumn(params.colDef.field) : null;
         if(col && col.editType == 'CHECKBOX' && params.event.target.tagName == 'I' && this.isColumnEditable(params)) {
             let v = parseInt(params.value);
-            if(v == NaN) v = 0;		
+            if(v == NaN) v = 0;
             params.node.setDataValue(params.column.colId, v ? 0 : 1);
         }
         if (this.onCellClick) {
@@ -2734,7 +2730,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
             this.onCellRightClick(this.getFoundsetIndexFromEvent(params), this.getColumnIndex(params.column.colId), this.getRecord(params), params.event);
         }
-    }    
+    }
 
     onColumnRowGroupChanged(event) {
         // return;
@@ -2828,7 +2824,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         setTimeout(function() {
             _this.sizeHeaderAndColumnsToFit();
         }, 50);
-        
+
         // scroll to the selected row when switching from Group to plain view.
         // without timeout the column don't fit automatically
         setTimeout(function() {
@@ -2851,28 +2847,28 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         const rowGroupInfo = this.getNodeGroupInfo(column);
         const rowGroupCols = rowGroupInfo.rowGroupFields;
         const groupKeys = rowGroupInfo.rowGroupKeys;
-        
+
         // Persist the state of an expanded row
         if (isExpanded) { // add expanded node to cache
             this.addRowExpandedState(groupKeys);
         } else { // remove expanded node from cache when collapsed
             this.removeRowExpandedState(groupKeys);
         }
-        
+
         if (this.onRowGroupOpened) {
-            
+
             // return the column indexes
             const rowGroupColIdxs = [];
             for (let i = 0; i < rowGroupCols.length; i++) {
                 rowGroupColIdxs.push(this.getColumnIndex(rowGroupCols[i]));
             }
-            
+
             this.onRowGroupOpened(rowGroupColIdxs, groupKeys, isExpanded);
         }
 
-        return
+        return;
         // TODO why was this commented ?
-        
+
         // TODO expose model property to control perfomance
 //					if (isExpanded === false && $scope.model.perfomanceClearCacheStateOnCollapse === true) {
 //						// FIXME remove foundset based on values
@@ -2889,8 +2885,8 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     getRecord(params) {
         if(params.data) {
-            const foundsetId = params.data["_svyFoundsetUUID"] == "root" ? this.foundset.foundset["foundsetId"]: params.data["_svyFoundsetUUID"];
-            const jsonRecord = {_svyRowId : params.data["_svyRowId"], foundsetId: foundsetId };
+            const foundsetId = params.data['_svyFoundsetUUID'] == 'root' ? this.foundset.foundset['foundsetId']: params.data['_svyFoundsetUUID'];
+            const jsonRecord = {_svyRowId : params.data['_svyRowId'], foundsetId };
             return jsonRecord;
         }
         return null;
@@ -2902,116 +2898,124 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * @type {Array}
      * */
     setStateGroupedColumns(columns) {
-        
+
         // cache order of grouped columns
         this.state.grouped.columns = [];
         const groupFields = [];
         let levelToRemove = null;
-        
+
         for (let i = 0; i < columns.length; i++) {
             this.state.grouped.columns.push(columns[i].colId);
-            
+
             // cache order of grouped fields
             const field = columns[i].colDef.field;
             groupFields.push(field);
-            
+
             // TODO i am sure this run always before the onRowGroupOpen ?
             // Remove the grouped fields
             if (this.state.expanded.fields[i] && this.state.expanded.fields[i] != field) {
                 if (levelToRemove === null || levelToRemove === undefined) levelToRemove = i;
             }
         }
-        
+
         // clear expanded node if grouped columns change
         this.removeRowExpandedStateAtLevel(levelToRemove);
-        
+
         // TODO shall i use the state.grouped.fields instead ?
         // cache order of grouped fields
         this.state.expanded.fields = groupFields;
     }
 
-    /** 
+    /**
+     *
      * add expanded node to cache
      * see onRowGroupOpened
-     * 
-     * @param {Array} groupKeys
-     * 
-     * @private  */
+     *
+     * @param groupKeys
+     *
+     * @private
+     */
     addRowExpandedState(groupKeys) {
-        
+
         if (!this._internalExpandedState) {
             this._internalExpandedState = new Object();
         }
-        
+
         let node = this._internalExpandedState;
-        
+
         // Persist the state of an expanded row
         for (let i = 0; i < groupKeys.length; i++) {
-            let key = groupKeys[i];
-            
+            const key = groupKeys[i];
+
             if (!node[key]) {
                 node[key] = new Object();
             }
-            
+
             node = node[key];
         }
 
         this._internalExpandedStateChange.emit(this._internalExpandedState);
     }
-    
-    /** 
+
+    /**
+     *
      * remove expanded node state from cache
      * see onRowGroupOpened
-     * @param {Array} groupKeys
-     * 
-     * @private  */
+     *
+     * @param groupKeys
+     *
+     * @private
+     */
     removeRowExpandedState(groupKeys) {
-        
+
         if (!groupKeys) {
             return;
         }
-        
+
         if (!groupKeys.length) {
             return;
         }
-        
+
         // search for the group key node
         let node = this._internalExpandedState;
         for (let i = 0; i < groupKeys.length - 1; i++) {
             const key = groupKeys[i];
             node = node[key];
-            
+
             if (!node) {
                 return;
             }
         }
-        
+
         // remove the node
         delete node[groupKeys[groupKeys.length - 1]];
-        
+
         this._internalExpandedStateChange.emit(this._internalExpandedState);
     }
 
-    /** 
+    /**
+     *
      * remove state of expanded nodes from level
      * see onRowGroupChanged
-     * @param {Number} level
-     * 
-     * @private  */
+     *
+     * @param level
+     *
+     * @private
+     */
     removeRowExpandedStateAtLevel(level) {
         if (level === null || level === undefined)  {
             return;
         }
-        
-        console.log("clear expanded state at level " + level)
-        
+
+        console.log('clear expanded state at level ' + level);
+
         removeNodeAtLevel(this._internalExpandedState, level);
-        
+
         function removeNodeAtLevel(node, lvl) {
             if (!node) {
                 return;
             }
-            
+
             if (node) {
                 for (const key in node) {
                     if (lvl === 0) {
@@ -3021,16 +3025,16 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                         // clear subnodes
                         removeNodeAtLevel(node[key], lvl - 1);
                     }
-                }	
+                }
             }
         }
-        
+
         this._internalExpandedStateChange.emit(this._internalExpandedState);
     }
 
     /** Listener for the root foundset */
     changeListener(changeEvent: FoundsetChangeEvent) {
-        this.log.debug("Root change listener is called " + this.state.waitFor.loadRecords);
+        this.log.debug('Root change listener is called ' + this.state.waitFor.loadRecords);
         this.log.debug(changeEvent);
 
         if(!this.isRootFoundsetLoaded) {
@@ -3044,8 +3048,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         // Floor
         const idRandom = Math.floor(1000 * Math.random());
 
-        if(changeEvent.multiSelectChanged)
-        {
+        if(changeEvent.multiSelectChanged) {
             this.agGridOptions.rowSelection =  changeEvent.multiSelectChanged.newValue ? 'multiple' : 'single';
         }
 
@@ -3062,7 +3065,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             const oldSort = changeEvent.sortColumnsChanged.oldValue;
 
             // sort changed
-            this.log.debug("Change Sort Model " + newSort);
+            this.log.debug('Change Sort Model ' + newSort);
 
             /** TODO check with R&D, sortColumns is updated only after the viewPort is update or there could be a concurrency race. When i would know when sort is completed ? */
             if (newSort != oldSort) {
@@ -3070,14 +3073,13 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 // could be already set when clicking sort on header and there is an onsort handler, so skip reseting it, to avoid a new onsort call
                 if(this.sortHandlerPromises.length == 0) {
                     this.agGrid.api.setSortModel(this.getSortModel());
-                }
-                else {
+                } else {
                     this.agGrid.api.refreshServerSideStore({purge: true});
                 }
                 this.isSelectionReady = false;
                 this.scrollToSelectionWhenSelectionReady = true;
             } else if (newSort == oldSort && !newSort && !oldSort) {
-                this.log.warn("this should not be happening");
+                this.log.warn('this should not be happening');
             }
             // do nothing else after a sort ?
             // sort should skip purge
@@ -3087,7 +3089,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         // if viewPort changes and startIndex does not change is the result of a sort or of a loadRecords
         if (changeEvent.viewportRowsCompletelyChanged && !this.state.waitFor.loadRecords) {
             this.log.debug(idRandom + ' - 2. Change foundset serverside');
-            this.log.debug("Foundset changed serverside ");
+            this.log.debug('Foundset changed serverside ');
 
             if (this.isTableGrouped()) {
                 // Foundset state is changed server side, shall refresh all groups to match new query criteria
@@ -3106,7 +3108,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             }
             return;
         } else {
-            this.log.debug("wait for loadRecords request " + this.state.waitFor.loadRecords);
+            this.log.debug('wait for loadRecords request ' + this.state.waitFor.loadRecords);
         }
 
         if (changeEvent.viewportRowsUpdated) {
@@ -3132,15 +3134,15 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     * API methods
     *
     ************************************************************************************************************************************
-    ***********************************************************************************************************************************/    
+    ***********************************************************************************************************************************/
 
     /**
      * Return the column index for the given column id.
      * Can be used in combination with getColumnState to retrieve the column index for the column state with colId in the columnState object.
-     * 
-     * @param {String} colId
-     * 
-     * @return {Number}
+     *
+     * @param colId
+     *
+     * @return
      * @example <pre>
      * // get the state
      * var state = elements.table.getColumnState();
@@ -3148,15 +3150,15 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * var columnsState = JSON.parse(state).columnState;
      *
      * for (var index = 0; index < columnsState.length; index++) {
-     * 
+     *
      *   // skip column hidden by the user
      *   if (!columnsState[index].hide) {
-     * 
+     *
      * 	  // get the column using the colId of the columnState
      * 	  var columnIndex = elements.table.getColumnIndex(columnsState[index].colId);
      * 		if (columnIndex > -1) {
      * 		  var column = elements.table.getColumn(columnIndex);
-     * 		  // do something with column				
+     * 		  // do something with column
      * 		}
      * 	}
      * }
@@ -3219,7 +3221,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         let groupedSelection = null;
         if(this.isTableGrouped()) {
             groupedSelection = new Array();
-            var selectedNodes = this.agGrid.api.getSelectedNodes();
+            const selectedNodes = this.agGrid.api.getSelectedNodes();
             for(let i = 0; i < selectedNodes.length; i++) {
                 const node = selectedNodes[i];
                 if(node) {
@@ -3232,20 +3234,18 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     /**
      * Start cell editing (only works when the table is not in grouping mode).
+     *
      * @param foundsetindex foundset row index of the editing cell (1-based)
      * @param columnindex column index in the model of the editing cell (0-based)
      */
     editCellAt = function(foundsetindex, columnindex) {
         if(this.isTableGrouped()) {
             this.log.warn('editCellAt API is not supported in grouped mode');
-        }
-        else if (foundsetindex < 1) {
+        } else if (foundsetindex < 1) {
             this.log.warn('editCellAt API, invalid foundsetindex:' + foundsetindex);
-        }
-        else if(columnindex < 0 || columnindex > this.columns.length - 1) {
+        } else if(columnindex < 0 || columnindex > this.columns.length - 1) {
             this.log.warn('editCellAt API, invalid columnindex:' + columnindex);
-        }
-        else {
+        } else {
 
             // if is not ready to edit, wait for the row to be rendered
             if(this.isSelectionReady && !this.isDataLoading) {
@@ -3262,16 +3262,16 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 // reset the edit cell coordinates
                 this.startEditFoundsetIndex = -1;
                 this.startEditColumnIndex = -1;
-            }
-            else {
+            } else {
                 this.startEditFoundsetIndex = foundsetindex;
                 this.startEditColumnIndex = columnindex;
             }
         }
-    }
+    };
 
     /**
      * Request focus on the given column
+     *
      * @param columnindex column index in the model of the editing cell (0-based)
      */
     requestFocus(columnindex) {
@@ -3282,15 +3282,15 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             this.requestFocusColumnIndex = -1;
             this.log.warn('requestFocus API, invalid columnindex:' + columnindex);
         } else {
-            
+
             // if is not ready to request focus, wait for the row to be rendered
             if (this.isSelectionReady) {
-                if (this.myFoundset && this.myFoundset.viewPort.size && this.myFoundset.selectedRowIndexes.length ) {								
+                if (this.myFoundset && this.myFoundset.viewPort.size && this.myFoundset.selectedRowIndexes.length ) {
                     const column = this.columns[columnindex];
                     const rowIndex = this.myFoundset.selectedRowIndexes[0];
                     const	colId = column.id ? column.id : this.getColumnID(column, columnindex);
                     this.agGrid.api.setFocusedCell(rowIndex, colId, null);
-                    
+
                     // reset the request focus column index
                     this.requestFocusColumnIndex = -1;
                 }
@@ -3302,19 +3302,19 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     /**
      * Scroll to the selected row
-     */				
+     */
     scrollToSelection() {
         if(this.isSelectionReady) {
             this.scrollToSelectionEx();
             this.scrollToSelectionWhenSelectionReady = false;
-        }
-        else {
+        } else {
             this.scrollToSelectionWhenSelectionReady = true;
         }
     }
 
     /**
      * If a cell is editing, it stops the editing
+     *
      * @param cancel 'true' to cancel the editing (ie don't accept changes)
      */
     stopCellEditing(cancel) {
@@ -3324,7 +3324,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     /**
      * Sets expanded groups
      *
-     * @param {Object} groups an object like {expandedGroupName1:{}, expandedGroupName2:{expandedSubGroupName2_1:{}, expandedSubGroupName2_2:{}}}
+     * @param groups an object like {expandedGroupName1:{}, expandedGroupName2:{expandedSubGroupName2_1:{}, expandedSubGroupName2_2:{}}}
      */
     setExpandedGroups(groups) {
         this._internalExpandedState = groups;
@@ -3337,20 +3337,20 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     /**
      * Show or hide the ToolPanel
      *
-     * @param {Boolean} show
+     * @param show
      */
     showToolPanel(show) {
         if (show) {
-            this.agGrid.api.openToolPanel("columns");
+            this.agGrid.api.openToolPanel('columns');
         } else {
             this.agGrid.api.closeToolPanel();
         }
     }
-    
+
     /**
      * Returns true if the ToolPanel is showing
      *
-     * @return {Boolean}
+     * @return
      */
     isToolPanelShowing(show) {
         return this.agGrid.api.getOpenedToolPanel();
@@ -3360,8 +3360,8 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         const agGridSortModel = [];
         const columnsState = this.agGrid.columnApi.getColumnState();
         for(let i = 0; i < columnsState.length; i++) {
-            if(columnsState[i]["sort"] != null) {
-                agGridSortModel.push({colId: columnsState[i]["colId"], sort: columnsState[i]["sort"]});
+            if(columnsState[i]['sort'] != null) {
+                agGridSortModel.push({colId: columnsState[i]['colId'], sort: columnsState[i]['sort']});
             }
         }
         return agGridSortModel;
@@ -3908,7 +3908,7 @@ class FoundsetDatasource {
         }
 
         const allPromisses = this.dataGrid.sortHandlerPromises.concat(filterPromises);
-        Promise.all(allPromisses).then(function() {
+        Promise.all(allPromisses).then(() => {
             _this.dataGrid.removeAllFoundsetRef = false;
             _this.foundsetServer.getData(params.request, groupKeys,
                 function successCallback(resultForGrid, lastRow) {
@@ -3924,7 +3924,7 @@ class FoundsetDatasource {
                                 const firstBlock = model.rootNode.childrenCache.getBlock(sortedBlockIds[0]);
                                 if(firstBlock.state == 'loaded') {
                                     _this.dataGrid.isRefreshNeededForAutoHeight = false;
-                                    setTimeout(function() {
+                                    setTimeout(() => {
                                         _this.dataGrid.purgeImpl();
                                     }, 150);
                                     return;
@@ -4208,21 +4208,20 @@ class GroupManager {
             sortColumnDirection = sortModel[0].sort;
         }
 
-        const _this = this;
         childFoundsetPromise = this.dataGrid.servoyApi.callServerSideApi('getGroupedFoundsetUUID',
             [groupColumns, groupKeys, idForFoundsets, sort, this.dataGrid.filterModel, hasRowStyleClassDataprovider, sortColumn, sortColumnDirection]);
 
-        childFoundsetPromise.then(function(childFoundsetUUID) {
-            _this.dataGrid.log.debug(childFoundsetUUID);
+        childFoundsetPromise.then((childFoundsetUUID) => {
+            this.dataGrid.log.debug(childFoundsetUUID);
                 if (!childFoundsetUUID) {
-                    _this.dataGrid.log.error('why i don\'t have a childFoundset ?');
+                    this.dataGrid.log.error('why i don\'t have a childFoundset ?');
                     resultDeferred.reject('can\'t retrieve the child foundset');
                 }
 
                 // FIXME add listener somewhere else
                 //childFoundset.addChangeListener(childChangeListener);
                 resultDeferred.resolve(childFoundsetUUID);
-            }, function(e) {
+            }, (e) => {
                 // propagate the error
                 resultDeferred.reject(e);
             });
@@ -4344,13 +4343,12 @@ class GroupHashCache {
      *  */
     clearAll() {
 
-        const _this = this;
-        this.rootGroupNode.forEach(function(node) {
+        this.rootGroupNode.forEach((node) => {
             if (node.foundsetUUID) {
-                _this.removeFoundset(_this.rootGroupNode, node.foundsetUUID);
+                this.removeFoundset(this.rootGroupNode, node.foundsetUUID);
             } else {
                 // TODO is it this possible
-                _this.dataGrid.log.error('There is a root node without a foundset UUID, it should not happen');
+                this.dataGrid.log.error('There is a root node without a foundset UUID, it should not happen');
             }
 
         });
@@ -4404,8 +4402,7 @@ class GroupHashCache {
 
         let success = true;
 
-        const _this = this;
-        tree.forEach(function(node) {
+        tree.forEach((node) => {
 
             // remove the foundset and all it's child nodes if foundsetUUID or level === 0
             if (level === 0) {
@@ -4414,9 +4411,7 @@ class GroupHashCache {
                 delete tree.nodes[id];
                 return true;
             } else {
-                success = node.forEach(function(subNode) {
-                    return _this.removeFoundsetAtLevel(node, level - 1);
-                }) && success;
+                success = node.forEach((subNode) => this.removeFoundsetAtLevel(node, level - 1)) && success;
                 return success;
             }
         });
@@ -4445,26 +4440,24 @@ class GroupHashCache {
 
             // TODO Refactor this part of code
             let success = true;
-            const _this = this;
-            tree.forEach(function(node) {
+            tree.forEach((node) => {
                 if (node.foundsetUUID === foundsetUUID) {
                     // delete all subnodes
                     success = true;
                     node.forEach(function(subNode) {
                         const childFoundsetUUID = subNode.foundsetUUID;
-                        const foundsetRef = _this.dataGrid.getFoundsetManagerByFoundsetUUID(childFoundsetUUID);
+                        const foundsetRef = this.dataGrid.getFoundsetManagerByFoundsetUUID(childFoundsetUUID);
                         // FIXME this solution is horrible, can break if rows.length === 0 or...
                         // A better solution is to retrieve the proper childFoundsetUUID by rowGroupCols/groupKeys
-                        if (foundsetRef && ( (field === null || field === undefined) || (field !== null && field !== undefined && foundsetRef.foundset.viewPort.rows[0] && foundsetRef.foundset.viewPort.rows[0][field] == value))) {
-                            success = (_this.removeFoundset(node, childFoundsetUUID) && success);
+                        if (foundsetRef && ( (field === null || field === undefined) || (field !== null && field !== undefined &&
+                             foundsetRef.foundset.viewPort.rows[0] && foundsetRef.foundset.viewPort.rows[0][field] === value))) {
+                            success = (this.removeFoundset(node, childFoundsetUUID) && success);
                         } else {
-                            _this.dataGrid.log.debug('ignore the child foundset');
+                            this.dataGrid.log.debug('ignore the child foundset');
                         }
                     });
                 } else if (node.hasNodes()) { // search in subnodes
-                    success = success && node.forEachUntilSuccess(function(subNode) {
-                        return _this.removeChildFoundsets(node, foundsetUUID);
-                    });
+                    success = success && node.forEachUntilSuccess((subNode) => this.removeChildFoundsets(node, foundsetUUID));
                 }
             });
         }
@@ -4607,14 +4600,13 @@ class GroupHashCache {
         }
 
         let resultNode = null;
-        const _this = this;
-        tree.forEachUntilSuccess(function(node) {
+        tree.forEachUntilSuccess((node)=> {
             if (node.foundsetUUID === foundsetUUID) {
                 resultNode = node;
                 return true;
             } else if (node.hasNodes()) { // search in subnodes
-                return node.forEachUntilSuccess(function(subNode) {
-                    resultNode = _this.getGroupNodeByFoundsetUUID(node, foundsetUUID);
+                return node.forEachUntilSuccess((subNode)=> {
+                    resultNode = this.getGroupNodeByFoundsetUUID(node, foundsetUUID);
                     if (resultNode) { // if has found the result
                         return true;
                     } else { // keep searching
@@ -4645,8 +4637,7 @@ class GroupHashCache {
         }
 
         let parentNode = null;
-        const _this = this;
-        tree.forEachUntilSuccess(function(node) {
+        tree.forEachUntilSuccess((node) => {
             // found in the child
             if (parentNode) { // already found the tree
                 return true;
@@ -4655,8 +4646,8 @@ class GroupHashCache {
                 parentNode = tree;
                 return true;
             } else if (node.hasNodes()) { // search in subnodes
-                node.forEachUntilSuccess(function(subNode) {
-                    parentNode = _this.getParentGroupNode(node, foundsetUUID);
+                node.forEachUntilSuccess((subNode)=>  {
+                    parentNode = this.getParentGroupNode(node, foundsetUUID);
                     if (parentNode) { // break the for each if has found the result
                         return true;
                     } else { // keep searching
@@ -4691,15 +4682,14 @@ class GroupHashCache {
         const path = [];
 
         const resultNode = null;
-        const _this = this;
-        tree.forEachUntilSuccess(function(node) {
+        tree.forEachUntilSuccess((node) => {
             if (node.foundsetUUID === foundsetUUID) {
                 path.push(node);
                 return true;
             } else if (node.hasNodes()) { // search in subnodes
                 let subPath;
-                const isInSubNodes = node.forEachUntilSuccess(function(subNode) {
-                    subPath = _this.getTreeNodePath(node, foundsetUUID);
+                const isInSubNodes = node.forEachUntilSuccess((subNode) => {
+                    subPath = this.getTreeNodePath(node, foundsetUUID);
                     if (resultNode) { // if has found the result
                         return true;
                     } else { // keep searching
@@ -4734,7 +4724,7 @@ class GroupNode {
      *
      */
     forEach(callback) {
-        for (const key in this.nodes) {
+        for (const key of Object.keys(this.nodes)) {
             callback.call(this, this.nodes[key]);
         }
     }
@@ -4746,7 +4736,7 @@ class GroupNode {
      *
      */
     forEachUntilSuccess(callback) {
-        for (const key in this.nodes) {
+        for (const key of Object.keys(this.nodes)) {
             if (callback.call(this, this.nodes[key]) === true) {
                 return true;
             }
@@ -4761,10 +4751,7 @@ class GroupNode {
      *
      */
     hasNodes() {
-        for (const key in this.nodes) {
-            return true;
-        }
-        return false;
+        return Object.keys(this.nodes).length > 0;
     }
 
     /**
@@ -4789,7 +4776,7 @@ class GroupNode {
     }
 
     removeAllSubNodes() {
-        this.forEach(function(subNode) {
+        this.forEach((subNode) => {
             subNode.destroy();
         });
         this.nodes = [];
