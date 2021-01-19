@@ -8,7 +8,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
 @Injectable()
 export class NGUtilsService {
     private _tags: Tag[];
-    private _styleclasses: Object;
+    private _styleclasses: any;
     private _backActionCB: any;
     private confirmMessage: string;
 
@@ -28,7 +28,7 @@ export class NGUtilsService {
            // do something with it..
     }
 
-    get styleclasses(): Object {
+    get styleclasses(): any {
         return this._styleclasses;
     }
 
@@ -41,12 +41,6 @@ export class NGUtilsService {
         this._backActionCB = backActionCB;
         this.setBackActionCallback();
     }
-
-    private beforeUnload(e) {
-        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
-        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
-    };
-
 
     /**
      * This will return the user agent string of the clients browser.
@@ -278,7 +272,7 @@ export class NGUtilsService {
      * @param callback
      */
     public setBackActionCallback() {
-        this.platformLocation.onPopState((event) => {
+        this.platformLocation.onPopState(() => {
             if (this._backActionCB) {
                 if (this.platformLocation.hash) {
                     this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[this.platformLocation.hash]);
@@ -288,6 +282,11 @@ export class NGUtilsService {
             }
         });
     }
+
+    private beforeUnload(e) {
+        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
+        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
+    };
 }
 
 class Tag {

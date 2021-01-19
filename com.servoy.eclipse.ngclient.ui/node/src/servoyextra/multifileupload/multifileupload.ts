@@ -1,6 +1,6 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
-import { UppyConfig, UppyAngularComponent } from "uppy-angular";
+import { UppyConfig, UppyAngularComponent } from 'uppy-angular';
 
 @Component({
     selector: 'servoyextra-multifileupload',
@@ -20,21 +20,23 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     @Input() inline;
     @Input() closeAfterFinish;
     @Input() sources: string[];
-    @Input() options: object;
-    @Input() localeStrings: object;
+    @Input() options: any;
+    @Input() localeStrings: any;
 
     @Input() onFileUploaded;
     @Input() onFileAdded;
     @Input() onBeforeFileAdded;
     @Input() onFileRemoved;
     @Input() onUploadComplete;
-    @Input() onModalOpened
+    @Input() onModalOpened;
     @Input() onModalClosed;
     @Input() onRestrictionFailed;
 
     @ViewChild('element', { static: false }) uppyRef: UppyAngularComponent;
 
     settings: UppyConfig = null;
+    filesToBeAdded: Array<string> = [];
+
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService) {
         super(renderer, cdRef);
@@ -78,16 +80,16 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         }
 
         if (this.onUploadComplete) {
-            this.uppyRef.uppyInstance.on('complete', (result) => {
-                var filesSuccess = [];
+            this.uppyRef.uppyInstance.on('complete', (result: {successful:[], failed:[]}) => {
+                const filesSuccess = [];
                 if (result.successful) {
-                    for (var o = 0; o < result.successful.length; o++) {
+                    for (let o = 0; o < result.successful.length; o++) {
                         filesSuccess.push(this.createUppyFile(result.successful[o]));
                     }
                 }
-                var filesFailed = [];
+                const filesFailed = [];
                 if (result.failed) {
-                    for (var f = 0; f < result.failed.length; f++) {
+                    for (let f = 0; f < result.failed.length; f++) {
                         filesFailed.push(this.createUppyFile(result.failed[f]));
                     }
                 }
@@ -97,12 +99,12 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         this.uppyRef.uppyInstance.setOptions({
             onBeforeFileAdded: (currentFile, files) => this.onBeforeFileAddedEvent(currentFile, files)
         });
-        let locale = null;
+        const locale = null;
         if (this.localeStrings) {
-            for (var key in this.localeStrings) {
-                var localeString = this.localeStrings[key];
+            for (const key of  Object.keys(this.localeStrings)) {
+                const localeString = this.localeStrings[key];
                 if (key.indexOf('.') !== -1) {
-                    var keyParts = key.split('.');
+                    const keyParts = key.split('.');
                     if (!locale.strings.hasOwnProperty(keyParts[0])) {
                         locale.strings[keyParts[0]] = {};
                     }
@@ -113,15 +115,15 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
             }
         }
 
-        let dashBoardOptions = {
+        const dashBoardOptions = {
             disableStatusBar: this.disableStatusBar,
             inline: this.inline,
             closeAfterFinish: this.closeAfterFinish,
-            locale: locale
+            locale
         };
 
         if (this.options) {
-            for (var x in this.options) {
+            for (const x of  Object.keys(this.options)) {
                 dashBoardOptions[x] = this.options[x];
             }
         }
@@ -175,9 +177,11 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     internalInit(): void {
-        let uppyPlugins = {};
+        const uppyPlugins = {};
         if (this.sources) {
-            this.sources.forEach((value) => { uppyPlugins[value] = true });
+            this.sources.forEach((value) => {
+                uppyPlugins[value] = true;
+            });
         }
         this.settings = {
             uploadAPI: {
@@ -201,13 +205,11 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         };
     }
 
-    filesToBeAdded: Array<String> = [];
-
     onBeforeFileAddedEvent(currentFile: any, files: any): boolean {
         if (!this.onBeforeFileAdded) {
             return true;
         }
-        let currentFiles = this.getFiles();
+        const currentFiles = this.getFiles();
 
         if (this.filesToBeAdded.indexOf(currentFile.name) !== -1) {
             return true;
@@ -215,7 +217,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
 
         this.filesToBeAdded.push(currentFile.name);
 
-        this.onBeforeFileAdded(this.createUppyFile(currentFile), currentFiles).then(function(result) {
+        this.onBeforeFileAdded(this.createUppyFile(currentFile), currentFiles).then(function(result: boolean) {
             if (result === true) {
                 this.uppyRef.uppyInstance.addFile(currentFile);
             }
@@ -225,7 +227,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     getFile(fileID: string): UploadFile {
-        let file = this.uppyRef.uppyInstance.getFile(fileID);
+        const file = this.uppyRef.uppyInstance.getFile(fileID);
         if (file != null) {
             return this.createUppyFile(file);
         }
@@ -233,10 +235,10 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     getFiles(): UploadFile[] {
-        let files = this.uppyRef.uppyInstance.getFiles();
-        let result = [];
+        const files = this.uppyRef.uppyInstance.getFiles();
+        const result = [];
         if (files) {
-            for (var f = 0; f < files.length; f++) {
+            for (let f = 0; f < files.length; f++) {
                 result.push(this.createUppyFile(files[f]));
             }
         }
@@ -244,7 +246,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     createUppyFile(file: any): UploadFile {
-        let result: UploadFile = {
+        const result: UploadFile = {
             id: file.id,
             name: file.name,
             extension: file.extension,
@@ -255,8 +257,8 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         };
 
         if (this.metaFields && file.meta) {
-            for (var m = 0; m < this.metaFields.length; m++) {
-                let fieldName = this.metaFields[m].id
+            for (let m = 0; m < this.metaFields.length; m++) {
+                const fieldName = this.metaFields[m].id;
                 result.metaFields[fieldName] = file.meta[fieldName] || null;
             }
         }
@@ -268,7 +270,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
                 percentage: 0,
                 uploadComplete: false,
                 uploadStarted: null
-            }
+            };
         } else {
             result.progress = file.progress;
             if (result.progress.uploadStarted) {
