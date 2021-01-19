@@ -34,6 +34,7 @@
 					<compilerArgument>-warn:none</compilerArgument>
 					<useProjectSettings>false</useProjectSettings>
 					<useJDK>BREE</useJDK>
+					<deriveReleaseCompilerArgumentFromTargetLevel>false</deriveReleaseCompilerArgumentFromTargetLevel>
 				</configuration>
 			</plugin>
 			<plugin>
