@@ -37,7 +37,8 @@
               "bootstrapcomponents",
               "servoycore",
               "servoyextra",
-              "svy"
+              "svy",
+              "aggrid"
             ],
             "style": "kebab-case"
           }
@@ -51,7 +52,8 @@
               "bootstrapcomponents",
               "servoycore",
               "servoyextra",
-              "svy"
+              "svy",
+              "aggrid"
             ],
             "style": "camelCase"
           }
