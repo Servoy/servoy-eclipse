@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --prod --subresourceIntegrity=true",
-    "build_debug": "ng build --watch --subresourceIntegrity=true",
+    "build_debug": "ng build --watch",
     "test": "ng test --watch --browsers Chrome",
     "test_edge": "ng test --watch --browsers Edge",
     "test_headless": "ng test --browsers ChromeHeadless --watch=false",
