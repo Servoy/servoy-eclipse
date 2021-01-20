@@ -37,6 +37,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield<HTMLDiv
                 case 'valuelistID':
                     if (this.valuelistID && this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0]))
                         this.allowNullinc = 1;
+                    this.setSelectionFromDataprovider();
                     break;
 
             }
