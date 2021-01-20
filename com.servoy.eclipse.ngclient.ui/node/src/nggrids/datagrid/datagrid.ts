@@ -100,6 +100,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() rowHeight;
     @Input() groupUseEntireRow;
     @Input() showGroupCount;
+    @Input() styleClass: string;
 
     @Input() toolPanelConfig;
     @Input() iconConfig;
@@ -126,6 +127,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() onSelectedRowsChanged;
     @Input() onSort;
     @Input() onColumnFormEditStarted;
+    @Input() tooltipTextRefreshData;
 
     log: LoggerService;
     agGridOptions: GridOptions;
@@ -143,7 +145,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
 
     dirtyCache: boolean;
     // used in HTML template to toggle sync button
-    isGroupView = false;
+    @Output() isGroupView = false;
 
     // set to true once the grid is rendered and the selection is set
     isSelectionReady = false;
@@ -216,6 +218,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         let iconConfig = this.datagridService.iconConfig ? this.datagridService.iconConfig : null;
         let userGridOptions = this.datagridService.gridOptions ? this.datagridService.gridOptions : null;
         let localeText = this.datagridService.localeText ? this.datagridService.localeText : null;
+        let mainMenuItemsConfig = this.datagridService.mainMenuItemsConfig ? this.datagridService.mainMenuItemsConfig : null;
 
         if(this.datagridService.arrowsUpDownMoveWhenEditing) {
             this.agArrowsUpDownMoveWhenEditing = this.datagridService.arrowsUpDownMoveWhenEditing;
@@ -225,7 +228,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
         iconConfig = this.mergeConfig(iconConfig, this.iconConfig);
         userGridOptions = this.mergeConfig(userGridOptions, this.gridOptions);
         localeText = this.mergeConfig(localeText, this.localeText);
-        this.agMainMenuItemsConfig = this.mergeConfig(this.agMainMenuItemsConfig, this.mainMenuItemsConfig);
+        this.agMainMenuItemsConfig = this.mergeConfig(mainMenuItemsConfig, this.mainMenuItemsConfig);
 
         if(this.arrowsUpDownMoveWhenEditing) {
             this.agArrowsUpDownMoveWhenEditing = this.arrowsUpDownMoveWhenEditing;

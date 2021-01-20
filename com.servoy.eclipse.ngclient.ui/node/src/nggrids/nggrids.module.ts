@@ -14,6 +14,7 @@ import { LicenseManager } from '@ag-grid-enterprise/core';
 import { ColumnsToolPanelModule, FiltersToolPanelModule, MenuModule, ModuleRegistry, RowGroupingModule, ServerSideRowModelModule, SideBarModule } from '@ag-grid-enterprise/all-modules';
 import { ValuelistFilter } from './datagrid/filters/valuelistfilter';
 import { RadioFilter } from './datagrid/filters/radiofilter';
+import { PowerGrid } from './powergrid/powergrid';
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import { RadioFilter } from './datagrid/filters/radiofilter';
         SelectEditor,
         TypeaheadEditor,
         ValuelistFilter,
-        RadioFilter
+        RadioFilter,
+        PowerGrid
     ],
     imports: [
         CommonModule,
@@ -34,7 +36,8 @@ import { RadioFilter } from './datagrid/filters/radiofilter';
         AgGridModule.withComponents([])
     ],
     exports: [
-        DataGrid
+        DataGrid,
+        PowerGrid
     ]
 })
 export class NGGridsModule {
