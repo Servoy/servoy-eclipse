@@ -59,7 +59,7 @@ export class LocaleService {
 
     private setMomentLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
         if (moment.locale() === localeId) return Promise.resolve();
-        return import(`../../node_modules/moment/src/locale/${localeId}`).then(
+        return import(`moment/locale/${localeId}`).then(
             module => {
                 if (moment.locale() !== localeId)
                     moment.defineLocale(localeId, module.default._config);
