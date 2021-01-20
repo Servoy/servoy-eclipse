@@ -9,6 +9,7 @@ import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WindowService as WindowPlugin} from '../window_service/window.service';
+import { WindowServiceModule} from '../window_service/windowservice.module';
 
 // generated services start
 import { KeyListener } from '../keylistener/keylistener.service';
@@ -60,5 +61,6 @@ export class AllServiceService implements ServiceProvider {
                 PowergridService
                 // generated services end
                 ],
+    imports: [WindowServiceModule]            
 } )
 export class AllServicesModules { }
