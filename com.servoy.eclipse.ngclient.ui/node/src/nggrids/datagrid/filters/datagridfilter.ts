@@ -9,11 +9,11 @@ export class DatagridFilterDirective implements AgFilterComponent {
     @ViewChild('element') elementRef: ElementRef;
     dataGrid: DataGrid;
     params: IFilterParams;
-    model;
-    instance;
-    valuelist;
-    valuelistValues;
-    format;
+    model: any;
+    instance: any;
+    valuelist: any;
+    valuelistValues: any;
+    format: any;
     txtClearFilter: string;
     txtApplyFilter: string;
 
@@ -34,7 +34,7 @@ export class DatagridFilterDirective implements AgFilterComponent {
         if(rows && rows.length > 0) {
           this.valuelist = this.dataGrid.getValuelistEx(rows[0], params.column.getColId());
           if (this.valuelist) {
-            this.valuelist.filterList('').subscribe(valuelistValues => {
+            this.valuelist.filterList('').subscribe((valuelistValues: any) => {
               this.valuelistValues = valuelistValues;
             });
           };
@@ -87,7 +87,7 @@ export class DatagridFilterDirective implements AgFilterComponent {
         return this.model != null;
     }
 
-    doesFilterPass(params: IDoesFilterPassParams): boolean {
+    doesFilterPass(): boolean {
         return true;
     }
 

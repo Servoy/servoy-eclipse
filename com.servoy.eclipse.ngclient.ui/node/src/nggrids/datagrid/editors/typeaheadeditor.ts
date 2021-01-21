@@ -24,16 +24,16 @@ import { DatagridEditorDirective } from './datagrideditor';
 export class TypeaheadEditor extends DatagridEditorDirective {
 
   @ViewChild('instance') instance: NgbTypeahead;
-  @Input() initialDisplayValue;
+  @Input() initialDisplayValue: any;
   @Input() maxLength = 524288;
 
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
 
   width: number;
-  valuelist;
+  valuelist: any;
   hasRealValues: boolean;
-  format;
+  format: any;
 
   constructor(private formatService: FormattingService, config: NgbTypeaheadConfig) {
     super();
@@ -69,7 +69,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
 
     this.valuelist = this.dataGrid.getValuelist(params);
     if (this.valuelist) {
-      this.valuelist.filterList('').subscribe(valuelistValues => {
+      this.valuelist.filterList('').subscribe((valuelistValues: any) => {
         let hasRealValues = false;
         for (const item of valuelistValues) {
           if (item.realValue !== item.displayValue) {
@@ -185,7 +185,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
     else if (this.valuelist.hasRealValues()) {
       // on purpose test with == so that "2" equals to 2
       // eslint-disable-next-line eqeqeq
-      const value = this.valuelist.find((item) => item.realValue == result);
+      const value = this.valuelist.find((item: any) => item.realValue == result);
       if (value) {
         result = value.displayValue;
       }
@@ -193,7 +193,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
     return this.formatService.format(result, this.format, false);
   };
 
-  private findDisplayValue(vl, displayValue) {
+  private findDisplayValue(vl: any, displayValue: any) {
     if(vl) {
       for (const vvalue of vl) {
         //TODO: compare trimmed values, typeahead will trim the selected value

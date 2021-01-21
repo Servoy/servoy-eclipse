@@ -12,7 +12,7 @@ import { DatagridEditorDirective } from './datagrideditor';
 })
 export class FormEditor extends DatagridEditorDirective implements OnDestroy {
 
-    editForm;
+    editForm: any;
     width = 300;
     height = 200;
 

@@ -23,7 +23,7 @@ export class DatePicker extends DatagridEditorDirective {
   pickerType = 'both';
   showSecondsTimer = false;
 
-  selectedValue;
+  selectedValue: any;
 
   constructor(localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>) {
     super();
@@ -65,7 +65,7 @@ export class DatePicker extends DatagridEditorDirective {
     return this.selectedValue;
   }
 
-  dateChanged(e): any {
+  dateChanged(e: any): any {
     if (e && e.value) {
       this.selectedValue = e.value.toDate();
     } else this.selectedValue = null;

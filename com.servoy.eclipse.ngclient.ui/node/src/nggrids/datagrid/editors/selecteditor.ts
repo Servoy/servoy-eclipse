@@ -32,8 +32,8 @@ export class SelectEditor extends DatagridEditorDirective {
             if (v && v.displayValue !== undefined) {
                 v = v.displayValue;
             }
-            vl.filterList('').subscribe(valuelistValues => {
-                valuelistValues.forEach((value) => {
+            vl.filterList('').subscribe((valuelistValues: any) => {
+                valuelistValues.forEach((value: any) => {
                     const option = document.createElement('option');
                     option.value = value.realValue == null ? '_SERVOY_NULL' : value.realValue;
                     option.text = value.displayValue;

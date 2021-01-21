@@ -10,7 +10,7 @@ export class DatagridEditorDirective implements ICellEditorAngularComp {
     @ViewChild('element') elementRef: ElementRef;
     dataGrid: DataGrid;
     params: ICellEditorParams;
-    initialValue;
+    initialValue: any;
     instance: any;
 
     constructor() {

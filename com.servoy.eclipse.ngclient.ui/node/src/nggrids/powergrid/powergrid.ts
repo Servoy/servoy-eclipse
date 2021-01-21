@@ -44,19 +44,19 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
     @ViewChild('element') agGrid: AgGridAngular;
     @ViewChild('element', { read: ElementRef }) agGridElementRef: ElementRef;
 
-    @Input() columns;
+    @Input() columns: any;
     @Input() styleClass: string;
 
-    @Input() toolPanelConfig;
-    @Input() iconConfig;
-    @Input() localeText;
-    @Input() mainMenuItemsConfig;
-    @Input() gridOptions;
-    @Input() showColumnsMenuTab;
+    @Input() toolPanelConfig: any;
+    @Input() iconConfig: any;
+    @Input() localeText: any;
+    @Input() mainMenuItemsConfig: any;
+    @Input() gridOptions: any;
+    @Input() showColumnsMenuTab: any;
 
     log: LoggerService;
     agGridOptions: GridOptions;
-    agMainMenuItemsConfig;
+    agMainMenuItemsConfig: any;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
         private powergridService: PowergridService) {
@@ -83,7 +83,7 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
 
         if(this.showColumnsMenuTab) vMenuTabs.push('columnsMenuTab');
 
-        let sideBar;
+        let sideBar: any;
         if (toolPanelConfig && toolPanelConfig.suppressSideButtons === true) {
             sideBar = false;
         } else {
@@ -280,8 +280,8 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
     //     return colDefs;
     // }
 
-    mergeConfig(target, source) {
-        let property;
+    mergeConfig(target: any, source: any) {
+        let property: any;
 
         // clone target to avoid side effects
         let mergeConfig = {};

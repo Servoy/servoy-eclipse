@@ -57,7 +57,7 @@ export class ValuelistFilter extends DatagridFilterDirective {
       else if (this.valuelist.hasRealValues()) {
         // on purpose test with == so that "2" equals to 2
         // eslint-disable-next-line eqeqeq
-        const value = this.valuelist.find((item) => item.realValue == result);
+        const value = this.valuelist.find((item: any) => item.realValue == result);
         if (value) {
           result = value.displayValue;
         }

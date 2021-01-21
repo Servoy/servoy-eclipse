@@ -12,8 +12,8 @@ import { DatagridEditorDirective } from './datagrideditor';
 })
 export class TextEditor extends DatagridEditorDirective {
 
-    @Input() initialDisplayValue;
-    @Input() format;
+    @Input() initialDisplayValue: any;
+    @Input() format: any;
     @Input() maxLength = 524288;
 
     @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {

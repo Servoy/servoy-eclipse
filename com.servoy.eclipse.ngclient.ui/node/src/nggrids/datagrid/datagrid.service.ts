@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class DatagridService {
-    public iconConfig;
-    public toolPanelConfig;
-    public gridOptions;
-    public localeText;
-    public columnOptions;
-    public mainMenuItemsConfig;
+    public iconConfig: any;
+    public toolPanelConfig: any;
+    public gridOptions: any;
+    public localeText: any;
+    public columnOptions: any;
+    public mainMenuItemsConfig: any;
     public arrowsUpDownMoveWhenEditing: string;
 
     /**
