@@ -1,16 +1,16 @@
 import { ICellEditorParams } from '@ag-grid-community/core';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { DatagridEditor } from './datagrideditor';
+import { DatagridEditorDirective } from './datagrideditor';
 
 @Component({
-    selector: 'datagrid-formeditor',
+    selector: 'aggrid-datagrid-formeditor',
     template: `
       <div id="nggridformeditor" [style.width.px]="width" [style.height.px]="height">
         <ng-template [ngTemplateOutlet]="getTemplate()" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
       </div>
     `
 })
-export class FormEditor extends DatagridEditor implements OnDestroy {
+export class FormEditor extends DatagridEditorDirective implements OnDestroy {
 
     editForm;
     width = 300;

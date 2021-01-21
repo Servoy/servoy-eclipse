@@ -1,47 +1,23 @@
 import { ICellEditorParams } from '@ag-grid-community/core';
 import { Component, HostListener, Input } from '@angular/core';
-import { DatagridEditor } from './datagrideditor';
+import { DatagridEditorDirective } from './datagrideditor';
 
 @Component({
-    selector: 'datagrid-texteditor',
+    selector: 'aggrid-datagrid-texteditor',
     template: `
     <div class="ag-input-wrapper">
       <input class="ag-cell-edit-input" [value]="initialDisplayValue" [svyDecimalKeyConverter]="format" [maxLength]="maxLength" #element>
     </div>
     `
 })
-export class TextEditor extends DatagridEditor {
+export class TextEditor extends DatagridEditorDirective {
 
     @Input() initialDisplayValue;
     @Input() format;
     @Input() maxLength = 524288;
 
-
-    agInit(params: ICellEditorParams): void {
-        super.agInit(params);
-
-        if(this.initialValue && this.initialValue.displayValue != undefined) {
-            this.initialValue = this.initialValue.displayValue;
-        }
-        let v = this.initialValue;
-        const column = this.dataGrid.getColumn(params.column.getColId());
-        if(column && column.format) {
-            this.format = column.format;
-            if (this.format.maxLength) {
-                this.maxLength = this.format.maxLength;
-            }
-            if(this.format.edit) {
-                v = this.dataGrid.formattingService.format(v, this.format, true);
-            }
-            else if(this.format.display) {
-                v = this.dataGrid.formattingService.format(v, this.format, false);
-            }
-        }
-        this.initialDisplayValue = v;
-    }
-
     @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {
-        if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing != 'NONE') {
+        if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
             const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
             const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
@@ -50,22 +26,20 @@ export class TextEditor extends DatagridEditor {
                 if(isNavigationUpDownEntertKey) {
                     let newEditingNode = null;
                     const columnToCheck = this.params.column;
-                    const mustBeEditable = this.dataGrid.arrowsUpDownMoveWhenEditing == 'NEXTEDITABLECELL';
-                    if( e.keyCode == 38) { // UP
+                    const mustBeEditable = this.dataGrid.arrowsUpDownMoveWhenEditing === 'NEXTEDITABLECELL';
+                    if( e.keyCode === 38) { // UP
                         if(this.params.rowIndex > 0) {
-                            const _this = this;
-                            this.dataGrid.agGrid.api.forEachNode( function(node) {
-                                if (node.rowIndex <= (_this.params.rowIndex - 1) &&
+                            this.dataGrid.agGrid.api.forEachNode( (node) => {
+                                if (node.rowIndex <= (this.params.rowIndex - 1) &&
                                     (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
                                 }
                             });
                         }
-                    } else if (e.keyCode == 13 || e.keyCode == 40) { // ENTER/DOWN
+                    } else if (e.keyCode === 13 || e.keyCode === 40) { // ENTER/DOWN
                         if( this.params.rowIndex < this.dataGrid.agGrid.api.getModel().getRowCount() - 1) {
-                            const _this = this;
-                            this.dataGrid.agGrid.api.forEachNode( function(node) {
-                                if (node.rowIndex >= (_this.params.rowIndex + 1) &&
+                            this.dataGrid.agGrid.api.forEachNode( (node) => {
+                                if (node.rowIndex >= (this.params.rowIndex + 1) &&
                                     !newEditingNode && (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
                                 }
@@ -99,8 +73,29 @@ export class TextEditor extends DatagridEditor {
 
         if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && this.format) {
             return this.dataGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
+        } else return true;
+    }
+
+    agInit(params: ICellEditorParams): void {
+        super.agInit(params);
+
+        if(this.initialValue && this.initialValue.displayValue !== undefined) {
+            this.initialValue = this.initialValue.displayValue;
         }
-        else return true;
+        let v = this.initialValue;
+        const column = this.dataGrid.getColumn(params.column.getColId());
+        if(column && column.format) {
+            this.format = column.format;
+            if (this.format.maxLength) {
+                this.maxLength = this.format.maxLength;
+            }
+            if(this.format.edit) {
+                v = this.dataGrid.formattingService.format(v, this.format, true);
+            } else if(this.format.display) {
+                v = this.dataGrid.formattingService.format(v, this.format, false);
+            }
+        }
+        this.initialDisplayValue = v;
     }
 
     // focus and select can be done after the gui is attached
@@ -129,7 +124,7 @@ export class TextEditor extends DatagridEditor {
             if(editFormat) {
                 displayValue = this.dataGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
             }
-            if (this.format.type == 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
+            if (this.format.type === 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
                 if (this.format.uppercase) displayValue = displayValue.toUpperCase();
                 else if (this.format.lowercase) displayValue = displayValue.toLowerCase();
             }

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 
 @Injectable()
 export class PowergridService {
@@ -11,19 +11,21 @@ export class PowergridService {
 
     /**
      * Creates an empty icon configuration object
-     * @return {iconConfig}
+     *
+     * @return object
      */
     createIconConfig() {
         return {
-            iconGroupExpanded: "glyphicon glyphicon-minus ag-icon",
-            iconGroupContracted: "glyphicon glyphicon-plus ag-icon",
-            iconRefreshData: "glyphicon glyphicon-refresh"
+            iconGroupExpanded: 'glyphicon glyphicon-minus ag-icon',
+            iconGroupContracted: 'glyphicon glyphicon-plus ag-icon',
+            iconRefreshData: 'glyphicon glyphicon-refresh'
         };
     }
 
     /**
      * Creates an empty toolpanel configuration object
-     * @return {toolPanelConfig}
+     *
+     * @return object
      */
     createToolPanelConfig() {
         return {};
@@ -31,9 +33,10 @@ export class PowergridService {
 
     /**
      * Creates an empty mainMenuItems configuration object
-     * @return {mainMenuItemsConfig}
+     *
+     * @return object
      */
     createMainMenuItemsConfig() {
         return {};
-    }    
+    }
 }

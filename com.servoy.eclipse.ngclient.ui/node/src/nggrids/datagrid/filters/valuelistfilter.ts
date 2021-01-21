@@ -3,10 +3,10 @@ import { NgbTypeahead, NgbTypeaheadConfig } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { FormattingService } from '../../../ngclient/servoy_public';
-import { DatagridFilter } from './datagridfilter';
+import { DatagridFilterDirective } from './datagridfilter';
 
 @Component({
-    selector: 'datagrid-valuelistfilter',
+    selector: 'aggrid-datagrid-valuelistfilter',
     template: `
       <div><div class="ag-filter-body-wrapper"><div class="ag-filter-body">
         <div class="ag-input-wrapper">
@@ -27,7 +27,7 @@ import { DatagridFilter } from './datagridfilter';
       </ng-template>
     `
 })
-export class ValuelistFilter extends DatagridFilter {
+export class ValuelistFilter extends DatagridFilterDirective {
 
     @ViewChild('instance') instance: NgbTypeahead;
     focus$ = new Subject<string>();
@@ -35,23 +35,22 @@ export class ValuelistFilter extends DatagridFilter {
 
     constructor(private formatService: FormattingService, config: NgbTypeaheadConfig) {
       super();
-      config.container = "body";
+      config.container = 'body';
     }
 
     filterValues = (text$: Observable<string>) => {
         const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
         const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
         const inputFocus$ = this.focus$;
-    
         return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelist)
         : this.valuelist.filterList(term))));
-    }
+    };
 
-    resultFormatter = (result: {displayValue: string; realValue: object}) => {
+    resultFormatter = (result: {displayValue: string; realValue: any}) => {
       if (result.displayValue === null) return '';
       return this.formatService.format(result.displayValue, this.format, false);
-    }
-  
+    };
+
     inputFormatter = (result: any) => {
       if (result === null) return '';
       if (result.displayValue !== undefined) result = result.displayValue;
@@ -64,7 +63,7 @@ export class ValuelistFilter extends DatagridFilter {
         }
       }
       return this.formatService.format(result, this.format, false);
-    }
+    };
 
     getFilterUIValue(): any {
       return this.elementRef.nativeElement.value;

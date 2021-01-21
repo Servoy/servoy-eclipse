@@ -6,10 +6,10 @@ import { NgbTypeahead, NgbTypeaheadConfig } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { FormattingService } from '../../../ngclient/servoy_public';
-import { DatagridEditor } from './datagrideditor';
+import { DatagridEditorDirective } from './datagrideditor';
 
 @Component({
-    selector: 'datagrid-typeahededitor',
+    selector: 'aggrid-datagrid-typeahededitor',
     template: `
       <input class="ag-table-typeahed-editor-input"
         [value]="initialDisplayValue"
@@ -21,14 +21,14 @@ import { DatagridEditor } from './datagrideditor';
         #instance="ngbTypeahead" #element>
     `
 })
-export class TypeaheadEditor extends DatagridEditor {
+export class TypeaheadEditor extends DatagridEditorDirective {
 
   @ViewChild('instance') instance: NgbTypeahead;
-  focus$ = new Subject<string>();
-  click$ = new Subject<string>();
-
   @Input() initialDisplayValue;
   @Input() maxLength = 524288;
+
+  focus$ = new Subject<string>();
+  click$ = new Subject<string>();
 
   width: number;
   valuelist;
@@ -37,59 +37,11 @@ export class TypeaheadEditor extends DatagridEditor {
 
   constructor(private formatService: FormattingService, config: NgbTypeaheadConfig) {
     super();
-    config.container = "body";
-  }
-
-  agInit(params: any): void {
-    super.agInit(params);
-
-    if(params.column.actualWidth) {
-      this.width = params.column.actualWidth;
-    }
-
-    this.valuelist = this.dataGrid.getValuelist(params);
-    if (this.valuelist) {
-      const _this = this;
-      this.valuelist.filterList('').subscribe(valuelistValues => {
-        let hasRealValues = false;
-        for (let i = 0; i < valuelistValues.length; i++) {
-          const item = valuelistValues[i];
-          if (item.realValue != item.displayValue) {
-            hasRealValues = true;
-            break;
-          }
-        }
-        _this.hasRealValues = hasRealValues;
-        // make sure initial value has the "realValue" set, so when oncolumndatachange is called
-        // the previous value has the "realValue"
-        if(hasRealValues && params.value && (params.value['realValue'] == undefined)) {
-          params.node['data'][params.column.colDef['field']] = {realValue: params.value, displayValue: params.value};
-        }
-      });
-    }
-
-    if(this.initialValue && this.initialValue.displayValue != undefined) {
-      this.initialValue = this.initialValue.displayValue;
-    }
-    let v = this.initialValue;
-    const column = this.dataGrid.getColumn(params.column.getColId());
-    if(column && column.format) {
-        this.format = column.format;
-        if (this.format.maxLength) {
-            this.maxLength = this.format.maxLength;
-        }
-        if(this.format.edit) {
-            v = this.dataGrid.formattingService.format(v, this.format, true);
-        }
-        else if(this.format.display) {
-            v = this.dataGrid.formattingService.format(v, this.format, false);
-        }
-    }
-    this.initialDisplayValue = v;
+    config.container = 'body';
   }
 
   @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {
-    if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing != 'NONE') {
+    if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
         const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
         const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
@@ -105,8 +57,52 @@ export class TypeaheadEditor extends DatagridEditor {
 
       if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && this.format) {
         return this.dataGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
-      }
-      else return true;
+      } else return true;
+  }
+
+  agInit(params: any): void {
+    super.agInit(params);
+
+    if(params.column.actualWidth) {
+      this.width = params.column.actualWidth;
+    }
+
+    this.valuelist = this.dataGrid.getValuelist(params);
+    if (this.valuelist) {
+      this.valuelist.filterList('').subscribe(valuelistValues => {
+        let hasRealValues = false;
+        for (const item of valuelistValues) {
+          if (item.realValue !== item.displayValue) {
+            hasRealValues = true;
+            break;
+          }
+        }
+        this.hasRealValues = hasRealValues;
+        // make sure initial value has the "realValue" set, so when oncolumndatachange is called
+        // the previous value has the "realValue"
+        if(hasRealValues && params.value && (params.value['realValue'] === undefined)) {
+          params.node['data'][params.column.colDef['field']] = {realValue: params.value, displayValue: params.value};
+        }
+      });
+    }
+
+    if(this.initialValue && this.initialValue.displayValue !== undefined) {
+      this.initialValue = this.initialValue.displayValue;
+    }
+    let v = this.initialValue;
+    const column = this.dataGrid.getColumn(params.column.getColId());
+    if(column && column.format) {
+        this.format = column.format;
+        if (this.format.maxLength) {
+            this.maxLength = this.format.maxLength;
+        }
+        if(this.format.edit) {
+            v = this.dataGrid.formattingService.format(v, this.format, true);
+        } else if(this.format.display) {
+            v = this.dataGrid.formattingService.format(v, this.format, false);
+        }
+    }
+    this.initialDisplayValue = v;
   }
 
   filterValues = (text$: Observable<string>) => {
@@ -141,7 +137,7 @@ export class TypeaheadEditor extends DatagridEditor {
         if(editFormat) {
             displayValue = this.dataGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
         }
-        if (this.format.type == 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
+        if (this.format.type === 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
             if (this.format.uppercase) displayValue = displayValue.toUpperCase();
             else if (this.format.lowercase) displayValue = displayValue.toLowerCase();
         }
@@ -161,16 +157,14 @@ export class TypeaheadEditor extends DatagridEditor {
           // if we still have old value do not set it to null or try to  get it from the list.
           if (this.initialValue != null && this.initialValue !== displayValue) {
             // so invalid thing is typed in the list and we are in real/display values, try to search the real value again to set the display value back.
-            for (let i = 0; i < this.valuelist.length; i++) {
+            for (const vvalue of this.valuelist) {
               //TODO: compare trimmed values, typeahead will trim the selected value
-              if (this.initialValue === this.valuelist[i].displayValue) {
-                realValue = this.valuelist[i].realValue;
+              if (this.initialValue === vvalue.displayValue) {
+                realValue = vvalue.realValue;
                 break;
               }
             }
-          }
-          // if the dataproviderid was null and we are in real|display then reset the value to ""
-          else if(this.initialValue == null) {
+          } else if(this.initialValue == null) { // if the dataproviderid was null and we are in real|display then reset the value to ""
             displayValue = realValue = '';
           }
         }
@@ -180,10 +174,10 @@ export class TypeaheadEditor extends DatagridEditor {
     return {displayValue, realValue};
   }
 
-  resultFormatter = (result: {displayValue: string; realValue: object}) => {
+  resultFormatter = (result: {displayValue: string; realValue: any}) => {
     if (result.displayValue === null) return '';
     return this.formatService.format(result.displayValue, this.format, false);
-  }
+  };
 
   inputFormatter = (result: any) => {
     if (result === null) return '';
@@ -197,14 +191,14 @@ export class TypeaheadEditor extends DatagridEditor {
       }
     }
     return this.formatService.format(result, this.format, false);
-  }
+  };
 
   private findDisplayValue(vl, displayValue) {
     if(vl) {
-      for (let i = 0; i < vl.length; i++) {
+      for (const vvalue of vl) {
         //TODO: compare trimmed values, typeahead will trim the selected value
-        if (displayValue === vl[i].displayValue) {
-          return { hasMatchingDisplayValue: true, realValue: vl[i].realValue };
+        if (displayValue === vvalue.displayValue) {
+          return { hasMatchingDisplayValue: true, realValue: vvalue.realValue };
         }
       }
     }

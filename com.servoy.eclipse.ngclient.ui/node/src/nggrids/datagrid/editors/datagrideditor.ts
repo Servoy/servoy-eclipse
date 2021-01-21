@@ -5,7 +5,7 @@ import { Directive, ElementRef, ViewChild } from '@angular/core';
 import { DataGrid } from '../datagrid';
 
 @Directive()
-export class DatagridEditor implements ICellEditorAngularComp {
+export class DatagridEditorDirective implements ICellEditorAngularComp {
 
     @ViewChild('element') elementRef: ElementRef;
     dataGrid: DataGrid;

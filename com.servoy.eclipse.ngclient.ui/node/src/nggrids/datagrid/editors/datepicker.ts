@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { LocaleService } from '../../../ngclient/servoy_public';
-import { DatagridEditor } from './datagrideditor';
-import { ICellEditorParams } from '@ag-grid-community/core'
+import { DatagridEditorDirective } from './datagrideditor';
+import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
 
 @Component({
-  selector: 'datagrid-datepicker',
+  selector: 'aggrid-datagrid-datepicker',
   template: `
       <div class="input-group ag-cell-edit-input">
         <input class="form-control" style="height: 100%;" [owlDateTime]="datetime" (dateTimeChange)="dateChanged($event)" [value]="initialValue" #element>
@@ -16,7 +16,7 @@ import * as moment from 'moment';
     `,
   providers: [OwlDateTimeIntl]
 })
-export class DatePicker extends DatagridEditor {
+export class DatePicker extends DatagridEditorDirective {
 
   firstDayOfWeek = 1;
   hour12Timer = false;
