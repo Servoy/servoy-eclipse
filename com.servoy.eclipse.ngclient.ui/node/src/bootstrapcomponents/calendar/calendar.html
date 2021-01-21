@@ -1,8 +1,8 @@
-<div class='input-group date bts-calendar'
+<div class='input-group date bts-calendar-container'
 	[svyTooltip]="toolTipText"
     [id]="servoyApi.getMarkupId()"
     #element>
-    <input class='form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'
+    <input class='bts-calendar form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'
     	[sabloTabseq]="tabSeq"
 		[(ngModel)]="dataProviderID"
 		[svyFormat]="format"
