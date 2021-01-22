@@ -66,6 +66,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button useDarkIconsButton;
 	private Button chromiumButton;
 	private Button contextMenuTutorialsButton;
+	private Button launchNG1Button;
+	private Button launchNG2Button;
 
 
 	public void init(IWorkbench workbench)
@@ -201,6 +203,22 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		waitForSolutionToBeLoadedInTestClientSpinner.setToolTipText(tt);
 		testSolutionLoadTimeoutLabelUnits.setToolTipText(tt);
 
+		// launch NG
+		Group launchNGContainer = new Group(rootContainer, SWT.NONE);
+		launchNGContainer.setText("Launch NG Client");
+		launchNGContainer.setLayout(new GridLayout(1, false));
+		launchNGContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Group launchNGGroup = new Group(launchNGContainer, SWT.NONE);
+		launchNGGroup.setText("Start NG Client should launch");
+		launchNGGroup.setLayout(new GridLayout(2, true));
+
+		launchNG1Button = new Button(launchNGGroup, SWT.RADIO);
+		launchNG1Button.setText("NG1");
+
+		launchNG2Button = new Button(launchNGGroup, SWT.RADIO);
+		launchNG2Button.setText("NG2");
+
 		initializeFields();
 
 		return rootContainer;
@@ -221,6 +239,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		chromiumButton.setSelection(prefs.useChromiumBrowser());
 		contextMenuTutorialsButton.setSelection(prefs.useContextMenuTutorials());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
+		launchNG2Button.setSelection(prefs.launchNG2());
+		launchNG1Button.setSelection(!launchNG2Button.getSelection());
 	}
 
 	@Override
@@ -238,6 +258,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
 		chromiumButton.setSelection(DesignerPreferences.USE_CHROMIUM_BROWSER_DEFAULT);
 		contextMenuTutorialsButton.setSelection(DesignerPreferences.USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
+		launchNG1Button.setSelection(!launchNG2Button.getSelection());
+		launchNG2Button.setSelection(DesignerPreferences.LAUNCH_NG2_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -256,6 +278,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.setUseChromiumBrowser(chromiumButton.getSelection());
 		prefs.setContextMenuTutorials(contextMenuTutorialsButton.getSelection());
+		prefs.setLaunchNG2(launchNG2Button.getSelection());
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();

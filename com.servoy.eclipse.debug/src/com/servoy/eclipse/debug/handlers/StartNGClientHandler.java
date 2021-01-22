@@ -30,6 +30,7 @@ import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Solution;
@@ -96,6 +97,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
+					final String solution_path = (new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
 					if (debugNGClient != null && debugNGClient.getFlattenedSolution().getDebugListener() == null)
 					{
@@ -107,7 +109,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 					}
 					try
 					{
-						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() +
+						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + solution_path + solution.getName() +
 							"/index.html";
 						EditorUtil.openURL(getWebBrowser(), url);
 					}
