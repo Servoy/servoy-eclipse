@@ -46,7 +46,7 @@
     "rxjs": "^6.6.3",
     "tslib": "^2.1.0",
     "webpack": "^4.44.2",
-    "zone.js": "~0.10.3",
+    "zone.js": "~0.11.3",
     "uppy-angular": "^0.1.4"
   },
   "devDependencies": {
@@ -75,7 +75,7 @@
     "jasmine": "^3.6.4",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~6.0.0",
-    "karma": "~5.2.3",
+    "karma": "~6.0.1",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "^2.0.0",
     "karma-coverage-istanbul-reporter": "~3.0.3",
