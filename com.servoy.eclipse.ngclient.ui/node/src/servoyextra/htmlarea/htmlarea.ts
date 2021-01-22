@@ -1,6 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-editor';
 
 @Component( {
@@ -10,28 +9,26 @@ import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-edi
 } )
 export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onActionMethodID;
-    @Input() onRightClickMethodID;
-    @Input() onDataChangeMethodID;
-    @Input() onFocusGainedMethodID;
-    @Input() onFocusLostMethodID;
+    @Input() onActionMethodID: ( e: Event ) => void;
+    @Input() onRightClickMethodID: ( e: Event ) => void;
+    @Input() onDataChangeMethodID: ( e: Event ) => void;
+    @Input() onFocusGainedMethodID: ( e: Event ) => void;
+    @Input() onFocusLostMethodID: ( e: Event ) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
-    @Input() dataProviderID;
-    @Input() enabled;
-    @Input() editable;
-    @Input() placeholderText;
-    @Input() readOnly;
-    @Input() responsiveHeight;
-    @Input() styleClass;
-    @Input() tabSeq;
-    @Input() text;
-    @Input() toolTipText;
-    @Input() scrollbars;
+    @Input() dataProviderID: any;
+    @Input() enabled: boolean;
+    @Input() editable: boolean;
+    @Input() placeholderText: string;
+    @Input() readOnly: boolean;
+    @Input() responsiveHeight: any;
+    @Input() styleClass: string;
+    @Input() tabSeq: number;
+    @Input() text: string;
+    @Input() toolTipText: string;
+    @Input() scrollbars: any;
 
     @ViewChild( AngularEditorComponent ) editor: AngularEditorComponent;
-
-    private log: LoggerService;
 
     config: AngularEditorConfig = {
         editable: true,
@@ -41,9 +38,8 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
         defaultParagraphSeparator: 'p'
     };
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( renderer, cdRef );
-        this.log = logFactory.getLogger( 'Htmlarea' );
     }
 
     svyOnInit() {

@@ -1,6 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { FileUploader } from 'ng2-file-upload';
 
 @Component( {
@@ -11,42 +10,39 @@ import { FileUploader } from 'ng2-file-upload';
 } )
 export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onDataChangeMethodID;
-    @Input() onFileUploadedMethodID;
-    @Input() onFileTransferFinishedMethodID;
+    @Input() onDataChangeMethodID: ( e: Event ) => void;
+    @Input() onFileUploadedMethodID: ( e: Event ) => void;
+    @Input() onFileTransferFinishedMethodID: ( e: Event ) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
-    @Input() dataProviderID;
-    @Input() displaysTags;
-    @Input() accept;
-    @Input() enabled;
-    @Input() location;
-    @Input() name;
-    @Input() size;
-    @Input() styleClass;
-    @Input() styleClassExpression;
-    @Input() iconStyleClass;
-    @Input() resultDisplayTimeout;
-    @Input() successIconStyleClass;
-    @Input() showFileName;
-    @Input() showProgress;
-    @Input() multiFileUpload;
-    @Input() uploadText;
-    @Input() uploadProgressText;
-    @Input() uploadSuccessText;
-    @Input() uploadCancelText;
-    @Input() uploadNotSupportedText;
-    @Input() uploadNotSupportedFileText;
-    @Input() toolTipText;
+    @Input() dataProviderID: any;
+    @Input() displaysTags: boolean;
+    @Input() accept: any;
+    @Input() enabled: boolean;
+    @Input() location: any;
+    @Input() name: string;
+    @Input() size: any;
+    @Input() styleClass: string;
+    @Input() styleClassExpression: string;
+    @Input() iconStyleClass: string;
+    @Input() resultDisplayTimeout: number;
+    @Input() successIconStyleClass: string;
+    @Input() showFileName: boolean;
+    @Input() showProgress: boolean;
+    @Input() multiFileUpload: boolean;
+    @Input() uploadText: string;
+    @Input() uploadProgressText: string;
+    @Input() uploadSuccessText: string;
+    @Input() uploadCancelText: string;
+    @Input() uploadNotSupportedText: string;
+    @Input() uploadNotSupportedFileText: string;
+    @Input() toolTipText: string;
 
     uploader: FileUploader;
     hasBaseDropZoneOver: boolean;
 
-    private log: LoggerService;
-
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, private utilsService: SvyUtilsService ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService ) {
         super( renderer, cdRef );
-        this.log = logFactory.getLogger( 'FileUpload' );
         this.uploader = new FileUploader( {
             url: '',
         } );

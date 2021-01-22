@@ -1,6 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Component( {
     selector: 'servoyextra-imagelabel',
@@ -9,21 +8,18 @@ import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 } )
 export class ServoyExtraImageLabel extends ServoyBaseComponent<HTMLImageElement> {
 
-    @Input() onActionMethodID;
-    @Input() onRightClickMethodID;
+    @Input() onActionMethodID: ( e: Event ) => void;
+    @Input() onRightClickMethodID: ( e: Event ) => void;
 
-    @Input() enabled;
-    @Input() styleClass;
-    @Input() tabSeq;
-    @Input() media;
+    @Input() enabled: boolean;
+    @Input() styleClass: string;
+    @Input() tabSeq: number;
+    @Input() media: any;
 
     imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';
 
-    private log: LoggerService;
-
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super( renderer, cdRef );
-        this.log = logFactory.getLogger( 'ImageLabel' );
     }
 
     svyOnInit() {
@@ -71,8 +67,8 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent<HTMLImageElement>
         }
         if ( this.onRightClickMethodID ) {
             this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
- this.onRightClickMethodID( e ); return false;
-} );
+                this.onRightClickMethodID( e ); return false;
+            } );
         }
     }
 }
