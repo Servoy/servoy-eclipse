@@ -273,7 +273,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							$scope.ghostContainerElements[uuid] = parent;
 							defer.resolve(parent);
 							delete $scope.testElementTimeouts[uuid];
-						} else {
+						} else if (isGhostContainer(uuid)) {
 								$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
 							}
 					}
@@ -284,6 +284,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					return defer.promise;
 				}
 				return parent;
+			}
+			
+			function isGhostContainer(uuid) {
+				if ($scope.ghosts.ghostContainers) {
+						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+							if 	($scope.ghosts.ghostContainers[i].uuid === uuid)
+							 return true;						
+						}
+					}
+				return false;
 			}
 
 			var realContainerPromise = {};
@@ -896,8 +906,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.setGhosts = function(ghosts) {
 				if (!equalGhosts($scope.ghosts, ghosts)) {
+					flushGhostContainers();
 					$scope.ghosts = ghosts;
-					$scope.ghostContainerElements = {}
 	
 					if ($scope.ghosts.ghostContainers) {
 						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
@@ -1177,7 +1187,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			});
 
 			$element.on('flushGhostContainerElements.content', function(event) {
-				$scope.ghostContainerElements = {};
+				flushGhostContainers();
 			});
 
 			$element.on('renderDecorators.content', function(event) {
@@ -1254,7 +1264,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			})
 			
 			function areAllGhostContainersVisible() {
-				if ($scope.ghosts.ghostContainers) {
+				if ($scope.ghosts && $scope.ghosts.ghostContainers) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 						if (!$scope.ghosts.ghostContainers[i].style || $scope.ghosts.ghostContainers[i].style.display !== "block") {
 							return false;
@@ -1273,7 +1283,20 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					windowWidth =  $($window).width();
 					$element.trigger('renderDecorators.content');
 				}
-			});			
+			});		
+			
+			function flushGhostContainers() {
+				$scope.ghostContainerElements = {};
+				if ($scope.testElementTimeouts) {
+					var timeouts = $scope.testElementTimeouts;
+					$scope.testElementTimeouts = {};
+					for (var uuid in timeouts) {
+						if (timeouts.hasOwnProperty(uuid) && timeouts[uuid] !== undefined){
+						 clearTimeout(timeouts[uuid]);
+						}
+					}
+				}
+			}	
 			
 		},
 		templateUrl: 'templates/editor.html',
