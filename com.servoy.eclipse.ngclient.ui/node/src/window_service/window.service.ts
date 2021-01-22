@@ -20,87 +20,80 @@ export class WindowService {
         this._shortcuts = shortcuts;
         if (this._shortcuts) {
             this._shortcuts.forEach((newvalue) => {
-                var translatedShortcut = this.translateSwingShortcut(newvalue.shortcut);
+                const translatedShortcut = this.translateSwingShortcut(newvalue.shortcut);
                 if (!this.shortcutService.all_shortcuts[translatedShortcut]) {
-                    this.shortcutService.add(translatedShortcut, (e) => {
-                        let targetEl;
+                    this.shortcutService.add(translatedShortcut, (e: KeyboardEvent) => {
+                        let targetEl: EventTarget;
                         if (e.target) targetEl = e.target;
                         else if (e.srcElement) targetEl = e.srcElement;
                         let retValue = true;
-                        let callback = newvalue.callback;
+                        const callback = newvalue.callback;
                         let contextFilter = null;
                         let contextFilterElement = null;
                         if (newvalue.contextFilter) {
-                            let contextFilterParts = newvalue.contextFilter.split('.');
+                            const contextFilterParts = newvalue.contextFilter.split('.');
                             contextFilter = contextFilterParts[0];
                             if (contextFilterParts.length > 1) {
                                 contextFilterElement = contextFilterParts[1];
                             }
                         }
 
-                        var jsEvent = this.utils.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
+                        const jsEvent = this.utils.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
 
                         if (!jsEvent) return retValue;
 
-                        let args = newvalue.arguments;
+                        const args = newvalue.arguments;
                         let argsWithEvent: Array<any> = [jsEvent];// append args
                         if (args != null) {
                             if (args.length) {
                                 argsWithEvent = argsWithEvent.concat(args);
-                            }
-                            else {
+                            } else {
                                 argsWithEvent.push(args);
                             }
                         }
-                        targetEl.dispatchEvent(new CustomEvent("change"));
+                        targetEl.dispatchEvent(new CustomEvent('change'));
                         //$sabloTestability.block(true);
-                        setTimeout((callback, argsWithEvent) => {
-                            var formName = argsWithEvent[0].formName;
-                            if (!formName) formName = callback.formname;
-                            this.servoyService.executeInlineScript(formName, callback.script, argsWithEvent);
+                        setTimeout((clb: {script: string; formname?: string}, clbArgs: Array<any>) => {
+                            let formName = clbArgs[0].formName;
+                            if (!formName) formName = clb.formname;
+                            this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
                             //$sabloTestability.block(false);
                         }, 10, callback, argsWithEvent);
                         if (retValue && newvalue.consumeEvent) retValue = false;
                         return retValue;
 
                     }
-                    , { 'propagate': true, 'disable_in_input': false });
+                    , { propagate: true, disable_in_input: false });
                 }
-            })
+            });
         }
     }
 
     private translateSwingShortcut(shortcutcombination: string): string {
-        var shortcutParts = shortcutcombination.split(" ");
-        var translatedShortcut = '';
+        const shortcutParts = shortcutcombination.split(' ');
+        let translatedShortcut = '';
         for (let i = 0; i < shortcutParts.length; i++) {
             if (i > 0) {
                 translatedShortcut += '+';
             }
-            if (shortcutParts[i] == 'control' || shortcutParts[i] == 'ctrl') {
+            if (shortcutParts[i] === 'control' || shortcutParts[i] === 'ctrl') {
                 translatedShortcut += 'CTRL';
-            }
-            else if (shortcutParts[i] == 'meta') {
+            } else if (shortcutParts[i] === 'meta') {
                 translatedShortcut += 'META';
-            }
-            else if (shortcutParts[i] == 'shift') {
+            } else if (shortcutParts[i] === 'shift') {
                 translatedShortcut += 'SHIFT';
-            }
-            else if (shortcutParts[i] == 'alt') {
+            } else if (shortcutParts[i] === 'alt') {
                 translatedShortcut += 'ALT';
-            }
-            else if (shortcutParts[i].toLowerCase().indexOf('numpad') == 0) {
+            } else if (shortcutParts[i].toLowerCase().indexOf('numpad') === 0) {
                 //numpad0 to numpad9
-                if (shortcutParts[i].length == 7) {
+                if (shortcutParts[i].length === 7) {
                     shortcutParts[i] = shortcutParts[i].toLowerCase();
-                    shortcutParts[i] = shortcutParts[i].replace("numpad", "numpad-");
+                    shortcutParts[i] = shortcutParts[i].replace('numpad', 'numpad-');
+                    translatedShortcut += shortcutParts[i];
+                } else {
                     translatedShortcut += shortcutParts[i];
                 }
-                else {
-                    translatedShortcut += shortcutParts[i];
-                }
-            }
-            else {
+            } else {
                 translatedShortcut += shortcutParts[i];
             }
         }
@@ -110,7 +103,7 @@ export class WindowService {
 
 class Shortcut {
     public shortcut: string;
-    public callback: string;
+    public callback: {script: string; formname?: string};
     public contextFilter: string;
     public consumeEvent: boolean;
     public arguments: Array<any>;
