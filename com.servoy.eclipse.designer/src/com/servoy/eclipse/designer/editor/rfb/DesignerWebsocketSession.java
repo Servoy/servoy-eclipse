@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -378,7 +379,16 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 
 		IPersist superPersist = PersistHelper.getSuperPersist(persist);
-		if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
+		if (superPersist instanceof IFormElement)
+		{
+			deletedComponents.add((IFormElement)superPersist);
+			if (persist instanceof WebComponent)
+			{
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+					.getWebComponentSpecification(((WebComponent)persist).getTypeName());
+				ghost = !spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty();
+			}
+		}
 
 
 		if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
