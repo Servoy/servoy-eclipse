@@ -363,7 +363,7 @@ div.svy-label-with-focus:focus{
 	border-color: #d6e9c6;
 }
 
-.dropdown-menu {
+div[ngbDropdownMenu] {
   max-height: 300px;
   overflow-y: scroll;
 }

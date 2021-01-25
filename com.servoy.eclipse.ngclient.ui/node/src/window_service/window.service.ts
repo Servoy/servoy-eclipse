@@ -1,15 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 import { ShortcutService } from './shortcut.service';
 import { SvyUtilsService } from '../ngclient/servoy_public';
 import { ServoyService } from '../ngclient/servoy.service';
+import { PopupMenuService,Popup, MenuItem, Callback } from './popupmenu.service';
+import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 
 @Injectable()
 export class WindowService {
     private _shortcuts: Shortcut[];
+    private _popupmenus: Popup[];
+    private _popupMenuShowCommand: PopupMenuShowCommand;
 
-    constructor(private shortcutService: ShortcutService, private utils: SvyUtilsService, private servoyService: ServoyService) {
-
+    constructor(private shortcutService: ShortcutService, private popupMenuService: PopupMenuService, private utils: SvyUtilsService, private servoyService: ServoyService, @Inject(DOCUMENT) private document: Document, private changeHandler: ServiceChangeHandler) {
+        this.popupMenuService.setClosePopupHandler(()=>{
+            this._popupMenuShowCommand = null;
+            this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
+        })
     }
 
     get shortcuts(): Shortcut[] {
@@ -69,6 +77,57 @@ export class WindowService {
         }
     }
 
+    get popupMenuShowCommand(): PopupMenuShowCommand {
+        return this._popupMenuShowCommand;
+    }
+
+    set popupMenuShowCommand(popupMenuShowCommand: PopupMenuShowCommand) {
+        this._popupMenuShowCommand = popupMenuShowCommand;
+        this.showPopupMenu();
+    }
+
+    get popupMenus(): Popup[] {
+        return this._popupmenus;
+    }
+
+    set popupMenus(popupmenus: Popup[]) {
+        this._popupmenus = popupmenus;
+        this.showPopupMenu();
+    }
+
+    private showPopupMenu() {
+       
+        if (this._popupmenus && this._popupMenuShowCommand) {
+            for (let i = 0; i < this._popupmenus.length; i++) {
+                if (this._popupMenuShowCommand.popupName == this._popupmenus[i].name) {
+                    let x : number;
+                    let y : number;
+                    
+                    if (this._popupMenuShowCommand.elementId) {
+                        let element = document.getElementById(this._popupMenuShowCommand.elementId);
+                        if (element) {
+                            let rect = element.getBoundingClientRect();
+                            x = element.scrollLeft + rect.left + this._popupMenuShowCommand.x;
+                            y = element.scrollTop + rect.top + this._popupMenuShowCommand.y;
+                        }
+                        else {
+                            console.error("Cannot display popup, element with id:" + this._popupMenuShowCommand.elementId + " , not found");
+                            return;
+                        }
+                    }
+                    else {
+                        x = this._popupMenuShowCommand.x ;
+                        y = this._popupMenuShowCommand.y;
+                    }
+                    
+                    this.popupMenuService.showMenu(x, y, this._popupmenus[i]);
+                    break;
+                }
+            }
+        }
+
+    }
+
     private translateSwingShortcut(shortcutcombination: string): string {
         const shortcutParts = shortcutcombination.split(' ');
         let translatedShortcut = '';
@@ -103,9 +162,16 @@ export class WindowService {
 
 class Shortcut {
     public shortcut: string;
-    public callback: {script: string; formname?: string};
+    public callback: Callback;
     public contextFilter: string;
     public consumeEvent: boolean;
     public arguments: Array<any>;
 
+}
+
+class PopupMenuShowCommand {
+    public popupName: string;
+    public elementId: string;
+    public x: number;
+    public y: number
 }

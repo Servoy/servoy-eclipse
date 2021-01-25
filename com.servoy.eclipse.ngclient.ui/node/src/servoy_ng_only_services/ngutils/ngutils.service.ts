@@ -34,7 +34,7 @@ export class NGUtilsService {
 
     set styleclasses(styleclasses) {
          this._styleclasses = styleclasses;
-         this.changeHandler.changed('ngclientutils','styleclasses', styleclasses);
+         // TODO add implementation
     }
 
     set backActionCB(backActionCB: any) {
@@ -250,10 +250,6 @@ export class NGUtilsService {
      */
     public removeFormStyleClass(formname,styleclass) {
         // implemented in ngutils_server.js
-    }
-
-    public setServiceChangeHandler(changeHandler: ServiceChangeHandler) {
-        this.changeHandler = changeHandler;
     }
 
     /**
