@@ -1585,7 +1585,7 @@ public class SolutionDeserializer
 		{
 			return IColumnTypes.TEXT;
 		}
-		else if ("Date".equalsIgnoreCase(name))
+		else if ("Date".equals(name))
 		{
 			return IColumnTypes.DATETIME;
 		}
@@ -1593,7 +1593,7 @@ public class SolutionDeserializer
 		{
 			return IColumnTypes.NUMBER;
 		}
-		else if ("Integer".equalsIgnoreCase(name))
+		else if ("Integer".equals(name))
 		{
 			return IColumnTypes.INTEGER;
 		}
