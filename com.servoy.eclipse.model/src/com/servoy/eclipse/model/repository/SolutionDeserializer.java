@@ -1581,19 +1581,19 @@ public class SolutionDeserializer
 	 */
 	private int getServoyType(String name)
 	{
-		if ("String".equals(name))
+		if ("String".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.TEXT;
 		}
-		else if ("Date".equals(name))
+		else if ("Date".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.DATETIME;
 		}
-		else if ("Number".equals(name))
+		else if ("Number".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.NUMBER;
 		}
-		else if ("Integer".equals(name))
+		else if ("Integer".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.INTEGER;
 		}
