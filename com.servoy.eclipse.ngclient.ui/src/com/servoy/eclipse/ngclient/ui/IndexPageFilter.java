@@ -81,7 +81,7 @@ public class IndexPageFilter implements Filter
 			else
 			{
 				File file = new File(distFolder, requestURI);
-				if (file.exists() && !file.getName().equals("favicon.ico"))
+				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
 				{
 					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
 					if (contentType != null) servletResponse.setContentType(contentType);
