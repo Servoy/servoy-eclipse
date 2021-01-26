@@ -4,7 +4,7 @@ import { DOCUMENT } from '@angular/common';
 import { ShortcutService } from './shortcut.service';
 import { SvyUtilsService } from '../ngclient/servoy_public';
 import { ServoyService } from '../ngclient/servoy.service';
-import { PopupMenuService,Popup, MenuItem, Callback } from './popupmenu.service';
+import { PopupMenuService, Popup, MenuItem, Callback } from './popupmenu.service';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 
 @Injectable()
@@ -14,10 +14,7 @@ export class WindowService {
     private _popupMenuShowCommand: PopupMenuShowCommand;
 
     constructor(private shortcutService: ShortcutService, private popupMenuService: PopupMenuService, private utils: SvyUtilsService, private servoyService: ServoyService, @Inject(DOCUMENT) private document: Document, private changeHandler: ServiceChangeHandler) {
-        this.popupMenuService.setClosePopupHandler(()=>{
-            this._popupMenuShowCommand = null;
-            this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
-        })
+
     }
 
     get shortcuts(): Shortcut[] {
@@ -61,7 +58,7 @@ export class WindowService {
                         }
                         targetEl.dispatchEvent(new CustomEvent('change'));
                         //$sabloTestability.block(true);
-                        setTimeout((clb: {script: string; formname?: string}, clbArgs: Array<any>) => {
+                        setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
                             let formName = clbArgs[0].formName;
                             if (!formName) formName = clb.formname;
                             this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
@@ -71,7 +68,7 @@ export class WindowService {
                         return retValue;
 
                     }
-                    , { propagate: true, disable_in_input: false });
+                        , { propagate: true, disable_in_input: false });
                 }
             });
         }
@@ -96,13 +93,19 @@ export class WindowService {
     }
 
     private showPopupMenu() {
-       
+
         if (this._popupmenus && this._popupMenuShowCommand) {
+            if (!this.popupMenuService.closePopupHandler) {
+                this.popupMenuService.initClosePopupHandler(() => {
+                    this._popupMenuShowCommand = null;
+                    this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
+                })
+            }
             for (let i = 0; i < this._popupmenus.length; i++) {
                 if (this._popupMenuShowCommand.popupName == this._popupmenus[i].name) {
-                    let x : number;
-                    let y : number;
-                    
+                    let x: number;
+                    let y: number;
+
                     if (this._popupMenuShowCommand.elementId) {
                         let element = document.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
@@ -116,10 +119,10 @@ export class WindowService {
                         }
                     }
                     else {
-                        x = this._popupMenuShowCommand.x ;
+                        x = this._popupMenuShowCommand.x;
                         y = this._popupMenuShowCommand.y;
                     }
-                    
+
                     this.popupMenuService.showMenu(x, y, this._popupmenus[i]);
                     break;
                 }

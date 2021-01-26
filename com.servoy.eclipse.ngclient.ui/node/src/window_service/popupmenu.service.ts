@@ -8,17 +8,20 @@ export class PopupMenuService {
     closePopupHandler: () => void;
 
     constructor(private servoyService: ServoyService, @Inject(DOCUMENT) private document: Document) {
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.svy-popup-menu').forEach(item => {
-                item.remove();
-            });
-            if (this.closePopupHandler) {
-                this.closePopupHandler();
-            }
-        });
+
     }
 
-    public setClosePopupHandler(handler: () => void) {
+    public initClosePopupHandler(handler: () => void) {
+        if (!this.closePopupHandler) {
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.svy-popup-menu').forEach(item => {
+                    item.remove();
+                });
+                if (this.closePopupHandler) {
+                    this.closePopupHandler();
+                }
+            });
+        }
         this.closePopupHandler = handler;
     }
 
