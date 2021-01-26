@@ -93,19 +93,16 @@ export class WindowService {
     }
 
     private showPopupMenu() {
-
         if (this._popupmenus && this._popupMenuShowCommand) {
-            if (!this.popupMenuService.closePopupHandler) {
-                this.popupMenuService.initClosePopupHandler(() => {
-                    this._popupMenuShowCommand = null;
-                    this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
-                })
-            }
             for (let i = 0; i < this._popupmenus.length; i++) {
                 if (this._popupMenuShowCommand.popupName == this._popupmenus[i].name) {
                     let x: number;
                     let y: number;
 
+                    this.popupMenuService.initClosePopupHandler(() => {
+                        this._popupMenuShowCommand = null;
+                        this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
+                    })
                     if (this._popupMenuShowCommand.elementId) {
                         let element = document.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
@@ -128,7 +125,6 @@ export class WindowService {
                 }
             }
         }
-
     }
 
     private translateSwingShortcut(shortcutcombination: string): string {

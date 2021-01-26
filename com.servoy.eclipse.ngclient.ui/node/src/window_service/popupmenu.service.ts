@@ -5,24 +5,21 @@ import { ServoyService } from '../ngclient/servoy.service';
 @Injectable()
 export class PopupMenuService {
 
-    closePopupHandler: () => void;
-
     constructor(private servoyService: ServoyService, @Inject(DOCUMENT) private document: Document) {
 
     }
 
     public initClosePopupHandler(handler: () => void) {
-        if (!this.closePopupHandler) {
-            document.addEventListener('click', () => {
-                document.querySelectorAll('.svy-popup-menu').forEach(item => {
-                    item.remove();
-                });
-                if (this.closePopupHandler) {
-                    this.closePopupHandler();
-                }
+        const listener = () => {
+            document.querySelectorAll('.svy-popup-menu').forEach(item => {
+                item.remove();
             });
-        }
-        this.closePopupHandler = handler;
+            if (handler) {
+                handler();
+            }
+            document.removeEventListener('click', listener);
+        };
+        document.addEventListener('click', listener);
     }
 
     public showMenu(x: number, y: number, popup: Popup) {
