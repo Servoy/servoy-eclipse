@@ -298,10 +298,14 @@ public class TutorialView extends ViewPart
 
 								if (event.getSource() instanceof StyledText)
 								{
-									System.out.println("login token: " + System.getProperty("servoy.tutorial.url"));
-									BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-										Activator.TUTORIALS_URL + getLoginToken() + "&viewTutorial=" + tutorialID, true, false);
-									tutorialDialog.open(true);
+									String loginToken = getLoginToken();
+									if (loginToken != null)
+									{
+										System.out.println("login token: " + System.getProperty("servoy.tutorial.url"));
+										BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+											Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
+										tutorialDialog.open(true);
+									}
 								}
 							}
 						});
@@ -348,10 +352,14 @@ public class TutorialView extends ViewPart
 				@Override
 				public void handleEvent(Event event)
 				{
-					final String currentTutorialID = dataModel.optString("tutorialID");
-					BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-						Activator.TUTORIALS_URL + getLoginToken() + "&viewTutorial=" + currentTutorialID, true, false);
-					tutorialDialog.open(true);
+					String loginToken = getLoginToken();
+					if (loginToken != null)
+					{
+						final String currentTutorialID = dataModel.optString("tutorialID");
+						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+							Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
+						tutorialDialog.open(true);
+					}
 				}
 			});
 

@@ -39,7 +39,10 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 	public void run(IAction action)
 	{
 		String loginToken = ServoyLoginDialog.getLoginToken();
-
+		if (loginToken == null)
+		{
+			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+		}
 		if (loginToken != null)
 		{
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
