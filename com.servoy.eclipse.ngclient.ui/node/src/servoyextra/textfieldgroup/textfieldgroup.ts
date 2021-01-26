@@ -6,8 +6,11 @@ import { ServoyBaseComponent, Format } from '../../ngclient/servoy_public';
     styleUrls: ['./textfieldgroup.css'],
     templateUrl: './textfieldgroup.html'
 } )
-export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElement> {
+export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElement> {
 
+    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
+    @ViewChild('span', { static: false }) span: ElementRef<HTMLSpanElement>;
+    
     @Input() onActionMethodID: ( e: Event ) => void;
     @Input() onRightClickMethodID: ( e: Event ) => void;
     @Input() onDataChangeMethodID: ( e: Event ) => void;
@@ -28,7 +31,9 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElem
     @Input() tabSeq: number;
     @Input() visible: boolean;
     
-    showError = true;
+    showError = false;
+    
+    mustExecuteOnFocus = true;
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( renderer, cdRef );
@@ -37,6 +42,15 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElem
     svyOnInit() {
         super.svyOnInit();
         this.attachHandlers();
+    }
+    
+    getFocusElement() {
+        return this.input.nativeElement;
+    }
+
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getFocusElement().focus();
     }
 
     svyOnChanges( changes: SimpleChanges ) {
@@ -50,11 +64,8 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElem
                         else
                             this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
                         break;
-                    case 'styleClass':
-                        if ( change.previousValue )
-                            this.renderer.removeClass( this.getNativeElement(), change.previousValue );
-                        if ( change.currentValue )
-                            this.renderer.addClass( this.getNativeElement(), change.currentValue );
+                    case 'dataProviderID':
+                        this.dataProviderValidation();
                         break;
                 }
             }
@@ -62,11 +73,29 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElem
         super.svyOnChanges( changes );
     }
 
-    getFocusElement(): any {
-        return this.getNativeElement();
+    dataProviderValidation() {
+        if ( this.inputValidation === 'email' ) {
+            const email_regexp = /^[_a-z0-9-+^$']+(\.[_a-z0-9-+^$']+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+            let isMatchRegex = email_regexp.test( this.dataProviderID );
+            if ( isMatchRegex || !this.dataProviderID ) {
+                this.showError = false;
+            } else {
+                this.showError = true;
+            }
+        } else {
+            this.showError = false;
+        }
+    }
+    
+    pushUpdate() {
+        this.dataProviderID = this.input.nativeElement.value;
+        this.dataProviderIDChange.emit(this.dataProviderID);
+        this.dataProviderValidation();
     }
 
     protected attachHandlers() {
+
+        this.attachFocusListeners(this.getFocusElement());
         if ( this.onActionMethodID ) {
             this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
         }
@@ -75,6 +104,20 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLImageElem
                 this.onRightClickMethodID( e ); return false;
             } );
         }
+    }
+    
+    attachFocusListeners( nativeElement: any ) {
+        if ( this.onFocusGainedMethodID )
+            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( e );
+                }
+                this.mustExecuteOnFocus = true;
+            } );
+        if ( this.onFocusLostMethodID )
+            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+                this.onFocusLostMethodID( e );
+            } );
     }
 }
 
