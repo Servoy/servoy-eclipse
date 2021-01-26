@@ -53,6 +53,10 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElemen
         this.getFocusElement().focus();
     }
 
+    isValid() {
+        return !this.showError;
+    }
+
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes ) {
             for ( const property of Object.keys( changes ) ) {
