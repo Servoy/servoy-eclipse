@@ -3,6 +3,7 @@ import { ServoyExtraTable } from './table/table';
 import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
+import { ServoyExtraTextfieldGroup } from './textfieldgroup/textfieldgroup';
 import { ServoyExtraSlider } from './slider/slider';
 import { ServoyExtraSpinner } from './spinner/spinner';
 import { ServoyExtraSplitpane } from './splitpane/splitpane';
@@ -29,6 +30,7 @@ import { UppyAngularModule } from 'uppy-angular';
         ServoyExtraHtmlarea,
         ServoyExtraImageLabel,
         ServoyExtraFileUpload,
+        ServoyExtraTextfieldGroup,
         ServoyExtraSlider,
         ServoyExtraSpinner,
 		ServoyExtraSplitpane,
@@ -57,6 +59,7 @@ import { UppyAngularModule } from 'uppy-angular';
               ServoyExtraHtmlarea,
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,
+              ServoyExtraTextfieldGroup,
               ServoyExtraSlider,
               ServoyExtraSpinner,
 			  ServoyExtraSplitpane,
