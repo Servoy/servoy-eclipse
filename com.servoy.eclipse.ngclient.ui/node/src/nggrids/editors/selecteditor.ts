@@ -1,16 +1,16 @@
 import { Component, HostListener } from '@angular/core';
-import { DatagridEditorDirective } from './datagrideditor';
+import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
 
 @Component({
-    selector: 'aggrid-datagrid-selecteditor',
+    selector: 'aggrid-selecteditor',
     template: `
         <div class="ag-cell-edit-input">
             <select class="ag-cell-edit-input" #element></select>
         </div>
     `
 })
-export class SelectEditor extends DatagridEditorDirective {
+export class SelectEditor extends EditorDirective {
 
     @HostListener('keydown', ['$event']) onKeyDown(e: KeyboardEvent) {
         const isNavigationKey = e.keyCode === 38 || e.keyCode === 40;
@@ -26,7 +26,7 @@ export class SelectEditor extends DatagridEditorDirective {
     agInit(params: ICellEditorParams): void {
         super.agInit(params);
 
-        const vl = this.dataGrid.getValuelist(params);
+        const vl = this.ngGrid.getValuelist(params);
         if (vl) {
             let v = params.value;
             if (v && v.displayValue !== undefined) {

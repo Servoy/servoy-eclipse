@@ -128,6 +128,7 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     // component template generate start
     @ViewChild('aggridGroupingtable', { static: true }) readonly aggridGroupingtable: TemplateRef<any>;
+    @ViewChild('aggridDatasettable', { static: true }) readonly aggridDatasettable: TemplateRef<any>;
 
     @ViewChild('servoydefaultTextfield', { static: true }) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild('servoydefaultTextarea', { static: true }) readonly servoydefaultTextarea: TemplateRef<any>;

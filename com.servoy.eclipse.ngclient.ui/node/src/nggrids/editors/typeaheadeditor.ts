@@ -5,11 +5,11 @@ import { Component } from '@angular/core';
 import { NgbTypeahead, NgbTypeaheadConfig } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
-import { FormattingService } from '../../../ngclient/servoy_public';
-import { DatagridEditorDirective } from './datagrideditor';
+import { FormattingService } from '../../ngclient/servoy_public';
+import { EditorDirective } from './editor';
 
 @Component({
-    selector: 'aggrid-datagrid-typeahededitor',
+    selector: 'aggrid-typeahededitor',
     template: `
       <input class="ag-table-typeahed-editor-input"
         [value]="initialDisplayValue"
@@ -21,7 +21,7 @@ import { DatagridEditorDirective } from './datagrideditor';
         #instance="ngbTypeahead" #element>
     `
 })
-export class TypeaheadEditor extends DatagridEditorDirective {
+export class TypeaheadEditor extends EditorDirective {
 
   @ViewChild('instance') instance: NgbTypeahead;
   @Input() initialDisplayValue: any;
@@ -41,7 +41,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
   }
 
   @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {
-    if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
+    if(this.ngGrid.arrowsUpDownMoveWhenEditing && this.ngGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
         const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
         const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
@@ -56,7 +56,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
       const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
       if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && this.format) {
-        return this.dataGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
+        return this.ngGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
       } else return true;
   }
 
@@ -67,7 +67,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
       this.width = params.column.actualWidth;
     }
 
-    this.valuelist = this.dataGrid.getValuelist(params);
+    this.valuelist = this.ngGrid.getValuelist(params);
     if (this.valuelist) {
       this.valuelist.filterList('').subscribe((valuelistValues: any) => {
         let hasRealValues = false;
@@ -90,16 +90,16 @@ export class TypeaheadEditor extends DatagridEditorDirective {
       this.initialValue = this.initialValue.displayValue;
     }
     let v = this.initialValue;
-    const column = this.dataGrid.getColumn(params.column.getColId());
+    const column = this.ngGrid.getColumn(params.column.getColId());
     if(column && column.format) {
         this.format = column.format;
         if (this.format.maxLength) {
             this.maxLength = this.format.maxLength;
         }
         if(this.format.edit) {
-            v = this.dataGrid.formattingService.format(v, this.format, true);
+            v = this.ngGrid.formattingService.format(v, this.format, true);
         } else if(this.format.display) {
-            v = this.dataGrid.formattingService.format(v, this.format, false);
+            v = this.ngGrid.formattingService.format(v, this.format, false);
         }
     }
     this.initialDisplayValue = v;
@@ -135,7 +135,7 @@ export class TypeaheadEditor extends DatagridEditorDirective {
     if(this.format) {
         const editFormat = this.format.edit ? this.format.edit : this.format.display;
         if(editFormat) {
-            displayValue = this.dataGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
+            displayValue = this.ngGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
         }
         if (this.format.type === 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
             if (this.format.uppercase) displayValue = displayValue.toUpperCase();

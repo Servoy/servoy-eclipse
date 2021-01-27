@@ -1,23 +1,23 @@
 import { ICellEditorParams } from '@ag-grid-community/core';
 import { Component, HostListener, Input } from '@angular/core';
-import { DatagridEditorDirective } from './datagrideditor';
+import { EditorDirective } from './editor';
 
 @Component({
-    selector: 'aggrid-datagrid-texteditor',
+    selector: 'aggrid-texteditor',
     template: `
     <div class="ag-input-wrapper">
       <input class="ag-cell-edit-input" [value]="initialDisplayValue" [svyDecimalKeyConverter]="format" [maxLength]="maxLength" #element>
     </div>
     `
 })
-export class TextEditor extends DatagridEditorDirective {
+export class TextEditor extends EditorDirective {
 
     @Input() initialDisplayValue: any;
     @Input() format: any;
     @Input() maxLength = 524288;
 
     @HostListener('keydown',['$event']) onKeyDown(e: KeyboardEvent) {
-        if(this.dataGrid.arrowsUpDownMoveWhenEditing && this.dataGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
+        if(this.ngGrid.arrowsUpDownMoveWhenEditing && this.ngGrid.arrowsUpDownMoveWhenEditing !== 'NONE') {
             const isNavigationLeftRightKey = e.keyCode === 37 || e.keyCode === 39;
             const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
@@ -26,10 +26,10 @@ export class TextEditor extends DatagridEditorDirective {
                 if(isNavigationUpDownEntertKey) {
                     let newEditingNode = null;
                     const columnToCheck = this.params.column;
-                    const mustBeEditable = this.dataGrid.arrowsUpDownMoveWhenEditing === 'NEXTEDITABLECELL';
+                    const mustBeEditable = this.ngGrid.arrowsUpDownMoveWhenEditing === 'NEXTEDITABLECELL';
                     if( e.keyCode === 38) { // UP
                         if(this.params.rowIndex > 0) {
-                            this.dataGrid.agGrid.api.forEachNode( (node) => {
+                            this.ngGrid.agGrid.api.forEachNode( (node) => {
                                 if (node.rowIndex <= (this.params.rowIndex - 1) &&
                                     (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
@@ -37,8 +37,8 @@ export class TextEditor extends DatagridEditorDirective {
                             });
                         }
                     } else if (e.keyCode === 13 || e.keyCode === 40) { // ENTER/DOWN
-                        if( this.params.rowIndex < this.dataGrid.agGrid.api.getModel().getRowCount() - 1) {
-                            this.dataGrid.agGrid.api.forEachNode( (node) => {
+                        if( this.params.rowIndex < this.ngGrid.agGrid.api.getModel().getRowCount() - 1) {
+                            this.ngGrid.agGrid.api.forEachNode( (node) => {
                                 if (node.rowIndex >= (this.params.rowIndex + 1) &&
                                     !newEditingNode && (!mustBeEditable || columnToCheck.isCellEditable(node))) {
                                     newEditingNode = node;
@@ -46,18 +46,18 @@ export class TextEditor extends DatagridEditorDirective {
                             });
                         }
                     }
-                    this.dataGrid.agGrid.api.stopEditing();
+                    this.ngGrid.agGrid.api.stopEditing();
                     if (newEditingNode) {
-                        this.dataGrid.selectionEvent = { type: 'key', event: e };
+                        this.ngGrid.selectionEvent = { type: 'key', event: e };
                         newEditingNode.setSelected(true, true);
 
                         if(columnToCheck.isCellEditable(newEditingNode)) {
-                            this.dataGrid.agGrid.api.startEditingCell({
+                            this.ngGrid.agGrid.api.startEditingCell({
                                 rowIndex: newEditingNode.rowIndex,
                                 colKey: columnToCheck.getColId()
                             });
                         } else {
-                            this.dataGrid.agGrid.api.setFocusedCell(newEditingNode.rowIndex, columnToCheck.getColId());
+                            this.ngGrid.agGrid.api.setFocusedCell(newEditingNode.rowIndex, columnToCheck.getColId());
                         }
                     }
                     e.preventDefault();
@@ -72,7 +72,7 @@ export class TextEditor extends DatagridEditorDirective {
         const isNavigationUpDownEntertKey = e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13;
 
         if(!(isNavigationLeftRightKey || isNavigationUpDownEntertKey) && this.format) {
-            return this.dataGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
+            return this.ngGrid.formattingService.testForNumbersOnly(e, null, this.elementRef.nativeElement, false, true, this.format, false);
         } else return true;
     }
 
@@ -83,16 +83,16 @@ export class TextEditor extends DatagridEditorDirective {
             this.initialValue = this.initialValue.displayValue;
         }
         let v = this.initialValue;
-        const column = this.dataGrid.getColumn(params.column.getColId());
+        const column = this.ngGrid.getColumn(params.column.getColId());
         if(column && column.format) {
             this.format = column.format;
             if (this.format.maxLength) {
                 this.maxLength = this.format.maxLength;
             }
             if(this.format.edit) {
-                v = this.dataGrid.formattingService.format(v, this.format, true);
+                v = this.ngGrid.formattingService.format(v, this.format, true);
             } else if(this.format.display) {
-                v = this.dataGrid.formattingService.format(v, this.format, false);
+                v = this.ngGrid.formattingService.format(v, this.format, false);
             }
         }
         this.initialDisplayValue = v;
@@ -122,7 +122,7 @@ export class TextEditor extends DatagridEditorDirective {
         if(this.format) {
             const editFormat = this.format.edit ? this.format.edit : this.format.display;
             if(editFormat) {
-                displayValue = this.dataGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
+                displayValue = this.ngGrid.formattingService.unformat(displayValue, editFormat, this.format.type, this.initialValue);
             }
             if (this.format.type === 'TEXT' && (this.format.uppercase || this.format.lowercase)) {
                 if (this.format.uppercase) displayValue = displayValue.toUpperCase();

@@ -1,14 +1,13 @@
 import { ICellEditorAngularComp } from '@ag-grid-community/angular';
 import { ICellEditorParams } from '@ag-grid-community/core';
 import { Directive, ElementRef, ViewChild } from '@angular/core';
-
-import { DataGrid } from '../datagrid';
+import { NGGridDirective} from '../nggrid';
 
 @Directive()
-export class DatagridEditorDirective implements ICellEditorAngularComp {
+export class EditorDirective implements ICellEditorAngularComp {
 
     @ViewChild('element') elementRef: ElementRef;
-    dataGrid: DataGrid;
+    ngGrid: NGGridDirective;
     params: ICellEditorParams;
     initialValue: any;
     instance: any;
@@ -20,7 +19,7 @@ export class DatagridEditorDirective implements ICellEditorAngularComp {
     agInit(params: ICellEditorParams): void {
         // create the cell
         this.params = params;
-        this.dataGrid = params.context.componentParent;
+        this.ngGrid = params.context.componentParent;
         this.initialValue = params.value;
     }
 

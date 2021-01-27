@@ -1,4 +1,3 @@
-import { AgGridAngular } from '@ag-grid-community/angular';
 import { GridOptions } from '@ag-grid-community/core';
 import { ChangeDetectionStrategy, ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
@@ -6,18 +5,19 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyService } from '../../ngclient/servoy.service';
-import { FormattingService, ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { FormattingService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ChangeType, IFoundset } from '../../sablo/spectypes.service';
 import { Deferred } from '../../sablo/util/deferred';
 import { DatagridService } from './datagrid.service';
-import { DatePicker } from './editors/datepicker';
-import { FormEditor } from './editors/formeditor';
-import { SelectEditor } from './editors/selecteditor';
-import { TextEditor } from './editors/texteditor';
-import { TypeaheadEditor } from './editors/typeaheadeditor';
+import { DatePicker } from '../editors/datepicker';
+import { FormEditor } from '../editors/formeditor';
+import { SelectEditor } from '../editors/selecteditor';
+import { TextEditor } from '../editors/texteditor';
+import { TypeaheadEditor } from '../editors/typeaheadeditor';
 import { RadioFilter } from './filters/radiofilter';
 import { ValuelistFilter } from './filters/valuelistfilter';
+import { NGGridDirective } from '../nggrid';
 
 const TABLE_PROPERTIES_DEFAULTS = {
     rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
@@ -72,12 +72,8 @@ const COLUMN_KEYS_TO_CHECK_FOR_CHANGES = [
     templateUrl: './datagrid.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
+export class DataGrid extends NGGridDirective {
 
-    @ContentChild( TemplateRef  , {static: true})
-    templateRef: TemplateRef<any>;
-
-    @ViewChild('element') agGrid: AgGridAngular;
     @ViewChild('element', { read: ElementRef }) agGridElementRef: ElementRef;
 
     @Input() myFoundset: IFoundset;
@@ -87,16 +83,13 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() hashedFoundsets: any;
     @Input() filterModel: any;
     @Input() rowStyleClassDataprovider: any;
-    @Input() arrowsUpDownMoveWhenEditing: any;
     @Input() _internalExpandedState: any;
-    @Input() _internalExpandedStateChange = new EventEmitter();
+    @Output() _internalExpandedStateChange = new EventEmitter();
     @Input() _internalAutoSizeState: any;
-    @Input() _internalAutoSizeStateChange = new EventEmitter();
-    @Input() _internalFormEditorValue: any;
+    @Output() _internalAutoSizeStateChange = new EventEmitter();
     @Input() enableSorting: any;
     @Input() enableColumnResize: any;
     @Input() enableColumnMove: any;
-    @Input() visible: any;
     @Input() rowHeight: any;
     @Input() groupUseEntireRow: any;
     @Input() showGroupCount: any;
@@ -112,7 +105,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() columnState: any;
     @Output() columnStateChange = new EventEmitter();
     @Input() _internalColumnState: any;
-    @Input() _internalColumnStateChange = new EventEmitter();
+    @Output() _internalColumnStateChange = new EventEmitter();
     @Input() columnStateOnError: any;
     @Input() restoreStates: any;
 
@@ -126,7 +119,6 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() onRowGroupOpened: any;
     @Input() onSelectedRowsChanged: any;
     @Input() onSort: any;
-    @Input() onColumnFormEditStarted: any;
     @Input() tooltipTextRefreshData: any;
     // used in HTML template to toggle sync button
     @Output() isGroupView = false;
@@ -169,7 +161,6 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
     // if row autoHeight, we need to do a refresh after first time data are displayed, to allow ag grid to re-calculate the heights
     isRefreshNeededForAutoHeight = false;
 
-    selectionEvent: any;
     onSelectionChangedTimeout: any = null;
     requestSelectionPromises = new Array();
 
@@ -291,11 +282,11 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
                 this.log.debug('gridReady');
                 this.isGridReady = true;
                 if(this.isRendered) {
-                    if(this._internalColumnState !== '_empty') {
+                    const emptyValue = '_empty';
+                    if(this._internalColumnState !== emptyValue) {
                         this.columnState = this._internalColumnState;
                         this.columnStateChange.emit(this._internalColumnState);
                         // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalColumnState again
-                        const emptyValue = '_empty';
                         this._internalColumnState = emptyValue;
                         this._internalColumnStateChange.emit(emptyValue);
                     }
@@ -590,12 +581,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             // new agGrid.Grid(gridDiv, designGridOptions);
             return;
         } else {
-            if (this.visible === false) {
-                // rerender next time model.visible will be true
-                this.isRendered = false;
-            } else {
-                this.isRendered = true;
-            }
+            this.isRendered = true;
         }
 
         this.agGridElementRef.nativeElement.addEventListener('click', (e: any) => {
@@ -1063,7 +1049,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * @return
      *
      */
-    getColumn(field: any, columnsModel?: any) {
+    getColumn(field: any, columnsModel?: any): any {
         if (!columnsModel && this.state.columns[field]) { // check if is already cached
             return this.state.columns[field];
         } else {
@@ -1108,6 +1094,10 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
             }
         }
         return result;
+    }
+
+    getEditingRowIndex(param: any): number {
+        return this.getFoundsetIndexFromEvent(param);
     }
 
     stripUnsortableColumns(sortString: any) {
@@ -3148,7 +3138,7 @@ export class DataGrid extends ServoyBaseComponent<HTMLDivElement> {
      * </pre>
      * @public
      */
-    getColumnIndex(field: any) {
+    getColumnIndex(field: any): number {
         let fieldToCompare = field;
         let fieldIdx = 0;
         if (field.indexOf('_') > 0) { // has index

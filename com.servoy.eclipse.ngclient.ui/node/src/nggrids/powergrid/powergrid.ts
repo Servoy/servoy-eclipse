@@ -1,8 +1,11 @@
-import { AgGridAngular } from '@ag-grid-community/angular';
 import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectorRef, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { FormattingService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { NGGridDirective } from '../nggrid';
+import { DatePicker } from '../editors/datepicker';
+import { FormEditor } from '../editors/formeditor';
+import { TextEditor } from '../editors/texteditor';
 import { PowergridService } from './powergrid.service';
 
 const TABLE_PROPERTIES_DEFAULTS = {
@@ -35,13 +38,30 @@ const COLUMN_PROPERTIES_DEFAULTS = {
     cellRendererFunc: { colDefProperty: 'cellRenderer', default: null }
 };
 
+const COLUMN_KEYS_TO_CHECK_FOR_CHANGES = [
+    'headerTitle',
+    'headerStyleClass',
+    'headerTooltip',
+    'styleClass',
+    'visible',
+    'width',
+    'minWidth',
+    'maxWidth',
+    'enableRowGroup',
+    'enableSort',
+    'enableResize',
+    'enableToolPanel',
+    'autoResize',
+    'editType',
+    'id'
+];
+
 @Component({
     selector: 'aggrid-datasettable',
     templateUrl: './powergrid.html'
 })
-export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
+export class PowerGrid extends NGGridDirective {
 
-    @ViewChild('element') agGrid: AgGridAngular;
     @ViewChild('element', { read: ElementRef }) agGridElementRef: ElementRef;
 
     @Input() columns: any;
@@ -53,13 +73,57 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
     @Input() mainMenuItemsConfig: any;
     @Input() gridOptions: any;
     @Input() showColumnsMenuTab: any;
+    @Input() multiSelect: any;
+    @Input() enableSorting: any;
+    @Input() enableColumnResize: any;
+    @Input() rowHeight: any;
+    @Input() headerHeight: any;
+    @Input() pivotMode: any;
+    @Input() visible: any;
+    @Input() useLazyLoading: any;
+    @Input() data: any;
+    @Input() lastRowIndex: any;
+    @Input() readOnly: boolean;
+
+    @Input() _internalColumnState: any;
+    @Output() _internalColumnStateChange = new EventEmitter();
+    @Input() columnState: any;
+    @Output() columnStateChange = new EventEmitter();
+    @Input() _internalExpandedState: any;
+    @Output() _internalExpandedStateChange = new EventEmitter();
+
+    @Input() onCellClick: any;
+    @Input() onCellDoubleClick: any;
+    @Input() onColumnDataChange: any;
+    @Input() onColumnFormEditStarted: any;
+    @Input() onLazyLoadingGetRows: any;
+    @Input() onRowGroupOpened: any;
+    @Input() onRowSelected: any;
+    @Input() onReady: any;
+    @Input() onColumnStateChanged: any;
 
     log: LoggerService;
     agGridOptions: GridOptions;
     agMainMenuItemsConfig: any;
 
+    /**
+     * Store the state of the table. TODO to be persisted
+     * */
+    state: State = new State();
+
+    contextMenuItems: any = [];
+
+    // set the true when the grid is ready
+    isGridReady = false;
+
+    // position of cell with invalid data as reported by the return of onColumnDataChange
+    invalidCellDataIndex = { rowIndex: -1, colKey: ''};
+    onColumnDataChangePromise: any = null;
+
+    clickTimer: any = null;
+
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
-        private powergridService: PowergridService) {
+        private powergridService: PowergridService, public formattingService: FormattingService) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('PowerGrid');
     }
@@ -109,176 +173,488 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
             ]};
         }
 
-        //const columnDefs = this.getColumnDefs();
+        const columnDefs = this.getColumnDefs();
+
+        // setup grid options
+        this.agGridOptions = {
+            debug: false,
+            rowGroupPanelShow: 'always', // TODO expose property
+
+            defaultColDef: {
+//                width: 0,
+                filter: false,
+//                    valueFormatter: displayValueFormatter,
+                menuTabs: vMenuTabs,
+                headerCheckboxSelection: false, //$scope.model.multiSelect === true ? isFirstColumn : false,	// FIXME triggers a long loop of onRowSelection event when a new selection is made.
+                checkboxSelection: (params) => this.multiSelect === true ? this.isFirstColumn(params) : false ,
+                sortable: this.enableSorting,
+                resizable: this.enableColumnResize
+            },
+            columnDefs,
+            getMainMenuItems: (params) => this.getMainMenuItems(params),
+
+            rowHeight: this.rowHeight,
+            // TODO enable it ?					rowClass: $scope.model.rowStyleClass,	// add the class to each row
+
+            headerHeight: this.headerHeight, // exposed property
+
+            suppressContextMenu: false,
+            suppressMovableColumns: false, // TODO persist column order changes
+            suppressAutoSize: true,
+            autoSizePadding: 25,
+            suppressFieldDotNotation: true,
+
+            // suppressMovingInCss: true,
+            suppressColumnMoveAnimation: true,
+            suppressAnimationFrame: true,
+
+            rowSelection: this.multiSelect === true ? 'multiple' : 'single',
+//                suppressRowClickSelection: rowGroupColsDefault.length === 0 ? false : true,
+            suppressCellSelection: false, // TODO implement focus lost/gained
+            enableRangeSelection: false,
+
+            stopEditingWhenGridLosesFocus: true,
+            singleClickEdit: true,
+            suppressClickEdit: false,
+            enableGroupEdit: false,
+            // groupUseEntireRow: false,
+            // groupMultiAutoColumn: true,
+
+            pivotMode: this.pivotMode,
+
+            animateRows: false,
+            enableCellExpressions: true,
+
+            onGridReady: () => {
+                this.log.debug('gridReady');
+                this.isGridReady = true;
+
+                const emptyValue = '_empty';
+                if(this._internalColumnState !== emptyValue) {
+                    this.columnState = this._internalColumnState;
+                    // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalColumnState again
+                    this._internalColumnState = emptyValue;
+                    this._internalColumnStateChange.emit(emptyValue);
+                }
+                this.restoreColumnsState();
+                this.applyExpandedState();
+
+                this.agGridOptions.onDisplayedColumnsChanged = () => {
+                    this.sizeColumnsToFit();
+                    this.storeColumnsState();
+                };
+                if(this.onReady) {
+                    this.onReady();
+                }
+                // without timeout the column don't fit automatically
+                setTimeout(() => {
+                    this.sizeColumnsToFit();
+                }, 150);
+            },
+            getContextMenuItems: () => this.contextMenuItems,
+            // TODO:
+            // autoGroupColumnDef: {
+            //     cellRenderer: DatasetTableGroupCellRenderer,
+            //     cellRendererParams : { suppressCount: false},
+            //     headerName: ' ',
+            //     cellClass: $scope.model.groupStyleClass
+            // },
+            onGridSizeChanged: () => {
+                setTimeout(() => {
+                    // if not yet destroyed
+                    if(this.agGrid.gridOptions.onGridSizeChanged) {
+                        this.sizeColumnsToFit();
+                    }
+                }, 150);
+            },
+//                onColumnEverythingChanged: storeColumnsState,	// do we need that ?, when is it actually triggered ?
+            onSortChanged: () => this.storeColumnsState(),
+//                onFilterChanged: storeColumnsState,			 disable filter sets for now
+//                onColumnVisible: storeColumnsState,			 covered by onDisplayedColumnsChanged
+//                onColumnPinned: storeColumnsState,			 covered by onDisplayedColumnsChanged
+            onColumnResized: () => this.storeColumnsState(),				// NOT covered by onDisplayedColumnsChanged
+//                onColumnRowGroupChanged: storeColumnsState,	 covered by onDisplayedColumnsChanged
+//                onColumnValueChanged: storeColumnsState,
+//                onColumnMoved: storeColumnsState,              covered by onDisplayedColumnsChanged
+//                onColumnGroupOpened: storeColumnsState		 i don't think we need that, it doesn't include the open group in column state
+
+            navigateToNextCell: (params) => this.selectionChangeNavigation(params),
+
+            sideBar,
+            // TODO:
+            //popupParent: gridDiv,
+            enableBrowserTooltips: true,
+            onToolPanelVisibleChanged : () => this.sizeColumnsToFit(),
+            onCellEditingStopped : (event) => {
+                // don't allow escape if cell data is invalid
+                if(this.onColumnDataChangePromise == null) {
+                    const rowIndex = event.rowIndex;
+                    const colId = event.column.getColId();
+                    if(this.invalidCellDataIndex.rowIndex === rowIndex  && this.invalidCellDataIndex.colKey === colId) {
+                        this.agGrid.api.startEditingCell({
+                            rowIndex,
+                            colKey: colId
+                        });
+                    }
+                }
+            },
+            onCellEditingStarted : (event) => {
+                // don't allow editing another cell if we have an invalidCellData
+                if(this.invalidCellDataIndex.rowIndex !== -1 && this.invalidCellDataIndex.colKey !== '') {
+                    const rowIndex = event.rowIndex;
+                    const colId = event.column.getColId();
+                    if(this.invalidCellDataIndex.rowIndex !== rowIndex  || this.invalidCellDataIndex.colKey !== colId) {
+                        this.agGrid.api.stopEditing();
+                        this.agGrid.api.startEditingCell({
+                            rowIndex: this.invalidCellDataIndex.rowIndex,
+                            colKey: this.invalidCellDataIndex.colKey
+                        });
+                    }
+                }
+            }
+        };
+
+        // check if we have filters
+        for(let i = 0; this.agGridOptions.sideBar && this.agGridOptions.sideBar['toolPanels'] && i < columnDefs.length; i++) {
+            if(columnDefs[i].filter) {
+                this.agGridOptions.sideBar['toolPanels'].push({
+                    id: 'filters',
+                    labelDefault: 'Filters',
+                    labelKey: 'filters',
+                    iconKey: 'filter',
+                    toolPanel: 'agFiltersToolPanel',
+                });
+                break;
+            }
+        }
+
+        if(this.useLazyLoading) {
+            this.agGridOptions.rowModelType = 'serverSide';
+        } else {
+            this.agGridOptions.rowModelType = 'clientSide';
+            this.agGridOptions.rowData = this.data;
+        }
+
+        // TODO:
+        // if($scope.model.rowStyleClassFunc) {
+        //     var rowStyleClassFunc = eval($scope.model.rowStyleClassFunc);
+        //     gridOptions.getRowClass = function(params) {
+        //         return rowStyleClassFunc(params.rowIndex, params.data, params.event);
+        //     };
+        // }
+
+        // set the icons
+        if(iconConfig) {
+            const icons = new Object();
+
+            for (const iconName in iconConfig) {
+                if (iconName === 'iconRefreshData') continue;
+
+                let aggridIcon = iconName.slice(4);
+                aggridIcon = aggridIcon[0].toLowerCase() + aggridIcon.slice(1);
+                icons[aggridIcon] = this.getIconElement(iconConfig[iconName]);
+            }
+
+            // TODO expose property
+//                icons.rowGroupPanel = " "
+//                icons.pivotPanel = " "
+//                icons.valuePanel = " "
+
+            this.agGridOptions.icons = icons;
+        }
+
+        this.setHeight();
+
+        // locale text
+        if (localeText) {
+            this.agGridOptions['localeText'] = localeText;
+        }
+
+        // fill user grid options properties
+        if (userGridOptions) {
+            const gridOptionsSetByComponent = {};
+            for( const p in TABLE_PROPERTIES_DEFAULTS) {
+                if(TABLE_PROPERTIES_DEFAULTS[p]['default'] !== this[p]) {
+                    gridOptionsSetByComponent[TABLE_PROPERTIES_DEFAULTS[p]['gridOptionsProperty']] = true;
+                }
+            }
+
+            for (const property in userGridOptions) {
+                if (userGridOptions.hasOwnProperty(property) && !gridOptionsSetByComponent.hasOwnProperty(property)) {
+                    this.agGridOptions[property] = userGridOptions[property];
+                }
+            }
+        }
+
+        // TODO:
+        // if(gridOptions.groupUseEntireRow) {
+        //     var groupRowRendererFunc = groupRowInnerRenderer;
+        //     if($scope.model.groupRowRendererFunc) {
+        //         groupRowRendererFunc = eval($scope.model.groupRowRendererFunc);
+        //     }
+        //     gridOptions.groupRowRenderer = DatasetTableGroupCellRenderer;
+        //     gridOptions.groupRowInnerRenderer = groupRowRendererFunc;
+        // }
+
+        // handle options that are dependent on gridOptions
+        if(this.agGridOptions['enableCharts'] && this.agGridOptions['enableRangeSelection']) {
+            this.contextMenuItems.push('chartRange');
+        }
+
     }
 
     svyOnInit() {
         super.svyOnInit();
+
+        // TODO:
+        // init the grid. If is in designer render a mocked grid
+        if (this.servoyApi.isInDesigner()) {
+            // $element.addClass("design-mode");
+            // var designGridOptions = {
+            //     rowModelType: 'clientSide',
+            //     columnDefs: columnDefs,
+            //     rowHeight: $scope.model.rowHeight,
+            //     rowData: []
+            // };
+            return;
+        }
+
+        // register listener for selection changed
+        this.agGrid.api.addEventListener('rowSelected', (event: any) => this.onRowSelectedHandler(event));
+        this.agGrid.api.addEventListener('cellClicked', (params: any) => this.cellClickHandler(params));
+        this.agGrid.api.addEventListener('cellDoubleClicked', (params: any) => this.onCellDoubleClicked(params));
+        this.agGrid.api.addEventListener('displayedColumnsChanged', () => this.sizeColumnsToFit());
+
+        // listen to group changes
+        this.agGrid.api.addEventListener('columnRowGroupChanged', (event: any) => this.onColumnRowGroupChanged(event));
+
+        // listen to group collapsed
+        this.agGrid.api.addEventListener('rowGroupOpened', (event: any) => this.onRowGroupOpenedHandler(event));
+
+
+        if(!this.servoyApi.isInDesigner() && this.useLazyLoading) {
+            this.agGridOptions.api.setEnterpriseDatasource(new RemoteDatasource(this));
+        } else {
+            // TODO:
+            // $scope.$watchCollection("model.data", function(newValue, oldValue) {
+            //     if(gridOptions) {
+            //         gridOptions.api.setRowData($scope.model.data);
+            //     }
+            // });
+        }
     }
 
-    // getColumnDefs() {
-    //     //create the column definitions from the specified columns in designer
-    //     const colDefs = [];
-    //     let colDef: any = { };
-    //     const colGroups = { };
-    //     let column;
-    //     for (let i = 0; this.columns && i < this.columns.length; i++) {
-    //         column = this.columns[i];
+    svyOnChanges(changes: SimpleChanges) {
+        if (changes) {
+            for (const property of Object.keys(changes)) {
+                const change = changes[property];
+                switch (property) {
+                    case 'responsiveHeight':
+                        this.setHeight();
+                        break;
+                    case 'data':
+                        if(this.agGrid) {
+                            this.agGrid.api.setRowData(this.data);
+                        }
+                        break;
+                    case 'columns':
+                        // need a better way to detect if columns array are changed
+                        if(change.currentValue !== change.previousValue) {
+                            this.updateColumnDefs();
+                        } else {
+                            for(let i = 0; i < this.columns.length; i++) {
+                                for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                    const oldPropertyValue = change.previousValue[i][prop];
+                                    const newPropertyValue = change.currentValue[i][prop];
+                                    if(newPropertyValue !== oldPropertyValue) {
+                                        this.log.debug('column property changed');
+                                        if(this.isGridReady) {
+                                            this.updateColumnDefs();
+                                            if(prop !== 'visible' && prop !== 'width') {
+                                                this.restoreColumnsState();
+                                            }
+                                        }
 
-    //         //create a column definition based on the properties defined at design time
-    //         colDef = {
-    //             headerName: "" + (column["headerTitle"] ? column["headerTitle"] : "") + "",
-    //             headerTooltip: column["headerTooltip"] ? column["headerTooltip"] : null,
-    //             field: column["dataprovider"],
-    //             tooltipField: column["tooltip"] ? column["tooltip"] : null
-    //         };
+                                        if(prop === 'headerTitle') {
+                                            this.handleColumnHeaderTitle(i, newPropertyValue);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case '_internalColumnState':
+                        if(this.isGridReady && (change.currentValue !== '_empty')) {
+                            this.columnState = change.currentValue;
+                            this.columnStateChange.emit(this.columnState);
+                            // need to clear it, so the watch can be used, if columnState changes, and we want to apply the same _internalColumnState again
+                            this._internalColumnState = '_empty';
+                            this._internalColumnStateChange.emit(this._internalColumnState);
+                            if(this.columnState) {
+                                this.restoreColumnsState();
+                            } else {
+                                this.agGrid.columnApi.resetColumnState();
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        super.svyOnChanges(changes);
+    }
 
-    //         // set id if defined
-    //         if(column.id) {
-    //             colDef.colId = column.id;
-    //         }
+    getColumnDefs() {
+        //create the column definitions from the specified columns in designer
+        const colDefs = [];
+        let colDef: any = { };
+        const colGroups = { };
+        for (const column of this.columns) {
+            //create a column definition based on the properties defined at design time
+            colDef = {
+                headerName: '' + (column['headerTitle'] ? column['headerTitle'] : '') + '',
+                headerTooltip: column['headerTooltip'] ? column['headerTooltip'] : null,
+                field: column['dataprovider'],
+                tooltipField: column['tooltip'] ? column['tooltip'] : null
+            };
 
-    //         // styleClass
-    //         colDef.headerClass = 'ag-table-header ' + column.headerStyleClass;
-    //         colDef.cellClass = 'ag-table-cell ' + column.styleClass;
+            // set id if defined
+            if(column.id) {
+                colDef.colId = column.id;
+            }
+
+            // styleClass
+            colDef.headerClass = 'ag-table-header ' + column.headerStyleClass;
+            colDef.cellClass = 'ag-table-cell ' + column.styleClass;
 
 
-    //         // column grouping & pivoting
-    //         colDef.enableRowGroup = column.enableRowGroup;
-    //         if (column.rowGroupIndex >= 0) colDef.rowGroupIndex = column.rowGroupIndex;
+            // column grouping & pivoting
+            colDef.enableRowGroup = column.enableRowGroup;
+            if (column.rowGroupIndex >= 0) colDef.rowGroupIndex = column.rowGroupIndex;
 
-    //         colDef.enablePivot = column.enablePivot;
-    //         if (column.pivotIndex >= 0) colDef.pivotIndex = column.pivotIndex;
+            colDef.enablePivot = column.enablePivot;
+            if (column.pivotIndex >= 0) colDef.pivotIndex = column.pivotIndex;
 
-    //         if(column.aggFunc) colDef.aggFunc = column.aggFunc;
-    //         // tool panel
-    //         if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
+            if(column.aggFunc) colDef.aggFunc = column.aggFunc;
+            // tool panel
+            if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
 
-    //         // column sizing
-    //         if (column.width || column.width === 0) colDef.width = column.width;
-    //         if (column.maxWidth) colDef.maxWidth = column.maxWidth;
-    //         if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
+            // column sizing
+            // TODO:
+            // if (column.width || column.width === 0) colDef.width = column.width;
+            // if (column.maxWidth) colDef.maxWidth = column.maxWidth;
+            // if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
 
-    //         // column resizing https://www.ag-grid.com/javascript-grid-resizing/
-    //         if (column.enableResize === false) colDef.resizable = column.enableResize;
-    //         if (column.autoResize === false) colDef.suppressSizeToFit = !column.autoResize;
-    //         // sorting
-    //         if (column.enableSort === false) colDef.sortable = false;
-    //         // visibility
-    //         if (column.visible === false) colDef.hide = true;
-    //         if (column.format) {
-    //             var parsedFormat = column.format;
-    //             if(column.formatType == 'DATETIME') {
-    //                 var useLocalDateTime = false;
-    //                 try {
-    //                     var jsonFormat = JSON.parse(column.format);
-    //                     parsedFormat = jsonFormat.displayFormat;
-    //                     useLocalDateTime = jsonFormat.useLocalDateTime;
-    //                 }
-    //                 catch(e){}
-    //                 if(useLocalDateTime) {
-    //                     colDef.valueGetter = function(params) {
-    //                         var field = params.colDef.field;
-    //                         if (field && params.data) {
-    //                             return new Date(params.data[field]);
-    //                         }
-    //                         return undefined;
-    //                     };
-    //                 }
-    //             }
-    //             colDef.valueFormatter = createValueFormatter(parsedFormat, column.formatType);
-    //         }
+            // column resizing https://www.ag-grid.com/javascript-grid-resizing/
+            if (column.enableResize === false) colDef.resizable = column.enableResize;
+            if (column.autoResize === false) colDef.suppressSizeToFit = !column.autoResize;
+            // sorting
+            if (column.enableSort === false) colDef.sortable = false;
+            // visibility
+            if (column.visible === false) colDef.hide = true;
+            if (column.format) {
+                let parsedFormat = column.format;
+                if(column.formatType === 'DATETIME') {
+                    let useLocalDateTime = false;
+                    try {
+                        const jsonFormat = JSON.parse(column.format);
+                        parsedFormat = jsonFormat.displayFormat;
+                        useLocalDateTime = jsonFormat.useLocalDateTime;
+                    } catch(e){}
+                    if(useLocalDateTime) {
+                        colDef.valueGetter = (params: any) => {
+                            const field = params.colDef.field;
+                            if (field && params.data) {
+                                return new Date(params.data[field]);
+                            }
+                            return undefined;
+                        };
+                    }
+                }
+                // TODO
+                // colDef.valueFormatter = this.createValueFormatter(parsedFormat, column.formatType);
+            }
 
-    //         if(column.cellStyleClassFunc) {
-    //             colDef.cellClass = createColumnCallbackFunctionFromString(column.cellStyleClassFunc);
-    //         }
+            // TODO
+            // if(column.cellStyleClassFunc) {
+            //     colDef.cellClass = this.createColumnCallbackFunctionFromString(column.cellStyleClassFunc);
+            // }
 
-    //         if(column.cellRendererFunc) {
-    //             colDef.cellRenderer = createColumnCallbackFunctionFromString(column.cellRendererFunc);
-    //         }
-    //         else {
-    //             colDef.cellRenderer = getDefaultCellRenderer(column);
-    //         }
+            // if(column.cellRendererFunc) {
+            //     colDef.cellRenderer = this.createColumnCallbackFunctionFromString(column.cellRendererFunc);
+            // }
+            // else {
+            //     colDef.cellRenderer = this.getDefaultCellRenderer(column);
+            // }
 
-    //         if (column.filterType) {
-    //             colDef.filter = true;
+            if (column.filterType) {
+                colDef.filter = true;
 
-    //             if(column.filterType == 'TEXT') {
-    //                 colDef.filter = 'agTextColumnFilter';
-    //             }
-    //             else if(column.filterType == 'NUMBER') {
-    //                 colDef.filter = 'agNumberColumnFilter';
-    //             }
-    //             else if(column.filterType == 'DATE') {
-    //                 colDef.filter = 'agDateColumnFilter';
-    //             }
-    //             colDef.filterParams = { applyButton: true, clearButton: true, newRowsAction: 'keep', suppressAndOrCondition: true, caseSensitive: false };
-    //         }
+                if(column.filterType === 'TEXT') {
+                    colDef.filter = 'agTextColumnFilter';
+                } else if(column.filterType === 'NUMBER') {
+                    colDef.filter = 'agNumberColumnFilter';
+                } else if(column.filterType === 'DATE') {
+                    colDef.filter = 'agDateColumnFilter';
+                }
+                colDef.filterParams = { applyButton: true, clearButton: true, newRowsAction: 'keep', suppressAndOrCondition: true, caseSensitive: false };
+            }
 
-    //         if (column.editType) {
-    //             colDef.editable = !$scope.model.readOnly && (column.editType != 'CHECKBOX');
+            if (column.editType) {
+                colDef.editable = !this.readOnly && (column.editType !== 'CHECKBOX');
 
-    //             if(column.editType == 'TEXTFIELD') {
-    //                 colDef.cellEditor = getTextEditor();
-    //             }
-    //             else if(column.editType == 'DATEPICKER') {
-    //                 colDef.cellEditor = getDatePicker();
-    //             }
-    //             else if(column.editType == 'FORM') {
-    //                 colDef.cellEditor = getFormEditor();
-    //             }
+                if(column.editType === 'TEXTFIELD') {
+                    colDef.cellEditorFramework = TextEditor;
+                } else if(column.editType === 'DATEPICKER') {
+                    colDef.cellEditorFramework = DatePicker;
+                } else if(column.editType === 'FORM') {
+                    colDef.cellEditorFramework = FormEditor;
+                }
 
-    //             colDef.onCellValueChanged = onCellValueChanged;
-    //         }
+                colDef.onCellValueChanged = (param: any) => this.onCellValueChanged(param);
+            }
 
-    //         var columnOptions = {};
-    //         if($injector.has('ngPowerGrid')) {
-    //             var datasettableDefaultConfig = $services.getServiceScope('ngPowerGrid').model;
-    //             if(datasettableDefaultConfig.columnOptions) {
-    //                 columnOptions = datasettableDefaultConfig.columnOptions;
-    //             }
-    //         }
+            let columnOptions = this.powergridService.columnOptions ? this.powergridService.columnOptions : {};
+            columnOptions = this.mergeConfig(columnOptions, column.columnDef);
 
-    //         columnOptions = mergeConfig(columnOptions, column.columnDef);
+            if(columnOptions) {
+                const colDefSetByComponent = {};
+                for( const p in COLUMN_PROPERTIES_DEFAULTS) {
+                    if(COLUMN_PROPERTIES_DEFAULTS[p]['default'] !== column[p]) {
+                        colDefSetByComponent[COLUMN_PROPERTIES_DEFAULTS[p]['colDefProperty']] = true;
+                    }
+                }
+                for (const property in columnOptions) {
+                    if (columnOptions.hasOwnProperty(property) && !colDefSetByComponent.hasOwnProperty(property)) {
+                        colDef[property] = columnOptions[property];
+                    }
+                }
+            }
 
-    //         if(columnOptions) {
-    //             var colDefSetByComponent = {};
-    //             for( var p in COLUMN_PROPERTIES_DEFAULTS) {
-    //                 if(COLUMN_PROPERTIES_DEFAULTS[p]["default"] != column[p]) {
-    //                     colDefSetByComponent[COLUMN_PROPERTIES_DEFAULTS[p]["colDefProperty"]] = true;
-    //                 }
-    //             }
-    //             for (var property in columnOptions) {
-    //                 if (columnOptions.hasOwnProperty(property) && !colDefSetByComponent.hasOwnProperty(property)) {
-    //                     colDef[property] = columnOptions[property];
-    //                 }
-    //             }
-    //         }
+            if(column.headerGroup) {
+                if(!colGroups[column.headerGroup]) {
+                    colGroups[column.headerGroup] = {};
+                    colGroups[column.headerGroup]['headerClass'] = column.headerGroupStyleClass;
+                    colGroups[column.headerGroup]['children'] = [];
 
-    //         if(column.headerGroup) {
-    //             if(!colGroups[column.headerGroup]) {
-    //                 colGroups[column.headerGroup] = {}
-    //                 colGroups[column.headerGroup]['headerClass'] = column.headerGroupStyleClass;
-    //                 colGroups[column.headerGroup]['children'] = [];
+                }
+                colGroups[column.headerGroup]['children'].push(colDef);
+            } else {
+                colDefs.push(colDef);
+            }
+        }
 
-    //             }
-    //             colGroups[column.headerGroup]['children'].push(colDef);
-    //         }
-    //         else {
-    //             colDefs.push(colDef);
-    //         }
-    //     }
+        for(const groupName in colGroups) {
+            if(colGroups.hasOwnProperty(groupName)) {
+                const group: any = {};
+                group.headerName = groupName;
+                group.headerClass = colGroups[groupName]['headerClass'];
+                group.children = colGroups[groupName]['children'];
+                colDefs.push(group);
+            }
+        }
 
-    //     for(var groupName in colGroups) {
-    //         var group = {};
-    //         group.headerName = groupName;
-    //         group.headerClass = colGroups[groupName]['headerClass'];
-    //         group.children = colGroups[groupName]['children'];
-    //         colDefs.push(group);
-    //     }
-
-    //     return colDefs;
-    // }
+        return colDefs;
+    }
 
     mergeConfig(target: any, source: any) {
         let property: any;
@@ -305,4 +681,772 @@ export class PowerGrid extends ServoyBaseComponent<HTMLDivElement> {
         return mergeConfig;
     }
 
+    isFirstColumn(params: any) {
+        const displayedColumns = this.agGrid.columnApi.getAllDisplayedColumns();
+        const thisIsFirstColumn = displayedColumns[0] === params.column;
+        return thisIsFirstColumn;
+    }
+
+    getMainMenuItems(params: any) {
+        // default items
+        //					pinSubMenu: Submenu for pinning. Always shown.
+        //					valueAggSubMenu: Submenu for value aggregation. Always shown.
+        //					autoSizeThis: Auto-size the current column. Always shown.
+        //					autoSizeAll: Auto-size all columns. Always shown.
+        //					rowGroup: Group by this column. Only shown if column is not grouped.
+        //					rowUnGroup: Un-group by this column. Only shown if column is grouped.
+        //					resetColumns: Reset column details. Always shown.
+        //					expandAll: Expand all groups. Only shown if grouping by at least one column.
+        //					contractAll: Contract all groups. Only shown if grouping by at least one column.
+        //					toolPanel: Show the tool panel.
+        let items: any;
+        if(this.mainMenuItemsConfig && Object.keys(this.mainMenuItemsConfig).length !== 0) {
+            items = [];
+            for (const key in this.mainMenuItemsConfig) {
+                if(this.mainMenuItemsConfig.hasOwnProperty(key) && this.mainMenuItemsConfig[key]) items.push(key);
+            }
+        } else {
+            items = ['rowGroup', 'rowUnGroup'];
+        }
+        const menuItems = [];
+        params.defaultItems.forEach((item: any) => {
+            if (items.indexOf(item) > -1) {
+                menuItems.push(item);
+            }
+        });
+        return menuItems;
+    }
+
+    restoreColumnsState() {
+        if(this.columnState) {
+            let columnStateJSON = null;
+
+            try {
+                columnStateJSON = JSON.parse(this.columnState);
+            } catch(e) {
+                this.log.error(e);
+            }
+
+            if(columnStateJSON != null) {
+                if(Array.isArray(columnStateJSON.columnState) && columnStateJSON.columnState.length > 0) {
+                    this.agGrid.columnApi.setColumnState(columnStateJSON.columnState);
+                }
+
+                if(Array.isArray(columnStateJSON.rowGroupColumnsState) && columnStateJSON.rowGroupColumnsState.length > 0) {
+                    this.agGrid.columnApi.setRowGroupColumns(columnStateJSON.rowGroupColumnsState);
+                }
+
+                if(Array.isArray(columnStateJSON.sortingState) && columnStateJSON.sortingState.length > 0) {
+                    this.agGrid.api.setSortModel(columnStateJSON.sortingState);
+                }
+
+                this.agGrid.api.setSideBarVisible(columnStateJSON.isSideBarVisible);
+            }
+        }
+    }
+
+    applyExpandedState() {
+        let expandedState = this._internalExpandedState;
+        const groupFields = this.state.expanded.fields;
+        if (this.isTableGrouped() && groupFields && expandedState) {
+            this.agGrid.api.forEachNode((node, index) => {
+                const rowGroupInfo = this.getNodeGroupInfo(node);
+                const rowGroupKeys = rowGroupInfo.rowGroupKeys;
+
+                // check if node is expanded
+                let isExpanded = false;
+
+                // check if the node is expanded
+                expandedState = this._internalExpandedState;
+
+                for (let j = 0; expandedState && j < rowGroupKeys.length; j++) {
+                    expandedState = expandedState[rowGroupKeys[j]];
+                    if (!expandedState) {
+                        isExpanded = false;
+                        break;
+                    } else {
+                        isExpanded = true;
+                    }
+                }
+
+                node.setExpanded(isExpanded);
+            });
+        }
+    }
+
+    isTableGrouped() {
+        const rowGroupCols = this.agGrid.columnApi.getRowGroupColumns();
+        return rowGroupCols && rowGroupCols.length > 0;
+    }
+
+    /**
+     * Returns the group hierarchy for the given node
+     *
+     * @param  node
+     *
+     * */
+    getNodeGroupInfo(node: any): any {
+        const rowGroupCols = [];
+        const groupKeys = [];
+
+        let parentNode = node.parent;
+        while (parentNode && parentNode.level >= 0 && parentNode.group === true) {
+            // is reverse order
+            rowGroupCols.unshift(parentNode.field);
+            groupKeys.unshift(parentNode.key);
+
+            // next node
+            parentNode = parentNode.parent;
+        }
+
+        const field = node.field;
+        const key = node.key;
+
+        rowGroupCols.push(field);
+        groupKeys.push(key);
+
+        const result = {
+            rowGroupFields: rowGroupCols,
+            rowGroupKeys: groupKeys
+        };
+
+        return result;
+    }
+
+    sizeColumnsToFit() {
+        if(this.visible) {
+            this.agGrid.api.sizeColumnsToFit();
+        }
+    }
+
+    storeColumnsState() {
+        if(this.visible) {
+            const rowGroupColumns = this.agGrid.columnApi.getRowGroupColumns();
+            const svyRowGroupColumnIds = [];
+            for(const rowGroupColumn of rowGroupColumns) {
+                svyRowGroupColumnIds.push(rowGroupColumn.getColId());
+            }
+
+            const columnState = {
+                columnState: this.agGrid.columnApi.getColumnState(),
+                rowGroupColumnsState: svyRowGroupColumnIds,
+                isToolPanelShowing: this.agGrid.api.isToolPanelShowing(),
+                isSideBarVisible: this.agGrid.api.isSideBarVisible(),
+                // filterState: gridOptions.api.getFilterModel(), TODO persist column states
+                sortingState: this.agGrid.api.getSortModel()
+            };
+
+            const newColumnState = JSON.stringify(columnState);
+
+            if (newColumnState !== this.columnState) {
+                this.columnState = newColumnState;
+                this.columnStateChange.emit(newColumnState);
+                if (this.onColumnStateChanged) {
+                    this.onColumnStateChanged(this.columnState);
+                }
+            }
+        }
+    }
+
+    selectionChangeNavigation(params: any) {
+        const previousCell = params.previousCellPosition;
+        const suggestedNextCell = params.nextCellPosition;
+
+        const KEY_UP = 38;
+        const KEY_DOWN = 40;
+        const KEY_LEFT = 37;
+        const KEY_RIGHT = 39;
+
+        let newIndex: any;
+        let nextRow: any;
+        switch (params.key) {
+            case KEY_DOWN:
+                newIndex = previousCell.rowIndex + 1;
+                nextRow = this.agGrid.api.getDisplayedRowAtIndex(newIndex);
+                while(nextRow && (nextRow.group || nextRow.selected)) {
+                    newIndex++;
+                    nextRow = this.agGrid.api.getDisplayedRowAtIndex(newIndex);
+                }
+
+                // set selected cell on next non-group row cells
+                if(nextRow) {
+                    this.agGrid.api.forEachNode( (node) => {
+                        if (newIndex === node.rowIndex) {
+                            if (this.multiSelect) {
+                                // node.setSelected(true); // keep previus selection
+                            } else {
+                                node.setSelected(true, true);
+                            }
+                        }
+                    });
+                    suggestedNextCell.rowIndex = newIndex;
+                }
+                return suggestedNextCell;
+            case KEY_UP:
+                newIndex = previousCell.rowIndex - 1;
+                nextRow = this.agGrid.api.getDisplayedRowAtIndex(newIndex);
+                while(nextRow && (nextRow.group || nextRow.selected)) {
+                    newIndex--;
+                    nextRow = this.agGrid.api.getDisplayedRowAtIndex(newIndex);
+                }
+
+                // set selected cell on previous non-group row cells
+                if(nextRow) {
+                    this.agGrid.api.forEachNode( (node) => {
+                        if (newIndex === node.rowIndex) {
+                            if (this.multiSelect) {
+                                // node.setSelected(true); // keep previus selection
+                            } else {
+                                node.setSelected(true, true);
+                            }
+                        }
+                    });
+                    suggestedNextCell.rowIndex = newIndex;
+                }
+                return suggestedNextCell;
+            case KEY_LEFT:
+            case KEY_RIGHT:
+                return suggestedNextCell;
+            default:
+                throw new Error('this will never happen, navigation is always on of the 4 keys above');
+        }
+    }
+
+    getIconElement(iconStyleClass: any): any {
+        return '<i class="' + iconStyleClass + '"/>';
+    }
+
+    setHeight() {
+        // TODO:
+        // if (this.isResponsive()) {
+        //     if ($scope.model.responsiveHeight) {
+        //         gridDiv.style.height = $scope.model.responsiveHeight + 'px';
+        //     } else {
+        //         // when responsive height is 0 or undefined, use 100% of the parent container.
+        //         gridDiv.style.height = '100%';
+        //     }
+        // }
+    }
+
+    createJSEvent() {
+        const element = this.agGridElementRef.nativeElement;
+        const x = element.offsetLeft;
+        const y = element.offsetTop;
+
+        const event = document.createEvent('MouseEvents');
+        event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
+        return event;
+    }
+
+    onRowSelectedHandler(event: any) {
+        const node = event.node;
+
+        if (this.onRowSelected && node && node.data) {
+            // var selectIndex = node.rowIndex + 1; Selected index doesn't make sense for a dataset since the grid may change the dataset internally
+            this.onRowSelected(node.data, node.selected, this.createJSEvent());
+        }
+    }
+
+    onCellClicked(params: any) {
+        const col = params.colDef.field ? this.getColumn(params.colDef.field) : null;
+        if(col && col.editType === 'CHECKBOX' && params.event.target.tagName === 'I') {
+            let v = parseInt(params.value, 10);
+            if(isNaN(v)) v = 0;
+            params.node.setDataValue(params.column.colId, v ? 0 : 1);
+        }
+
+        if (this.onCellClick && params.data && params.colDef.field) {
+            this.onCellClick(params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
+        }
+    }
+
+    cellClickHandler(params: any) {
+        if (this.onCellDoubleClick) {
+            if (this.clickTimer) {
+                clearTimeout(this.clickTimer);
+                this.clickTimer = null;
+            } else {
+                this.clickTimer = setTimeout(() => {
+                        this.clickTimer = null;
+                        this.onCellClicked(params);
+                    }, 250);
+            }
+        } else {
+            this.onCellClicked(params);
+        }
+    }
+
+    onCellDoubleClicked(params: any) {
+        this.log.debug(params);
+        if (this.onCellDoubleClick) {
+            if (params.data && params.colDef.field) {
+                this.onCellDoubleClick(params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
+            }
+        }
+    }
+
+    /**
+     * When Column Group Changes
+     */
+    onColumnRowGroupChanged(event: any) {
+        const columns = event.columns;
+        const groupFields = [];
+        let levelToRemove = null;
+
+        let i = 0;
+        for (const column of columns) {
+            // cache order of grouped fields
+            const field = column.colDef.field;
+            groupFields.push(field);
+
+            // TODO i am sure this run always before the onRowGroupOpen ?
+            // Remove the grouped fields
+            if (this.state.expanded.fields[i] && this.state.expanded.fields[i] !== field) {
+                if (levelToRemove === null || levelToRemove === undefined) levelToRemove = i;
+            }
+            i++;
+        }
+
+        // clear expanded node if grouped columns change
+        this.removeRowExpandedStateAtLevel(levelToRemove);
+
+        // cache order of grouped fields
+        this.state.expanded.fields = groupFields;
+    }
+
+    /**
+     * remove state of expanded nodes from level
+     * see onRowGroupChanged
+     *
+     * @param level
+     *
+     */
+    removeRowExpandedStateAtLevel(level: any) {
+        if (level === null || level === undefined)  {
+            return;
+        }
+        this.removeNodeAtLevel(this._internalExpandedState, level);
+        this._internalExpandedStateChange.emit(this._internalExpandedState);
+    }
+
+    removeNodeAtLevel(node: any, lvl: any) {
+        if (!node) {
+            return;
+        }
+
+        if (node) {
+            for (const key in node) {
+                if (lvl === 0) {
+                    // remove all keys at this level
+                    delete node[key];
+                } else {
+                    // clear subnodes
+                    this.removeNodeAtLevel(node[key], lvl - 1);
+                }
+            }
+        }
+    }
+
+    onRowGroupOpenedHandler(event: any) {
+        const column = event.node;
+        const isExpanded = column.expanded;
+
+        // get group parent
+        const rowGroupInfo = this.getNodeGroupInfo(column);
+        const rowGroupCols = rowGroupInfo.rowGroupFields;
+        const groupKeys = rowGroupInfo.rowGroupKeys;
+
+        // Persist the state of an expanded row
+        if (isExpanded) { // add expanded node to cache
+            this.addRowExpandedState(groupKeys);
+        } else { // remove expanded node from cache when collapsed
+            this.removeRowExpandedState(groupKeys);
+        }
+
+        if (this.onRowGroupOpened) {
+
+            // return the column indexes
+            const rowGroupColIdxs = [];
+            for (const rowGroupCol of rowGroupCols) {
+                rowGroupColIdxs.push(this.getColumnIndex(rowGroupCol));
+            }
+
+            this.onRowGroupOpened(rowGroupColIdxs, groupKeys, isExpanded);
+        }
+    }
+
+    getColumn(colId: any, columnsModel?: any): any {
+        if(this.columns) {
+            for (const column of this.columns) {
+                if(column['id'] === colId || column['dataprovider'] === colId) {
+                    return column;
+                }
+            }
+        }
+        return null;
+    }
+
+    getColumnIndex(colId: any): number {
+        if(this.columns) {
+            let i = 0;
+            for (const column of this.columns) {
+                if(column['id'] === colId || column['dataprovider'] === colId) {
+                    return i;
+                }
+                i++;
+            }
+        }
+        return -1;
+    }
+
+    getEditingRowIndex(param: any): number {
+        return param.node.rowIndex;
+    }
+
+    /**
+     * add expanded node to cache
+     * see onRowGroupOpened
+     *
+     * @param groupKeys
+     */
+    addRowExpandedState(groupKeys: any) {
+
+        if (!this._internalExpandedState) {
+            this._internalExpandedState = new Object();
+        }
+
+        let node = this._internalExpandedState;
+
+        // Persist the state of an expanded row
+        for (const key of groupKeys) {
+            if (!node[key]) {
+                node[key] = new Object();
+            }
+
+            node = node[key];
+        }
+        this._internalExpandedStateChange.emit(this._internalExpandedState);
+    }
+
+    /**
+     * remove expanded node state from cache
+     * see onRowGroupOpened
+     *
+     * @param groupKeys
+     *
+     */
+    removeRowExpandedState(groupKeys: any) {
+
+        if (!groupKeys) {
+            return;
+        }
+
+        if (!groupKeys.length) {
+            return;
+        }
+
+        // search for the group key node
+        let node = this._internalExpandedState;
+        for (const key of groupKeys) {
+            node = node[key];
+
+            if (!node) {
+                return;
+            }
+        }
+
+        // remove the node
+        delete node[groupKeys[groupKeys.length - 1]];
+
+        this._internalExpandedStateChange.emit(this._internalExpandedState);
+    }
+
+    updateColumnDefs() {
+        if(this.agGrid) {
+            // need to clear/remove old columns first, else the id for
+            // the new columns will have the counter at the end (ex. "myid_1")
+            // and that will broke our getColumn()
+            this.agGrid.api.setColumnDefs([]);
+
+            this.agGrid.api.setColumnDefs(this.getColumnDefs());
+        }
+    }
+
+    handleColumnHeaderTitle(index: any, newValue: any) {
+        this.log.debug('header title column property changed');
+
+        // column id is either the id of the column
+        const column = this.columns[index];
+        let colId = column.id;
+        if (!colId) {
+            colId = column['dataprovider'];
+        }
+
+        if (!colId) {
+            this.log.warn('cannot update header title for column at position index ' + index);
+            return;
+        }
+        this.updateColumnHeaderTitle(colId, newValue);
+    }
+
+    updateColumnHeaderTitle(id: any, text: any) {
+        // get a reference to the column
+        const col = this.agGrid.columnApi.getColumn(id);
+
+        // obtain the column definition from the column
+        const colDef = col.getColDef();
+
+        // update the header name
+        colDef.headerName = text;
+
+        // the column is now updated. to reflect the header change, get the grid refresh the header
+        this.agGrid.api.refreshHeader();
+    }
+
+    /**
+     * Export data to excel format (xlsx)
+     *
+     * @param fileName
+     * @param skipHeader
+     * @param columnGroups
+     * @param skipFooters
+     * @param skipGroups
+     * @param asCSV
+     */
+    exportData(fileName: any, skipHeader: any, columnGroups: any, skipFooters: any, skipGroups: any, asCSV: any) {
+        // set defaults
+        if(fileName === undefined) {
+            fileName = 'export.xlsx';
+        }
+        if(skipHeader === undefined) {
+            skipHeader = false;
+        }
+        if(columnGroups === undefined) {
+            columnGroups = true;
+        }
+        if(skipFooters === undefined) {
+            skipFooters = false;
+        }
+        if(skipGroups === undefined) {
+            skipGroups = false;
+        }
+        if(asCSV === undefined) {
+            asCSV = false;
+        }
+
+        const params = {
+            fileName,
+            skipHeader,
+            columnGroups,
+            skipFooters,
+            skipGroups,
+            processCellCallback: (processCellParams: any) => {
+                const columnModel = this.getColumn(processCellParams.column.colId);
+                if(columnModel && columnModel.exportDisplayValue && processCellParams.column.colDef.valueFormatter) {
+                    return processCellParams.column.colDef.valueFormatter({value: processCellParams.value });
+                } else {
+                    return processCellParams.value;
+                }
+            }
+        };
+        if(asCSV) {
+            this.agGrid.api.exportDataAsCsv(params);
+        } else {
+            this.agGrid.api.exportDataAsExcel(params);
+        }
+    }
+
+    /**
+     * Gets selected rows data
+     */
+    getSelectedRows(): any {
+        const selectedNodes = this.agGrid.api.getSelectedNodes();
+        // TODO return the selected Nodes as JSON;
+        const result = [];
+        for (const node of selectedNodes) {
+            const selectedNode = node.data;
+            result.push(selectedNode);
+            //result.push({rowIndex:  selectedNodes[i].rowIndex, rowData: selectedNodes[i].data})
+        }
+        return result;
+    }
+
+    /**
+     * Start cell editing (only works when the table is not in grouping mode).
+     *
+     * @param rowindex row index of the editing cell (0-based)
+     * @param columnindex column index in the model of the editing cell (0-based)
+     */
+    editCellAt(rowindex: any, columnindex: any) {
+        if(this.isTableGrouped()) {
+            this.log.warn('editCellAt API is not supported in grouped mode');
+        } else if (rowindex < 0) {
+            this.log.warn('editCellAt API, invalid rowindex:' + rowindex);
+        } else if(columnindex < 0 || columnindex > this.columns.length - 1) {
+            this.log.warn('editCellAt API, invalid columnindex:' + columnindex);
+        } else {
+            const column = this.columns[columnindex];
+            const	colId = column['id'] ? column['id'] : column['dataprovider'];
+            setTimeout(() => {
+                this.agGrid.api.startEditingCell({
+                    rowIndex: rowindex,
+                    colKey: colId
+                });
+            }, 0);
+        }
+    }
+
+    /**
+     * If a cell is editing, it stops the editing
+     *
+     * @param cancel 'true' to cancel the editing (ie don't accept changes)
+     */
+    stopCellEditing(cancel: any) {
+        this.agGrid.api.stopEditing(cancel);
+    }
+
+    /**
+     * Sets expanded groups
+     *
+     * @param groups an object like {expandedGroupName1:{}, expandedGroupName2:{expandedSubGroupName2_1:{}, expandedSubGroupName2_2:{}}}
+     */
+    setExpandedGroups(groups: any) {
+        this._internalExpandedState = groups;
+        this._internalExpandedStateChange.emit(groups);
+        if(this.isGridReady) {
+            this.applyExpandedState();
+        }
+    }
+
+    onCellValueChanged(params: any) {
+        const rowIndex = params.node.rowIndex;
+        const colId = params.column.colId;
+
+        // if we have an invalid cell data, ignore any updates for other cells
+        if((this.invalidCellDataIndex.rowIndex !== -1 && this.invalidCellDataIndex.rowIndex !== rowIndex)
+            || (this.invalidCellDataIndex.colKey !== '' && this.invalidCellDataIndex.colKey !== colId)) {
+            return;
+        }
+
+        const newValue = params.newValue;
+        const oldValue = params.oldValue;
+        let oldValueStr = oldValue;
+        if(oldValueStr == null) oldValueStr = '';
+
+        const col = this.getColumn(params.colDef.field);
+        // ignore types in compare only for non null values ("200"/200 are equals, but ""/0 is not)
+        let isValueChanged = newValue !== oldValueStr || (!newValue && newValue !== oldValueStr);
+        if(isValueChanged && newValue instanceof Date && oldValue instanceof Date) {
+            isValueChanged = newValue.toISOString() !== oldValue.toISOString();
+        }
+        if(col && col['dataprovider'] && (isValueChanged || this.invalidCellDataIndex.rowIndex !== -1)) {
+            if(this.onColumnDataChange && isValueChanged) {
+                const currentEditCells = this.agGrid.api.getEditingCells();
+                this.onColumnDataChangePromise = this.onColumnDataChange(
+                    rowIndex,
+                    this.getColumnIndex(params.column.colId),
+                    oldValue,
+                    newValue,
+                    this.createJSEvent()
+                );
+                this.onColumnDataChangePromise.then((r: any) => {
+                    if(r === false) {
+                        // if old value was reset, clear invalid state
+                        const currentValue = this.agGrid.api.getValue(colId, params.node);
+                        if(oldValue === currentValue) {
+                            this.invalidCellDataIndex.rowIndex = -1;
+                            this.invalidCellDataIndex.colKey = '';
+                        } else {
+                            this.invalidCellDataIndex.rowIndex = rowIndex;
+                            this.invalidCellDataIndex.colKey = colId;
+                        }
+                        const editCells = this.agGrid.api.getEditingCells();
+                        if(!editCells.length || (editCells[0].rowIndex !== rowIndex || editCells[0].column.getColId() !== colId)) {
+                            this.agGrid.api.stopEditing();
+                            this.agGrid.api.startEditingCell({
+                                rowIndex,
+                                colKey: colId
+                            });
+                            setTimeout(() => {
+                                this.agGrid.api.forEachNode( (node) => {
+                                    if (node.rowIndex === rowIndex) {
+                                        node.setSelected(true, true);
+                                    }
+                                });
+                            }, 0);
+                        }
+                    } else {
+                        this.invalidCellDataIndex.rowIndex = -1;
+                        this.invalidCellDataIndex.colKey = '';
+                        const editCells = this.agGrid.api.getEditingCells();
+                        if(editCells.length === 0 && currentEditCells.length !== 0) {
+                            this.agGrid.api.startEditingCell({
+                                rowIndex: currentEditCells[0].rowIndex,
+                                colKey: currentEditCells[0].column.getColId()
+                            });
+                        }
+                    }
+                    this.onColumnDataChangePromise = null;
+                }).catch((e: any) => {
+                    this.log.error(e);
+                    this.invalidCellDataIndex.rowIndex = -1;
+                    this.invalidCellDataIndex.colKey = '';
+                    this.onColumnDataChangePromise = null;
+                });
+            }
+        }
+    }
+}
+
+class State {
+    expanded: ExpandedInfo = new ExpandedInfo();
+}
+
+class ExpandedInfo {
+    /** the group fields in order
+     * This is a re-duntant info. I can obtain it via:
+     *
+     * var groupedColumns = gridOptions.columnApi.getRowGroupColumns();
+     * var groupFields = [];
+     * for (var j = 0; j < groupedColumns.length; j++) {
+     *	    groupFields.push(groupedColumns[j].colDef.field);
+     * }
+     *  */
+    fields: any = [];
+}
+
+class RemoteDatasource {
+
+    constructor(private powerGrid: PowerGrid) {
+    }
+
+    getRows(params: any) {
+        this.powerGrid.data = [];
+        this.powerGrid.lastRowIndex = null;
+        if(this.powerGrid.onLazyLoadingGetRows) {
+            const request = params.request;
+            const filterModels = [];
+            for(const id in request.filterModel) {
+                if(request.filterModel.hasOwnProperty(id)) {
+                    filterModels.push({id, operator: request.filterModel[id].type, value: request.filterModel[id].filter });
+                }
+            }
+
+            const getRowsPromise = this.powerGrid.onLazyLoadingGetRows(
+                request.startRow,
+                request.endRow,
+                request.rowGroupCols,
+                request.valueCols,
+                request.pivotCols,
+                request.pivotMode,
+                request.groupKeys,
+                filterModels,
+                request.sortModel);
+            getRowsPromise.then(() => {
+                params.successCallback(this.powerGrid.data, this.powerGrid.lastRowIndex);
+            });
+        } else {
+            params.successCallback(this.powerGrid.data, this.powerGrid.lastRowIndex);
+        }
+    }
 }

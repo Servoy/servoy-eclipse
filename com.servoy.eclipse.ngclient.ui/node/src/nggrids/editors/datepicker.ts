@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
-import { LocaleService } from '../../../ngclient/servoy_public';
-import { DatagridEditorDirective } from './datagrideditor';
+import { LocaleService } from '../../ngclient/servoy_public';
+import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
 
 @Component({
-  selector: 'aggrid-datagrid-datepicker',
+  selector: 'aggrid-datepicker',
   template: `
       <div class="input-group ag-cell-edit-input">
         <input class="form-control" style="height: 100%;" [owlDateTime]="datetime" (dateTimeChange)="dateChanged($event)" [value]="initialValue" #element>
@@ -16,7 +16,7 @@ import * as moment from 'moment';
     `,
   providers: [OwlDateTimeIntl]
 })
-export class DatePicker extends DatagridEditorDirective {
+export class DatePicker extends EditorDirective {
 
   firstDayOfWeek = 1;
   hour12Timer = false;
@@ -40,7 +40,7 @@ export class DatePicker extends DatagridEditorDirective {
     this.selectedValue = this.initialValue;
 
     let format = 'MM/dd/yyyy hh:mm a';
-    const column = this.dataGrid.getColumn(params.column.getColId());
+    const column = this.ngGrid.getColumn(params.column.getColId());
     if (column && column.format) {
       format = column.format.edit ? column.format.edit : column.format.display;
     }
