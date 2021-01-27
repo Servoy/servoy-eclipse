@@ -89,7 +89,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 const selected = this.foundset.selectedRowIndexes;
                 if (!selected || selected.indexOf(index) === -1) {
                     this.foundset.requestSelectionUpdate([index]);
-                     if (this.onSelectionChanged) {
+                    if (this.onSelectionChanged) {
                         this.onSelectionChanged(event);
                     }
                 }
@@ -207,6 +207,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
 
                 this.foundset.notifyChanged(); // let foundset send it's pending requests to server if any
+                this.cdRef.detectChanges();
             }
         });
     }
@@ -324,15 +325,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             const selectedIndex = this.foundset.selectedRowIndexes[0];
             let row = this.componentCache[selectedIndex];
             if (!row) {
-                this.log.warn('calling api ' + apiName + ' on' + componentName + ' in LFC:' + this.name + ' but selected record '  + selectedIndex +
-                                    '  is not in the view' + this.foundset.viewPort + ' fallback to the nearest visible row');
+                this.log.warn('calling api ' + apiName + ' on' + componentName + ' in LFC:' + this.name + ' but selected record ' + selectedIndex +
+                    '  is not in the view' + this.foundset.viewPort + ' fallback to the nearest visible row');
                 let closestIndex = selectedIndex;
                 let difference = Number.MAX_VALUE;
                 Object.keys(this.componentCache).forEach(key => {
                     const intKey = parseInt(key, 10);
-                    const dif = Math.abs(intKey-selectedIndex);
+                    const dif = Math.abs(intKey - selectedIndex);
                     if (dif < difference) {
-                        closestIndex = intKey; 
+                        closestIndex = intKey;
                         difference = dif;
                     }
                 });
@@ -474,7 +475,7 @@ class ListFormComponentServoyApi extends ServoyApi {
         servoyService: ServoyService,
         private fc: ListFormComponent) {
         super(cell.state, formname, absolute, formservice, servoyService);
-        this.markupId = super.getMarkupId() +'_' +this.cell.rowIndex;
+        this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }
 
     registerComponent(comp: ServoyBaseComponent<any>) {
