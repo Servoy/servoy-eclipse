@@ -12,7 +12,7 @@ import { FormComponentState } from '../../ngclient/converters/formcomponent_conv
 import { ServoyApi } from '../../ngclient/servoy_public';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
-import { IApiExecutor, instanceOfApiExecutor } from '../../ngclient/types';
+import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { isEmpty } from 'lodash-es';
 
@@ -32,6 +32,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() pageLayout: string;
     @Input() onSelectionChanged: (event: any) => void;
 
+    @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('element', { static: true }) elementRef: ElementRef;
     @ViewChild('firstelement', { static: true }) elementFirstRef: ElementRef;
     @ViewChild('leftelement', { static: true }) elementLeftRef: ElementRef;
@@ -41,6 +42,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     numberOfCells = 0;
     selectionChangedByKey = false;
     removeListenerFunction: () => void;
+    cache: FormComponentCache;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
 
@@ -100,6 +102,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     svyOnInit() {
         super.svyOnInit();
+        this.cache = this.parent.getFormCache().getFormComponent(this.name);
         this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
             if (event.viewportRowsUpdated) {
                 // copy the viewport data over to the cell
@@ -247,6 +250,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.pageLayout === 'listview') {
             return '100%';
         }
+        if (!this.containedForm.absoluteLayout) {
+            return null;
+        }
         return this.containedForm.getStateHolder().formWidth + 'px';
     }
 
@@ -273,21 +279,31 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
     }
 
-    getRowItemTemplate(item: ComponentModel): TemplateRef<any> {
+    getRowItemTemplate(item: StructureCache | ComponentModel): TemplateRef<any> {
+        if (item instanceof StructureCache) {
+            return this.svyResponsiveDiv;
+        }
         return this.parent.getTemplateForLFC(item);
     }
 
-    getRowItemState(item: ComponentModel, row: ViewPortRow, rowIndex: number): Cell {
+    getRowItemState(item: StructureCache | ComponentModel | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache{
+        if (item instanceof StructureCache) {
+            return item;
+        }
+        let cm: ComponentModel = null
+        if (item instanceof ComponentCache) {
+            cm = this.getRowItems().find(elem => elem.name === item.name);
+        } else cm  = item;
         if (row._cache) {
-            const cache = row._cache.get(item.name);
+            const cache = row._cache.get(cm.name);
             if (cache) return cache;
         }
 
-        if (!item.nestedPropertyChange) {
-            item.nestedPropertyChange = (property: string, value: any) => {
+        if (!cm.nestedPropertyChange) {
+            cm.nestedPropertyChange = (property: string, value: any) => {
                 // should we really see if this was a foundset based property so for the selected index?
                 this.componentCache.forEach(rowObject => {
-                    const ui = rowObject[item.name];
+                    const ui = rowObject[cm.name];
                     if (ui) {
                         const change = {};
                         change[property] = new SimpleChange(value, value, false);
@@ -299,23 +315,23 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         function Model() {
         }
-        Model.prototype = item.model;
+        Model.prototype = cm.model;
 
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
         const model = new Model();
         const handlers = {};
-        const rowItem = new Cell(item, model, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
-        if (item.foundsetConfig && item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array) {
-            (item.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
-                rowItem.model[p] = item[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
+        const rowItem = new Cell(cm, model, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
+        if (cm.foundsetConfig && cm.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array) {
+            (cm.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
+                rowItem.model[p] = cm[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
             });
         }
-        item.mappedHandlers.forEach((value, key) => {
+        cm.mappedHandlers.forEach((value, key) => {
             rowItem.handlers[key] = value.selectRecordHandler(rowId);
         });
 
         if (!row._cache) row._cache = new Map();
-        row._cache.set(item.name, rowItem);
+        row._cache.set(cm.name, rowItem);
         return rowItem;
     }
 
