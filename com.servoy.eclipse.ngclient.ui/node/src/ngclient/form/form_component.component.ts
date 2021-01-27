@@ -28,11 +28,10 @@ import { ServoyBaseComponent } from '../basecomponent';
       </div>
       <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
-            <ng-template *ngFor="let formComponent of formCache.formComponents" [ngTemplateOutlet]="getTemplate(formComponent)" [ngTemplateOutletContext]="{state:formComponent}"></ng-template>
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
-          <div [svyContainerStyle]="state">
+          <div [svyContainerStyle]="state" class="svy-layoutcontainer">
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
@@ -205,6 +204,10 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     public detectChanges() {
         this.changeHandler.markForCheck();
+    }
+
+    public getFormCache(): FormCache {
+        return this.formCache;
     }
 
     propertyChanged(componentName: string, property: string, value: any): void {
