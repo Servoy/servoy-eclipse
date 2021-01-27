@@ -28,6 +28,8 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
     @Input() toolTipText: string;
     @Input() scrollbars: any;
 
+    mustExecuteOnFocus = true;
+
     @ViewChild( AngularEditorComponent ) editor: AngularEditorComponent;
 
     config: AngularEditorConfig = {
@@ -46,7 +48,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
         super.svyOnInit();
 
         this.attachHandlers();
-        this.attachFocusListeners( this.getFocusElement() );
+        this.attachFocusListeners();
 
         if ( this.dataProviderID === undefined ) {
             this.dataProviderID = null;
@@ -55,24 +57,24 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
         const nativeElement = this.getNativeElement();
         const componentHeight = nativeElement.offsetHeight;
         // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        const initialContentHeight = (nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement).offsetHeight;
-        const initialEditorHeight = (nativeElement.childNodes[0].childNodes[0] as HTMLElement).offsetHeight;
+        const initialContentHeight = ( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement ).offsetHeight;
+        const initialEditorHeight = ( nativeElement.childNodes[0].childNodes[0] as HTMLElement ).offsetHeight;
 
         this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
 
     }
 
     public getScrollX(): number {
-        return this.getNativeElement().scrollLeft;
+        return this.getFocusElement().scrollLeft;
     }
 
     public getScrollY(): number {
-        return this.getNativeElement().scrollTop;
+        return this.getFocusElement().scrollTop;
     }
 
     public setScroll( x: number, y: number ) {
-        this.getNativeElement().scrollLeft = x;
-        this.getNativeElement().scrollTop = y;
+        this.getFocusElement().scrollLeft = x;
+        this.getFocusElement().scrollTop = y;
     }
 
     svyOnChanges( changes: SimpleChanges ) {
@@ -104,22 +106,26 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
         super.svyOnChanges( changes );
     }
 
-    getFocusElement(): any {
-        return this.getNativeElement();
+    getFocusElement() {
+        return this.editor.textArea.nativeElement;
     }
 
-    requestFocus() {
-        this.editor.focus();
+    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getFocusElement().focus();
     }
 
     pushUpdate() {
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 
-    attachFocusListeners( nativeElement: any ) {
+    attachFocusListeners() {
         if ( this.onFocusGainedMethodID ) {
             this.editor.focusEvent.subscribe(() => {
-                this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
+                if ( this.mustExecuteOnFocus === true ) {
+                    this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
+                }
+                this.mustExecuteOnFocus = true;
             } );
         }
 
@@ -127,6 +133,14 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
             this.pushUpdate();
             if ( this.onFocusLostMethodID ) this.onFocusLostMethodID( new CustomEvent( 'blur' ) );
         } );
+    }
+
+    public selectAll() {
+        const range = document.createRange();
+        range.selectNodeContents( this.getFocusElement() );
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange( range );
     }
 
     protected attachHandlers() {
@@ -145,5 +159,36 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
                 this.onRightClickMethodID( e ); return false;
             } );
         }
+    }
+
+    public getSelectedText(): string {
+        const selection = window.getSelection();
+        let node = selection.anchorNode;
+        while ( node ) {
+            if ( node === this.getFocusElement() || node === this.getFocusElement().parentNode ) {
+                return selection.toString();
+            }
+            node = node.parentNode;
+        }
+        return '';
+    }
+
+    public replaceSelectedText( text: string ) {
+        var sel: any, range: any;
+        if ( window.getSelection ) {
+            sel = window.getSelection();
+            if ( sel.rangeCount ) {
+                range = sel.getRangeAt( 0 );
+                range.deleteContents();
+                range.insertNode( document.createTextNode( text ) );
+            }
+        }
+    }
+
+    public getAsPlainText(): string {
+        if ( this.dataProviderID ) {
+            return this.dataProviderID.replace( /<[^>]*>/g, '' );
+        }
+        return this.dataProviderID;
     }
 }

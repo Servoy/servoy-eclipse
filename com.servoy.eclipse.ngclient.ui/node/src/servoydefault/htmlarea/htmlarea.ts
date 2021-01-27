@@ -104,8 +104,20 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     public getScrollY(): number {
         return this.getNativeElement().scrollTop;
     }
+    
+    public replaceSelectedText( text: string ) {
+        var sel: any, range: any;
+        if ( window.getSelection ) {
+            sel = window.getSelection();
+            if ( sel.rangeCount ) {
+                range = sel.getRangeAt( 0 );
+                range.deleteContents();
+                range.insertNode( document.createTextNode( text ) );
+            }
+        }
+    }
 
-    public setScroll(x: number, y: number) {
+    public setScroll( x: number, y: number ) {
         this.getNativeElement().scrollLeft = x;
         this.getNativeElement().scrollTop = y;
     }

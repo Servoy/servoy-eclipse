@@ -1,16 +1,16 @@
-<div style="width:100%; height:100%; overflow:hidden"
-     class='svy-extra-htmlarea'
-     [id]="servoyApi.getMarkupId()" 
-     [ngClass]="styleClass"
-     [svyTooltip]="toolTipText"
-     [sabloTabseq]="tabSeq"
-     #element>
-  <angular-editor 
-  		[placeholder]="placeholderText" 
-  		[id]="servoyApi.getMarkupId() + 'editor'"  
-  		[(ngModel)]="dataProviderID" 
-  		(blur)="pushUpdate()" 
-      [config]="config"
-      #editor>
-  </angular-editor>
+<div style="width: 100%; height: 100%; overflow: hidden"
+	class='svy-extra-htmlarea' 
+	[id]="servoyApi.getMarkupId()"
+	[ngClass]="styleClass" 
+	[svyTooltip]="toolTipText"
+	[sabloTabseq]="tabSeq" 
+	#element>
+	<angular-editor 
+	      [placeholder]="placeholderText"
+		  [id]="servoyApi.getMarkupId() + 'editor'" 
+		  [(ngModel)]="dataProviderID"
+		  (blur)="pushUpdate()" 
+		  [config]="config" 
+		  #editor> 
+    </angular-editor>
 </div>
