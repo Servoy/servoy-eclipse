@@ -1,4 +1,4 @@
-import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject } from '@angular/core';
+import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject, Renderer2, RendererFactory2 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -25,6 +25,7 @@ export class WindowService {
     private instances: { [property: string]: SvyWindow } = {};
     private windowCounter: number;
     private windowsRestored = false;
+    private renderer2: Renderer2;
 
     constructor(private formService: FormService,
         public servoyService: ServoyService,
@@ -41,6 +42,7 @@ export class WindowService {
         private platformLocation: PlatformLocation,
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
+        private rendererFactory: RendererFactory2,
         @Inject(DOCUMENT) private document: any) {
 
         this.platformLocation.onPopState(() => {
@@ -49,9 +51,10 @@ export class WindowService {
         });
 
         this.windowCounter = 0;
+        this.renderer2 = rendererFactory.createRenderer(null, null);
     }
 
-    public updateController(formName: string, formStructure: string) {
+    public updateController(formName, formStructure) {
         const formState = JSON.parse(formStructure)[formName];
         this.formService.createFormCache(formName, formState);
     }
@@ -65,7 +68,7 @@ export class WindowService {
             });
         }
         if (!this.instances[name]) {
-            this.instances[name] = new SvyWindow(name, type, this);
+            this.instances[name] = new SvyWindow(name, type, this, this.renderer2);
         }
     }
 
@@ -240,28 +243,25 @@ export class WindowService {
         }
     }
 
-    public setTitle(name: string, title: string) {
-        const currentWindow = 'window' + this.windowCounter;
-        const storedWindow = this.sessionStorageService.get(currentWindow);
-        if (title && storedWindow && !storedWindow.title) {
-            storedWindow.title = title;
-            this.sessionStorageService.set(currentWindow, storedWindow);
-        }
-        if (this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW) {
+    public setTitle(name: string, title: string ) {
+        this.saveInSessionStorage(title);
+        if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
         } else {
             this.titleService.setTitle(title);
         }
     }
 
-    public setInitialBounds(name: string, initialBounds: any) {
-        if (this.instances[name]) {
+    public setInitialBounds(name: string, initialBounds: any ) {
+        this.saveInSessionStorage(initialBounds);
+        if ( this.instances[name] ) {
             this.instances[name].initialBounds = initialBounds;
         }
     }
 
-    public setStoreBounds(name: string, storeBounds: boolean) {
-        if (this.instances[name]) {
+    public setStoreBounds(name: string, storeBounds: boolean ) {
+        this.saveInSessionStorage(storeBounds);
+        if ( this.instances[name] ) {
             this.instances[name].storeBounds = storeBounds;
         }
     }
@@ -273,64 +273,68 @@ export class WindowService {
         }
     }
 
-    public setLocation(name: string, location: {x: number; y: number}) {
-        if (this.instances[name]) {
-            this.instances[name].setLocation(location);
+    public setLocation(name: string, location: any ) {
+        this.saveInSessionStorage(location);
+        if ( this.instances[name] ) {
+            this.instances[name].setLocation( location );
         }
     }
 
-    public setSize(name: string, size: { width: number; height: number }) {
-        if (this.instances[name]) {
-            this.instances[name].setSize(size);
+    public setSize(name: string, size: any ) {
+        this.saveInSessionStorage(size);
+        if ( this.instances[name] ) {
+            this.instances[name].setSize( size );
         }
     }
 
-    public getSize(name: string) {
-        if (this.instances[name] && this.instances[name].bsWindowInstance) {
+    private saveInSessionStorage(property: any) {
+        const currentWindow = 'window' + this.windowCounter;
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (property && storedWindow && !storedWindow.size) {
+            storedWindow.size = property;
+            this.sessionStorageService.set(currentWindow, storedWindow);
+        }
+    }
+
+    public getSize(name: string ) {
+        if ( this.instances[name] && this.instances[name].bsWindowInstance ) {
             return this.instances[name].getSize();
         } else {
             return { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight };
         }
     }
 
-    public setUndecorated(name: string, undecorated: boolean) {
-        const currentWindow = 'window' + this.windowCounter;
-        const storedWindow = this.sessionStorageService.get(currentWindow);
-        if (storedWindow && !storedWindow.title) {
-            storedWindow.undecorated = undecorated;
-            this.sessionStorageService.set(currentWindow, storedWindow);
-        }
-        if (this.instances[name]) {
+    public setUndecorated(name: string, undecorated: boolean ) {
+        this.saveInSessionStorage(undecorated);
+        if ( this.instances[name] ) {
             this.instances[name].undecorated = undecorated;
         }
     }
 
-    public setCSSClassName(name: string, cssClassName: string) {
-        const currentWindow = 'window' + this.windowCounter;
-        const storedWindow = this.sessionStorageService.get(currentWindow);
-        if (storedWindow && !storedWindow.cssClassName) {
-            storedWindow.cssClassName = cssClassName;
-            this.sessionStorageService.set(currentWindow, storedWindow);
-        }
-        if (this.instances[name]) {
+    public setCSSClassName(name: string, cssClassName: string ) {
+        this.saveInSessionStorage(cssClassName);
+        if ( this.instances[name] ) {
             this.instances[name].cssClassName = cssClassName;
         }
     }
 
     public setOpacity(name: string, opacity: boolean) {
+        this.saveInSessionStorage(opacity);
         if (this.instances[name]) {
             this.instances[name].opacity = opacity?0:1;
         }
     }
 
-    public setResizable(name: string, resizable: boolean) {
-        if (this.instances[name]) {
+    public setResizable(name: string, resizable: boolean ) {
+        this.saveInSessionStorage(resizable);
+        if ( this.instances[name] ) {
             this.instances[name].resizable = resizable;
         }
     }
 
-    public setTransparent(name: string, transparent: boolean) {
-        if (this.instances[name]) {
+    public setTransparent(name: string, transparent: boolean ) {
+        this.saveInSessionStorage(transparent);
+        if ( this.instances[name] ) {
             this.instances[name].transparent = transparent;
         }
     }
@@ -410,7 +414,6 @@ export class WindowService {
         this.formService.destroyFormCache(formName);
     }
 
-
     private restoreWindows() {
         const window0 = this.sessionStorageService.get('window0');
         if (window0 && window0.showForm) {
@@ -430,18 +433,24 @@ export class WindowService {
                         this.setTitle(window.name, window.title);
                         this.setUndecorated(window.name, window.undecorated);
                         this.setCSSClassName(window.name, window.cssClassName);
-                        this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then(() => {
-                            // in order to show all the windows the counter must be reset
-                            if (this.windowsRestored && !windowCounterReset) {
-                                this.windowCounter = 0;
-                                windowCounterReset = true;
-                            }
-                            this.show(window.name, window.showForm, window.showTitle);
-                            this.windowCounter++;
+                        this.setInitialBounds(window.name, window.initialBounds);
+                        this.setStoreBounds(window.name, window.storeBounds);
+                        this.setSize(window.name, window.size);
+                        this.setLocation(window.name, window.location);
+                        this.setOpacity(window.name, window.opacity);
+                        this.setTransparent(window.name, window.transparent);
+                        this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
+                          // in order to show all the windows the counter must be reset
+                          if (this.windowsRestored && !windowCounterReset) {
+                              this.windowCounter = 0;
+                              windowCounterReset = true;
+                          }
+                          this.show(window.name, window.showForm, window.showTitle);
+                          this.windowCounter++;
                         });
                         counter++;
                         this.windowCounter++;
-                    }
+                }
                 }
             }, 1000);
         }
@@ -464,13 +473,15 @@ export class SvyWindow {
     resizable = false;
     transparent = false;
     storeBounds = false;
+    renderer2: Renderer2;
     bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
 
     windowService: WindowService;
 
-    constructor(name: string, type: number, windowService: WindowService) {
+    constructor(name: string, type: number, windowService: WindowService, renderer2: Renderer2) {
         this.name = name;
         this.type = type;
+        this.renderer2 = renderer2;
         this.windowService = windowService;
     }
 
@@ -486,8 +497,8 @@ export class SvyWindow {
     setLocation(location: {x: number; y: number}) {
         this.location = location;
         if (this.bsWindowInstance) {
-            this.bsWindowInstance.element.css('left', this.location.x + 'px');
-            this.bsWindowInstance.element.css('top', this.location.y + 'px');
+            this.renderer2.setStyle(this.bsWindowInstance.element, 'left', this.location.x + 'px');
+            this.renderer2.setStyle(this.bsWindowInstance.element, 'top', this.location.y + 'px');
         }
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location', this.location);

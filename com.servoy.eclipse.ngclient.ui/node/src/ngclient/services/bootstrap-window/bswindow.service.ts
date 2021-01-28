@@ -121,7 +121,7 @@ export class BSWindow {
             this.setSize(this.options.size);
         }
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            this.options.references.window.bind('orientationchange resize', () => _this.centerWindow());
+            this.renderer.listen(this.element, 'orientationchange resize', () => _this.centerWindow());
         }
 
         this.renderer.listen(this.element, 'touchmove', (e) => {
@@ -150,21 +150,21 @@ export class BSWindow {
         this.renderer.setStyle(winBody, 'height', size.height + 'px');
     }
 
-    centerWindow() {
+    centerWindow() {  
         let top: number; let left: number;
         const bodyTop = this.options.references.body.offsetTop + parseInt(this.options.references.body.style.paddingTop, 10);
         if (!this.options.sticky) {
-            left = (this.options.references.window.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
-            top = (this.options.references.window.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
+            left = (this.options.references.body.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
+            top = (this.options.references.body.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
         } else {
-            left = (this.options.references.window.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
-            top = (this.options.references.window.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
+            left = (this.options.references.body.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
+            top = (this.options.references.body.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
         }
 
         if (top < bodyTop) {
             top = bodyTop;
         }
-        const maxHeight = ((this.options.references.window.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) +
+        const maxHeight = ((this.options.references.body.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) +
             this.getInteger(this.options.elements.footer.style.height))) - 45;
         this.renderer.setStyle(this.options.elements.body, 'maxHeight', maxHeight);
         this.renderer.setStyle(this.element, 'left', left);
@@ -460,7 +460,7 @@ export class BSWindow {
         this.options.elements.body.append(shade);
         this.renderer.addClass(this.options.elements.body, 'disable-scroll');
         this.options.elements.footer.append(shade);
-        this.element.querySelector('.disable-shade').fadeIn();
+        this.renderer.addClass(this.element.querySelector('.disable-shade'), 'show');
         if (!this.options.blocker.getParent()) {
             this.options.blocker.setParent(this);
         }
@@ -473,9 +473,7 @@ export class BSWindow {
 
     clearBlocker() {
         this.renderer.removeClass(this.options.elements.body, 'disable-scroll');
-        this.element.querySelector('.disable-shade').fadeOut(function() {
-            this.remove();
-        });
+        this.renderer.addClass(this.element.querySelector('.disable-shade'), 'hide');
         delete this.options.blocker;
     }
 
@@ -495,7 +493,7 @@ export class BSWindow {
         const active = this.element.classList.contains('active');
 
         const blinkInterval = setInterval(() => {
-            _this.element.toggleClass('active');
+            _this.renderer.addClass(_this.element, 'active');
         }, 250);
         const blinkTimeout = setTimeout(() => {
             clearInterval(blinkInterval);
