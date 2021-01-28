@@ -244,7 +244,7 @@ export class WindowService {
     }
 
     public setTitle(name: string, title: string ) {
-        this.saveInSessionStorage(title);
+        this.saveInSessionStorage(title, 'title');
         if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
         } else {
@@ -253,14 +253,14 @@ export class WindowService {
     }
 
     public setInitialBounds(name: string, initialBounds: any ) {
-        this.saveInSessionStorage(initialBounds);
+        this.saveInSessionStorage(initialBounds, 'initialBounds');
         if ( this.instances[name] ) {
             this.instances[name].initialBounds = initialBounds;
         }
     }
 
     public setStoreBounds(name: string, storeBounds: boolean ) {
-        this.saveInSessionStorage(storeBounds);
+        this.saveInSessionStorage(storeBounds, 'storeBounds');
         if ( this.instances[name] ) {
             this.instances[name].storeBounds = storeBounds;
         }
@@ -274,24 +274,24 @@ export class WindowService {
     }
 
     public setLocation(name: string, location: any ) {
-        this.saveInSessionStorage(location);
+        this.saveInSessionStorage(location, 'location');
         if ( this.instances[name] ) {
             this.instances[name].setLocation( location );
         }
     }
 
     public setSize(name: string, size: any ) {
-        this.saveInSessionStorage(size);
+        this.saveInSessionStorage(size, 'size');
         if ( this.instances[name] ) {
             this.instances[name].setSize( size );
         }
     }
 
-    private saveInSessionStorage(property: any) {
+    private saveInSessionStorage(property: any, propertyName: string) {
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
-        if (property && storedWindow && !storedWindow.size) {
-            storedWindow.size = property;
+        if (property && storedWindow && !storedWindow[propertyName]) {
+            storedWindow[propertyName] = property;
             this.sessionStorageService.set(currentWindow, storedWindow);
         }
     }
@@ -305,35 +305,35 @@ export class WindowService {
     }
 
     public setUndecorated(name: string, undecorated: boolean ) {
-        this.saveInSessionStorage(undecorated);
+        this.saveInSessionStorage(undecorated, 'undecorated');
         if ( this.instances[name] ) {
             this.instances[name].undecorated = undecorated;
         }
     }
 
     public setCSSClassName(name: string, cssClassName: string ) {
-        this.saveInSessionStorage(cssClassName);
+        this.saveInSessionStorage(cssClassName, 'cssClassName');
         if ( this.instances[name] ) {
             this.instances[name].cssClassName = cssClassName;
         }
     }
 
     public setOpacity(name: string, opacity: boolean) {
-        this.saveInSessionStorage(opacity);
+        this.saveInSessionStorage(opacity, 'opacity');
         if (this.instances[name]) {
             this.instances[name].opacity = opacity?0:1;
         }
     }
 
     public setResizable(name: string, resizable: boolean ) {
-        this.saveInSessionStorage(resizable);
+        this.saveInSessionStorage(resizable, 'resizable');
         if ( this.instances[name] ) {
             this.instances[name].resizable = resizable;
         }
     }
 
     public setTransparent(name: string, transparent: boolean ) {
-        this.saveInSessionStorage(transparent);
+        this.saveInSessionStorage(transparent, 'transparent');
         if ( this.instances[name] ) {
             this.instances[name].transparent = transparent;
         }

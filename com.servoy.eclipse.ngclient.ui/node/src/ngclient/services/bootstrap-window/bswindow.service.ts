@@ -121,7 +121,7 @@ export class BSWindow {
             this.setSize(this.options.size);
         }
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            this.renderer.listen(this.element, 'orientationchange resize', () => _this.centerWindow());
+            this.renderer.listen(this.options.references.window.nativeWindow, 'orientationchange resize', () => _this.centerWindow());
         }
 
         this.renderer.listen(this.element, 'touchmove', (e) => {
@@ -153,14 +153,8 @@ export class BSWindow {
     centerWindow() {  
         let top: number; let left: number;
         const bodyTop = this.options.references.body.offsetTop + parseInt(this.options.references.body.style.paddingTop, 10);
-        if (!this.options.sticky) {
-            left = (this.options.references.body.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
-            top = (this.options.references.body.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
-        } else {
-            left = (this.options.references.body.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
-            top = (this.options.references.body.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
-        }
-
+        left = (this.options.references.window.nativeWindow.innerWidth / 2) - (this.element.getBoundingClientRect().width / 2);
+        top = (this.options.references.window.nativeWindow.innerHeight / 2) - (this.element.getBoundingClientRect().height / 2);
         if (top < bodyTop) {
             top = bodyTop;
         }
