@@ -19,6 +19,106 @@ export class SabloTabseq implements OnInit, OnDestroy {
     constructor(private _elemRef: ElementRef) {
     }
 
+    // handle event: Child Servoy Tab Sequence registered
+    @HostListener('registerCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
+    registerChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
+        if (this.designTabSeq == -2 || designChildIndex == -2) {
+            event.stopPropagation();
+            return false;
+        }
+
+        // insert it sorted
+        let posInDesignArray = 0;
+        for (var tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < designChildIndex; tz++) {
+            posInDesignArray = tz + 1;
+        }
+        if (posInDesignArray === this.designChildTabSeq.length || this.designChildTabSeq[posInDesignArray] > designChildIndex) {
+            this.designChildTabSeq.splice(posInDesignArray, 0, designChildIndex);
+
+            // always keep in designChildIndexToArrayPosition[i] the first occurrance of design index i in the sorted designChildTabSeq array
+            for (var tz = posInDesignArray; tz < this.designChildTabSeq.length; tz++) {
+                this.designChildIndexToArrayPosition[this.designChildTabSeq[tz]] = tz;
+            }
+            this.runtimeChildIndexes[designChildIndex] = runtimeChildIndex;
+        } else {
+            // its == that means that we have dupliate design indexes; we treat this special - all same design index children as a list in one runtime index array cell
+            if (!this.runtimeChildIndexes[designChildIndex].push) {
+                this.runtimeChildIndexes[designChildIndex] = [this.runtimeChildIndexes[designChildIndex]];
+            }
+            this.runtimeChildIndexes[designChildIndex].push(runtimeChildIndex);
+        }
+
+        event.stopPropagation();
+        return false;
+    }
+
+    @HostListener('unregisterCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
+    unregisterChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
+        if (this.designTabSeq == -2 || designChildIndex == -2) {
+            event.stopPropagation();
+            return false;
+        }
+
+        const posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
+        if (posInDesignArray != undefined) {
+            const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
+            const multipleEqualDesignValues = this.runtimeChildIndexes[keyInRuntimeArray].push;
+            if (!multipleEqualDesignValues) {
+                delete this.designChildIndexToArrayPosition[designChildIndex];
+                for (const tmp in this.designChildIndexToArrayPosition) {
+                    if (this.designChildIndexToArrayPosition[tmp] > posInDesignArray) this.designChildIndexToArrayPosition[tmp]--;
+                }
+                this.designChildTabSeq.splice(posInDesignArray, 1);
+                delete this.runtimeChildIndexes[keyInRuntimeArray];
+            } else {
+                this.runtimeChildIndexes[keyInRuntimeArray].splice(this.runtimeChildIndexes[keyInRuntimeArray].indexOf(runtimeChildIndex), 1);
+                if (this.runtimeChildIndexes[keyInRuntimeArray].length == 1) this.runtimeChildIndexes[keyInRuntimeArray] = this.runtimeChildIndexes[keyInRuntimeArray][0];
+            }
+        }
+        event.stopPropagation();
+        return false;
+    }
+
+    // handle event: child tree was now linked or some child needs extra indexes; runtime indexes can be computed starting at the given child;
+    // recalculate Parent Servoy Tab Sequence
+    @HostListener('recalculatePSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
+    recalculateIndexesHandler(designChildIndex, initialRootRecalculate, event): boolean {
+        if (this.designTabSeq == -2 || designChildIndex == -2) {
+            event.stopPropagation();
+            return false;
+        }
+
+        if (!this.initializing) {
+            // a new child is ready/linked; recalculate tab indexes for it and after it
+            const startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] != undefined) ? this.designChildIndexToArrayPosition[designChildIndex] : 0;
+            this.recalculateChildRuntimeIndexesStartingAt(startIdx, false);
+        } else if (initialRootRecalculate) {
+            // this is $rootScope (one $parent extra cause the directive creates it); we always assume a sabloTabseq directive is bound to it;
+            // now that it is linked we can do initial calculation of tre
+            this.runtimeIndex.startIndex = this.runtimeIndex.nextAvailableIndex = 1;
+            this.recalculateChildRuntimeIndexesStartingAt(0, true);
+        } // else wait for parent tabSeq directives to get linked as well
+
+        event.stopPropagation();
+        return false;
+    }
+
+    @HostListener('disableTabseq', ['$event'])
+    disableTabseq(event: CustomEvent<boolean>): boolean {
+        this.isEnabled = false;
+        this.recalculateChildRuntimeIndexesStartingAt(0, true);
+        event.stopPropagation();
+        return false;
+    }
+
+    @HostListener('enableTabseq', ['$event'])
+    enableTabseq(event: CustomEvent<boolean>): boolean {
+        this.isEnabled = true;
+        this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [0, false]);
+        event.stopPropagation();
+        return false;
+    }
+
     ngOnInit(): void {
         // called by angular in parents first then in children
         if (!this.designTabSeq) this.designTabSeq = 0;
@@ -127,106 +227,6 @@ export class SabloTabseq implements OnInit, OnDestroy {
         setTimeout(() => {
             this.tabindex = tabindex;
         });
-    }
-
-    // handle event: Child Servoy Tab Sequence registered
-    @HostListener('registerCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
-    registerChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
-            event.stopPropagation();
-            return false;
-        }
-
-        // insert it sorted
-        let posInDesignArray = 0;
-        for (var tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < designChildIndex; tz++) {
-            posInDesignArray = tz + 1;
-        }
-        if (posInDesignArray === this.designChildTabSeq.length || this.designChildTabSeq[posInDesignArray] > designChildIndex) {
-            this.designChildTabSeq.splice(posInDesignArray, 0, designChildIndex);
-
-            // always keep in designChildIndexToArrayPosition[i] the first occurrance of design index i in the sorted designChildTabSeq array
-            for (var tz = posInDesignArray; tz < this.designChildTabSeq.length; tz++) {
-                this.designChildIndexToArrayPosition[this.designChildTabSeq[tz]] = tz;
-            }
-            this.runtimeChildIndexes[designChildIndex] = runtimeChildIndex;
-        } else {
-            // its == that means that we have dupliate design indexes; we treat this special - all same design index children as a list in one runtime index array cell
-            if (!this.runtimeChildIndexes[designChildIndex].push) {
-                this.runtimeChildIndexes[designChildIndex] = [this.runtimeChildIndexes[designChildIndex]];
-            }
-            this.runtimeChildIndexes[designChildIndex].push(runtimeChildIndex);
-        }
-
-        event.stopPropagation();
-        return false;
-    }
-
-    @HostListener('unregisterCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
-    unregisterChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
-            event.stopPropagation();
-            return false;
-        }
-
-        const posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
-        if (posInDesignArray != undefined) {
-            const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
-            const multipleEqualDesignValues = this.runtimeChildIndexes[keyInRuntimeArray].push;
-            if (!multipleEqualDesignValues) {
-                delete this.designChildIndexToArrayPosition[designChildIndex];
-                for (const tmp in this.designChildIndexToArrayPosition) {
-                    if (this.designChildIndexToArrayPosition[tmp] > posInDesignArray) this.designChildIndexToArrayPosition[tmp]--;
-                }
-                this.designChildTabSeq.splice(posInDesignArray, 1);
-                delete this.runtimeChildIndexes[keyInRuntimeArray];
-            } else {
-                this.runtimeChildIndexes[keyInRuntimeArray].splice(this.runtimeChildIndexes[keyInRuntimeArray].indexOf(runtimeChildIndex), 1);
-                if (this.runtimeChildIndexes[keyInRuntimeArray].length == 1) this.runtimeChildIndexes[keyInRuntimeArray] = this.runtimeChildIndexes[keyInRuntimeArray][0];
-            }
-        }
-        event.stopPropagation();
-        return false;
-    }
-
-    // handle event: child tree was now linked or some child needs extra indexes; runtime indexes can be computed starting at the given child;
-    // recalculate Parent Servoy Tab Sequence
-    @HostListener('recalculatePSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
-    recalculateIndexesHandler(designChildIndex, initialRootRecalculate, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
-            event.stopPropagation();
-            return false;
-        }
-
-        if (!this.initializing) {
-            // a new child is ready/linked; recalculate tab indexes for it and after it
-            const startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] != undefined) ? this.designChildIndexToArrayPosition[designChildIndex] : 0;
-            this.recalculateChildRuntimeIndexesStartingAt(startIdx, false);
-        } else if (initialRootRecalculate) {
-            // this is $rootScope (one $parent extra cause the directive creates it); we always assume a sabloTabseq directive is bound to it;
-            // now that it is linked we can do initial calculation of tre
-            this.runtimeIndex.startIndex = this.runtimeIndex.nextAvailableIndex = 1;
-            this.recalculateChildRuntimeIndexesStartingAt(0, true);
-        } // else wait for parent tabSeq directives to get linked as well
-
-        event.stopPropagation();
-        return false;
-    }
-
-    @HostListener('disableTabseq', ['$event'])
-    disableTabseq(event): boolean {
-        this.isEnabled = false;
-        this.recalculateChildRuntimeIndexesStartingAt(0, true);
-        event.stopPropagation();
-        return false;
-    }
-
-    @HostListener('enableTabseq', ['$event'])
-    enableTabseq(event): boolean {
-        this.isEnabled = true;
-        this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [0, false]);
-        event.stopPropagation();
-        return false;
     }
 
     trigger(target, event: string, arg): void {
