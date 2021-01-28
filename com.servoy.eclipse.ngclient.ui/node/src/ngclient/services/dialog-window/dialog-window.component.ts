@@ -4,7 +4,7 @@ import { SvyWindow } from '../window.service';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
-    selector: 'app-dialog-window',
+    selector: 'servoycore-dialog-window',
     templateUrl: './dialog-window.component.html',
     styleUrls: ['./dialog-window.component.css']
   })
@@ -24,7 +24,8 @@ import { DOCUMENT } from '@angular/common';
     }
 
     getNavigatorFormName(): string {
-      return (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') == -1) ? this.window.navigatorForm.name : null;
+      return (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) ?
+                this.window.navigatorForm.name : null;
     }
 
     hasDefaultNavigator(): boolean{
@@ -55,21 +56,21 @@ import { DOCUMENT } from '@angular/common';
       this.sabloService.callService( '$windowService', 'windowClosing', { window: this.window.name }, false );
     }
 
-    firstElementFocused(event) {
-      const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'));
+    firstElementFocused(event: Event) {
+      const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'), 10);
       const newTarget: any = document.querySelector('[tabindex=\'' + ( tabIndex - 1 ) + '\']');
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
-      if(event.target != newTarget) {
+      if(event.target !== newTarget) {
         newTarget.focus();
       }
     }
 
-    lastElementFocused(event) {
+    lastElementFocused(event: Event) {
       const newTarget: any = document.querySelector('[tabindex=\'2\']');
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
-      if(event.target != newTarget) {
+      if(event.target !== newTarget) {
         newTarget.focus();
       }
     }

@@ -2,31 +2,32 @@ import { WindowRefService } from '../../../sablo/util/windowref.service';
 import { Renderer2, Injectable, RendererFactory2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { SvyUtilsService } from '../utils.service';
+import { BSWindowManager } from './bswindow_manager.service';
 
 const NORTH = 1;
 const SOUTH = 2;
 const EAST = 4;
 const WEST = 8;
 
-const resizeConstants = {NORTH, SOUTH, EAST, WEST};
+const resizeConstants = { NORTH, SOUTH, EAST, WEST };
 
 @Injectable()
 export class BSWindow {
 
     resizeAnchorClasses = {
-        1:'ns-resize', // NORTH
-        2:'ns-resize', // SOUTH
-        4:'ew-resize', // EAST
-        8:'ew-resize', // WEST
-        5:'nesw-resize', // N-E
-        9:'nwse-resize', // N-W
-        6:'nwse-resize', // S-E
-        10:'nesw-resize',// S-W
-        0:''
+        1: 'ns-resize', // NORTH
+        2: 'ns-resize', // SOUTH
+        4: 'ew-resize', // EAST
+        8: 'ew-resize', // WEST
+        5: 'nesw-resize', // N-E
+        9: 'nwse-resize', // N-W
+        6: 'nwse-resize', // S-E
+        10: 'nesw-resize',// S-W
+        0: ''
     };
 
-    options: any;
-    element: any;
+    options: BSWindowOptions;
+    element: HTMLElement;
     id: any;
     windowTab: any;
 
@@ -35,46 +36,15 @@ export class BSWindow {
     offset: any;
     window_info: any;
 
-    private renderer: Renderer2;
-
     mouseDownListenerElement: any;
     mouseDownListenerHandle: any;
 
+    private renderer: Renderer2;
     constructor(private windowRefService: WindowRefService,
-                private rendererFactory: RendererFactory2,
-                private utilsService: SvyUtilsService,
-                @Inject(DOCUMENT) private document: Document) {
+        rendererFactory: RendererFactory2,
+        private utilsService: SvyUtilsService,
+        @Inject(DOCUMENT) private document: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
-    }
-
-
-    private addClassToBodyChildren(cls: string) {
-        const childNodesBody = this.utilsService.getMainBody().childNodes;
-        for(let i = 0; i < childNodesBody.length; i++) {
-            if (childNodesBody[i] instanceof Element) {
-                const node =  childNodesBody[i] as Element;
-                node.classList.add(cls);
-            }
-        }
-    }
-
-    private getInteger(value: any) {
-        if (value) {
-            const parsed = parseInt(value, 10);
-            if (parsed == NaN) return 0;
-            return parsed;
-        }
-        return 0;
-    }
-
-    private removeClassToBodyChildren(cls: string) {
-        const childNodesBody = this.utilsService.getMainBody().childNodes;
-        for(let i = 0; i < childNodesBody.length; i++) {
-            if (childNodesBody[i] instanceof Element) {
-                const node = childNodesBody[i] as Element;
-                node.classList.add(cls);
-            }
-        }
     }
 
     setOptions(options) {
@@ -102,15 +72,15 @@ export class BSWindow {
             footerContent: ''
         };
 
-        this.options = this.utilsService.deepExtend([true, defaults, options]);
+        this.options = this.utilsService.deepExtend([true, defaults, options]) as BSWindowOptions;
         this.initialize(this.options);
     }
 
-    initialize(options) {
+    initialize(options: BSWindowOptions) {
         const _this = this;
 
         if (options.fromElement) {
-            if (options.fromElement instanceof Element) {
+            if (options.fromElement instanceof HTMLElement) {
                 this.element = options.fromElement;
             } else if (typeof options.fromElement) { // I don't get this ...
                 this.element = options.fromElement;
@@ -129,8 +99,8 @@ export class BSWindow {
         if (options.fromElement && _this.element.querySelectorAll('[data-dismiss=window]').length <= 0) {
             options.elements.title.innerHTML += '<button class="close" data-dismiss="window">x</button>';
         }
-        if(options.bodyContent)options.elements.body.innerHTML = options.bodyContent;
-        if(options.footerContent)options.elements.footer.innerHTML = options.footerContent;
+        if (options.bodyContent) options.elements.body.innerHTML = options.bodyContent;
+        if (options.footerContent) options.elements.footer.innerHTML = options.footerContent;
         this.undock();
         this.setSticky(options.sticky);
     }
@@ -139,21 +109,19 @@ export class BSWindow {
         const _this = this;
         this.renderer.setStyle(this.element, 'visibility', 'hidden');
         this.renderer.appendChild(this.utilsService.getMainBody(), this.element);
-        if(!this.options.location){
+        if (!this.options.location) {
             //default positioning
             this.centerWindow();
         } else {
             //user entered options
-            this.renderer.setStyle(this.element, 'left', this.options.location.left +'px');
+            this.renderer.setStyle(this.element, 'left', this.options.location.left + 'px');
             this.renderer.setStyle(this.element, 'top', this.options.location.top + 'px');
         }
-        if(this.options.size){
+        if (this.options.size) {
             this.setSize(this.options.size);
         }
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-            this.options.references.window.bind('orientationchange resize', function(event){
-                _this.centerWindow();
-            });
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            this.options.references.window.bind('orientationchange resize', () => _this.centerWindow());
         }
 
         this.renderer.listen(this.element, 'touchmove', (e) => {
@@ -176,16 +144,15 @@ export class BSWindow {
         this.renderer.setStyle(this.element, 'transition', 'opacity 400ms');
     }
 
-    setSize(size) {
+    setSize(size: { width: number; height: number }) {
         const winBody = this.element.querySelector(this.options.selectors.body);
         this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
         this.renderer.setStyle(winBody, 'height', size.height + 'px');
     }
 
     centerWindow() {
-        let top; let left;
-            const bodyTop = parseInt(this.options.references.body.offsetTop, 10) + parseInt(this.options.references.body.style.paddingTop, 10);
-            let maxHeight;
+        let top: number; let left: number;
+        const bodyTop = this.options.references.body.offsetTop + parseInt(this.options.references.body.style.paddingTop, 10);
         if (!this.options.sticky) {
             left = (this.options.references.window.getBoundingClientRect().width / 2) - (this.element.getBoundingClientRect().width / 2);
             top = (this.options.references.window.getBoundingClientRect().height / 2) - (this.element.getBoundingClientRect().height / 2);
@@ -197,7 +164,8 @@ export class BSWindow {
         if (top < bodyTop) {
             top = bodyTop;
         }
-        maxHeight = ((this.options.references.window.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) + this.getInteger(this.options.elements.footer.style.height))) - 45;
+        const maxHeight = ((this.options.references.window.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) +
+            this.getInteger(this.options.elements.footer.style.height))) - 45;
         this.renderer.setStyle(this.options.elements.body, 'maxHeight', maxHeight);
         this.renderer.setStyle(this.element, 'left', left);
         this.renderer.setStyle(this.element, 'top', top);
@@ -205,9 +173,9 @@ export class BSWindow {
 
     close() {
         const _this = this;
-        if(this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
+        if (this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
             const backdropModals = this.document.getElementsByClassName('.modal-backdrop');
-            while(backdropModals[0]) {
+            while (backdropModals[0]) {
                 backdropModals[0].parentNode.removeChild(backdropModals[0]);
             }
         }
@@ -227,7 +195,7 @@ export class BSWindow {
         }
     }
 
-    setActive(active) {
+    setActive(active: boolean) {
         if (active) {
             this.renderer.addClass(this.element, 'active');
             if (this.windowTab) {
@@ -244,10 +212,10 @@ export class BSWindow {
 
         // before: this.$el.trigger('bswin.active', active);
         // not sure if it's okay, is there a better way to trigger events manually in Angular?
-        this.element.dispatchEvent(new CustomEvent('bswin.active', {detail: {active}}));
+        this.element.dispatchEvent(new CustomEvent<boolean>('bswin.active', { detail: active  }));
     }
 
-    setIndex(index) {
+    setIndex(index: number) {
         this.renderer.setStyle(this.element, 'zIndex', index);
     }
 
@@ -267,7 +235,7 @@ export class BSWindow {
         return this.element;
     }
 
-    setSticky(sticky) {
+    setSticky(sticky: boolean) {
         this.options.sticky = sticky;
         this.renderer.setStyle(this.element, 'position', (sticky === false) ? 'absolute' : 'fixed');
     }
@@ -276,7 +244,7 @@ export class BSWindow {
         return this.options.sticky;
     }
 
-    setManager(window_manager) {
+    setManager(window_manager: BSWindowManager) {
         this.options.window_manager = window_manager;
     }
 
@@ -289,7 +257,7 @@ export class BSWindow {
         });
 
 
-        if(this.mouseDownListenerElement) {
+        if (this.mouseDownListenerElement) {
             this.mouseDownListenerElement();
         }
         this.mouseDownListenerElement = this.renderer.listen(this.element, 'mousedown', (event) => {
@@ -317,7 +285,7 @@ export class BSWindow {
 
                 let offX = event.offsetX;
                 let offY = event.offsetY;
-                if (!event.offsetX && event.offsetX != 0) {
+                if (!event.offsetX && event.offsetX !== 0) {
                     // FireFox Fix
                     offX = event.originalEvent.layerX;
                     offY = event.originalEvent.layerY;
@@ -354,20 +322,20 @@ export class BSWindow {
             const width = this.element.getBoundingClientRect().width;
             const height = this.element.getBoundingClientRect().height;
 
-            const size = {width,height};
+            const size = { width, height };
             // before: this.element.trigger('bswin.resize',size);
             // not sure if it's okay, is there a better way to trigger events manually in Angular?
-            this.element.dispatchEvent(new CustomEvent('bswin.resize', {detail: {resize: size}}));
+            this.element.dispatchEvent(new CustomEvent('bswin.resize', { detail: size  }));
         });
-        if(this.mouseDownListenerHandle) {
+        if (this.mouseDownListenerHandle) {
             this.mouseDownListenerHandle();
         }
-        this.mouseDownListenerHandle = this.renderer.listen( this.options.elements.handle, 'mousedown', (event) => {
+        this.mouseDownListenerHandle = this.renderer.listen(this.options.elements.handle, 'mousedown', (event) => {
             const handleHeight = this.options.elements.handle.offsetHeight;
             const handleWidth = this.options.elements.handle.offsetWidth;
             let offX = event.offsetX;
             let offY = event.offsetY;
-            if (!event.offsetX && event.offsetX != 0) {
+            if (!event.offsetX && event.offsetX !== 0) {
                 // FireFox Fix
                 offX = event.originalEvent.layerX;
                 offY = event.originalEvent.layerY;
@@ -386,14 +354,14 @@ export class BSWindow {
             this.addClassToBodyChildren('disable-select');
         });
 
-        this.renderer.listen(this.options.elements.handle, 'mouseup', (event) => {
+        this.renderer.listen(this.options.elements.handle, 'mouseup', () => {
             this.moving = false;
             this.removeClassToBodyChildren('disable-select');
-            const pos = {top:this.element.offsetTop,left:this.element.offsetLeft};
-            this.element.dispatchEvent(new CustomEvent('bswin.move', {detail: {pos}}));
+            const pos = { y: this.element.offsetTop, x: this.element.offsetLeft };
+            this.element.dispatchEvent(new CustomEvent<{x: number; y: number}>('bswin.move', { detail: pos }));
         });
 
-        this.renderer.listen(this.options.references.body, 'mousemove', (event) => {
+        this.renderer.listen(this.options.references.body, 'mousemove', (event: MouseEvent) => {
             if (this.moving) {
                 this.renderer.setStyle(this.element, 'top', (event.pageY - this.offset.y) + 'px');
                 this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + 'px');
@@ -401,42 +369,42 @@ export class BSWindow {
             if (this.options.resizable && this.resizing) {
                 const winBody = this.element.querySelector(this.options.selectors.body);
                 let winHeadFootHeight = 0;
-                const head = this.element.querySelector(this.options.selectors.handle);
-                if(head){
+                const head = this.element.querySelector(this.options.selectors.handle) as HTMLElement;
+                if (head) {
                     winHeadFootHeight += head.offsetHeight;
                 }
-                const foot = this.element.querySelector(this.options.selectors.footer);
-                if(foot){
+                const foot = this.element.querySelector(this.options.selectors.footer) as HTMLElement;
+                if (foot) {
                     winHeadFootHeight += foot.offsetHeight;
                 }
                 if (this.element.classList.contains('east')) {
                     this.renderer.setStyle(winBody, 'width', (event.pageX - this.window_info.left) + 'px');
                 }
                 if (this.element.classList.contains('west')) {
-                    this.renderer.setStyle(winBody, 'width', this.window_info.width + (this.window_info.left  - event.pageX )+ 'px');
-                    this.renderer.setStyle(this.element, 'left', event.pageX+ 'px');
+                    this.renderer.setStyle(winBody, 'width', this.window_info.width + (this.window_info.left - event.pageX) + 'px');
+                    this.renderer.setStyle(this.element, 'left', event.pageX + 'px');
                 }
                 if (this.element.classList.contains('south')) {
                     this.renderer.setStyle(winBody, 'height', (event.pageY - this.window_info.top - winHeadFootHeight) + 'px');
                 }
                 if (this.element.classList.contains('north')) {
-                    this.renderer.setStyle(winBody, 'height', (this.window_info.height + (this.window_info.top  - event.pageY) - winHeadFootHeight) + 'px');
+                    this.renderer.setStyle(winBody, 'height', (this.window_info.height + (this.window_info.top - event.pageY) - winHeadFootHeight) + 'px');
                     this.renderer.setStyle(this.element, 'top', event.pageY + 'px');
                 }
             }
         });
 
-        this.renderer.listen(this.options.references.body, 'mouseleave', (event) => {
-              this.moving = false;
-              this.removeClassToBodyChildren('disable-select');
+        this.renderer.listen(this.options.references.body, 'mouseleave', () => {
+            this.moving = false;
+            this.removeClassToBodyChildren('disable-select');
         });
 
-        var lastResizeClass = '';
+        let lastResizeClass = '';
         this.renderer.listen(this.element, 'mousemove', (event) => {
             if (this.options.blocker) {
                 return;
             }
-            if (this.options.resizable ) {
+            if (this.options.resizable) {
                 let resizeClassIdx = 0;
                 //target can be the header or footer, and event.offsetX/Y will be relative to the header/footer .Adjust to '.window';
                 const rectTarget = event.target.getBoundingClientRect();
@@ -446,28 +414,28 @@ export class BSWindow {
 
                 let offX = event.offsetX;
                 let offY = event.offsetY;
-                if (!event.offsetX && event.offsetX != 0) {
+                if (!event.offsetX && event.offsetX !== 0) {
                     // FireFox Fix
                     offX = event.originalEvent.layerX;
                     offY = event.originalEvent.layerY;
                 }
-                if (offY + windowOffsetY > (this.element.getBoundingClientRect().height - 5) ) {
+                if (offY + windowOffsetY > (this.element.getBoundingClientRect().height - 5)) {
                     resizeClassIdx += resizeConstants.SOUTH;
                 }
-                if (offY + windowOffsetY< 5) {
+                if (offY + windowOffsetY < 5) {
                     resizeClassIdx += resizeConstants.NORTH;
                 }
-                if (offX + windowOffsetX> this.element.getBoundingClientRect().width - 5) {
+                if (offX + windowOffsetX > this.element.getBoundingClientRect().width - 5) {
                     resizeClassIdx += resizeConstants.EAST;
                 }
-                if (offX + windowOffsetX< 5) {
+                if (offX + windowOffsetX < 5) {
                     resizeClassIdx += resizeConstants.WEST;
                 }
-                if (lastResizeClass != '' && lastResizeClass != undefined && lastResizeClass != null) {
+                if (lastResizeClass !== '' && lastResizeClass !== undefined && lastResizeClass != null) {
                     this.renderer.removeClass(this.element, lastResizeClass);
                 }
-                lastResizeClass=this.resizeAnchorClasses[resizeClassIdx];
-                if (lastResizeClass != '' && lastResizeClass != undefined && lastResizeClass != null) {
+                lastResizeClass = this.resizeAnchorClasses[resizeClassIdx];
+                if (lastResizeClass !== '' && lastResizeClass !== undefined && lastResizeClass != null) {
                     this.renderer.addClass(this.element, lastResizeClass);
                 }
             }
@@ -482,10 +450,10 @@ export class BSWindow {
         if (options.left) {
             this.renderer.setStyle(this.element, 'left', options.left);
         }
-        this.setSize({height:options.height,width:options.width});
+        this.setSize({ height: options.height, width: options.width });
     }
 
-    setBlocker(window_handle) {
+    setBlocker(window_handle: BSWindow) {
         this.options.blocker = window_handle;
         this.element.querySelector('.disable-shade').remove();
         const shade = '<div class="disable-shade"></div>';
@@ -511,29 +479,79 @@ export class BSWindow {
         delete this.options.blocker;
     }
 
-    setParent(window_handle) {
+    setParent(window_handle: BSWindow) {
         this.options.parent = window_handle;
         if (!this.options.parent.getBlocker()) {
             this.options.parent.setBlocker(this);
         }
     }
 
-    getParent() {
+    getParent(): BSWindow {
         return this.options.parent;
     }
 
     blink() {
         const _this = this;
-            const active = this.element.classList.contains('active');
+        const active = this.element.classList.contains('active');
 
-            const blinkInterval = setInterval(function() {
+        const blinkInterval = setInterval(() => {
             _this.element.toggleClass('active');
         }, 250);
-            const blinkTimeout = setTimeout(function() {
+        const blinkTimeout = setTimeout(() => {
             clearInterval(blinkInterval);
             if (active) {
                 this.renderer.addClass(_this.element, 'active');
             }
         }, 1000);
     }
+
+    private addClassToBodyChildren(cls: string) {
+        const childNodesBody = this.utilsService.getMainBody().childNodes;
+        for (const key of Object.keys(childNodesBody)) {
+            if (childNodesBody[key] instanceof Element) {
+                const node = childNodesBody[key] as Element;
+                node.classList.add(cls);
+            }
+        }
+    }
+
+    private getInteger(value: any) {
+        if (value) {
+            const parsed = parseInt(value, 10);
+            if (isNaN(parsed)) return 0;
+            return parsed;
+        }
+        return 0;
+    }
+
+    private removeClassToBodyChildren(cls: string) {
+        const childNodesBody = this.utilsService.getMainBody().childNodes;
+        for (const key of Object.keys(childNodesBody)) {
+            if (childNodesBody[key] instanceof Element) {
+                const node = childNodesBody[key] as Element;
+                node.classList.add(cls);
+            }
+        }
+    }
+}
+
+export interface BSWindowOptions {
+    id?: string;
+    size?: { width: number; height: number };
+    location?: {left: number; top: number};
+    fromElement?: HTMLElement;
+    template?: HTMLElement;
+    bodyContent?: string;
+    footerContent?: string;
+    selectors?: {handle: string; title: string; body: string; footer: string};
+    elements?: {handle: HTMLElement; title: HTMLElement; body: HTMLElement; footer: HTMLElement};
+    title?: string;
+    sticky?: boolean;
+    references?: {body: HTMLElement; window: WindowRefService };
+    parent?: BSWindow;
+    blocker?: BSWindow;
+    resizable?: boolean;
+    isModal?: boolean;
+    window_manager?: BSWindowManager;
+    modalBackdrop?: HTMLElement;
 }
