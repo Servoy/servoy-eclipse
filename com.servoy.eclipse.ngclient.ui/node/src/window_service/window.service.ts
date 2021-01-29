@@ -4,16 +4,24 @@ import { DOCUMENT } from '@angular/common';
 import { ShortcutService } from './shortcut.service';
 import { SvyUtilsService } from '../ngclient/servoy_public';
 import { ServoyService } from '../ngclient/servoy.service';
-import { PopupMenuService, Popup, MenuItem, Callback } from './popupmenu.service';
+import { PopupMenuService, Popup } from './popupmenu.service';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
+import { PopupFormService, PopupForm, Callback } from '../ngclient/services/popupform.service';
 
 @Injectable()
 export class WindowService {
     private _shortcuts: Shortcut[];
     private _popupmenus: Popup[];
     private _popupMenuShowCommand: PopupMenuShowCommand;
+    private _popupform: PopupForm;
 
-    constructor(private shortcutService: ShortcutService, private popupMenuService: PopupMenuService, private utils: SvyUtilsService, private servoyService: ServoyService, @Inject(DOCUMENT) private document: Document, private changeHandler: ServiceChangeHandler) {
+    constructor(private shortcutService: ShortcutService, 
+                private popupMenuService: PopupMenuService, 
+                private utils: SvyUtilsService, 
+                private servoyService: ServoyService, 
+                @Inject(DOCUMENT) private document: Document, 
+                private changeHandler: ServiceChangeHandler,
+                private popupFormService: PopupFormService) {
 
     }
 
@@ -157,6 +165,23 @@ export class WindowService {
         }
         return translatedShortcut;
     }
+    
+    get popupform(): PopupForm {
+        return this._popupform;
+    }
+
+    set popupform(popup: PopupForm) {
+        this._popupform = popup;
+        if (popup) this.popupFormService.showForm(popup);
+    }
+    
+    cancelFormPopup() :void{
+        this.cancelFormPopupInternal(false);
+    }
+    
+    cancelFormPopupInternal(disableClearPopupFormCallToServer : boolean) : void{
+        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
+    }
 }
 
 class Shortcut {
@@ -174,3 +199,4 @@ class PopupMenuShowCommand {
     public x: number;
     public y: number
 }
+

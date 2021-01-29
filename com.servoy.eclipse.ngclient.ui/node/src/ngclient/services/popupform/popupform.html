@@ -1,0 +1,6 @@
+<div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
+<div id='formpopup' [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [ngStyle]="getStyle()">
+    <svy-form [name]="getForm()"></svy-form>
+</div>
+<div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>
+<div *ngIf="popup.showBackdrop" class="formpopup-backdrop modal-backdrop fade in" style="z-index:1498"></div>

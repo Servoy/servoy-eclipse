@@ -91,7 +91,7 @@ export class FormService {
     }
 
     public createFormCache(formName: string, jsonData) {
-        const formCache = new FormCache(formName);
+        const formCache = new FormCache(formName,jsonData.size);
         this.walkOverChildren(jsonData.children, formCache);
         this.formsCache.set(formName, formCache);
         //        this.touchedForms[formName] = true;
@@ -185,8 +185,8 @@ export class FormService {
         // dummy promise
         return Promise.resolve(null);
     }
-    public hideForm(formname: string, parentForm: string, beanName: string, relationname: string, formIndex: number,
-                     formnameThatWillBeShown: string, relationnameThatWillBeShown: string, formIndexThatWillBeShown: number) {
+    public hideForm(formname: string, parentForm?: string, beanName?: string, relationname?: string, formIndex?: number,
+                     formnameThatWillBeShown?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number) {
         if (!formname) {
             throw new Error('formname is undefined');
         }
@@ -215,10 +215,14 @@ export class FormService {
         this.sabloService.callService('formService', 'gotoform', { formname });
     }
 
-    public callServerSideApi(formname: string, beanname: string, methodName: string, args: Array<any>) {
-        return this.sabloService.callService('formService', 'callServerSideApi', { formname, beanname, methodName, args });
+    public callComponentServerSideApi(formname: string, beanname: string, methodName: string, args: Array<any>) {
+        return this.sabloService.callService('formService', 'callServerSideApi', {formname:formname,beanname:beanname,methodName:methodName,args:args});
     }
 
+    public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
+        return this.sabloService.callService('applicationServerService', 'callServerSideApi', {service:servicename,methodName:methodName,args:args});
+    }
+    
     private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
         const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;

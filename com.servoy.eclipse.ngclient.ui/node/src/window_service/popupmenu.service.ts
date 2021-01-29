@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyService } from '../ngclient/servoy.service';
+import { Callback } from '../ngclient/services/popupform.service';
 
 @Injectable()
 export class PopupMenuService {
@@ -147,9 +148,4 @@ export class MenuItem {
     public methodArguments: Array<any>;
     public cssClass: string;
     public items: MenuItem[]
-}
-
-export class Callback {
-    public formname: string;
-    public script: string;
 }

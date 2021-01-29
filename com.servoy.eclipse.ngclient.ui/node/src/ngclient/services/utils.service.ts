@@ -12,7 +12,7 @@ export class SvyUtilsService {
         this.log = logFactory.getLogger('SvyUtilsService');
     }
 
-    public createJSEvent(event: KeyboardEvent, eventType: string, contextFilter?: string, contextFilterElement?: any) {
+    public createJSEvent(event: KeyboardEvent, eventType: string, contextFilter?: string, contextFilterElement?: any) : JSEvent{
         if (!event) {
             if (contextFilter || contextFilterElement) return null;
             this.log.error("event is undefined, returning default event");
@@ -54,12 +54,12 @@ export class SvyUtilsService {
 
         if (!contextMatch)
             return null;
-        const jsEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
+        const jsEvent : JSEvent = { svyType: 'JSEvent', eventType : eventType, timestamp: new Date().getTime() } ;
         const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
-        jsEvent['modifiers'] = modifiers;
-        jsEvent['x'] = event['pageX'];//TODO check
-        jsEvent['y'] = event['pageY'];
-        jsEvent['formName'] = form;
+        jsEvent.modifiers = modifiers;
+        jsEvent.x = event['pageX'];//TODO check
+        jsEvent.y = event['pageY'];
+        jsEvent.formName = form;
         for (let i = 0; i < targetElNameChain.length; i++) {
             if (this.formservice.getFormCacheByName(form).getComponent(targetElNameChain[i])) {
                 jsEvent['elementName'] = targetElNameChain[i];
@@ -123,4 +123,15 @@ export class SvyUtilsService {
     public getMainBody() {
         return document.getElementById('mainBody');
     }
+}
+
+export class JSEvent {
+    public formName?: string;
+    public elementName?: string;
+    public svyType: string;
+    public eventType: string;
+    public modifiers?: number;
+    public x?: number;
+    public y?: number;
+    public timestamp: number;
 }

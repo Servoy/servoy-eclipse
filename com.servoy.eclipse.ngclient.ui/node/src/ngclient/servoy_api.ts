@@ -31,7 +31,7 @@ export class ServoyApi {
     }
 
     public callServerSideApi( methodName: string, args: Array<any> ) {
-        return this.formservice.callServerSideApi(this.formname, this.item.name, methodName, args);
+        return this.formservice.callComponentServerSideApi(this.formname, this.item.name, methodName, args);
     }
 
     public getFormComponentElements( _propertyName: string, _formComponentValue: any ) { }

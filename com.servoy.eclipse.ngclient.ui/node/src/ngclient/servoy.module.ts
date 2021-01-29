@@ -16,6 +16,7 @@ import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
+import { ServoyFormPopupComponent } from './services/popupform/popupform';
 import { HttpClientModule } from '@angular/common/http';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
@@ -51,6 +52,7 @@ import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.se
         ErrorBean,
         ServoyCoreSlider,
         DialogWindowComponent,
+        ServoyFormPopupComponent,
         LoadingIndicatorComponent,
         ListFormComponent
     ],
@@ -69,7 +71,7 @@ import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.se
 					SvyUtilsService,ServerDataService,TypesRegisterService, BSWindow, BSWindowManager,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],
+    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],
     schemas: [
               CUSTOM_ELEMENTS_SCHEMA
     ]

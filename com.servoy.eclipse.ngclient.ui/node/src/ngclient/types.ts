@@ -6,14 +6,15 @@ export class FormSettings {
 
 export class FormCache {
     public navigatorForm: FormSettings;
-
+    public size : Dimension;
     private componentCache: Map<string, ComponentCache>;
     private _mainStructure: StructureCache;
     private _formComponents: Map<string, FormComponentCache>;
     private _parts: Array<PartCache>;
     private conversionInfo = {};
 
-    constructor(readonly formname: string) {
+    constructor(readonly formname: string, size : Dimension) {
+        this.size = size;
         this.componentCache = new Map();
         this._parts = [];
         this._formComponents = new Map();
@@ -164,4 +165,9 @@ export class FormComponentProperties {
     constructor(public readonly classes: Array<string>,
         public readonly layout: { [property: string]: string }) {
     }
+}
+
+export class Dimension{
+    public width : number;
+    public height: number;
 }
