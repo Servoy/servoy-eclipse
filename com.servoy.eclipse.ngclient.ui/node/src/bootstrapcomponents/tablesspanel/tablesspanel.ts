@@ -36,10 +36,12 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
 								this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
 									.then(() => {
 										this.realContainedForm = this.containedForm;
+                                        this.cdRef.detectChanges();
 									});
 							} else if (change.currentValue) {
 								this.setRealContainedForm(change.currentValue, this.relationName);
 							}
+                        break;
 					}
 					case 'visible': {
 						if (this.containedForm && change.currentValue !== change.previousValue) {
@@ -50,6 +52,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
 								this.servoyApi.hideForm(this.containedForm);
 							}
 						}
+                        break;
 					}
 				}
 			}
@@ -63,6 +66,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
 			if (this.waitForData) {
 				Promise.resolve(this.servoyApi.formWillShow(formName, relationName)).then(() => {
 					this.realContainedForm = formName;
+                    this.cdRef.detectChanges();
 				});
 			} else {
 				this.servoyApi.formWillShow(formName, relationName);
