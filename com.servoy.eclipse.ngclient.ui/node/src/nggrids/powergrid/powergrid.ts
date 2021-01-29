@@ -1,5 +1,5 @@
-import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { GridOptions, GroupCellRenderer } from '@ag-grid-community/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, ViewChild } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { NGGridDirective } from '../nggrid';
@@ -7,6 +7,7 @@ import { DatePicker } from '../editors/datepicker';
 import { FormEditor } from '../editors/formeditor';
 import { TextEditor } from '../editors/texteditor';
 import { PowergridService } from './powergrid.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 const TABLE_PROPERTIES_DEFAULTS = {
     rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
@@ -64,7 +65,7 @@ export class PowerGrid extends NGGridDirective {
 
     @ViewChild('element', { read: ElementRef }) agGridElementRef: ElementRef;
 
-    @Input() columns: any;
+    @Input() columns: any[];
     @Input() styleClass: string;
 
     @Input() toolPanelConfig: any;
@@ -73,17 +74,20 @@ export class PowerGrid extends NGGridDirective {
     @Input() mainMenuItemsConfig: any;
     @Input() gridOptions: any;
     @Input() showColumnsMenuTab: any;
-    @Input() multiSelect: any;
-    @Input() enableSorting: any;
-    @Input() enableColumnResize: any;
-    @Input() rowHeight: any;
-    @Input() headerHeight: any;
-    @Input() pivotMode: any;
-    @Input() visible: any;
-    @Input() useLazyLoading: any;
+    @Input() multiSelect: boolean;
+    @Input() enableSorting: boolean;
+    @Input() enableColumnResize: boolean;
+    @Input() rowHeight: number;
+    @Input() headerHeight: number;
+    @Input() pivotMode: boolean;
+    @Input() visible: boolean;
+    @Input() useLazyLoading: boolean;
     @Input() data: any;
-    @Input() lastRowIndex: any;
+    @Input() lastRowIndex: number;
     @Input() readOnly: boolean;
+    @Input() rowStyleClassFunc: any;
+    @Input() groupStyleClass: any;
+    @Input() groupRowRendererFunc: any;
 
     @Input() _internalColumnState: any;
     @Output() _internalColumnStateChange = new EventEmitter();
@@ -123,7 +127,7 @@ export class PowerGrid extends NGGridDirective {
     clickTimer: any = null;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
-        private powergridService: PowergridService, public formattingService: FormattingService) {
+        private powergridService: PowergridService, public formattingService: FormattingService, private sanitizer: DomSanitizer) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('PowerGrid');
     }
@@ -177,6 +181,9 @@ export class PowerGrid extends NGGridDirective {
 
         // setup grid options
         this.agGridOptions = {
+            context: {
+                componentParent: this
+            },
             debug: false,
             rowGroupPanelShow: 'always', // TODO expose property
 
@@ -213,7 +220,7 @@ export class PowerGrid extends NGGridDirective {
             suppressCellSelection: false, // TODO implement focus lost/gained
             enableRangeSelection: false,
 
-            stopEditingWhenGridLosesFocus: true,
+            //stopEditingWhenGridLosesFocus: true,
             singleClickEdit: true,
             suppressClickEdit: false,
             enableGroupEdit: false,
@@ -252,13 +259,13 @@ export class PowerGrid extends NGGridDirective {
                 }, 150);
             },
             getContextMenuItems: () => this.contextMenuItems,
-            // TODO:
-            // autoGroupColumnDef: {
-            //     cellRenderer: DatasetTableGroupCellRenderer,
-            //     cellRendererParams : { suppressCount: false},
-            //     headerName: ' ',
-            //     cellClass: $scope.model.groupStyleClass
-            // },
+
+            autoGroupColumnDef: {
+                cellRenderer: DatasetTableGroupCellRenderer,
+                cellRendererParams : { suppressCount: false},
+                headerName: ' ',
+                cellClass: this.groupStyleClass
+            },
             onGridSizeChanged: () => {
                 setTimeout(() => {
                     // if not yet destroyed
@@ -281,8 +288,6 @@ export class PowerGrid extends NGGridDirective {
             navigateToNextCell: (params) => this.selectionChangeNavigation(params),
 
             sideBar,
-            // TODO:
-            //popupParent: gridDiv,
             enableBrowserTooltips: true,
             onToolPanelVisibleChanged : () => this.sizeColumnsToFit(),
             onCellEditingStopped : (event) => {
@@ -335,13 +340,11 @@ export class PowerGrid extends NGGridDirective {
             this.agGridOptions.rowData = this.data;
         }
 
-        // TODO:
-        // if($scope.model.rowStyleClassFunc) {
-        //     var rowStyleClassFunc = eval($scope.model.rowStyleClassFunc);
-        //     gridOptions.getRowClass = function(params) {
-        //         return rowStyleClassFunc(params.rowIndex, params.data, params.event);
-        //     };
-        // }
+        if(this.rowStyleClassFunc) {
+            // eslint-disable-next-line no-eval
+            const rowStyleClassFunc = eval(this.rowStyleClassFunc);
+            this.agGridOptions.getRowClass = (params) => rowStyleClassFunc(params.rowIndex, params.data, params.event);
+        }
 
         // set the icons
         if(iconConfig) {
@@ -386,15 +389,17 @@ export class PowerGrid extends NGGridDirective {
             }
         }
 
-        // TODO:
-        // if(gridOptions.groupUseEntireRow) {
-        //     var groupRowRendererFunc = groupRowInnerRenderer;
-        //     if($scope.model.groupRowRendererFunc) {
-        //         groupRowRendererFunc = eval($scope.model.groupRowRendererFunc);
-        //     }
-        //     gridOptions.groupRowRenderer = DatasetTableGroupCellRenderer;
-        //     gridOptions.groupRowInnerRenderer = groupRowRendererFunc;
-        // }
+        if(this.agGridOptions.groupUseEntireRow) {
+            let groupRowRendererFunc = this.groupRowInnerRenderer;
+            if(this.groupRowRendererFunc) {
+                // eslint-disable-next-line no-eval
+                groupRowRendererFunc = eval(this.groupRowRendererFunc);
+            }
+            this.agGridOptions.groupRowRenderer = DatasetTableGroupCellRenderer;
+            this.agGridOptions.groupRowRendererParams = {
+                innerRenderer: groupRowRendererFunc
+            };
+        }
 
         // handle options that are dependent on gridOptions
         if(this.agGridOptions['enableCharts'] && this.agGridOptions['enableRangeSelection']) {
@@ -419,6 +424,7 @@ export class PowerGrid extends NGGridDirective {
             return;
         }
 
+        this.agGridOptions.popupParent = this.agGridElementRef.nativeElement;
         // register listener for selection changed
         this.agGrid.api.addEventListener('rowSelected', (event: any) => this.onRowSelectedHandler(event));
         this.agGrid.api.addEventListener('cellClicked', (params: any) => this.cellClickHandler(params));
@@ -434,13 +440,6 @@ export class PowerGrid extends NGGridDirective {
 
         if(!this.servoyApi.isInDesigner() && this.useLazyLoading) {
             this.agGridOptions.api.setEnterpriseDatasource(new RemoteDatasource(this));
-        } else {
-            // TODO:
-            // $scope.$watchCollection("model.data", function(newValue, oldValue) {
-            //     if(gridOptions) {
-            //         gridOptions.api.setRowData($scope.model.data);
-            //     }
-            // });
         }
     }
 
@@ -539,10 +538,9 @@ export class PowerGrid extends NGGridDirective {
             if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
 
             // column sizing
-            // TODO:
-            // if (column.width || column.width === 0) colDef.width = column.width;
-            // if (column.maxWidth) colDef.maxWidth = column.maxWidth;
-            // if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
+            if (column.width || column.width === 0) colDef.width = column.width;
+            if (column.maxWidth) colDef.maxWidth = column.maxWidth;
+            if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
 
             // column resizing https://www.ag-grid.com/javascript-grid-resizing/
             if (column.enableResize === false) colDef.resizable = column.enableResize;
@@ -570,21 +568,18 @@ export class PowerGrid extends NGGridDirective {
                         };
                     }
                 }
-                // TODO
-                // colDef.valueFormatter = this.createValueFormatter(parsedFormat, column.formatType);
+                colDef.valueFormatter = this.createValueFormatter(parsedFormat, column.formatType);
             }
 
-            // TODO
-            // if(column.cellStyleClassFunc) {
-            //     colDef.cellClass = this.createColumnCallbackFunctionFromString(column.cellStyleClassFunc);
-            // }
+            if(column.cellStyleClassFunc) {
+                colDef.cellClass = this.createColumnCallbackFunctionFromString(column.cellStyleClassFunc);
+            }
 
-            // if(column.cellRendererFunc) {
-            //     colDef.cellRenderer = this.createColumnCallbackFunctionFromString(column.cellRendererFunc);
-            // }
-            // else {
-            //     colDef.cellRenderer = this.getDefaultCellRenderer(column);
-            // }
+            if(column.cellRendererFunc) {
+                colDef.cellRenderer = this.createColumnCallbackFunctionFromString(column.cellRendererFunc);
+            } else {
+                colDef.cellRenderer = this.getDefaultCellRenderer(column);
+            }
 
             if (column.filterType) {
                 colDef.filter = true;
@@ -1203,6 +1198,96 @@ export class PowerGrid extends NGGridDirective {
         this.agGrid.api.refreshHeader();
     }
 
+    createValueFormatter(format: any, formatType: any): any {
+        return (params: any) => {
+            if(params.value !== undefined) {
+                if(formatType === 'TEXT' && params.value) {
+                    let v = params.value;
+                    if(v.displayValue !== undefined) v = v.displayValue;
+                    if(format === '|U') {
+                        return v.toUpperCase();
+                    } else if(format === '|L') {
+                        return v.toLowerCase();
+                    }
+                }
+                return params.context.componentParent.formattingService.format(params.value, format, false);
+            }
+            return '';
+        };
+    }
+
+    createColumnCallbackFunctionFromString(functionAsString: string) {
+        // eslint-disable-next-line no-eval
+        const f = eval(functionAsString);
+        return (params: any) => f(params.rowIndex, params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
+    }
+
+    getDefaultCellRenderer(column: any) {
+        return (params: any) => {
+            if(column.editType === 'CHECKBOX' && !params.node.group) {
+                const checkboxEl = document.createElement('i');
+                checkboxEl.className = this.getIconCheckboxEditor(parseInt(params.value, 10));
+                return checkboxEl;
+            }
+
+            let value = params.value != null ? params.value : '';
+            const valueFormatted = params.valueFormatted != null ? params.valueFormatted : value;
+
+            let returnValueFormatted = false;
+            if(column != null && column.showAs === 'html') {
+                value =  value && value.displayValue !== undefined ? value.displayValue : value;
+            } else if(column != null && column.showAs === 'sanitizedHtml') {
+                value = this.sanitizer.sanitize(SecurityContext.HTML, value && value.displayValue !== undefined ? value.displayValue : value);
+            } else if (value && value.contentType && value.contentType.indexOf('image/') === 0 && value.url) {
+                value = '<img class="ag-table-image-cell" src="' + value.url + '">';
+            } else {
+                returnValueFormatted = true;
+            }
+
+            return returnValueFormatted ? document.createTextNode(valueFormatted) : value;
+        };
+    }
+
+    getIconCheckboxEditor(state: any) {
+        let iconConfig = this.powergridService.iconConfig ? this.powergridService.iconConfig : null;
+        iconConfig = this.mergeConfig(iconConfig, this.iconConfig);
+        const checkboxEditorIconConfig = this.iconConfig ? iconConfig : this.iconConfig;
+
+        if(state) {
+            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorChecked ?
+            checkboxEditorIconConfig.iconEditorChecked : 'far fa-check-square';
+        } else {
+            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorUnchecked ?
+            checkboxEditorIconConfig.iconEditorUnchecked : 'far fa-square';
+        }
+    }
+
+    groupRowInnerRenderer(params: any) {
+        let label = '<span class="ag-group-label">' + params.node.key + '</span>';
+        if(params.node.aggData) {
+            let needsSeparator = false;
+            for(const agg in params.node.aggData) {
+                if(params.node.aggData.hasOwnProperty(agg)) {
+                    const column = this.agGrid.columnApi.getColumn(agg);
+                    const columnText = column['aggFunc'] + '(' + column.getColDef().headerName + ')';
+                    const value = params.node.aggData[agg];
+                    if(column['aggFunc'] !== 'count' && column.getColDef().valueFormatter) {
+                        // TODO
+                        //value = column.getColDef().valueFormatter(value.value !== undefined ? value : {value });
+                    }
+                    if(needsSeparator) {
+                        label += '<span class="ag-group-aggregate-separator">,</span>';
+                    } else {
+                        needsSeparator = true;
+                    }
+                    label += '<span class="ag-group-aggregate">' + columnText + ':</span><span class="ag-group-aggregate-value">'
+                    + value + '</span>';
+                }
+            }
+        }
+        return label;
+    }
+
     /**
      * Export data to excel format (xlsx)
      *
@@ -1448,5 +1533,17 @@ class RemoteDatasource {
         } else {
             params.successCallback(this.powerGrid.data, this.powerGrid.lastRowIndex);
         }
+    }
+}
+
+class DatasetTableGroupCellRenderer extends GroupCellRenderer {
+
+    constructor() {
+        super();
+        this['updateChildCount'] = () => {
+            const allChildrenCount = this['displayedGroup'].allChildrenCount;
+            this['eChildCount'].innerHTML = allChildrenCount >= 0 ? '<span class="ag-group-child-count-prefix"></span>' + allChildrenCount
+                + '<span class="ag-group-child-count-suffix"></span>' : '';
+        };
     }
 }

@@ -1,5 +1,5 @@
 import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectionStrategy, ChangeDetectorRef, ContentChild, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
@@ -77,8 +77,8 @@ export class DataGrid extends NGGridDirective {
     @ViewChild('element', { read: ElementRef }) agGridElementRef: ElementRef;
 
     @Input() myFoundset: IFoundset;
-    @Input() columns: any;
-    @Input() readOnly: any;
+    @Input() columns: any[];
+    @Input() readOnly: boolean;
     @Input() readOnlyColumnIds: any;
     @Input() hashedFoundsets: any;
     @Input() filterModel: any;
@@ -87,12 +87,12 @@ export class DataGrid extends NGGridDirective {
     @Output() _internalExpandedStateChange = new EventEmitter();
     @Input() _internalAutoSizeState: any;
     @Output() _internalAutoSizeStateChange = new EventEmitter();
-    @Input() enableSorting: any;
-    @Input() enableColumnResize: any;
-    @Input() enableColumnMove: any;
-    @Input() rowHeight: any;
-    @Input() groupUseEntireRow: any;
-    @Input() showGroupCount: any;
+    @Input() enableSorting: boolean;
+    @Input() enableColumnResize: boolean;
+    @Input() enableColumnMove: boolean;
+    @Input() rowHeight: number;
+    @Input() groupUseEntireRow: boolean;
+    @Input() showGroupCount: boolean;
     @Input() styleClass: string;
 
     @Input() toolPanelConfig: any;
@@ -129,6 +129,7 @@ export class DataGrid extends NGGridDirective {
     groupManager: GroupManager;
 
     // when the grid is not ready yet set the value to the foundset/column index for which has been edit cell called
+    editCellAtTimeout = null;
     startEditFoundsetIndex = -1;
     startEditColumnIndex = -1;
 
@@ -585,7 +586,8 @@ export class DataGrid extends NGGridDirective {
         }
 
         this.agGridElementRef.nativeElement.addEventListener('click', (e: any) => {
-            if(e.target.parentNode.classList.contains('ag-selection-checkbox')) {
+            if(e.target.parentNode && e.target.parentNode.classList &&
+                e.target.parentNode.classList.contains('ag-selection-checkbox')) {
                 let t = e.target.parentNode;
                 while(t && !t.hasAttribute('row-index')) t = t.parentNode;
                 if(t) {
@@ -1925,7 +1927,13 @@ export class DataGrid extends NGGridDirective {
     }
 
     editCellAtWithTimeout(foundsetindex: any, columnindex: any) {
-        //TODO
+        if(this.editCellAtTimeout) {
+            clearTimeout(this.editCellAtTimeout);
+        }
+        this.editCellAtTimeout = setTimeout(() => {
+            this.editCellAtTimeout = null;
+            this.editCellAt(this.startEditFoundsetIndex, this.startEditColumnIndex);
+        }, 200);
     }
 
     /**
@@ -2381,7 +2389,7 @@ export class DataGrid extends NGGridDirective {
 
     getIconRefreshData() {
         return this.iconConfig && this.iconConfig.iconRefreshData ?
-            this.iconConfig.iconRefreshData : 'glyphicon glyphicon-refresh';
+            this.iconConfig.iconRefreshData : 'fa fa-sync';
     }
 
     getIconCheckboxEditor(state: any) {
@@ -2391,10 +2399,10 @@ export class DataGrid extends NGGridDirective {
 
         if(state) {
             return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorChecked ?
-            checkboxEditorIconConfig.iconEditorChecked : 'glyphicon glyphicon-check';
+            checkboxEditorIconConfig.iconEditorChecked : 'far fa-check-square';
         } else {
             return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorUnchecked ?
-            checkboxEditorIconConfig.iconEditorUnchecked : 'glyphicon glyphicon-unchecked';
+            checkboxEditorIconConfig.iconEditorUnchecked : 'far fa-square';
         }
     }
 

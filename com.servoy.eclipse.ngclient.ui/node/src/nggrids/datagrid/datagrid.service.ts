@@ -17,9 +17,9 @@ export class DatagridService {
      */
     createIconConfig() {
         return {
-            iconGroupExpanded: 'glyphicon glyphicon-minus ag-icon',
-            iconGroupContracted: 'glyphicon glyphicon-plus ag-icon',
-            iconRefreshData: 'glyphicon glyphicon-refresh'
+            iconGroupExpanded: 'fa fa-minus ag-icon',
+            iconGroupContracted: 'fa fa-plus ag-icon',
+            iconRefreshData: 'fa fa-sync'
         };
     }
 

@@ -103,15 +103,17 @@ export class TextEditor extends EditorDirective {
         this.elementRef.nativeElement.focus();
         this.elementRef.nativeElement.select();
 
-        const editFormat = this.format.edit ? this.format.edit : this.format.display;
-        if(this.format && editFormat && this.format.isMask) {
-            const settings = {};
-            settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
-            if (this.format.allowedCharacters)
-                settings['allowedCharacters'] = this.format.allowedCharacters;
+        if(this.format) {
+            const editFormat = this.format.edit ? this.format.edit : this.format.display;
+            if(editFormat && this.format.isMask) {
+                const settings = {};
+                settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
+                if (this.format.allowedCharacters)
+                    settings['allowedCharacters'] = this.format.allowedCharacters;
 
-            //TODO: jquery mask
-            //$(this.eInput).mask(editFormat, settings);
+                //TODO: jquery mask
+                //$(this.eInput).mask(editFormat, settings);
+            }
         }
     }
 
