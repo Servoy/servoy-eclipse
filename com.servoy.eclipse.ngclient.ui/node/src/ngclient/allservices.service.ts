@@ -16,6 +16,7 @@ import { KeyListener } from '../keylistener/keylistener.service';
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
 import { DatagridService } from '../nggrids/datagrid/datagrid.service';
 import { PowergridService } from '../nggrids/powergrid/powergrid.service';
+import { DialogService } from '../dialogservice/dialogs.service';
 // generated services end
 
 
@@ -37,7 +38,8 @@ export class AllServiceService implements ServiceProvider {
         private keyListener: KeyListener,
         private window: WindowPlugin,
         private ngDataGrid: DatagridService,
-        private ngPowerGrid: PowergridService
+        private ngPowerGrid: PowergridService,
+        private dialogs: DialogService
         // generated services end
     ) {
         services.setServiceProvider( this );
@@ -58,7 +60,8 @@ export class AllServiceService implements ServiceProvider {
                 NGUtilsService,
                 KeyListener,
                 DatagridService,
-                PowergridService
+                PowergridService,
+                DialogService
                 // generated services end
                 ],
     imports: [WindowServiceModule]            

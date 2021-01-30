@@ -39,6 +39,8 @@ import { ServerDataService } from './services/serverdata.service';
 import { TypesRegisterService } from '../servoydefault/types_register.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DialogModule } from '../dialogservice/dialog.module';
 
 @NgModule( {
     declarations: [
@@ -65,7 +67,9 @@ import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.se
         AllServicesModules,
         HttpClientModule,
         ServoyPublicModule,
-        NGGridsModule
+        NGGridsModule,
+        BrowserAnimationsModule,
+        DialogModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
 					SvyUtilsService,ServerDataService,TypesRegisterService, BSWindow, BSWindowManager,

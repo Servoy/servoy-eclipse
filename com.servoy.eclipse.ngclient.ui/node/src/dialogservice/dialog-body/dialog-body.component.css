@@ -1,0 +1,24 @@
+.type-error
+{
+	color: #d9534f;
+}
+
+.type-info
+{
+	color: #5bc0de;
+}
+
+.type-warning
+{
+	color: #f0ad4e;
+}
+
+.type-question
+{
+	color: #428bca;
+}
+
+.fullWidth
+{
+	width: 100%;
+}
