@@ -11,7 +11,7 @@ import { FileUploader } from 'ng2-file-upload';
 export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() onDataChangeMethodID: ( e: Event ) => void;
-    @Input() onFileUploadedMethodID: ( e: Event ) => void;
+    @Input() onFileUploadedMethodID: (  ) => void;
     @Input() onFileTransferFinishedMethodID: ( e: Event ) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
@@ -39,14 +39,12 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
     @Input() toolTipText: string;
 
     uploader: FileUploader;
-    hasBaseDropZoneOver: boolean;
+    hasBaseDropZoneOver= false;
+
+    private ready = true;
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService ) {
         super( renderer, cdRef );
-        this.uploader = new FileUploader( {
-            url: '',
-        } );
-        this.hasBaseDropZoneOver = false;
     }
 
     public fileOverBase( e: any ): void {
@@ -58,13 +56,36 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
         element.click();
     }
 
-    svyOnInit() {
-        super.svyOnInit();
-        const url = this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'dataProviderID' );
-        this.uploader = new FileUploader( {
+    initializeComponent() {
+        super.initializeComponent();
+        if (this.multiFileUpload && ! this.onFileUploadedMethodID) {
+            console.warn('Multifile upload without onFileUploaded Method isn\'t supported. To upload multi file start using onFileUploaded Method');
+        }
+        const url = this.onFileUploadedMethodID ? this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'onFileUploadedMethodID' ):
+                            this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'dataProviderID' );
+        if (!this.multiFileUpload) this.uploader = new FileUploader( {
+            url,
+            filters: [{name:'multi', fn: (): boolean => {
+                const retValue = this.ready;
+                this.ready = false;
+                return retValue;
+            }}]
+        });
+        else this.uploader = new FileUploader( {
             url,
         });
+        this.uploader.onProgressItem = () => {
+            this.cdRef.detectChanges();
+        };
+        if (!this.multiFileUpload || this.onFileTransferFinishedMethodID) {
+            this.uploader.onCompleteAll =this.onComplete;
+        }
     }
+
+    onComplete = () => {
+        this.ready = true;
+        this.onFileTransferFinishedMethodID(new CustomEvent('onFileTransferFinishedMethodID'));
+    };
 
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes ) {

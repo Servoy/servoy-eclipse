@@ -1,7 +1,6 @@
 <div class="svy-extra-fileupload container" 
 	[ngClass]="styleClass" 
 	[svyTooltip]="toolTipText"  
-	(click)= "fileInputClick()"
 	#element>
     <div ng2FileDrop
         [ngClass]="{'svy-fu-dragover': hasBaseDropZoneOver}"
@@ -10,8 +9,7 @@
     	(onFileDrop) = "uploader.uploadAll()"
         class="well svy-fu-drop-box">
         	
-        	<i class="svy-fu-row {{uploader.progress > 0 ? [successIconStyleClass] : [iconStyleClass] }} custom-file-upload" 
-        		> </i>
+        	<i class="svy-fu-row {{uploader.progress > 0 ? [successIconStyleClass] : [iconStyleClass] }} custom-file-upload" (click)= "fileInputClick()"> </i>
         	
         	<label id = "fileInputLabel" class="custom-file-upload" >  {{uploadText}}
             	<div *ngIf="multiFileUpload; else elseBlock">
