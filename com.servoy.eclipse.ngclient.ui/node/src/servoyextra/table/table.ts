@@ -104,6 +104,13 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             if (event.selectedRowIndexesChanged) {
                 this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
             }
+
+            let newVal: object[];
+            if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
+            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue;
+            if (event.fullValueChanged || event.viewportRowsCompletelyChanged) {
+                this.dataStream.next([...newVal]);
+            }
         });
 
         window.setTimeout(() => {

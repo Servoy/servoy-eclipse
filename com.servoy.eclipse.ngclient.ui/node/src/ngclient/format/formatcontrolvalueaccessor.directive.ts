@@ -1,5 +1,5 @@
 
-import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit } from '@angular/core';
+import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
@@ -15,10 +15,10 @@ import { Format, FormattingService } from './formatting.service';
         multi: true
     }]
 })
-export class FormatDirective implements ControlValueAccessor, AfterViewInit {
+export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
     @Input('svyFormat') format: Format;
-    @Input() inputType: string;
-    @Input() findMode: boolean;
+    @Input('type') inputType: string;
+    @Input() findmode: boolean;
 
     private hasFocus = false;
 	private realValue = null;
@@ -45,7 +45,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 
     @HostListener('change', ['$event.target.value']) input(value: any) {
         let data = value;
-        if (!this.findMode && this.format) {
+        if (!this.findmode && this.format) {
             const type = this.format.type;
             let format = this.format.display ? this.format.display : this.format.edit;
             if (this.hasFocus&& this.format.edit && !this.format.isMask) format = this.format.edit;
@@ -86,25 +86,34 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
     onTouchedCallback = () => {};
 
     ngAfterViewInit(): void {
-		if (this.format) {
-			if (this.format.uppercase || this.format.lowercase) {
-				this._renderer.listen(this._elementRef.nativeElement,'input',() => this.upperOrLowerCase());
-			}
-			if (this.format.isNumberValidator || this.format.type === 'NUMBER' || this.format.type === 'INTEGER') {
-				this._renderer.listen(this._elementRef.nativeElement,'keypress',(event) => {
-					this.isKeyPressEventFired=true;
-					return this.formatService.testForNumbersOnly(event, null, this._elementRef.nativeElement, this.findMode, true, this.format, false);
-				});
-				this._renderer.listen(this._elementRef.nativeElement,'input',(event) => this.inputFiredForNumbersCheck(event));
-			}
-			if (this.format.maxLength) {
-				this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
-			}
-			if (this.format.isMask) {
-				new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService);
-			}
-		}
-	}
+		this.setFormat();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        this.setFormat();
+    }
+    
+    private setFormat() {
+        if (this.format) {
+            if (this.format.uppercase || this.format.lowercase) {
+                this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase());
+            }
+            if (this.format.isNumberValidator || this.format.type === 'NUMBER' || this.format.type === 'INTEGER') {
+                this._renderer.listen(this._elementRef.nativeElement, 'keypress', (event) => {
+                    this.isKeyPressEventFired = true;
+                    return this.formatService.testForNumbersOnly(event, null, this._elementRef.nativeElement, this.findmode, true, this.format, false);
+                });
+                this._renderer.listen(this._elementRef.nativeElement, 'input', (event) => this.inputFiredForNumbersCheck(event));
+            }
+            if (this.format.maxLength) {
+                this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+            }
+            if (this.format.isMask) {
+                new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService);
+            }
+            this.writeValue(this.realValue);
+        }
+    }
 
 	registerOnChange(fn: any) {
         this.onChangeCallback = fn;
@@ -119,7 +128,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
         this.realValue = value;
          if (value && this.format) {
              let data = value;
-             if (!this.findMode) {
+             if (!this.findmode) {
                 data = this.inputType === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength):data;
                  let useEdit = !this.format.display;
                  if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
@@ -160,7 +169,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 			const pasted = inserted.length > 1 || (!inserted && !removed);
 
 			if(!pasted && !removed) {
-				if(!this.formatService.testForNumbersOnly(event, inserted, this._elementRef.nativeElement, this.findMode, true, this.format, true)) {
+				if(!this.formatService.testForNumbersOnly(event, inserted, this._elementRef.nativeElement, this.findmode, true, this.format, true)) {
 					currentValue = this.oldInputValue;
 				}
 			}
@@ -213,7 +222,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit {
 		}
 		let stripped = '';
 		for (let i = 0; i < currentValue.length; i++) {
-			if(this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findMode, true, this.format, true)){
+			if(this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findmode, true, this.format, true)){
 				stripped = stripped + currentValue.charAt(i);
 				if(stripped.length === this.format.maxLength) break;
 			}
