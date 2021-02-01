@@ -27,21 +27,21 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1566987856854</id>
-			<name>node/node</name>
+			<id>1612188325051</id>
+			<name>node</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-name-matches-false-false-*</arguments>
+				<arguments>1.0-name-matches-false-false-node</arguments>
 			</matcher>
 		</filter>
 		<filter>
-			<id>1566987869995</id>
-			<name>node/node_modules</name>
+			<id>1612188325057</id>
+			<name>node</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-name-matches-false-false-*</arguments>
+				<arguments>1.0-name-matches-false-false-node_modules</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
