@@ -23,7 +23,10 @@ export class DialogBodyComponent implements OnInit {
   handleKeyboardEvent(event: KeyboardEvent) {
     const key = event.key;
     if (key === 'Escape') {
+      const nodeName = (event.target as HTMLElement).nodeName;
+      if (!nodeName.match(/mat-select/i)) {
         this.close(null);
+      } 
     } else if (key === 'Enter') {
       if (this.class === 'type-input' || this.class === 'type-select') {
         this.close('OK');
