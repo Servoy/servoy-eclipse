@@ -13,6 +13,19 @@ body {
   padding:1px;
 }
 
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    background-color: transparent;
+    border-color: #ccc;
+}
+
+.input-sm {
+    font-size: 12px;
+}
+
 .svy-btn {
     display: inline-block;
     padding: 6px 12px;

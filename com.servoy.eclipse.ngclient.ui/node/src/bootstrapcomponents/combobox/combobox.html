@@ -1,5 +1,5 @@
 <div [id]="servoyApi.getMarkupId()" ngbDropdown (openChange)="openChange($event)"  [container]="appendToBody?'body':null" #element> 
-      <button class="bts-combobox form-control dropdown-toggle svy-dropdown" ngbDropdownToggle
+      <button class="bts-combobox form-control dropdown-toggle svy-dropdown bts-input-sm" ngbDropdownToggle
         [sabloTabseq]="tabSeq"
         [svyTooltip]="toolTipText"
         [svyStartEdit]="'dataProviderID'"
@@ -10,7 +10,7 @@
         #input><span class="svy-dropdown-text">{{formattedValue}}</span></button>
       <div ngbDropdownMenu [attr.aria-labelledby]="servoyApi.getMarkupId() + '_btn'">
        <ng-container *ngIf="openState">
-        <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format}}</button>
+        <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem bts-input-sm" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format}}</button>
        </ng-container>
       </div>
 </div> 

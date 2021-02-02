@@ -1,7 +1,7 @@
 <input
         [id]="servoyApi.getMarkupId()"
 		type="text"
-		class='bts-typeahead'
+		class='bts-typeahead bts-input-sm'
 		[svyStartEdit]="'dataProviderID'"
 		[hostComponent]="this"
 		[(ngModel)]="dataProviderID"
@@ -16,6 +16,11 @@
 		[inputFormatter]="inputFormatter"
 		(focus)="focus$.next('')"
 		(click)="click$.next('')"
+        [resultTemplate]="rt"
 		#instance="ngbTypeahead"
 		#element
 />
+
+<ng-template #rt let-r="result" let-t="term" let-formatter="formatter">
+  <div class="bts-input-sm"><ngb-highlight [result]="formatter(r)" [term]="t"></ngb-highlight></div>
+</ng-template>
