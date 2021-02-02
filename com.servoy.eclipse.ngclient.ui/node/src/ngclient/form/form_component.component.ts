@@ -160,6 +160,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('servoyextraImagelabel', { static: true }) readonly servoyextraImagelabel: TemplateRef<any>;
     @ViewChild('servoyextraFileupload', { static: true }) readonly servoyextraFileupload: TemplateRef<any>;
     @ViewChild('servoyextraTextfieldgroup', { static: true }) readonly servoyextraTextfieldgroup: TemplateRef<any>;
+    @ViewChild('servoyextraLightboxgallery', { static: true }) readonly servoyextraLightboxgallery: TemplateRef<any>;
     @ViewChild('servoyextraSpinner', { static: true }) readonly servoyextraSpinner: TemplateRef<any>;
     @ViewChild('servoyextraSlider', { static: true }) readonly servoyextraSlider: TemplateRef<any>;
 	@ViewChild('servoyextraSplitpane', { static: true }) readonly servoyextraSplitpane: TemplateRef<any>;

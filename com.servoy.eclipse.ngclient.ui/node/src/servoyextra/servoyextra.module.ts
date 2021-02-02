@@ -4,6 +4,7 @@ import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
 import { ServoyExtraTextfieldGroup } from './textfieldgroup/textfieldgroup';
+import { ServoyExtraLightboxGallery } from './lightboxgallery/lightboxgallery';
 import { ServoyExtraSlider } from './slider/slider';
 import { ServoyExtraSpinner } from './spinner/spinner';
 import { ServoyExtraSplitpane } from './splitpane/splitpane';
@@ -23,6 +24,7 @@ import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
 import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
 import { Select2Module } from 'ng-select2-component';
 import { UppyAngularModule } from 'uppy-angular';
+import { LightboxModule } from 'ngx-lightbox';
 
 @NgModule({
     declarations: [
@@ -31,6 +33,7 @@ import { UppyAngularModule } from 'uppy-angular';
         ServoyExtraImageLabel,
         ServoyExtraFileUpload,
         ServoyExtraTextfieldGroup,
+        ServoyExtraLightboxGallery,
         ServoyExtraSlider,
         ServoyExtraSpinner,
 		ServoyExtraSplitpane,
@@ -51,7 +54,8 @@ import { UppyAngularModule } from 'uppy-angular';
         FileUploadModule,
         NgxSliderModule,
 		Select2Module,
-        UppyAngularModule
+        UppyAngularModule,
+        LightboxModule
     ],
     providers: [AsyncPipe
     ],
@@ -60,6 +64,7 @@ import { UppyAngularModule } from 'uppy-angular';
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,
               ServoyExtraTextfieldGroup,
+              ServoyExtraLightboxGallery,
               ServoyExtraSlider,
               ServoyExtraSpinner,
 			  ServoyExtraSplitpane,
