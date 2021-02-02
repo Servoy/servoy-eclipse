@@ -93,13 +93,15 @@ public class TutorialView extends ViewPart
 		{
 			Runnable run = null;
 			long last = 0;
+			int previousWidth = 0;
 
 			@Override
 			public void controlResized(ControlEvent e)
 			{
 				last = System.currentTimeMillis();
-				if (run == null)
+				if (run == null && previousWidth != parent.getSize().x)
 				{
+					previousWidth = parent.getSize().x;
 					run = () -> {
 						if ((System.currentTimeMillis() - last) < 300)
 						{
