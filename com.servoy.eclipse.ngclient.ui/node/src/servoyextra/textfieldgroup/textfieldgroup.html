@@ -7,7 +7,7 @@
 	<input class='form-control' 
 	    [type]="inputType"
 		[ngClass]="styleClass" 
-		(ngModelChange)="pushUpdate()"
+		(ngModelChange)="pushUpdate($event)"
 		[id]="servoyApi.getMarkupId()"
 		[ngModel]="dataProviderID" 
 		[svyFormat]="format"

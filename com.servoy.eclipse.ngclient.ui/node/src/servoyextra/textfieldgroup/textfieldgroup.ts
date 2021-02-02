@@ -91,8 +91,8 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElemen
         }
     }
     
-    pushUpdate() {
-        this.dataProviderID = this.input.nativeElement.value;
+    pushUpdate( event: any) {
+        this.dataProviderID = event;
         this.dataProviderIDChange.emit(this.dataProviderID);
         this.dataProviderValidation();
     }
