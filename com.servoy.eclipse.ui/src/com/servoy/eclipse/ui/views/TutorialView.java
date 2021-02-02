@@ -303,7 +303,6 @@ public class TutorialView extends ViewPart
 									String loginToken = getLoginToken();
 									if (loginToken != null)
 									{
-										System.out.println("login token: " + System.getProperty("servoy.tutorial.url"));
 										BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 											Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
 										tutorialDialog.open(true);
