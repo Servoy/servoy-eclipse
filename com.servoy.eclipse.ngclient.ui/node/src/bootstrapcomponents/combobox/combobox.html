@@ -4,6 +4,7 @@
         [svyTooltip]="toolTipText"
         [svyStartEdit]="'dataProviderID'"
         [hostComponent]="this"
+        [svyFormat]="format"
         [disabled]="readOnly || !enabled"
         [id]="servoyApi.getMarkupId() + '_btn'"
         #input><span class="svy-dropdown-text">{{formattedValue}}</span></button>

@@ -31,6 +31,12 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
         if (changes.readOnly || changes.enabled) {
             this.instance.setDisabledState(this.readOnly || !this.enabled);
         }
+        if (changes.format && this.valuelistID) {
+            const value = this.valuelistID.find((item) => item.realValue === this.dataProviderID);
+            if (value) {
+              this.instance.writeValue(value.displayValue);
+            }
+          }
     }
 
     @HostListener('keydown', ['$event'])
