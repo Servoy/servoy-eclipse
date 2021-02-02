@@ -144,6 +144,4 @@ label input {
 	margin-right: 7px;
 }
 
-.bts-input-sm {
-    font-size: 14px;
-}
+:root { font-size: 14px;}
