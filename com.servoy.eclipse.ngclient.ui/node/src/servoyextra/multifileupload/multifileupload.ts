@@ -9,29 +9,28 @@ import { UppyConfig, UppyAngularComponent } from 'uppy-angular';
 })
 export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() autoProceed;
-    @Input() allowMultipleUploads;
-    @Input() hideUploadButton;
-    @Input() restrictions;
-    @Input() note;
-    @Input() metaFields;
-    @Input() size;
-    @Input() cssPosition;
-    @Input() disableStatusBar;
-    @Input() inline;
-    @Input() closeAfterFinish;
+    @Input() autoProceed: boolean;
+    @Input() allowMultipleUploads: boolean;
+    @Input() hideUploadButton: boolean;
+    @Input() restrictions: UploadRestriction;
+    @Input() note: string;
+    @Input() metaFields: {[key: string]: MetaField};
+    @Input() cssPosition: {width: number; height: number};
+    @Input() disableStatusBar: boolean;
+    @Input() inline: boolean;
+    @Input() closeAfterFinish: boolean;
     @Input() sources: string[];
     @Input() options: any;
     @Input() localeStrings: any;
 
-    @Input() onFileUploaded;
-    @Input() onFileAdded;
-    @Input() onBeforeFileAdded;
-    @Input() onFileRemoved;
-    @Input() onUploadComplete;
-    @Input() onModalOpened;
-    @Input() onModalClosed;
-    @Input() onRestrictionFailed;
+    @Input() onFileUploaded: (file: any) => void;
+    @Input() onFileAdded: (file: UploadFile) => void;
+    @Input() onBeforeFileAdded: (fileToAdd: UploadFile, files: UploadFile[]) => Promise<boolean>;
+    @Input() onFileRemoved: (file: UploadFile) => void;
+    @Input() onUploadComplete: (successfulFiles: UploadFile[], failedFiles: UploadFile[]) => void;
+    @Input() onModalOpened: () => void;
+    @Input() onModalClosed: () => void;
+    @Input() onRestrictionFailed: (file: UploadFile, error: string) => void;
 
     @ViewChild('element', { static: false }) uppyRef: UppyAngularComponent;
 
@@ -51,19 +50,19 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     svyOnInit() {
         super.svyOnInit();
         if (this.onFileAdded) {
-            this.uppyRef.uppyInstance.on('file-added', (file) => {
+            this.uppyRef.uppyInstance.on('file-added', (file: UppyFile) => {
                 this.onFileAdded(this.createUppyFile(file));
             });
         }
 
         if (this.onFileRemoved) {
-            this.uppyRef.uppyInstance.on('file-removed', (file) => {
+            this.uppyRef.uppyInstance.on('file-removed', (file: UppyFile) => {
                 this.onFileRemoved(this.createUppyFile(file));
             });
         }
 
         if (this.onRestrictionFailed) {
-            this.uppyRef.uppyInstance.on('restriction-failed', (file, error) => {
+            this.uppyRef.uppyInstance.on('restriction-failed', (file: UppyFile, error: {message: string}) => {
                 this.onRestrictionFailed(this.createUppyFile(file), error.message);
             });
         }
@@ -81,16 +80,16 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         }
 
         if (this.onUploadComplete) {
-            this.uppyRef.uppyInstance.on('complete', (result: {successful:[], failed:[]}) => {
+            this.uppyRef.uppyInstance.on('complete', (result: {successful: []; failed: []}) => {
                 const filesSuccess = [];
                 if (result.successful) {
-                    for (let o = 0; o < result.successful.length; o++) {
+                    for (const o of Object.keys(result.successful)) {
                         filesSuccess.push(this.createUppyFile(result.successful[o]));
                     }
                 }
                 const filesFailed = [];
                 if (result.failed) {
-                    for (let f = 0; f < result.failed.length; f++) {
+                    for (const f of Object.keys(result.failed)) {
                         filesFailed.push(this.createUppyFile(result.failed[f]));
                     }
                 }
@@ -98,7 +97,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
             });
         }
         this.uppyRef.uppyInstance.setOptions({
-            onBeforeFileAdded: (currentFile, files) => this.onBeforeFileAddedEvent(currentFile, files)
+            onBeforeFileAdded: (currentFile: UppyFile) => this.onBeforeFileAddedEvent(currentFile)
         });
         const locale = null;
         if (this.localeStrings) {
@@ -206,7 +205,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         };
     }
 
-    onBeforeFileAddedEvent(currentFile: any, files: any): boolean {
+    onBeforeFileAddedEvent(currentFile: any): boolean {
         if (!this.onBeforeFileAdded) {
             return true;
         }
@@ -239,14 +238,14 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         const files = this.uppyRef.uppyInstance.getFiles();
         const result = [];
         if (files) {
-            for (let f = 0; f < files.length; f++) {
+            for (const f of Object.keys(files)) {
                 result.push(this.createUppyFile(files[f]));
             }
         }
         return result;
     }
 
-    createUppyFile(file: any): UploadFile {
+    createUppyFile(file: UppyFile): UploadFile {
         const result: UploadFile = {
             id: file.id,
             name: file.name,
@@ -258,7 +257,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         };
 
         if (this.metaFields && file.meta) {
-            for (let m = 0; m < this.metaFields.length; m++) {
+            for (const m of Object.keys(this.metaFields)) {
                 const fieldName = this.metaFields[m].id;
                 result.metaFields[fieldName] = file.meta[fieldName] || null;
             }
@@ -287,21 +286,41 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 }
 
-class UploadFile {
+interface MetaField {
+    id: string;
+    name: string;
+    placeholder: string;
+}
+
+interface BaseFile {
     id: string;
     name: string;
     extension: string;
     type: string;
     size: number;
-    metaFields: any;
     progress?: Progress;
     error: string;
 }
 
-class Progress {
+interface UppyFile extends BaseFile {
+    meta: {[key: string]: MetaField} ;
+}
+
+interface UploadFile extends BaseFile {
+    metaFields: {[key: string]: MetaField};
+}
+
+interface Progress {
     bytesTotal: number;
     bytesUploaded: number;
     percentage: number;
     uploadComplete: boolean;
     uploadStarted: Date;
+}
+
+interface UploadRestriction {
+    maxFileSize: number;
+    maxNumberOfFiles: number;
+    minNumberOfFiles: number;
+    allowedFileTypes: string[];
 }
