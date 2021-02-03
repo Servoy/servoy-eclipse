@@ -25,6 +25,7 @@ public class NgDesktopServiceMonitor implements Runnable, IProgressMonitor
 
 	public void startChase(String name, int totalWork, int duration)
 	{
+		stopServiceMonitor = false;
 		totalSteps = totalWork;
 		currentStep = 0;
 		progressUnit = Math.round(((float)totalWork / duration) / (1000 / REFRESH_INTERVAL));
