@@ -53,19 +53,19 @@ export class ServoyFormPopupComponent {
                 popupTop = this.popup.y;
             }
 
-            if ((popupLeft + popupwidth > this.document.defaultView.offsetWidth) && (popupLeft - popupwidth + compWidth > 0)) {
+            if ((popupLeft + popupwidth > this.document.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
                 popupLeft = popupLeft - popupwidth + compWidth;
             }
 
-            if ((popupTop + popupheight > this.document.defaultView.offsetHeight) && (popupTop - popupheight + compHeight > 0)) {
+            if ((popupTop + popupheight > this.document.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
                 popupTop = popupTop - popupheight + compHeight;
             }
 
         }
         else if (!this.popup.component) {
             // calculate the real center
-            popupLeft = this.document.defaultView.offsetWidth / 2 - popupwidth / 2;
-            popupTop = this.document.defaultView.offsetHeight / 2 - popupheight / 2;
+            popupLeft = this.document.defaultView.innerWidth / 2 - popupwidth / 2;
+            popupTop = this.document.defaultView.innerHeight / 2 - popupheight / 2;
         }
         this._width = popupwidth;
         this._height = popupheight;
