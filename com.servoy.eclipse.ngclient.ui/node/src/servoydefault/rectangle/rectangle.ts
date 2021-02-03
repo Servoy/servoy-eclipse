@@ -6,9 +6,10 @@ import {ServoyDefaultBaseComponent} from '../basecomponent';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
-    @Input() lineSize;
-    @Input() roundedRadius;
-    @Input() shapeType;
+    @Input() lineSize: number;
+    @Input() roundedRadius: number;
+    @Input() shapeType: number;
+    @Input() size: {width: number; height: number};
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -18,7 +19,7 @@ export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivEl
 
         super.svyOnChanges(changes);
 
-        for ( const property in changes ) {
+        for ( const property of  Object.keys(changes) ) {
             const change = changes[property];
             switch ( property ) {
             case 'lineSize':
@@ -34,8 +35,8 @@ export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivEl
                 this.renderer.setStyle(this.getNativeElement(), 'borderRadius', change.currentValue/2 + 'px');
                 break;
             case 'shapeType':
-                if (change.currentValue == 3 && changes['size']) {
-                    this.renderer.setStyle(this.getNativeElement(), 'borderRadius', changes['size'].currentValue.width/2 + 'px');
+                if (change.currentValue === 3 && this.size) {
+                    this.renderer.setStyle(this.getNativeElement(), 'borderRadius', this.size.width/2 + 'px');
                 }
                 break;
             }

@@ -37,7 +37,7 @@ describe('ServoyDefaultRectangle', () => {
   });
 
   it ('should check border styles from ngOnChanges (linesize)', () => {
-      component.lineSize = '5';
+      component.lineSize = 5;
       component.ngOnChanges({
           lineSize: new SimpleChange(null, component.lineSize, true)
       });
@@ -47,7 +47,7 @@ describe('ServoyDefaultRectangle', () => {
   });
 
   it ('should check border styles from ngOnChanges (roundedRadius)', () => {
-      component.roundedRadius = '6';
+      component.roundedRadius = 6;
       component.ngOnChanges({
           roundedRadius: new SimpleChange(null, component.roundedRadius, false)
       });
@@ -65,7 +65,7 @@ describe('ServoyDefaultRectangle', () => {
   });
 
   it ('should check border styles from ngOnChanges (shapetype)', () => {
-      component.shapeType = '3';
+      component.shapeType = 3;
       component.size = {width: 4, height: 0};
       component.ngOnChanges({
           shapeType: new SimpleChange(null, component.shapeType, true),
