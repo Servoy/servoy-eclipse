@@ -23,7 +23,7 @@ export class PropertyUtils {
         }
     }
 
-    public static setRotation(element: any, renderer: Renderer2, rotation, size) {
+    public static setRotation(element: HTMLElement, renderer: Renderer2, rotation: number, size: {width: number; height: number}) {
         const r = 'rotate(' + rotation + 'deg)';
         renderer.setStyle( element, '-moz-transform',  r );
         renderer.setStyle( element, '-webkit-transform', r );
@@ -32,17 +32,17 @@ export class PropertyUtils {
         renderer.setStyle( element, 'transform', r );
         renderer.setStyle( element, 'position', 'absolute' );
         if (rotation === 90 || rotation === 270) {
-            renderer.setStyle( element.getParent(), 'width', size.height + 'px' );
-            renderer.setStyle( element.getParent(), 'height', size.width + 'px' );
-            renderer.setStyle( element.getParent(), 'left', (size.width - size.height) / 2 + 'px' );
-            renderer.setStyle( element.getParent(), 'top', (size.height - size.width) / 2 + 'px' );
+            renderer.setStyle( element, 'width', size.height + 'px' );
+            renderer.setStyle( element, 'height', size.width + 'px' );
+            renderer.setStyle( element, 'left', (size.width - size.height) / 2 + 'px' );
+            renderer.setStyle( element, 'top', (size.height - size.width) / 2 + 'px' );
         }
     }
 
     public static setBorder( element: any, renderer: Renderer2, newVal ) {
         if ( typeof newVal !== 'object' || newVal == null ) {
- renderer.removeStyle( element, 'border' ); return;
-}
+         renderer.removeStyle( element, 'border' ); return;
+        }
 
         if ( renderer.parentNode( element ).nodeName === 'FIELDSET' ) {
             // unwrap fieldset
