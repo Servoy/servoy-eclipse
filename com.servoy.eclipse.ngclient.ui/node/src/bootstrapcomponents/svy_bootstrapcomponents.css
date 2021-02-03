@@ -106,18 +106,18 @@
 }
 
 
-.svy-dropdown::after {
+.bts-dropdown::after {
     float: right;
     margin-top: 8px;
 }
 
-.svy-dropdown {
+.bts-dropdown {
     height: 100%;
     text-align: left;
     padding: 1px 5px;
 }
 
-.svy-dropdown-text {
+.bts-dropdown-text {
     text-overflow: clip;
     white-space: nowrap;
     overflow: hidden;

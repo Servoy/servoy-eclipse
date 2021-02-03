@@ -1,5 +1,5 @@
-<div [id]="servoyApi.getMarkupId()" ngbDropdown (openChange)="openChange($event)"  [container]="appendToBody?'body':null" #element> 
-      <button class="bts-combobox form-control dropdown-toggle svy-dropdown" ngbDropdownToggle
+<div [id]="servoyApi.getMarkupId()" class="bts-combobox-container" ngbDropdown (openChange)="openChange($event)"  [container]="appendToBody?'body':null" #element> 
+      <button class="bts-combobox form-control dropdown-toggle bts-dropdown" ngbDropdownToggle
         [sabloTabseq]="tabSeq"
         [svyTooltip]="toolTipText"
         [svyStartEdit]="'dataProviderID'"
@@ -7,7 +7,7 @@
         [svyFormat]="format"
         [disabled]="readOnly || !enabled"
         [id]="servoyApi.getMarkupId() + '_btn'"
-        #input><span class="svy-dropdown-text">{{formattedValue}}</span></button>
+        #input><span class="bts-dropdown-text">{{formattedValue}}</span></button>
       <div ngbDropdownMenu [attr.aria-labelledby]="servoyApi.getMarkupId() + '_btn'">
        <ng-container *ngIf="openState">
         <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format}}</button>
