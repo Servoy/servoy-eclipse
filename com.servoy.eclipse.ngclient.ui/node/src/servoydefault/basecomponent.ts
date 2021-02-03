@@ -20,9 +20,7 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
     @Input() foreground: string;
     @Input() format: Format;
     @Input() horizontalAlignment;
-    @Input() location: { x: number; y: number };
     @Input() margin;
-    @Input() size: { width: number; height: number };
     @Input() styleClass: string;
     @Input() tabSeq: number;
     @Input() text: string;

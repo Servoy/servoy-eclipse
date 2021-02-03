@@ -8,15 +8,16 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
-    @Input() hideText;
+    @Input() hideText: boolean;
     @Input() imageMediaID;
     @Input() mediaOptions;
-    @Input() mnemonic;
-    @Input() rolloverCursor;
+    @Input() mnemonic: string;
+    @Input() rolloverCursor: number;
     @Input() rolloverImageMediaID;
-    @Input() showFocus;
-    @Input() textRotation;
-    @Input() verticalAlignment;
+    @Input() showFocus: boolean;
+    @Input() textRotation: number;
+    @Input() verticalAlignment: number;
+    @Input() size: {width: number; height: number};
 
     @ViewChild('child') child: ElementRef;
 
@@ -37,6 +38,9 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
                     break;
                 case 'textRotation':
                     if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue, this.size);
+                    break;
+                case 'verticalAlignment':
+                    this.setVerticalAlignment();
                     break;
             }
         }
@@ -73,4 +77,16 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
             });
         }
     }
+
+    private setVerticalAlignment(): void {
+            if (this.verticalAlignment === 1) {
+                this.renderer.setStyle(this.getNativeChild(), 'top', '0px');
+            } else if (this.verticalAlignment === 3) {
+                this.renderer.setStyle(this.getNativeChild(), 'top', '100%');
+                this.renderer.setStyle(this.getNativeChild(), 'transform', 'translateY(-100%)');
+            } else {
+                this.renderer.setStyle(this.getNativeChild(), 'top', '50%');
+                this.renderer.setStyle(this.getNativeChild(), 'transform', 'translateY(-50%)');
+            }
+        }
 }
