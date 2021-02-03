@@ -205,11 +205,10 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				{
 					if (dropTarget != null && dragObjects != null && dragObjects.length > 0)
 					{
-						Form dropTargetForm = (Form)dropTarget.getAncestor(IRepository.FORMS);
 						final CompoundCommand cc = new CompoundCommand();
 						for (final IPersist p : dragObjects)
 						{
-							cc.add(new ChangeParentCommand(p, dropTargetForm.equals(p.getAncestor(IRepository.FORMS)) ? dropTarget : null, dropTargetComponent,
+							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent,
 								form, getCurrentLocation() == LOCATION_AFTER));
 						}
 						if (!cc.isEmpty())
@@ -395,8 +394,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									if (p instanceof LayoutContainer)
 									{
 										WebLayoutSpecification spec = null;
-										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-											((LayoutContainer)p).getPackageName());
+										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
+											.getLayoutSpecifications().get(
+												((LayoutContainer)p).getPackageName());
 										if (pkg != null)
 										{
 											spec = pkg.getSpecification(((LayoutContainer)p).getSpecName());
