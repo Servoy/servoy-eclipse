@@ -30,9 +30,8 @@ public class NgDesktopClientConnection implements Closeable
 {
 	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
+	private int downloadSize;
 	private int buildCurrentSize;
-	private int binarySize;
-	private String binaryName;
 	private int buildRefSize;
 	private int buildRefDuration;
 
@@ -43,12 +42,14 @@ public class NgDesktopClientConnection implements Closeable
 	private static String BUILD_ENDPOINT = "/build/start";
 	private static String STATUS_ENDPOINT = "/build/status/";
 	private static String DOWNLOAD_ENDPOINT = "/build/download/";
-	private static String BINARY_NAME_ENDPOINT = "/build/name/";
+	private static String BUILD_NAME_ENDPOINT = "/build/name/";
 	private static String DELETE_ENDPOINT = "/build/delete/";
 	private static String CANCEL_ENDPOINT = "/build/cancel/";
 
 	// START sync - this block need to be identical with the similar error codes
 	// from the NgDesktopMonitor in ngdesktop-service project
+	public final static int RUNNING = 0;
+	public final static int NOT_RUNNING = 1;
 	public final static int REQUESTS_FULL = 2;
 	public final static int BUILDS_FULL = 3;
 	public final static int PROCESSING = 4; // installer is currently created
@@ -59,6 +60,9 @@ public class NgDesktopClientConnection implements Closeable
 	public final static int NOT_FOUND = 9;
 	public final static int ALREADY_STARTED = 10;
 	public final static int OK = 11; // no error
+	public final static int WARNING = 12;
+	public final static int ACCESS_DENIED = 13; //authorization failed
+	public final static int DOWNLOAD_ARCHIVE = 14; //Build not supported. Download binary instead.
 	// END sync
 
 	public NgDesktopClientConnection() throws MalformedURLException
@@ -106,12 +110,12 @@ public class NgDesktopClientConnection implements Closeable
 	 * @return tokenId - string id to be used in future queries
 	 * @throws IOException
 	 */
-	public String startBuild(String platform, IDialogSettings settings) throws IOException
+	public JSONObject startBuild(IDialogSettings settings) throws IOException
 	{
 
 		JSONObject jsonObj = new JSONObject();
-		if (platform != null)
-			jsonObj.put("platform", platform);
+		if (settings.get("platform") != null && settings.get("platform").trim().length() > 0)
+			jsonObj.put("platform", settings.get("platform"));
 		if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0)
 			jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
 		if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
@@ -124,7 +128,8 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("width", settings.get("ngdesktop_width"));
 		if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
 			jsonObj.put("height", settings.get("ngdesktop_height"));
-
+		if (settings.get("login_token") != null)
+			jsonObj.put("loginToken", settings.get("login_token"));
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
 
@@ -132,11 +137,12 @@ public class NgDesktopClientConnection implements Closeable
 		postRequest.setEntity(input);
 		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 		jsonObj = processRequest(postRequest);
-		System.out.println(jsonObj.getString("statusMessage"));
+
 		buildRefSize = jsonObj.optInt("buildRefSize", 0);
 		buildRefDuration = jsonObj.optInt("buildRefDuration", 0);
 
-		return jsonObj.getString("tokenId");
+		//return jsonObj.getString("tokenId");
+		return jsonObj;
 	}
 
 	/**
@@ -146,12 +152,12 @@ public class NgDesktopClientConnection implements Closeable
 	 *         errors; ready - build is ready to download
 	 * @throws IOException
 	 */
-	public int getStatus(String tokenId) throws IOException
+	public JSONObject getStatus(String tokenId) throws IOException
 	{
 		final JSONObject jsonObj = processRequest(new HttpGet(service_url + STATUS_ENDPOINT + tokenId));
 		buildCurrentSize = jsonObj.optInt("buildCurrentSize", 0);
 		statusMessage = jsonObj.getString("statusMessage");
-		return jsonObj.getInt("statusCode");
+		return jsonObj;
 	}
 
 	public String getStatusMessage()
@@ -159,30 +165,54 @@ public class NgDesktopClientConnection implements Closeable
 		return statusMessage;
 	}
 
-	public int download(String tokenId, String savePath, NgDesktopServiceMonitor monitor) throws IOException // expect
-	// absolutePath
+	//expect absolute path
+	public int download(String tokenId, String savePath, NgDesktopServiceMonitor monitor) throws IOException
 	{
-		final HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
-		final JSONObject jsonObj = processRequest(new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId));
-		binaryName = jsonObj.getString("binaryName");
-		binarySize = jsonObj.optInt("binarySize", 0); // MB
+		final JSONObject jsonObj = processRequest(new HttpGet(service_url + BUILD_NAME_ENDPOINT + tokenId));
+		final String binaryName = jsonObj.getString("binaryName");
+		final String updateName = jsonObj.optString("updateName", null);
+		final String yamlName = "latest.yml";
+		final String readmeName = "readme.txt";
+		downloadSize = jsonObj.optInt("binarySize", 0); // size in MB; value contain also update size if requested
 
-		int downloadedBytes = 0;
-		int currentSize = 0;
+		monitor.beginTask("Download...", downloadSize);
+		int downloadedMBytes = downloadFile(binaryName, tokenId, savePath, monitor, false);
+		if (updateName != null)
+		{
+			downloadedMBytes += downloadFile(updateName, tokenId, savePath, monitor, true);
+			downloadedMBytes += downloadFile(yamlName, tokenId, savePath, monitor, true);
+			downloadedMBytes += downloadFile(readmeName, tokenId, savePath, monitor, true);
+		}
+		monitor.fillRemainingSteps();
+		monitor.done();
+		ServoyLog.logInfo("Downloaded (Mb): " + downloadedMBytes);
+		return downloadedMBytes;
+	}
+
+	private int downloadFile(String fileName,
+		String tokenId,
+		String savePath,
+		NgDesktopServiceMonitor monitor,
+		boolean isUpdate)
+		throws IOException
+	{
+		String strUrl = service_url + DOWNLOAD_ENDPOINT + tokenId;
+		if (isUpdate) strUrl = service_url + DOWNLOAD_ENDPOINT + tokenId + "/" + fileName;
+		final HttpGet getRequest = new HttpGet(strUrl);
 
 		ServoyLog.logInfo(service_url + DOWNLOAD_ENDPOINT + tokenId);
-		monitor.beginTask("Download " + binaryName, binarySize);
-		int amount = 0;
+		monitor.setTaskName("Download " + fileName + "...");
+
+		int totalBytesRead = 0;
+		int bytesCountForMonitor = 0;
 		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
 			InputStream is = httpResponse.getEntity().getContent();
-			FileOutputStream fos = new FileOutputStream(savePath + File.separator + binaryName))
+			FileOutputStream fos = new FileOutputStream(savePath + File.separator + fileName))
 		{
 
 			final byte[] inputFile = new byte[BUFFER_SIZE];
-
-			int n = is.read(inputFile, 0, BUFFER_SIZE);
-			downloadedBytes = n;
-			while (n != -1)
+			int readBytes = is.read(inputFile, 0, BUFFER_SIZE);
+			while (readBytes != -1)
 			{
 				if (monitor.isCanceled())
 				{
@@ -191,32 +221,29 @@ public class NgDesktopClientConnection implements Closeable
 					new File(savePath).delete();
 					return 0; // download failed, cancel was pressed
 				}
-				if (n > 0)
+				if (readBytes > 0)
 				{
-					monitor.worked(Math.round((float)n / (1024 * 1024)));
-					fos.write(inputFile, 0, n);
-					amount += n;
+					fos.write(inputFile, 0, readBytes);
+					totalBytesRead += readBytes;
+					bytesCountForMonitor += readBytes;
 				}
-				n = is.read(inputFile, 0, BUFFER_SIZE);
-				downloadedBytes += n;
+				readBytes = is.read(inputFile, 0, BUFFER_SIZE);
 
-				final int bytesToMegaBytes = Math.round((float)downloadedBytes / (1024 * 1024));// bytes => MB
-				if (bytesToMegaBytes > 0)
-				{// if BUFFER_SIZE is 8kb => 1MB at every 128 steps
-					currentSize += bytesToMegaBytes;
-					monitor.worked(bytesToMegaBytes);
-					downloadedBytes = 0;
+				final float countMB = (float)bytesCountForMonitor / (1024 * 1024);// bytes => MB;
+				final float fractionalMB = countMB % 1;
+				final int decimalMB = Math.round(countMB - fractionalMB);
+				if (decimalMB > 0)
+				{
+					monitor.worked(decimalMB);
+					bytesCountForMonitor = 0;
 				}
 			}
-			if (binarySize > currentSize) monitor.worked(binarySize - currentSize);
-			monitor.done();
 		}
 		finally
 		{
 			getRequest.reset();
 		}
-		ServoyLog.logInfo("Downloaded bytes: " + amount);
-		return amount;
+		return totalBytesRead / (1024 * 1024); //bytes to Mb
 	}
 
 	public void delete(String tokenId) throws IOException
