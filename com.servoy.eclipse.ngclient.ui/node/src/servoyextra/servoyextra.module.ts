@@ -10,6 +10,7 @@ import { ServoyExtraSpinner } from './spinner/spinner';
 import { ServoyExtraSplitpane } from './splitpane/splitpane';
 import { ServoyExtraMultiFileUpload } from './multifileupload/multifileupload';
 import { ServoyExtraSelect2Tokenizer } from './select2tokenizer/select2tokenizer';
+import { ServoyExtraYoutubeVideoEmbedder } from './youtubevideoembedder/youtubevideoembedder';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -39,6 +40,7 @@ import { LightboxModule } from 'ngx-lightbox';
 		ServoyExtraSplitpane,
         ServoyExtraMultiFileUpload,
 		ServoyExtraSelect2Tokenizer,
+        ServoyExtraYoutubeVideoEmbedder,
 		BGSplitter,
     	BGPane
     ],
@@ -69,7 +71,8 @@ import { LightboxModule } from 'ngx-lightbox';
               ServoyExtraSpinner,
 			  ServoyExtraSplitpane,
 			  ServoyExtraSelect2Tokenizer,
-              ServoyExtraMultiFileUpload
+              ServoyExtraMultiFileUpload,
+              ServoyExtraYoutubeVideoEmbedder
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
