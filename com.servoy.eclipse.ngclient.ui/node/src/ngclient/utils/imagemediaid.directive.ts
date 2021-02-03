@@ -14,7 +14,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     private rollOverImgStyle: Map<string, any>;
     private clearStyle: Map<string, any>;
 
-    public constructor(private _elemRef: ElementRef, private _renderer: Renderer2) {
+    public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2) {
         this.clearStyle = new Map();
         this.clearStyle.set('width', '0px');
         this.clearStyle.set('height', '0px');
@@ -56,7 +56,8 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
 
     private setImageStyle(): void {
         if (this.media) {
-            const componentSize = this.media.componentSize;
+            const componentSize = { width: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientWidth,
+                                                    height: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientHeight };
             const mediaOptions = this.media.mediaOptions;
             if (this.media.rollOverImg) {
                 this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
