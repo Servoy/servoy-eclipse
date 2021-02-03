@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -117,6 +118,18 @@ public class ChangeParentCommand extends Command
 
 		ISupportChilds initialParent = child instanceof ISupportExtendsID ? ((ISupportExtendsID)child).getRealParent() : child.getParent();
 		if (newParent == null) newParent = initialParent;
+		if (!form.equals(newParent.getAncestor(IRepository.FORMS)))
+		{
+			try
+			{
+				newParent = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(newParent, form));
+				changes.add(newParent);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error("Cannot move " + child.getUUID() + " to " + newParent.getUUID() + ". Cause: " + e);
+			}
+		}
 
 		if (childPositionClass != null)
 		{
