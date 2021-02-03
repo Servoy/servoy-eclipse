@@ -19,7 +19,7 @@ import { ServoyBaseComponent } from '../basecomponent';
     changeDetection: ChangeDetectionStrategy.OnPush,
     /* eslint-disable max-len */
     template: `
-      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" svyAutosave> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
            <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part"> <!-- part div -->
                <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
@@ -189,7 +189,9 @@ export class FormComponent implements OnDestroy, OnChanges {
 
 
 
-    @Input() readonly name;
+    @Input() readonly name: string;
+
+    formClasses: string[];
 
     formCache: FormCache;
 
@@ -224,6 +226,9 @@ export class FormComponent implements OnDestroy, OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.name) {
             this.formCache = this.formservice.getFormCache(this);
+            const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+            if (styleClasses)
+                this.formClasses =styleClasses.split(' ');
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
         }
     }
