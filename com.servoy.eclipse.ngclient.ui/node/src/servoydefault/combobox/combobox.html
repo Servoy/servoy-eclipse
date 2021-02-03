@@ -1,5 +1,5 @@
-<div [id]="servoyApi.getMarkupId()" ngbDropdown (openChange)="openChange($event)"  container="body" #element> 
-      <button class="bts-combobox form-control dropdown-toggle svy-dropdown input-sm" ngbDropdownToggle
+<div [id]="servoyApi.getMarkupId()" ngbDropdown (openChange)="openChange($event)"  class="svy-combobox-container" style="width:100%;height:100%;overflow:hidden" container="body" #element> 
+      <button class="svy-combobox input-sm form-control dropdown-toggle svy-dropdown" ngbDropdownToggle
         [sabloTabseq]="tabSeq"
         [svyTooltip]="toolTipText"
         [svyStartEdit]="'dataProviderID'"
