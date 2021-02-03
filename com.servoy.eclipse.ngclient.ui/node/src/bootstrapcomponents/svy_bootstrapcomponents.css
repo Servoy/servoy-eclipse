@@ -126,6 +126,11 @@
     max-width: calc(100% - 15px);
 }
 
+div[ngbDropdownMenu] {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
 .svy-wrapper > * > .bts-radiogroup {
     width: 100%;
     height: 100%;

@@ -5,27 +5,6 @@ body {
 	font-size: 14px;
 }
 
-
-.svy-dropdown-border {
-  border-width: 1px 1px 1px 0px;
-  border-style: solid;
-  border-color: #DBDBDB;
-  padding:1px;
-}
-
-.btn-xs {
-    padding: 1px 5px;
-    font-size: 12px;
-    line-height: 1.5;
-    border-radius: 3px;
-    background-color: transparent;
-    border-color: #ccc;
-}
-
-.input-sm {
-    font-size: 12px;
-}
-
 .svy-btn {
     display: inline-block;
     padding: 6px 12px;
@@ -121,40 +100,6 @@ body {
 {
   background:lightgray;
   opacity: 0.75;
-}
-
-/*align labels for radios and check groups with input element;
- we should use flexbox instead of useless vertical-align*/
-label.svy-check-radio{
-    display:block;
-}
-label.svy-check-radio input[type="checkbox"],
-label.svy-check-radio input[type="radio"]{
-    vertical-align:middle;
-    margin:0px;
-}
-
-label.svy-check-radio span{
-    vertical-align: middle;
-    padding-left: 5px;
-}
-label.svy-check{
-    display:-ms-flexbox;
-    display:flex;
-    -ms-flex-align:center;
-    align-items:center;
-    padding: 1px;
-    margin: 0px;
-}
-label.svy-radio{
-    padding: 1px;
-    margin: 0px;
-}
-label.svy-check span{
-    padding-left: 3px;
-}
-div.svy-label-with-focus:focus{
-    border: thin solid black;   
 }
 
 #mktipmsg {
@@ -374,11 +319,6 @@ div.svy-label-with-focus:focus{
 .bs-callout-success {
 	background-color: #dff0d8;
 	border-color: #d6e9c6;
-}
-
-div[ngbDropdownMenu] {
-  max-height: 300px;
-  overflow-y: scroll;
 }
 
 .owl-dt-inline-container {

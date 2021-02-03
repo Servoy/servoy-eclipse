@@ -1,0 +1,71 @@
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    background-color: transparent;
+    border-color: #ccc;
+}
+
+.input-sm {
+    font-size: 12px;
+}
+
+.svy-dropdown::after {
+    float: right;
+    margin-top: 8px;
+}
+
+.svy-dropdown {
+    height: 100%;
+    text-align: left;
+    padding: 1px 5px;
+}
+
+.svy-dropdown-text {
+    text-overflow: clip;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 15px);
+}
+
+/*align labels for radios and check groups with input element;
+ we should use flexbox instead of useless vertical-align*/
+label.svy-check-radio{
+    display:block;
+}
+label.svy-check-radio input[type="checkbox"],
+label.svy-check-radio input[type="radio"]{
+    vertical-align:middle;
+    margin:0px;
+}
+
+label.svy-check-radio span{
+    vertical-align: middle;
+    padding-left: 5px;
+}
+label.svy-check{
+    display:-ms-flexbox;
+    display:flex;
+    -ms-flex-align:center;
+    align-items:center;
+    padding: 1px;
+    margin: 0px;
+}
+label.svy-radio{
+    padding: 1px;
+    margin: 0px;
+}
+label.svy-check span{
+    padding-left: 3px;
+}
+div.svy-label-with-focus:focus{
+    border: thin solid black;   
+}
+
+div[ngbDropdownMenu] {
+  max-height: 300px;
+  overflow-y: scroll;
+}
