@@ -1,1 +1,5 @@
-<div>This is the lightbox</div>
+<div class="svy-extra-lightboxgallery"
+	*ngFor="let image of images; let i=index" 
+	#element>
+	<img [src]="image.thumbUrl" (click)="open(i)" />
+</div>
