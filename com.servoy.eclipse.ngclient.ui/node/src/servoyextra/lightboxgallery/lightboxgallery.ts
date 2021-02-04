@@ -1,7 +1,7 @@
-import { Component, Output, ChangeDetectorRef, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
+import { Component, ChangeDetectorRef, ViewChild, ElementRef, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
+import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IFoundset } from '../../sablo/spectypes.service';
-import { LightboxModule, Lightbox } from 'ngx-lightbox';
+import { Lightbox, LightboxConfig, LightboxEvent } from 'ngx-lightbox';
 
 @Component( {
     selector: 'servoyextra-lightboxgallery',
@@ -33,19 +33,19 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
 
     public images: Array<any> = [];
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private _lightbox: Lightbox ) {
+
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private _lightbox: Lightbox, private _lightboxConfig: LightboxConfig ) {
         super( renderer, cdRef );
     }
 
-
     svyOnInit() {
         super.svyOnInit();
-        for ( let i = 0; i <= this.imagesFoundset.viewPort.rows.length; i++ ) {
-            const row = this.imagesFoundset.viewPort.rows[i];
+        for ( const row of this.imagesFoundset.viewPort.rows ) {
             const image = {
                 src: row.image && row.image.url ? row.image.url : null,
                 caption: row.caption ? row.caption : null,
-                thumb: row.thumbnail && row.thumbnail.url ? row.thumbnail.url : null
+                thumb: row.thumbnail && row.thumbnail.url ? row.thumbnail.url : null,
+                imageId: row.imageId
             };
 
             //check if using url strings instead of media/blob
@@ -56,6 +56,18 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
             this.images.push( image );
         }
 
+        this._lightboxConfig.albumLabel = this.albumLabel;
+        if ( this.fadeDuration ) {
+            this._lightboxConfig.fadeDuration = this.fadeDuration / 1000;
+        }
+        this._lightboxConfig.fitImageInViewPort = this.fitImagesInViewport;
+        this._lightboxConfig.positionFromTop = this.positionFromTop;
+        if ( this.resizeDuration ) {
+            this._lightboxConfig.resizeDuration = this.resizeDuration / 1000;
+        }
+        this._lightboxConfig.wrapAround = this.wrapAround;
+        this._lightboxConfig.showImageNumberLabel = this.showImageNumberLabel;
+
     }
 
     svyOnChanges( changes: SimpleChanges ) {
@@ -63,12 +75,7 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
             for ( const property of Object.keys( changes ) ) {
                 const change = changes[property];
                 switch ( property ) {
-                    case 'styleClass':
-                        if ( change.previousValue )
-                            this.renderer.removeClass( this.getNativeElement(), change.previousValue );
-                        if ( change.currentValue )
-                            this.renderer.addClass( this.getNativeElement(), change.currentValue );
-                        break;
+
                 }
             }
         }
@@ -83,6 +90,14 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
     close(): void {
         // close lightbox programmatically
         this._lightbox.close();
+    }
+
+    showLightbox( index: number ): void {
+        this.open( 0 );
+    }
+
+    refresh( index: number ): void {
+        this.svyOnInit();
     }
 }
 
