@@ -217,7 +217,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
 
         this.filesToBeAdded.push(currentFile.name);
 
-        this.onBeforeFileAdded(this.createUppyFile(currentFile), currentFiles).then(function(result: boolean) {
+        this.onBeforeFileAdded(this.createUppyFile(currentFile), currentFiles).then((result: boolean) => {
             if (result === true) {
                 this.uppyRef.uppyInstance.addFile(currentFile);
             }
