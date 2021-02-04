@@ -71,6 +71,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -623,6 +624,26 @@ public class DesignerUtil
 		{
 			ServoyLog.logError("Wrong template, parsing problem: " + template, e);
 			return false;
+		}
+		return false;
+	}
+
+	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj)
+	{
+		if (parent instanceof LayoutContainer)
+		{
+			Set<String> allowed = getAllowedChildren().get(
+				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
+			if (webObj instanceof LayoutContainer)
+				return allowed.contains(((LayoutContainer)webObj).getPackageName() + "." + ((LayoutContainer)webObj).getSpecName());
+			if (webObj instanceof WebComponent) return allowed.contains("component");
+			return true;
+		}
+		if (parent instanceof Form)
+		{
+			Set<String> topContainers = findTopContainers(true);
+			if (webObj instanceof LayoutContainer)
+				return topContainers.contains(((LayoutContainer)webObj).getPackageName() + "." + ((LayoutContainer)webObj).getSpecName());
 		}
 		return false;
 	}
