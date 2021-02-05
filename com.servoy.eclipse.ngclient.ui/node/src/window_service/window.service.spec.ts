@@ -10,6 +10,7 @@ import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
 import { ViewportService } from '../ngclient/services/viewport.service';
 import {ServiceChangeHandler} from '../sablo/util/servicechangehandler';
+import { ClientFunctionService } from '../ngclient/services/clientfunction.service';
 
 describe('WindowService', () => {
   let service: WindowService;
@@ -17,7 +18,8 @@ describe('WindowService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
         imports: [SabloModule, ServoyPublicModule],
-        providers:[WindowService, ShortcutService, PopupMenuService, SvyUtilsService,ViewportService, FormService, ServoyService, ServiceChangeHandler, { provide: LocaleService, useValue: {getLocale: () => 'en' }}]
+        providers:[WindowService, ShortcutService, PopupMenuService, SvyUtilsService,ViewportService, ClientFunctionService,
+                    FormService, ServoyService, ServiceChangeHandler, { provide: LocaleService, useValue: {getLocale: () => 'en' }}]
     });
     service = TestBed.inject(WindowService);
   });

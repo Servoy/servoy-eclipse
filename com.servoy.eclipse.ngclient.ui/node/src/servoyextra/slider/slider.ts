@@ -167,25 +167,25 @@ export class ServoyExtraSlider extends ServoyBaseComponent<HTMLDivElement> {
 						this.setNewOptions('logScale', change.currentValue);
 						break;
 					case 'formattingFunction':
-						this.formattingFunctionParsed = eval('(' + change.currentValue + ')');
+						this.formattingFunctionParsed = change.currentValue;
 						break;
 					case 'selectionBarColorFunction':
-						this.setNewOptions('getSelectionBarColor', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('getSelectionBarColor', change.currentValue );
 						break;
 					case 'getLegendFunction':
-						this.setNewOptions('getLegend', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('getLegend', change.currentValue );
 						break;
 					case 'tickColorFunction':
-						this.setNewOptions('getTickColor', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('getTickColor', change.currentValue );
 						break;
 					case 'ticksTooltipFunction':
-						this.setNewOptions('ticksTooltip', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('ticksTooltip', change.currentValue );
 						break;
 					case 'ticksValuesTooltipFunction':
-						this.setNewOptions('ticksValuesTooltip', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('ticksValuesTooltip', change.currentValue );
 						break;
 					case 'pointerColorFunction':
-						this.setNewOptions('getPointerColor', eval('(' + change.currentValue + ')'));
+						this.setNewOptions('getPointerColor', change.currentValue );
 						break;
 					case 'stepsValueList':
 						if (change.currentValue) {

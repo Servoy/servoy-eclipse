@@ -16,7 +16,7 @@ import { FoundsetConverter } from './converters/foundset_converter';
 import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter';
 import { ViewportService } from './services/viewport.service';
 
-import { IterableDiffers, IterableDiffer } from '@angular/core';
+import { IterableDiffers } from '@angular/core';
 
 import { SpecTypesService } from '../sablo/spectypes.service';
 
@@ -24,6 +24,8 @@ import { FormcomponentConverter } from './converters/formcomponent_converter';
 import { ComponentConverter } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
+import { ClientFunctionConverter } from './converters/clientfunction_converter';
+import { ClientFunctionService } from './services/clientfunction.service';
 
 class UIProperties {
     private uiProperties;
@@ -81,6 +83,7 @@ export class ServoyService {
         private windowRefService: WindowRefService,
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
+        private clientFunctionService: ClientFunctionService,
         converterService: ConverterService,
         specTypesService: SpecTypesService,
         sabloDeferHelper: SabloDeferHelper,
@@ -102,6 +105,7 @@ export class ServoyService {
             new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
         converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
         converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, logFactory));
+        converterService.registerCustomPropertyHandler('clientfunction', new ClientFunctionConverter(this.windowRefService));
     }
 
     public connect() {
@@ -167,7 +171,7 @@ export class ServoyService {
     }
 
     public loaded(): Promise<any> {
-        return this.localeService.isLoaded();
+        return Promise.all([this.localeService.isLoaded(), this.clientFunctionService.waitForLoading()]);
     }
 
     public setFindMode(formName: string, findmode: boolean) {

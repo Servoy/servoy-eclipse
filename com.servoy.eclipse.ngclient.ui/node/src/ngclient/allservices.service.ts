@@ -17,6 +17,7 @@ import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.servi
 import { DatagridService } from '../nggrids/datagrid/datagrid.service';
 import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
+import { ClientFunctionService } from './services/clientfunction.service';
 // generated services end
 
 
@@ -33,6 +34,7 @@ export class AllServiceService implements ServiceProvider {
         private $windowService: WindowService,
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
+        private clientFunctionService: ClientFunctionService,
         // generated services start
         private ngclientutils: NGUtilsService,
         private keyListener: KeyListener,
@@ -55,7 +57,7 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SessionService,
+    providers: [AllServiceService, ApplicationService, WindowService, SessionService, ClientFunctionService,
                 // generated services start (only for dynamic services (servoy plugins))
                 NGUtilsService,
                 KeyListener,

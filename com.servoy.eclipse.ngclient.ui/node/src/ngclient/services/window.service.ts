@@ -14,6 +14,7 @@ import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
+import { ClientFunctionService } from './clientfunction.service';
 
 @Injectable()
 export class WindowService {
@@ -42,6 +43,7 @@ export class WindowService {
         private platformLocation: PlatformLocation,
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
+        private clientFunctionService: ClientFunctionService,
         private rendererFactory: RendererFactory2,
         @Inject(DOCUMENT) private document: any) {
 
@@ -54,9 +56,9 @@ export class WindowService {
         this.renderer2 = rendererFactory.createRenderer(null, null);
     }
 
-    public updateController(formName, formStructure) {
+    public updateController(formName: string, formStructure: string) {
         const formState = JSON.parse(formStructure)[formName];
-        this.formService.createFormCache(formName, formState);
+        this.clientFunctionService.waitForLoading().finally( () =>  this.formService.createFormCache(formName, formState));
     }
 
     public create(name: string, type: number) {

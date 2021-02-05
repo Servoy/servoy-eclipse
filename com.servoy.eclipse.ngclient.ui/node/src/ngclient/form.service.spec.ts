@@ -10,6 +10,7 @@ import {WindowRefService} from '../sablo/util/windowref.service';
 
 import { FormService } from './form.service';
 import {ServoyService} from './servoy.service';
+import { ClientFunctionService } from './services/clientfunction.service';
 
 describe('FormService', () => {
   let websocketService;
@@ -25,6 +26,7 @@ describe('FormService', () => {
       providers: [FormService,
                           LoggerFactory,
                           WindowRefService,
+                          ClientFunctionService,
                           {provide: WebsocketService, useValue:websocketService},
                           {provide: SabloService, useValue:sabloService},
                           {provide: ConverterService, useValue:converterService},

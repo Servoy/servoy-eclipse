@@ -12,6 +12,7 @@ import { ApplicationService } from '../../ngclient/services/application.service'
 import { By } from '@angular/platform-browser';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { FormService } from '../../ngclient/form.service';
+import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 
 describe('ServoyDefaultImageMedia', () => {
   let component: ServoyDefaultImageMedia;
@@ -28,7 +29,7 @@ describe('ServoyDefaultImageMedia', () => {
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultImageMedia, UploadDirective],
         imports: [SabloModule, ServoyPublicModule],
-        providers: [FormattingService, TooltipService, { provide: ApplicationService, useValue: applicationService},
+        providers: [FormattingService, TooltipService, ClientFunctionService, { provide: ApplicationService, useValue: applicationService},
           ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi},
           ViewportService, FormService , { provide: LocaleService, useValue: {getLocale: () => 'en' }}],
       })
