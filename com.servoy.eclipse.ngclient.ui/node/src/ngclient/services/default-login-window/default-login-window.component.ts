@@ -21,7 +21,7 @@ export class DefaultLoginWindowComponent {
   ) { }
 
   doLogin() {
-    const promise = this.sabloService.callService('applicationServerService', 'login',
+    const promise = this.sabloService.callService<{username: string;password: string}>('applicationServerService', 'login',
       {username : this.username, password : this.password, remember: this.remember }, false);
     promise.then((ok) =>{
 			if(ok) {

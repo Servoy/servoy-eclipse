@@ -8,7 +8,7 @@ import { LoggerService, LoggerFactory } from './logger.service';
 @Injectable()
 export class SabloService {
 
-    private locale: { language: string, country: string, full: string } = null;
+    private locale: { language: string; country: string; full: string } = null;
     private wsSession: WebsocketSession;
     private currentServiceCallCallbacks = [];
     private currentServiceCallDone;
@@ -17,7 +17,8 @@ export class SabloService {
     private log: LoggerService;
 
 
-    constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService: WindowRefService, private logFactory: LoggerFactory) {
+    constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, 
+                        private windowRefService: WindowRefService, private logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SabloService');
     }
 
@@ -28,7 +29,7 @@ export class SabloService {
             websocketUri
         };
 
-        if (this.websocketService.getURLParameter(WebsocketConstants.CLEAR_SESSION_PARAM) == 'true') {
+        if (this.websocketService.getURLParameter(WebsocketConstants.CLEAR_SESSION_PARAM) === 'true') {
             this.clearSabloInfo();
         }
         this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
@@ -77,12 +78,14 @@ export class SabloService {
     public getLanguageAndCountryFromBrowser() {
         let langAndCountry;
         const browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
-        // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage (IE, and IE seems to return the right one from there)
+        // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage
+        // (IE, and IE seems to return the right one from there)
         if (browserLanguages && browserLanguages.length > 0) {
             langAndCountry = browserLanguages[0];
             if (browserLanguages.length > 1 && langAndCountry.indexOf('-') === -1
-                && browserLanguages[1].indexOf(langAndCountry + '-') == 0) {
-                // if the first language in the list doesn't specify country, see if the following one is the same language but with a country specified (for example browser could give a list of "en", "en-GB", ...)
+                && browserLanguages[1].indexOf(langAndCountry + '-') === 0) {
+                // if the first language in the list doesn't specify country, see if the following one is the same language but with a country specified
+                 // (for example browser could give a list of "en", "en-GB", ...)
                 langAndCountry = browserLanguages[1];
             }
         } else {
@@ -92,7 +95,7 @@ export class SabloService {
         if (!langAndCountry) langAndCountry = 'en';
         return langAndCountry;
     }
-    public getLocale(): { language: string, country: string, full: string } {
+    public getLocale(): { language: string; country: string; full: string } {
         if (!this.locale) {
             const langAndCountry = this.getLanguageAndCountryFromBrowser();
             const array = langAndCountry.split('-');
@@ -105,16 +108,16 @@ export class SabloService {
         this.locale = loc;
     }
 
-    public callService(serviceName: string, methodName: string, argsObject, async?: boolean) {
+    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
         const promise = this.wsSession.callService(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
 
-    public addToCurrentServiceCall(func) {
-        if (this.currentServiceCallWaiting == 0) {
+    public addToCurrentServiceCall(func: () => void) {
+        if (this.currentServiceCallWaiting === 0) {
             // No service call currently running, call the function now
-            setTimeout(function() {
-                func.apply();
+            setTimeout(() => {
+                func();
             });
         } else {
             this.currentServiceCallCallbacks.push(func);
@@ -122,15 +125,13 @@ export class SabloService {
     }
 
     private callServiceCallbacksWhenDone() {
-        if (this.currentServiceCallDone || --this.currentServiceCallWaiting == 0) {
+        if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
             this.currentServiceCallWaiting = 0;
-            this.currentServiceCallTimeouts.map(function(id) {
-                return clearTimeout(id);
-            });
+            this.currentServiceCallTimeouts.map((id) => clearTimeout(id));
             const tmp = this.currentServiceCallCallbacks;
             this.currentServiceCallCallbacks = [];
-            tmp.map(function(func) {
-                func.apply();
+            tmp.map((func: () => void)  => {
+                func();
             });
         }
     }

@@ -31,16 +31,16 @@ describe('ValuelistConverter', () => {
     });
 
     const sabloService: SabloService = TestBed.get( SabloService );
-    sabloService.callService = (serviceName: string, methodName: string, argsObject, async?: boolean) => {
+    sabloService.callService = <T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> => {
         if (serviceName === 'formService' && methodName === 'getValuelistDisplayValue') {
-            const promise = new Promise((resolve, reject) => {
+            const promise = new Promise<any>((resolve, reject) => {
                 if (argsObject.realValue === 4) {
                     resolve('d');
                 } else {
                     reject('No display value found for ' + argsObject.realValue);
                 }
             });
-            return promise;
+            return promise
         }
     };
     sabloService.connect({}, {}, '');

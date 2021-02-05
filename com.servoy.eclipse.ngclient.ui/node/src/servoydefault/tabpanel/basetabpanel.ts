@@ -39,14 +39,16 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 	@ContentChild(TemplateRef, { static: true })
 	templateRef: TemplateRef<any>;
 
+	public selectedTabID: string;
+
+	protected selectedTab: Tab;
+
 	private waitingForServerVisibility = {};
 	private lastSelectedTab: Tab;
 
-	protected selectedTab: Tab;
-	public selectedTabID: string;
 	private log: LoggerService;
 
-	constructor(private windowRefService: WindowRefService, private logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
+	constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
 		super(renderer, cdRef);
 		this.log = logFactory.getLogger('BaseTabpanel');
 	}
@@ -79,7 +81,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 			}
 		}
 		if (tab) {
-			if (this.selectedTab && (tab.containsFormId == this.selectedTab.containsFormId) && (tab.relationName == this.selectedTab.relationName)) {
+			if (this.selectedTab && (tab.containsFormId === this.selectedTab.containsFormId) && (tab.relationName === this.selectedTab.relationName)) {
 				return tab.containsFormId;
 			}
 		} else if (this.selectedTab) {
@@ -90,8 +92,10 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
 	select(tab: Tab) {
 		if (this.isValidTab(tab)) {
-			this.log.debug(this.log.buildMessage(() => ('svy * Will select tab \'' + (tab ? tab.containsFormId : undefined) + '\'. Previously selected: \'' + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + '\'. Same: ' + (tab == this.selectedTab))));
-			if ((tab != undefined && this.selectedTab != undefined && tab.containsFormId == this.selectedTab.containsFormId && tab.relationName == this.selectedTab.relationName) || (tab == this.selectedTab)) return;
+			this.log.debug(this.log.buildMessage(() => ('svy * Will select tab \'' + (tab ? tab.containsFormId : undefined) + '\'. Previously selected: \'' +
+                (this.selectedTab ? this.selectedTab.containsFormId : undefined) + '\'. Same: ' + (tab === this.selectedTab))));
+			if ((tab !== undefined && this.selectedTab !== undefined && tab.containsFormId === this.selectedTab.containsFormId
+                 && tab.relationName === this.selectedTab.relationName) || (tab === this.selectedTab)) return;
 			const selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
 			if (this.selectedTab) {
 				if (this.selectedTab.containsFormId && !this.waitingForServerVisibility[this.selectedTab.containsFormId]) {
@@ -104,12 +108,12 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 					promise.then((ok) => {
 						this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
 						delete this.waitingForServerVisibility[formInWait];
-						if (this.lastSelectedTab != tab) {
+						if (this.lastSelectedTab !== tab) {
 							// visibility changed again, just ignore this
 							this.log.debug(this.log.buildMessage(() => ('svy * Tab \'' + tab.containsFormId + '\': no longer active, ignore making it visible')));
 							// it could be that the server was sending the correct state in the mean time already at the same time
 							// we try to hide it. just call show again to be sure.
-							if (currentSelectedTab == this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName);
+							if (currentSelectedTab === this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName);
 							return;
 						}
 						if (ok) {
@@ -127,28 +131,6 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 		return this.selectedTab;
 	}
 
-	private isValidTab(tab: Tab) {
-		if (this.tabs) {
-			for (let i = 0; i < this.tabs.length; i++) {
-				if (this.tabs[i] === tab) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private getTabIndex(tab: Tab) {
-		if (tab) {
-			for (let i = 0; i < this.tabs.length; i++) {
-				if (this.tabs[i] == tab) {
-					return i + 1;
-				}
-			}
-		}
-		return -1;
-	}
-
 	protected setFormVisible(tab: Tab, event) {
 		if (tab.containsFormId)
 			this.servoyApi.formWillShow(tab.containsFormId, tab.relationName).finally(() => this.cdRef.markForCheck());
@@ -158,7 +140,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 		this.selectedTabID = tab._id;
 		this.tabIndex = this.getTabIndex(this.selectedTab);
 		this.tabIndexChange.emit(this.tabIndex);
-		if (oldSelected && oldSelected != tab && this.onChangeMethodID) {
+		if (oldSelected && oldSelected !== tab && this.onChangeMethodID) {
 			setTimeout(() => {
 				this.onChangeMethodID(this.getTabIndex(oldSelected), event != null ? event : null /* TODO $.Event("change") */);
 			}, 0, false);
@@ -170,7 +152,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 			if (isNaN(this.tabIndex)) {
 				if (!this.tabs) return -1;
 				for (let i = 0; i < this.tabs.length; i++) {
-					if (this.tabs[i].name == this.tabIndex) {
+					if (this.tabs[i].name === this.tabIndex) {
 						this.tabIndex = i + 1;
 						this.tabIndexChange.emit(i);
 						return i;
@@ -183,6 +165,28 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 		if (this.tabs && this.tabs.length > 0) return 0;
 		return -1;
 	}
+
+    private isValidTab(tab: Tab) {
+        if (this.tabs) {
+            for (let i = 0; i < this.tabs.length; i++) {
+                if (this.tabs[i] === tab) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private getTabIndex(tab: Tab) {
+        if (tab) {
+            for (let i = 0; i < this.tabs.length; i++) {
+                if (this.tabs[i] === tab) {
+                    return i + 1;
+                }
+            }
+        }
+        return -1;
+    }
 
 	private initTabID() {
 		for (let i = 0; i < this.tabs.length; i++) {
