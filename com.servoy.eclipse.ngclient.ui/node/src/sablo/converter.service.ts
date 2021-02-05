@@ -187,8 +187,8 @@ export class ConverterService {
 }
 
 export interface IConverter {
-  fromServerToClient(serverSentData: Object, currentClientData: Object, propertyContext: PropertyContext): Object;
-  fromClientToServer(newClientData: Object, oldClientData: Object): Object;
+  fromServerToClient(serverSentData: any, currentClientData: any, propertyContext: PropertyContext): any;
+  fromClientToServer(newClientData: any, oldClientData: any): any;
 }
 
 
