@@ -1624,6 +1624,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 		{
+			ServerEditorInput currentServerEditorInput = (ServerEditorInput)getEditorInput();
+			boolean isUpdateForDifferenServer = oldServerConfig != null && currentServerEditorInput != null &&
+				oldServerConfig.getServerName() != currentServerEditorInput.getServerConfig().getServerName();
+
+			// if it is an update for a diff server or it is a delete (newServerConfig == null), skip ui update
+			if (isUpdateForDifferenServer || newServerConfig == null) return;
+
 			setInput(new ServerEditorInput(newServerConfig));
 			initDataBindings();
 			relayout();
