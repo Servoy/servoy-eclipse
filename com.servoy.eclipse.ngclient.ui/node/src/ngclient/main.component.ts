@@ -53,7 +53,8 @@ export class MainComponent implements OnInit {
   }
 
   hasDefaultNavigator(): boolean {
-    return this.mainForm && this.formservice.getFormCacheByName(this.mainForm.toString()).getComponent('svy_default_navigator') != null;
+    const cache = this.mainForm? this.formservice.getFormCacheByName(this.mainForm.toString()): null;
+    return cache && cache.getComponent('svy_default_navigator') != null;
   }
 
   public get sessionProblem() {
