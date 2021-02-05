@@ -81,7 +81,7 @@ describe('ComboboxComponent', () => {
     component.ngOnChanges({
       dataProviderID: new SimpleChange(null, 3, true)
     });
-    combobox = fixture.debugElement.query(By.css('.bts-combobox'));
+    combobox = fixture.debugElement.query(By.css('.svy-combobox'));
     fixture.detectChanges();
   });
 
