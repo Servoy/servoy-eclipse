@@ -44,8 +44,8 @@ export class WindowService {
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
         private clientFunctionService: ClientFunctionService,
-        private rendererFactory: RendererFactory2,
-        @Inject(DOCUMENT) private document: any) {
+        rendererFactory: RendererFactory2,
+        @Inject(DOCUMENT) private document: Document) {
 
         this.platformLocation.onPopState(() => {
             const form = this.platformLocation.hash.replace('#', '');
@@ -91,7 +91,7 @@ export class WindowService {
                 return;
             }
 
-            if ([...this.document.getElementsByClassName('svy-window')].length < 1) {
+            if (this.document.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
@@ -197,7 +197,7 @@ export class WindowService {
                 });
                 event.target.dispatchEvent(customEvent);
             });
-            [...this.document.getElementsByClassName('window-header')][0].focus();
+            (this.document.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
             // init the size of the dialog
             const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
@@ -229,7 +229,7 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if ([...this.document.getElementsByClassName('svy-window')].length < 1) {
+            if (this.document.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
@@ -286,15 +286,6 @@ export class WindowService {
         this.saveInSessionStorage(size, 'size');
         if ( this.instances[name] ) {
             this.instances[name].setSize( size );
-        }
-    }
-
-    private saveInSessionStorage(property: any, propertyName: string) {
-        const currentWindow = 'window' + this.windowCounter;
-        const storedWindow = this.sessionStorageService.get(currentWindow);
-        if (property && storedWindow && !storedWindow[propertyName]) {
-            storedWindow[propertyName] = property;
-            this.sessionStorageService.set(currentWindow, storedWindow);
         }
     }
 
@@ -383,6 +374,7 @@ export class WindowService {
         }
         this.servoyService.loaded().then(() => {
             // if first show of this form in browser window then request initial data (dataproviders and such)
+            // isn't this a nop in NG2? formWillShow with false doesn't do anything.
             this.formService.formWillShow(form.name, false); // false because form was already made visible server-side
             if (navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) {
                 // if first show of this form in browser window then request initial data (dataproviders and such)
@@ -414,6 +406,16 @@ export class WindowService {
 
     public destroyController(formName: string) {
         this.formService.destroyFormCache(formName);
+    }
+
+
+    private saveInSessionStorage(property: any, propertyName: string) {
+        const currentWindow = 'window' + this.windowCounter;
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (property && storedWindow && !storedWindow[propertyName]) {
+            storedWindow[propertyName] = property;
+            this.sessionStorageService.set(currentWindow, storedWindow);
+        }
     }
 
     private restoreWindows() {
