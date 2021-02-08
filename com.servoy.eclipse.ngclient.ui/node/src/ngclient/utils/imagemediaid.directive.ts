@@ -25,7 +25,6 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         if (changes['hostComponent']) {
             this.hostComponent.addViewStateListener(this);
         }
-        this.setImageStyle();
     }
 
     ngOnDestroy(): void {
@@ -37,13 +36,13 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     afterViewInit() {
         const nativeElement = this.hostComponent.getNativeElement();
         const renderer = this.hostComponent.getRenderer();
-        renderer.listen( nativeElement, 'mouseenter', ( e ) => {
+        renderer.listen(nativeElement, 'mouseenter', (e) => {
             if (this.rollOverImgStyle) {
                 this.setCSSStyle(this.rollOverImgStyle);
             }
-        } );
+        });
 
-        renderer.listen( nativeElement, 'mouseleave', ( e ) => {
+        renderer.listen(nativeElement, 'mouseleave', (e) => {
             if (this.rollOverImgStyle) {
                 if (this.imgStyle) {
                     this.setCSSStyle(this.imgStyle);
@@ -51,38 +50,45 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                     this.setCSSStyle(this.clearStyle);
                 }
             }
-        } );
+        });
+        this.setImageStyle();
     }
 
     private setImageStyle(): void {
-        if (this.media) {
-            const componentSize = { width: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientWidth,
-                                                    height: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientHeight };
-            const mediaOptions = this.media.mediaOptions;
-            if (this.media.rollOverImg) {
-                this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
-            } else {
-                this.rollOverImgStyle = null;
-            }
-            if (this.media.img) {
-                this.imgStyle = this.parseImageOptions(this.media.img, mediaOptions, componentSize);
-                this.setCSSStyle(this.imgStyle);
-            } else {
-                this.imgStyle = null;
-                this.setCSSStyle(this.clearStyle);
+        if (this.media && (this.media.img || this.media.rollOverImg) || this.rollOverImgStyle || this.imgStyle) {
+            const componentSize = {
+                width: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientWidth,
+                height: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientHeight
+            };
+            if (componentSize.height === 0 || componentSize.width === 0)
+                setTimeout(() => this.setImageStyle(), 100);
+            else {
+                const mediaOptions = this.media.mediaOptions;
+                if (this.media.rollOverImg) {
+                    this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
+                } else {
+                    this.rollOverImgStyle = null;
+                }
+                if (this.media.img) {
+                    this.imgStyle = this.parseImageOptions(this.media.img, mediaOptions, componentSize);
+                    this.setCSSStyle(this.imgStyle);
+                } else {
+                    this.imgStyle = null;
+                    this.setCSSStyle(this.clearStyle);
+                }
             }
         }
     }
 
-    private parseImageOptions(image, mediaOptions, componentSize): Map<string, any> {
+    private parseImageOptions(image, mediaOptions: number, componentSize): Map<string, any> {
         const bgstyle = new Map();
         bgstyle.set('background-image', 'url(\'' + image + '\')');
         bgstyle.set('background-repeat', 'no-repeat');
         bgstyle.set('background-position', 'left');
         bgstyle.set('display', 'inline-block');
         bgstyle.set('vertical-align', 'middle');
-        if (mediaOptions == undefined) mediaOptions = 14; // reduce-enlarge & keep aspect ration
-        const mediaKeepAspectRatio = mediaOptions == 0 || ((mediaOptions & 8) == 8);
+        if (mediaOptions === undefined) mediaOptions = 14; // reduce-enlarge & keep aspect ration
+        const mediaKeepAspectRatio = mediaOptions === 0 || ((mediaOptions & 8) === 8);
 
         // default  img size values
         let imgWidth = 16;
@@ -91,9 +97,9 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         if (image.indexOf('imageWidth=') > 0 && image.indexOf('imageHeight=') > 0) {
             const vars = {};
             image.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-                    function(m, key, value) {
-                vars[key] = value;
-            });
+                (m, key, value) => {
+                    vars[key] = value;
+                });
             imgWidth = vars['imageWidth'];
             imgHeight = vars['imageHeight'];
         }
@@ -102,7 +108,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         const heightChange = imgHeight / componentSize.height;
 
         if (widthChange > 1.01 || heightChange > 1.01 || widthChange < 0.99 || heightChange < 0.99) {
-            if ((mediaOptions & 6) == 6) {
+            if ((mediaOptions & 6) === 6) {
                 if (mediaKeepAspectRatio) {
                     if (widthChange > heightChange) {
                         imgWidth = imgWidth / widthChange;
