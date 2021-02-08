@@ -52,7 +52,7 @@ import { FormService } from '../../form.service';
     }
 
     getBackgroundColor(): string {
-      return this.window.transparent ? 'transparent' : 'inherit';
+      return this.window.transparent ? 'transparent' : null;
     }
 
     getCSSClassName() {
