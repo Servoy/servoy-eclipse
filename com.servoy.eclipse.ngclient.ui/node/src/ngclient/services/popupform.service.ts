@@ -18,22 +18,23 @@ export class PopupFormService {
         private formService: FormService,
         private servoyService: ServoyService,
         private utils: SvyUtilsService,
-        @Inject(DOCUMENT) private document) {
+        @Inject(DOCUMENT) private document: Document) {
     }
 
     public showForm(popup: PopupForm) {
-        const customEvent = new CustomEvent('disableTabseq', {
-            bubbles: true
-        });
-        this.document.getElementById('mainForm').dispatchEvent(customEvent);
+        const mainForm = this.document.getElementById('mainForm');
+        if (mainForm) {
+            // main form can be null at startup
+            const customEvent = new CustomEvent('disableTabseq', {
+                bubbles: true
+            });
+            mainForm.dispatchEvent(customEvent);
+        }
 
-        Promise.resolve(this.formService.formWillShow(popup.form, true)).then(() => {
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ServoyFormPopupComponent);
-            this.formPopupComponent = componentFactory.create(this._injector);
-            this.formPopupComponent.instance.setPopupForm(popup);
-            this._applicationRef.attachView(this.formPopupComponent.hostView);
-            this.document.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
-            this.document.body.addEventListener('mouseup', this.formPopupBodyListener);
+        Promise.resolve(this.formService.formWillShow(popup.form, true)).then(() =>
+            this.servoyService.loaded()
+        ).then(() => {
+            this.showPopup(popup);
         });
     }
 
@@ -41,13 +42,13 @@ export class PopupFormService {
         document.body.removeEventListener('mouseup', this.formPopupBodyListener);
         if (this.formPopupComponent) {
             this.formService.hideForm(this.formPopupComponent.instance.popup.form);
-        }
-        if (this.formPopupComponent.instance.popup.onClose) {
-            let jsEvent = this.utils.createJSEvent({ target: this.document.getElementById("formpopup") } as KeyboardEvent, "popupClose");
-            if (jsEvent) {
-                jsEvent.formName = this.formPopupComponent.instance.popup.onClose.formname;
+            if (this.formPopupComponent.instance.popup.onClose) {
+                const jsEvent = this.utils.createJSEvent({ target: this.document.getElementById('formpopup') }, 'popupClose');
+                if (jsEvent) {
+                    jsEvent.formName = this.formPopupComponent.instance.popup.onClose.formname;
+                }
+                this.servoyService.executeInlineScript(this.formPopupComponent.instance.popup.onClose.formname, this.formPopupComponent.instance.popup.onClose.script, [jsEvent]);
             }
-            this.servoyService.executeInlineScript(this.formPopupComponent.instance.popup.onClose.formname, this.formPopupComponent.instance.popup.onClose.script, [jsEvent]);
         }
 
         const customEvent = new CustomEvent('enableTabseq', {
@@ -67,7 +68,7 @@ export class PopupFormService {
          *       form popup but a null scope.model.popupform on server which is wrong... that is the purpose of "disableClearPopupFormCallToServer" flag
          */
         if (!disableClearPopupFormCallToServer) {
-            this.formService.callServiceServerSideApi("window", "clearPopupForm", []);
+            this.formService.callServiceServerSideApi('window', 'clearPopupForm', []);
         }
         if (this.formPopupComponent) {
             this.formPopupComponent.destroy();
@@ -75,27 +76,43 @@ export class PopupFormService {
         }
     }
 
-     formPopupBodyListener = (event) => {
+    private showPopup(popup: PopupForm, counter?: number) {
+        if (popup.component && !this.document.getElementById(popup.component) && (!counter || counter < 10)) {
+            setTimeout(() => {
+                const c = counter? counter++:1;
+                this.showPopup(popup, counter);
+            }, 50);
+        } else {
+            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ServoyFormPopupComponent);
+            this.formPopupComponent = componentFactory.create(this._injector);
+            this.formPopupComponent.instance.setPopupForm(popup);
+            this._applicationRef.attachView(this.formPopupComponent.hostView);
+            this.document.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
+            this.document.body.addEventListener('mouseup', this.formPopupBodyListener);
+        }
+    }
+
+    private formPopupBodyListener = (event: Event) => {
         if (this.formPopupComponent && this.formPopupComponent.instance.popup.doNotCloseOnClickOutside) {
             return;
         }
-        let backdrop = this.document.querySelector(".formpopup-backdrop");
-        if (backdrop && (backdrop == event.target)) {
+        const backdrop = this.document.querySelector('.formpopup-backdrop');
+        if (backdrop && (backdrop === event.target)) {
             //backdrop.remove();
             this.cancelFormPopup(false);
             return;
         }
-        let mainform = this.document.querySelector(".svy-main-window-container");
-        if (mainform && mainform.contains(event.target)) {
+        let mainform = this.document.querySelector('.svy-main-window-container');
+        if (mainform && mainform.contains(event.target as Node)) {
             this.cancelFormPopup(false);
             return;
         }
-        mainform = this.document.querySelector(".svy-dialog");
-        if (mainform && mainform.contains(event.target)) {
+        mainform = this.document.querySelector('.svy-dialog');
+        if (mainform && mainform.contains(event.target as Node)) {
             this.cancelFormPopup(false);
             return;
         }
-    }
+    };
 }
 
 export class PopupForm {
@@ -104,7 +121,7 @@ export class PopupForm {
     public x: number;
     public y: number;
     public width: number;
-    public height: number
+    public height: number;
     public showBackdrop: boolean;
     public doNotCloseOnClickOutside: boolean;
     public onClose: Callback;
