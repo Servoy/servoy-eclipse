@@ -23,25 +23,25 @@ window.onerror = function(message, source, lineno, colno, error) {
 	}
 	if (!catchedErrors.catchedErrorsDiv) {
 		var div = document.createElement('div');
+		div.id = "errorsDiv"
 		div.style.position = "absolute";
 		div.style.overflow = "auto";
 		div.style.left = "0px";
 		//div.style.right = "0px";
 		div.style.height = "300px";
-		div.style.top = "0px";
+		div.style.top = "35px";
 		div.style.zIndex = "10000";
+		div.style.display = 'none';
 		window.parent.document.body.appendChild(div);
 		catchedErrors.catchedErrorsDiv = document.createElement('pre');
 		catchedErrors.catchedErrorsDiv.style.color = "red";
 		div.appendChild(catchedErrors.catchedErrorsDiv);
 		var close = document.createElement('a');
+		close.id = "closeErrors"
 		close.style.float="right";
 		close.href="#";
 		close.innerHTML="x"
 		catchedErrors.catchedErrorsDiv.appendChild(close);
-		close.addEventListener('click', function(e){
-			div.removeChild(catchedErrors.catchedErrorsDiv);
-		});
 		catchedErrors.catchedErrorsDiv.appendChild(document.createElement('br'));
 	}
 	if (!catchedErrors.textNodesCreated) {

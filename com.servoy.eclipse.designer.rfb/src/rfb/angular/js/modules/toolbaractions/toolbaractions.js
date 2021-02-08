@@ -87,6 +87,17 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 				editorScope.getEditorContentRootScope().$apply();
 			}
 		});
+		
+		if (document.getElementById("errorsDiv") !== null) {
+			btnShowErrors.enabled = true;
+			if (document.getElementById("closeErrors")) {
+  				document.getElementById("closeErrors").addEventListener('click', function(e) {
+				btnShowErrors.state = !btnShowErrors.state;
+				document.getElementById("errorsDiv").style.display = btnShowErrors.state ? 'block' : 'none';
+  			});
+		}
+  }
+
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -808,6 +819,19 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 	}
 	
 	$toolbar.add(btnClassicEditor, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+	
+	var btnShowErrors = {
+			text: "Show existing errors (if applicable)",
+			icon: "toolbaractions/icons/error.png",
+			disabledIcon: "toolbaractions/icons/disabled_error.png",
+			state: false,
+			enabled: false,
+			onclick: function() {
+				btnShowErrors.state = !btnShowErrors.state;
+				document.getElementById("errorsDiv").style.display = btnShowErrors.state ? 'block' : 'none';
+			}
+	}
+	$toolbar.add(btnShowErrors, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
 	$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
 		// disable or enable buttons.
