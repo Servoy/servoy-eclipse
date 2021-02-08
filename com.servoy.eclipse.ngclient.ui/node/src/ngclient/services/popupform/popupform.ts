@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import { Callback, PopupForm } from '../popupform.service';
+import { PopupForm } from '../popupform.service';
 import { DOCUMENT } from '@angular/common';
-import { SabloService } from '../../../sablo/sablo.service';
 import { FormService } from '../../form.service';
 
 @Component({
@@ -11,12 +10,12 @@ import { FormService } from '../../form.service';
 export class ServoyFormPopupComponent {
 
     public popup: PopupForm;
-    _left: number = 0;
-    _top: number = 0;
-    _width: number = 0;
-    _height: number = 0;
+    _left = 0;
+    _top = 0;
+    _width = 0;
+    _height = 0;
 
-    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document, private formService: FormService) {
+    constructor(@Inject(DOCUMENT) private document: Document, private formService: FormService) {
     }
 
     setPopupForm(popup: PopupForm) {
@@ -25,7 +24,7 @@ export class ServoyFormPopupComponent {
     }
 
     initSize() {
-        let formCache = this.formService.getFormCacheByName(this.popup.form);
+        const formCache = this.formService.getFormCacheByName(this.popup.form);
 
         let popupwidth = this.popup.width;
         if (!popupwidth || popupwidth <= 0) {
@@ -35,20 +34,19 @@ export class ServoyFormPopupComponent {
         if (!popupheight || popupheight <= 0) {
             popupheight = formCache.size.height;
         }
-        let popupLeft;
-        let popupTop;
+        let popupLeft: number;
+        let popupTop: number;
         if (this.popup.component || (this.popup.x && this.popup.y)) {
-            let element = document.getElementById(this.popup.component);
+            const element = document.getElementById(this.popup.component);
             let compWidth = 0;
             let compHeight = 0;
             if (element) {
-                let rect = element.getBoundingClientRect();
+                const rect = element.getBoundingClientRect();
                 popupLeft = rect.left;
-                popupTop = rect.top;
+                popupTop = rect.top + rect.height;
                 compWidth = rect.width;
                 compHeight = rect.height;
-            }
-            else {
+            } else {
                 popupLeft = this.popup.x;
                 popupTop = this.popup.y;
             }
@@ -61,8 +59,7 @@ export class ServoyFormPopupComponent {
                 popupTop = popupTop - popupheight + compHeight;
             }
 
-        }
-        else if (!this.popup.component) {
+        } else if (!this.popup.component) {
             // calculate the real center
             popupLeft = this.document.defaultView.innerWidth / 2 - popupwidth / 2;
             popupTop = this.document.defaultView.innerHeight / 2 - popupheight / 2;
@@ -81,21 +78,21 @@ export class ServoyFormPopupComponent {
         return { position: 'absolute', zIndex: 1499, left: this._left + 'px', top: this._top + 'px', width: this._width + 'px', height: this._height + 'px' };
     }
 
-    firstElementFocused(event) {
-        const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'));
+    firstElementFocused(event: Event) {
+        const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'), 10);
         const newTarget: any = document.querySelector('[tabindex=\'' + (tabIndex - 1) + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
-        if (event.target != newTarget) {
+        if (event.target !== newTarget) {
             newTarget.focus();
         }
     }
 
-    lastElementFocused(event) {
+    lastElementFocused(event: Event) {
         const newTarget: any = document.querySelector('[tabindex=\'2\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
-        if (event.target != newTarget) {
+        if (event.target !== newTarget) {
             newTarget.focus();
         }
     }
