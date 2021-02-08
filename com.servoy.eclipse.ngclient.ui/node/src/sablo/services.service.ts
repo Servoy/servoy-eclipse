@@ -7,12 +7,12 @@ import { LoggerService, LoggerFactory } from './logger.service';
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
     private log: LoggerService;
+    private serviceScopesConversionInfo = {};
 
-    constructor( private converterService: ConverterService, private logFactory: LoggerFactory ) {
+    constructor( private converterService: ConverterService, logFactory: LoggerFactory ) {
         this.log = logFactory.getLogger('ServicesService');
     }
 
-    private serviceScopesConversionInfo = {};
 
     public setServiceProvider( serviceProvider: ServiceProvider ) {
         if ( serviceProvider == null ) this.serviceProvider = new VoidServiceProvider();
@@ -32,14 +32,14 @@ export class ServicesService {
     }
 
     public updateServiceScopes( services, conversionInfo ) {
-        for ( const servicename in services ) {
+        for ( const servicename of Object.keys(services) ) {
             // current model
             const service = this.serviceProvider.getService( servicename );
             if ( service ) {
                 const serviceData = services[servicename];
 
                 try {
-                    for ( const key in serviceData ) {
+                    for ( const key of Object.keys(serviceData) ) {
                         if ( conversionInfo && conversionInfo[servicename] && conversionInfo[servicename][key] ) {
                             // convert property, remember type for when a client-server conversion will be needed
                             if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
