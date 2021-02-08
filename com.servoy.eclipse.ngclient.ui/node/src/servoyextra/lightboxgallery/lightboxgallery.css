@@ -32,6 +32,7 @@
     margin: 5px;
     white-space: nowrap;
     text-overflow: ellipsis;
+    line-height: 27px;
 }
 
 .svyextra-lightboxgallery-image-delete {
