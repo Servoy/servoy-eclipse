@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
 import { DOCUMENT } from '@angular/common';
+import { FormService } from '../../form.service';
 
 @Component({
     selector: 'servoycore-dialog-window',
@@ -12,7 +13,7 @@ import { DOCUMENT } from '@angular/common';
 
     window: SvyWindow;
 
-    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: any) {
+    constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private document: any) {
     }
 
     setWindow(window: SvyWindow) {
@@ -20,12 +21,18 @@ import { DOCUMENT } from '@angular/common';
     }
 
     getFormName(): string {
-        return this.window.form.name;
+        const name = this.window.form.name;
+        if (name && this.formservice.hasFormCacheEntry(name))
+            return name;
+        return null;
     }
 
     getNavigatorFormName(): string {
-      return (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) ?
+        const name = (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) ?
                 this.window.navigatorForm.name : null;
+        if (name && this.formservice.hasFormCacheEntry(name))
+            return name;
+        return null;
     }
 
     hasDefaultNavigator(): boolean{

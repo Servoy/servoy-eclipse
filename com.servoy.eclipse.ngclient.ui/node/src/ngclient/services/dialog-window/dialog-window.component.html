@@ -10,7 +10,7 @@
             <svy-form [name]="getNavigatorFormName()" *ngIf="getNavigatorFormName() != null"></svy-form>
             <div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
             <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}">
-                <svy-form [name]="getFormName()"></svy-form>
+                <svy-form [name]="getFormName()" *ngIf="getFormName() != null"></svy-form>
             </div>
             <div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>
         </div>    
