@@ -24,10 +24,10 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield<HTMLImag
                 const change = changes[property];
                 switch ( property ) {
                 case 'media':
-                    this.updateImageURL(change.currentValue, null);
+                    this.updateImageURL();
                     break;
                 case 'dataProviderID':
-                    this.updateImageURL(null, change.currentValue);
+                    this.updateImageURL();
                     break;
                 }
             }
@@ -35,18 +35,18 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield<HTMLImag
         }
     }
 
-    private updateImageURL(media: any, dataProvider: any) {
-        if (media || this.media) {
-            if (media) this.imageURL = media;
+    private updateImageURL() {
+        if (this.media) {
+            this.imageURL = this.media;
             // do nothing if data provider changed but media is defined
-        } else if(dataProvider && dataProvider.url) {
-            this.imageURL = dataProvider.url;
-        } else if (!dataProvider && this.servoyApi.isInDesigner()) {
+        } else if(this.dataProviderID && this.dataProviderID.url) {
+            this.imageURL = this.dataProviderID.url;
+        } else if (!this.dataProviderID && this.servoyApi.isInDesigner()) {
             this.imageURL = 'bootstrapcomponents/imagemedia/media.png';
-        } else if (!dataProvider){
+        } else if (!this.dataProviderID){
             this.imageURL = 'bootstrapcomponents/imagemedia/images/empty.gif';
         } else {
-            this.imageURL = dataProvider;
+            this.imageURL = this.dataProviderID;
         }
     }
 }
