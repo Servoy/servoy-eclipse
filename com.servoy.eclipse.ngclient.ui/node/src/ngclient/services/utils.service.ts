@@ -12,7 +12,7 @@ export class SvyUtilsService {
         this.log = logFactory.getLogger('SvyUtilsService');
     }
 
-    public createJSEvent(event: KeyboardEvent, eventType: string, contextFilter?: string, contextFilterElement?: any) : JSEvent{
+    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any) : JSEvent{
         if (!event) {
             if (contextFilter || contextFilterElement) return null;
             this.log.error("event is undefined, returning default event");
@@ -134,4 +134,12 @@ export class JSEvent {
     public x?: number;
     public y?: number;
     public timestamp: number;
+}
+
+export interface EventLike {
+    target: EventTarget;
+    altKey?: boolean;
+    shiftKey?: boolean;
+    ctrlKey?: boolean;
+    metaKey?: boolean;
 }
