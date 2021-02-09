@@ -647,20 +647,21 @@ public class TypeCreator extends TypeCache
 				m.setDeprecated(true);
 			}
 			EList<Parameter> parameters = m.getParameters();
-			Class< ? >[] parameterTypes = method.getParameterTypes();
-			for (int i = 0; i < parameterTypes.length; i++)
+			java.lang.reflect.Parameter[] methodParams = method.getParameters();
+			for (int i = 0; i < methodParams.length; i++)
 			{
+				Class< ? > paramType = methodParams[i].getType();
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-				parameter.setName("arg" + i);
+				parameter.setName(methodParams[i].getName());
 				JSType jsType;
-				if (i == (parameterTypes.length - 1) && method.isVarArgs() && parameterTypes[i].isArray())
+				if (i == (methodParams.length - 1) && method.isVarArgs() && paramType.isArray())
 				{
-					jsType = getJSType(context, parameterTypes[i].getComponentType());
+					jsType = getJSType(context, paramType.getComponentType());
 					parameter.setKind(ParameterKind.VARARGS);
 				}
 				else
 				{
-					jsType = getJSType(context, parameterTypes[i]);
+					jsType = getJSType(context, paramType);
 				}
 				// don't set any type of it is just Object, so that everything is excepted
 				if (!jsType.getName().equals("java.lang.Object")) parameter.setType(jsType);
