@@ -24,7 +24,7 @@ describe('ServoyExtraMultiFileUpload', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyExtraMultiFileUpload);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent', 'getFormname']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent', 'getFormName']);
     fixture.detectChanges();
   });
 
