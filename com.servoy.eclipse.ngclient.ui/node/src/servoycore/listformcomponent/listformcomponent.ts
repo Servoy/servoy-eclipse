@@ -383,7 +383,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getServoyApi(cell: Cell) {
         if (cell.api == null) {
-            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormname(), this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
+            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
         }
         return cell.api;
     }
@@ -406,7 +406,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 // always just render 1
                 if (this.numberOfCells < 1) this.numberOfCells = 1;
             } else {
-                console.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormname());
+                console.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
             }
 
         }

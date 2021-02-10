@@ -185,7 +185,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         }
         this.settings = {
             uploadAPI: {
-                endpoint: this.utilsService.generateUploadUrl(this.servoyApi.getFormname(), this.name, 'onFileUploaded')
+                endpoint: this.utilsService.generateUploadUrl(this.servoyApi.getFormName(), this.name, 'onFileUploaded')
             },
             plugins: uppyPlugins,
             restrictions: this.restrictions,

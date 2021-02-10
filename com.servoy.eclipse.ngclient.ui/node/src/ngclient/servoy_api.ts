@@ -55,7 +55,7 @@ export class ServoyApi {
         return this.item.model.svyMarkupId;
     }
 
-    public getFormname(): string {
+    public getFormName(): string {
         return this.formname;
     }
 

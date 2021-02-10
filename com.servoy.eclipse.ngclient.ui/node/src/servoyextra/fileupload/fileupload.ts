@@ -61,8 +61,8 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
         if (this.multiFileUpload && ! this.onFileUploadedMethodID) {
             console.warn('Multifile upload without onFileUploaded Method isn\'t supported. To upload multi file start using onFileUploaded Method');
         }
-        const url = this.onFileUploadedMethodID ? this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'onFileUploadedMethodID' ):
-                            this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, 'dataProviderID' );
+        const url = this.onFileUploadedMethodID ? this.utilsService.generateUploadUrl( this.servoyApi.getFormName(), this.name, 'onFileUploadedMethodID' ):
+                            this.utilsService.generateUploadUrl( this.servoyApi.getFormName(), this.name, 'dataProviderID' );
         if (!this.multiFileUpload) this.uploader = new FileUploader( {
             url,
             filters: [{name:'multi', fn: (): boolean => {
