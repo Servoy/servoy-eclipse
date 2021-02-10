@@ -22,21 +22,22 @@ export class SabloTabseq implements OnInit, OnDestroy {
     // handle event: Child Servoy Tab Sequence registered
     @HostListener('registerCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
     registerChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
+        if (this.designTabSeq === -2 || designChildIndex === -2) {
+            this.recalculateIndexesHandler(designChildIndex ? designChildIndex : 0, false);
             event.stopPropagation();
             return false;
         }
 
         // insert it sorted
         let posInDesignArray = 0;
-        for (var tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < designChildIndex; tz++) {
+        for (let tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < designChildIndex; tz++) {
             posInDesignArray = tz + 1;
         }
         if (posInDesignArray === this.designChildTabSeq.length || this.designChildTabSeq[posInDesignArray] > designChildIndex) {
             this.designChildTabSeq.splice(posInDesignArray, 0, designChildIndex);
 
             // always keep in designChildIndexToArrayPosition[i] the first occurrance of design index i in the sorted designChildTabSeq array
-            for (var tz = posInDesignArray; tz < this.designChildTabSeq.length; tz++) {
+            for (let tz = posInDesignArray; tz < this.designChildTabSeq.length; tz++) {
                 this.designChildIndexToArrayPosition[this.designChildTabSeq[tz]] = tz;
             }
             this.runtimeChildIndexes[designChildIndex] = runtimeChildIndex;
@@ -48,19 +49,20 @@ export class SabloTabseq implements OnInit, OnDestroy {
             this.runtimeChildIndexes[designChildIndex].push(runtimeChildIndex);
         }
 
+        this.recalculateIndexesHandler(designChildIndex ? designChildIndex : 0, false);
         event.stopPropagation();
         return false;
     }
 
     @HostListener('unregisterCSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
     unregisterChildHandler(designChildIndex, runtimeChildIndex, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
+        if (this.designTabSeq === -2 || designChildIndex === -2) {
             event.stopPropagation();
             return false;
         }
 
         const posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
-        if (posInDesignArray != undefined) {
+        if (posInDesignArray !== undefined) {
             const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
             const multipleEqualDesignValues = this.runtimeChildIndexes[keyInRuntimeArray].push;
             if (!multipleEqualDesignValues) {
@@ -72,7 +74,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
                 delete this.runtimeChildIndexes[keyInRuntimeArray];
             } else {
                 this.runtimeChildIndexes[keyInRuntimeArray].splice(this.runtimeChildIndexes[keyInRuntimeArray].indexOf(runtimeChildIndex), 1);
-                if (this.runtimeChildIndexes[keyInRuntimeArray].length == 1) this.runtimeChildIndexes[keyInRuntimeArray] = this.runtimeChildIndexes[keyInRuntimeArray][0];
+                if (this.runtimeChildIndexes[keyInRuntimeArray].length === 1) this.runtimeChildIndexes[keyInRuntimeArray] = this.runtimeChildIndexes[keyInRuntimeArray][0];
             }
         }
         event.stopPropagation();
@@ -82,15 +84,16 @@ export class SabloTabseq implements OnInit, OnDestroy {
     // handle event: child tree was now linked or some child needs extra indexes; runtime indexes can be computed starting at the given child;
     // recalculate Parent Servoy Tab Sequence
     @HostListener('recalculatePSTS', ['$event.detail[0]', '$event.detail[1]', '$event'])
-    recalculateIndexesHandler(designChildIndex, initialRootRecalculate, event): boolean {
-        if (this.designTabSeq == -2 || designChildIndex == -2) {
-            event.stopPropagation();
+    recalculateIndexesHandler(designChildIndex, initialRootRecalculate, event?): boolean {
+        if (this.designTabSeq === -2 || designChildIndex === -2) {
+            if(event) event.stopPropagation();
             return false;
         }
 
         if (!this.initializing) {
             // a new child is ready/linked; recalculate tab indexes for it and after it
-            const startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] != undefined) ? this.designChildIndexToArrayPosition[designChildIndex] : 0;
+            const startIdx = (this.designChildIndexToArrayPosition && this.designChildIndexToArrayPosition[designChildIndex] !== undefined) ?
+                this.designChildIndexToArrayPosition[designChildIndex] : 0;
             this.recalculateChildRuntimeIndexesStartingAt(startIdx, false);
         } else if (initialRootRecalculate) {
             // this is $rootScope (one $parent extra cause the directive creates it); we always assume a sabloTabseq directive is bound to it;
@@ -99,7 +102,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
             this.recalculateChildRuntimeIndexesStartingAt(0, true);
         } // else wait for parent tabSeq directives to get linked as well
 
-        event.stopPropagation();
+        if(event) event.stopPropagation();
         return false;
     }
 
@@ -129,20 +132,17 @@ export class SabloTabseq implements OnInit, OnDestroy {
         // runtime index -1 == SKIP focus traversal in browser
         // runtime index  0 == DEFAULT == design tab seq 0 (not tabIndex attr set to element or it's children)
         this.runtimeIndex = { startIndex: -1, nextAvailableIndex: -1, sablotabseq: this };
-        this.updateCurrentDomElTabIndex(); // -1 runtime initially for all (in case some node in the tree has -2 design (skip) and children have >= 0, at runtime all children should be excluded as wel)
-
-
-        if (this.designTabSeq != -2 && !(this.config && this.config.root)) {
-            this.trigger(this._elemRef.nativeElement.parentNode, 'registerCSTS', [this.designTabSeq, this.runtimeIndex]);
-        }
+        // -1 runtime initially for all (in case some node in the tree has -2 design (skip) and children have >= 0,
+        // at runtime all children should be excluded as wel)
+        this.updateCurrentDomElTabIndex();
 
         // check to see if this is the top-most tabSeq container
         if (this.config && this.config.root) {
-            // it's root tab seq container (so no parent); just emit on self to do initial tree calculation
-            this.trigger(this._elemRef.nativeElement, 'recalculatePSTS', [0, true]);
+            // it's root tab seq container (so no parent); just do initial tree calculation
+            this.recalculateIndexesHandler(0, true);
         } else {
-            if (this.designTabSeq != -2) {
-                this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [this.designTabSeq ? this.designTabSeq : 0, false]);
+            if (this.designTabSeq !== -2) {
+                this.trigger(this._elemRef.nativeElement.parentNode, 'registerCSTS', [this.designTabSeq, this.runtimeIndex]);
             }
         }
     }
@@ -161,7 +161,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
         } else if (this.runtimeIndex.startIndex === 0) {
             this.runtimeIndex.nextAvailableIndex = 0;
         } else if (this.runtimeIndex.nextAvailableIndex === -1) {
-            var reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
+            const reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
             this.runtimeIndex.nextAvailableIndex = this.runtimeIndex.startIndex + reservedGap;
         }
 
@@ -179,10 +179,14 @@ export class SabloTabseq implements OnInit, OnDestroy {
                 // multiple equal design time indexes as siblings
                 let max = recalculateStartIndex;
                 for (const k in childRuntimeIndex) {
-                    childRuntimeIndex[k].startIndex = recalculateStartIndex;
-                    childRuntimeIndex[k].sablotabseq.recalculateChildRuntimeIndexesStartingAt(0, true); // call recalculate on whole child; normally it only makes sense for same index siblings if they are not themselfes containers, just apply the given value
-                    if (max < childRuntimeIndex[k].nextAvailableIndex)
-                        max = childRuntimeIndex[k].nextAvailableIndex;
+                    if(childRuntimeIndex.hasOwnProperty(k)) {
+                        childRuntimeIndex[k].startIndex = recalculateStartIndex;
+                        // call recalculate on whole child; normally it only makes sense for same index siblings
+                        // if they are not themselfes containers, just apply the given value
+                        childRuntimeIndex[k].sablotabseq.recalculateChildRuntimeIndexesStartingAt(0, true);
+                        if (max < childRuntimeIndex[k].nextAvailableIndex)
+                            max = childRuntimeIndex[k].nextAvailableIndex;
+                    }
                 }
                 recalculateStartIndex = max;
             } else {
@@ -198,7 +202,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
         if (this.runtimeIndex.startIndex !== 0 && this.runtimeIndex.startIndex !== -1) {
             const ownTabIndexBump = this.hasOwnTabIndex() ? 1 : 0;
             parentRecalculateNeeded = (this.runtimeIndex.nextAvailableIndex < recalculateStartIndex + ownTabIndexBump);
-            var reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
+            const reservedGap = (this.config && this.config.reservedGap) ? this.config.reservedGap : 0;
             if (parentRecalculateNeeded) this.runtimeIndex.nextAvailableIndex = recalculateStartIndex + reservedGap + ownTabIndexBump;
         } else {
             // start index 0 means default (no tabIndex attr. set)
