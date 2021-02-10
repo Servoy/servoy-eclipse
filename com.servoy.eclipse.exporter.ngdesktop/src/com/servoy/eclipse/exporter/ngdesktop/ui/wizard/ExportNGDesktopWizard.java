@@ -174,6 +174,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			{
 				serviceConn.cancel(tokenId);
 				monitor.endChase();
+				monitor.done();
 				retCode = PROCESS_CANCELLED;
 			}
 			else
@@ -189,7 +190,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						break;
 				}
 				serviceConn.delete(tokenId);
-				monitor.done();
 			}
 		}
 		catch (IOException | InterruptedException e)
