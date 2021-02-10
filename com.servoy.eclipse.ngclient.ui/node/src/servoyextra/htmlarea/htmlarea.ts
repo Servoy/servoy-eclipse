@@ -62,6 +62,11 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
         this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
 
+        // work around for https://github.com/kolkov/angular-editor/issues/341
+        setTimeout(() => {
+            this.cdRef.detectChanges();
+        }, 5);
+
     }
 
     public getScrollX(): number {
