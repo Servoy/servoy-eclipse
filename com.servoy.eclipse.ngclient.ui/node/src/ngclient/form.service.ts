@@ -8,7 +8,7 @@ import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 import { ServoyService } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { get } from 'lodash-es';
-import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IComponentCache, IFormComponent, PartCache, StructureCache } from './types';
+import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IComponentCache, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
 
 @Injectable()
 export class FormService {
@@ -94,6 +94,10 @@ export class FormService {
         const formCache = new FormCache(formName,jsonData.size);
         this.walkOverChildren(jsonData.children, formCache);
         this.formsCache.set(formName, formCache);
+        const formComponent = this.formComponentCache.get(formName);
+        if (instanceOfFormComponent(formComponent)) {
+            formComponent.formCacheChanged(formCache);
+        }
         //        this.touchedForms[formName] = true;
     }
 

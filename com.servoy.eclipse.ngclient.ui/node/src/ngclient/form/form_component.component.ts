@@ -211,6 +211,11 @@ export class FormComponent implements OnDestroy, OnChanges {
         this.changeHandler.markForCheck();
     }
 
+    public formCacheChanged(cache: FormCache): void {
+        this.formCache = cache;
+        this.detectChanges();
+    }
+
     public getFormCache(): FormCache {
         return this.formCache;
     }

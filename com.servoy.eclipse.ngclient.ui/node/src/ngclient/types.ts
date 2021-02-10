@@ -82,6 +82,8 @@ export interface IFormComponent extends IApiExecutor {
     name: string;
     // called when there are changed pushed to this form, so this form can trigger a detection change
     detectChanges(): void;
+    // called when there are changed pushed to this form, so this form can trigger a detection change
+    formCacheChanged(cache: FormCache): void;
     // called when a model property is updated for the given compponent, but the value itself didn't change  (only nested)
     propertyChanged(componentName: string, property: string, value: any): void;
 }
@@ -93,6 +95,8 @@ export interface IApiExecutor {
 export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
     obj != null && (obj).callApi instanceof Function;
 
+export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
+    obj != null && (obj).detectChanges instanceof Function;
 
 export interface IComponentCache {
     name: string;
