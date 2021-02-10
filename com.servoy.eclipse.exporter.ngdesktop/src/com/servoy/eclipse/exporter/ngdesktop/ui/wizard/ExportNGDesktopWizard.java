@@ -172,6 +172,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			{
 				serviceConn.cancel(tokenId);
 				monitor.endChase();
+				monitor.done();
 				retCode = PROCESS_CANCELLED;
 			}
 			else
@@ -187,7 +188,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						break;
 				}
 				serviceConn.delete(tokenId);
-				monitor.done();
 			}
 		}
 		catch (IOException | InterruptedException e)
@@ -308,11 +308,20 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final String height = exportSettings.get("ngdesktop_height");
 		final String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
 		final JSONObject configFile = new JSONObject(jsonFile);
-		final JSONObject options = (JSONObject)configFile.get("options");
-		options.put("url", url);
-		if (width.length() > 0) options.put("width", width);
-		if (height.length() > 0) options.put("height", height);
-		configFile.put("options", options);
+		final JSONObject options = configFile.optJSONObject("options");
+		if (options != null)
+		{//old archive (till 2020.12.0 inclusive)
+			options.put("url", url);
+			if (width.length() > 0) options.put("width", width);
+			if (height.length() > 0) options.put("height", height);
+			configFile.put("options", options);
+		}
+		else
+		{
+			configFile.put("url", url);
+			if (width.length() > 0) configFile.put("width", width);
+			if (height.length() > 0) configFile.put("height", height);
+		}
 		return configFile.toString().getBytes(Charset.forName("UTF-8"));
 	}
 
@@ -330,13 +339,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final boolean osxPlatform = settings.getBoolean("osx_export");
 		final boolean linuxPlatform = settings.getBoolean("linux_export");
 		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected");
-		String value = settings.get("save_dir");
-		if (value.length() == 0)
+		String strValue = settings.get("save_dir");
+		if (strValue.length() == 0)
 		{
 			errorMsg.append("Export path must to be specified");
 			return errorMsg;
 		}
-		final File f = new File(value);
+		final File f = new File(strValue);
 		if (!f.exists() && !f.mkdirs())
 		{
 			errorMsg.append("Export path can't be created (permission issues?)");
@@ -368,33 +377,33 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 		}
 
-		value = settings.get("copyright");
-		if (value.toCharArray().length > COPYRIGHT_LENGTH)
+		strValue = settings.get("copyright");
+		if (strValue.toCharArray().length > COPYRIGHT_LENGTH)
 		{
-			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + value.toCharArray().length);
+			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length);
 			return errorMsg;
 		}
 
 		int intValue;
 		try
 		{
-			value = settings.get("ngdesktop_width");
-			if (value.length() > 0)
+			strValue = settings.get("ngdesktop_width");
+			if (strValue.length() > 0)
 			{
-				intValue = Integer.parseInt(value);
+				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid width size: " + value);
+					errorMsg.append("Invalid width size: " + strValue);
 					return errorMsg;
 				}
 			}
-			value = settings.get("ngdesktop_height");
-			if (value.length() > 0)
+			strValue = settings.get("ngdesktop_height");
+			if (strValue.length() > 0)
 			{
-				intValue = Integer.parseInt(value);
+				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid height size: " + value);
+					errorMsg.append("Invalid height size: " + strValue);
 					return errorMsg;
 				}
 			}
@@ -407,6 +416,4 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 		return errorMsg;
 	}
-
-
 }
