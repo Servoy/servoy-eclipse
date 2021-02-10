@@ -228,9 +228,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
     }
 
     setDOMTabIndex(tabindex): void {
-        setTimeout(() => {
-            this.tabindex = tabindex;
-        });
+        this.tabindex = tabindex;
     }
 
     trigger(target, event: string, arg): void {
