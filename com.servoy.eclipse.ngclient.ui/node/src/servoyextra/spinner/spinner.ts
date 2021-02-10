@@ -22,7 +22,8 @@ export class ServoyExtraSpinner extends ServoyBaseComponent<HTMLDivElement> {
     @Input() tabSeq: number;
     @Input() toolTipText: string;
     @Input() valuelistID: IValuelist;
-
+    @Input() responsiveHeight: number;
+    
     selection: any;
     private counter = 0;
 
@@ -49,6 +50,13 @@ export class ServoyExtraSpinner extends ServoyBaseComponent<HTMLDivElement> {
                 case 'dataProviderID':
                     this.selection = this.getSelectionFromDataprovider();
                     break;
+                case 'responsiveHeight':
+                    if (!this.servoyApi.isInAbsoluteLayout())
+                    {
+                        this.getNativeElement().style.minHeight = this.responsiveHeight +'px';
+                        this.getNativeElement().style.position = 'relative';
+                    }
+                    break;    
             }
         }
         super.svyOnChanges(changes);
