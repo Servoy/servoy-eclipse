@@ -43,7 +43,6 @@ export class WindowService {
         private platformLocation: PlatformLocation,
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
-        private clientFunctionService: ClientFunctionService,
         rendererFactory: RendererFactory2,
         @Inject(DOCUMENT) private document: Document) {
 
@@ -58,7 +57,7 @@ export class WindowService {
 
     public updateController(formName: string, formStructure: string) {
         const formState = JSON.parse(formStructure)[formName];
-        this.clientFunctionService.waitForLoading().finally( () =>  this.formService.createFormCache(formName, formState));
+        this.formService.createFormCache(formName, formState)
     }
 
     public create(name: string, type: number) {

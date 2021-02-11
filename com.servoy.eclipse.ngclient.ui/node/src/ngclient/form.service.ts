@@ -9,6 +9,7 @@ import { ServoyService } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { get } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IComponentCache, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
+import { ClientFunctionService } from './services/clientfunction.service';
 
 @Injectable()
 export class FormService {
@@ -19,7 +20,7 @@ export class FormService {
     //    private touchedForms:Map<String,boolean>;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
-        servoyService: ServoyService) {
+        servoyService: ServoyService, private clientFunctionService: ClientFunctionService) {
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
         this.formComponentCache = new Map();
@@ -91,13 +92,16 @@ export class FormService {
     }
 
     public createFormCache(formName: string, jsonData) {
-        const formCache = new FormCache(formName,jsonData.size);
+        const formCache = new FormCache(formName, jsonData.size);
         this.walkOverChildren(jsonData.children, formCache);
-        this.formsCache.set(formName, formCache);
-        const formComponent = this.formComponentCache.get(formName);
-        if (instanceOfFormComponent(formComponent)) {
-            formComponent.formCacheChanged(formCache);
-        }
+        this.clientFunctionService.waitForLoading().finally(() => {
+            this.formsCache.set(formName, formCache);
+            const formComponent = this.formComponentCache.get(formName);
+            if (instanceOfFormComponent(formComponent)) {
+                formComponent.formCacheChanged(formCache);
+            }
+        });
+
         //        this.touchedForms[formName] = true;
     }
 
@@ -190,7 +194,7 @@ export class FormService {
         return Promise.resolve(true);
     }
     public hideForm(formname: string, parentForm?: string, beanName?: string, relationname?: string, formIndex?: number,
-                     formnameThatWillBeShown?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number): Promise<boolean> {
+        formnameThatWillBeShown?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number): Promise<boolean> {
         if (!formname) {
             throw new Error('formname is undefined');
         }
@@ -220,11 +224,11 @@ export class FormService {
     }
 
     public callComponentServerSideApi(formname: string, beanname: string, methodName: string, args: Array<any>) {
-        return this.sabloService.callService('formService', 'callServerSideApi', {formname,beanname,methodName,args});
+        return this.sabloService.callService('formService', 'callServerSideApi', { formname, beanname, methodName, args });
     }
 
     public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
-        return this.sabloService.callService('applicationServerService', 'callServerSideApi', {service:servicename,methodName,args});
+        return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: servicename, methodName, args });
     }
 
     private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
@@ -250,9 +254,9 @@ export class FormService {
                         value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, beanname, property, value));
                     }
                     if (comp.model[property] === value) {
-                      // this value didn't realy change but it was changed internally
-                      // but we want to let the component know that this is still a (nested) change.
-                      formComponent.propertyChanged(beanname,property, value);
+                        // this value didn't realy change but it was changed internally
+                        // but we want to let the component know that this is still a (nested) change.
+                        formComponent.propertyChanged(beanname, property, value);
                     }
                 }
                 comp.model[property] = value;
@@ -270,7 +274,7 @@ export class FormService {
                 const structure = new StructureCache(elem.styleclass);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
-                    parent  = new StructureCache(null);
+                    parent = new StructureCache(null);
                     formCache.mainStructure = parent;
                 }
                 parent.addChild(structure);
@@ -304,7 +308,7 @@ export class FormService {
                         formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                     }
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
-                    const structure = new FormComponentCache(elem.name, elem.model, elem.handlers ,elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
+                    const structure = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child], formCache, structure);
                     });
@@ -345,8 +349,8 @@ export class FormService {
         };
     }
 
-    private getFoundsetLinkedDPInfo(propertyName: string, beanModel): {propertyNameForServer: string; rowId?: string} {
-        let propertyNameForServerAndRowID: {propertyNameForServer: string; rowId?: string};
+    private getFoundsetLinkedDPInfo(propertyName: string, beanModel): { propertyNameForServer: string; rowId?: string } {
+        let propertyNameForServerAndRowID: { propertyNameForServer: string; rowId?: string };
 
         if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith(']')) {
             // TODO this is a big hack - see comment in pushDPChange below
