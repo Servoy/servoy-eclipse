@@ -9,9 +9,10 @@ import { IValuelist } from '../../sablo/spectypes.service';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyExtraSpinner extends ServoyBaseComponent<HTMLDivElement> {
-
+    @Input() onDataChangeMethodID: (e: Event, data?: any) => void;
     @Input() onActionMethodID: (e: Event, data?: any) => void;
     @Input() onFocusGainedMethodID: (e: Event, data?: any) => void;
+    @Input() onRightClickMethodID: (e: Event, data?: any) => void;
     @Input() onFocusLostMethodID: (e: Event, data?: any) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
@@ -70,6 +71,15 @@ export class ServoyExtraSpinner extends ServoyBaseComponent<HTMLDivElement> {
 
         this.renderer.listen(spinnerButtons[0], 'click', e => this.increment());
         this.renderer.listen(spinnerButtons[1], 'click', e => this.decrement());
+        
+         if (this.onActionMethodID)
+                this.renderer.listen(this.getNativeChild(), 'click', e => this.onActionMethodID(e));
+
+         if (this.onRightClickMethodID)
+                this.renderer.listen(this.getNativeChild(), 'contextmenu', e => {
+                 this.onRightClickMethodID(e);
+                 return false;
+                });
 
         for (const i of Object.keys(spinnerButtons)) {
             if (this.onActionMethodID)
