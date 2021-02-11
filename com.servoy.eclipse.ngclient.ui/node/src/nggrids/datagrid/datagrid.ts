@@ -1226,7 +1226,8 @@ export class DataGrid extends NGGridDirective {
     }
 
     getCellClass(params: any) {
-        const column = this.getColumn(params.colDef.field);
+        const dataGrid = params.context.componentParent;
+        const column = dataGrid.getColumn(params.colDef.field);
 
         let cellClass = 'ag-table-cell';
         if(column.styleClass) cellClass += ' ' + column.styleClass;
