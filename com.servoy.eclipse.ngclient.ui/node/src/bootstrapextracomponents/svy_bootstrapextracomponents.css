@@ -1,0 +1,10 @@
+.breadcrumb > li > a:hover {
+    cursor: pointer;
+}
+
+.svy-wrapper > * > .bts-extra-breadcrumbs {
+    width: 100%;
+    
+    overflow: auto;
+    white-space: nowrap;
+}
