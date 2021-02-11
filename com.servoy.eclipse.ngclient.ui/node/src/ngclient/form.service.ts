@@ -99,6 +99,12 @@ export class FormService {
             const formComponent = this.formComponentCache.get(formName);
             if (instanceOfFormComponent(formComponent)) {
                 formComponent.formCacheChanged(formCache);
+            } else {
+                this.formComponentCache.forEach((value) => {
+                    if (instanceOfFormComponent(value)) {
+                        value.detectChanges();
+                    }
+                });
             }
         });
 
