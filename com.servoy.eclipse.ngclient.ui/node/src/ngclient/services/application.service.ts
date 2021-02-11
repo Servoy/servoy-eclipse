@@ -135,7 +135,7 @@ export class ApplicationService {
 
     public showInfoPanel(url, w, h, t, closeText) {
         const infoPanel = document.createElement('div');
-        infoPanel.innerHTML ='<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 src=\''+ url +'\' width=\'100%\' height=\''+ (h - 25) +'\'></iframe><br><a href=\'#\' onClick=\'javascript:document.getElementById("infoPanel").style.display="none";return false;\'>'+ closeText +'</a>';
+        infoPanel.innerHTML ='<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 src=\''+ url +'\' width=\'100%\' height=\''+ (h - 25) +'\'></iframe><br><a href=\'#\' id =\'closePanelButton\'>'+ closeText +'</a>';
         infoPanel.style.zIndex ='2147483647';
         infoPanel.id ='infoPanel';
         const width = window.innerWidth || document.body.offsetWidth;
@@ -145,6 +145,12 @@ export class ApplicationService {
         infoPanel.style.height = h +'px';
         infoPanel.style.width = w +'px';
         document.body.appendChild(infoPanel);
+        document.getElementById("closePanelButton").addEventListener("click", function(event : MouseEvent){
+                document.getElementById("infoPanel").style.display="none";
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+        });
         setTimeout('document.getElementById(\"infoPanel\").style.display=\"none\"', t);
     }
 
