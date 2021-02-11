@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
 import { ServoyBootstrapComponentsModule } from '../bootstrapcomponents/servoybootstrap.module';
+import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';
 import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 
 /**
@@ -13,11 +14,13 @@ import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
   imports: [
     ServoyDefaultComponentsModule,
     ServoyBootstrapComponentsModule,
+    ServoyBootstrapExtraComponentsModule,
     ServoyExtraComponentsModule
   ],
   exports: [
     ServoyDefaultComponentsModule,
     ServoyBootstrapComponentsModule,
+    ServoyBootstrapExtraComponentsModule,
     ServoyExtraComponentsModule
   ]
 })
