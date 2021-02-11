@@ -118,48 +118,6 @@ export class FormService {
     }
 
 
-    public sendChanges(formname: string, beanname: string, property: string, value: any, oldvalue: any) {
-        const formState = this.formsCache.get(formname);
-        const changes = {};
-
-        const conversionInfo = formState.getConversionInfo(beanname);
-        let fslRowID = null;
-        if (conversionInfo && conversionInfo[property]) {
-            changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
-        } else {
-            // foundset linked stuff.
-            let dpValue = null;
-
-            if (property.indexOf('.') > 0 || property.indexOf('[') > 0) {
-                // TODO this is a big hack - it would be nicer in the future if we have type info for all properties on the client and move
-                // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
-                // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
-                // then we can get rid of all the custom apply code on server as well as all this pushDPChange on client
-
-                // nested property; get the value correctly
-                dpValue = get(formState.getComponent(beanname).model, property);
-
-                // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
-                if (foundsetLinkedDPInfo) {
-                    fslRowID = foundsetLinkedDPInfo.rowId;
-                    property = foundsetLinkedDPInfo.propertyNameForServer;
-                }
-            } else {
-                dpValue = formState.getComponent(beanname).model[property];
-            }
-
-            changes[property] = this.converterService.convertClientObject(value);
-        }
-
-        const dpChange = { formname, beanname, property, changes };
-        if (fslRowID) {
-            dpChange['fslRowID'] = fslRowID;
-        }
-
-        this.sabloService.callService('formService', 'svyPush', dpChange, true);
-    }
-
     public executeEvent(formname: string, beanname: string, handler: string, args: IArguments | Array<any>, async?: boolean) {
         this.log.debug(this.log.buildMessage(() => (formname + ',' + beanname + ', executing: ' + handler + ' with values: ' + JSON.stringify(args))));
 
@@ -235,6 +193,72 @@ export class FormService {
 
     public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
         return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: servicename, methodName, args });
+    }
+
+    public sendChanges(formname: string, beanname: string, property: string, value: any, oldvalue: any, dataprovider?: boolean) {
+        if (dataprovider) {
+            this.applyDataprovider(formname, beanname, property, value, oldvalue);
+        } else {
+            this.dataPush(formname, beanname, property, value, oldvalue);
+        }
+    }
+
+    private dataPush(formname: string, beanname: string, property: string, value: any, oldvalue: any) {
+        const formState = this.formsCache.get(formname);
+        const conversionInfo = formState.getConversionInfo(beanname);
+        const changes = {};
+
+        if (conversionInfo && conversionInfo[property]) {
+            changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
+            this.sabloService.callService('formService', 'dataPush', { formname, beanname, changes }, true);
+        } else {
+            changes[property] = this.converterService.convertClientObject(value);
+            const oldvalues = {};
+            oldvalues[property] = this.converterService.convertClientObject(oldvalue);
+            this.sabloService.callService('formService', 'dataPush', { formname, beanname, changes, oldvalues }, true);
+        }
+    }
+
+    private applyDataprovider(formname: string, beanname: string, property: string, value: any, oldvalue: any) {
+        const formState = this.formsCache.get(formname);
+        const changes = {};
+
+        const conversionInfo = formState.getConversionInfo(beanname);
+        let fslRowID = null;
+        if (conversionInfo && conversionInfo[property]) {
+            changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
+        } else {
+            // foundset linked stuff.
+            let dpValue = null;
+
+            if (property.indexOf('.') > 0 || property.indexOf('[') > 0) {
+                // TODO this is a big hack - it would be nicer in the future if we have type info for all properties on the client and move
+                // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
+                // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
+                // then we can get rid of all the custom apply code on server as well as all this pushDPChange on client
+
+                // nested property; get the value correctly
+                dpValue = get(formState.getComponent(beanname).model, property);
+
+                // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
+                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
+                if (foundsetLinkedDPInfo) {
+                    fslRowID = foundsetLinkedDPInfo.rowId;
+                    property = foundsetLinkedDPInfo.propertyNameForServer;
+                }
+            } else {
+                dpValue = formState.getComponent(beanname).model[property];
+            }
+
+            changes[property] = this.converterService.convertClientObject(value);
+        }
+
+        const dpChange = { formname, beanname, property, changes };
+        if (fslRowID) {
+            dpChange['fslRowID'] = fslRowID;
+        }
+
+        this.sabloService.callService('formService', 'svyPush', dpChange, true);
     }
 
     private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {

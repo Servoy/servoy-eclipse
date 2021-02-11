@@ -9,19 +9,19 @@ import { ComponentCache } from '../types';
 
 export class ComponentConverter implements IConverter {
 
-	static readonly PROPERTY_UPDATES_KEY = 'propertyUpdates';
-	static readonly MODEL_KEY = 'model';
-	static readonly MODEL_VIEWPORT_KEY = 'model_vp';
-	static readonly MODEL_VIEWPORT_CHANGES_KEY = 'model_vp_ch';
-	static readonly MODEL_VIEWPORT = 'modelViewport';
-	static readonly PROPERTY_NAME_KEY = 'pn';
-	static readonly VALUE_KEY = 'v';
+    static readonly PROPERTY_UPDATES_KEY = 'propertyUpdates';
+    static readonly MODEL_KEY = 'model';
+    static readonly MODEL_VIEWPORT_KEY = 'model_vp';
+    static readonly MODEL_VIEWPORT_CHANGES_KEY = 'model_vp_ch';
+    static readonly MODEL_VIEWPORT = 'modelViewport';
+    static readonly PROPERTY_NAME_KEY = 'pn';
+    static readonly VALUE_KEY = 'v';
     static readonly NO_OP = 'n';
     static readonly RECORD_BASED_PROPERTIES = 'recordBasedProperties';
 
     private log: LoggerService;
 
-    constructor( private converterService: ConverterService, private viewportService: ViewportService, logFactory: LoggerFactory) {
+    constructor(private converterService: ConverterService, private viewportService: ViewportService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
@@ -30,7 +30,7 @@ export class ComponentConverter implements IConverter {
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
         const hasListeners = (currentClientData && currentClientData.getStateHolder().viewportChangeListeners.length > 0);
-        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ?  {} : undefined;
+        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ? {} : undefined;
 
         if (serverSentData && serverSentData[ComponentConverter.PROPERTY_UPDATES_KEY]) {
             // granular updates received
@@ -49,7 +49,7 @@ export class ComponentConverter implements IConverter {
                 const beanLayout = componentModel.layout;
 
                 const modelUpdateConversionInfo = modelBeanUpdate[ConverterService.TYPES_KEY] ? this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY)
-                        : this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
+                    : this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
                 this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, componentModel,
                     modelUpdateConversionInfo, modelBeanUpdate[ConverterService.TYPES_KEY], propertyContext);
@@ -62,17 +62,17 @@ export class ComponentConverter implements IConverter {
                 if (oldRows === undefined) componentModel[ComponentConverter.MODEL_VIEWPORT] = [];
 
                 componentModel.modelViewport = this.viewportService.updateWholeViewport(componentModel.modelViewport,
-                        componentModel.getStateHolder(), wholeViewportUpdate, beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] ?
-                                beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
+                    componentModel.getStateHolder(), wholeViewportUpdate, beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] ?
+                    beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
                 if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: currentClientData[ComponentConverter.MODEL_VIEWPORT] };
                 done = true;
             } else if (viewportUpdate) {
                 this.viewportService.updateViewportGranularly(componentModel.modelViewport, componentModel.getStateHolder(), viewportUpdate,
-                        beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] ?
-                                beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] : undefined, propertyContext, false);
+                    beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] ?
+                        beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] : undefined, propertyContext, false);
                 if (hasListeners) {
                     const upd: ViewportRowUpdates = viewportUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS];
-                    notificationParamForListeners.viewportRowsUpdated = upd ; // viewPortUpdate[UPDATE_PREFIX + ROWS] was alre
+                    notificationParamForListeners.viewportRowsUpdated = upd; // viewPortUpdate[UPDATE_PREFIX + ROWS] was alre
                 }
 
                 done = true;
@@ -115,19 +115,19 @@ export class ComponentConverter implements IConverter {
                  * get their changes applied you can use $webSocket.addIncomingMessageHandlingDoneTask.
                  * @param listener the listener to register.
                  */
-//                newValue.addViewportChangeListener = function(listener) {
-//                    internalState.viewportChangeListeners.push(listener);
-//                    return  function() {
-//                     return newValue.removeViewportChangeListener(listener);
-//                    };
-//                };
+                //                newValue.addViewportChangeListener = function(listener) {
+                //                    internalState.viewportChangeListeners.push(listener);
+                //                    return  function() {
+                //                     return newValue.removeViewportChangeListener(listener);
+                //                    };
+                //                };
 
-//                newValue.removeViewportChangeListener = function(listener) {
-//                    const index = internalState.viewportChangeListeners.indexOf(listener);
-//                    if (index > -1) {
-//                        internalState.viewportChangeListeners.splice(index, 1);
-//                    }
-//                };
+                //                newValue.removeViewportChangeListener = function(listener) {
+                //                    const index = internalState.viewportChangeListeners.indexOf(listener);
+                //                    if (index > -1) {
+                //                        internalState.viewportChangeListeners.splice(index, 1);
+                //                    }
+                //                };
                 // calling applyBeanData initially to make sure any needed conversions are done on model's properties
                 const beanData = serverSentData[ComponentConverter.MODEL_KEY];
                 const beanModel: any = {};
@@ -135,7 +135,7 @@ export class ComponentConverter implements IConverter {
 
                 const currentConversionInfo = beanData[ConverterService.TYPES_KEY] ?
                     this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY) :
-                        this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
+                    this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
 
                 this.applyBeanData(beanModel, componentModel.layout, beanData, componentModel,
                     currentConversionInfo, beanData[ConverterService.TYPES_KEY], propertyContext);
@@ -147,8 +147,8 @@ export class ComponentConverter implements IConverter {
 
                 if (wholeViewport) {
                     serverSentData[ComponentConverter.MODEL_VIEWPORT] = this.viewportService.updateWholeViewport(serverSentData[ComponentConverter.MODEL_VIEWPORT],
-                            componentModel.getStateHolder(), wholeViewport, serverSentData[ConverterService.TYPES_KEY] ?
-                                    serverSentData[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
+                        componentModel.getStateHolder(), wholeViewport, serverSentData[ConverterService.TYPES_KEY] ?
+                        serverSentData[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
                 }
                 if (serverSentData[ConverterService.TYPES_KEY] !== undefined) delete serverSentData[ConverterService.TYPES_KEY];
 
@@ -180,28 +180,36 @@ export class ComponentConverter implements IConverter {
                 retValue = internalState.requests;
                 internalState.requests = [];
             }
+            let added = false;
+            const propChange = { propertyChanges: {} };
+            const conversionInfo = newClientData.model.svy_types;
+            internalState.changes.forEach((change) => {
+                let value = change.value;
+                if (conversionInfo && conversionInfo[change.dp])
+                    value = this.converterService.convertFromClientToServer(value, conversionInfo[change.dp], change.oldValue);
+                else value = this.converterService.convertClientObject(value);
+                if (change.dataprovider) {
+                    const apply = { svyApply: {} };
+                    if (change.rowId) apply.svyApply[ViewportService.ROW_ID_COL_KEY] = change.rowId;
+                    apply.svyApply[ComponentConverter.PROPERTY_NAME_KEY] = change.dp;
+                    apply.svyApply[ComponentConverter.VALUE_KEY] = value;;
 
-            if (newClientData.model.svy_types) {
-                const model = newClientData.model;
-                const propertyChanges = {propertyChanges: {}};
-                let hasChanges = false;
-                for (const property of Object.keys(model.svy_types)) {
-                    const changes = this.converterService.convertFromClientToServer(model[property], model.svy_types[property], oldClientData?oldClientData.model[property]:null);
-                    if (changes) {
-                       if (!hasChanges) {
-                          hasChanges = true;
-                          retValue.push(propertyChanges);
-                        }
-                        propertyChanges.propertyChanges[property] = changes;
+                    retValue.push(apply);
+                } else {
+                    propChange.propertyChanges[change.dp] = value;
+                    if (!added) {
+                        retValue.push(propChange);
+                        added = true;
                     }
                 }
-            }
+            });
+            internalState.changes = [];
         }
         return retValue;
     }
 
     private generateWrapperHandler(handler: string, state: ComponentModel) {
-         const executeHandler = (type, args, row, name, model) => {
+        const executeHandler = (type, args, row, name, model) => {
             // TODO implement $uiBlocker
             // if ($uiBlocker.shouldBlockDuplicateEvents(name, model, type, row))
             // {
@@ -209,26 +217,28 @@ export class ComponentConverter implements IConverter {
             //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
             //     return $q.resolve(null);
             // }
-            const defered =new Deferred<{}> ();
-            const newargs = this.converterService.getEventArgs(args,type);
-            state.getStateHolder().requests.push({ handlerExec: {
-                eventType: type,
-                args: newargs,
-                rowId: row
-            }});
-             state.getStateHolder().notifyChangeListener();
+            const defered = new Deferred<{}>();
+            const newargs = this.converterService.getEventArgs(args, type);
+            state.getStateHolder().requests.push({
+                handlerExec: {
+                    eventType: type,
+                    args: newargs,
+                    rowId: row
+                }
+            });
+            state.getStateHolder().notifyChangeListener();
             // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
             return defered.promise;
         };
-        const eventHandler = (args: any,rowId: any) => executeHandler(handler, args, rowId, state.name, state.model);
+        const eventHandler = (args: any, rowId: any) => executeHandler(handler, args, rowId, state.name, state.model);
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         const wrapper = function() {
             return eventHandler(arguments, null);
         };
         wrapper.selectRecordHandler = (rowId: any) =>
             // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-             function() {
-                return eventHandler(arguments,rowId instanceof Function?rowId():rowId);
+            function() {
+                return eventHandler(arguments, rowId instanceof Function ? rowId() : rowId);
             };
         return wrapper;
     }
@@ -257,7 +267,7 @@ export class ComponentConverter implements IConverter {
                 // if the value changed and it wants to be in control of it's changes, or if the conversion info for this value changed
                 // (thus possibly preparing an old value for being change-aware without changing the value reference)
                 if ((oldModelValueForKey !== beanData[key] || oldConversionInfoForKey !== newConversionInfo[key])
-                        && beanData[key] && instanceOfChangeAwareValue(beanData[key])) {
+                    && beanData[key] && instanceOfChangeAwareValue(beanData[key])) {
                     // setChangeNotifier can be called now after the new conversion info and value are set (changeNotifierGenerator(key) will probably use the values in model
                     //  and that has to point to the new value if reference was changed)
                     // as setChangeNotifier on smart property types might end up calling the change notifier right away to announce it already has changes (because for example
@@ -278,7 +288,7 @@ export class ComponentConverter implements IConverter {
 export class ComponentModel extends ComponentCache implements IChangeAwareValue {
 
     public nestedPropertyChange: (property: string, value: any) => void;
-    public readonly mappedHandlers = new Map<string,{ (): Promise<any>;selectRecordHandler(rowId: any): () => Promise<any>}>();
+    public readonly mappedHandlers = new Map<string, { (): Promise<any>; selectRecordHandler(rowId: any): () => Promise<any> }>();
     private readonly stateHolder = new ComponentState();
 
     constructor(
@@ -305,19 +315,14 @@ export class ComponentModel extends ComponentCache implements IChangeAwareValue 
         this.stateHolder.notifyChangeListener();
     }
 
-    apply(property: string, propertyValue: any, rowId: any) {
-        const req = { svyApply: {} };
-
-        if (rowId) req.svyApply[ViewportService.ROW_ID_COL_KEY] = rowId;
-        req.svyApply[ComponentConverter.PROPERTY_NAME_KEY] = property;
-        req.svyApply[ComponentConverter.VALUE_KEY] = propertyValue;
-
-        this.stateHolder.requests.push(req);
+    sendChanges(dp: string, value: any, oldValue: any, rowId: any, dataprovider?: boolean) {
+        this.stateHolder.changes.push({ dp, value, oldValue, dataprovider, rowId });
         this.stateHolder.notifyChangeListener();
     }
 }
 
 class ComponentState extends FoundsetViewportState {
+    changes: Array<{ dp: string; value: any; oldValue: any; dataprovider: boolean; rowId?: any }> = [];
     viewportChangeListeners: Array<(any) => void>;
     fireChanges(viewportChanges: any) {
         this.viewportChangeListeners.forEach(listener => listener(viewportChanges));

@@ -388,8 +388,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return cell.api;
     }
 
-    datachange(component: Cell, property: string, value: any) {
-        component.state.apply(property, value, component.rowId);
+    datachange(component: Cell, property: string, value: any, dataprovider: boolean) {
+        const model = component.model;
+        const oldValue = model[property];
+        model[property] = value;
+        component.state.sendChanges(property, value, oldValue, component.rowId, dataprovider);
     }
 
     calculateCells() {
