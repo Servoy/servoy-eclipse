@@ -88,6 +88,7 @@ export class PowerGrid extends NGGridDirective {
     @Input() rowStyleClassFunc: any;
     @Input() groupStyleClass: any;
     @Input() groupRowRendererFunc: any;
+    @Input() responsiveHeight: number;
 
     @Input() _internalColumnState: any;
     @Output() _internalColumnStateChange = new EventEmitter();
@@ -912,15 +913,14 @@ export class PowerGrid extends NGGridDirective {
     }
 
     setHeight() {
-        // TODO:
-        // if (this.isResponsive()) {
-        //     if ($scope.model.responsiveHeight) {
-        //         gridDiv.style.height = $scope.model.responsiveHeight + 'px';
-        //     } else {
-        //         // when responsive height is 0 or undefined, use 100% of the parent container.
-        //         gridDiv.style.height = '100%';
-        //     }
-        // }
+        if (this.agGridElementRef && !this.servoyApi.isInAbsoluteLayout()) {
+            if (this.responsiveHeight) {
+                this.agGridElementRef.nativeElement.style.height = this.responsiveHeight + 'px';
+            } else {
+                // when responsive height is 0 or undefined, use 100% of the parent container.
+                this.agGridElementRef.nativeElement.style.height = '100%';
+            }
+        }
     }
 
     createJSEvent() {

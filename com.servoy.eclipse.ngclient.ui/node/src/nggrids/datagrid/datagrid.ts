@@ -94,6 +94,7 @@ export class DataGrid extends NGGridDirective {
     @Input() groupUseEntireRow: boolean;
     @Input() showGroupCount: boolean;
     @Input() styleClass: string;
+    @Input() responsiveHeight: number;
 
     @Input() toolPanelConfig: any;
     @Input() iconConfig: any;
@@ -2273,23 +2274,14 @@ export class DataGrid extends NGGridDirective {
         return '<i class="' + iconStyleClass + '"/>';
     }
 
-    isResponsive(): boolean {
-        // TODO:
-        // var parent = $element.parent();
-        // !parent.hasClass('svy-wrapper');
-        //return !$scope.$parent.absoluteLayout;
-        return false;
-    }
-
     setHeight() {
-        if (this.isResponsive()) {
-            // TODO:
-            // if ($scope.model.responsiveHeight) {
-            //     gridDiv.style.height = $scope.model.responsiveHeight + 'px';
-            // } else {
-            //     // when responsive height is 0 or undefined, use 100% of the parent container.
-            //     gridDiv.style.height = '100%';
-            // }
+        if (this.agGridElementRef && !this.servoyApi.isInAbsoluteLayout()) {
+            if (this.responsiveHeight) {
+                this.agGridElementRef.nativeElement.style.height = this.responsiveHeight + 'px';
+            } else {
+                // when responsive height is 0 or undefined, use 100% of the parent container.
+                this.agGridElementRef.nativeElement.style.height = '100%';
+            }
         }
     }
 
