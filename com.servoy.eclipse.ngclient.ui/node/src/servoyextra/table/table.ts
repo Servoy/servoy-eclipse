@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, AfterViewInit, Directive } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IFoundset } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
@@ -6,7 +6,18 @@ import { ResizeEvent } from 'angular-resizable-element';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { BehaviorSubject } from 'rxjs';
-import { auditTime, tap } from 'rxjs/operators';
+import { auditTime, tap, first } from 'rxjs/operators';
+
+@Directive({
+    selector: '[svyTableRow]'
+  })
+export class TableRow {
+
+    @Input() svyTableRow: number;
+
+    constructor(public elRef: ElementRef) {
+    }
+ }
 
 @Component({
     selector: 'servoyextra-table',
@@ -18,6 +29,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     // this is a hack for test, so that this has a none static child ref because the child is in a nested template
     @ViewChild('child', { static: false }) child: ElementRef;
     @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
+    @ViewChildren(TableRow) renderedRows: QueryList<TableRow>;
 
     @Input() foundset: IFoundset;
     @Input() columns;
@@ -70,13 +82,14 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     rendered: boolean;
     scrollToSelectionNeeded = true;
     averageRowHeight: number;
-    actualPageSize = -1;
     dataStream = new BehaviorSubject<any[]>([]);
     idx: number;
     changedPage = false;
     prevPage: number;
     private log: LoggerService;
     private removeListenerFunction: () => void;
+    minBuff: number;
+    maxBuff: number;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) {
         super(renderer, cdRef);
@@ -86,6 +99,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     svyOnInit() {
         super.svyOnInit();
         this.rendered = true;
+        this.minBuff = this.pageSize ? (this.pageSize + 1) * this.getNumberFromPxString(this.minRowHeight) : 200
+        this.maxBuff = this.pageSize ? this.minBuff * 2 : 400;
 
         this.computeTableWidth();
         this.computeTableHeight();
@@ -113,17 +128,12 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             }
         });
 
-        window.setTimeout(() => {
-            // first time we need to wait a bit before we scroll
-            this.computeAverageRowHeight();
-        }, 100);
-
         this.idx = 0;
         this.viewPort.scrolledIndexChange.pipe(
             auditTime(300),
             tap((currIndex: number) => {
-                this.loadMoreRecords(currIndex);
-                this.idx = Math.min(currIndex, this.foundset.serverSize);
+                this.idx = this.getFirstVisibleIndex();
+                this.loadMoreRecords(this.idx);
                 this.setCurrentPageIfNeeded();
             })
         ).subscribe();
@@ -134,31 +144,20 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         }, 50);
     }
     loadMoreRecords(currIndex: number, scroll?: boolean) {
-        if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.actualPageSize) ||
-            currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length) {
-            this.foundset.loadExtraRecordsAsync(currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
+        if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.pageSize) ||
+            currIndex + this.pageSize >= this.foundset.viewPort.rows.length) {
+            this.foundset.loadExtraRecordsAsync(currIndex + this.pageSize >= this.foundset.viewPort.rows.length ? this.pageSize : (-1) * this.pageSize, false).then(() => {
                 this.recordsLoaded();
                 if (scroll) this.scrollToSelection();
             });
         }
     }
 
-    computeAverageRowHeight() {
-        if (!this.rendered) return;
-        if (this.actualPageSize === -1) {
-            const children = this.getNativeElement().getElementsByTagName('tr');
-            const realRowCount = children.length;
-            if (realRowCount > 0) {
-                const firstChild = children[0];
-                const lastChild = children[children.length - 1];
-                this.averageRowHeight = Math.round((lastChild.offsetTop + lastChild.offsetHeight - firstChild.offsetTop) / realRowCount);
-            } else {
-                this.averageRowHeight = 25; // it won't be relevant anyway; it is equal to the default minRowHeight from .spec
-            }
-            const tbody = this.getNativeElement().getElementsByTagName('tbody')[0];
-            this.actualPageSize = Math.ceil(tbody.clientHeight / this.averageRowHeight) - 1;
-            this.setCurrentPageIfNeeded();
-        }
+    getFirstVisibleIndex(): number {
+        const offset = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
+         const first = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
+         if (first) return first.svyTableRow;
+        return -1;
     }
 
     calculateTableHeight(innerThis: ServoyExtraTable): void {
@@ -625,21 +624,32 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         return this.pageSize && this.foundset && (this.foundset.serverSize > this.pageSize || this.foundset.hasMoreRows);
     }
 
-    modifyPage() {
+    modifyPage(page: number) {
+        this.currentPage = page;
         this.changedPage = true;
-        const startIndex = this.actualPageSize * (this.currentPage - 1);
-        const endIndex = Math.min(this.foundset.serverSize, this.actualPageSize * this.currentPage);
-        const offset = this.getNativeElement().getElementsByTagName('tbody')[0].clientHeight * (this.currentPage - 1);
-        if (this.prevPage > this.currentPage) {
-            this.viewPort.scrollToOffset(offset - 2);// TODO SVY-15634
-        } else {
-            if (this.idx + this.actualPageSize > this.foundset.serverSize) {
-                this.viewPort.scrollToOffset(this.viewPort.measureScrollOffset() + Math.trunc(this.averageRowHeight * this.idx % this.actualPageSize));
-            } else {
-                this.viewPort.scrollToOffset(offset);
+        const startIndex = this.pageSize * (this.currentPage - 1);
+        if (!this.goToPage(startIndex)) {
+            if (this.prevPage < this.currentPage) {
+                this.renderedRows.last.elRef.nativeElement.scrollIntoView();
             }
+            else {
+                this.renderedRows.first.elRef.nativeElement.scrollIntoView();
+            }
+            this.renderedRows.changes.pipe(first())
+               .subscribe(() => {
+                    this.goToPage(startIndex);
+                });
+            }
+    }
+
+    goToPage(startIndex: number) {
+        const startPage: TableRow = this.renderedRows.find((element) => element.svyTableRow === startIndex);
+        if (startPage) {
+            startPage.elRef.nativeElement.scrollIntoView();
+            this.prevPage = this.currentPage;
+            return true;
         }
-        this.prevPage = this.currentPage;
+        return false;
     }
 
     getRowClass(idx: number) {
@@ -662,7 +672,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             if (event.key === 'PageUp') { // PAGE UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageUp) return;
 
-                const firstVisibleIndex = this.showPagination() ? this.actualPageSize * Math.trunc(selection / this.actualPageSize) : 1;
+                const firstVisibleIndex = this.showPagination() ? this.pageSize * Math.trunc(selection / this.pageSize) : 1;
                 fs.selectedRowIndexes = [firstVisibleIndex];
                 selectionChanged = (selection !== firstVisibleIndex);
                 this.log.spam('svy extra table * keyPressed; scroll on PG UP');
@@ -670,7 +680,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             } else if (event.key === 'PageDown') { // PAGE DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageDown) return;
 
-                let lastVisibleIndex = this.showPagination() ? this.actualPageSize * (Math.trunc(selection / this.actualPageSize) + 1) - 1 : (this.foundset.viewPort.rows.length - 1);
+                let lastVisibleIndex = this.showPagination() ? this.pageSize * (Math.trunc(selection / this.pageSize) + 1) - 1 : (this.foundset.viewPort.rows.length - 1);
                 if (lastVisibleIndex > fs.serverSize - 1) lastVisibleIndex = fs.serverSize - 1;
                 fs.selectedRowIndexes = [lastVisibleIndex];
                 selectionChanged = (selection !== lastVisibleIndex);
@@ -741,8 +751,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             return;
         }
         if (this.showPagination()) {
-            if (this.actualPageSize > 0) {
-                this.currentPage = Math.floor(this.idx / this.actualPageSize);
+            if (this.pageSize > 0) {
+                this.currentPage = Math.floor(this.idx / this.pageSize) + 1;
+                this.cdRef.detectChanges();
             } else {
                 window.setTimeout(() => {
                     this.setCurrentPageIfNeeded();
@@ -801,7 +812,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                     this.loadMoreRecords(this.lastSelectionFirstElement, true);
                 } else {
                     this.viewPort.scrollToOffset((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) * this.averageRowHeight);
-                    this.currentPage = Math.floor(this.lastSelectionFirstElement / this.actualPageSize);
+                    this.currentPage = Math.floor(this.lastSelectionFirstElement / this.pageSize);
                 }
             } else {
                 window.setTimeout(() => {

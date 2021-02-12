@@ -1,5 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ServoyExtraTable } from './table/table';
+import { ServoyExtraTable, TableRow } from './table/table';
 import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
@@ -31,6 +31,7 @@ import { LightboxModule } from 'ngx-lightbox';
 @NgModule({
     declarations: [
         ServoyExtraTable,
+        TableRow,
         ServoyExtraHtmlarea,
         ServoyExtraImageLabel,
         ServoyExtraFileUpload,
@@ -64,6 +65,7 @@ import { LightboxModule } from 'ngx-lightbox';
     providers: [AsyncPipe
     ],
     exports: [ServoyExtraTable,
+              TableRow,
               ServoyExtraHtmlarea,
               ServoyExtraImageLabel,
               ServoyExtraFileUpload,

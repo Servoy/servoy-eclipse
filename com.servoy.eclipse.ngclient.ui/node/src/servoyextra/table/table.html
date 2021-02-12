@@ -15,9 +15,9 @@
 		<tbody *ngIf="dataStream | async; let items">
 			<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()"
 				[itemSize]="getNumberFromPxString(minRowHeight)"
-				[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200"
-				[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400">
-				<tr cdk-row *cdkVirtualFor="let row of items; let r = index;"
+				[minBufferPx]="minBuff"
+				[maxBufferPx]="maxBuff">
+				<tr [svyTableRow]="r + foundset.viewPort.startIndex" cdk-row *cdkVirtualFor="let row of items; let r = index;"
 					(click)="selectRow(r + foundset.viewPort.startIndex, $event)" [ngClass]="getRowClass(r + foundset.viewPort.startIndex)">
 					<td cdk-cell *ngFor="let column of columns; let i = index;" [className]="'c' + i"
 						(click)="cellClick(r + foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
@@ -31,7 +31,7 @@
 		<tfoot>
 			<ngb-pagination *ngIf="showPagination()"
 				[ngClass]="{'svy-pagination': true, 'svy-nomargin': servoyApi.isInAbsoluteLayout()} " [(page)]="currentPage"
-				[pageSize]="actualPageSize" [collectionSize]="foundset.serverSize" (pageChange)="modifyPage()" [maxSize]="1"
+				[pageSize]="pageSize" [collectionSize]="foundset.serverSize" (pageChange)="modifyPage($event)" [maxSize]="1"
 				[ellipses]="false">
 			</ngb-pagination>
 		</tfoot>
