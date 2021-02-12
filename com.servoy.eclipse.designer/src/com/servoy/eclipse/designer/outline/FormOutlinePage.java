@@ -550,6 +550,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	public void setActionBars(IActionBars actionBars)
 	{
 		super.setActionBars(actionBars);
+		if (form.isResponsiveLayout()) return;
 		IMenuManager menuManager = actionBars.getMenuManager();
 		menuManager.add(GroupedOutlineViewToggleAction.addListener(this));
 	}
