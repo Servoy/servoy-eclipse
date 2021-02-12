@@ -539,7 +539,7 @@ export class PowerGrid extends NGGridDirective {
             if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
 
             // column sizing
-            if (column.width || column.width === 0) colDef.width = column.width;
+            if (column.width) colDef.width = column.width;
             if (column.maxWidth) colDef.maxWidth = column.maxWidth;
             if (column.minWidth || column.minWidth === 0) colDef.minWidth = column.minWidth;
 

@@ -313,7 +313,6 @@ export class DataGrid extends NGGridDirective {
                 }
             },
             defaultColDef: {
-                width: 0,
                 filter: false,
                 menuTabs: vMenuTabs,
                 valueGetter: this.displayValueGetter,
@@ -914,7 +913,7 @@ export class DataGrid extends NGGridDirective {
             // column grouping
             colDef.enableRowGroup = column.enableRowGroup;
             if (column.rowGroupIndex >= 0) colDef.rowGroupIndex = column.rowGroupIndex;
-            if (column.width || column.width === 0) colDef.width = column.width;
+            if (column.width) colDef.width = column.width;
 
             // tool panel
             if (column.enableToolPanel === false) colDef.suppressToolPanel = !column.enableToolPanel;
