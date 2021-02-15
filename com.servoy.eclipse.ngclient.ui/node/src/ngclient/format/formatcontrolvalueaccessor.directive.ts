@@ -25,6 +25,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 
 	private isKeyPressEventFired = false;
 	private oldInputValue = null;
+    private listeners = [];
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService) {}
 
@@ -94,16 +95,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     }
     
     private setFormat() {
+        this.listeners.forEach(lFn => lFn());
+        this.listeners = [];
         if (this.format) {
             if (this.format.uppercase || this.format.lowercase) {
-                this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase());
+                this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));
             }
             if (this.format.isNumberValidator || this.format.type === 'NUMBER' || this.format.type === 'INTEGER') {
-                this._renderer.listen(this._elementRef.nativeElement, 'keypress', (event) => {
+                this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'keypress', (event) => {
                     this.isKeyPressEventFired = true;
                     return this.formatService.testForNumbersOnly(event, null, this._elementRef.nativeElement, this.findmode, true, this.format, false);
-                });
-                this._renderer.listen(this._elementRef.nativeElement, 'input', (event) => this.inputFiredForNumbersCheck(event));
+                }));
+                this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', (event) => this.inputFiredForNumbersCheck(event)));
             }
             if (this.format.maxLength) {
                 this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
