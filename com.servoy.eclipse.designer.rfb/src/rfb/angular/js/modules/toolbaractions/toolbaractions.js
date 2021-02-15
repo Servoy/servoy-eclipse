@@ -821,7 +821,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 	$toolbar.add(btnClassicEditor, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 	
 	var btnShowErrors = {
-			text: "Show existing errors (if applicable)",
+			text: "Show errors console",
 			icon: "toolbaractions/icons/error.png",
 			disabledIcon: "toolbaractions/icons/disabled_error.png",
 			state: false,
