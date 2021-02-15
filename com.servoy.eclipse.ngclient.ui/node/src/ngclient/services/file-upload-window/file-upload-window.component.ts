@@ -56,7 +56,7 @@ export class FileUploadWindowComponent {
   }
 
   isMultiselect(): boolean {
-    return this.multiselect == true;
+    return this.multiselect === true;
   }
 
   isFileSelected(): boolean {
@@ -69,7 +69,7 @@ export class FileUploadWindowComponent {
 
   getFileIndex(f: File): number {
     for(let i = 0; i < this.uploadFiles.length; i++) {
-      if(f.name == this.uploadFiles[i].name) {
+      if(f.name === this.uploadFiles[i].name) {
         return i;
       }
     }

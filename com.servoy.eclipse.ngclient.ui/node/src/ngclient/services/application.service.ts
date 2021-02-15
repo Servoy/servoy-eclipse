@@ -16,23 +16,23 @@ import { ServerDataService } from './serverdata.service';
 
 @Injectable()
 export class ApplicationService {
-    private userProperties;
+    private userProperties: {[property: string]: any};
 
     constructor(private servoyService: ServoyService,
                             private localStorageService: LocalStorageService,
                             private localeService: LocaleService,
                             private windowRefService: WindowRefService,
                             private sabloService: SabloService,
-                            @Inject(DOCUMENT) private doc,
+                            @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
                             private serverData: ServerDataService) {
     }
 
-    public setLocale(language, country ) {
+    public setLocale(language: string, country: string ) {
         this.localeService.setLocale(language, country);
     }
 
-    public setStyleSheets(paths) {
+    public setStyleSheets(paths: string[]) {
        if (paths) {
            for (const path of paths) {
                const link: HTMLLinkElement = this.doc.createElement('link');
@@ -43,26 +43,26 @@ export class ApplicationService {
        }
     }
 
-    public getUserProperty(key) {
+    public getUserProperty(key: string) {
         return this.getUserProperties()[key];
     }
 
-    public setUserProperty(key, value) {
+    public setUserProperty(key: string, value: any) {
         const userProps = this.getUserProperties();
         if (value == null) delete userProps[key];
         else userProps[key] = value;
         this.localStorageService.set('userProperties', JSON.stringify(userProps));
     }
 
-    public getUIProperty(key) {
+    public getUIProperty(key: string) {
         return this.servoyService.getUIProperties().getUIProperty(key);
     }
 
-    public setUIProperty(key, value) {
+    public setUIProperty(key: string, value: any) {
         this.servoyService.getUIProperties().setUIProperty(key, value);
-        if (key == ClientPropertyConstants.WINDOW_BRANDING_ICON_32) {
+        if (key === ClientPropertyConstants.WINDOW_BRANDING_ICON_32) {
             this.setIcon(value, '32x32');
-        } else if (key == ClientPropertyConstants.WINDOW_BRANDING_ICON_192) {
+        } else if (key === ClientPropertyConstants.WINDOW_BRANDING_ICON_192) {
             this.setIcon(value, '192x192');
         }
     }
@@ -71,11 +71,11 @@ export class ApplicationService {
         return Object.getOwnPropertyNames(this.getUserProperties());
     }
 
-    public showMessage(message) {
+    public showMessage(message: string) {
         this.windowRefService.nativeWindow.alert(message);
     }
 
-    public showUrl(pUrl, target, targetOptions, timeout) {
+    public showUrl(pUrl: string, target: string, targetOptions: string, timeout: number) {
         let url = pUrl;
         // for now, if url starts with 'solutions' we replace it with 'solution'
         // in order for the security.logout to work, using the same server side code, on both ng1 and ng2
@@ -104,7 +104,7 @@ export class ApplicationService {
         }, timeout * 1000);
     }
 
-    public setStatusText(text) {
+    public setStatusText(text: string) {
         this.windowRefService.nativeWindow.status = text;
     }
 
@@ -133,9 +133,10 @@ export class ApplicationService {
         };
     }
 
-    public showInfoPanel(url, w, h, t, closeText) {
+    public showInfoPanel(url: string, w: number, h: number, t: number, closeText: string) {
         const infoPanel = document.createElement('div');
-        infoPanel.innerHTML ='<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 src=\''+ url +'\' width=\'100%\' height=\''+ (h - 25) +'\'></iframe><br><a href=\'#\' id =\'closePanelButton\'>'+ closeText +'</a>';
+        infoPanel.innerHTML ='<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 src=\''+ url +'\' width=\'100%\' height=\''+ (h - 25) +
+                                            '\'></iframe><br><a href=\'#\' id =\'closePanelButton\'>'+ closeText +'</a>';
         infoPanel.style.zIndex ='2147483647';
         infoPanel.id ='infoPanel';
         const width = window.innerWidth || document.body.offsetWidth;
@@ -144,19 +145,20 @@ export class ApplicationService {
         infoPanel.style.top = '10px';
         infoPanel.style.height = h +'px';
         infoPanel.style.width = w +'px';
-        document.body.appendChild(infoPanel);
-        document.getElementById("closePanelButton").addEventListener("click", function(event : MouseEvent){
-                document.getElementById("infoPanel").style.display="none";
+        this.doc.body.appendChild(infoPanel);
+        this.doc.getElementById('closePanelButton').addEventListener('click', (event: MouseEvent) => {
+                this.doc.getElementById('infoPanel').style.display='none';
                 event.preventDefault();
                 event.stopPropagation();
                 return false;
         });
-        setTimeout('document.getElementById(\"infoPanel\").style.display=\"none\"', t);
+        setTimeout(() => this.doc.getElementById('infoPanel').style.display='none', t);
     }
 
     public showDefaultLogin() {
         if (this.localStorageService.get('servoy_username') && this.localStorageService.get('servoy_password')) {
-            const promise = this.sabloService.callService('applicationServerService', 'login', {username : this.localStorageService.get('servoy_username'), password : this.localStorageService.get('servoy_password'), encrypted: true}, false);
+            const promise = this.sabloService.callService('applicationServerService', 'login',
+                    {username : this.localStorageService.get('servoy_username'), password : this.localStorageService.get('servoy_password'), encrypted: true}, false);
             promise.then((ok) => {
                 if (!ok) {
                     this.localStorageService.remove('servoy_username');
@@ -169,7 +171,7 @@ export class ApplicationService {
         }
     }
 
-    public showFileOpenDialog(url, title, multiselect, acceptFilter) {
+    public showFileOpenDialog(url: string, title: string, multiselect: boolean, acceptFilter: string ) {
         const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
         modalRef.componentInstance.url = url;
         modalRef.componentInstance.title = title;
@@ -180,7 +182,7 @@ export class ApplicationService {
         return this.servoyService.getSolutionSettings().solutionName;
     }
 
-    public trustAsHtml(beanModel) {
+    public trustAsHtml(beanModel: {clientProperty?: {trustDataAsHtml?: boolean}}) {
 
         if (beanModel && beanModel.clientProperty && beanModel.clientProperty.trustDataAsHtml) {
             return beanModel.clientProperty.trustDataAsHtml;
@@ -210,9 +212,9 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.location.protocol + '//' + this.windowRefService.nativeWindow.location.host + context;
     }
 
-    private setIcon(favicon, size) {
+    private setIcon(favicon: string, size: string) {
         const link: any = document.querySelector('link[rel*=\'icon\'][sizes=\'' + size + '\']');
-        if (link && link.href != favicon) {
+        if (link && link.href !== favicon) {
             link.href = favicon;
             document.getElementsByTagName('head')[0].appendChild(link);
         }

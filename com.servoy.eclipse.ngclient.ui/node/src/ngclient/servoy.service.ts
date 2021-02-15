@@ -4,7 +4,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
 import { WindowRefService } from '../sablo/util/windowref.service';
-import { LoggerService, LoggerFactory } from '../sablo/logger.service';
+import { LoggerFactory } from '../sablo/logger.service';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
@@ -28,19 +28,19 @@ import { ClientFunctionConverter } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 
 class UIProperties {
-    private uiProperties;
+    private uiProperties: { [property: string]: any};
 
     constructor(private sessionStorageService: SessionStorageService) {
     }
 
-    public getUIProperty(key) {
+    public getUIProperty(key: string) {
         let value = this.getUiProperties()[key];
         if (value === undefined) {
             value = null;
         }
         return value;
     }
-    public setUIProperty(key, value) {
+    public setUIProperty(key: string, value: any) {
         const uiProps = this.getUiProperties();
         if (value == null) delete uiProps[key];
         else uiProps[key] = value;
@@ -76,7 +76,6 @@ export class ServoyService {
     private uiProperties: UIProperties;
 
     private findModeShortCutCallback: any = null;
-    private log: LoggerService;
 
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
@@ -91,7 +90,6 @@ export class ServoyService {
         logFactory: LoggerFactory,
         viewportService: ViewportService) {
 
-        this.log = logFactory.getLogger('ServoyService');
         this.uiProperties = new UIProperties(sessionStorageService);
         const dateConverter = new DateConverter();
         converterService.registerCustomPropertyHandler('svy_date', dateConverter);
@@ -114,7 +112,7 @@ export class ServoyService {
         if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())[1];
         else this.solutionSettings.solutionName = solName;
         this.solutionSettings.windowName = this.sabloService.getWindownr();
-        let recordingPrefix;
+        let recordingPrefix: string;
         if (this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1) {
             recordingPrefix = '/recording/websocket';
 
@@ -123,7 +121,7 @@ export class ServoyService {
             { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix);
         // TODO find mode and anchors handling (anchors should be handles completely at the server side,
         // css positioning should go over the line)
-        wsSession.onMessageObject((msg, conversionInfo) => {
+        wsSession.onMessageObject((msg: {clientnr?: number; windownr?: string}) => {
 
             if (msg.clientnr && recordingPrefix) {
                 const btn = this.windowRefService.nativeWindow.document.createElement('A')  as HTMLAnchorElement;      // Create a <button> element
@@ -141,7 +139,7 @@ export class ServoyService {
             }
         });
 
-        wsSession.onopen((evt) => {
+        wsSession.onopen(() => {
             // update the main app window with the right size
             wsSession.callService('$windowService', 'resize',
                 { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true);
@@ -188,15 +186,6 @@ export class ServoyService {
             this.findModeShortCutCallback = null;
         }
     }
-}
-
-
-
-class AnchorConstants {
-    public static readonly NORTH = 1;
-    public static readonly EAST = 2;
-    public static readonly SOUTH = 4;
-    public static readonly WEST = 8;
 }
 
 export class SessionProblem {

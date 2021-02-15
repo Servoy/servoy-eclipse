@@ -14,7 +14,7 @@ import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
-import { ClientFunctionService } from './clientfunction.service';
+import { FormSettings } from '../types';
 
 @Injectable()
 export class WindowService {
@@ -57,7 +57,7 @@ export class WindowService {
 
     public updateController(formName: string, formStructure: string) {
         const formState = JSON.parse(formStructure)[formName];
-        this.formService.createFormCache(formName, formState)
+        this.formService.createFormCache(formName, formState);
     }
 
     public create(name: string, type: number) {
@@ -343,11 +343,11 @@ export class WindowService {
         }
     }
 
-    centerWindow(formSize) {
+    centerWindow(formSize: {width: number; height: number}) {
         // var body = $( 'body' );
         const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
         const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
-        let top; let left;
+        let top: number; let left: number;
         // bodyTop = body.position().top + parseInt( body.css( 'paddingTop' ), 10 );
         left = (windowWidth / 2) - (formSize.width / 2);
         top = (windowHeight / 2) - (formSize.height / 2);
@@ -359,7 +359,7 @@ export class WindowService {
         return { x: left, y: top };
     }
 
-    public switchForm(name, form, navigatorForm) {
+    public switchForm(name: string, form: FormSettings, navigatorForm: FormSettings) {
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.switchForm) {
@@ -400,7 +400,7 @@ export class WindowService {
     }
 
     public reload() {
-        window.location.reload(true);
+        window.location.reload();
     }
 
     public destroyController(formName: string) {
@@ -420,7 +420,6 @@ export class WindowService {
     private restoreWindows() {
         const window0 = this.sessionStorageService.get('window0');
         if (window0 && window0.showForm) {
-            const isConnected = false;
             // wait until the server is connected
             const interval = setInterval(() => {
                 if (this.webSocketService.isConnected()) {

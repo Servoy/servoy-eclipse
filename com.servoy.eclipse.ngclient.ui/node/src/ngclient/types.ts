@@ -6,14 +6,14 @@ export class FormSettings {
 
 export class FormCache {
     public navigatorForm: FormSettings;
-    public size : Dimension;
+    public size: Dimension;
     private componentCache: Map<string, ComponentCache>;
     private _mainStructure: StructureCache;
     private _formComponents: Map<string, FormComponentCache>;
     private _parts: Array<PartCache>;
     private conversionInfo = {};
 
-    constructor(readonly formname: string, size : Dimension) {
+    constructor(readonly formname: string, size: Dimension) {
         this.size = size;
         this.componentCache = new Map();
         this._parts = [];
@@ -58,7 +58,7 @@ export class FormCache {
     public getConversionInfo(beanname: string) {
         return this.conversionInfo[beanname];
     }
-    public addConversionInfo(beanname: string, conversionInfo) {
+    public addConversionInfo(beanname: string, conversionInfo: { [property: string]: string}) {
         const beanConversion = this.conversionInfo[beanname];
         if (beanConversion == null) {
             this.conversionInfo[beanname] = conversionInfo;
@@ -150,7 +150,7 @@ export class FormComponentCache implements IComponentCache {
             public readonly responsive: boolean,
             public readonly layout: { [property: string]: string },
             public readonly formComponentProperties: FormComponentProperties,
-            public readonly hasFoundset,
+            public readonly hasFoundset: boolean,
             items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
             if ( !items ) this.items = [];
             else this.items = items;
@@ -172,6 +172,6 @@ export class FormComponentProperties {
 }
 
 export class Dimension{
-    public width : number;
+    public width: number;
     public height: number;
 }

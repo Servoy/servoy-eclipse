@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';

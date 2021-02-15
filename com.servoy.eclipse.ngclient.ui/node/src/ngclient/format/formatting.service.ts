@@ -25,7 +25,7 @@ export class FormattingService {
 
     // formatting stufff
     public format(data: any, format: Format, useEditFormat: boolean): string {
-        let formatString = useEditFormat ? format.edit : format.display;
+        const formatString = useEditFormat ? format.edit : format.display;
 
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
             if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
@@ -49,7 +49,7 @@ export class FormattingService {
     }
 
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
-        let code;
+        let code: number;
 
         if (!event) event = window.event as KeyboardEvent;
         if (!event) return false;
@@ -61,30 +61,29 @@ export class FormattingService {
 	// test numbers only
 	public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
 		if (!vFindMode && vCheckNumbers) {
-			if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() == 'INPUT') {
+			if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
 				//do not looses focus, just apply the format and push value
 				vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
-			} else if (vSvyFormat.type == 'INTEGER') {
-				var currentLanguageNumeralSymbols = numbro.languageData();
+			} else if (vSvyFormat.type === 'INTEGER') {
+				const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar == undefined) {
+				if(keyChar === undefined) {
 					return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
 							.symbol,
 							vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
 				} else {
-					return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
-							.symbol,
-							vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+					return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                    currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
 				}
-			} else if (vSvyFormat.type == 'NUMBER' || ((vSvyFormat.type == 'TEXT') && vSvyFormat.isNumberValidator)) {
-				var currentLanguageNumeralSymbols = numbro.languageData();
+			} else if (vSvyFormat.type === 'NUMBER' || ((vSvyFormat.type === 'TEXT') && vSvyFormat.isNumberValidator)) {
+				const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar == undefined) {
-					return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency.symbol,
-						vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+				if(keyChar === undefined) {
+					return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
 				} else {
-					return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency.symbol,
-						vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+					return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
 				}
 			}
 		}
@@ -122,7 +121,7 @@ export class FormattingService {
             return d;
         }
         return data;
-    }    
+    }
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
 		if (data === '') return data;
@@ -140,7 +139,7 @@ export class FormattingService {
 			// replace the literals
 			const parts = format.split('\'');
 			for (let i=0;i<parts.length;i++) {
-				if (i % 2 == 1) {
+				if (i % 2 === 1) {
 					data = data.replace(new RegExp(parts[i], 'g'), '');
 				}
 			}
@@ -152,7 +151,6 @@ export class FormattingService {
 
 	private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
 		let key;
-		let keychar;
 
 		if (window.event) {
 			key = window.event['keyCode'];
@@ -162,12 +160,12 @@ export class FormattingService {
 			return true;
 		}
 
-		if ((key == null) || (key == 0) || (key == 8) || (key == 9) || (key == 13) || (key == 27) || (e.ctrlKey && key == 97) || (e.ctrlKey && key == 99) || (e.ctrlKey && key ==
-				118) || (e.ctrlKey && key == 120)) { //added CTRL-A, X, C and V
+		if ((key == null) || (key === 0) || (key === 8) || (key === 9) || (key === 13) || (key === 27) || (e.ctrlKey && key === 97) || (e.ctrlKey && key === 99) ||
+            (e.ctrlKey && key === 118) || (e.ctrlKey && key === 120)) { //added CTRL-A, X, C and V
 			return true;
 		}
 
-		keychar = String.fromCharCode(key);
+		const keychar = String.fromCharCode(key);
 		return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
 
 	}
@@ -176,16 +174,16 @@ export class FormattingService {
 		const value = vElement.value;
 		if (mlength > 0 && value) {
 			let counter = 0;
-			if (('0123456789').indexOf(keychar) != -1) counter++;
+			if (('0123456789').indexOf(keychar) !== -1) counter++;
 			const stringLength = value.length;
-			for (var i = 0; i < stringLength; i++) {
-				if (('0123456789').indexOf(value.charAt(i)) != -1) counter++;
+			for (let i = 0; i < stringLength; i++) {
+				if (('0123456789').indexOf(value.charAt(i)) !== -1) counter++;
 			}
 			const selectedTxt = this.getSelectedText(vElement);
 			if (selectedTxt) {
 				// selection will get deleted/replaced by typed key
-				for (var i = 0; i < selectedTxt.length; i++) {
-					if (('0123456789').indexOf(selectedTxt.charAt(i)) != -1) counter--;
+				for (let i = 0; i < selectedTxt.length; i++) {
+					if (('0123456789').indexOf(selectedTxt.charAt(i)) !== -1) counter--;
 				}
 			}
 			if (counter > mlength) return false;
@@ -193,13 +191,13 @@ export class FormattingService {
 
 		if ((('-0123456789').indexOf(keychar) > -1)) {
 			return true;
-		} else if (decimal && (keychar == decimalChar)) {
+		} else if (decimal && (keychar === decimalChar)) {
 			return true;
-		} else if (keychar == groupingChar) {
+		} else if (keychar === groupingChar) {
 			return true;
-		} else if (keychar == currencyChar) {
+		} else if (keychar === currencyChar) {
 			return true;
-		} else if (keychar == percentChar) {
+		} else if (keychar === percentChar) {
 			return true;
 		}
 		return false;
