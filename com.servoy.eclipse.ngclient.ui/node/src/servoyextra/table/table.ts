@@ -1,6 +1,6 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, AfterViewInit, Directive } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
-import { IFoundset } from '../../sablo/spectypes.service';
+import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ResizeEvent } from 'angular-resizable-element';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
@@ -32,33 +32,32 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     @ViewChildren(TableRow) renderedRows: QueryList<TableRow>;
 
     @Input() foundset: IFoundset;
-    @Input() columns;
+    @Input() columns: string | any[];
     @Input() sortDirection: string;
     @Input() enableSort = true;
     @Input() sortStyleClass: string;
     @Input() sortdownClass = 'table-servoyextra-sort-down';
     @Input() sortupClass = 'table-servoyextra-sort-up';
     @Input() styleClass: string;
-    @Input() servoyApi;
     @Input() minRowHeight: any;
     @Input() enableColumnResize: boolean;
     @Input() pageSize: number;
     @Input() rowStyleClassDataprovider: IFoundset;
-    @Input() tabSeq;
-    @Input() responsiveHeight;
-    @Input() responsiveDynamicHeight;
+    @Input() tabSeq: number;
+    @Input() responsiveHeight: number;
+    @Input() responsiveDynamicHeight: boolean;
     @Input() lastSelectionFirstElement: number;
     @Input() keyCodeSettings: { arrowUp: boolean; arrowDown: boolean; end: boolean; enter: boolean; home: boolean; pageDown: boolean; pageUp: boolean };
 
-    @Input() onViewPortChanged;
-    @Input() onCellClick;
-    @Input() onCellDoubleClick;
-    @Input() onCellRightClick;
-    @Input() onHeaderClick;
-    @Input() onHeaderRightClick;
-    @Input() onColumnResize;
-    @Input() onFocusGainedMethodID;
-    @Input() onFocusLostMethodID;
+    @Input() onViewPortChanged: (start: number, end: number) => void;
+    @Input() onCellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
+    @Input() onCellDoubleClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
+    @Input() onCellRightClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
+    @Input() onHeaderClick: (colIdx:number,  sortDirection: string, e?: MouseEvent, columnId?: string  ) => Promise<string>;
+    @Input() onHeaderRightClick: (colIdx:number,  sortDirection: string, e?: MouseEvent, columnId?: string  ) => void;
+    @Input() onColumnResize: (event?: ResizeEvent) => void;
+    @Input() onFocusGainedMethodID: (event: Event) => void;
+    @Input() onFocusLostMethodID: (event?: Event) => void;
 
     timeoutID: number;
     lastClicked: number;
@@ -131,10 +130,10 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         this.idx = 0;
         this.viewPort.scrolledIndexChange.pipe(
             auditTime(300),
-            tap((currIndex: number) => {
+            tap(() => {
                 this.idx = this.getFirstVisibleIndex();
                 this.loadMoreRecords(this.idx);
-                this.setCurrentPageIfNeeded();
+				this.setCurrentPageIfNeeded();
             })
         ).subscribe();
 
@@ -155,8 +154,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     getFirstVisibleIndex(): number {
         const offset = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
-         const first = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
-         if (first) return first.svyTableRow;
+        const first = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
+        if (first) return first.svyTableRow;
         return -1;
     }
 
@@ -236,7 +235,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         }
     }
 
-    cellClick(rowIdx: number, colIdx: number, record: any, e: Event, columnId: string) {
+    cellClick(rowIdx: number, colIdx: number, record: any, e: MouseEvent, columnId: string) {
         if (this.onCellDoubleClick && this.onCellClick) {
             const innerThis: ServoyExtraTable = this;
             if (innerThis.lastClicked === rowIdx * colIdx) {
@@ -438,7 +437,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     public getSortClass(column: number) {
         let sortClass = 'table-servoyextra-sort-hide';
         if (this.enableSort) {
-            let direction;
+            let direction: string;
             let isGetSortFromSQL = this.sortColumnIndex < 0;
             if (column === this.sortColumnIndex) {
                 direction = this.sortDirection;
@@ -787,7 +786,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     private sortColumnsChanged(event: FoundsetChangeEvent) {
         let sortSet = false;
-        const sortColumnsA = this.foundset.sortColumns.split(/[\s,]+/);
+        const sortColumnsA = event.sortColumnsChanged.newValue.split(/[\s,]+/);
         if (sortColumnsA.length >= 2) {
             for (let i = 0; i < this.columns.length; i++) {
                 if (this.columns[i].dataprovider && sortColumnsA[0] === this.columns[i].dataprovider.idForFoundset) {
@@ -880,7 +879,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         this.skipOnce = false;
     }
 
-    private headerClicked(i: number, event?: Event): void {
+    private headerClicked(i: number, event?: MouseEvent): void {
         this.onHeaderClick(i, this.sortDirection, event, this.columns[i].id)
             .then((ret: string) => {
                 if (ret === 'override')
