@@ -1,5 +1,5 @@
 
-import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
@@ -17,7 +17,7 @@ import { Format, FormattingService } from './formatting.service';
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
     @Input('svyFormat') format: Format;
-    @Input('type') inputType: string;
+    @Input() type: string;
     @Input() findmode: boolean;
 
     private hasFocus = false;
@@ -90,10 +90,44 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 		this.setFormat();
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
+    ngOnChanges(): void {
         this.setFormat();
     }
-    
+
+	registerOnChange(fn: any) {
+        this.onChangeCallback = fn;
+    }
+
+    registerOnTouched(fn: any) {
+        this.onTouchedCallback = fn;
+    }
+
+
+    writeValue(value: any): void {
+        this.realValue = value;
+         if (value && this.format) {
+             let data = value;
+             if (!this.findmode) {
+                data = this.type === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength):data;
+                 let useEdit = !this.format.display;
+                 if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
+                 try {
+                     data = this.formatService.format(data, this.format, useEdit);
+                 } catch (e) {
+                     console.log(e);
+                 }
+                 if (data && this.format.type === 'TEXT') {
+                     if (this.format.uppercase) data = data.toUpperCase();
+                     else if (this.format.lowercase) data = data.toLowerCase();
+                 }
+             }
+             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+         } else {
+             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value?value:'');
+         }
+	 }
+
+
     private setFormat() {
         this.listeners.forEach(lFn => lFn());
         this.listeners = [];
@@ -117,39 +151,6 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this.writeValue(this.realValue);
         }
     }
-
-	registerOnChange(fn: any) {
-        this.onChangeCallback = fn;
-    }
-
-    registerOnTouched(fn: any) {
-        this.onTouchedCallback = fn;
-    }
-
-
-    writeValue(value: any): void {
-        this.realValue = value;
-         if (value && this.format) {
-             let data = value;
-             if (!this.findmode) {
-                data = this.inputType === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength):data;
-                 let useEdit = !this.format.display;
-                 if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
-                 try {
-                     data = this.formatService.format(data, this.format, useEdit);
-                 } catch (e) {
-                     console.log(e);
-                 }
-                 if (data && this.format.type === 'TEXT') {
-                     if (this.format.uppercase) data = data.toUpperCase();
-                     else if (this.format.lowercase) data = data.toLowerCase();
-                 }
-             }
-             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
-         } else {
-             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value?value:'');
-         }
-	 }
 
 	 // lower and upper case handling
 
