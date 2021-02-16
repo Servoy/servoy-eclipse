@@ -30,7 +30,7 @@
 		</tbody>
 		<tfoot>
 			<ngb-pagination *ngIf="showPagination()"
-				[ngClass]="{'svy-pagination': true, 'svy-nomargin': servoyApi.isInAbsoluteLayout()} " [(page)]="currentPage"
+				[ngClass]="{'svy-pagination': true, 'svy-nomargin': servoyApi.isInAbsoluteLayout()} " [page]="currentPage"
 				[pageSize]="pageSize" [collectionSize]="foundset.serverSize" (pageChange)="modifyPage($event)" [maxSize]="1"
 				[ellipses]="false">
 			</ngb-pagination>

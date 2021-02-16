@@ -814,7 +814,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                     this.loadMoreRecords(this.lastSelectionFirstElement, true);
                 } else {
                     this.viewPort.scrollToOffset((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) * this.averageRowHeight);
-                    this.currentPage = Math.floor(this.lastSelectionFirstElement / this.pageSize);
+                    this.currentPage = Math.floor(this.lastSelectionFirstElement / this.pageSize) + 1;
+                    this.cdRef.detectChanges();
                 }
             } else {
                 window.setTimeout(() => {
