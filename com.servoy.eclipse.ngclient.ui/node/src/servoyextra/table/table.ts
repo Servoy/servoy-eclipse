@@ -137,11 +137,12 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             })
         ).subscribe();
         this.renderedRows.changes.subscribe(() => {
-            this.averageRowHeight = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
-            console.log(this.averageRowHeight);
-            this.minBuff = this.pageSize ? (this.pageSize + 1) * this.averageRowHeight : 200
-            this.maxBuff = this.minBuff * 2;
-
+           const newAvg = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
+           if (newAvg !== this.averageRowHeight) {
+                this.averageRowHeight = newAvg;
+                if (this.responsiveDynamicHeight) this.computeTableHeight();
+           }
+           console.log(this.averageRowHeight);
         });
 
         setTimeout(() => {
@@ -852,11 +853,11 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             }
             if (this.columns) {
                 if (this.responsiveDynamicHeight) {
-                    // TODO let h = paginationHeight + this.getNativeElement().clientHeight;
+                    const headerHeight = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
+                    const height = headerHeight + this.pageSize  * this.averageRowHeight + paginationHeight;
                     if (this.responsiveHeight === 0) {
-                        // this case does not really work for ng1
-                        this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', '100%');
+                        this.renderer.setStyle(this.getNativeElement(), 'height', height + 'px');
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', height + 'px');
                     } else {
                         this.renderer.setStyle(this.getNativeElement(), 'height', this.responsiveHeight + 'px');
                         this.renderer.setStyle(this.getNativeElement(), 'max-height', this.responsiveHeight + 'px');
