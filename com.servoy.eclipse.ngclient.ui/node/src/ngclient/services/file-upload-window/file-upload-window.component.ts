@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { I18NProvider } from '../../../ngclient/servoy_public';
 
 @Component({
-  selector: 'app-file-upload-window',
+  selector: 'servoycore-file-upload-window',
   templateUrl: './file-upload-window.component.html',
   styleUrls: ['./file-upload-window.component.css']
 })
@@ -81,13 +81,14 @@ export class FileUploadWindowComponent {
     if(fileIdx > -1) this.uploadFiles.splice(fileIdx, 1);
   }
 
-  fileChange($event): void {
+  fileChange($event: Event): void {
     if(!this.isMultiselect()) this.uploadFiles.length = 0;
-    const fileList: FileList = $event.target.files;
-    for(let i = 0; i < fileList.length; i++) {
-      if(this.getFileIndex(fileList[i]) == -1) this.uploadFiles.push(fileList[i]);
+    const target = $event.target as HTMLInputElement;
+    const fileList: FileList = target.files;
+    for (const key of Object.keys(fileList)) {
+      if(this.getFileIndex(fileList[key]) === -1) this.uploadFiles.push(fileList[key]);
     }
-    $event.target.value = '';
+    target.value = '';
   }
 
   getAcceptFilter(): string {
@@ -99,15 +100,15 @@ export class FileUploadWindowComponent {
     this.progress = 0;
     this.errorText = '';
     const formData = new FormData();
-    for(let i = 0; i < this.uploadFiles.length; i++) {
-      formData.append('uploads[]', this.uploadFiles[i], this.uploadFiles[i].name);
+    for(const key of Object.keys(this.uploadFiles)) {
+      formData.append('uploads[]', this.uploadFiles[key], this.uploadFiles[key].name);
     }
 
     this.http.post(this.url, formData, { reportProgress: true, observe: 'events' })
     .subscribe(
         data => {
           const r: any = data as any;
-          if (r.type == HttpEventType.UploadProgress) {
+          if (r.type === HttpEventType.UploadProgress) {
             const current = 100.0 * r.loaded / r.total;
             if (current < this.progress) {
               // unsubscribe ?
@@ -127,10 +128,10 @@ export class FileUploadWindowComponent {
 //    .add(() => this.uploadBtn.nativeElement.disabled = false);//teardown
   }
 
-  getProgress = function(postFix): string {
+  getProgress(postFix: string): string {
     if (this.progress) return Math.round(this.progress) + postFix;
     return '';
-  };
+  }
 
   dismiss(): void {
     if(!this.isUploading) this.activeModal.close();

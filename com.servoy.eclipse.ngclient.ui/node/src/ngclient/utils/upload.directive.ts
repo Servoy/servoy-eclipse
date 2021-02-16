@@ -18,7 +18,7 @@ export class UploadDirective implements OnInit {
     }
 
     @HostListener('click') click(e: Event) {
-        this.appService.showFileOpenDialog(this.url, 'Please select a file', false, null);
+        this.appService.showFileOpenDialog('Please select a file', false, null, this.url);
     }
 
     ngOnInit(): void {

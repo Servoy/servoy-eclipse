@@ -13,6 +13,7 @@ import { FileUploadWindowComponent } from './file-upload-window/file-upload-wind
 import { LocalStorageService } from '../../sablo/webstorage/localstorage.service';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
+import { SvyUtilsService } from './utils.service';
 
 @Injectable()
 export class ApplicationService {
@@ -25,7 +26,8 @@ export class ApplicationService {
                             private sabloService: SabloService,
                             @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
-                            private serverData: ServerDataService) {
+                            private serverData: ServerDataService,
+                             private utilsService: SvyUtilsService) {
     }
 
     public setLocale(language: string, country: string ) {
@@ -171,13 +173,17 @@ export class ApplicationService {
         }
     }
 
-    public showFileOpenDialog(url: string, title: string, multiselect: boolean, acceptFilter: string ) {
+    public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string ) {
+        if (!url) {
+           url = this.utilsService.generateUploadUrl(null, null, null);
+        }
         const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
         modalRef.componentInstance.url = url;
         modalRef.componentInstance.title = title;
         modalRef.componentInstance.multiselect = multiselect;
         modalRef.componentInstance.filter = acceptFilter;
     }
+
     public getSolutionName() {
         return this.servoyService.getSolutionSettings().solutionName;
     }
