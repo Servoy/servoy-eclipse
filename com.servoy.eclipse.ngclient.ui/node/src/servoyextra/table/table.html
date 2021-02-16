@@ -14,7 +14,7 @@
 		</thead>
 		<tbody *ngIf="dataStream | async; let items">
 			<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()"
-				[itemSize]="getNumberFromPxString(minRowHeight)"
+				[itemSize]="averageRowHeight"
 				[minBufferPx]="minBuff"
 				[maxBufferPx]="maxBuff">
 				<tr [svyTableRow]="r + foundset.viewPort.startIndex" cdk-row *cdkVirtualFor="let row of items; let r = index;"

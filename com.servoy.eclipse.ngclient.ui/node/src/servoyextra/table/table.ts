@@ -80,7 +80,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     currentPage = 1;
     rendered: boolean;
     scrollToSelectionNeeded = true;
-    averageRowHeight: number;
+    averageRowHeight = 25;
     dataStream = new BehaviorSubject<any[]>([]);
     idx: number;
     changedPage = false;
@@ -136,6 +136,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 				this.setCurrentPageIfNeeded();
             })
         ).subscribe();
+        this.renderedRows.changes.subscribe(()=> {
+            this.averageRowHeight = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
+        });
 
         setTimeout(() => {
             this.dataStream.next(this.foundset.viewPort.rows);
