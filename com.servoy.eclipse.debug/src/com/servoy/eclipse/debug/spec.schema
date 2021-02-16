@@ -772,7 +772,6 @@
 		[
 		"name",
 		"displayName",
-		"definition",
 		"version"
 	],
 	"additionalProperties": false
