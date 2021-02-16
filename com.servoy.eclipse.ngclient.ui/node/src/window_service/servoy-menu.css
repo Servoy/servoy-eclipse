@@ -50,3 +50,7 @@
 .svy-popup-menu{
     line-height: normal;
 }
+
+.svy-popup-menu .dropdown-item{
+    cursor: pointer;
+}
