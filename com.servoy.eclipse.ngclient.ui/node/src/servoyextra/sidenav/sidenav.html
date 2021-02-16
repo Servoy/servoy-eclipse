@@ -98,7 +98,7 @@
          [ngStyle]="getContainerStyle()"
          [ngClass]="{'svy-sidenav-right': slidePosition == 'right', 'svy-sidenav-static': slidePosition == 'static' , 'svy-sidenav-left': slidePosition == 'left' }"
          [sabloTabseq]="tabSeq"
-         [sabloTabseqConfig]="{container: true, reserverGap: 50}">
+         [sabloTabseqConfig]="{container: true, reservedGap: 50}">
             <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
     </div>
 </div>

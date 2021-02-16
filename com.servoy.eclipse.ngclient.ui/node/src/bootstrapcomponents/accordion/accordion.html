@@ -1,4 +1,4 @@
-<ngb-accordion [activeIds]="getSelectedTabId()" (panelChange)="onTabChange($event)"  class="bts-accordion"  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reserverGap: 50}">
+<ngb-accordion [activeIds]="getSelectedTabId()" (panelChange)="onTabChange($event)"  class="bts-accordion"  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reservedGap: 50}">
     <ngb-panel *ngFor="let tab of tabs;let i = index" [disabled]="tab.disabled || !tab.containedForm" [id]="tab._id">
       <ng-template ngbPanelTitle>
       	<div (click)="tabClicked(tab, i , $event)">
