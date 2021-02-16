@@ -10,14 +10,14 @@ import { auditTime, tap, first } from 'rxjs/operators';
 
 @Directive({
     selector: '[svyTableRow]'
-  })
+})
 export class TableRow {
 
     @Input() svyTableRow: number;
 
     constructor(public elRef: ElementRef) {
     }
- }
+}
 
 @Component({
     selector: 'servoyextra-table',
@@ -53,8 +53,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     @Input() onCellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
     @Input() onCellDoubleClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
     @Input() onCellRightClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
-    @Input() onHeaderClick: (colIdx:number,  sortDirection: string, e?: MouseEvent, columnId?: string  ) => Promise<string>;
-    @Input() onHeaderRightClick: (colIdx:number,  sortDirection: string, e?: MouseEvent, columnId?: string  ) => void;
+    @Input() onHeaderClick: (colIdx: number, sortDirection: string, e?: MouseEvent, columnId?: string) => Promise<string>;
+    @Input() onHeaderRightClick: (colIdx: number, sortDirection: string, e?: MouseEvent, columnId?: string) => void;
     @Input() onColumnResize: (event?: ResizeEvent) => void;
     @Input() onFocusGainedMethodID: (event: Event) => void;
     @Input() onFocusLostMethodID: (event?: Event) => void;
@@ -99,7 +99,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         super.svyOnInit();
         this.rendered = true;
         this.minBuff = this.pageSize ? (this.pageSize + 1) * this.getNumberFromPxString(this.minRowHeight) : 200
-        this.maxBuff = this.pageSize ? this.minBuff * 2 : 400;
+        this.maxBuff = this.minBuff * 2;
 
         this.computeTableWidth();
         this.computeTableHeight();
@@ -133,11 +133,15 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             tap(() => {
                 this.idx = this.getFirstVisibleIndex();
                 this.loadMoreRecords(this.idx);
-				this.setCurrentPageIfNeeded();
+                this.setCurrentPageIfNeeded();
             })
         ).subscribe();
-        this.renderedRows.changes.subscribe(()=> {
+        this.renderedRows.changes.subscribe(() => {
             this.averageRowHeight = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
+            console.log(this.averageRowHeight);
+            this.minBuff = this.pageSize ? (this.pageSize + 1) * this.averageRowHeight : 200
+            this.maxBuff = this.minBuff * 2;
+
         });
 
         setTimeout(() => {
@@ -638,19 +642,23 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 this.renderedRows.first.elRef.nativeElement.scrollIntoView();
             }
             this.renderedRows.changes.pipe(first())
-               .subscribe(() => {
+                .subscribe(() => {
                     this.goToPage(startIndex);
                 });
-            }
+        }
     }
 
     goToPage(startIndex: number) {
         const startPage: TableRow = this.renderedRows.find((element) => element.svyTableRow === startIndex);
         if (startPage) {
             startPage.elRef.nativeElement.scrollIntoView();
+            console.log(startPage.elRef.nativeElement);
+            console.log(this.foundset.viewPort);
+            console.log(this.renderedRows.length + " " + this.minBuff + " " + this.maxBuff + " " + this.averageRowHeight);
             this.prevPage = this.currentPage;
             return true;
         }
+        console.log("returning false for " + startIndex);
         return false;
     }
 
