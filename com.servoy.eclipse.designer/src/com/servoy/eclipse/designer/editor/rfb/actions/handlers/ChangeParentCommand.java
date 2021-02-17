@@ -100,7 +100,7 @@ public class ChangeParentCommand extends Command
 				}
 
 				// adding an element into its own child is not allowed
-				if (child instanceof LayoutContainer && isChildOf(possibleNewParent, initialParent))
+				if (child instanceof LayoutContainer && isChildOf(possibleNewParent, (LayoutContainer)child))
 				{
 					return false;
 				}

@@ -221,7 +221,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				{
 					dropTargetComponent = null;
 					dropTarget = null;
-					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
+					Object input = (getCurrentTarget() == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput()
+						: getCurrentTarget();
 					if (input instanceof PersistContext)
 					{
 						IPersist inputPersist = ((PersistContext)input).getPersist();
@@ -307,6 +308,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 											}
 											parentContainer = (ISupportChilds)superParent;
 										}
+										if (doAllow && getCurrentLocation() == LOCATION_ON) break;//we want to drop on the current location if possible, no need to check the parents
 										parentContainer = parentContainer.getParent();
 									}
 									while (parentContainer != null);
