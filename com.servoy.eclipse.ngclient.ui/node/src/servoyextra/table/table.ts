@@ -1,16 +1,18 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ResizeEvent } from 'angular-resizable-element';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/scrolling';
 import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap, first } from 'rxjs/operators';
+import { CustomVirtualScrollStrategy } from './scroll-strategy';
 
 @Directive({
     selector: '[svyTableRow]'
 })
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class TableRow {
 
     @Input() svyTableRow: number;
@@ -22,7 +24,11 @@ export class TableRow {
 @Component({
     selector: 'servoyextra-table',
     templateUrl: './table.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [{
+        provide: VIRTUAL_SCROLL_STRATEGY,
+        useClass: CustomVirtualScrollStrategy,
+    }]
 })
 export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implements OnDestroy {
 
@@ -66,7 +72,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     autoColumnPercentage: any;
     tableWidth = 0;
     scrollWidth = 0;
-    autoColumns: { [x: string]: any; count: any; length?: any; columns?: {}; minWidth?: {}; autoResize?: {} };
+    autoColumns: { [x: string]: any; count: any; length?: any; columns?: any; minWidth?: any; autoResize?: any };
     componentWidth: any;
     needToUpdateAutoColumnsWidth = false;
     extraWidth: any;
@@ -80,17 +86,19 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     currentPage = 1;
     rendered: boolean;
     scrollToSelectionNeeded = true;
-    averageRowHeight = 25;
     dataStream = new BehaviorSubject<any[]>([]);
     idx: number;
     changedPage = false;
     prevPage: number;
+
+    averageRowHeight = 25;
+
     private log: LoggerService;
     private removeListenerFunction: () => void;
-    minBuff: number;
-    maxBuff: number;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) {
+
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
+                    @Inject(VIRTUAL_SCROLL_STRATEGY) private scrollStrategy: CustomVirtualScrollStrategy) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('Table');
     }
@@ -98,9 +106,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     svyOnInit() {
         super.svyOnInit();
         this.rendered = true;
-        this.minBuff = this.pageSize ? (this.pageSize + 1) * this.getNumberFromPxString(this.minRowHeight) : 200
-        this.maxBuff = this.minBuff * 2;
-
+        let minBuff = this.pageSize ? (this.pageSize + 1) * this.getNumberFromPxString(this.minRowHeight) : 200;
+        let maxBuff = minBuff * 2;
+        this.scrollStrategy.updateItemAndBufferSize(this.averageRowHeight,minBuff, maxBuff );
         this.computeTableWidth();
         this.computeTableHeight();
 
@@ -119,9 +127,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
             }
 
-            let newVal: object[];
+            let newVal: ViewPortRow[];
             if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
-            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue;
+            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue as ViewPortRow[];
             if (event.fullValueChanged || event.viewportRowsCompletelyChanged) {
                 this.dataStream.next([...newVal]);
             }
@@ -142,7 +150,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 this.averageRowHeight = newAvg;
                 if (this.responsiveDynamicHeight) this.computeTableHeight();
            }
-           console.log(this.averageRowHeight);
+            minBuff = this.pageSize ? (this.pageSize + 1) * this.averageRowHeight : 200;
+            maxBuff = minBuff * 2;
+            this.scrollStrategy.updateItemAndBufferSize(this.averageRowHeight,minBuff, maxBuff );
         });
 
         setTimeout(() => {
@@ -162,8 +172,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     getFirstVisibleIndex(): number {
         const offset = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
-        const first = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
-        if (first) return first.svyTableRow;
+        const firstRow = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
+        if (firstRow) return firstRow.svyTableRow;
         return -1;
     }
 
@@ -511,7 +521,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 this.renderer.setStyle(tBodyEl, p, tBodyStyle[p]);
             }
         }
-        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', tBodyEl['clientHeight'] + 'px');
+        this.renderer.setStyle(this.viewPort.elementRef.nativeElement, 'height', tBodyEl['clientHeight'] + 'px');
+        this.viewPort.checkViewportSize();
     }
 
 
@@ -638,8 +649,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         if (!this.goToPage(startIndex)) {
             if (this.prevPage < this.currentPage) {
                 this.renderedRows.last.elRef.nativeElement.scrollIntoView();
-            }
-            else {
+            } else {
                 this.renderedRows.first.elRef.nativeElement.scrollIntoView();
             }
             this.renderedRows.changes.pipe(first())
@@ -650,17 +660,8 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     }
 
     goToPage(startIndex: number) {
-        const startPage: TableRow = this.renderedRows.find((element) => element.svyTableRow === startIndex);
-        if (startPage) {
-            startPage.elRef.nativeElement.scrollIntoView();
-            console.log(startPage.elRef.nativeElement);
-            console.log(this.foundset.viewPort);
-            console.log(this.renderedRows.length + " " + this.minBuff + " " + this.maxBuff + " " + this.averageRowHeight);
-            this.prevPage = this.currentPage;
-            return true;
-        }
-        console.log("returning false for " + startIndex);
-        return false;
+        this.viewPort.scrollToIndex(startIndex);
+        return true;
     }
 
     getRowClass(idx: number) {
