@@ -132,7 +132,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         this.listeners.forEach(lFn => lFn());
         this.listeners = [];
         if (this.format) {
-            if (this.format.uppercase || this.format.lowercase) {
+            if (!this.findmode && (this.format.uppercase || this.format.lowercase)) {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));
             }
             if (this.format.isNumberValidator || this.format.type === 'NUMBER' || this.format.type === 'INTEGER') {
@@ -143,9 +143,14 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', (event) => this.inputFiredForNumbersCheck(event)));
             }
             if (this.format.maxLength) {
-                this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+                if (!this.findmode) {
+                    this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+                }
+                else {
+                    this._renderer.removeAttribute(this._elementRef.nativeElement, 'maxlength');
+                }
             }
-            if (this.format.isMask) {
+            if (!this.findmode && this.format.isMask) {
                 new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService);
             }
             this.writeValue(this.realValue);
