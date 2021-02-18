@@ -165,3 +165,7 @@ label input {
 }
 
 :root { font-size: 14px;}
+
+.bts-calendar-container .input-group-append {
+    cursor: pointer;
+}

@@ -69,3 +69,7 @@ div[ngbDropdownMenu] {
   max-height: 300px;
   overflow-y: scroll;
 }
+
+.svy-calendar-container .input-group-append {
+    cursor: pointer;
+}
