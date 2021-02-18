@@ -28,9 +28,9 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     @Output() openChange = new EventEmitter();
     @Input() animate: boolean;
 
-    @Input() selectedIndex: Object;
+    @Input() selectedIndex: any;
     @Output() selectedIndexChange = new EventEmitter();
-    @Input() expandedIndex: Object;
+    @Input() expandedIndex: any;
     @Output() expandedIndexChange = new EventEmitter();
     @Input() menu: Array<MenuItem>;
 
@@ -41,9 +41,14 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     @ContentChild(TemplateRef, { static: true })
     templateRef: TemplateRef<any>;
-    private realContainedForm: any;
 
     @ViewChild('element', { static: true }) elementRef: ElementRef;
+
+    animateSlideMenuTimeout: number;
+    mouseEnterTimeout: number;
+    mouseLeaveTimeout: number;
+
+    private realContainedForm: any;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
         super(renderer, cdRef);
@@ -62,18 +67,17 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                 const change = changes[property];
                 switch (property) {
                     case 'enabled':
-                        let nav = this.getNativeElement().querySelector('nav');
+                        const nav = this.getNativeElement().querySelector('nav');
                         if (change.currentValue) {
                             this.renderer.removeAttribute(nav, 'disabled');
-                            this.renderer.removeClass(nav, 'svy-sidenav-disabled')
-                        }
-                        else {
+                            this.renderer.removeClass(nav, 'svy-sidenav-disabled');
+                        } else {
                             this.renderer.setAttribute(nav, 'disabled', 'disabled');
                             this.renderer.addClass(nav, 'svy-sidenav-disabled');
                         }
                         break;
                     case 'styleClass':
-                        let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+                        const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
                         if (change.previousValue) {
                             const array = change.previousValue.trim().split(' ');
                             array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(sidenav, element));
@@ -83,25 +87,24 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(sidenav, element));
                         }
                         break;
-                    case "containedForm":
+                    case 'containedForm':
                         if (change.currentValue) {
-                            this.renderer.addClass(this.getNativeElement(), "has-panel");
+                            this.renderer.addClass(this.getNativeElement(), 'has-panel');
                         } else {
-                            this.renderer.removeClass(this.getNativeElement(), "has-panel");
+                            this.renderer.removeClass(this.getNativeElement(), 'has-panel');
                         }
                         if (change.previousValue) {
                             this.servoyApi.hideForm(change.previousValue, null, null, this.containedForm, this.relationName).then(() => {
                                 this.realContainedForm = this.containedForm;
                             }).finally(() => this.cdRef.detectChanges());
-                        }
-                        else if (change.currentValue) {
+                        } else if (change.currentValue) {
                             this.servoyApi.formWillShow(this.containedForm, this.relationName).then(() => {
                                 this.realContainedForm = this.containedForm;
                             }).finally(() => this.cdRef.detectChanges());
                         }
                         break;
-                    case "sidenavWidth":
-                    case "responsiveHeight":
+                    case 'sidenavWidth':
+                    case 'responsiveHeight':
                         this.updateSidenavStyle();
                         break;
                     case 'open':
@@ -128,13 +131,13 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getResponsiveHeight() {
-        var height = 0;
+        let height = 0;
         if (!this.servoyApi.isInAbsoluteLayout()) {
             if (this.responsiveHeight) {
                 height = this.responsiveHeight;
             } else if (this.containedForm) {
                 // for absolute form default height is design height, for responsive form default height is 0
-                let formCache = this.formService.getFormCacheByName(this.containedForm);
+                const formCache = this.formService.getFormCacheByName(this.containedForm);
                 if (formCache && formCache.absolute) {
                     height = formCache.size.height;
                 }
@@ -154,32 +157,33 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     updateSidenavStyle() {
-        let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-        var width = this.getSidenavWidth();
+        const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+        const width = this.getSidenavWidth();
         if (width) {
             this.renderer.setStyle(sidenav, 'width', width + 'px');
         }
 
         // check height
-        var height = this.getResponsiveHeight();
+        const height = this.getResponsiveHeight();
         if (height) {
-            this.renderer.setStyle(sidenav, 'minHeight', height + 'px')
+            this.renderer.setStyle(sidenav, 'minHeight', height + 'px');
         }
     }
 
     getContainerStyle() {
-        let height = this.getResponsiveHeight();
-        let width = this.getSidenavWidth();
-        let cssStyle = {
-            "position": "relative",
-            "min-height": height + "px"
-        }
+        const height = this.getResponsiveHeight();
+        const width = this.getSidenavWidth();
+        const cssStyle = {
+            position: 'relative',
+            'min-height': height + 'px'
+        };
         switch (this.slidePosition) {
-            case "left":
-                cssStyle['marginLeft'] = width + "px";
+            case 'left':
+                cssStyle['marginLeft'] = width + 'px';
                 break;
-            case "right":
-                cssStyle['marginRight'] = width + "px";
+            case 'right':
+                cssStyle['marginRight'] = width + 'px';
+                break;
             default:
                 break;
         }
@@ -187,13 +191,11 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         return cssStyle;
     }
 
-    animateSlideMenuTimeout: number;
-
     animateSlideMenu(open: boolean) {
-        if (this.slidePosition && this.slidePosition != 'static') {
-            let iconOpen = this.getNativeElement().querySelector('.svy-sidenav-action-open');
-            let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-            let svyextracontainer = this.getNativeElement();
+        if (this.slidePosition && this.slidePosition !== 'static') {
+            const iconOpen = this.getNativeElement().querySelector('.svy-sidenav-action-open');
+            const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+            const svyextracontainer = this.getNativeElement();
             if (open) { // open the menu when hovering
 
                 // remove all hover animation
@@ -207,7 +209,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                     this.renderer.removeClass(sidenav, 'svy-slide-out');
 
                     // used to slide in the panel if. Use only if menu slides
-                    if (this.slideAnimation === "slide-menu") {
+                    if (this.slideAnimation === 'slide-menu') {
                         this.renderer.addClass(svyextracontainer, 'svy-slide-out-remove-delay');
 
                         // stop remove animation clearing previous timeout
@@ -252,65 +254,11 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         }
     }
 
-    mouseEnterTimeout: number;
-    mouseLeaveTimeout: number;
-    private onMouseEnter = (e: Event) => {
-        // only if the menu is collapsed, use the mouseover
-        if (this.slideAnimation === 'collapse-menu') {
-            let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-            // stop remove animation clearing previous timeout
-            if (this.mouseLeaveTimeout) {
-                this.renderer.removeClass(sidenav, 'svy-hover-remove');
-                window.clearTimeout(this.mouseLeaveTimeout);
-                this.mouseLeaveTimeout = undefined;
-            }
-
-
-            // to start animation add svy-hover-add to start animation and remove at next repaint
-            this.renderer.addClass(sidenav, 'svy-hover');
-            this.renderer.addClass(sidenav, 'svy-hover-add');
-            this.renderer.addClass(sidenav, 'svy-hover-animate');
-            window.requestAnimationFrame(() => {
-                this.renderer.removeClass(sidenav, 'svy-hover-add');
-
-                // complete hover animation
-                this.mouseEnterTimeout = window.setTimeout(() => {
-                    this.renderer.removeClass(sidenav, 'svy-hover-animate');
-                }, 450);
-
-            });
-
-        }
-    }
-    private onMouseLeave = (e: Event) => {
-        // only if the menu is collapsed, use the mouseover
-        if (this.slideAnimation === 'collapse-menu') {
-            let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-            // stop add animation
-            if (this.mouseEnterTimeout) {
-                this.renderer.removeClass(sidenav, 'svy-hover-add');
-                window.clearTimeout(this.mouseEnterTimeout);
-                this.mouseEnterTimeout = undefined;
-            }
-
-            // start hover remove animation
-            this.renderer.addClass(sidenav, 'svy-hover-animate');
-            this.renderer.addClass(sidenav, 'svy-hover-remove ');
-            this.renderer.removeClass(sidenav, 'svy-hover');
-
-            // complete hover animation
-            this.mouseLeaveTimeout = window.setTimeout(() => {
-                this.renderer.removeClass(sidenav, 'svy-hover-animate');
-                this.renderer.removeClass(sidenav, 'svy-hover-remove');
-            }, 450);
-        }
-    }
-
     bindOnHover() {
         // register on mouse hover
         if (this.slideAnimation === 'collapse-menu') {
-            let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-            let nav = this.getNativeElement().querySelector('nav');
+            const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+            const nav = this.getNativeElement().querySelector('nav');
             nav.addEventListener('mouseenter', this.onMouseEnter);
             sidenav.addEventListener('mouseleave', this.onMouseLeave);
         }
@@ -318,14 +266,14 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     unbindOnHover() {
-        let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
-        let nav = this.getNativeElement().querySelector('nav');
+        const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+        const nav = this.getNativeElement().querySelector('nav');
         nav.removeEventListener('mouseenter', this.onMouseEnter);
         sidenav.removeEventListener('mouseleave', this.onMouseLeave);
     }
 
     slideMenu(event: MouseEvent) {
-        let wasOpen = this.open;
+        const wasOpen = this.open;
         this.open = this.open === false ? true : false;
 
         this.animateMenuHover(this.open);
@@ -333,7 +281,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         this.openChange.emit(this.open);
 
         // event on menu open
-        if (this.onOpenToggled && wasOpen != this.open) {
+        if (this.onOpenToggled && wasOpen !== this.open) {
             this.onOpenToggled(event);
         }
 
@@ -352,21 +300,21 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             return false;
         }
 
-        let confirmSelection = function() {
+        const confirmSelection = () => {
             this.setSelectedIndex(level, index, item);
 
             // expand the item
             if (item.menuItems) { // expand the node if not leaf
                 this.expandItem(level, index, item, event, preventExpandHandler); // TODO add collapsed argument
             } else { // expand the parent node if is a leaf
-                var parentNode = this.getParentNode(item.id);
+                const parentNode = this.getParentNode(item.id);
                 if (parentNode) {
                     this.expandItem(level - 1, null, parentNode, event, preventExpandHandler);
                 }
             }
-        }
+        };
 
-        if (preventSelectHandler != true && this.onMenuItemSelected) { // change selection only if onMenuItemSelected allows it
+        if (preventSelectHandler !== true && this.onMenuItemSelected) { // change selection only if onMenuItemSelected allows it
             this.onMenuItemSelected(item.id, event).then((result) => {
                 if (result !== false) {
                     confirmSelection();
@@ -408,8 +356,8 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         // if is expanded
-        if (preventHandler != true && this.onMenuItemExpanded) { // change selection only if onMenuItemSelected allows it
-            this.onMenuItemExpanded(item.id, event).then((result) => {
+        if (preventHandler !== true && this.onMenuItemExpanded) { // change selection only if onMenuItemSelected allows it
+            this.onMenuItemExpanded(item.id, event).then(() => {
                 // if (result == true) {
                 this.setExpandedIndex(level, index, item);
                 // }
@@ -424,7 +372,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         return true;
     }
 
-    collapseItem(level: number, index: number, item: MenuItem, event?: MouseEvent, preventHandler?: boolean) {
+    collapseItem(level: number, _index: number, item: MenuItem, event?: MouseEvent, preventHandler?: boolean) {
 
         if (event) { //
             event.stopPropagation();
@@ -443,8 +391,8 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         // call handler onMenuItemCollapsed
-        if (preventHandler != true && this.onMenuItemCollapsed) {
-            this.onMenuItemCollapsed(item.id, event).then((result) => {
+        if (preventHandler !== true && this.onMenuItemCollapsed) {
+            this.onMenuItemCollapsed(item.id, event).then(() => {
                 // if (result == true) {
                 this.clearExpandedIndex(level - 1);
                 // }
@@ -461,13 +409,13 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     getNodeById(nodeId: string | number, nodes: Array<MenuItem>): MenuItem {
         if (nodes) {
-            for (let i = 0; i < nodes.length; i++) { // search in each subtree
-                let subTree = nodes[i];
+            for (const i of Object.keys(nodes)) { // search in each subtree
+                const subTree = nodes[i];
                 // TODO use type equality or not ?
-                if (subTree.id == nodeId) { // find the node
+                if (subTree.id === nodeId) { // find the node
                     return subTree;
                 }
-                let node = this.getNodeById(nodeId, subTree.menuItems);
+                const node = this.getNodeById(nodeId, subTree.menuItems);
                 if (node) {
                     return node;
                 }
@@ -482,8 +430,8 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             if (path && path.length === 1) {
                 node = nodes[path[0]];
             } else if (path && path.length) {
-                var subPathIndex = path[0];
-                var subtree = nodes[subPathIndex].menuItems;
+                const subPathIndex = path[0];
+                const subtree = nodes[subPathIndex].menuItems;
                 node = this.getNodeByIndexPath(path.slice(1, path.length), subtree);
             } else { // is the root
                 node = nodes;
@@ -492,17 +440,17 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         return node;
     }
 
-    getPathToNode(idOrNode, nodes: Array<MenuItem>, key?: string): Array<number> {
+    getPathToNode(idOrNode: any, nodes: Array<MenuItem>, key?: string): Array<number> {
         if (!key) key = 'id';
-        var nodeId = idOrNode[key] ? idOrNode[key] : idOrNode;
+        const nodeId = idOrNode[key] ? idOrNode[key] : idOrNode;
 
         if (nodes) { // for each node in nodes
             for (let i = 0; i < nodes.length; i++) { // search in each subtree
-                let subTree = nodes[i];
-                if (subTree[key] == nodeId) { // find the node
+                const subTree = nodes[i];
+                if (subTree[key] === nodeId) { // find the node
                     return [i];
                 }
-                let path = this.getPathToNode(nodeId, subTree.menuItems, key);
+                const path = this.getPathToNode(nodeId, subTree.menuItems, key);
                 if (path) {
                     return [i].concat(path);
                 }
@@ -513,13 +461,12 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     getAllNodesToNodeId(nodeId: string | number): Array<MenuItem> {
         let nodes = this.menu;
-        var pathIndex = this.getPathToNode(nodeId, nodes);
-        let anchestors = [];
-        let node;
+        const pathIndex = this.getPathToNode(nodeId, nodes);
+        const anchestors = [];
 
         // returns all the anchestors of node
-        for (var i = 0; pathIndex && i < pathIndex.length; i++) {
-            node = nodes[pathIndex[i]];
+        for (let i = 0; pathIndex && i < pathIndex.length; i++) {
+            const node = nodes[pathIndex[i]];
             anchestors.push(node);
             nodes = node.menuItems;
         }
@@ -527,13 +474,13 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getNodeAnchestors(nodeId: string | number): Array<MenuItem> {
-        var anchestors = this.getAllNodesToNodeId(nodeId);
+        const anchestors = this.getAllNodesToNodeId(nodeId);
         anchestors.pop();
         return anchestors;
     }
 
     getParentNode(nodeId: string | number): MenuItem {
-        var anchestors = this.getNodeAnchestors(nodeId);
+        const anchestors = this.getNodeAnchestors(nodeId);
         if (anchestors && anchestors.length) {
             return anchestors[anchestors.length - 1];
         }
@@ -541,7 +488,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getNodeLevel(nodeId: string | number): number {
-        var path = this.getPathToNode(nodeId, this.menu);
+        const path = this.getPathToNode(nodeId, this.menu);
         if (path) {
             return path.length;
         } else {
@@ -550,45 +497,45 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getSelectedNode(level: number): MenuItem {
-        let levels = this.selectedIndex;
+        const levels = this.selectedIndex;
         let maxLevel = -1;
 
         // get the node at deeper level
-        for (let lvl in levels) {
+        for (const lvl in levels) {
             if (Number(lvl) > maxLevel && (!level || Number(lvl) <= level)) {
                 maxLevel = Number(lvl);
             }
         }
 
-        var nodeId = levels[maxLevel];
+        const nodeId = levels[maxLevel];
         return this.getNodeById(nodeId, this.menu);
     }
 
-    getSelectedIndexPath(level: number): Array<Number> {
-        var selectedNode = this.getSelectedNode(level);
-        var path = this.getPathToNode(selectedNode.id, this.menu);
+    getSelectedIndexPath(level: number): Array<number> {
+        const selectedNode = this.getSelectedNode(level);
+        const path = this.getPathToNode(selectedNode.id, this.menu);
         return path;
     }
 
-    setSelectedIndex(level: number, index: number, item: MenuItem) {
+    setSelectedIndex(level: number, _index: number, item: MenuItem) {
         if (!this.selectedIndex) this.selectedIndex = {};
-        var levels = this.selectedIndex;
+        const levels = this.selectedIndex;
 
         // clear level below selection
         this.clearSelectedIndex(level);
 
         //              // update levels above selection, all anchestors
-        let newSelectedIndex = {}
-        let anchestors = this.getNodeAnchestors(item.id);
-        for (var i = 0; i < anchestors.length; i++) {
-            if (newSelectedIndex[i + 1] != anchestors[i].id) {
+        const newSelectedIndex = {};
+        const anchestors = this.getNodeAnchestors(item.id);
+        for (let i = 0; i < anchestors.length; i++) {
+            if (newSelectedIndex[i + 1] !== anchestors[i].id) {
                 newSelectedIndex[i + 1] = anchestors[i].id;
             }
         }
 
         // TODO select all parents as well
         // set level index
-        if (levels[level] == item.id) { // collapse the selected menu
+        if (levels[level] === item.id) { // collapse the selected menu
             // TODO allow unselect !?
             newSelectedIndex[level] = item.id;
         } else {
@@ -599,34 +546,34 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     clearSelectedIndex(level: number) {
-        var levels = this.selectedIndex;
+        const levels = this.selectedIndex;
         // reset all sub levels
-        for (var lvl in levels) {
+        for (const lvl in levels) {
             if (Number(lvl) > level) { // reset the next levels
                 delete levels[lvl];
             }
         }
     }
 
-    setExpandedIndex(level: number, index: number, item: MenuItem) {
-        if (!this.expandedIndex) this.expandedIndex = {}
-        var levels = this.expandedIndex;
+    setExpandedIndex(level: number, _index: number, item: MenuItem) {
+        if (!this.expandedIndex) this.expandedIndex = {};
+        const levels = this.expandedIndex;
 
         // clear sub levels
         this.clearExpandedIndex(level);
 
         // expand all anchestors
-        var newExpandedIndex = {}
-        var anchestors = this.getNodeAnchestors(item.id);
-        for (var i = 0; i < anchestors.length; i++) {
-            if (newExpandedIndex[i + 1] != anchestors[i].id) {
+        const newExpandedIndex = {};
+        const anchestors = this.getNodeAnchestors(item.id);
+        for (let i = 0; i < anchestors.length; i++) {
+            if (newExpandedIndex[i + 1] !== anchestors[i].id) {
                 newExpandedIndex[i + 1] = anchestors[i].id;
             }
         }
 
         // TODO select all parents as well
         // expand node index
-        if (levels[level] != item.id) { // collapse the selected menu
+        if (levels[level] !== item.id) { // collapse the selected menu
             newExpandedIndex[level] = item.id;
         }
         this.expandedIndex = newExpandedIndex;
@@ -635,48 +582,47 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
 
     clearExpandedIndex(level: number) {
-        var levels = this.expandedIndex;
+        const levels = this.expandedIndex;
 
         // reset all sub levels
-        for (let lvl in levels) {
+        for (const lvl in levels) {
             if (Number(lvl) > level) { // reset the next levels
                 delete levels[lvl];
             }
         }
     }
 
-    isDisabled = function(nodeId: string | number): boolean {
+    isDisabled = (nodeId: string | number): boolean => {
         // check if menu itself is disable
-        if (this.enabled == false) {
+        if (this.enabled === false) {
             return true;
         }
 
         // TODO refactor: use getNodeAnchestors
-        let indexPath = this.getPathToNode(nodeId, this.menu);
+        const indexPath = this.getPathToNode(nodeId, this.menu);
         let tree = this.menu;
-        let node;
 
         if (!indexPath || !indexPath.length) {
             return null;
         }
 
-        for (let i = 0; i < indexPath.length; i++) {
-            node = tree[indexPath[i]];
-            if (node.enabled == false) {
+        for (const i of Object.keys(indexPath)) {
+            const node = tree[indexPath[i]];
+            if (node.enabled === false) {
                 return true;
             }
             tree = node.menuItems;
         }
         return false;
-    }
+    };
 
     isNodeSelected(nodeId: string | number, level: number): boolean {
-        var levels = this.selectedIndex;
+        const levels = this.selectedIndex;
         if (level) {
-            return levels[level] == nodeId;
+            return levels[level] === nodeId;
         } else {
-            for (let level2 in levels) {
-                if (levels[level2] == nodeId) {
+            for (const level2 in levels) {
+                if (levels[level2] === nodeId) {
                     return true;
                 }
             }
@@ -684,13 +630,13 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         return false;
     }
 
-    isNodeExpanded(nodeId: string, level: number): boolean {
-        var levels = this.expandedIndex;
+    isNodeExpanded(nodeId: string | number, level?: number): boolean {
+        const levels = this.expandedIndex;
         if (level) {
-            return levels[level] == nodeId;
+            return levels[level] === nodeId;
         } else {
-            for (let level2 in levels) {
-                if (levels[level2] == nodeId) {
+            for (const level2 in levels) {
+                if (levels[level2] === nodeId) {
                     return true;
                 }
             }
@@ -699,20 +645,20 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     createJSEvent(): MouseEvent {
-        let x = this.getNativeElement().offsetLeft;
-        let y = this.getNativeElement().offsetHeight;
+        const x = this.getNativeElement().offsetLeft;
+        const y = this.getNativeElement().offsetHeight;
 
-        var event = document.createEvent("MouseEvents");
-        event.initMouseEvent("click", false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
+        const event = document.createEvent('MouseEvents');
+        event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
         return event;
     }
 
     getDOMElementByID(nodeId: string | number): Element {
-        let indexPath = this.getPathToNode(nodeId, this.menu);
+        const indexPath = this.getPathToNode(nodeId, this.menu);
         if (indexPath) {
             let foundElement: Element = this.getNativeElement();
-            for (var i = 0; i < indexPath.length; i++) {
-                foundElement = foundElement.querySelector("ul.sn-level-" + (i + 1));
+            for (let i = 0; i < indexPath.length; i++) {
+                foundElement = foundElement.querySelector('ul.sn-level-' + (i + 1));
                 foundElement = foundElement.children.item(i);
             }
             return foundElement;
@@ -730,13 +676,13 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     setSelectedMenuItem(id: string | number, mustExecuteOnMenuItemSelect?: boolean, mustExecuteOnMenuItemExpand?: boolean, level?: number): boolean {
-        var nodes;
-        var levelPath = [];
+        let nodes: MenuItem[];
+        let levelPath = [];
 
         // if level is provided search only in the selected node
         if (level && level > 1) { // search in selected node only
             levelPath = this.getSelectedIndexPath(level - 1);
-            var parentNode = this.getNodeByIndexPath(levelPath, this.menu); // retrieve the selected node at level
+            const parentNode = this.getNodeByIndexPath(levelPath, this.menu); // retrieve the selected node at level
             if (parentNode) nodes = parentNode.menuItems;
         } else if (level === 1) { // search in root
             // FIXME it searches in the whole tree
@@ -746,8 +692,8 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         // search path to node
-        var path = levelPath;
-        var subPath = this.getPathToNode(id, nodes, 'id');
+        let path = levelPath;
+        const subPath = this.getPathToNode(id, nodes, 'id');
         if (subPath) { // not found in the selected node
             path = levelPath.concat(subPath);
         } else {
@@ -759,11 +705,11 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             return true;
         } else {
             // search the node
-            var node = this.getNodeByIndexPath(subPath, nodes);
+            const node = this.getNodeByIndexPath(subPath, nodes);
 
             // select the item
-            var preventSelectHandler = mustExecuteOnMenuItemSelect == true ? false : true;
-            var preventExpandHandler = mustExecuteOnMenuItemExpand == true ? false : true;
+            const preventSelectHandler = mustExecuteOnMenuItemSelect === true ? false : true;
+            const preventExpandHandler = mustExecuteOnMenuItemExpand === true ? false : true;
             return this.selectItem(path.length, path[path.length - 1], node, null, preventSelectHandler, preventExpandHandler);
         }
     }
@@ -775,22 +721,22 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     setSelectedByIndexPath(path: Array<number>, mustExecuteOnSelectNode: boolean) {
 
         // search node in tree
-        var node = this.getNodeByIndexPath(path, this.menu);
-        var preventSelectHandler = mustExecuteOnSelectNode == true ? false : true;
+        const node = this.getNodeByIndexPath(path, this.menu);
+        const preventSelectHandler = mustExecuteOnSelectNode === true ? false : true;
         this.selectItem(path.length, path[path.length - 1], node, null, preventSelectHandler);
         return;
     }
 
     setMenuItemExpanded(menuItemId: string | number, expanded: boolean, mustExecuteOnMenuItemExpand?: boolean) {
-        var node = this.getNodeById(menuItemId, this.menu);
+        const node = this.getNodeById(menuItemId, this.menu);
 
         if (!node) {
             return false;
         }
 
         // expandItem/collapsItem requires node level
-        var level = this.getNodeLevel(menuItemId);
-        var preventHandler = mustExecuteOnMenuItemExpand == true ? false : true;
+        const level = this.getNodeLevel(menuItemId);
+        const preventHandler = mustExecuteOnMenuItemExpand === true ? false : true;
 
         if (expanded) {
             return this.expandItem(level, null, node, null, preventHandler);
@@ -800,36 +746,87 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     }
 
-    isMenuItemExpanded = function(menuItemId: string | number) {
-        return this.isNodeExpanded(menuItemId);
-    }
+    isMenuItemExpanded = (menuItemId: string | number) =>this.isNodeExpanded(menuItemId);
 
-    isMenuItemEnabled = function(menuItemId: string | number) {
-        var disabled = this.isDisabled(menuItemId);
+    isMenuItemEnabled = (menuItemId: string | number) => {
+        const disabled = this.isDisabled(menuItemId);
         if (disabled === null) {
-            return false
+            return false;
         } else {
             return !disabled;
         }
-    }
+    };
 
-    getLocation(nodeId: string | number): Object {
-        var domElement = this.getDOMElementByID(nodeId);
+    getLocation(nodeId: string | number): {x: number; y: number} {
+        const domElement = this.getDOMElementByID(nodeId);
         if (domElement) {
-            var position = domElement.getBoundingClientRect();
+            const position = domElement.getBoundingClientRect();
             return { x: position.left, y: position.top };
         }
         return null;
     }
 
-    getSize(nodeId: string | number): Object {
-        var domElement = this.getDOMElementByID(nodeId);
+    getSize(nodeId: string | number): {width: number; height: number} {
+        const domElement = this.getDOMElementByID(nodeId);
         if (domElement) {
-            var position = domElement.getBoundingClientRect();
+            const position = domElement.getBoundingClientRect();
             return { width: position.width, height: position.height };
         }
         return null;
     }
+
+    private onMouseEnter = () => {
+        // only if the menu is collapsed, use the mouseover
+        if (this.slideAnimation === 'collapse-menu') {
+            const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+            // stop remove animation clearing previous timeout
+            if (this.mouseLeaveTimeout) {
+                this.renderer.removeClass(sidenav, 'svy-hover-remove');
+                window.clearTimeout(this.mouseLeaveTimeout);
+                this.mouseLeaveTimeout = undefined;
+            }
+
+
+            // to start animation add svy-hover-add to start animation and remove at next repaint
+            this.renderer.addClass(sidenav, 'svy-hover');
+            this.renderer.addClass(sidenav, 'svy-hover-add');
+            this.renderer.addClass(sidenav, 'svy-hover-animate');
+            window.requestAnimationFrame(() => {
+                this.renderer.removeClass(sidenav, 'svy-hover-add');
+
+                // complete hover animation
+                this.mouseEnterTimeout = window.setTimeout(() => {
+                    this.renderer.removeClass(sidenav, 'svy-hover-animate');
+                }, 450);
+
+            });
+
+        }
+    };
+
+    private onMouseLeave = () => {
+        // only if the menu is collapsed, use the mouseover
+        if (this.slideAnimation === 'collapse-menu') {
+            const sidenav = this.getNativeElement().querySelector('.svy-sidenav');
+            // stop add animation
+            if (this.mouseEnterTimeout) {
+                this.renderer.removeClass(sidenav, 'svy-hover-add');
+                window.clearTimeout(this.mouseEnterTimeout);
+                this.mouseEnterTimeout = undefined;
+            }
+
+            // start hover remove animation
+            this.renderer.addClass(sidenav, 'svy-hover-animate');
+            this.renderer.addClass(sidenav, 'svy-hover-remove ');
+            this.renderer.removeClass(sidenav, 'svy-hover');
+
+            // complete hover animation
+            this.mouseLeaveTimeout = window.setTimeout(() => {
+                this.renderer.removeClass(sidenav, 'svy-hover-animate');
+                this.renderer.removeClass(sidenav, 'svy-hover-remove');
+            }, 450);
+        }
+    };
 }
 class MenuItem {
     public text: string;
