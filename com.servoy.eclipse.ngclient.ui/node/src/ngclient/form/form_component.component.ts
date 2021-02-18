@@ -237,10 +237,19 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.name) {
+            // really make sure all form state is reverted to default
+            // Form Instances are reused for tabpanels that have a template reference to this.
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
             if (styleClasses)
                 this.formClasses =styleClasses.split(' ');
+            else
+                this.formClasses = null;;
+
+            this.handlerCache = {};
+            this.servoyApiCache = {};
+            this.componentCache = {};
+
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
         }
     }
