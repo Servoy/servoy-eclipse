@@ -14,11 +14,11 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
 	@Input() waitForData: any;
 	@Input() height: number;
 
-	private realContainedForm: any;
-	private formWillShowCalled: any;
-
 	@ContentChild(TemplateRef, { static: true })
 	templateRef: TemplateRef<any>;
+
+    private realContainedForm: any;
+    private formWillShowCalled: any;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
 		super(renderer, cdRef);
@@ -61,15 +61,15 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
 	}
 
 	setRealContainedForm(formName: any, relationName: any) {
-		if (this.formWillShowCalled != formName && formName) {
+		if (this.formWillShowCalled !== formName && formName) {
 			this.formWillShowCalled = formName;
 			if (this.waitForData) {
-				Promise.resolve(this.servoyApi.formWillShow(formName, relationName)).then(() => {
+				this.servoyApi.formWillShow(formName, relationName).then(() => {
 					this.realContainedForm = formName;
                     this.cdRef.detectChanges();
 				});
 			} else {
-				this.servoyApi.formWillShow(formName, relationName);
+				this.servoyApi.formWillShow(formName, relationName).then(() => this.cdRef.detectChanges());
 				this.realContainedForm = formName;
 			}
 		}
