@@ -75,12 +75,12 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                     case 'styleClass':
                         let sidenav = this.getNativeElement().querySelector('.svy-sidenav');
                         if (change.previousValue) {
-                            const array = change.previousValue.split(' ');
-                            array.forEach(element => this.renderer.removeClass(sidenav, element));
+                            const array = change.previousValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(sidenav, element));
                         }
                         if (change.currentValue) {
-                            const array = change.currentValue.split(' ');
-                            array.forEach(element => this.renderer.addClass(sidenav, element));
+                            const array = change.currentValue.trim().split(' ');
+                           array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(sidenav, element));
                         }
                         break;
                     case "containedForm":

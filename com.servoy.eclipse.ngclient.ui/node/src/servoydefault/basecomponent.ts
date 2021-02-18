@@ -105,12 +105,12 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
                         break;
                     case 'styleClass':
                         if (change.previousValue) {
-                            const array = change.previousValue.split(' ');
-                            array.forEach(element => this.renderer.removeClass(this.getNativeElement(), element));
+                            const array = change.previousValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(this.getNativeElement(), element));
                         }
                         if (change.currentValue) {
-                            const array = change.currentValue.split(' ');
-                            array.forEach(element => this.renderer.addClass(this.getNativeElement(), element));
+                            const array = change.currentValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(this.getNativeElement(), element));
                         }
                         break;
                 }

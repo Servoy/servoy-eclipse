@@ -40,12 +40,12 @@ export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyB
                         break;
                     case 'styleClass':
                         if (change.previousValue) {
-                            const array = change.previousValue.split(' ');
-                            array.forEach(element => this.renderer.removeClass(this.getStyleClassElement(), element));
+                            const array = change.previousValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(this.getStyleClassElement(), element));
                         }
                         if (change.currentValue) {
-                            const array = change.currentValue.split(' ');
-                            array.forEach(element => this.renderer.addClass(this.getStyleClassElement(), element));
+                            const array = change.currentValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(this.getStyleClassElement(), element));
                         }
                         break;
                 }
