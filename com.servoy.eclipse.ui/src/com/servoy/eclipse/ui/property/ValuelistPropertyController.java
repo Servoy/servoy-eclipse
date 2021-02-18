@@ -88,7 +88,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 						protected IPersist createPersist(Solution editingSolution)
 						{
 							ValueList val = null;
-							Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), editingSolution.getName());
+							Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), null);
 							if (name != null)
 							{
 								val = NewValueListAction.createValueList(name.getLeft(),

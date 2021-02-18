@@ -52,7 +52,7 @@ public class ModuleListSelectionDialog extends FilteredItemsSelectionDialog
 		super(shell);
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
-		if (activeModules.length > 1)
+		if (activeModules.length > 0)
 		{
 			for (ServoyProject module : activeModules)
 			{
@@ -60,6 +60,7 @@ public class ModuleListSelectionDialog extends FilteredItemsSelectionDialog
 			}
 		}
 		setTitle(title);
+		setMessage("Select a module by typing a name or by selecting from the list:");
 		setSelectionHistory(new ResourceSelectionHistory());
 		setInitialElementSelections(moduleNames);
 	}

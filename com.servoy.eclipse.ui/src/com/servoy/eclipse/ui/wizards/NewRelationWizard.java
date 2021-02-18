@@ -16,48 +16,23 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewRelationWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewRelationWizard";
 
-	private RelationNameSolutionPage relationPage;
+	private NewRelationWizardPage relationPage;
 	private WizardPage errorPage;
 	private final String activeSolutionName;
 	private final IDeveloperServoyModel servoyModel;
@@ -98,7 +73,7 @@ public class NewRelationWizard extends Wizard implements INewWizard
 		}
 		else
 		{
-			relationPage = new RelationNameSolutionPage("New relation creation");
+			relationPage = new NewRelationWizardPage("New relation creation", servoyModel, activeSolutionName);
 		}
 
 	}
@@ -130,219 +105,4 @@ public class NewRelationWizard extends Wizard implements INewWizard
 		}
 		return true;
 	}
-
-
-	public class RelationNameSolutionPage extends WizardPage implements Listener
-	{
-
-		private Combo solutionsCombo;
-		private String[] currentSolutionNames;
-
-		private String selectedSolutionName = "";
-		private String selectedRelationName = "";
-		private Text relationNameText;
-
-		protected RelationNameSolutionPage(String pageName)
-		{
-			super(pageName);
-			setTitle("Select the solution and set the relation name.");
-			setDialogSettings(Activator.getDefault().getDialogSettings());
-
-			retrieveCurrentSolutionNames();
-		}
-
-		private void retrieveCurrentSolutionNames()
-		{
-			ServoyProject servoyProject = servoyModel.getActiveProject();
-			Solution solution = servoyProject.getSolution();
-			ServoyProject projects[] = servoyModel.getModulesOfActiveProject();
-
-			List<String> list = new ArrayList<String>();
-
-			for (ServoyProject project : projects)
-			{
-				if (list.contains(project.getSolution().getName()) == false)
-				{
-					list.add(project.getSolution().getName());
-				}
-			}
-
-			currentSolutionNames = new String[list.size()];
-			list.toArray(currentSolutionNames);
-
-		}
-
-		/**
-		 *
-		 * @return a string[] with the selected combo items
-		 */
-		public String[] getSelectedItems()
-		{
-			selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-			selectedRelationName = relationNameText.getText();
-			return new String[] { selectedSolutionName, selectedRelationName };
-		}
-
-		public void createControl(Composite parent)
-		{
-			initializeDialogUnits(parent);
-			// top level group
-			Composite topLevel = new Composite(parent, SWT.NONE);
-			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
-
-			setControl(topLevel);
-
-			// Source server
-			Label solutionNameLabel = new Label(topLevel, SWT.NONE);
-			solutionNameLabel.setText("Solution name");
-
-			solutionsCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
-			UIUtils.setDefaultVisibleItemCount(solutionsCombo);
-
-			solutionsCombo.setItems(currentSolutionNames);
-			int counter = 0;
-			if (activeSolutionName.equals("") == false)
-			{
-				for (int i = 0; i < currentSolutionNames.length; i++)
-				{
-					if (currentSolutionNames[i].equals(activeSolutionName))
-					{
-						counter = i;
-						break;
-					}
-				}
-			}
-			solutionsCombo.select(counter);
-
-
-			solutionsCombo.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent event)
-				{
-					selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-				}
-			});
-
-
-			//Source table
-			Label relationNameLabel = new Label(topLevel, SWT.NONE);
-			relationNameLabel.setText("Relation name");
-
-			relationNameText = new Text(topLevel, SWT.BORDER);
-			relationNameText.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent event)
-				{
-					selectedRelationName = relationNameText.getText();
-				}
-			});
-
-			relationNameText.addModifyListener(new ModifyListener()
-			{
-				public void modifyText(ModifyEvent e)
-				{
-					setPageComplete(validatePage());
-				}
-			});
-
-			//Define the layout and place the components
-			FormLayout formLayout = new FormLayout();
-			formLayout.spacing = 10;
-			formLayout.marginWidth = formLayout.marginHeight = 15;
-			topLevel.setLayout(formLayout);
-
-			//label
-			FormData formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(solutionsCombo, 0, SWT.CENTER);
-			solutionNameLabel.setLayoutData(formData);
-
-			//combo
-			formData = new FormData();
-			formData.left = new FormAttachment(solutionNameLabel, 0);
-			formData.top = new FormAttachment(0, 0);
-			formData.right = new FormAttachment(100, 0);
-			solutionsCombo.setLayoutData(formData);
-
-			//label
-			formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(relationNameText, 0, SWT.CENTER);
-			relationNameLabel.setLayoutData(formData);
-
-			//text
-			formData = new FormData();
-			formData.left = new FormAttachment(solutionsCombo, 0, SWT.LEFT);
-			formData.top = new FormAttachment(solutionsCombo, 0, SWT.BOTTOM);
-			formData.right = new FormAttachment(100, 0);
-			relationNameText.setLayoutData(formData);
-
-		}
-
-		@Override
-		public void setVisible(boolean visible)
-		{
-			super.setVisible(visible);
-
-			if (visible)
-			{
-				setPageComplete(validatePage());
-				//validatePage();
-			}
-		}
-
-		protected String relationExists(String relName, String solName)
-		{
-			ServoyProject project = servoyModel.getServoyProject(solName);
-
-			ValidatorSearchContext validatorSearchContext = new ValidatorSearchContext(project.getEditingSolution(), IRepository.RELATIONS);
-			IValidateName validator = servoyModel.getNameValidator();
-			try
-			{
-				validator.checkName(relName, 0, validatorSearchContext, false);
-			}
-			catch (RepositoryException e)
-			{
-				return e.getMessage();
-			}
-
-			return "";
-		}
-
-		protected boolean validatePage()
-		{
-			String error = null;
-			if (relationNameText.getText().trim().length() == 0)
-			{
-				error = "Enter a relation name";
-			}
-			else if (!IdentDocumentValidator.isJavaIdentifier(relationNameText.getText()))
-			{
-				error = "Invalid relation name";
-			}
-			else
-			{
-				String relName = relationNameText.getText();
-				String solName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-
-				String message = relationExists(relName, solName);
-				if (message.equals("") == false)
-				{
-					error = "Name error encountered due to following reason: " + message;
-				}
-			}
-
-			setErrorMessage(error);
-			return error == null;
-		}
-
-		public void handleEvent(Event event)
-		{
-			setPageComplete(validatePage());
-		}
-
-	}
-
 }

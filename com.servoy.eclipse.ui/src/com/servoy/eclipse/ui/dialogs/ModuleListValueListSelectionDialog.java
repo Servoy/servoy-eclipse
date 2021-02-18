@@ -86,6 +86,7 @@ public class ModuleListValueListSelectionDialog extends ModuleListSelectionDialo
 				handleSelected(getSelectedItems());
 			}
 		});
+		valueListText.forceFocus();
 		return parent;
 	}
 
