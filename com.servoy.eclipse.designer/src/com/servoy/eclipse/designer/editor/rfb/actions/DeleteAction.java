@@ -71,7 +71,7 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 		final List<IPersist> toDelete = new ArrayList<IPersist>();
 		for (Object modelObject : objects)
 		{
-			if (modelObject instanceof Form) continue; // do not delete entire form here
+			if (modelObject instanceof Form || (modelObject instanceof PersistContext && ((PersistContext)modelObject).getPersist() instanceof Form)) continue; // do not delete entire form here
 
 			if (modelObject instanceof FormElementGroup)
 			{
