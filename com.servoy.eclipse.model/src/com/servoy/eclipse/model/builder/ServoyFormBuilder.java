@@ -106,6 +106,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -298,7 +299,7 @@ public class ServoyFormBuilder
 					throw new RuntimeException(e);
 				}
 
-				addWebComponentMissingHandlers(markerResource, fs, o, form);
+				addWebComponentMissingHandlers(markerResource, fs, o, form, form.getDataSource());
 
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
@@ -334,6 +335,11 @@ public class ServoyFormBuilder
 										{
 											foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 										}
+									}
+									else
+									{
+										//default is form foundset
+										foundsetValue = "";
 									}
 									if (foundsetValue != null)
 									{
@@ -390,7 +396,7 @@ public class ServoyFormBuilder
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
 										fs);
-									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form);
+									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
 								}
 							}
 						}
@@ -1532,7 +1538,7 @@ public class ServoyFormBuilder
 		});
 	}
 
-	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form)
+	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1586,6 +1592,26 @@ public class ServoyFormBuilder
 										{
 											ServoyLog.logError(ex);
 										}
+									}
+								}
+							}
+							else if (scriptMethod.getParent() instanceof TableNode &&
+								!Utils.equalObjects(datasource, ((TableNode)scriptMethod.getParent()).getDataSource()))
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+									form);
+								IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, o);
+								if (marker != null)
+								{
+									try
+									{
+										marker.setAttribute("EventName", handler);
+									}
+									catch (Exception ex)
+									{
+										ServoyLog.logError(ex);
 									}
 								}
 							}
