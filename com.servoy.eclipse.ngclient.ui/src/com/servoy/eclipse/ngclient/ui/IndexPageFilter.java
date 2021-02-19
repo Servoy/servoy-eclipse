@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import static com.servoy.j2db.server.ngclient.AngularIndexPageWriter.addcontentSecurityPolicyHeader;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -32,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
+import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.util.MimeTypes;
@@ -58,6 +61,7 @@ public class IndexPageFilter implements Filter
 		if (distFolder.exists())
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
+			HttpServletResponse response = (HttpServletResponse)servletResponse;
 			request.getSession();
 			String requestURI = request.getRequestURI();
 			String solutionName = getSolutionNameFromURI(requestURI);
@@ -66,7 +70,10 @@ public class IndexPageFilter implements Filter
 			{
 				File file = new File(distFolder, "index.html");
 				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
-				AngularIndexPageWriter.writeIndexPage(indexHtml, request, (HttpServletResponse)servletResponse, solutionName);
+
+				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
+				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
+					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
 			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
