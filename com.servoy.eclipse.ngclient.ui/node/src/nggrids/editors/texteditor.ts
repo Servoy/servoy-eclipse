@@ -100,21 +100,22 @@ export class TextEditor extends EditorDirective {
 
     // focus and select can be done after the gui is attached
     ngAfterViewInit(): void {
-        this.elementRef.nativeElement.focus();
-        this.elementRef.nativeElement.select();
+        setTimeout(() => {
+            this.elementRef.nativeElement.select();
 
-        if(this.format) {
-            const editFormat = this.format.edit ? this.format.edit : this.format.display;
-            if(editFormat && this.format.isMask) {
-                const settings = {};
-                settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
-                if (this.format.allowedCharacters)
-                    settings['allowedCharacters'] = this.format.allowedCharacters;
+            if(this.format) {
+                const editFormat = this.format.edit ? this.format.edit : this.format.display;
+                if(editFormat && this.format.isMask) {
+                    const settings = {};
+                    settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
+                    if (this.format.allowedCharacters)
+                        settings['allowedCharacters'] = this.format.allowedCharacters;
 
-                //TODO: jquery mask
-                //$(this.eInput).mask(editFormat, settings);
+                    //TODO: jquery mask
+                    //$(this.eInput).mask(editFormat, settings);
+                }
             }
-        }
+        }, 0);
     }
 
     // returns the new value after editing

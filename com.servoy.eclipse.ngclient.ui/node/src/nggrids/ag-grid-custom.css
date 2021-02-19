@@ -205,3 +205,8 @@
     width: 100%;
     line-height: normal;
 }
+
+#nggridformeditor .svy-form {
+    min-width: 0 !important;
+    min-height: 0 !important;
+}

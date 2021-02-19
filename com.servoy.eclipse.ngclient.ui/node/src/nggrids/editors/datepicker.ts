@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { LocaleService } from '../../ngclient/servoy_public';
 import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'aggrid-datepicker',
   template: `
       <div class="input-group ag-cell-edit-input">
         <input class="form-control" style="height: 100%;" [owlDateTime]="datetime" (dateTimeChange)="dateChanged($event)" [value]="initialValue" #element>
-        <span tabindex="-1" class="input-group-text input-group-append ag-custom-component-popup" style="height: 100%;" [owlDateTimeTrigger]="datetime"><span class="far fa-calendar-alt"></span></span>
+        <span tabindex="-1" (click)="onOpenPopup($event)"
+          class="input-group-text input-group-append ag-custom-component-popup" style="height: 100%;" [owlDateTimeTrigger]="datetime"><span class="far fa-calendar-alt"></span></span>
         <owl-date-time #datetime [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
       </div>
     `,
@@ -25,7 +27,7 @@ export class DatePicker extends EditorDirective {
 
   selectedValue: any;
 
-  constructor(localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>) {
+  constructor(localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) private doc: Document) {
     super();
     dateTimeAdapter.setLocale(localeService.getLocale());
 
@@ -56,8 +58,20 @@ export class DatePicker extends EditorDirective {
   }
 
   ngAfterViewInit(): void {
-    // this.elementRef.nativeElement.focus();
-    // this.elementRef.nativeElement.select();
+    setTimeout(() => {
+      this.elementRef.nativeElement.select();
+    }, 0);
+  }
+
+  onOpenPopup(event: MouseEvent) {
+    const dateContainer = this.doc.getElementsByTagName('owl-date-time-container');
+    if(dateContainer && dateContainer.length) {
+      dateContainer[0].classList.add('ag-custom-component-popup');
+    }
+  }
+
+  isPopup(): boolean {
+    return true;
   }
 
   // returns the new value after editing

@@ -1,6 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, Inject } from '@angular/core';
 import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'aggrid-selecteditor',
@@ -11,6 +12,10 @@ import { ICellEditorParams } from '@ag-grid-community/core';
     `
 })
 export class SelectEditor extends EditorDirective {
+
+    constructor(@Inject(DOCUMENT) private doc: Document) {
+        super();
+    }
 
     @HostListener('keydown', ['$event']) onKeyDown(e: KeyboardEvent) {
         const isNavigationKey = e.keyCode === 38 || e.keyCode === 40;
@@ -34,7 +39,7 @@ export class SelectEditor extends EditorDirective {
             }
             vl.filterList('').subscribe((valuelistValues: any) => {
                 valuelistValues.forEach((value: any) => {
-                    const option = document.createElement('option');
+                    const option = this.doc.createElement('option');
                     option.value = value.realValue == null ? '_SERVOY_NULL' : value.realValue;
                     option.text = value.displayValue;
                     if (v != null && v.toString() === value.displayValue) {
@@ -48,10 +53,6 @@ export class SelectEditor extends EditorDirective {
                 });
             });
         }
-    }
-
-    ngAfterViewInit(): void {
-        this.elementRef.nativeElement.focus();
     }
 
     // returns the new value after editing

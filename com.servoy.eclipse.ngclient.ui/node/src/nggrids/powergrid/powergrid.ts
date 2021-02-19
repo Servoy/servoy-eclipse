@@ -1,5 +1,5 @@
 import { GridOptions, GroupCellRenderer } from '@ag-grid-community/core';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, Output, Renderer2, SecurityContext, SimpleChanges, ViewChild } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { NGGridDirective } from '../nggrid';
@@ -8,6 +8,7 @@ import { FormEditor } from '../editors/formeditor';
 import { TextEditor } from '../editors/texteditor';
 import { PowergridService } from './powergrid.service';
 import { DomSanitizer } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
 
 const TABLE_PROPERTIES_DEFAULTS = {
     rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
@@ -128,7 +129,8 @@ export class PowerGrid extends NGGridDirective {
     clickTimer: any = null;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
-        private powergridService: PowergridService, public formattingService: FormattingService, private sanitizer: DomSanitizer) {
+        private powergridService: PowergridService, public formattingService: FormattingService,
+        private sanitizer: DomSanitizer, @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('PowerGrid');
     }
@@ -221,7 +223,7 @@ export class PowerGrid extends NGGridDirective {
             suppressCellSelection: false, // TODO implement focus lost/gained
             enableRangeSelection: false,
 
-            //stopEditingWhenGridLosesFocus: true,
+            stopEditingWhenGridLosesFocus: true,
             singleClickEdit: true,
             suppressClickEdit: false,
             enableGroupEdit: false,
@@ -289,6 +291,7 @@ export class PowerGrid extends NGGridDirective {
             navigateToNextCell: (params) => this.selectionChangeNavigation(params),
 
             sideBar,
+            popupParent: this.doc.getElementById('mainForm'),
             enableBrowserTooltips: true,
             onToolPanelVisibleChanged : () => this.sizeColumnsToFit(),
             onCellEditingStopped : (event) => {
@@ -928,7 +931,7 @@ export class PowerGrid extends NGGridDirective {
         const x = element.offsetLeft;
         const y = element.offsetTop;
 
-        const event = document.createEvent('MouseEvents');
+        const event = this.doc.createEvent('MouseEvents');
         event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
         return event;
     }
@@ -1225,7 +1228,7 @@ export class PowerGrid extends NGGridDirective {
     getDefaultCellRenderer(column: any) {
         return (params: any) => {
             if(column.editType === 'CHECKBOX' && !params.node.group) {
-                const checkboxEl = document.createElement('i');
+                const checkboxEl = this.doc.createElement('i');
                 checkboxEl.className = this.getIconCheckboxEditor(parseInt(params.value, 10));
                 return checkboxEl;
             }
@@ -1244,7 +1247,7 @@ export class PowerGrid extends NGGridDirective {
                 returnValueFormatted = true;
             }
 
-            return returnValueFormatted ? document.createTextNode(valueFormatted) : value;
+            return returnValueFormatted ? this.doc.createTextNode(valueFormatted) : value;
         };
     }
 

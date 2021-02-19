@@ -1,5 +1,5 @@
 import { GridOptions } from '@ag-grid-community/core';
-import { ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, EventEmitter, Input, Output, Renderer2, SecurityContext, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, EventEmitter, Inject, Input, Output, Renderer2, SecurityContext, SimpleChanges } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
@@ -18,6 +18,7 @@ import { TypeaheadEditor } from '../editors/typeaheadeditor';
 import { RadioFilter } from './filters/radiofilter';
 import { ValuelistFilter } from './filters/valuelistfilter';
 import { NGGridDirective } from '../nggrid';
+import { DOCUMENT } from '@angular/common';
 
 const TABLE_PROPERTIES_DEFAULTS = {
     rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
@@ -199,7 +200,7 @@ export class DataGrid extends NGGridDirective {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
         private servoyService: ServoyService, public formattingService: FormattingService,
-        private datagridService: DatagridService, private sanitizer: DomSanitizer) {
+        private datagridService: DatagridService, private sanitizer: DomSanitizer, @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('DataGrid');
     }
@@ -321,8 +322,8 @@ export class DataGrid extends NGGridDirective {
                 resizable: this.enableColumnResize
             },
             columnDefs,
-            // TODO this makes the date editor to close instanttly, because its popup steals the focus
-            // stopEditingWhenGridLosesFocus: true,
+
+            stopEditingWhenGridLosesFocus: true,
             suppressAnimationFrame: true,
             animateRows: false,
             suppressColumnMoveAnimation: true,
@@ -371,6 +372,7 @@ export class DataGrid extends NGGridDirective {
                     }
                 }, 150);
             },
+            popupParent: this.doc.getElementById('mainForm'),
             onCellEditingStopped: (event) => {
                 // don't allow escape if cell data is invalid
                 if(this.onColumnDataChangePromise == null) {
@@ -947,7 +949,7 @@ export class DataGrid extends NGGridDirective {
 
                 // const _this = this;
                 // colDef.onCellValueChanged = function(params) {
-                //     var focused = document.activeElement;
+                //     var focused = this.doc.activeElement;
                 //     // in case value change is triggered by clicking into another cell
                 //     // we need a timeout so the new cell will enter edit mode (updateFoundsetRecord needs
                 //     // to know the new editing cell, so it can restore its editing state after update)
@@ -1278,7 +1280,7 @@ export class DataGrid extends NGGridDirective {
         let checkboxEl = null;
 
         if(col && col.editType === 'CHECKBOX' && !params.node.group) {
-            checkboxEl = document.createElement('i');
+            checkboxEl = this.doc.createElement('i');
             checkboxEl.className = this.getIconCheckboxEditor(parseInt(value, 10));
         } else {
             if(col != null && col.showAs === 'html') {
@@ -1319,7 +1321,7 @@ export class DataGrid extends NGGridDirective {
         }
 
         if(styleClassProvider) {
-            const divContainer = document.createElement('div');
+            const divContainer = this.doc.createElement('div');
             divContainer.className = styleClassProvider;
             if(checkboxEl) {
                 divContainer.appendChild(checkboxEl);
@@ -1332,7 +1334,7 @@ export class DataGrid extends NGGridDirective {
             if(checkboxEl) {
                 return checkboxEl;
             } else {
-                return returnValueFormatted ? document.createTextNode(params.valueFormatted) : value;
+                return returnValueFormatted ? this.doc.createTextNode(params.valueFormatted) : value;
             }
         }
     }
@@ -1948,7 +1950,7 @@ export class DataGrid extends NGGridDirective {
         const x = element.offsetLeft;
         const y = element.offsetTop;
 
-        const event = document.createEvent('MouseEvents');
+        const event = this.doc.createEvent('MouseEvents');
         event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
         return event;
     }
