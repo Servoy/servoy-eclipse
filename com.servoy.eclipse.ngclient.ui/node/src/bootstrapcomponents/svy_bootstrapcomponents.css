@@ -63,6 +63,41 @@ button.btn-default{
 	display: block;
 }
 
+.svy-wrapper > * > .bts-typeahead {
+    width : 100%;
+    height: 100%;
+    display: block;
+}
+
+.svy-wrapper > * > .bts-check {
+  width: 100%;
+  height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+.svy-wrapper > * > * > .bts-combobox
+{
+    width : 100%;
+    height: 100%;
+}
+  
+.svy-wrapper > * > .bts-combobox-container {
+    width : 100%;
+    height: 100%;
+}
+
+.svy-wrapper > * > * > .bts-calendar
+{
+    height: 100%;
+}
+  
+.svy-wrapper > * > .bts-calendar-container {
+    width : 100%;
+    height: 100%;
+}
+
 .svy-wrapper > * > .bts-label.default-align {
 	display: flex;
     align-items: center;
@@ -131,7 +166,6 @@ button.btn-default{
 }
 
 .bts-dropdown {
-    height: 100%;
     text-align: left;
     padding: 1px 5px;
 }
