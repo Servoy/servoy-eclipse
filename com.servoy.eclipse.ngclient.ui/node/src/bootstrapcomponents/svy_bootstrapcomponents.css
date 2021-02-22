@@ -1,3 +1,7 @@
+button.btn-default{
+    border-color: #ccc;
+}
+
 .btn-default {
     background-color: #fff;
 }
