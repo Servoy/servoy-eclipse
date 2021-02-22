@@ -122,7 +122,7 @@ export class CustomVirtualScrollStrategy implements VirtualScrollStrategy {
             return;
         }
         let scrollOffset = this._viewport.measureScrollOffset();
-        if (this.wantedOffset !== -1 && scrollOffset !== this.wantedOffset) {
+        if (this.wantedOffset !== -1 && Math.round(scrollOffset) !== Math.round(this.wantedOffset) && wantedOffset === undefined) {
               this._viewport.scrollToOffset(this.wantedOffset);
             return;
         }
