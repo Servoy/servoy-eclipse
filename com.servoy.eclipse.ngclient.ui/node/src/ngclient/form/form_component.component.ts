@@ -404,22 +404,28 @@ class FormComponentServoyApi extends ServoyApi {
 
 @Directive({ selector: '[svyContainerStyle]' })
 export class AddAttributeDirective implements OnInit {
-    @Input() svyContainerStyle: {classes?: string[]; styles?:  { [key: string]: string }; layout?:  { [key: string]: string}};
+    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache;
 
     constructor(private el: ElementRef, private renderer: Renderer2) { }
 
     ngOnInit() {
-        if (this.svyContainerStyle.classes) {
+        if ('classes' in this.svyContainerStyle) {
             this.svyContainerStyle.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
-        if (this.svyContainerStyle.styles) {
+
+        if ('styles' in this.svyContainerStyle && this.svyContainerStyle.styles) {
             for (const key of Object.keys(this.svyContainerStyle.styles)) {
                 this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.styles[key]);
             }
         }
-        if (this.svyContainerStyle.layout) {
+        if ('layout' in this.svyContainerStyle) {
             for (const key of Object.keys(this.svyContainerStyle.layout)) {
                 this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.layout[key]);
+            }
+        }
+        if ('attributes' in this.svyContainerStyle) {
+              for (const key of Object.keys(this.svyContainerStyle.attributes)) {
+                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
             }
         }
     }
