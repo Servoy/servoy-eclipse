@@ -19,9 +19,11 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Color;
 import java.awt.Insets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
@@ -81,7 +83,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		Default, Empty, Etched, Bevel, Line, Title, Matte, SpecialMatte, RoundedWebBorder
 	}
 
-	private static HashMap<BorderType, Border> defaultBorderValues = new HashMap<BorderType, Border>();
+	private static final ConcurrentMap<BorderType, Border> defaultBorderValues = new ConcurrentHashMap<BorderType, Border>();
+	private static final AtomicBoolean loading = new AtomicBoolean(false);
+
 	private final PersistContext persistContext;
 
 	final static ComboboxPropertyController<BorderType> comboboxController = new ComboboxPropertyController<BorderType>("BORDER_TYPE", "borderTypes",
@@ -102,45 +106,39 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		getDefaultBorderValuesMap(false);
 	}
 
-	public static HashMap<BorderType, Border> getDefaultBorderValuesMap()
+	public static ConcurrentMap<BorderType, Border> getDefaultBorderValuesMap()
 	{
 		return getDefaultBorderValuesMap(true);
 	}
 
-	private static HashMap<BorderType, Border> getDefaultBorderValuesMap(boolean wait)
+	private static ConcurrentMap<BorderType, Border> getDefaultBorderValuesMap(boolean wait)
 	{
 		Runnable runnable = null;
-		synchronized (defaultBorderValues)
+		if (loading.compareAndSet(false, true))
 		{
-			if (defaultBorderValues.size() == 0)
+			runnable = new Runnable()
 			{
-				runnable = new Runnable()
+				@Override
+				public void run()
 				{
-					@Override
-					public void run()
+					if (defaultBorderValues.size() == 0)
 					{
-						synchronized (defaultBorderValues)
-						{
-							if (defaultBorderValues.size() == 0)
-							{
-								defaultBorderValues.put(BorderType.Default, null);
-								defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
-								defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
-								defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
-								defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
-								TitledBorder titledBorder = new TitledBorder("Title");
-								titledBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
-								defaultBorderValues.put(BorderType.Title, titledBorder);
-								defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
-								defaultBorderValues.put(BorderType.SpecialMatte,
-									new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
-								defaultBorderValues.put(BorderType.RoundedWebBorder,
-									new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
-							}
-						}
+						defaultBorderValues.put(BorderType.Default, null);
+						defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
+						defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
+						defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
+						defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
+						TitledBorder titledBorder = new TitledBorder("Title");
+						titledBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
+						defaultBorderValues.put(BorderType.Title, titledBorder);
+						defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
+						defaultBorderValues.put(BorderType.SpecialMatte,
+							new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
+						defaultBorderValues.put(BorderType.RoundedWebBorder,
+							new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
 					}
-				};
-			}
+				}
+			};
 		}
 		if (runnable != null)
 		{
@@ -1491,8 +1489,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { Integer.valueOf(TitledBorder.LEFT), Integer.valueOf(TitledBorder.CENTER), Integer.valueOf(TitledBorder.RIGHT), Integer.valueOf(
 					TitledBorder.LEADING), Integer.valueOf(TitledBorder.TRAILING) },
-				new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight, Messages.JustifyLeading, Messages.JustifyTrailing }).addDefaultValue(
-					Integer.valueOf(TitledBorder.DEFAULT_JUSTIFICATION)),
+				new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight, Messages.JustifyLeading, Messages.JustifyTrailing })
+					.addDefaultValue(
+						Integer.valueOf(TitledBorder.DEFAULT_JUSTIFICATION)),
 			Messages.LabelUnresolved);
 
 		private static final IPropertyController<Integer, Integer> POSITION_CONTROLLER = new ComboboxPropertyController<Integer>(POSITION, "position",
@@ -1500,8 +1499,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				new Integer[] { Integer.valueOf(TitledBorder.ABOVE_TOP), Integer.valueOf(TitledBorder.TOP), Integer.valueOf(
 					TitledBorder.BELOW_TOP), Integer.valueOf(
 						TitledBorder.ABOVE_BOTTOM), Integer.valueOf(TitledBorder.BOTTOM), Integer.valueOf(TitledBorder.BELOW_BOTTOM) },
-				new String[] { Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM }).addDefaultValue(
-					Integer.valueOf(TitledBorder.DEFAULT_POSITION)),
+				new String[] { Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM })
+					.addDefaultValue(
+						Integer.valueOf(TitledBorder.DEFAULT_POSITION)),
 			Messages.LabelUnresolved);
 
 		private final PersistContext persistContext;
@@ -1623,7 +1623,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 
 		@Override
-		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
+		public Object resetComplexPropertyValue(@SuppressWarnings("unused")
+		Object id)
 		{
 			TitledBorder defVal = (TitledBorder)getDefaultBorderValuesMap().get(BorderType.Title);
 			if (TITLE.equals(id))
