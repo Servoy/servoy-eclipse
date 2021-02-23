@@ -17,6 +17,7 @@
 		(focus)="focus$.next('')"
 		(click)="click$.next('')"
         [resultTemplate]="rt"
+        (keyup.arrowDown)="scroll()" (keyup.arrowUp)="scroll()"
 		#instance="ngbTypeahead"
 		#element
 />

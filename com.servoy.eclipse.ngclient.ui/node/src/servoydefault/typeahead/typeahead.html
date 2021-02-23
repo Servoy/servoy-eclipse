@@ -18,6 +18,6 @@ container="body"
 (focus)="focus$.next('')"
 (click)="click$.next('')"
 (selectItem)="valueChanged($event.item)"
-(keyup.arrowDown)="scroll($event)" (keyup.arrowUp)="scroll($event)"
+(keyup.arrowDown)="scroll()" (keyup.arrowUp)="scroll()"
 #instance="ngbTypeahead"
 #element/>

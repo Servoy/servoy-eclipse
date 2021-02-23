@@ -26,6 +26,46 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
         super(renderer, cdRef);
     }
 
+    @HostListener('keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            // stop propagation when using list form component (to not break the selection)
+            event.stopPropagation();
+        }
+    }
+
+    svyOnInit() {
+        super.svyOnInit();
+         this.renderer.listen( this.getFocusElement(), 'focus', () => {
+            setTimeout(this.onFocus);
+        });
+    }
+
+    onFocus = () => {
+        const popup = document.getElementById(this.instance.popupId);
+        if (popup) {
+            popup.style.width = this.getFocusElement().clientWidth + 'px';
+        }
+    };
+
+    scroll() {
+        if (!this.instance.isPopupOpen()) {
+            return;
+        }
+
+        setTimeout(() => {
+            const popup = document.getElementById(this.instance.popupId);
+            const activeElements = popup.getElementsByClassName('active');
+            if (activeElements.length === 1) {
+                const elem = activeElements[0] as HTMLElement;
+                elem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    }
+
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
         if (changes.readOnly || changes.enabled) {
@@ -33,14 +73,6 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
         }
         if (changes.format && this.valuelistID) {
             this.instance.writeValue(this.dataProviderID);
-        }
-    }
-
-    @HostListener('keydown', ['$event'])
-    handleKeyDown(event: KeyboardEvent) {
-        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-            // stop propagation when using list form component (to not break the selection)
-            event.stopPropagation();
         }
     }
 
