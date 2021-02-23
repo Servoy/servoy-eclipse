@@ -79,7 +79,7 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElemen
 
     dataProviderValidation() {
         if ( this.inputValidation === 'email' ) {
-            const email_regexp = /^[_a-z0-9-+^$']+(\.[_a-z0-9-+^$']+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+            const email_regexp = /^[_a-zA-Z0-9-+^$']+(\.[_a-zA-Z0-9-+^$']+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
             let isMatchRegex = email_regexp.test( this.dataProviderID );
             if ( isMatchRegex || !this.dataProviderID ) {
                 this.showError = false;
