@@ -95,6 +95,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     private log: LoggerService;
     private removeListenerFunction: () => void;
+    renderedRowsLength: number;
 
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
@@ -146,10 +147,11 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         ).subscribe();
         this.renderedRows.changes.subscribe(() => {
            const newAvg = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
-           if (newAvg !== this.averageRowHeight) {
+           if (newAvg !== this.averageRowHeight || this.renderedRowsLength !== this.renderedRows.length) {
                 this.averageRowHeight = newAvg;
                 if (this.responsiveDynamicHeight) this.computeTableHeight();
            }
+            this.renderedRowsLength = this.renderedRows.length;
             minBuff = this.pageSize ? (this.pageSize + 1) * this.averageRowHeight : 200;
             maxBuff = minBuff * 2;
             this.scrollStrategy.updateItemAndBufferSize(this.averageRowHeight,minBuff, maxBuff );
@@ -854,15 +856,15 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             }
             if (this.columns) {
                 if (this.responsiveDynamicHeight) {
-                    const headerHeight = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
-                    const height = headerHeight + this.pageSize  * this.averageRowHeight + paginationHeight;
-                    if (this.responsiveHeight === 0) {
-                        this.renderer.setStyle(this.getNativeElement(), 'height', height + 'px');
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', height + 'px');
+                if (this.responsiveHeight === 0) {
+                         this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
+                         this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', '100%');
                     } else {
-                        this.renderer.setStyle(this.getNativeElement(), 'height', this.responsiveHeight + 'px');
+                        const headerHeight = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
+                        const h = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) + headerHeight;
+                        this.renderer.setStyle(this.getNativeElement(), 'height', h - paginationHeight  + 'px');
                         this.renderer.setStyle(this.getNativeElement(), 'max-height', this.responsiveHeight + 'px');
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', (this.responsiveHeight - paginationHeight) + 'px');
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', Math.min(h, this.responsiveHeight) - paginationHeight  + 'px');
                         window.setTimeout(this.calculateTableHeight, 100, this);
                     }
                 } else if (this.responsiveHeight === 0) {
