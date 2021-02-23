@@ -8,6 +8,15 @@
     padding-right: 20px;
 }
 
+.svy-wrapper > * > .select2tokenizer_container,
+.svy-wrapper > * > .select2tokenizer_container > * > .select2-container,
+.svy-wrapper > * > .select2tokenizer_container > * > .select2-container > .selection ,
+.svy-wrapper > * > .select2tokenizer_container > * > .select2-container > .selection > .select2-selection {
+    width: 100%;
+    height: 100%;
+}
+
+
 .table td, .table th {
      padding: 8px;
  }
