@@ -26,7 +26,7 @@ import { ServoyBaseComponent } from '../basecomponent';
                 </div>
           </div>
       </div>
-      <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto"> <!-- main container div -->
+      <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
 

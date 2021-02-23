@@ -1,12 +1,12 @@
-.svy-main-window-container > svy-formload > .svy-respform
+.svy-main-window-container > svy-form > .svy-respform
 {
 	height: 100%;
 }
-.svy-wrapper > * > div > div > div > svy-formload > .svy-respform
+.svy-wrapper > * > div > div > div > svy-form > .svy-respform
 {
 	height: 100%;
 }
-.svy-wrapper > * > div > div > div > div > svy-formload > .svy-respform
+.svy-wrapper > * > div > div > div > div > svy-form > .svy-respform
 {
 	height: 100%;
 }  
