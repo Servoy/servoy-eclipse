@@ -1,9 +1,6 @@
-button.btn-default{
-    border-color: #ccc;
-}
-
 .btn-default {
-    background-color: #fff;
+    border-color: #ccc;
+	background-color: #fff;
 }
 
 .svy-wrapper > * > .bts-media {
@@ -76,7 +73,6 @@ button.btn-default{
     overflow-x: hidden;
     margin: 0;
 }
-
 .svy-wrapper > * > * > .bts-combobox
 {
     width : 100%;

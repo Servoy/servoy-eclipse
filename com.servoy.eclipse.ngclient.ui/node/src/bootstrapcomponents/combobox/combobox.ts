@@ -28,13 +28,17 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService) {
         super(renderer, cdRef);
     }
-    
+
     @HostListener('keydown', ['$event'])
     handleKeyDown(event: KeyboardEvent) {
         if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             // stop propagation when using list form component (to not break the selection)
             event.stopPropagation();
         }
+    }
+
+    getDropDownWidth() {
+        return this.input?.nativeElement?.clientWidth;
     }
 
     getFocusElement() {

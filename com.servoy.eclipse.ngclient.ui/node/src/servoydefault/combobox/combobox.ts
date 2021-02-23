@@ -30,6 +30,11 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         }
     }
 
+    getDropDownWidth() {
+        return this.input?.nativeElement?.clientWidth;
+    }
+
+
     getFocusElement() {
         return this.input.nativeElement;
     }

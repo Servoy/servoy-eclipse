@@ -9,7 +9,7 @@
         [disabled]="readOnly || !enabled"
         [id]="servoyApi.getMarkupId() + '_btn'"
         #input><span class="svy-dropdown-text">{{formattedValue}}</span></button>
-      <div ngbDropdownMenu [attr.aria-labelledby]="servoyApi.getMarkupId() + '_btn'">
+      <div ngbDropdownMenu [attr.aria-labelledby]="servoyApi.getMarkupId() + '_btn'" [ngStyle]="{ 'width.px': getDropDownWidth() }">
        <ng-container *ngIf="openState">
         <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem input-sm" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format}}</button>
        </ng-container>
