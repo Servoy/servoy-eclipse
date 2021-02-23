@@ -268,7 +268,7 @@ public class ChangeParentCommand extends Command
 					{
 						((IChildWebObject)persist).setIndex(i);
 					}
-					changes.add(persist);
+					if (!changes.contains(newParent)) changes.add(persist);
 				}
 				if (flattenedNewParent instanceof IBasicWebObject && child instanceof WebCustomType)
 				{
