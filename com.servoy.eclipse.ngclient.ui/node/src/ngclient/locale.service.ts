@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import numbro from 'numbro';
 
 import { I18NProvider } from './services/i18n_provider.service';
+import { LoggerFactory, LoggerService } from '../sablo/logger.service';
 
 @Injectable()
 export class LocaleService {
@@ -15,10 +16,13 @@ export class LocaleService {
     private loadedLocale: Deferred<any>;
 
     private readonly localeMap = { en: 'en-US' };
+    private readonly log: LoggerService;
 
     constructor(private sabloService: SabloService,
         private i18nProvider: I18NProvider,
-        private sessionStorageService: SessionStorageService) {
+        private sessionStorageService: SessionStorageService,
+        logFactory: LoggerFactory ) {
+            this.log = logFactory.getLogger('LocaleService');
     }
 
     public isLoaded(): Promise<any> {
@@ -70,7 +74,7 @@ export class LocaleService {
                 } else if (tryOnlyLanguage) {
                     return this.setMomentLocale(localeId.substring(0, index), false);
                 } else {
-                    console.log('moment locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
+                    this.log.warn('moment locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
                 }
             });
     }
@@ -87,7 +91,7 @@ export class LocaleService {
             } else if (tryOnlyLanguage) {
                 return this.setNumbroLocale(localeId.substring(0, index), false);
             } else {
-                console.log('numbro locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
+                this.log.warn('numbro locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
             }
         });
     }

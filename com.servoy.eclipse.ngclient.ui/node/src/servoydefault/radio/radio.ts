@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
+import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
@@ -15,7 +16,9 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
     @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
 
     selected = false;
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document ) {
+    private log: LoggerService;
+
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
         super( renderer, cdRef, formattingService, doc );
     }
 
@@ -29,10 +32,10 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
     }
 
     public setHorizontalAlignmentFlexbox( element: any, renderer: Renderer2, halign: any ) {
-        if ( halign != -1 ) {
-            if ( halign == 0 ) {
+        if ( halign !== -1 ) {
+            if ( halign === 0 ) {
                 renderer.setStyle( element, 'justify-content', 'center' );
-            } else if ( halign == 4 ) {
+            } else if ( halign === 4 ) {
                 renderer.setStyle( element, 'justify-content', 'flex-end' );
             } else {
                 renderer.setStyle( element, 'justify-content', 'flex-start' );
@@ -41,10 +44,7 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
     }
 
     attachHandlers() {
-        console.log("attaching");
-        console.log(this.getFocusElement());
         this.renderer.listen( this.getFocusElement(), 'click', (e) => {
-            console.log(e);
             if (!this.readOnly && this.enabled) {
                 this.itemClicked(e);
                 if (this.onActionMethodID) this.onActionMethodID(e);
@@ -58,8 +58,10 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
             this.selected = !this.selected;
 
         if ( this.valuelistID && this.valuelistID[0] )
+            // eslint-disable-next-line eqeqeq
             this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
         else if ( typeof this.dataProviderID === 'string' )
+            // eslint-disable-next-line eqeqeq
             this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
         else
             this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
@@ -70,8 +72,10 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
         if ( !this.dataProviderID )
             return false;
         if ( this.valuelistID && this.valuelistID[0] ) {
+            // eslint-disable-next-line eqeqeq
             return this.dataProviderID == this.valuelistID[0].realValue;
         } else if ( typeof this.dataProviderID === 'string' ) {
+            // eslint-disable-next-line eqeqeq
             return this.dataProviderID == '1';
         } else {
             return this.dataProviderID > 0;

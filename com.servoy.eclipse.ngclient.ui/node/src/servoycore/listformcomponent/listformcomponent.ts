@@ -411,7 +411,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 // always just render 1
                 if (this.numberOfCells < 1) this.numberOfCells = 1;
             } else {
-                console.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
             }
 
         }

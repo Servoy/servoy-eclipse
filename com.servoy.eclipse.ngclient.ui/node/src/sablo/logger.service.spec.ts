@@ -21,7 +21,7 @@ describe('LoggerService', () => {
       expect(log).toBeTruthy();
   }));
 
-  it('should not log anything but errors', inject([LoggerFactory], (logFactory: LoggerFactory) => {
+  it('should not log anything but warn and errors', inject([LoggerFactory], (logFactory: LoggerFactory) => {
    	   //by default isDebugMode is false, so it should only log errors
       const log = logFactory.getLogger('LoggerService'); //by default isDebugMode is false
 
@@ -32,18 +32,18 @@ describe('LoggerService', () => {
       expect(windowRef.nativeWindow.console.info).not.toHaveBeenCalled();
 
       log.warn('test');
-      expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
+      expect(windowRef.nativeWindow.console.warn).toHaveBeenCalled();
 
       log.error('ERROR!');
       expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
 
   	  log.warn(log.buildMessage(()=>('test')));
-      expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
+      expect(windowRef.nativeWindow.console.warn).toHaveBeenCalledWith(jasmine.stringMatching(' WARN LoggerService - '),'test');
   }));
 
   it('should log error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
       const log = logFactory.getLogger('LoggerService');
-      log.setLogLevel(LogLevel.ERROR);
+      log.logLevel = LogLevel.ERROR;
 
       log.warn('test');
       expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
@@ -54,7 +54,7 @@ describe('LoggerService', () => {
 
   it('should log info, warning, error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
       const log = logFactory.getLogger('LoggerService');
-      log.setLogLevel(LogLevel.INFO);
+      log.logLevel = LogLevel.INFO;
 
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
@@ -74,7 +74,7 @@ describe('LoggerService', () => {
 
   it('should log debug ... error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
       const log = logFactory.getLogger('LoggerService');
-      log.setLogLevel(LogLevel.DEBUG);
+      log.logLevel = LogLevel.DEBUG;
 
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ stringResolved=true;return 'test' + 2;
 
   it('should spam', inject([LoggerFactory], (logFactory: LoggerFactory) => {
       const log = logFactory.getLogger('LoggerService');
-      log.setLogLevel(LogLevel.SPAM);
+      log.logLevel = LogLevel.SPAM;
 
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' SPAM LoggerService - '),'some spam');

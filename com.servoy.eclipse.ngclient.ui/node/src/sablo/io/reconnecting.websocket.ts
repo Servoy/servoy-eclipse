@@ -1,19 +1,10 @@
+import { LoggerFactory, LoggerService, LogLevel } from '../logger.service';
 import { CustomEventEmitter, CustomEvent } from '../util/eventemitter';
 
 
 type UrlFunction = () => string;
 
 export class ReconnectingWebSocket {
-    /**
-     * Whether all instances of ReconnectingWebSocket should log debug messages.
-     * Setting this to true is the equivalent of setting all instances of ReconnectingWebSocket.debug to true.
-     */
-    public static debugAll = false;
-
-
-    /** Whether this instance should log debug messages. */
-    public debug = false;
-
     /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
     private automaticOpen = true;
 
@@ -53,8 +44,12 @@ export class ReconnectingWebSocket {
      * Read only.
      */
     private readyState = WebSocket.CONNECTING;
+    private log: LoggerService;
 
-    constructor(url: string | UrlFunction, options?: { [property: string]: string | number | boolean }) {
+    constructor(url: string | UrlFunction, logFactory: LoggerFactory, options?: { [property: string]: string | number | boolean }) {
+        this.log = logFactory.getLogger('ReconnectingWebSocket');
+        // enable this to have debug log level
+        // this.log.logLevel = LogLevel.DEBUG;
         // Default settings
         const settings = {
 
@@ -136,12 +131,12 @@ export class ReconnectingWebSocket {
      */
     public send(data) {
         if (this.ws) {
-            if (this.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'send', this.getUrl(), data);
+            if (this.log.logLevel === LogLevel.DEBUG) {
+                this.log.debug('ReconnectingWebSocket', 'send', this.getUrl(), data);
             }
             return this.ws.send(data);
         } else {
-            throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
+            throw new Error('INVALID_STATE_ERR : Pausing to reconnect websocket');
         }
     };
 
@@ -157,15 +152,15 @@ export class ReconnectingWebSocket {
             this.reconnectAttempts = 0;
         }
 
-        if (this.debug || ReconnectingWebSocket.debugAll) {
-            console.debug('ReconnectingWebSocket', 'attempt-connect', this.getUrl());
+       if (this.log.logLevel === LogLevel.DEBUG) {
+            this.log.debug('ReconnectingWebSocket', 'attempt-connect', this.getUrl());
         }
         this.ws = new WebSocket(this.getUrl());
         const self = this;
         const localWs = this.ws;
         const timeout = setTimeout(function() {
-            if (this.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl());
+            if (this.log.logLevel === LogLevel.DEBUG) {
+                this.log.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl());
             }
             this.timedOut = true;
             localWs.close();
@@ -174,8 +169,8 @@ export class ReconnectingWebSocket {
 
         this.ws.onopen = (event) => {
             clearTimeout(timeout);
-            if (self.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'onopen', self.getUrl());
+            if (this.log.logLevel === LogLevel.DEBUG) {
+                this.log.debug('ReconnectingWebSocket', 'onopen', self.getUrl());
             }
             self.readyState = WebSocket.OPEN;
             self.reconnectAttempts = 0;
@@ -199,8 +194,8 @@ export class ReconnectingWebSocket {
                 e.wasClean = event.wasClean;
                 self.eventTarget.dispatchEvent(e);
                 if (!reconnectAttempt && !self.timedOut) {
-                    if (self.debug || ReconnectingWebSocket.debugAll) {
-                        console.debug('ReconnectingWebSocket', 'onclose', self.getUrl());
+                    if (this.log.logLevel === LogLevel.DEBUG) {
+                        this.log.debug('ReconnectingWebSocket', 'onclose', self.getUrl());
                     }
                     self.eventTarget.dispatchEvent(new WebsocketCustomEvent('close'));
                 }
@@ -215,16 +210,16 @@ export class ReconnectingWebSocket {
             }
         };
         this.ws.onmessage = (event) => {
-            if (self.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'onmessage', self.getUrl(), event.data);
+           if (this.log.logLevel === LogLevel.DEBUG) {
+                this.log.debug('ReconnectingWebSocket', 'onmessage', self.getUrl(), event.data);
             }
             const e = new WebsocketCustomEvent('message');
             e.data = event.data;
             self.eventTarget.dispatchEvent(e);
         };
         this.ws.onerror = (event) => {
-            if (self.debug || ReconnectingWebSocket.debugAll) {
-                console.debug('ReconnectingWebSocket', 'onerror', self.getUrl(), event);
+           if (this.log.logLevel === LogLevel.DEBUG) {
+                this.log.debug('ReconnectingWebSocket', 'onerror', self.getUrl(), event);
             }
             self.eventTarget.dispatchEvent(new WebsocketCustomEvent('error'));
         };

@@ -44,7 +44,7 @@ export class WebsocketService {
         this.ngZone.runOutsideAngular(() => {
             // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
             const websocket = new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
-                this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']));
+                this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']), this.logFactory);
 
             this.wsSession = new WebsocketSession(websocket, this, this.services, this.windowRef, this.converterService, this.logFactory, this.loadingIndicatorService, this.ngZone);
             // todo should we just merge $websocket and $services into $sablo that just has all
@@ -545,7 +545,6 @@ export class WebsocketSession {
                 });
             }
         } catch (e) {
-            console.log(e);
             this.log.error(this.log.buildMessage(() => ('Error (follows below) in parsing/processing this message: ' + message_data)));
             this.log.error(e);
             if (obj && obj.smsgid) {

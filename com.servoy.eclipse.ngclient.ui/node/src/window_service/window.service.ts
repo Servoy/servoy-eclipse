@@ -7,6 +7,7 @@ import { ServoyService } from '../ngclient/servoy.service';
 import { PopupMenuService, Popup } from './popupmenu.service';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 import { PopupFormService, PopupForm, Callback } from '../ngclient/services/popupform.service';
+import { LoggerFactory, LoggerService } from '../sablo/logger.service';
 
 @Injectable()
 export class WindowService {
@@ -14,17 +15,27 @@ export class WindowService {
     private _popupmenus: Popup[];
     private _popupMenuShowCommand: PopupMenuShowCommand;
     private _popupform: PopupForm;
+    private log: LoggerService;
 
-    constructor(private shortcutService: ShortcutService, 
-                private popupMenuService: PopupMenuService, 
-                private utils: SvyUtilsService, 
-                private servoyService: ServoyService, 
-                @Inject(DOCUMENT) private doc: Document, 
-                private changeHandler: ServiceChangeHandler,
-                private popupFormService: PopupFormService) {
-
+    constructor(private shortcutService: ShortcutService,
+        private popupMenuService: PopupMenuService,
+        private utils: SvyUtilsService,
+        private servoyService: ServoyService,
+        @Inject(DOCUMENT) private doc: Document,
+        private changeHandler: ServiceChangeHandler,
+        private popupFormService: PopupFormService,
+        logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('LocaleService');
     }
 
+
+    cancelFormPopup(): void {
+        this.cancelFormPopupInternal(false);
+    }
+
+    cancelFormPopupInternal(disableClearPopupFormCallToServer: boolean): void {
+        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
+    }
     get shortcuts(): Shortcut[] {
         return this._shortcuts;
     }
@@ -102,28 +113,26 @@ export class WindowService {
 
     private showPopupMenu() {
         if (this._popupmenus && this._popupMenuShowCommand) {
-            for (let i = 0; i < this._popupmenus.length; i++) {
-                if (this._popupMenuShowCommand.popupName == this._popupmenus[i].name) {
+            for (const i of Object.keys(this._popupmenus)) {
+                if (this._popupMenuShowCommand.popupName === this._popupmenus[i].name) {
                     let x: number;
                     let y: number;
 
                     this.popupMenuService.initClosePopupHandler(() => {
                         this._popupMenuShowCommand = null;
                         this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
-                    })
+                    });
                     if (this._popupMenuShowCommand.elementId) {
-                        let element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
+                        const element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
-                            let rect = element.getBoundingClientRect();
+                            const rect = element.getBoundingClientRect();
                             x = element.scrollLeft + rect.left + this._popupMenuShowCommand.x;
                             y = element.scrollTop + rect.top + this._popupMenuShowCommand.y;
-                        }
-                        else {
-                            console.error("Cannot display popup, element with id:" + this._popupMenuShowCommand.elementId + " , not found");
+                        } else {
+                            this.log.error('Cannot display popup, element with id:' + this._popupMenuShowCommand.elementId + ' , not found');
                             return;
                         }
-                    }
-                    else {
+                    } else {
                         x = this._popupMenuShowCommand.x;
                         y = this._popupMenuShowCommand.y;
                     }
@@ -165,7 +174,7 @@ export class WindowService {
         }
         return translatedShortcut;
     }
-    
+
     get popupform(): PopupForm {
         return this._popupform;
     }
@@ -173,14 +182,6 @@ export class WindowService {
     set popupform(popup: PopupForm) {
         this._popupform = popup;
         if (popup) this.popupFormService.showForm(popup);
-    }
-    
-    cancelFormPopup() :void{
-        this.cancelFormPopupInternal(false);
-    }
-    
-    cancelFormPopupInternal(disableClearPopupFormCallToServer : boolean) : void{
-        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
 }
 
@@ -197,6 +198,6 @@ class PopupMenuShowCommand {
     public popupName: string;
     public elementId: string;
     public x: number;
-    public y: number
+    public y: number;
 }
 

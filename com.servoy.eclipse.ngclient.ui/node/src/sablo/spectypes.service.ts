@@ -2,19 +2,24 @@ import { Injectable } from '@angular/core';
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 import { Observable } from 'rxjs';
+import { LoggerFactory, LoggerService } from './logger.service';
 
 
 @Injectable()
 export class SpecTypesService {
 
     private registeredTypes = new Map<string, typeof BaseCustomObject>();
+    private log: LoggerService;
 
+    constructor(logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('SpecTypesService');
+    }
     createType(name: string): BaseCustomObject {
         const classRef = this.registeredTypes.get(name);
         if (classRef) {
             return new classRef();
         }
-        console.log('returning just the basic custom object for  ' + name + ' none of the properties will be monitored');
+        this.log.warn('returning just the basic custom object for  ' + name + ' none of the properties will be monitored');
         return new BaseCustomObject();
     }
 
@@ -35,7 +40,7 @@ export class SpecTypesService {
             });
             array['stateHolder'].initDiffer();
         }
-        return <ICustomArray<T>>array;
+        return array as ICustomArray<T>;
     }
 
     registerType(name: string, classRef: typeof BaseCustomObject, specProperties: Array<string>) {
@@ -57,7 +62,8 @@ export class SpecTypesService {
         } // else TODO do any other types need guessing?
         //        else { // try to find it in types?
         //            this.registeredTypes.forEach(function(typeConstructorValue, typeNameKey) {
-        //                if (val instanceof typeConstructorValue) guess = typeNameKey; // this wouldn't return the converter name like 'JSON_obj' but rather the actual name from spec of the custom type like "(...).tab"
+        //                if (val instanceof typeConstructorValue) guess = typeNameKey; // this wouldn't return the converter name like 'JSON_obj' but rather the actual name from spec
+        //                of the custom type like "(...).tab"
         //            });
         //        }
         return guess;
@@ -188,7 +194,7 @@ export interface IFoundset {
      * browser yourself; keys are the dataprovider names and values are objects that contain
      * the format contents
      */
-    columnFormats: Record<string, object>;
+    columnFormats: Record<string, any>;
 
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
@@ -332,7 +338,8 @@ export interface IFoundset {
     /**
      * Adds a change listener that will get triggered when server sends changes for this foundset.
      *
-     * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
+     * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset
+                 get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
      * @param changeListener the listener to register.
      */
     addChangeListener(changeListener: ChangeListener): () => void;
@@ -354,7 +361,7 @@ export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    viewportRowsCompletelyChanged?: { oldValue: object[]; newValue: object[] };
+    viewportRowsCompletelyChanged?: { oldValue: any[]; newValue: any[] };
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
@@ -371,7 +378,7 @@ export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
 export interface ViewportRowUpdate { type: ChangeType; startIndex: number; endIndex: number }
 export type ViewportRowUpdates = ViewportRowUpdate[];
 
-export enum ChangeType {
+export enum ChangeType  {
     ROWS_CHANGED = 0,
 
     /**
@@ -494,6 +501,10 @@ export class BaseCustomObjectState extends ChangeAwareState {
         this.allChanged = false;
     }
 
+    public getHashKey(): string {
+        return this.hash + '_' + this.change;
+    }
+
     protected markIfChanged(propertyName: string | number, newObject: any, oldObject: any) {
         if (this.testChanged(propertyName, newObject, oldObject)) {
             this.pushChange(propertyName);
@@ -511,7 +522,7 @@ export class BaseCustomObjectState extends ChangeAwareState {
 
     private pushChange(propertyName) {
         if (this.ignoreChanges) return;
-        if (this.changedKeys.size == 0) this.change++;
+        if (this.changedKeys.size === 0) this.change++;
 
         if (!this.changedKeys.has(propertyName)) {
             this.changedKeys.add(propertyName);
@@ -530,11 +541,6 @@ export class BaseCustomObjectState extends ChangeAwareState {
         }
         return false;
     }
-
-    public getHashKey(): string {
-        return this.hash + '_' + this.change;
-    }
-
 }
 
 export class ArrayState extends BaseCustomObjectState {
@@ -579,7 +585,7 @@ export class ArrayState extends BaseCustomObjectState {
                     return record.item.getStateHolder().markAllChanged(false);
                 }
             });
-            if (addedOrRemoved != 0) {
+            if (addedOrRemoved !== 0) {
                 // size changed, for now send whole array
                 this.markAllChanged(false);
             } else {

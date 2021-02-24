@@ -3,6 +3,7 @@ import {TooltipDirective} from './tooltip.directive';
 import {TooltipService} from './tooltip.service';
 import {Component, DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
+import { WindowRefService } from '../../sablo/util/windowref.service';
 const mouseEnter: Event = new Event('mouseenter');
 
 @Component({
@@ -22,7 +23,7 @@ describe('Directive: Tooltip', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [TooltipDirective, TestTooltipWrapperComponent],
-      providers: [TooltipService]
+      providers: [TooltipService, WindowRefService]
     });
 
     fixture = TestBed.createComponent(TestTooltipWrapperComponent);

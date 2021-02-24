@@ -2,6 +2,7 @@ import { Component, SimpleChanges, Input, Output, Renderer2, ChangeDetectorRef, 
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { FormService } from '../../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
+import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Component({
     selector: 'servoyextra-sidenav',
@@ -50,9 +51,11 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     mouseLeaveTimeout: number;
 
     private realContainedForm: any;
+    private log: LoggerService;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService, @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
         super(renderer, cdRef);
+        this.log = logFactory.getLogger('LocaleService');
     }
 
     svyOnInit() {
@@ -322,7 +325,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }, (err) => {
                 // TODO use logging instead
-                console.error(err);
+                this.log.error(err);
             });
         } else {
             confirmSelection();
@@ -364,7 +367,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                 // }
             }, (err) => { // Error: "Oops something went wrong"
                 // TODO use logging instead
-                console.error(err);
+                this.log.error(err);
             });
         } else {
             this.setExpandedIndex(level, index, item);
@@ -399,7 +402,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                 // }
             }, (err) => { // Error: "Oops something went wrong"
                 // TODO use logging instead
-                console.error(err);
+                this.log.error(err);
             });
         } else {
             this.clearExpandedIndex(level - 1);

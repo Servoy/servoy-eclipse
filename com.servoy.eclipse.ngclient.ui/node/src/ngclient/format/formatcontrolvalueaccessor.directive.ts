@@ -4,6 +4,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
 import { DOCUMENT } from '@angular/common';
+import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 
 @Directive({
@@ -27,8 +28,12 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 	private isKeyPressEventFired = false;
 	private oldInputValue = null;
     private listeners = [];
+    private readonly log: LoggerService;
 
-    constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService, @Inject(DOCUMENT) private doc: Document) {}
+    constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
+                        @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger('formatdirective');
+    }
 
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
@@ -54,7 +59,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             try {
                 data = this.formatService.unformat(data, format, type, this.realValue);
             } catch (e) {
-                console.log(e);
+                this.log.error(e);
                     //TODO set error state
             }
             if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask) {
@@ -115,7 +120,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                  try {
                      data = this.formatService.format(data, this.format, useEdit);
                  } catch (e) {
-                     console.log(e);
+                     this.log.error(e);
                  }
                  if (data && this.format.type === 'TEXT') {
                      if (this.format.uppercase) data = data.toUpperCase();

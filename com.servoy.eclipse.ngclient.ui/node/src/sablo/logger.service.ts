@@ -13,11 +13,13 @@ export enum LogLevel {
 }
 
 export class LogConfiguration {
-    constructor(public isDebugMode: boolean = false, public level: LogLevel= LogLevel.WARN) {}
+    constructor(public isDebugMode: boolean = false, public level: LogLevel= LogLevel.WARN) {
+    }
 }
 
 declare global {
-    interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {}; console: Console } // extend the existing window interface with the new log provider property
+    // extend the existing window interface with the new log provider property
+    interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {[property: string]: LogLevel}; console: Console }
 }
 
 const noop = (): any => undefined;
@@ -26,7 +28,7 @@ export class LoggerService {
     private console: Console;
     private enabled = false;
 
-    constructor( private windowRefService: WindowRefService, private svyLogConfiguration: LogConfiguration, private className: string ) {
+    constructor(windowRefService: WindowRefService, private svyLogConfiguration: LogConfiguration, private className: string ) {
         this.console = windowRefService.nativeWindow.console;
     }
 
@@ -85,7 +87,11 @@ export class LoggerService {
         return this.svyLogConfiguration.isDebugMode = !this.svyLogConfiguration.isDebugMode;
     }
 
-    public setLogLevel(level: LogLevel) {
+    get logLevel() {
+        return this.svyLogConfiguration.level;
+    }
+
+    set logLevel(level: LogLevel) {
         this.svyLogConfiguration.level = level;
     }
 
@@ -112,7 +118,7 @@ export class LoggerFactory {
     }
 
     public getLogger(cls: any): LoggerService {
-        if (this.instances[cls] == undefined) {
+        if (this.instances[cls] === undefined) {
             this.instances[cls] = new LoggerService(this.windowRefService, new LogConfiguration(this.defaultLogConfiguration.isDebugMode, this.defaultLogConfiguration.level), cls);
         }
         return this.instances[cls];

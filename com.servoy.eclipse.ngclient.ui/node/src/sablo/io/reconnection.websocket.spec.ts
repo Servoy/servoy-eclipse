@@ -3,6 +3,8 @@ import { TestBed,fakeAsync,tick } from '@angular/core/testing';
 import {ReconnectingWebSocket} from './reconnecting.websocket';
 
 import {CustomEvent} from '../util/eventemitter';
+import { LoggerFactory } from '../logger.service';
+import { WindowRefService } from '../util/windowref.service';
 
 describe('ReconnectionWebsocket', () => {
   let normalWebSocket = null;
@@ -16,7 +18,7 @@ describe('ReconnectionWebsocket', () => {
   });
 
   it('should be connecting and reconnecting', fakeAsync(() => {
-      const socket = new TestReconnectingWebSocket('ws://localhost/');
+      const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
       expect(socket.__latestEvent.name).toBe('connecting');
       tick(10);
       expect(socket.__latestEvent.name).toBe('open');
@@ -33,7 +35,7 @@ describe('ReconnectionWebsocket', () => {
     }));
 
   it('should send and receive data', () => {
-      const socket = new TestReconnectingWebSocket('ws://localhost/');
+      const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
 
       socket.send('some data');
       expect(WebSocketMock.instance.data).toBe('some data');
@@ -46,7 +48,7 @@ describe('ReconnectionWebsocket', () => {
     });
 
 it('test url as function param', () => {
-    const socket = new TestReconnectingWebSocket(()=>'ws://localhost/',);
+    const socket = new TestReconnectingWebSocket(()=>'ws://localhost/', new LoggerFactory(new WindowRefService()));
     expect(socket.__latestEvent.name).toBe('connecting');
     expect(WebSocketMock.instance.url).toBe('ws://localhost/');
   });

@@ -30,7 +30,8 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
         localeService: LocaleService,
         dateTimeAdapter: DateTimeAdapter<any>,
         owlDateTimeIntl: OwlDateTimeIntl,
-        logFactory: LoggerFactory, @Inject(DOCUMENT) doc: Document) {
+        logFactory: LoggerFactory,
+        @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, localeService, dateTimeAdapter, doc);
         i18nProvider.getI18NMessages('servoy.button.ok', 'servoy.button.cancel').then((val) => {
             if (val['servoy.button.ok']) owlDateTimeIntl.setBtnLabel = val['servoy.button.ok'];

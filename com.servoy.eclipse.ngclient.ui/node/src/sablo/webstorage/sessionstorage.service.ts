@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { LoggerFactory, LoggerService } from '../logger.service';
 import { WebStorage } from './webstorage.interface';
 
 @Injectable()
@@ -6,9 +7,11 @@ export class SessionStorageService implements WebStorage {
 
     hasSessionStorage: boolean;
     prefix = '';
+    private log: LoggerService;
 
-    constructor() {
+    constructor(logFactory: LoggerFactory) {
         this.hasSessionStorage = this.isSupported();
+         this.log = logFactory.getLogger('SessionStorageService');
     }
 
     isSupported(): boolean {
@@ -26,7 +29,7 @@ export class SessionStorageService implements WebStorage {
 			try {
 				sessionStorage.setItem(this.prefix + key, JSON.stringify(value));
 			} catch (e) {
-                console.log(e);
+                this.log.error(e);
                 return false;
 			}
 			return true;
@@ -40,7 +43,7 @@ export class SessionStorageService implements WebStorage {
 				const value = sessionStorage.getItem(this.prefix + key);
 				return value && JSON.parse(value);
 			} catch (e) {
-				console.log(e);
+				this.log.error(e);
 				return null;
 			}
 		}
@@ -56,7 +59,7 @@ export class SessionStorageService implements WebStorage {
 			try {
 				sessionStorage.removeItem(this.prefix + key);
 			} catch (e) {
-                console.log(e);
+                this.log.error(e);
                 return false;
 			}
 			return true;
@@ -75,7 +78,7 @@ export class SessionStorageService implements WebStorage {
 					}
 				}
 			} catch (e) {
-                console.log(e);
+                this.log.error(e);
                 return false;
 			}
 			return true;
@@ -84,7 +87,7 @@ export class SessionStorageService implements WebStorage {
 		try {
 			sessionStorage.clear();
 		} catch (e) {
-            console.log(e);
+            this.log.error(e);
             return false;
 		}
 

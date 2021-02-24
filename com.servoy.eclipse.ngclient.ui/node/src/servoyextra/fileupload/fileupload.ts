@@ -2,6 +2,7 @@ import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, Chang
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
 import { FileUploader } from 'ng2-file-upload';
 import { DOCUMENT } from '@angular/common';
+import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 
 @Component( {
     selector: 'servoyextra-fileupload',
@@ -43,9 +44,11 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
     hasBaseDropZoneOver= false;
 
     private ready = true;
+    private log: LoggerService;
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService, @Inject(DOCUMENT) private doc: Document ) {
-        super( renderer, cdRef );
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService, @Inject(DOCUMENT) private doc: Document , logFactory: LoggerFactory) {
+        super(renderer, cdRef);
+        this.log = logFactory.getLogger('LocaleService');
     }
 
     public fileOverBase( e: any ): void {
@@ -60,7 +63,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
     initializeComponent() {
         super.initializeComponent();
         if (this.multiFileUpload && ! this.onFileUploadedMethodID) {
-            console.warn('Multifile upload without onFileUploaded Method isn\'t supported. To upload multi file start using onFileUploaded Method');
+            this.log.warn('Multifile upload without onFileUploaded Method isn\'t supported. To upload multi file start using onFileUploaded Method');
         }
         const url = this.onFileUploadedMethodID ? this.utilsService.generateUploadUrl( this.servoyApi.getFormName(), this.name, 'onFileUploadedMethodID' ):
                             this.utilsService.generateUploadUrl( this.servoyApi.getFormName(), this.name, 'dataProviderID' );
