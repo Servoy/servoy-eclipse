@@ -179,34 +179,11 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         return -1;
     }
 
-    calculateTableHeight(innerThis: ServoyExtraTable): void {
-        const rows = innerThis.elementRef.nativeElement.querySelectorAll('tr');
-        if (rows.length > 1 || innerThis.foundset.viewPort.rows.length === 0) {
-            let height = 4; //the border
-            const pagination = innerThis.getNativeElement().getElementsByTagName('ngb-pagination');
-            let paginationHeight = 0;
-            if (pagination[0] && pagination[0].children[0]) {
-                paginationHeight = pagination[0].children[0].clientHeight;
-            }
-            height += paginationHeight;
-            rows.forEach((row) => {
-                if (height < innerThis.responsiveHeight) {
-                    height += row.clientHeight;
-                }
-            });
-            innerThis.renderer.setStyle(innerThis.getNativeElement(), 'height', height + 'px');
-            innerThis.renderer.setStyle(innerThis.viewPort._contentWrapper.nativeElement.parentElement, 'height', (height - paginationHeight) + 'px');
-        } else {
-            window.setTimeout(innerThis.calculateTableHeight, 100);
-        }
-    }
-
     ngOnDestroy(): void {
         if (this.removeListenerFunction != null) {
             this.removeListenerFunction();
             this.removeListenerFunction = null;
         }
-
     }
 
     attachHandlers() {
@@ -861,11 +838,13 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                          this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', '100%');
                     } else {
                         const headerHeight = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
-                        const h = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) + headerHeight;
-                        this.renderer.setStyle(this.getNativeElement(), 'height', h - paginationHeight  + 'px');
+                        const h = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0);
+                        // the total height of the component including the header and the pagination
+                        this.renderer.setStyle(this.getNativeElement(), 'height', h + headerHeight + paginationHeight + 'px');
                         this.renderer.setStyle(this.getNativeElement(), 'max-height', this.responsiveHeight + 'px');
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', Math.min(h, this.responsiveHeight) - paginationHeight  + 'px');
-                        window.setTimeout(this.calculateTableHeight, 100, this);
+                        // the height of the table body
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', Math.min(h, this.responsiveHeight - headerHeight - paginationHeight)  + 'px');
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'margin-bottom', paginationHeight + 'px');
                     }
                 } else if (this.responsiveHeight === 0) {
                     this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
