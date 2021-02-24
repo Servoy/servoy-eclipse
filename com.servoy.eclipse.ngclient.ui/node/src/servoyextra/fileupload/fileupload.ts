@@ -48,7 +48,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService, @Inject(DOCUMENT) private doc: Document , logFactory: LoggerFactory) {
         super(renderer, cdRef);
-        this.log = logFactory.getLogger('LocaleService');
+        this.log = logFactory.getLogger('FileUpload');
     }
 
     public fileOverBase( e: any ): void {

@@ -25,7 +25,7 @@ export class WindowService {
         private changeHandler: ServiceChangeHandler,
         private popupFormService: PopupFormService,
         logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('LocaleService');
+        this.log = logFactory.getLogger('WindowService');
     }
 
 

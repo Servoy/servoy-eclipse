@@ -55,7 +55,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService, @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
         super(renderer, cdRef);
-        this.log = logFactory.getLogger('LocaleService');
+        this.log = logFactory.getLogger('SideNav');
     }
 
     svyOnInit() {
