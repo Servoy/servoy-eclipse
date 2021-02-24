@@ -1,4 +1,5 @@
-import { Component, ChangeDetectorRef, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ChangeDetectorRef, Renderer2, Input, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { Format } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -14,7 +15,7 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield<HTMLInputEl
     @Input() inputType: string;
     @Input() autocomplete: string;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, doc);
     }
 }

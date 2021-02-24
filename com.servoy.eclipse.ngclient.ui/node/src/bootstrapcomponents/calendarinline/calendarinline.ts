@@ -1,4 +1,5 @@
-import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { DateTimeAdapter } from '@danielmoncada/angular-datetime-picker';
 import { Moment } from 'moment';
 import { LocaleService } from '../../ngclient/servoy_public';
@@ -13,8 +14,8 @@ import { ServoyBootstrapBaseCalendar } from '../calendar/basecalendar';
 export class ServoyBootstrapCalendarinline extends ServoyBootstrapBaseCalendar {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>,) {
-        super(renderer, cdRef, localeService, dateTimeAdapter);
+        localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, localeService, dateTimeAdapter, doc);
     }
 
     public dateChanged(event: Moment) {

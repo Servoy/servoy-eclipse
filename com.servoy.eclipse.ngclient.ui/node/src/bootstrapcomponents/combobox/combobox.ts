@@ -1,8 +1,9 @@
-import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { Format, FormattingService } from '../../ngclient/servoy_public';
 import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'bootstrapcomponents-combobox',
@@ -25,8 +26,8 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivEle
     openState = false;
     private skipFocus = false;
 
-    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService) {
-        super(renderer, cdRef);
+    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, doc);
     }
 
     @HostListener('keydown', ['$event'])

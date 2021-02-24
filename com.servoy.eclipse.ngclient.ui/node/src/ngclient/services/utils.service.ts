@@ -8,7 +8,7 @@ import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 export class SvyUtilsService {
     private log: LoggerService;
 
-    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document, private formservice: FormService, logFactory: LoggerFactory) {
+    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private doc: Document, private formservice: FormService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SvyUtilsService');
     }
 
@@ -45,7 +45,7 @@ export class SvyUtilsService {
 
         if (!form) {
             // form not found, search for an active dialog
-            let dialog = this.document.querySelector('.svy-dialog.window.active');
+            let dialog = this.doc.querySelector('.svy-dialog.window.active');
             if (dialog) {
                 let formInDialog = dialog.querySelector('svy-form');
                 if (formInDialog) form = formInDialog.getAttribute('ng-reflect-name');
@@ -121,7 +121,7 @@ export class SvyUtilsService {
     };
 
     public getMainBody() {
-        return document.getElementById('mainBody');
+        return this.doc.getElementById('mainBody');
     }
 }
 

@@ -5,7 +5,7 @@ import { DOCUMENT } from '@angular/common';
 export class ShortcutService {
     all_shortcuts: any = {};
 
-    constructor(@Inject(DOCUMENT) private document: Document) {
+    constructor(@Inject(DOCUMENT) private doc: Document) {
 
     }
 
@@ -15,7 +15,7 @@ export class ShortcutService {
             type: 'keydown',
             propagate: false,
             disable_in_input: false,
-            target: this.document,
+            target: this.doc,
             keycode: false
         };
         if (!opt) opt = default_options;
@@ -26,7 +26,7 @@ export class ShortcutService {
         }
 
         let ele = opt.target;
-        if (typeof opt.target == 'string') ele = document.getElementById(opt.target);
+        if (typeof opt.target == 'string') ele = this.doc.getElementById(opt.target);
 
         //The function to be called at keypress
         const func = (e: KeyboardEvent) => {

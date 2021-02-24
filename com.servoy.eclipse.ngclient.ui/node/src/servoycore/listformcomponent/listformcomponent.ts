@@ -15,6 +15,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { isEmpty } from 'lodash-es';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoycore-listformcomponent',
@@ -51,7 +52,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         private servoyService: ServoyService,
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
-        @Inject(FormComponent) private parent: FormComponent) {
+        @Inject(FormComponent) private parent: FormComponent,
+        @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('ListFormComponent');
     }
@@ -290,7 +292,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (item instanceof StructureCache) {
             return item;
         }
-        let cm: ComponentModel = null
+        let cm: ComponentModel = null;
         if (item instanceof ComponentCache) {
             cm = this.getRowItems().find(elem => elem.name === item.name);
         } else cm  = item;
@@ -449,7 +451,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     updateSelection() {
         const selectedRowIndex = this.foundset.selectedRowIndexes[0];
         const element = this.elementRef.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.numberOfCells * this.page : selectedRowIndex];
-        if (element && !element.contains(document.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
+        if (element && !element.contains(this.doc.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
             element.focus();
             this.selectionChangedByKey = false;
         }

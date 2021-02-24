@@ -1,4 +1,5 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 
 import { FormattingService } from '../../ngclient/servoy_public';
 
@@ -19,8 +20,8 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
     increment = 0;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        formattingService: FormattingService) {
-        super(renderer, cdRef, formattingService);
+        formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, formattingService, doc);
     }
 
     deleteMedia(): void {

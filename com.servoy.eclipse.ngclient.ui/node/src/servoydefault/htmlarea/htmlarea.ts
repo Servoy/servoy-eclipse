@@ -1,7 +1,8 @@
-import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
 import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-editor';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoydefault-htmlarea',
@@ -19,8 +20,8 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         defaultParagraphSeparator: 'p'
     };
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
-        super(renderer, cdRef, formattingService);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, formattingService, doc);
     }
 
     attachFocusListeners() {
@@ -95,7 +96,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     public selectAll() {
-        const range = document.createRange();
+        const range = this.doc.createRange();
         range.selectNodeContents(this.getFocusElement());
         const sel = window.getSelection();
         sel.removeAllRanges();
@@ -117,7 +118,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
             if ( sel.rangeCount ) {
                 range = sel.getRangeAt( 0 );
                 range.deleteContents();
-                range.insertNode( document.createTextNode( text ) );
+                range.insertNode( this.doc.createTextNode( text ) );
             }
         }
     }

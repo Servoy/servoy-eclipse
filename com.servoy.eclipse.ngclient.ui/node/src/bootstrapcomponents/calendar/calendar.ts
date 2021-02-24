@@ -1,4 +1,5 @@
-import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { Format, I18NProvider, LocaleService } from '../../ngclient/servoy_public';
 import { ServoyBootstrapBaseCalendar } from './basecalendar';
@@ -26,8 +27,9 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
         i18nProvider: I18NProvider,
         localeService: LocaleService,
         dateTimeAdapter: DateTimeAdapter<any>,
-        owlDateTimeIntl: OwlDateTimeIntl) {
-        super(renderer, cdRef, localeService, dateTimeAdapter);
+        owlDateTimeIntl: OwlDateTimeIntl,
+        logFactory: LoggerFactory, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, localeService, dateTimeAdapter, doc);
         i18nProvider.getI18NMessages('servoy.button.ok', 'servoy.button.cancel').then((val) => {
             if (val['servoy.button.ok']) owlDateTimeIntl.setBtnLabel = val['servoy.button.ok'];
             if (val['servoy.button.cancel']) owlDateTimeIntl.cancelBtnLabel = val['servoy.button.cancel'];

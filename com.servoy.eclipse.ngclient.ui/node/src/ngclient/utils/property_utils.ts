@@ -110,11 +110,11 @@ export class PropertyUtils {
         }
     }
 
-    public static addSelectOnEnter( element: any, renderer: Renderer2 ) {
+    public static addSelectOnEnter( element: any, renderer: Renderer2, doc: Document ) {
         renderer.listen( element, 'focus', () => {
             setTimeout(() => {
                 // this access "document" directly which shoudn't really be done, but angular doesn't have encapsuled support for testing "is(":focus")"
-                const currentFocusedElement = document.querySelector( ':focus' );
+                const currentFocusedElement = doc.querySelector( ':focus' );
                 if ( currentFocusedElement === element )
                     element.select();
             }, 0 );

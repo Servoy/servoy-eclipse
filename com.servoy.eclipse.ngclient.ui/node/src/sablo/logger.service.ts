@@ -13,7 +13,7 @@ export enum LogLevel {
 }
 
 export class LogConfiguration {
-    constructor(public isDebugMode: boolean = false, public level: LogLevel= LogLevel.ERROR) {}
+    constructor(public isDebugMode: boolean = false, public level: LogLevel= LogLevel.WARN) {}
 }
 
 declare global {

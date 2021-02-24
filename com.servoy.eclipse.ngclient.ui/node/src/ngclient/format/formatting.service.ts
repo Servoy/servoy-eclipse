@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import * as moment from 'moment';
 import numbro from 'numbro';
 
@@ -23,6 +24,7 @@ export class Format {
 @Injectable()
 export class FormattingService {
 
+    constructor(@Inject(DOCUMENT) private doc: Document) {}
     // formatting stufff
     public format(data: any, format: Format, useEditFormat: boolean): string {
         const formatString = useEditFormat ? format.edit : format.display;
@@ -207,9 +209,9 @@ export class FormattingService {
 		let sel = null;
 		if(textarea) {
 			// code for IE
-			if (document['selection']) {
+			if (this.doc['selection']) {
 				textarea.focus();
-				sel = document['selection'].createRange().text;
+				sel = this.doc['selection'].createRange().text;
 			} else {
 				// code for Mozilla
 				const start = textarea['selectionStart'];

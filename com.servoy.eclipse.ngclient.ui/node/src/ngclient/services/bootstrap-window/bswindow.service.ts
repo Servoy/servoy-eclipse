@@ -43,7 +43,7 @@ export class BSWindow {
     constructor(private windowRefService: WindowRefService,
         rendererFactory: RendererFactory2,
         private utilsService: SvyUtilsService,
-        @Inject(DOCUMENT) private document: Document) {
+        @Inject(DOCUMENT) private doc: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
@@ -168,7 +168,7 @@ export class BSWindow {
     close() {
         const _this = this;
         if (this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
-            const backdropModals = this.document.getElementsByClassName('.modal-backdrop');
+            const backdropModals = this.doc.getElementsByClassName('.modal-backdrop');
             while (backdropModals[0]) {
                 backdropModals[0].parentNode.removeChild(backdropModals[0]);
             }

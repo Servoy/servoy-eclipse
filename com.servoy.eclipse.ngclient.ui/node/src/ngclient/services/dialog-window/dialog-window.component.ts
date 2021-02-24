@@ -13,7 +13,7 @@ import { FormService } from '../../form.service';
 
     window: SvyWindow;
 
-    constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private document: any) {
+    constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private doc: Document) {
     }
 
     setWindow(window: SvyWindow) {
@@ -64,8 +64,8 @@ import { FormService } from '../../form.service';
     }
 
     firstElementFocused(event: Event) {
-      const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'), 10);
-      const newTarget: any = document.querySelector('[tabindex=\'' + ( tabIndex - 1 ) + '\']');
+      const tabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+      const newTarget: any = this.doc.querySelector('[tabindex=\'' + ( tabIndex - 1 ) + '\']');
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
       if(event.target !== newTarget) {
@@ -74,7 +74,7 @@ import { FormService } from '../../form.service';
     }
 
     lastElementFocused(event: Event) {
-      const newTarget: any = document.querySelector('[tabindex=\'2\']');
+      const newTarget: any = this.doc.querySelector('[tabindex=\'2\']');
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
       if(event.target !== newTarget) {

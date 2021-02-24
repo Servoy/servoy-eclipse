@@ -1,6 +1,7 @@
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
-import { Directive, Input, Output, EventEmitter, SimpleChanges, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Directive, Input, Output, EventEmitter, SimpleChanges, Renderer2, ChangeDetectorRef, Inject } from '@angular/core';
 import { PropertyUtils } from '../ngclient/servoy_public';
+import { DOCUMENT } from '@angular/common';
 
 @Directive()
 // eslint-disable-next-line
@@ -21,7 +22,7 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
 
     storedTooltip: any;
 
-    constructor(renderer: Renderer2,  protected cdRef: ChangeDetectorRef) {
+    constructor(renderer: Renderer2,  protected cdRef: ChangeDetectorRef, @Inject(DOCUMENT) protected doc: Document) {
         super(renderer, cdRef);
     }
 
@@ -49,7 +50,7 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
                       else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
                       break;
                   case 'selectOnEnter':
-                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
+                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer, this.doc);
                       break;
                 }
             }
@@ -118,7 +119,7 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
         elem.selectionStart = startPos;
         elem.selectionEnd = startPos + text.length;
 
-        const evt = document.createEvent('HTMLEvents');
+        const evt = this.doc.createEvent('HTMLEvents');
         evt.initEvent('change', false, true);
         elem.dispatchEvent(evt);
     }

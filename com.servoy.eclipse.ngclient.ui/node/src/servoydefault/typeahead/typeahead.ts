@@ -1,9 +1,10 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoydefault-typeahead',
@@ -17,8 +18,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     click$ = new Subject<string>();
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        formattingService: FormattingService) {
-        super(renderer, cdRef, formattingService);
+        formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, formattingService, doc);
     }
 
     @HostListener('keydown', ['$event'])
@@ -37,7 +38,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     }
 
     onFocus = () => {
-        const popup = document.getElementById(this.instance.popupId);
+        const popup = this.doc.getElementById(this.instance.popupId);
         if (popup) {
             popup.style.width = this.getFocusElement().clientWidth + 'px';
         }
@@ -49,7 +50,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         }
 
         setTimeout(() => {
-            const popup = document.getElementById(this.instance.popupId);
+            const popup = this.doc.getElementById(this.instance.popupId);
             const activeElements = popup.getElementsByClassName('active');
             if (activeElements.length === 1) {
                 const elem = activeElements[0] as HTMLElement;

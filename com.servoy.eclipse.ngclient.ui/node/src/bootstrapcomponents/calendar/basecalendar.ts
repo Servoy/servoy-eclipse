@@ -1,9 +1,10 @@
-import { Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Renderer2, ChangeDetectorRef, Inject } from '@angular/core';
 import { Moment } from 'moment';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import * as moment from 'moment';
 import { LocaleService } from '../../ngclient/servoy_public';
 import { DateTimeAdapter } from '@danielmoncada/angular-datetime-picker';
+import { DOCUMENT } from '@angular/common';
 
 export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDivElement> {
 
@@ -19,8 +20,8 @@ export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDi
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
             localeService: LocaleService,
-            dateTimeAdapter: DateTimeAdapter<any>) {
-        super(renderer, cdRef);
+            dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, doc);
         dateTimeAdapter.setLocale(localeService.getLocale());
         const ld = moment.localeData();
         this.firstDayOfWeek = ld.firstDayOfWeek();

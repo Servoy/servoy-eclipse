@@ -16,9 +16,9 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 	@ContentChild(TemplateRef, { static: true })
 	templateRef: TemplateRef<any>;
 
-	private selectedTab: Tab;
 	public selectedTabID: string;
 
+	private selectedTab: Tab;
 	private waitingForServerVisibility = {};
 	private lastSelectedTab: Tab;
 

@@ -1,10 +1,11 @@
-import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef } from '@angular/core';
+import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject } from '@angular/core';
 
 import { PropertyUtils, FormattingService } from '../ngclient/servoy_public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 
 import { IValuelist } from '../sablo/spectypes.service';
+import { DOCUMENT } from '@angular/common';
 
 @Directive()
 // eslint-disable-next-line
@@ -23,10 +24,10 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     @Input() valuelistID: IValuelist;
 
     storedTooltip: any;
-    
+
     mustExecuteOnFocus = true;
-    
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
+
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService, @Inject(DOCUMENT) protected doc: Document) {
         super(renderer, cdRef);
     }
 
@@ -91,7 +92,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                         else this.renderer.removeAttribute(this.getNativeElement(), 'placeholder');
                         break;
                     case 'selectOnEnter':
-                        if (change.currentValue) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
+                        if (change.currentValue) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer, this.doc);
                         break;
                 }
             }
@@ -120,7 +121,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     }
 
     public replaceSelectedText(text: string) {
-        const elem = this.getFocusElement() as HTMLInputElement
+        const elem = this.getFocusElement() as HTMLInputElement;
         const startPos = elem.selectionStart;
         const endPos = elem.selectionEnd;
 
@@ -130,7 +131,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
         elem.selectionStart = startPos;
         elem.selectionEnd = startPos + text.length;
 
-        const evt = document.createEvent('HTMLEvents');
+        const evt = this.doc.createEvent('HTMLEvents');
         evt.initEvent('change', false, true);
         elem.dispatchEvent(evt);
     }

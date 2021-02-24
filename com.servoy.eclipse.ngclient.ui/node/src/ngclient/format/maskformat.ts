@@ -1,4 +1,5 @@
-import { Renderer2 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Renderer2 } from '@angular/core';
 import { Format, FormattingService } from './formatting.service';
 
 const MASK_CONST = {
@@ -37,7 +38,8 @@ export class MaskFormat {
     private focusText: string;
     private filteredMask: string;
 
-    constructor(private format: Format, private _renderer: Renderer2, private element: HTMLInputElement, private formatService: FormattingService) {
+    constructor(private format: Format, private _renderer: Renderer2, private element: HTMLInputElement,
+                        private formatService: FormattingService, @Inject(DOCUMENT) private doc: Document) {
         this.ignore = false;
         this.settings = {};
         this.settings['placeholder'] = this.format.placeHolder ? this.format.placeHolder : ' ';
@@ -231,8 +233,8 @@ this.setCaret(this.checkVal(true));
             if (this.element['setSelectionRange']) {
                 begin = this.element.selectionStart;
                 end = this.element.selectionEnd;
-            } else if (document.getSelection() && document.getSelection()['createRange']) {
-                const range = document.getSelection()['createRange']();
+            } else if (this.doc.getSelection() && this.doc.getSelection()['createRange']) {
+                const range = this.doc.getSelection()['createRange']();
                 begin = 0 - range.duplicate().moveStart('character', -100000);
                 end = begin + range.text.length;
             }

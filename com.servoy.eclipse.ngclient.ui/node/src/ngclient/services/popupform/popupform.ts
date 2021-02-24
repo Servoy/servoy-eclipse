@@ -15,7 +15,7 @@ export class ServoyFormPopupComponent {
     _width = 0;
     _height = 0;
 
-    constructor(@Inject(DOCUMENT) private document: Document, private formService: FormService) {
+    constructor(@Inject(DOCUMENT) private doc: Document, private formService: FormService) {
     }
 
     setPopupForm(popup: PopupForm) {
@@ -37,7 +37,7 @@ export class ServoyFormPopupComponent {
         let popupLeft: number;
         let popupTop: number;
         if (this.popup.component || (this.popup.x && this.popup.y)) {
-            const element = document.getElementById(this.popup.component);
+            const element = this.doc.getElementById(this.popup.component);
             let compWidth = 0;
             let compHeight = 0;
             if (element) {
@@ -51,18 +51,18 @@ export class ServoyFormPopupComponent {
                 popupTop = this.popup.y;
             }
 
-            if ((popupLeft + popupwidth > this.document.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
+            if ((popupLeft + popupwidth > this.doc.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
                 popupLeft = popupLeft - popupwidth + compWidth;
             }
 
-            if ((popupTop + popupheight > this.document.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
+            if ((popupTop + popupheight > this.doc.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
                 popupTop = popupTop - popupheight + compHeight;
             }
 
         } else if (!this.popup.component) {
             // calculate the real center
-            popupLeft = this.document.defaultView.innerWidth / 2 - popupwidth / 2;
-            popupTop = this.document.defaultView.innerHeight / 2 - popupheight / 2;
+            popupLeft = this.doc.defaultView.innerWidth / 2 - popupwidth / 2;
+            popupTop = this.doc.defaultView.innerHeight / 2 - popupheight / 2;
         }
         this._width = popupwidth;
         this._height = popupheight;
@@ -79,8 +79,8 @@ export class ServoyFormPopupComponent {
     }
 
     firstElementFocused(event: Event) {
-        const tabIndex = parseInt(this.document.getElementById('tabStop').getAttribute('tabindex'), 10);
-        const newTarget: any = document.querySelector('[tabindex=\'' + (tabIndex - 1) + '\']');
+        const tabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+        const newTarget: any = this.doc.querySelector('[tabindex=\'' + (tabIndex - 1) + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
         if (event.target !== newTarget) {
@@ -89,7 +89,7 @@ export class ServoyFormPopupComponent {
     }
 
     lastElementFocused(event: Event) {
-        const newTarget: any = document.querySelector('[tabindex=\'2\']');
+        const newTarget: any = this.doc.querySelector('[tabindex=\'2\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
         if (event.target !== newTarget) {

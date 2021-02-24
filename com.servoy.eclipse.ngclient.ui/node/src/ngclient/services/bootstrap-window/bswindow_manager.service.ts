@@ -13,7 +13,7 @@ export class BSWindowManager {
 
     private renderer: Renderer2;
 
-    constructor(@Inject(DOCUMENT) private document: Document,
+    constructor(@Inject(DOCUMENT) private doc: Document,
             rendererFactory: RendererFactory2,
             private bsWindow: BSWindow,
             private utils: SvyUtilsService) {
@@ -55,7 +55,7 @@ export class BSWindowManager {
         if(this.modalStack.length>0){
             //update modal backdrop z-index.
             const lastWindowZindex = parseInt(this.modalStack[this.modalStack.length-1].element.style.zIndex, 10);
-            const backdropModals = this.document.getElementsByClassName('modal-backdrop');
+            const backdropModals = this.doc.getElementsByClassName('modal-backdrop');
            Array.from(backdropModals).forEach((el, index) => {
                 this.renderer.setStyle(el, 'z-index', lastWindowZindex - 1);
             });
@@ -96,12 +96,12 @@ export class BSWindowManager {
    initialize(options) {
        this.options = options;
        if (this.options.container) {
-           Array.from(this.document.querySelectorAll(this.options.container)).forEach((element => {
+           Array.from(this.doc.querySelectorAll(this.options.container)).forEach((element => {
                this.renderer.addClass(element, 'window-pane');
            }));
        }
        if(!this.options.backdrop){
-           this.options.modalBackdrop = this.document.createElement('div');
+           this.options.modalBackdrop = this.doc.createElement('div');
            this.options.modalBackdrop.setAttribute('class', 'modal-backdrop fade');
            this.options.modalBackdrop.setAttribute('style', 'z-index: 899');
        }
@@ -123,7 +123,7 @@ export class BSWindowManager {
         });
 
         if (this.options.container) {
-            const spanElement = this.document.createElement('span');
+            const spanElement = this.doc.createElement('span');
             spanElement.className = 'label label-default';
             spanElement.innerHTML = '<button class="close">x</button>';
             window_object.setWindowTab(spanElement);
@@ -164,7 +164,7 @@ export class BSWindowManager {
         if(this.modalStack.length  === 0) {
             this.utils.getMainBody().appendChild(windowObj.options.modalBackdrop);
             setTimeout(() => {
-                const backdrop = this.document.getElementsByClassName('modal-backdrop');
+                const backdrop = this.doc.getElementsByClassName('modal-backdrop');
                 Array.from(backdrop).forEach((el, index) => {
                      this.renderer.addClass(el, 'in');
                  });
@@ -180,7 +180,7 @@ export class BSWindowManager {
                 this.modalStack.splice(i, 1);
                 //also remove from dom with animation
                 if(this.modalStack.length === 0) {
-                    const backdrop = this.document.getElementsByClassName('modal-backdrop');
+                    const backdrop = this.doc.getElementsByClassName('modal-backdrop');
                     Array.from(backdrop).forEach((el) => {
                          this.renderer.removeClass(el, 'in');
                      });

@@ -8,6 +8,7 @@ import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/
 import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap, first } from 'rxjs/operators';
 import { CustomVirtualScrollStrategy } from './scroll-strategy';
+import { DOCUMENT } from '@angular/common';
 
 @Directive({
     selector: '[svyTableRow]'
@@ -92,14 +93,15 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     prevPage: number;
 
     averageRowHeight = 25;
+    renderedRowsLength: number;
 
     private log: LoggerService;
     private removeListenerFunction: () => void;
-    renderedRowsLength: number;
 
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
-                    @Inject(VIRTUAL_SCROLL_STRATEGY) private scrollStrategy: CustomVirtualScrollStrategy) {
+                    @Inject(VIRTUAL_SCROLL_STRATEGY) private scrollStrategy: CustomVirtualScrollStrategy,
+                    @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('Table');
     }
@@ -519,10 +521,10 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             const clsName = '#table_' + this.servoyApi.getMarkupId() + ' .c' + columnIndex;
             if (!this.columnCSSRules[columnIndex]) {
                 if (!this.targetStyleSheet) {
-                    const elem = document.createElement('style');
+                    const elem = this.doc.createElement('style');
                     elem.type = 'text/css';
-                    document.getElementsByTagName('head')[0].appendChild(elem);
-                    this.targetStyleSheet = document.styleSheets[document.styleSheets.length - 1] as CSSStyleSheet;
+                    this.doc.getElementsByTagName('head')[0].appendChild(elem);
+                    this.targetStyleSheet = this.doc.styleSheets[this.doc.styleSheets.length - 1] as CSSStyleSheet;
                 }
                 const rules = this.targetStyleSheet.cssRules || this.targetStyleSheet.rules;
                 this.targetStyleSheet.insertRule(clsName + '{}', rules.length);

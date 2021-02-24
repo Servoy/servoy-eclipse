@@ -1,6 +1,7 @@
-import { Component, SimpleChanges, Input, Output, Renderer2, ChangeDetectorRef, ContentChild, TemplateRef, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, SimpleChanges, Input, Output, Renderer2, ChangeDetectorRef, ContentChild, TemplateRef, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { FormService } from '../../ngclient/form.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoyextra-sidenav',
@@ -50,7 +51,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
 
     private realContainedForm: any;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService, @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
     }
 
@@ -648,7 +649,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         const x = this.getNativeElement().offsetLeft;
         const y = this.getNativeElement().offsetHeight;
 
-        const event = document.createEvent('MouseEvents');
+        const event = this.doc.createEvent('MouseEvents');
         event.initMouseEvent('click', false, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
         return event;
     }

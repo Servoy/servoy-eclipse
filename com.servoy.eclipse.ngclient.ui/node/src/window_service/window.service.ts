@@ -19,7 +19,7 @@ export class WindowService {
                 private popupMenuService: PopupMenuService, 
                 private utils: SvyUtilsService, 
                 private servoyService: ServoyService, 
-                @Inject(DOCUMENT) private document: Document, 
+                @Inject(DOCUMENT) private doc: Document, 
                 private changeHandler: ServiceChangeHandler,
                 private popupFormService: PopupFormService) {
 
@@ -112,7 +112,7 @@ export class WindowService {
                         this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     })
                     if (this._popupMenuShowCommand.elementId) {
-                        let element = document.getElementById(this._popupMenuShowCommand.elementId);
+                        let element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
                             let rect = element.getBoundingClientRect();
                             x = element.scrollLeft + rect.left + this._popupMenuShowCommand.x;

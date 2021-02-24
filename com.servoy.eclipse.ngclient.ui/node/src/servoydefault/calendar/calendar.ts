@@ -1,4 +1,4 @@
-import { Component,  SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component,  SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 
 import { LocaleService, FormattingService, I18NProvider } from '../../ngclient/servoy_public';
 
@@ -7,6 +7,7 @@ import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeComponent} from '@danielmo
 import {ServoyDefaultBaseField} from '../basefield';
 
 import * as moment from 'moment';
+import { DOCUMENT } from '@angular/common';
 
 @Component( {
     selector: 'servoydefault-calendar',
@@ -30,8 +31,8 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField<HTMLDivElemen
                             i18nProvider: I18NProvider,
                             localeService: LocaleService,
                             dateTimeAdapter: DateTimeAdapter<any> ,
-                            owlDateTimeIntl: OwlDateTimeIntl) {
-        super(renderer, cdRef, formattingService);
+                            owlDateTimeIntl: OwlDateTimeIntl, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, formattingService, doc);
         dateTimeAdapter.setLocale(  localeService.getLocale() );
         i18nProvider.getI18NMessages('servoy.button.ok', 'servoy.button.cancel').then((val) => {
             if (val['servoy.button.ok']) owlDateTimeIntl.setBtnLabel = val['servoy.button.ok'];

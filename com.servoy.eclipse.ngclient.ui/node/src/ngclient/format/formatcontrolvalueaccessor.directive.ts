@@ -1,8 +1,9 @@
 
-import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges } from '@angular/core';
+import {Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
+import { DOCUMENT } from '@angular/common';
 
 
 @Directive({
@@ -27,7 +28,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 	private oldInputValue = null;
     private listeners = [];
 
-    constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService) {}
+    constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService, @Inject(DOCUMENT) private doc: Document) {}
 
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
@@ -145,13 +146,12 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             if (this.format.maxLength) {
                 if (!this.findmode) {
                     this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
-                }
-                else {
+                } else {
                     this._renderer.removeAttribute(this._elementRef.nativeElement, 'maxlength');
                 }
             }
             if (!this.findmode && this.format.isMask) {
-                new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService);
+                new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
             }
             this.writeValue(this.realValue);
         }

@@ -44,7 +44,7 @@ export class WindowService {
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
         rendererFactory: RendererFactory2,
-        @Inject(DOCUMENT) private document: Document) {
+        @Inject(DOCUMENT) private doc: Document) {
 
         this.platformLocation.onPopState(() => {
             const form = this.platformLocation.hash.replace('#', '');
@@ -90,11 +90,11 @@ export class WindowService {
                 return;
             }
 
-            if (this.document.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
-                this.document.getElementById('mainForm').dispatchEvent(customEvent);
+                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
             }
 
             if (instance.storeBounds) {
@@ -130,8 +130,8 @@ export class WindowService {
             if (!formSize || (formSize.width === -1 && formSize.height === -1))
                 formSize = instance.form.size;
 
-            const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
-            const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
+            const windowWidth = this.doc.documentElement.clientWidth;
+            const windowHeight = this.doc.documentElement.clientHeight;
 
             // this can happen in case of responsive forms
             if (formSize.width === 0) formSize.width = windowWidth / 2;
@@ -196,7 +196,7 @@ export class WindowService {
                 });
                 event.target.dispatchEvent(customEvent);
             });
-            (this.document.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
+            (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
             // init the size of the dialog
             const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
@@ -228,11 +228,11 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.document.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
-                this.document.getElementById('mainForm').dispatchEvent(customEvent);
+                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
             }
         }
     }
@@ -345,8 +345,8 @@ export class WindowService {
 
     centerWindow(formSize: {width: number; height: number}) {
         // var body = $( 'body' );
-        const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
-        const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
+        const windowWidth = this.doc.documentElement.clientWidth;
+        const windowHeight = this.doc.documentElement.clientHeight;
         let top: number; let left: number;
         // bodyTop = body.position().top + parseInt( body.css( 'paddingTop' ), 10 );
         left = (windowWidth / 2) - (formSize.width / 2);

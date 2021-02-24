@@ -1,6 +1,7 @@
-import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
 import { FileUploader } from 'ng2-file-upload';
+import { DOCUMENT } from '@angular/common';
 
 @Component( {
     selector: 'servoyextra-fileupload',
@@ -43,7 +44,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
 
     private ready = true;
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService, @Inject(DOCUMENT) private doc: Document ) {
         super( renderer, cdRef );
     }
 
@@ -52,7 +53,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     public fileInputClick(): void {
-        const element: HTMLElement = document.getElementById( 'fileInputLabel' ) as HTMLElement;
+        const element: HTMLElement = this.doc.getElementById( 'fileInputLabel' ) as HTMLElement;
         element.click();
     }
 

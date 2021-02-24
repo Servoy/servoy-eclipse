@@ -1,7 +1,8 @@
-import { Component, Input, Renderer2, SimpleChanges,ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Renderer2, SimpleChanges,ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'bootstrapcomponents-select',
@@ -16,8 +17,8 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield<HTMLSelectEl
   @Input() selectSize;
   selectedValues: any[];
 
-  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private showDisplayValuePipe: ShowDisplayValuePipe) {
-    super(renderer, cdRef);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private showDisplayValuePipe: ShowDisplayValuePipe, @Inject(DOCUMENT) doc: Document) {
+    super(renderer, cdRef, doc);
   }
 
   svyOnChanges( changes: SimpleChanges ) {

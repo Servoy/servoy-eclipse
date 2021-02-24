@@ -1,7 +1,8 @@
-import { Component, OnInit, Renderer2, Input, ViewChild, ElementRef, HostListener, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, Input, ViewChild, ElementRef, HostListener, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'bootstrapcomponents-list',
@@ -14,8 +15,8 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLDivElement
   @Input() valuelistID: IValuelist;
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-     private showDisplayValuePipe: ShowDisplayValuePipe) {
-    super(renderer, cdRef);
+     private showDisplayValuePipe: ShowDisplayValuePipe, @Inject(DOCUMENT) doc: Document) {
+    super(renderer, cdRef, doc);
   }
 
   svyOnChanges( changes: SimpleChanges ) {

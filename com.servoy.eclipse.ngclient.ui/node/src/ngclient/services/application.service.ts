@@ -88,17 +88,17 @@ export class ApplicationService {
         if (!timeout) timeout = 0;
         setTimeout(() => {
             if (url.indexOf('resources/dynamic') === 0 && target === '_self') {
-                let ifrm = document.getElementById('srv_downloadframe');
+                let ifrm = this.doc.getElementById('srv_downloadframe');
                 if (ifrm) {
                     ifrm.setAttribute('src', url);
                 } else {
-                    ifrm = document.createElement('IFRAME');
+                    ifrm = this.doc.createElement('IFRAME');
                     ifrm.setAttribute('src', url);
                     ifrm.setAttribute('id', 'srv_downloadframe');
                     ifrm.setAttribute('name', 'srv_downloadframe');
                     ifrm.style.width = 0 + 'px';
                     ifrm.style.height = 0 + 'px';
-                    this.windowRefService.nativeWindow.document.body.appendChild(ifrm);
+                    this.doc.body.appendChild(ifrm);
                 }
             } else {
                 this.windowRefService.nativeWindow.open(url, target, targetOptions);
@@ -136,12 +136,12 @@ export class ApplicationService {
     }
 
     public showInfoPanel(url: string, w: number, h: number, t: number, closeText: string) {
-        const infoPanel = document.createElement('div');
+        const infoPanel = this.doc.createElement('div');
         infoPanel.innerHTML ='<iframe marginheight=0 marginwidth=0 scrolling=no frameborder=0 src=\''+ url +'\' width=\'100%\' height=\''+ (h - 25) +
                                             '\'></iframe><br><a href=\'#\' id =\'closePanelButton\'>'+ closeText +'</a>';
         infoPanel.style.zIndex ='2147483647';
         infoPanel.id ='infoPanel';
-        const width = window.innerWidth || document.body.offsetWidth;
+        const width =  this.windowRefService.nativeWindow.innerWidth || this.doc.body.offsetWidth;
         infoPanel.style.position = 'absolute';
         infoPanel.style.left = ((width - w) - 30) + 'px';
         infoPanel.style.top = '10px';
@@ -214,15 +214,15 @@ export class ApplicationService {
 
     private  getServerURL() {
         // current remote address including the context (includes leading /)
-        const context = this.windowRefService.nativeWindow.document.getElementsByTagName ('base')[0].getAttribute('href');
+        const context = this.doc.getElementsByTagName ('base')[0].getAttribute('href');
         return this.windowRefService.nativeWindow.location.protocol + '//' + this.windowRefService.nativeWindow.location.host + context;
     }
 
     private setIcon(favicon: string, size: string) {
-        const link: any = document.querySelector('link[rel*=\'icon\'][sizes=\'' + size + '\']');
+        const link: any = this.doc.querySelector('link[rel*=\'icon\'][sizes=\'' + size + '\']');
         if (link && link.href !== favicon) {
             link.href = favicon;
-            document.getElementsByTagName('head')[0].appendChild(link);
+            this.doc.getElementsByTagName('head')[0].appendChild(link);
         }
     }
 }

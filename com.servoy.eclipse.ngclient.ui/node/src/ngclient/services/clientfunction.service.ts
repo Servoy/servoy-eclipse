@@ -1,4 +1,5 @@
-import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { Deferred, IDeferred } from '../../sablo/util/deferred';
 
@@ -10,7 +11,7 @@ export class ClientFunctionService {
     private script: HTMLScriptElement;
     private deferred: IDeferred<void>;
 
-    constructor(private sabloService: SabloService, rendererFactory: RendererFactory2) {
+    constructor(private sabloService: SabloService, rendererFactory: RendererFactory2,  @Inject(DOCUMENT) private doc: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
@@ -18,7 +19,7 @@ export class ClientFunctionService {
         if (this.script) {
             this.script.remove();
         }
-        this.script = document.createElement('script');
+        this.script = this.doc.createElement('script');
         this.script.type = 'text/javascript';
         this.script.src = '/clientfunctions.js?clientnr='  +  this.sabloService.getClientnr() + '&stamp=' + new Date().getTime();
         // only create a defered when there is not one yet. if there was already one just reuse that one (could be waited already)
@@ -28,7 +29,7 @@ export class ClientFunctionService {
          this.deferred.resolve();
          this.deferred = null;
         };
-        this.renderer.appendChild(document.body, this.script);
+        this.renderer.appendChild(this.doc.body, this.script);
     }
 
     public waitForLoading(): Promise<void> {

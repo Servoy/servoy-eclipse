@@ -1,4 +1,5 @@
-import { Component, Renderer2, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Renderer2, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 
 import { FormattingService } from '../../ngclient/servoy_public';
 
@@ -17,8 +18,8 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
     selection: any[] = [];
     allowNullinc = 0;
 
-    constructor( changeDetectorRef: ChangeDetectorRef, renderer: Renderer2, formattingService: FormattingService ) {
-        super( renderer, changeDetectorRef, formattingService );
+    constructor( changeDetectorRef: ChangeDetectorRef, renderer: Renderer2, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document ) {
+        super( renderer, changeDetectorRef, formattingService, doc );
     }
 
     svyOnChanges( changes: SimpleChanges ) {

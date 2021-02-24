@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, Input, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
@@ -22,8 +23,8 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
     focus$ = new Subject<string>();
     click$ = new Subject<string>();
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formatService: FormattingService) {
-        super(renderer, cdRef);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject(DOCUMENT)  doc: Document, private formatService: FormattingService) {
+        super(renderer, cdRef, doc);
     }
 
     @HostListener('keydown', ['$event'])
@@ -42,7 +43,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
     }
 
     onFocus = () => {
-        const popup = document.getElementById(this.instance.popupId);
+        const popup = this.doc.getElementById(this.instance.popupId);
         if (popup) {
             popup.style.width = this.getFocusElement().clientWidth + 'px';
         }
@@ -54,7 +55,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
         }
 
         setTimeout(() => {
-            const popup = document.getElementById(this.instance.popupId);
+            const popup = this.doc.getElementById(this.instance.popupId);
             const activeElements = popup.getElementsByClassName('active');
             if (activeElements.length === 1) {
                 const elem = activeElements[0] as HTMLElement;

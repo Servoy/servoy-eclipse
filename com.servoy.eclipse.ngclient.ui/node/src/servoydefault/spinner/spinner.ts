@@ -1,6 +1,7 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService } from '../../ngclient/servoy_public';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoydefault-spinner',
@@ -11,11 +12,11 @@ import { FormattingService } from '../../ngclient/servoy_public';
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
     @ViewChild('child', { static: false }) child: ElementRef<HTMLInputElement>;
-    
+
     selection: any;
     private counter = 0;
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
-        super(renderer, cdRef, formattingService);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        super(renderer, cdRef, formattingService, doc);
     }
 
     svyOnInit() {

@@ -18,11 +18,11 @@ export class PopupFormService {
         private formService: FormService,
         private servoyService: ServoyService,
         private utils: SvyUtilsService,
-        @Inject(DOCUMENT) private document: Document) {
+        @Inject(DOCUMENT) private doc: Document) {
     }
 
     public showForm(popup: PopupForm) {
-        const mainForm = this.document.getElementById('mainForm');
+        const mainForm = this.doc.getElementById('mainForm');
         if (mainForm) {
             // main form can be null at startup
             const customEvent = new CustomEvent('disableTabseq', {
@@ -39,11 +39,11 @@ export class PopupFormService {
     }
 
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
-        document.body.removeEventListener('mouseup', this.formPopupBodyListener);
+        this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);
         if (this.formPopupComponent) {
             this.formService.hideForm(this.formPopupComponent.instance.popup.form);
             if (this.formPopupComponent.instance.popup.onClose) {
-                const jsEvent = this.utils.createJSEvent({ target: this.document.getElementById('formpopup') }, 'popupClose');
+                const jsEvent = this.utils.createJSEvent({ target: this.doc.getElementById('formpopup') }, 'popupClose');
                 if (jsEvent) {
                     jsEvent.formName = this.formPopupComponent.instance.popup.onClose.formname;
                 }
@@ -54,7 +54,7 @@ export class PopupFormService {
         const customEvent = new CustomEvent('enableTabseq', {
             bubbles: true
         });
-        this.document.getElementById('mainForm').dispatchEvent(customEvent);
+        this.doc.getElementById('mainForm').dispatchEvent(customEvent);
 
         /*
          * Because server side code in window_server.js checks for scope.model.popupform != null when closing a form popup it must have the correct value server-side; so
@@ -77,7 +77,7 @@ export class PopupFormService {
     }
 
     private showPopup(popup: PopupForm, counter?: number) {
-        if (popup.component && !this.document.getElementById(popup.component) && (!counter || counter < 10)) {
+        if (popup.component && !this.doc.getElementById(popup.component) && (!counter || counter < 10)) {
             setTimeout(() => {
                 const c = counter? counter++:1;
                 this.showPopup(popup, counter);
@@ -87,8 +87,8 @@ export class PopupFormService {
             this.formPopupComponent = componentFactory.create(this._injector);
             this.formPopupComponent.instance.setPopupForm(popup);
             this._applicationRef.attachView(this.formPopupComponent.hostView);
-            this.document.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
-            this.document.body.addEventListener('mouseup', this.formPopupBodyListener);
+            this.doc.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
+            this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
         }
     }
 
@@ -96,18 +96,18 @@ export class PopupFormService {
         if (this.formPopupComponent && this.formPopupComponent.instance.popup.doNotCloseOnClickOutside) {
             return;
         }
-        const backdrop = this.document.querySelector('.formpopup-backdrop');
+        const backdrop = this.doc.querySelector('.formpopup-backdrop');
         if (backdrop && (backdrop === event.target)) {
             //backdrop.remove();
             this.cancelFormPopup(false);
             return;
         }
-        let mainform = this.document.querySelector('.svy-main-window-container');
+        let mainform = this.doc.querySelector('.svy-main-window-container');
         if (mainform && mainform.contains(event.target as Node)) {
             this.cancelFormPopup(false);
             return;
         }
-        mainform = this.document.querySelector('.svy-dialog');
+        mainform = this.doc.querySelector('.svy-dialog');
         if (mainform && mainform.contains(event.target as Node)) {
             this.cancelFormPopup(false);
             return;

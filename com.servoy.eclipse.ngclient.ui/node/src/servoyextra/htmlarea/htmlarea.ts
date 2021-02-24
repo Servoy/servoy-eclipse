@@ -1,6 +1,7 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
 import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-editor';
+import { DOCUMENT } from '@angular/common';
 
 @Component( {
     selector: 'servoyextra-htmlarea',
@@ -8,6 +9,8 @@ import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-edi
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
+
+    @ViewChild( AngularEditorComponent ) editor: AngularEditorComponent;
 
     @Input() onActionMethodID: ( e: Event ) => void;
     @Input() onRightClickMethodID: ( e: Event ) => void;
@@ -30,8 +33,6 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
     mustExecuteOnFocus = true;
 
-    @ViewChild( AngularEditorComponent ) editor: AngularEditorComponent;
-
     config: AngularEditorConfig = {
         editable: true,
         enableToolbar: true,
@@ -40,7 +41,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
         defaultParagraphSeparator: 'p'
     };
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) private doc: Document ) {
         super( renderer, cdRef );
     }
 
@@ -141,11 +142,41 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     public selectAll() {
-        const range = document.createRange();
+        const range = this.doc.createRange();
         range.selectNodeContents( this.getFocusElement() );
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange( range );
+    }
+
+    public getSelectedText(): string {
+        const selection = window.getSelection();
+        let node = selection.anchorNode;
+        while ( node ) {
+            if ( node === this.getFocusElement() || node === this.getFocusElement().parentNode ) {
+                return selection.toString();
+            }
+            node = node.parentNode;
+        }
+        return '';
+    }
+
+    public replaceSelectedText( text: string ) {
+        if ( window.getSelection ) {
+            const sel = window.getSelection();
+            if ( sel.rangeCount ) {
+                const range = sel.getRangeAt( 0 );
+                range.deleteContents();
+                range.insertNode( this.doc.createTextNode( text ) );
+            }
+        }
+    }
+
+    public getAsPlainText(): string {
+        if ( this.dataProviderID ) {
+            return this.dataProviderID.replace( /<[^>]*>/g, '' );
+        }
+        return this.dataProviderID;
     }
 
     protected attachHandlers() {
@@ -164,36 +195,5 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
                 this.onRightClickMethodID( e ); return false;
             } );
         }
-    }
-
-    public getSelectedText(): string {
-        const selection = window.getSelection();
-        let node = selection.anchorNode;
-        while ( node ) {
-            if ( node === this.getFocusElement() || node === this.getFocusElement().parentNode ) {
-                return selection.toString();
-            }
-            node = node.parentNode;
-        }
-        return '';
-    }
-
-    public replaceSelectedText( text: string ) {
-        var sel: any, range: any;
-        if ( window.getSelection ) {
-            sel = window.getSelection();
-            if ( sel.rangeCount ) {
-                range = sel.getRangeAt( 0 );
-                range.deleteContents();
-                range.insertNode( document.createTextNode( text ) );
-            }
-        }
-    }
-
-    public getAsPlainText(): string {
-        if ( this.dataProviderID ) {
-            return this.dataProviderID.replace( /<[^>]*>/g, '' );
-        }
-        return this.dataProviderID;
     }
 }
