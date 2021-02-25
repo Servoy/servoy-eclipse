@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Renderer2, Inject, RendererFactory2 } from '@angular/core';
 
-import { PlatformLocation } from '@angular/common';
+import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { ServiceChangeHandler } from '../../sablo/util/servicechangehandler';
 import { ServoyService } from '../../ngclient/servoy.service';
@@ -11,12 +11,16 @@ export class NGUtilsService {
     private _styleclasses: any;
     private _backActionCB: any;
     private confirmMessage: string;
+    renderer: Renderer2;
 
     constructor(private windowRef: WindowRefService,
             private changeHandler: ServiceChangeHandler,
             private servoyService: ServoyService,
-            private platformLocation: PlatformLocation) {
+            private platformLocation: PlatformLocation,
+            rendererFactory: RendererFactory2,
+            @Inject(DOCUMENT) private document: Document) {
         this.windowRef.nativeWindow.location.hash = '';
+        this.renderer = rendererFactory.createRenderer(null,null);
     }
 
     get contributedTags(): Tag[] {
@@ -24,8 +28,18 @@ export class NGUtilsService {
     }
 
     set contributedTags(tags: Tag[]) {
-            this._tags = tags;
-           // do something with it..
+        this._tags = tags;
+        this.document.querySelectorAll('head > [hhsManagedTag]').forEach(e => e.remove());
+        this._tags.forEach(tag => {
+            const elem = this.renderer.createElement(tag.tagname);
+            if (tag.attrs) {
+                tag.attrs.forEach(attr => {
+                    this.renderer.setAttribute(elem, attr.name, attr.value);
+                });
+            }
+            this.renderer.setAttribute(elem, "hhsManagedTag", "");
+            this.renderer.appendChild(this.document.head, elem);
+        });
     }
 
     get styleclasses(): any {
@@ -33,8 +47,31 @@ export class NGUtilsService {
     }
 
     set styleclasses(styleclasses) {
-         this._styleclasses = styleclasses;
-         // TODO add implementation
+        const old = this._styleclasses;
+        this._styleclasses = styleclasses;
+        Object.keys(this._styleclasses).forEach((key: string) => {
+            const form = this.document.querySelector('svy-form[ng-reflect-name=' + key + '] > div');
+            if (form) {
+                const newCls = this._styleclasses[key] ? this._styleclasses[key].split(' ').filter((cls: string) => cls !== '') : [];
+                if (old && old[key]) {
+                    let toRemove = old[key];
+                    if (newCls.length > 0) {
+                        toRemove = old[key].split(' ').filter((cls: string) => {
+                            newCls.indexOf(cls) < 0
+                        });
+                    }
+                    toRemove.forEach((cls: string) => {
+                        this.renderer.removeClass(form, cls);
+                    });
+                }
+
+                newCls.forEach((cls: string) => {
+                   if(!form.classList.contains(cls)) {
+                    this.renderer.addClass(form, cls);
+                   } 
+                });
+            }
+        });
     }
 
     set backActionCB(backActionCB: any) {
