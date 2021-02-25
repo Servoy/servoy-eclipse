@@ -21,7 +21,7 @@ import { ServoyBaseComponent } from '../basecomponent';
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
            <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part"> <!-- part div -->
-               <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+               <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
           </div>
@@ -37,7 +37,7 @@ import { ServoyBaseComponent } from '../basecomponent';
       </ng-template>
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
           <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                </div>
           </div>
