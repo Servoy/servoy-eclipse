@@ -76,6 +76,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     }
 
+    public detectChanges() {
+        this.cdRef.detectChanges();
+    }
     /**
      * this should return the main native element (like the first div)
      */

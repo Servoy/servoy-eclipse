@@ -1,17 +1,17 @@
-import { Component, ChangeDetectorRef, ViewChild, ElementRef, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectorRef, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IFoundset } from '../../sablo/spectypes.service';
-import { Lightbox, LightboxConfig, LightboxEvent } from 'ngx-lightbox';
+import { Lightbox, LightboxConfig } from 'ngx-lightbox';
 
-@Component( {
+@Component({
     selector: 'servoyextra-lightboxgallery',
     templateUrl: './lightboxgallery.html',
     styleUrls: ['./lightboxgallery.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
-} )
+})
 export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onHoverButtonClicked: ( e: Event, imageId: string ) => void;
+    @Input() onHoverButtonClicked: (e: Event, imageId: string) => void;
 
     @Input() imagesFoundset: IFoundset;
     @Input() maxImageWidth: number;
@@ -34,13 +34,56 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
     public images: Array<any> = [];
 
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private _lightbox: Lightbox, private _lightboxConfig: LightboxConfig ) {
-        super( renderer, cdRef );
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private _lightbox: Lightbox, private _lightboxConfig: LightboxConfig) {
+        super(renderer, cdRef);
     }
 
     svyOnInit() {
         super.svyOnInit();
-        for ( const row of this.imagesFoundset.viewPort.rows ) {
+        this._lightboxConfig.albumLabel = this.albumLabel;
+        if (this.fadeDuration) {
+            this._lightboxConfig.fadeDuration = this.fadeDuration / 1000;
+        }
+        this._lightboxConfig.fitImageInViewPort = this.fitImagesInViewport;
+        this._lightboxConfig.positionFromTop = this.positionFromTop;
+        if (this.resizeDuration) {
+            this._lightboxConfig.resizeDuration = this.resizeDuration / 1000;
+        }
+        this._lightboxConfig.wrapAround = this.wrapAround;
+        this._lightboxConfig.showImageNumberLabel = this.showImageNumberLabel;
+
+    }
+
+    svyOnChanges(changes: SimpleChanges) {
+        if (changes) {
+            if (changes.imagesFoundset) {
+                this.createImages();
+            }
+        }
+        super.svyOnChanges(changes);
+    }
+
+    open(index: number): void {
+        // open lightbox
+        this._lightbox.open(this.images, index);
+    }
+
+    close(): void {
+        // close lightbox programmatically
+        this._lightbox.close();
+    }
+
+    showLightbox(index: number): void {
+        this.open(0);
+    }
+
+    refresh(index: number): void {
+        this.svyOnInit();
+    }
+
+    private createImages = () => {
+        this.images = [];
+        for (const row of this.imagesFoundset.viewPort.rows) {
             const image = {
                 src: row.image && row.image.url ? row.image.url : null,
                 caption: row.caption ? row.caption : null,
@@ -52,52 +95,9 @@ export class ServoyExtraLightboxGallery extends ServoyBaseComponent<HTMLDivEleme
             image.src = typeof row.image == 'string' ? row.image : image.src;
             image.thumb = typeof row.thumbnail == 'string' ? row.thumbnail : image.thumb;
 
-            if ( !image.src ) continue;
-            this.images.push( image );
+            if (!image.src) continue;
+            this.images.push(image);
         }
-
-        this._lightboxConfig.albumLabel = this.albumLabel;
-        if ( this.fadeDuration ) {
-            this._lightboxConfig.fadeDuration = this.fadeDuration / 1000;
-        }
-        this._lightboxConfig.fitImageInViewPort = this.fitImagesInViewport;
-        this._lightboxConfig.positionFromTop = this.positionFromTop;
-        if ( this.resizeDuration ) {
-            this._lightboxConfig.resizeDuration = this.resizeDuration / 1000;
-        }
-        this._lightboxConfig.wrapAround = this.wrapAround;
-        this._lightboxConfig.showImageNumberLabel = this.showImageNumberLabel;
-
-    }
-
-    svyOnChanges( changes: SimpleChanges ) {
-        if ( changes ) {
-            for ( const property of Object.keys( changes ) ) {
-                const change = changes[property];
-                switch ( property ) {
-
-                }
-            }
-        }
-        super.svyOnChanges( changes );
-    }
-
-    open( index: number ): void {
-        // open lightbox
-        this._lightbox.open( this.images, index );
-    }
-
-    close(): void {
-        // close lightbox programmatically
-        this._lightbox.close();
-    }
-
-    showLightbox( index: number ): void {
-        this.open( 0 );
-    }
-
-    refresh( index: number ): void {
-        this.svyOnInit();
-    }
+    };
 }
 

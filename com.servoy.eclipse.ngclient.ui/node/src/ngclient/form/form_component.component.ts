@@ -232,6 +232,8 @@ export class FormComponent implements OnDestroy, OnChanges {
             const change = {};
             change[property] = new SimpleChange(value,value,false);
             comp.ngOnChanges(change);
+            // this is kind of like a push so we should trigger this.
+            comp.detectChanges();
         }
     }
 
