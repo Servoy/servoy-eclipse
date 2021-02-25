@@ -87,6 +87,11 @@ public class Activator implements BundleActivator
 								}
 								else
 								{
+									if (getWindowTimeout() == Long.valueOf(BaseWebsocketSession.DEFAULT_WINDOW_TIMEOUT))
+									{
+										// in developer increase the timeout to 15 minutes, else will expire during debugging
+										setSessionWindowTimeout(new Long(60 * 15));
+									}
 									final IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class);
 									if (service != null)
 									{
@@ -118,11 +123,6 @@ public class Activator implements BundleActivator
 							};
 						}
 					};
-					if (wsSession.getWindowTimeout() == Long.valueOf(BaseWebsocketSession.DEFAULT_WINDOW_TIMEOUT))
-					{
-						// in developer increase the timeout to 15 minutes, else will expire during debugging
-						wsSession.setSessionWindowTimeout(new Long(60 * 15));
-					}
 					return wsSession;
 				}
 			});
