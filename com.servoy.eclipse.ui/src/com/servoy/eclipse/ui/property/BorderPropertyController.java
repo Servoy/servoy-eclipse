@@ -123,7 +123,6 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				{
 					if (defaultBorderValues.size() == 0)
 					{
-						defaultBorderValues.put(BorderType.Default, null);
 						defaultBorderValues.put(BorderType.Empty, new EmptyBorder(0, 0, 0, 0));
 						defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
 						defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
@@ -1624,8 +1623,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 
 		@Override
-		public Object resetComplexPropertyValue(@SuppressWarnings("unused")
-		Object id)
+		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
 		{
 			TitledBorder defVal = (TitledBorder)getDefaultBorderValuesMap().get(BorderType.Title);
 			if (TITLE.equals(id))
