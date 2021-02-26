@@ -11,7 +11,7 @@
             <!-- The main menu -->
             <ul class="svy-sidenav-menu sn-level-1 svy-sidenav-collapsed" dir="ltr">
                 <!-- Main list -->
-                <li *ngFor="let item of menu"
+                <li *ngFor="let item of menu;let $index=index"
                     class="svy-sidenav-dropdown sn-level-1"
                     [ngClass]="{'svy-navitem-selected': item.id != null && selectedIndex[1] == item.id, 'svy-navitem-disabled': item.enabled === false }"
                     >
