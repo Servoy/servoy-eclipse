@@ -70,6 +70,9 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         if (this.valuelistID) {
             const options: Select2Option[] = [];
             for (let i = 0; i < this.valuelistID.length; i++) {
+                if(this.valuelistID[i].realValue.trim() === ''){
+                    continue;
+                }
                 options.push({
                     value: this.valuelistID[i].realValue,
                     label: this.valuelistID[i].displayValue
