@@ -40,10 +40,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -52,11 +50,9 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -95,17 +91,12 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		this.activeSolutionName = activeSolutionName;
 		setTitle("Select the solution and set the value-list name.");
 
-		NewRelationWizard newRelWizard = new NewRelationWizard();
-		newRelWizard.setDialogSettings(Activator.getDefault().getDialogSettings());
-
 		retrieveCurrentSolutionNames();
 
 	}
 
 	private void retrieveCurrentSolutionNames()
 	{
-		ServoyProject servoyProject = servoyModel.getActiveProject();
-		Solution solution = servoyProject.getSolution();
 		ServoyProject projects[] = servoyModel.getModulesOfActiveProject();
 
 		List<String> list = new ArrayList<String>();
@@ -156,68 +147,15 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		Composite topLevel = new Composite(parent, SWT.NONE);
 		topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
+		GridLayout gd = new GridLayout(2, false);
+		gd.horizontalSpacing = 10;
+		topLevel.setLayout(gd);
+
 		setControl(topLevel);
-
-		Label solutionNamePatternLabel = new Label(topLevel, SWT.NONE);
-		solutionNamePatternLabel.setText("Solution name");
-		solutionNamePattern = new Text(topLevel, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
-		solutionNamePattern.getAccessible().addAccessibleListener(new AccessibleAdapter()
-		{
-			@Override
-			public void getName(AccessibleEvent e)
-			{
-				e.result = LegacyActionTools.removeMnemonics(solutionNamePatternLabel.getText());
-			}
-		});
-		// Source server
-		Label solutionNameLabel = new Label(topLevel, SWT.NONE);
-		solutionNameLabel.setText("Select solution");
-
-		tableViewer = new TableViewer(topLevel, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.VIRTUAL);
-		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
-		tableViewer.setLabelProvider(new LabelProvider());
-		tableViewer.setInput(currentSolutionNames);
-
-		int counter = 0;
-		if (activeSolutionName.equals("") == false)
-		{
-			for (int i = 0; i < currentSolutionNames.length; i++)
-			{
-				if (currentSolutionNames[i].equals(activeSolutionName))
-				{
-					counter = i;
-					break;
-				}
-			}
-		}
-		tableViewer.setSelection(new StructuredSelection(currentSolutionNames[counter]));
-
-		solutionNamePattern.addKeyListener(new KeyAdapter()
-		{
-			@Override
-			public void keyPressed(KeyEvent e)
-			{
-				filter.setSearchText(solutionNamePattern.getText());
-				tableViewer.refresh();
-			}
-		});
-
-		tableViewer.addFilter(filter);
-
-		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-
-			@Override
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				selectedSolutionName = tableViewer.getSelection().toString();
-			}
-		});
-
 
 		//Source table
 		Label valuelistNameLabel = new Label(topLevel, SWT.NONE);
-		valuelistNameLabel.setText("Value-list name");
+		valuelistNameLabel.setText("Valuelist name");
 
 		valuelistNameText = new Text(topLevel, SWT.BORDER);
 		valuelistNameText.addSelectionListener(new SelectionAdapter()
@@ -236,51 +174,82 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 				setPageComplete(validatePage());
 			}
 		});
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		valuelistNameText.setLayoutData(gridData);
 
-		//Define the layout and place the components
-		FormLayout formLayout = new FormLayout();
-		formLayout.spacing = 10;
-		formLayout.marginWidth = formLayout.marginHeight = 15;
-		topLevel.setLayout(formLayout);
 
-		//label
-		FormData formData = new FormData();
-		formData.left = new FormAttachment(0, 0);
-		formData.top = new FormAttachment(solutionNamePattern, 0, SWT.CENTER);
-		solutionNamePatternLabel.setLayoutData(formData);
+		Label solutionNamePatternLabel = new Label(topLevel, SWT.NONE);
+		solutionNamePattern = new Text(topLevel, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
+		solutionNamePattern.setMessage("Filter solutions");
+		solutionNamePattern.getAccessible().addAccessibleListener(new AccessibleAdapter()
+		{
+			@Override
+			public void getName(AccessibleEvent e)
+			{
+				e.result = LegacyActionTools.removeMnemonics(solutionNamePatternLabel.getText());
+			}
+		});
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		solutionNamePattern.setLayoutData(gridData);
 
-		//text
-		formData = new FormData();
-		formData.left = new FormAttachment(solutionNamePatternLabel, 0);
-		formData.top = new FormAttachment(0, 0);
-		formData.right = new FormAttachment(100, 0);
-		solutionNamePattern.setLayoutData(formData);
+		// Source server
+		Label solutionNameLabel = new Label(topLevel, SWT.NONE);
+		solutionNameLabel.setText("Select solution");
+		gridData = new GridData();
+		gridData.verticalAlignment = SWT.TOP;
+		solutionNameLabel.setLayoutData(gridData);
 
-		//label
-		formData = new FormData();
-		formData.left = new FormAttachment(0, 0);
-		formData.top = new FormAttachment(tableViewer.getTable(), 0, SWT.CENTER);
-		solutionNameLabel.setLayoutData(formData);
+		tableViewer = new TableViewer(topLevel, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.VIRTUAL);
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
+		tableViewer.setLabelProvider(new LabelProvider());
+		tableViewer.setInput(currentSolutionNames);
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.heightHint = 200;
+		tableViewer.getTable().setLayoutData(gridData);
 
-		//table
-		formData = new FormData();
-		formData.left = new FormAttachment(solutionNamePattern, 0, SWT.LEFT);
-		formData.top = new FormAttachment(solutionNamePattern, 0, SWT.BOTTOM);
-		formData.right = new FormAttachment(100, 0);
-		tableViewer.getTable().setLayoutData(formData);
+		int counter = 0;
+		if (activeSolutionName.equals("") == false)
+		{
+			for (int i = 0; i < currentSolutionNames.length; i++)
+			{
+				if (currentSolutionNames[i].equals(activeSolutionName))
+				{
+					counter = i;
+					break;
+				}
+			}
+		}
+		tableViewer.setSelection(new StructuredSelection(currentSolutionNames[counter]));
 
-		//label
-		formData = new FormData();
-		formData.left = new FormAttachment(0, 0);
-		formData.top = new FormAttachment(valuelistNameText, 0, SWT.CENTER);
-		valuelistNameLabel.setLayoutData(formData);
+		solutionNamePattern.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				filter.setSearchText(solutionNamePattern.getText());
+				tableViewer.refresh();
+			}
+		});
 
-		//text
-		formData = new FormData();
-		formData.left = new FormAttachment(tableViewer.getTable(), 0, SWT.LEFT);
-		formData.top = new FormAttachment(tableViewer.getTable(), 0, SWT.BOTTOM);
-		formData.right = new FormAttachment(100, 0);
-		valuelistNameText.setLayoutData(formData);
+		tableViewer.addFilter(filter);
+
+		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				selectedSolutionName = tableViewer.getSelection().toString();
+			}
+		});
 
 	}
 
@@ -349,7 +318,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		public void setSearchText(String s)
 		{
 			// ensure that the value can be used for matching
-			this.searchString = ".*" + s + ".*";
+			this.searchString = s + ".*";
 		}
 
 		/*
@@ -367,9 +336,10 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 				{
 					return true;
 				}
+				return false;
 			}
 
-			return false;
+			return true;
 		}
 
 	}

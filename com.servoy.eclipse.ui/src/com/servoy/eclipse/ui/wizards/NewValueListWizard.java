@@ -50,8 +50,8 @@ public class NewValueListWizard extends Wizard implements INewWizard
 	public NewValueListWizard()
 	{
 		super();
-		this.activeSolutionName = "";
 		servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		this.activeSolutionName = servoyModel.getActiveProject().getSolution().getName();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)

@@ -48,8 +48,8 @@ public class NewRelationWizard extends Wizard implements INewWizard
 	public NewRelationWizard()
 	{
 		super();
-		this.activeSolutionName = "";
 		servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		this.activeSolutionName = servoyModel.getActiveProject().getSolution().getName();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
