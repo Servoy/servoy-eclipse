@@ -43,7 +43,7 @@ export class ValuelistFilter extends DatagridFilterDirective {
         const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
         const inputFocus$ = this.focus$;
         return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelist)
-        : this.valuelist.filterList(term))));
+        : this.valuelist.filterList(term)))) as Observable<readonly any[]>;
     };
 
     resultFormatter = (result: {displayValue: string; realValue: any}) => {

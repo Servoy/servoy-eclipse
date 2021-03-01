@@ -23,5 +23,8 @@
     },
 	"outDir": "./out-tsc/app"
   },
+  "angularCompilerOptions": {
+    "strictTemplates": true
+  },
 	"buildOnSave": true
 }

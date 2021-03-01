@@ -333,7 +333,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         return true;
     }
 
-    toggleExpandedItem(level: number, index: number, item: MenuItem, event: MouseEvent, preventHandler: boolean) {
+    toggleExpandedItem(level: number, index: number, item: MenuItem, event: MouseEvent, preventHandler?: boolean) {
         if (!this.isNodeExpanded(item.id, level)) { // expand the item
             this.expandItem(level, index, item, event, preventHandler);
         } else { // collapse the item
@@ -836,7 +836,7 @@ class MenuItem {
     public text: string;
     public id: string;
     public iconStyleClass: string;
-    public styleClass: number;
+    public styleClass: string;
     public enabled: boolean;
     public data: any;
     public menuItems: Array<MenuItem>;

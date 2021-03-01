@@ -111,7 +111,7 @@ export class TypeaheadEditor extends EditorDirective {
     const inputFocus$ = this.focus$;
 
     return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelist)
-    : this.valuelist.filterList(term))));
+    : this.valuelist.filterList(term)))) as Observable<readonly any[]>;
   };
 
   // focus and select can be done after the gui is attached

@@ -12,7 +12,7 @@ import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 })
 export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel<HTMLDivElement> {
 
-    private panelHeight: number;
+    panelHeight: number;
 
     constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
         super(renderer,cdRef, windowRefService);

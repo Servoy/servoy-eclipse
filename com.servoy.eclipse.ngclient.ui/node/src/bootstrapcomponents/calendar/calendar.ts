@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
+import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
 import { Format, I18NProvider, LocaleService } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ServoyBootstrapBaseCalendar } from './basecalendar';
@@ -19,7 +20,7 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBaseCalendar {
     @Input() format: Format;
     @Input() pickerOnly: boolean;
 
-    public pickerType = 'both';
+    public pickerType: PickerType = 'both';
     public showSecondsTimer = false;
 
     private log: LoggerService;

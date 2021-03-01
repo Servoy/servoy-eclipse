@@ -1,6 +1,6 @@
 import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy
+    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges
 } from '@angular/core';
 import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
@@ -46,6 +46,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     cache: FormComponentCache;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
+    private rowItems: Array<ComponentModel | FormComponentCache>;
 
     constructor(protected readonly renderer: Renderer2,
         private formservice: FormService,
@@ -99,6 +100,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
                 break;
             }
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        super.ngOnChanges(changes);
+        if (changes.containedForm) {
+            this.rowItems = [];
+            this.containedForm.childElements.forEach(elem => {
+                if (elem.type === 'servoycore-formcomponent')
+                     this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
+                else this.rowItems.push(elem);
+            });
         }
     }
 
@@ -258,8 +271,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return this.containedForm.getStateHolder().formWidth + 'px';
     }
 
-    getRowItems(): Array<ComponentModel> {
-        return this.containedForm.getStateHolder().childElements;
+    getRowItems(): Array<ComponentModel | FormComponentCache> {
+        return this.rowItems;
     }
 
     moveLeft() {
@@ -281,21 +294,24 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
     }
 
-    getRowItemTemplate(item: StructureCache | ComponentModel): TemplateRef<any> {
+    getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache ): TemplateRef<any> {
         if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
+        }
+         if (item instanceof FormComponentCache) {
+            return this.parent.getTemplate(item);
         }
         return this.parent.getTemplateForLFC(item);
     }
 
-    getRowItemState(item: StructureCache | ComponentModel | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache{
-        if (item instanceof StructureCache) {
+    getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache{
+        if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
         }
         let cm: ComponentModel = null;
         if (item instanceof ComponentCache) {
-            cm = this.getRowItems().find(elem => elem.name === item.name);
-        } else cm  = item;
+            cm = this.getRowItems().find(elem => elem.name === item.name) as ComponentModel;
+        }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
             if (cache) return cache;

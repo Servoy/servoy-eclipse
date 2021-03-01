@@ -8,7 +8,7 @@
 		[(ngModel)]="selectedValues"
 		multiple
     	#element>
-		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format?.display:format?.type:format}}</option>		    
+		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>		    
 </select>
 <ng-template #notMultiselectListbox>
   	<select size='2'
@@ -20,6 +20,6 @@
 		[svyTooltip]="toolTipText"
 		[sabloTabseq]="tabSeq"
     	#element>
-		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format?.display:format?.type:format}}</option>		    
+		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>		    
 	</select>
 </ng-template>

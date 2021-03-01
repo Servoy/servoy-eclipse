@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
         TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, IApiExecutor, instanceOfApiExecutor } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, IApiExecutor, instanceOfApiExecutor, PartCache } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
@@ -274,7 +274,7 @@ export class FormComponent implements OnDestroy, OnChanges {
         }
     }
 
-    getTemplateForLFC(state: ComponentModel): TemplateRef<any> {
+    getTemplateForLFC(state: ComponentCache ): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
@@ -406,7 +406,7 @@ class FormComponentServoyApi extends ServoyApi {
 
 @Directive({ selector: '[svyContainerStyle]' })
 export class AddAttributeDirective implements OnInit {
-    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache;
+    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache;
 
     constructor(private el: ElementRef, private renderer: Renderer2) { }
 

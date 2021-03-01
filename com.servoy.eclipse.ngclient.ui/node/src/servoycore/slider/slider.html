@@ -1,7 +1,7 @@
 <input [id]="servoyApi.getMarkupId()" 
 	   type="range" 
 	   [value]="dataProviderID" 
-	   (change)="update($event.target.value)"
+	   (change)="update($event)"
        min="{{min}}" 
        max="{{max}}" 
        step="{{step}}" 

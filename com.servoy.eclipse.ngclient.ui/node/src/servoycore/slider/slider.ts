@@ -33,13 +33,14 @@ export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElemen
         }
      }
 
+    update( event: Event) {
+        this.dataProviderID = (event.target as HTMLInputElement).value;
+        this.dataProviderIDChange.emit( this.dataProviderID );
+    }
+
     protected attachHandlers(){
         if ( this.onChangeMethodID ) {
             this.renderer.listen( this.getNativeElement(), 'change', e => this.onChangeMethodID( e ));
         }
-    }
-    update( val: string ) {
-        this.dataProviderID = val;
-        this.dataProviderIDChange.emit( this.dataProviderID );
     }
 }

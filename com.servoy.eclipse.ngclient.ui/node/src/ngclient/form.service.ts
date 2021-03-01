@@ -307,7 +307,9 @@ export class FormService {
                     parent = new StructureCache(null);
                     formCache.mainStructure = parent;
                 }
-                parent.addChild(structure);
+                if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
+                    parent.addChild(structure);
+                }
             } else
                 if (elem.formComponent) {
                     const classes: Array<string> = new Array();
@@ -338,13 +340,13 @@ export class FormService {
                         formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                     }
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
-                    const structure = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
+                    const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                     elem.formComponent.forEach((child: string) => {
-                        this.walkOverChildren(elem[child], formCache, structure);
+                        this.walkOverChildren(elem[child], formCache, fcc);
                     });
-                    formCache.addFormComponent(structure);
+                    formCache.addFormComponent(fcc);
                     if (parent != null) {
-                        parent.addChild(structure);
+                        parent.addChild(fcc);
                     }
                 } else
                     if (elem.part === true) {

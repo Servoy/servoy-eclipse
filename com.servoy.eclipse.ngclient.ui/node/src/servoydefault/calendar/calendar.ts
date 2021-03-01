@@ -9,6 +9,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 import * as moment from 'moment';
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
 
 @Component({
     selector: 'servoydefault-calendar',
@@ -23,7 +24,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     public firstDayOfWeek = 1;
     public hour12Timer = false;
-    public pickerType = 'both';
+    public pickerType: PickerType = 'both';
     public showSecondsTimer = false;
 
     private log: LoggerService;

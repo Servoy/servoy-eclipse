@@ -44,7 +44,8 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
         if (changes.dataProviderID) this.updateImageURL();
     }
 
-    setCss(element: Element) {
+    setCss(event: Event) {
+        const element = event.target as Element;
         const alignStyle = { top: '0px', left: '0px' };
         const imageHeight = element.clientHeight;
         const imageWidth = element.clientWidth;

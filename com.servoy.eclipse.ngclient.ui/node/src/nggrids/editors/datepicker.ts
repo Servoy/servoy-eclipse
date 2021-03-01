@@ -5,6 +5,7 @@ import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
 import { DOCUMENT } from '@angular/common';
+import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
 
 @Component({
   selector: 'aggrid-datepicker',
@@ -22,7 +23,7 @@ export class DatePicker extends EditorDirective {
 
   firstDayOfWeek = 1;
   hour12Timer = false;
-  pickerType = 'both';
+  pickerType: PickerType = 'both';
   showSecondsTimer = false;
 
   selectedValue: any;

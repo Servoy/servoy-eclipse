@@ -130,11 +130,11 @@ export class StructureCache {
 export class PartCache {
     constructor(public readonly classes: Array<string>,
         public readonly layout: { [property: string]: string },
-        public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>) {
+        public readonly items?: Array<ComponentCache | FormComponentCache  >) {
         if (!this.items) this.items = [];
     }
 
-    addChild(child: StructureCache | ComponentCache | FormComponentCache) {
+    addChild(child: ComponentCache | FormComponentCache) {
         if (child instanceof ComponentCache && child.type && child.type === 'servoycoreNavigator')
             return;
         this.items.push(child);
@@ -157,12 +157,9 @@ export class FormComponentCache implements IComponentCache {
             else this.items = items;
         }
 
-    addChild(child: StructureCache | ComponentCache | FormComponentCache): FormComponentCache {
-        if (child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator') return null;
-        this.items.push(child);
-        if (child instanceof FormComponentCache)
-            return child as FormComponentCache;
-        return null;
+    addChild(child: StructureCache | ComponentCache | FormComponentCache) {
+        if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
+            this.items.push(child);
     }
 }
 
