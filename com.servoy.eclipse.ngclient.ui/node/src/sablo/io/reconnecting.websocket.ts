@@ -158,7 +158,7 @@ export class ReconnectingWebSocket {
         this.ws = new WebSocket(this.getUrl());
         const self = this;
         const localWs = this.ws;
-        const timeout = setTimeout(function() {
+        const timeout = setTimeout(() => {
             if (this.log.logLevel === LogLevel.DEBUG) {
                 this.log.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl());
             }
