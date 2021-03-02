@@ -200,6 +200,12 @@ export class PowerGrid extends NGGridDirective {
                 sortable: this.enableSorting,
                 resizable: this.enableColumnResize
             },
+            excelStyles: [
+                {
+                    id: 'stringType',
+                    dataType: 'string'
+                }
+            ],
             columnDefs,
             getMainMenuItems: (params) => this.getMainMenuItems(params),
 
@@ -527,8 +533,13 @@ export class PowerGrid extends NGGridDirective {
 
             // styleClass
             colDef.headerClass = 'ag-table-header ' + column.headerStyleClass;
-            colDef.cellClass = 'ag-table-cell ' + column.styleClass;
-
+            colDef.cellClass = ['ag-table-cell'];
+            if(column.formatType === 'TEXT') {
+                colDef.cellClass.push('stringType');
+            }
+            if(column.styleClass) {
+                colDef.cellClass = colDef.cellClass.concat(column.styleClass.split(' '));
+            }
 
             // column grouping & pivoting
             colDef.enableRowGroup = column.enableRowGroup;
