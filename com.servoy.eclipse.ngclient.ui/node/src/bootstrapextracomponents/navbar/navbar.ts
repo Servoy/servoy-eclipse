@@ -5,7 +5,6 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/oper
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { SvyUtilsService } from '../../ngclient/servoy_public';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
