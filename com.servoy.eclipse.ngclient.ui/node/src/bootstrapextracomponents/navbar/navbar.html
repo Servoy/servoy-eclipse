@@ -12,7 +12,7 @@
          </button>
   
         <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="{{servoyApi.getMarkupId()}}-navbar-collapse" (click)="navBarClicked($event, 1)">
+        <div class="collapse navbar-collapse" id="{{servoyApi.getMarkupId()}}-navbar-collapse" (click)="navBarClicked($event)">
             <ul class="nav navbar-nav">
                 <ng-container *ngFor="let menuItem of menuItems;let $index = index" >
                 <li  *ngIf="menuItem.position == 'LEFT'" class="nav-item {{menuItem.subMenuItems ? 'dropdown' : ''}} {{menuItem.isActive ? 'active' : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}">
