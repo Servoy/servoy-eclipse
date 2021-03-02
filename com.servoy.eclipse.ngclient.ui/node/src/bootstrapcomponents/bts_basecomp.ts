@@ -104,7 +104,7 @@ export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyB
                         if (e.keyCode === 13) this.onActionMethodID(e);
                     });
                 } else {
-                    this.renderer.listen(this.getFocusElement(), 'click', e => this.onActionMethodID(e));
+                    this.renderer.listen(this.getFocusElement(), 'keyup', e => this.onActionMethodID(e));
                 }
 
             }
