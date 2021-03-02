@@ -96,7 +96,7 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
        return result;
     }
 
-    doSvyApply(event: FocusEvent, index: number) {
+    doSvyApply(event: Event, index: number) {
         const menuItem = this.menuItems[index];
         if (!menuItem) {
             return;
