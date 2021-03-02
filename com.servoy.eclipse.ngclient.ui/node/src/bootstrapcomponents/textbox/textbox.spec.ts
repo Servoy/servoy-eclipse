@@ -4,7 +4,6 @@ import { ServoyBootstrapTextbox } from './textbox';
 import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 
 describe('TextboxComponent', () => {

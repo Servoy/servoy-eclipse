@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FormService } from '../../ngclient/form.service';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
 
@@ -12,7 +13,8 @@ describe('TablesspanelComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTablesspanel ],
-      imports: [NgbModule, SabloModule, ServoyPublicModule, SabloModule]
+      imports: [NgbModule, SabloModule, ServoyPublicModule, SabloModule],
+      providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ]
     })
     .compileComponents();
   });

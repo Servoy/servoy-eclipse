@@ -81,7 +81,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
     }
 
     getContainerStyle() {
-        var minHeight = 0;
+        let minHeight = 0;
         if (this.height) {
             minHeight = this.height
         }
