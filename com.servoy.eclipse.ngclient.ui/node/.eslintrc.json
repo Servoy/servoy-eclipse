@@ -35,6 +35,7 @@
             "prefix": [
               "servoydefault",
               "bootstrapcomponents",
+              "bootstrapextracomponents",
               "servoycore",
               "servoyextra",
               "svy",
@@ -50,6 +51,7 @@
             "prefix": [
               "servoydefault",
               "bootstrapcomponents",
+              "bootstrapextracomponents",
               "servoycore",
               "servoyextra",
               "svy",

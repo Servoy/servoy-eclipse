@@ -1,7 +1,7 @@
-import { Component, SimpleChanges, Input, ViewChildren, Renderer2, ChangeDetectorRef, Directive, ElementRef, OnInit, QueryList, Output, EventEmitter, Inject } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Directive, ElementRef, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { merge, Observable, of, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { FormattingService } from '../../ngclient/servoy_public';
@@ -32,13 +32,14 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     @Input() menuItems: Array<MenuItem>;
     @Output() menuItemsChange = new EventEmitter();
 
-    @Input() onMenuItemClicked: (e: Event, menuItem: MenuItem) => void;
+    @Input() onMenuItemClicked: (e: Event, menuItem: BaseMenuItem) => void;
     @Input() onBrandClicked: (e: Event) => void;
 
     focusSubjects = new Array<Subject<string>>();
     typeaheadInit = false;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService, @Inject(DOCUMENT) private document: Document, private servoyService: ServoyService, private utils: SvyUtilsService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService,
+        @Inject(DOCUMENT) private document: Document, private servoyService: ServoyService, private utils: SvyUtilsService) {
         super(renderer, cdRef);
     }
 
@@ -73,11 +74,11 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     }
 
     doBlur(e: Event) {
-        (<HTMLElement>e.target).blur();
+        (e.target as HTMLElement).blur();
     }
 
-    onInputChange(menuItem : MenuItem) {
-        menuItem.getStateHolder().getChangedKeys().add("dataProvider");
+    onInputChange(menuItem: MenuItem) {
+        menuItem.getStateHolder().getChangedKeys().add('dataProvider');
         menuItem.getStateHolder().notifyChangeListener();
         this.menuItemsChange.emit(this.menuItems);
     }
@@ -91,9 +92,9 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     inputFormatter = (result: any) => {
         if (result === null) return '';
         if (result.displayValue !== undefined) result = result.displayValue;
-       // return this.formattingService.format(result, null, false);
-       return result;
-    }
+        // return this.formattingService.format(result, null, false);
+        return result;
+    };
 
     doSvyApply(event: Event, index: number) {
         const menuItem = this.menuItems[index];
@@ -102,43 +103,43 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         }
         if (menuItem.valuelist && menuItem.valuelist.length > 0 && menuItem.valuelist[0].displayValue) {
             let hasMatchingDisplayValue = false;
-            for (let i = 0; i < menuItem.valuelist.length; i++) {
-                if ((<HTMLInputElement>event.target).value === menuItem.valuelist[i].displayValue) {
+            for (const i of Object.keys(menuItem.valuelist)) {
+                if ((event.target as HTMLInputElement).value === menuItem.valuelist[i].displayValue) {
                     menuItem.dataProvider = menuItem.valuelist[i].realValue;
-                    menuItem.getStateHolder().getChangedKeys().add("dataProvider");
+                    menuItem.getStateHolder().getChangedKeys().add('dataProvider');
                     hasMatchingDisplayValue = true;
                     break;
                 }
             }
             if (!hasMatchingDisplayValue) {
                 menuItem.dataProvider = null;
-                menuItem.getStateHolder().getChangedKeys().add("dataProvider");
-                (<HTMLInputElement>event.target).value = null;
+                menuItem.getStateHolder().getChangedKeys().add('dataProvider');
+                (event.target as HTMLInputElement).value = null;
             }
             menuItem.getStateHolder().notifyChangeListener();
         }
         this.menuItemsChange.emit(this.menuItems);
-        this.navBarClicked(event, index);
+        this.navBarClicked(event);
     }
 
-    navBarClicked(event: Event, index?: number) {
-        let $target = <Element>event.target;
-        if ($target.getAttribute('id') == 'navbar-collapse') {
+    navBarClicked(event: Event) {
+        let $target = event.target as Element;
+        if ($target.getAttribute('id') === 'navbar-collapse') {
             //click on navbar (background)
             return;
         }
-        var li = $target.closest('li');
+        const li = $target.closest('li');
         if (li && li.classList.contains('disabled')) {
             //disabled entry
             return;
         }
-        if (event.type == 'click' && $target.tagName == 'INPUT') {
+        if (event.type === 'click' && $target.tagName === 'INPUT') {
             //skip simple click in Input
             return;
         }
 
         // apply the change to the dataprovider at the on enter
-        if ($target.tagName == 'INPUT') {
+        if ($target.tagName === 'INPUT') {
             this.menuItemsChange.emit(this.menuItems);
         }
 
@@ -151,9 +152,9 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
 
         // if clicked on a dropdown menu
         if ($target.classList.contains('svy-navbar-dropdown')) { // if is a dropdown menu
-            let parent = $target.parentElement;
-            let nav = $target.closest('.navbar-nav'); // closest navbar anchestor
-            let ul = parent.querySelector('ul'); // first child of type ul
+            const parent = $target.parentElement;
+            const nav = $target.closest('.navbar-nav'); // closest navbar anchestor
+            const ul = parent.querySelector('ul'); // first child of type ul
 
             // only if is right aligned
             if (nav && ul && (nav.classList.contains('navbar-left') || nav.classList.contains('navbar-right'))) {
@@ -161,28 +162,28 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
                 const ITEM_POSITION = {
                     LEFT: 'left',
                     RIGHT: 'right'
-                }
+                };
 
                 let alignPosition: string;
                 if (nav.classList.contains('navbar-right')) {
-                    alignPosition = ITEM_POSITION.RIGHT
+                    alignPosition = ITEM_POSITION.RIGHT;
                 } else if (nav.classList.contains('navbar-left')) {
                     alignPosition = ITEM_POSITION.LEFT;
                 }
 
-                let dialog = $target.closest('.svy-dialog')
+                const dialog = $target.closest('.svy-dialog');
 
                 // make sure the menu is not collapsed because min-width < 768
-                let viewPortWidth = this.document.defaultView.innerWidth;
+                const viewPortWidth = this.document.defaultView.innerWidth;
                 //if (viewPortWidth >= 768) {
                 if (!this.isCollapseIn()) {
-                    let position = dialog ? dialog.getBoundingClientRect() : null;
+                    const position = dialog ? dialog.getBoundingClientRect() : null;
                     // location relative to viewport
-                    var boundingRect = $target[0].getBoundingClientRect();
+                    const boundingRect = $target[0].getBoundingClientRect();
                     // calculate fixed top/right position from either viewport or dialog
-                    var alignLocation = 0;
-                    if (alignPosition == ITEM_POSITION.RIGHT) {  // anchor the sub-menu to the right
-                        var right: number;
+                    let alignLocation = 0;
+                    if (alignPosition === ITEM_POSITION.RIGHT) {  // anchor the sub-menu to the right
+                        let right: number;
                         if (dialog) {
                             right = position.left + position.width - (boundingRect.left + boundingRect.width);
                         } else {
@@ -190,7 +191,7 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
                         }
                         alignLocation = right;
                     } else { // anchor the sub-menu to the left
-                        var left: number;
+                        let left: number;
                         if (dialog) {
                             left = boundingRect.left - position.left;
                         } else {
@@ -217,10 +218,10 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
                 }
             }
         }
-        let itemClicked = this.getItem(event);
+        const itemClicked = this.getItem(event);
         this.makeItemActive(itemClicked);
         if (itemClicked && itemClicked.onAction) {
-            var jsEvent = this.utils.createJSEvent(event, 'action');
+            const jsEvent = this.utils.createJSEvent(event, 'action');
             this.servoyService.executeInlineScript(itemClicked.onAction.formname, itemClicked.onAction.script, [jsEvent, this.createItemArg(itemClicked)]);
         } else if (itemClicked && this.onMenuItemClicked) {
             this.onMenuItemClicked(event, this.createItemArg(itemClicked));
@@ -228,7 +229,7 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     }
 
     isCollapseIn(): boolean {
-        var el = this.getNativeElement().querySelector('.navbar-collapse.collapse.in');
+        const el = this.getNativeElement().querySelector('.navbar-collapse.collapse.in');
         if (el) {
             return true;
         } else {
@@ -236,29 +237,31 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         }
     }
 
-    createItemArg(item: MenuItem): MenuItem {
-        var itemText = item.text;
-        if (item.displayValue) {
-            itemText = item.displayValue;
-        }
-        if (item.displayType == 'INPUT' || item.displayType == 'INPUT_GROUP') {
-            itemText = item.dataProvider != null ? item.dataProvider + '' : null;
+    createItemArg(item: BaseMenuItem): BaseMenuItem {
+        let itemText = item.text;
+        if (item instanceof MenuItem) {
+            if (item.displayValue) {
+                itemText = item.displayValue;
+            }
+            if (item.displayType === 'INPUT' || item.displayType === 'INPUT_GROUP') {
+                itemText = item.dataProvider != null ? item.dataProvider + '' : null;
+            }
         }
         return { itemId: item.itemId ? item.itemId : null, text: itemText ? itemText : null, userData: item.userData ? item.userData : null } as MenuItem;
     }
 
     getItem(event: Event) {
-        let $target = <Element>event.target;
-        //collapse menu if in mobile view             
-        //if ($(window).width() < 768) {   
+        const $target = event.target as Element;
+        //collapse menu if in mobile view
+        //if ($(window).width() < 768) {
         if (this.isCollapseIn()) {
             //if collapseOnClick is set don't collapse menu if we are selecting a drop-down
             if (this.collapseOnClick) {
                 if (!$target.classList.contains('dropdown')) {
 
                     // check if is a SPAN direct child of dropdown
-                    if ($target && $target.nodeName == "SPAN") {
-                        var parentNode = $target.parentElement;
+                    if ($target && $target.nodeName === 'SPAN') {
+                        const parentNode = $target.parentElement;
                         if (!parentNode || !parentNode.classList.contains('dropdown')) {
                             this.document.getElementById('#' + this.servoyApi.getMarkupId() + '-toggle-button').click();
                         }
@@ -269,25 +272,25 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
             }
         }
         try {
-            let dataMenuItemElement = $target.closest('[data-menu-item-id]');
+            const dataMenuItemElement = $target.closest('[data-menu-item-id]');
             if (!dataMenuItemElement) {
                 return null;
             }
-            let itemId = dataMenuItemElement.getAttribute('data-menu-item-id');
-            let itemClicked;
+            const itemId = dataMenuItemElement.getAttribute('data-menu-item-id');
+            let itemClicked: BaseMenuItem;
             if (!itemId) {
                 return null;
             } else {
-                for (let i = 0; i < this.menuItems.length; i++) {
-                    let menuItem = this.menuItems[i];
-                    if (menuItem.itemId == itemId) {
+                for (const i of Object.keys(this.menuItems)) {
+                    const menuItem = this.menuItems[i];
+                    if (menuItem.itemId === itemId) {
                         itemClicked = menuItem;
                         break;
                     }
                     if (menuItem.subMenuItems) {
                         //dropdown
-                        for (var s = 0; s < menuItem.subMenuItems.length; s++) {
-                            if (menuItem.subMenuItems[s].itemId == itemId) {
+                        for (const s of Object.keys(menuItem.subMenuItem)) {
+                            if (menuItem.subMenuItems[s].itemId === itemId) {
                                 itemClicked = menuItem.subMenuItems[s];
                                 break;
                             }
@@ -297,8 +300,10 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
                         }
                     }
                 }
-                if (itemClicked && (itemClicked.displayType == 'INPUT' || itemClicked.displayType == 'INPUT_GROUP')) {
-                    itemClicked.displayValue = (<HTMLInputElement>event.target).value;
+                if (itemClicked instanceof MenuItem) {
+                    if (itemClicked && (itemClicked.displayType === 'INPUT' || itemClicked.displayType === 'INPUT_GROUP')) {
+                        itemClicked.displayValue = (event.target as HTMLInputElement).value;
+                    }
                 }
                 return itemClicked;
             }
@@ -308,30 +313,30 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         return null;
     }
 
-    makeItemActive(item: MenuItem) {
+    makeItemActive(item: BaseMenuItem) {
         if (!item || !this.markClickedItemActive) {
             return;
         }
-        for (let i = 0; i < this.menuItems.length; i++) {
+        for (const i of Object.keys(this.menuItems)) {
             const menuItem = this.menuItems[i];
-            if (menuItem.itemId == item.itemId) {
+            if (menuItem.itemId === item.itemId) {
                 menuItem.isActive = true;
-            } else if (menuItem.isActive == true) {
+            } else if (menuItem.isActive === true) {
                 menuItem.isActive = false;
             }
         }
     }
 
-    requestFocus(itemId: String) {
-        let inputEl = this.getNativeElement().querySelector("[data-menu-item-id=" + itemId + "]");
+    requestFocus(itemId: string) {
+        const inputEl = this.getNativeElement().querySelector('[data-menu-item-id=' + itemId + ']');
         if (inputEl instanceof HTMLInputElement) inputEl.focus();
     }
 
-    getLocation(itemId: String) {
+    getLocation(itemId: string) {
         if (itemId) {
-            let el = this.getNativeElement().querySelector("[data-menu-item-id=" + itemId + "]");
+            const el = this.getNativeElement().querySelector('[data-menu-item-id=' + itemId + ']');
             if (el) {
-                let position = el.getBoundingClientRect();
+                const position = el.getBoundingClientRect();
                 return { x: position.left, y: position.top };
             }
 
@@ -339,11 +344,11 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         return null;
     }
 
-    getSize(itemId: String) {
+    getSize(itemId: string) {
         if (itemId) {
-            let el = this.getNativeElement().querySelector("[data-menu-item-id=" + itemId + "]");
+            const el = this.getNativeElement().querySelector('[data-menu-item-id=' + itemId + ']');
             if (el) {
-                let position = el.getBoundingClientRect();
+                const position = el.getBoundingClientRect();
                 return { width: position.width, height: position.height };
             }
         }
@@ -352,8 +357,8 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
 
     getFilterValues(index: number) {
         this.initTypeaheads(this.menuItems);
-        let item = this.menuItems[index];
-        let focus$ = this.focusSubjects[index];
+        const item = this.menuItems[index];
+        const focus$ = this.focusSubjects[index];
         return (text$: Observable<string>) => {
             const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
             const inputFocus$ = focus$;
@@ -368,11 +373,10 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         if (!this.typeaheadInit && items) {
             this.typeaheadInit = true;
             for (let i = 0; i < items.length; i++) {
-                let menuItem = items[i];
-                if (menuItem.valuelist && (menuItem.displayType == 'INPUT' || menuItem.displayType == 'INPUT_GROUP')) {
+                const menuItem = items[i];
+                if (menuItem.valuelist && (menuItem.displayType === 'INPUT' || menuItem.displayType === 'INPUT_GROUP')) {
                     this.focusSubjects[i] = new Subject<string>();
-                }
-                else {
+                } else {
                     this.focusSubjects[i] = null;
                 }
             }
@@ -390,45 +394,47 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     }
 
     toggleCollapse() {
-        var el = this.getNativeElement().querySelector('.navbar-collapse');
+        const el = this.getNativeElement().querySelector('.navbar-collapse');
         if (el) {
             if (el.classList.contains('show')) {
                 this.renderer.removeClass(el, 'show');
-            }
-            else {
+            } else {
                 this.renderer.addClass(el, 'show');
             }
         }
     }
 
     openMenu(event: MouseEvent) {
-        let $target = <Element>event.target;
+        let $target = event.target as Element;;
         $target = $target.closest('.dropdown');
         if ($target) {
             $target = $target.querySelector('.dropdown-menu');
             if ($target) {
                 this.renderer.addClass($target, 'show');
-                const closeOnClick = (event: MouseEvent) => {
+                const closeOnClick = () => {
                     this.renderer.removeClass($target, 'show');
                     this.document.removeEventListener('mousedown', closeOnClick);
-                }
+                };
                 this.document.addEventListener('mousedown', closeOnClick);
             }
         }
 
     }
 }
-export class MenuItem extends BaseCustomObject {
-    public attributes: Array<{ key: string; value: string }>;
+class BaseMenuItem extends BaseCustomObject {
     public text: string;
     public itemId: string;
     public tabindex: string;
     public enabled: boolean;
     public styleClass: string;
     public userData: any;
-    public onAction: Object;
-    public subMenuItems: Array<SubMenuItem>;
     public iconName: string;
+    public onAction: { formname: string; script: string };
+}
+
+export class MenuItem extends BaseMenuItem {
+    public attributes: Array<{ key: string; value: string }>;
+    public subMenuItems: Array<SubMenuItem>;
     public position: string;
     public displayType: string;
     public dataProvider: any;
@@ -440,21 +446,14 @@ export class MenuItem extends BaseCustomObject {
     public valuelist: IValuelist;
 }
 
-class SubMenuItem {
-    public text: string;
-    public itemId: string;
-    public tabindex: string;
-    public enabled: boolean;
-    public styleClass: string;
-    public userData: any;
-    public iconName: string;
-    public onAction: Object;
+class SubMenuItem extends BaseMenuItem {
     public isDivider: boolean;
 }
 
 @Directive({
     selector: '[svyAttributes]'
 })
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SvyAttributes implements OnInit {
     @Input('svyAttributes') attributes: Array<{ key: string; value: string }>;
 
