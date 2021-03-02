@@ -1,18 +1,31 @@
 
 import { NgModule } from '@angular/core';
 import { ServoyBootstrapExtraBreadcrumbs } from './breadcrumbs/breadcrumbs';
+import { ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
+import { ServoyPublicModule } from '../ngclient/servoy_public.module';
+import { SabloModule } from '../sablo/sablo.module';
+import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
-      ServoyBootstrapExtraBreadcrumbs
+      ServoyBootstrapExtraBreadcrumbs,
+      ServoyBootstrapExtraNavbar,
+      SvyAttributes
     ],
     providers: [],
     imports: [
-      CommonModule
+      CommonModule,
+      ServoyPublicModule,
+      SabloModule,
+      NgbModule,
+      FormsModule
     ],
     exports: [
-        ServoyBootstrapExtraBreadcrumbs
+        ServoyBootstrapExtraBreadcrumbs,
+        ServoyBootstrapExtraNavbar,
+        SvyAttributes
       ]
 })
 export class ServoyBootstrapExtraComponentsModule {}
