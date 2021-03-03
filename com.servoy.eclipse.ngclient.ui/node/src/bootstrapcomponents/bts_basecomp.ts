@@ -5,10 +5,6 @@ import { Directive, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@
 // eslint-disable-next-line
 export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyBaseComponent<T> {
 
-    @Input() onActionMethodID: (e: Event, data?: any) => void;
-    @Input() onRightClickMethodID: (e: Event, data?: any) => void;
-    @Input() onDoubleClickMethodID: (e: Event, data?: any) => void;
-
     @Input() enabled: boolean;
     @Input() size: { width: number; height: number };
     @Input() styleClass: string;
@@ -20,11 +16,6 @@ export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyB
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
-    }
-
-    svyOnInit() {
-        super.svyOnInit();
-        this.attachHandlers();
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -82,38 +73,4 @@ export class ServoyBootstrapBaseComponent<T extends HTMLElement> extends ServoyB
     public needsScrollbarInformation(): boolean {
         return true;
     }
-
-    protected attachHandlers() {
-        if (this.onActionMethodID) {
-            if (this.onDoubleClickMethodID) {
-                this.renderer.listen(this.getFocusElement(), 'click', e => {
-                    if (this.timeoutID) {
-                        window.clearTimeout(this.timeoutID);
-                        this.timeoutID = null;
-                        // double click, do nothing
-                    } else {
-                        this.timeoutID = window.setTimeout(() => {
-                            this.timeoutID = null;
-                            this.onActionMethodID(e);
-                        }, 250);
-                    }
-                });
-            } else {
-                if (this.getFocusElement().tagName === 'TEXTAREA' /* || this.getNativeElement().type === 'text' */) {
-                    this.renderer.listen(this.getFocusElement(), 'keydown', e => {
-                        if (e.keyCode === 13) this.onActionMethodID(e);
-                    });
-                } else {
-                    this.renderer.listen(this.getFocusElement(), 'keyup', e => this.onActionMethodID(e));
-                }
-
-            }
-        }
-        if (this.onRightClickMethodID) {
-            this.renderer.listen(this.getFocusElement(), 'contextmenu', e => {
-                this.onRightClickMethodID(e); return false;
-            });
-        }
-    }
-
 }
