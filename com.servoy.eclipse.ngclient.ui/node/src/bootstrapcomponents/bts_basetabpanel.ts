@@ -35,6 +35,12 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 		if (changes['tabs']) {
 			// quickly generate the id's for a the tab html id (and selecting it)
 			this.generateIDs();
+            if (!changes['tabs'].firstChange) {
+                let index = this.getRealTabIndex();
+                if (index >= 0) {
+                    this.select(this.tabs[index]);
+                }
+            }
 		}
 		if (changes['tabIndex']) {
 			Promise.resolve(null).then(() => {
