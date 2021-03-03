@@ -39,7 +39,6 @@ public class SmartClientTestSuite extends ApplicationJSTestSuite
 	public SmartClientTestSuite(IApplication application, TestTarget target)
 	{
 		super(application, target, false);
-		application.getRuntimeProperties().put("JSUnit", Boolean.TRUE);
 	}
 
 	@Override
