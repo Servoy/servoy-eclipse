@@ -7,6 +7,9 @@ import { DOCUMENT } from '@angular/common';
 // eslint-disable-next-line
 export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBootstrapBaseComponent<T> {
 
+    @Input() onActionMethodID: (e: Event, data?: any) => void;
+    @Input() onRightClickMethodID: (e: Event, data?: any) => void;
+
     @Input() onDataChangeMethodID: (e: Event) => void;
     @Input() onFocusGainedMethodID: (e: Event) => void;
     @Input() onFocusLostMethodID: (e: Event) => void;
@@ -22,7 +25,7 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
 
     storedTooltip: any;
 
-    constructor(renderer: Renderer2,  protected cdRef: ChangeDetectorRef, @Inject(DOCUMENT) protected doc: Document) {
+    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, @Inject(DOCUMENT) protected doc: Document) {
         super(renderer, cdRef);
     }
 
@@ -32,49 +35,59 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
         if (this.dataProviderID === undefined) {
             this.dataProviderID = null;
         }
+        if (this.onActionMethodID) {
+            this.renderer.listen(this.getFocusElement(), 'keydown', e => {
+                if (e.keyCode === 13) this.onActionMethodID(e);
+            });
+        }
+        if (this.onRightClickMethodID) {
+            this.renderer.listen(this.getFocusElement(), 'contextmenu', e => {
+                this.onRightClickMethodID(e); return false;
+            });
+        }
     }
 
-    svyOnChanges( changes: SimpleChanges ) {
+    svyOnChanges(changes: SimpleChanges) {
         if (changes) {
-          for ( const property of Object.keys(changes) ) {
-              const change = changes[property];
-              switch ( property ) {
-                  case 'editable':
-                      if ( change.currentValue && !this.readOnly)
-                          this.renderer.removeAttribute(this.getFocusElement(),  'readonly' );
-                      else
-                          this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
-                      break;
-                  case 'placeholderText':
-                      if ( change.currentValue ) this.renderer.setAttribute(this.getFocusElement(),   'placeholder', change.currentValue );
-                      else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
-                      break;
-                  case 'selectOnEnter':
-                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer, this.doc);
-                      break;
+            for (const property of Object.keys(changes)) {
+                const change = changes[property];
+                switch (property) {
+                    case 'editable':
+                        if (change.currentValue && !this.readOnly)
+                            this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
+                        else
+                            this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
+                        break;
+                    case 'placeholderText':
+                        if (change.currentValue) this.renderer.setAttribute(this.getFocusElement(), 'placeholder', change.currentValue);
+                        else this.renderer.removeAttribute(this.getFocusElement(), 'placeholder');
+                        break;
+                    case 'selectOnEnter':
+                        if (change.currentValue) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer, this.doc);
+                        break;
                 }
             }
             super.svyOnChanges(changes);
         }
     }
 
-    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
         this.getFocusElement().focus();
     }
-    
+
     attachFocusListeners(nativeElement: HTMLElement) {
-          if (this.onFocusGainedMethodID)
-              this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                  if ( this.mustExecuteOnFocus === true ) {
-                      this.onFocusGainedMethodID( e );
-                  }
-                  this.mustExecuteOnFocus = true;
-              } );
-          if (this.onFocusLostMethodID)
-              this.renderer.listen( nativeElement, 'blur', ( e ) => {
-                  this.onFocusLostMethodID(e);
-              } );
+        if (this.onFocusGainedMethodID)
+            this.renderer.listen(nativeElement, 'focus', (e) => {
+                if (this.mustExecuteOnFocus === true) {
+                    this.onFocusGainedMethodID(e);
+                }
+                this.mustExecuteOnFocus = true;
+            });
+        if (this.onFocusLostMethodID)
+            this.renderer.listen(nativeElement, 'blur', (e) => {
+                this.onFocusLostMethodID(e);
+            });
     }
 
     onDataChangeCallback(event, returnval) {
@@ -96,8 +109,8 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
         }
     }
 
-    pushUpdate( ) {
-          this.dataProviderIDChange.emit(this.dataProviderID);
+    pushUpdate() {
+        this.dataProviderIDChange.emit(this.dataProviderID);
     }
 
     public selectAll() {
@@ -109,8 +122,8 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
     }
 
     public replaceSelectedText(text: string) {
-        const elem = this.getFocusElement()  as HTMLInputElement;
-        const startPos =  elem.selectionStart;
+        const elem = this.getFocusElement() as HTMLInputElement;
+        const startPos = elem.selectionStart;
         const endPos = elem.selectionEnd;
 
         const beginning = elem.value.substring(0, startPos);
@@ -130,5 +143,4 @@ export class ServoyBootstrapBasefield<T extends HTMLElement> extends ServoyBoots
         }
         return this.dataProviderID;
     }
-
 }
