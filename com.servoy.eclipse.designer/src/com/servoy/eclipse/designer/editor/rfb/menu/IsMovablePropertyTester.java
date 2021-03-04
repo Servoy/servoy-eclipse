@@ -21,11 +21,13 @@ import java.util.Iterator;
 
 import org.eclipse.core.expressions.PropertyTester;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author gboros
@@ -51,7 +53,7 @@ public class IsMovablePropertyTester extends PropertyTester
 			Form form = (Form)persist.getAncestor(IRepository.FORMS);
 			if (form != null && form.isResponsiveLayout())
 			{
-				ISupportChilds persistParent = persist.getParent();
+				ISupportChilds persistParent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form, persist.getParent());
 				if (persistParent != null)
 				{
 					Iterator<IPersist> childIte = persistParent.getAllObjects();
