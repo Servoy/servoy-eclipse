@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Renderer2, Input, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 
 import { ServoyBootstrapBaseTabPanel, Tab } from '../bts_basetabpanel';
@@ -12,14 +12,12 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 })
 export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLUListElement> {
 
-	@Input() onTabClickedMethodID;
-	@Input() onTabCloseMethodID;
+	@Input() onTabClickedMethodID: (event: Event, tabIndex: number, datatarget: string) => Promise<boolean>;
+	@Input() onTabCloseMethodID: (event: Event, tabIndex: number ) => Promise<boolean>;
 
-	@Input() showTabCloseIcon;
-	@Input() closeIconStyleClass;
+	@Input() showTabCloseIcon: boolean;
+	@Input() closeIconStyleClass: string;
 
-	@Input() tabIndex;
-	@Output() tabIndexChange = new EventEmitter();
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
 		super(renderer, cdRef, windowRefService);
@@ -30,10 +28,11 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 		event.preventDefault();
 	}
 
-	tabClicked(tab: Tab, tabIndexClicked: number, event) {
-		if (event.target.classList.contains('bts-tabpanel-close-icon')) {
+	tabClicked(tab: Tab, tabIndexClicked: number, event: Event) {
+		if ((event.target as HTMLElement).classList.contains('bts-tabpanel-close-icon')) {
 			if (this.onTabCloseMethodID) {
-				const promise = this.onTabCloseMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /* TODO $.Event("tabclicked") */, tabIndexClicked + 1);
+				const promise = this.onTabCloseMethodID(this.windowRefService.nativeWindow.event != null ?
+				                                this.windowRefService.nativeWindow.event : null /* TODO $.Event("tabclicked") */, tabIndexClicked + 1);
 				promise.then((ok) => {
 					if (ok) {
 						this.removeTabAt(tabIndexClicked + 1);
@@ -50,7 +49,8 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 			if (this.onTabClickedMethodID) {
 				/*var dataTargetAttr = $(event.target).closest('[data-target]');
 				var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
-				const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, null);
+				const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ?
+				                                this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, null);
 				promise.then((ok) => {
 					if (ok) {
 						this.select(this.tabs[tabIndexClicked]);
@@ -65,9 +65,8 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 	removeTabAt(removeIndex: number) {
 		// copied from the serverside code
 		if (removeIndex > 0 && removeIndex <= this.tabs.length) {
-			const oldTabIndex = this.tabIndex;
-			let formToHide;
-			let formToShow;
+			let formToHide: Tab;
+			let formToShow: Tab;
 			if (this.tabIndex === removeIndex) {
 				formToHide = this.tabs[removeIndex - 1];
 
@@ -83,7 +82,7 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 			// create a new tabObject, so angular-ui is properly refreshed.
 			const newTabs = [];
 			for (let i = 0; i < this.tabs.length; i++) {
-				if (i == removeIndex - 1) continue;
+				if (i === removeIndex - 1) continue;
 				newTabs.push(this.tabs[i]);
 			}
 			this.tabs = newTabs;
@@ -103,6 +102,7 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 				} else {
 					this.tabIndex--;
 				}
+				this.tabIndexChange.emit(this.tabIndex);
 			}
 
 			// hide the form
@@ -132,14 +132,15 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 
 	 selectTabAt( selectionIndex: number ) {
 	        if ( selectionIndex >= 0 && selectionIndex <= this.tabs.length ) {
-	            let tabToSelect = this.tabs[selectionIndex];
-	            if ( tabToSelect.disabled == true ) {
+	            const tabToSelect = this.tabs[selectionIndex];
+	            if ( tabToSelect.disabled === true ) {
 	                return;
 	            }
 	            if (this.onTabClickedMethodID) {
 	                /*var dataTargetAttr = $(event.target).closest('[data-target]');
 	                var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
-	                const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, selectionIndex, null);
+	                const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ?
+                                                    this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, selectionIndex, null);
 	                promise.then((ok) => {
 	                    if (ok) {
 	                        this.select(tabToSelect);
@@ -150,7 +151,7 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 	            }
 	        }
 	    }
-	 
+
 	getFirstEnabledTabIndexNotAtIndex(skipIndex: number) {
 		for (let i = 0; this.tabs && i < this.tabs.length; i++) {
 			const tab = this.tabs[i];
