@@ -1,18 +1,22 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef, ContentChild, TemplateRef, Directive, ChangeDetectorRef } from '@angular/core';
+import { Renderer2, Input, Output, EventEmitter, SimpleChanges, ContentChild, TemplateRef, Directive, ChangeDetectorRef } from '@angular/core';
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { BaseCustomObject } from '../sablo/spectypes.service';
 
 @Directive()
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBootstrapBaseComponent<T> {
-	@Input() onChangeMethodID;
+	@Input() onChangeMethodID: (previousIndex: number, event: Event) => void;
 
-	@Input() height;
+	@Input() height: number;
 	@Input() tabs: Array<Tab>;
 
-	@Input() tabIndex;
+	@Input() tabIndex: number;
 	@Output() tabIndexChange = new EventEmitter();
 
+    @Input() activeTabIndex: number;
+    @Output() activeTabIndexChange= new EventEmitter();
+    
 	@ContentChild(TemplateRef, { static: true })
 	templateRef: TemplateRef<any>;
 
@@ -53,7 +57,7 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 				this.select(this.tabs[0]);
 			}
 		}
-		if (this.selectedTab && (tab.containedForm == this.selectedTab.containedForm) && (tab.relationName == this.selectedTab.relationName)) {
+		if (this.selectedTab && (tab.containedForm === this.selectedTab.containedForm) && (tab.relationName === this.selectedTab.relationName)) {
 			return tab.containedForm;
 		}
 		return null;
@@ -64,7 +68,8 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 			this.generateIDs();
 		}
 		if (this.isValidTab(tab)) {
-			if ((tab != undefined && this.selectedTab != undefined && tab.containedForm == this.selectedTab.containedForm && tab.relationName == this.selectedTab.relationName) || (tab == this.selectedTab)) return;
+			if ((tab !== undefined && this.selectedTab !== undefined && tab.containedForm === this.selectedTab.containedForm &&
+			              tab.relationName === this.selectedTab.relationName) || (tab === this.selectedTab)) return;
 			if (this.selectedTab) {
 				if (this.selectedTab.containedForm && !this.waitingForServerVisibility[this.selectedTab.containedForm]) {
 					const formInWait = this.selectedTab.containedForm;
@@ -74,11 +79,11 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 					const promise = this.servoyApi.hideForm(this.selectedTab.containedForm, null, null, tab.containedForm, tab.relationName);
 					promise.then((ok) => {
 						delete this.waitingForServerVisibility[formInWait];
-						if (this.lastSelectedTab != tab) {
+						if (this.lastSelectedTab !== tab) {
 							// visibility changed again, just ignore this
 							// it could be that the server was sending the correct state in the mean time already at the same time
 							// we try to hide it. just call show again to be sure.
-							if (currentSelectedTab == this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containedForm, this.selectedTab.relationName);
+							if (currentSelectedTab === this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containedForm, this.selectedTab.relationName);
 							return;
 						}
 						if (ok) {
@@ -103,27 +108,8 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 		} else if (this.tabs && this.tabs.length > 0) return this.tabs[0]._id;
 	}
 
-	private generateIDs() {
-		if (this.tabs) {
-			for (let i = 0; i < this.tabs.length; i++) {
-				this.tabs[i]._id = this.servoyApi.getMarkupId() + '_tab_' + i;
-			}
-		}
-	}
-
 	getRealTabIndex(): number {
 		if (this.tabIndex) {
-			if (isNaN(this.tabIndex)) {
-				if (!this.tabs) return -1;
-				for (let i = 0; i < this.tabs.length; i++) {
-					if (this.tabs[i].name == this.tabIndex) {
-						this.tabIndex = i + 1;
-						this.tabIndexChange.emit(i);
-						return i;
-					}
-				}
-				return -1;
-			}
 			return this.tabIndex - 1;
 		}
 		if (this.tabs && this.tabs.length > 0) return 0;
@@ -137,17 +123,28 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 		this.selectedTabID = tab._id;
 		this.tabIndex = this.getTabIndex(this.selectedTab);
 		this.tabIndexChange.emit(this.tabIndex);
-		if (oldSelected && oldSelected != tab && this.onChangeMethodID) {
+		if (oldSelected && oldSelected !== tab && this.onChangeMethodID) {
 			setTimeout(() => {
 				this.onChangeMethodID(this.getTabIndex(oldSelected), this.windowRefService.nativeWindow.event != null ? this.windowRefService.nativeWindow.event : null /* TODO $.Event("change") */);
 			}, 0, false);
 		}
 	}
 
+    isValidTab(tab: Tab) {
+        if (this.tabs) {
+            for (const i of Object.keys(this.tabs)) {
+                if (this.tabs[i] === tab) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 	private getTabIndex(tab: Tab) {
 		if (tab) {
 			for (let i = 0; i < this.tabs.length; i++) {
-				if (this.tabs[i] == tab) {
+				if (this.tabs[i] === tab) {
 					return i + 1;
 				}
 			}
@@ -155,16 +152,13 @@ export class ServoyBootstrapBaseTabPanel<T extends HTMLElement> extends ServoyBo
 		return -1;
 	}
 
-	isValidTab(tab: Tab) {
-		if (this.tabs) {
-			for (let i = 0; i < this.tabs.length; i++) {
-				if (this.tabs[i] === tab) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    private generateIDs() {
+        if (this.tabs) {
+            for (let i = 0; i < this.tabs.length; i++) {
+                this.tabs[i]._id = this.servoyApi.getMarkupId() + '_tab_' + i;
+            }
+        }
+    }
 }
 
 export class Tab extends BaseCustomObject {
