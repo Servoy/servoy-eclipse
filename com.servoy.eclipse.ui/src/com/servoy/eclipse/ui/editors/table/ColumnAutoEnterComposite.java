@@ -380,24 +380,35 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 509, Short.MAX_VALUE).add(
 				groupLayout.createSequentialGroup().add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(customValueButton).add(databaseDefaultButton).add(
-						lookupValueButton).add(sequenceButton)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
-								systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE, 420,
-									Short.MAX_VALUE).add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
-										GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)))).addContainerGap()));
+						lookupValueButton).add(sequenceButton))
+					.addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
+							systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE, 420,
+								Short.MAX_VALUE)
+							.add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
+								GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE))))
+			.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(
 				systemValueCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(customValueButton).add(customValueText, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(databaseDefaultButton).add(databaseDefaultValue)).addPreferredGap(
-								LayoutStyle.RELATED).add(
-									groupLayout.createParallelGroup(GroupLayout.LEADING).add(lookupValueButton).add(lookupValueControl)).addPreferredGap(
-										LayoutStyle.RELATED).add(
-											groupLayout.createParallelGroup(GroupLayout.LEADING).add(sequenceButton).add(sequenceCombo,
-												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-													LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.PREFERRED_SIZE).addContainerGap()));
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(databaseDefaultButton).add(databaseDefaultValue))
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(lookupValueButton).add(lookupValueControl))
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(sequenceButton).add(sequenceCombo,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE)
+				.addContainerGap()));
 		setLayout(groupLayout);
 
 		changeSupport = new ChangeSupport(Realm.getDefault())
@@ -884,13 +895,12 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			{
 				typeMismatch = false;//accepted
 			}
-			else if (valueType == IColumnTypes.INTEGER && otherType != IColumnTypes.INTEGER)
+			else if (valueType == IColumnTypes.INTEGER || valueType == IColumnTypes.NUMBER)
 			{
-				typeMismatch = true;
-			}
-			else if (valueType == IColumnTypes.NUMBER && (otherType != IColumnTypes.NUMBER || otherType != IColumnTypes.INTEGER))
-			{
-				typeMismatch = true;
+				if (otherType != IColumnTypes.INTEGER && otherType != IColumnTypes.NUMBER)
+				{
+					typeMismatch = true;
+				}
 			}
 			else if (valueType == IColumnTypes.TEXT)
 			{
