@@ -81,6 +81,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
     }
 
     getContainerStyle() {
+        let style = { position: "relative" }
         let minHeight = 0;
         if (this.height) {
             minHeight = this.height
@@ -92,6 +93,9 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent<HT
                 minHeight = formCache.size.height;
             }
         }
-        return { position: 'relative', minHeight: minHeight + 'px' };
+        if (minHeight > 0) {
+            style['minHeight'] = minHeight + "px";
+        }
+        return style;
     }
 }
