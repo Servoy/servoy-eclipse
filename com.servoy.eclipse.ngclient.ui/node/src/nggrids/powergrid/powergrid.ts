@@ -81,7 +81,6 @@ export class PowerGrid extends NGGridDirective {
     @Input() rowHeight: number;
     @Input() headerHeight: number;
     @Input() pivotMode: boolean;
-    @Input() visible: boolean;
     @Input() useLazyLoading: boolean;
     @Input() data: any;
     @Input() lastRowIndex: number;
@@ -127,6 +126,8 @@ export class PowerGrid extends NGGridDirective {
     onColumnDataChangePromise: any = null;
 
     clickTimer: any = null;
+
+    hasAutoHeightColumn = false;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
         private powergridService: PowergridService, public formattingService: FormattingService,
@@ -513,6 +514,7 @@ export class PowerGrid extends NGGridDirective {
     }
 
     getColumnDefs() {
+        this.hasAutoHeightColumn = false;
         //create the column definitions from the specified columns in designer
         const colDefs = [];
         let colDef: any = { };
@@ -638,6 +640,10 @@ export class PowerGrid extends NGGridDirective {
                         colDef[property] = columnOptions[property];
                     }
                 }
+            }
+
+            if(colDef['autoHeight'] && !this.hasAutoHeightColumn) {
+                this.hasAutoHeightColumn = true;
             }
 
             if(column.headerGroup) {
@@ -824,36 +830,33 @@ export class PowerGrid extends NGGridDirective {
     }
 
     sizeColumnsToFit() {
-        if(this.visible) {
-            this.agGrid.api.sizeColumnsToFit();
-        }
+        this.agGrid.api.sizeColumnsToFit();
+        if(this.hasAutoHeightColumn) this.agGrid.api.resetRowHeights();
     }
 
     storeColumnsState() {
-        if(this.visible) {
-            const rowGroupColumns = this.agGrid.columnApi.getRowGroupColumns();
-            const svyRowGroupColumnIds = [];
-            for(const rowGroupColumn of rowGroupColumns) {
-                svyRowGroupColumnIds.push(rowGroupColumn.getColId());
-            }
+        const rowGroupColumns = this.agGrid.columnApi.getRowGroupColumns();
+        const svyRowGroupColumnIds = [];
+        for(const rowGroupColumn of rowGroupColumns) {
+            svyRowGroupColumnIds.push(rowGroupColumn.getColId());
+        }
 
-            const columnState = {
-                columnState: this.agGrid.columnApi.getColumnState(),
-                rowGroupColumnsState: svyRowGroupColumnIds,
-                isToolPanelShowing: this.agGrid.api.isToolPanelShowing(),
-                isSideBarVisible: this.agGrid.api.isSideBarVisible(),
-                // filterState: gridOptions.api.getFilterModel(), TODO persist column states
-                sortingState: this.agGrid.api.getSortModel()
-            };
+        const columnState = {
+            columnState: this.agGrid.columnApi.getColumnState(),
+            rowGroupColumnsState: svyRowGroupColumnIds,
+            isToolPanelShowing: this.agGrid.api.isToolPanelShowing(),
+            isSideBarVisible: this.agGrid.api.isSideBarVisible(),
+            // filterState: gridOptions.api.getFilterModel(), TODO persist column states
+            sortingState: this.agGrid.api.getSortModel()
+        };
 
-            const newColumnState = JSON.stringify(columnState);
+        const newColumnState = JSON.stringify(columnState);
 
-            if (newColumnState !== this.columnState) {
-                this.columnState = newColumnState;
-                this.columnStateChange.emit(newColumnState);
-                if (this.onColumnStateChanged) {
-                    this.onColumnStateChanged(this.columnState);
-                }
+        if (newColumnState !== this.columnState) {
+            this.columnState = newColumnState;
+            this.columnStateChange.emit(newColumnState);
+            if (this.onColumnStateChanged) {
+                this.onColumnStateChanged(this.columnState);
             }
         }
     }
