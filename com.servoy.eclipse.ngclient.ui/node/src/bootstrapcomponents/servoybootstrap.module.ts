@@ -1,7 +1,5 @@
 
 import { NgModule } from '@angular/core';
-import { ServoyBootstrapBaseComponent } from './bts_basecomp';
-import { ServoyBootstrapBaseTabPanel } from './bts_basetabpanel';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ServoyBootstrapButton } from './button/button';
@@ -29,6 +27,8 @@ import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import { Select2Module } from 'ng-select2-component';
+import { SpecTypesService } from '../sablo/spectypes.service';
+import { Tab } from './bts_basetabpanel';
 
 @NgModule({
     declarations: [
@@ -83,4 +83,10 @@ import { Select2Module } from 'ng-select2-component';
       ServoyBootstrapCalendar,
       ServoyBootstrapCalendarinline]
 })
-export class ServoyBootstrapComponentsModule {}
+export class ServoyBootstrapComponentsModule {
+     constructor( specTypesService: SpecTypesService ) {
+        specTypesService.registerType('bootstrapcomponents-tabpanel.tab', Tab);
+        specTypesService.registerType('bootstrapcomponents-tablesspanel.tab', Tab);
+        specTypesService.registerType('bootstrapcomponents-accordion.tab', Tab);
+    }
+}

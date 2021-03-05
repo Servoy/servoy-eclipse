@@ -138,7 +138,7 @@ export class JSONObjectConverter implements IConverter {
                         ++internalState[JSONObjectConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
                     // send all
                     const toBeSentObj = changes[JSONObjectConverter.VALUE] = {};
-                    let specProperties = this.specTypesService.getProperties(newClientData.constructor);
+                    let specProperties = newClientData.getWatchedProperties();
                     if (!specProperties) specProperties = Object.keys(newClientData);
                     specProperties.forEach((key) => {
                         const val = newClientData[key];

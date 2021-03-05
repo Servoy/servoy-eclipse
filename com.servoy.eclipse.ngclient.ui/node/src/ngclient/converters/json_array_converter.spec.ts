@@ -31,12 +31,12 @@ describe( 'JSONArrayConverter', () => {
         TestBed.configureTestingModule( {
             providers: [ConverterService, SpecTypesService,LoggerFactory,WindowRefService]
         } );
-        const specTypes = TestBed.get( SpecTypesService );
+        const specTypes: SpecTypesService = TestBed.get( SpecTypesService );
         converterService = TestBed.get( ConverterService );
         converterService.registerCustomPropertyHandler( 'JSON_obj', new JSONObjectConverter( converterService, specTypes ) );
         converterService.registerCustomPropertyHandler( 'JSON_arr', new JSONArrayConverter( converterService, specTypes, TestBed.get( IterableDiffers ) ) );
-        TestBed.get( SpecTypesService ).registerType( 'Tab', Tab, ['name', 'myvalue'] );
-        TestBed.get( SpecTypesService ).registerType( 'TabHolder', TabHolder, ['name', 'tabs'] );
+        specTypes.registerType( 'Tab', Tab );
+        specTypes.registerType( 'TabHolder', TabHolder );
     } );
 
 
@@ -425,6 +425,10 @@ class Tab extends BaseCustomObject {
     set myvalue( value: string ) {
         this.getStateHolder().setPropertyAndHandleChanges( this, '_myvalue', 'myvalue', value );
     }
+
+    getWatchedProperties() {
+        return  ['name', 'myvalue'];
+    }
 }
 
 class TabHolder extends BaseCustomObject {
@@ -437,5 +441,9 @@ class TabHolder extends BaseCustomObject {
 
     set tabs( value: Array<Tab> ) {
         this.getStateHolder().setPropertyAndHandleChanges( this, '_tabs', 'tabs', value );
+    }
+
+    getWatchedProperties() {
+        return ['name', 'tabs'];
     }
 }

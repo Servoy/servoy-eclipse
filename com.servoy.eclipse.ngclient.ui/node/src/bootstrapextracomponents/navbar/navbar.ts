@@ -444,6 +444,10 @@ export class MenuItem extends BaseMenuItem {
     public isActive: boolean;
     public tooltip: string;
     public valuelist: IValuelist;
+
+    getWatchedProperties() {
+        return [];
+    }
 }
 
 class SubMenuItem extends BaseMenuItem {

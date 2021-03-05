@@ -36,8 +36,6 @@ import { LocaleService } from './locale.service';
 import { NGGridsModule } from '../nggrids/nggrids.module';
 import { SvyUtilsService } from './services/utils.service';
 import { ServerDataService } from './services/serverdata.service';
-import { TypesRegisterService } from '../servoydefault/types_register.service';
-import { TypesBootstrapExtraRegisterService } from '../bootstrapextracomponents/types_register.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -73,7 +71,7 @@ import { DialogModule } from '../dialogservice/dialog.module';
         DialogModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
-					SvyUtilsService,ServerDataService,TypesRegisterService, TypesBootstrapExtraRegisterService, BSWindow, BSWindowManager,
+					SvyUtilsService,ServerDataService, BSWindow, BSWindowManager,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],
