@@ -27,6 +27,7 @@ import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
 import { Select2Module } from 'ng-select2-component';
 import { UppyAngularModule } from 'uppy-angular';
 import { LightboxModule } from 'ngx-lightbox';
+import { ServoyExtraCollapse } from './collapse/collapse';
 
 @NgModule({
     declarations: [
@@ -44,6 +45,7 @@ import { LightboxModule } from 'ngx-lightbox';
 		ServoyExtraSelect2Tokenizer,
         ServoyExtraYoutubeVideoEmbedder,
         ServoyExtraSidenav,
+        ServoyExtraCollapse,
 		BGSplitter,
     	BGPane
     ],
@@ -77,7 +79,8 @@ import { LightboxModule } from 'ngx-lightbox';
 			  ServoyExtraSelect2Tokenizer,
               ServoyExtraMultiFileUpload,
               ServoyExtraYoutubeVideoEmbedder,
-              ServoyExtraSidenav
+              ServoyExtraSidenav,
+              ServoyExtraCollapse
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
