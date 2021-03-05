@@ -25,9 +25,11 @@ export class ServoyApi {
         this.formservice.pushEditingStarted(this.formname, this.item.name, propertyName);
     }
 
-    public apply( _propertyName: string ) {
-        // TODO is this ever needed now? this is now always done through EventEmitter ....
-        //        $servoyInternal.pushDPChange( "${name}", this.item.name, propertyName );
+    /**
+     * This apply is only needed for nested dataproviders, so a dataprovider property of custom type, this will push and apply the data to the data model.
+     */
+    public apply( propertyName: string, value: any ) {
+        this.formservice.sendChanges(this.formname, this.item.name, propertyName, value, null, true);
     }
 
     public callServerSideApi( methodName: string, args: Array<any> ) {
