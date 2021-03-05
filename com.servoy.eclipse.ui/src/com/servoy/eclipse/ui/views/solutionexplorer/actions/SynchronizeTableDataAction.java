@@ -329,7 +329,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			{ // check for existing data
 				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 				IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(), table.getServerName(),
-					null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+					null, query, null, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 				if (ds.getRowCount() > 0)
 				{
 					tablesWithDataInDB.add(table);

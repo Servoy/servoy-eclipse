@@ -77,10 +77,8 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         (e.target as HTMLElement).blur();
     }
 
-    onInputChange(menuItem: MenuItem) {
-        menuItem.getStateHolder().getChangedKeys().add('dataProvider');
-        menuItem.getStateHolder().notifyChangeListener();
-        this.menuItemsChange.emit(this.menuItems);
+    onInputChange(menuItem: MenuItem, index: number) {
+        this.servoyApi.apply('menuItems[' + index + '].dataProvider', menuItem.dataProvider);
     }
 
     resultFormatter = (result: { displayValue: string; realValue: any }) => {
@@ -444,6 +442,10 @@ export class MenuItem extends BaseMenuItem {
     public isActive: boolean;
     public tooltip: string;
     public valuelist: IValuelist;
+
+    getWatchedProperties() {
+        return [];
+    }
 }
 
 class SubMenuItem extends BaseMenuItem {

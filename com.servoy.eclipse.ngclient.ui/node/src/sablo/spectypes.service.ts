@@ -43,13 +43,8 @@ export class SpecTypesService {
         return array as ICustomArray<T>;
     }
 
-    registerType(name: string, classRef: typeof BaseCustomObject, specProperties: Array<string>) {
+    registerType(name: string, classRef: typeof BaseCustomObject) {
         this.registeredTypes.set(name, classRef);
-        classRef['__specProperties'] = specProperties;
-    }
-
-    getProperties(classRef): Array<string> {
-        return classRef['__specProperties'];
     }
 
     guessType(val: any): string {
@@ -411,6 +406,13 @@ export class BaseCustomObject implements ICustomObject {
 
     public getStateHolder() {
         return this.state;
+    }
+
+    /**
+     *  subclasses can override this to give back the properties that needs to be watched.
+     */
+    getWatchedProperties(): Array<string> {
+        return null;
     }
 
 }

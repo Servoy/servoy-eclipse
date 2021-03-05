@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
-        TemplateRef, QueryList, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
+        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, IApiExecutor, instanceOfApiExecutor, PartCache } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
@@ -9,7 +9,6 @@ import { SabloService } from '../../sablo/sablo.service';
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 
 import { ServoyApi } from '../servoy_api';
-import { ComponentModel } from '../converters/component_converter';
 import { FormService } from '../form.service';
 import { ServoyBaseComponent } from '../basecomponent';
 
@@ -174,7 +173,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('servoyextraSidenav', { static: true }) readonly servoyextraSidenav: TemplateRef<any>;
     @ViewChild('servoyextraCollapse', { static: true }) readonly servoyextraCollapse: TemplateRef<any>;
     
- 
+
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsButton', { static: true }) readonly bootstrapcomponentsButton: TemplateRef<any>;
@@ -192,7 +191,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('bootstrapcomponentsTabpanel', { static: true }) readonly bootstrapcomponentsTabpanel: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsAccordion', { static: true }) readonly bootstrapcomponentsAccordion: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsTypeahead', { static: true }) readonly bootstrapcomponentsTypeahead: TemplateRef<any>;
-    
+
     @ViewChild('bootstrapextracomponentsBreadcrumbs', { static: true }) readonly bootstrapextracomponentsBreadcrumbs: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsNavbar', { static: true }) readonly bootstrapextracomponentsNavbar: TemplateRef<any>;
     // component template generate end
@@ -205,7 +204,7 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     formCache: FormCache;
 
-    private handlerCache: { [property: string]: { [property: string]: (e) => void } } = {};
+    private handlerCache: { [property: string]: { [property: string]: () => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
@@ -318,7 +317,7 @@ export class FormComponent implements OnDestroy, OnChanges {
         return position;
     }
 
-    public isFormAvailable(name): boolean {
+    public isFormAvailable(name: string): boolean {
         // console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
         return this.formservice.hasFormCacheEntry(name);
     }
@@ -340,7 +339,7 @@ export class FormComponent implements OnDestroy, OnChanges {
         if (func == null && item.handlers && item.handlers.indexOf(handler) >= 0) {
             const me = this;
             // eslint-disable-next-line
-            func = function(e) {
+            func = function() {
                 return me.formservice.executeEvent(me.name, item.name, handler, arguments);
             };
             itemCache[handler] = func;

@@ -275,7 +275,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
-			+  "        -ng2 should ng2 binaries be exporter\n"
+			+  "        -ng2 export ng2 binaries\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}

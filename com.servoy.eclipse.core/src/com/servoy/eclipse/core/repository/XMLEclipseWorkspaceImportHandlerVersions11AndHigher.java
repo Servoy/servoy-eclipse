@@ -972,7 +972,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 						IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
-							table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+							table.getServerName(), null, query, null, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 						if (ds.getRowCount() == 0)
 						{
 							MetaDataUtils.loadMetadataInTable(table, def.tableMetaData);

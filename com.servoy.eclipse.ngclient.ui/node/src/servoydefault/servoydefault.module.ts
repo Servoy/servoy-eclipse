@@ -43,6 +43,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { UploadDirective } from '../ngclient/utils/upload.directive';
 import { Select2Module } from 'ng-select2-component';
+import { SpecTypesService } from '../sablo/spectypes.service';
+import { Tab } from './tabpanel/basetabpanel';
 
 @NgModule({
   declarations: [
@@ -116,4 +118,9 @@ import { Select2Module } from 'ng-select2-component';
     CUSTOM_ELEMENTS_SCHEMA
   ]
 })
-export class ServoyDefaultComponentsModule { }
+export class ServoyDefaultComponentsModule { 
+    constructor( specTypesService: SpecTypesService ) {
+        specTypesService.registerType('servoydefault-tabpanel.tab', Tab);
+        specTypesService.registerType('servoydefault-splitpane.tab', Tab);
+    }
+}
