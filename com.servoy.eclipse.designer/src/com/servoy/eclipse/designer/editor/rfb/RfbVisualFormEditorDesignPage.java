@@ -590,6 +590,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	{
 		private boolean hidden = false;
 		private boolean refresh = false;
+		private boolean fullRefresh = false;
 
 		@Override
 		public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
@@ -600,7 +601,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				{
 					refreshEntireForm();
 				}
-				else refresh = true;
+				else fullRefresh = true;
 			}
 		}
 
@@ -642,7 +643,13 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		{
 			if ((partRef.getPart(false) == getEditorPart()))
 			{
-				if (refresh)
+				if (fullRefresh)
+				{
+					refresh = false;
+					fullRefresh = false;
+					refreshEntireForm();
+				}
+				else if (refresh)
 				{
 					refresh = false;
 					refresh();
