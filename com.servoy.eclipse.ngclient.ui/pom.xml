@@ -11,6 +11,9 @@
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
 	<version>2021.3.0.3640_rc</version>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+	   <test.script>test_headless</test.script>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -68,7 +71,7 @@
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
 							<failOnError>true</failOnError>	
-							<arguments>run test_headless</arguments>
+							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>
 				</executions>
