@@ -9,6 +9,7 @@
     "build_debug": "ng build --watch",
     "test": "ng test --watch --browsers Chrome",
     "test_edge": "ng test --watch --browsers Edge",
+    "test_edge_nowatch": "ng test --watch=false --browsers Edge",
     "test_headless": "ng test --browsers ChromeHeadless --watch=false",
     "lint": "ng lint",
     "e2e": "ng e2e",
