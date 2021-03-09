@@ -76,6 +76,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
@@ -112,6 +113,7 @@ import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.UUID;
 
 /**
  * @author user
@@ -318,64 +320,7 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			if (editorPart.getForm().isResponsiveLayout() && !CSSPositionUtils.isCSSPositionContainer(
-				parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
-			{
-				List<IPersist> children = new ArrayList<IPersist>();
-				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
-					parentSupportingElements).getAllObjects();
-				while (it.hasNext())
-				{
-					IPersist persist = it.next();
-					if (persist instanceof ISupportBounds)
-					{
-						children.add(persist);
-					}
-				}
 
-				// default place it as the first element.
-				x = 1;
-				y = 1;
-				if (children.size() > 0)
-				{
-					IPersist[] childArray = children.toArray(new IPersist[0]);
-					Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
-					if (args.has("rightSibling"))
-					{
-						IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
-						if (rightSibling != null)
-						{
-							int counter = 1;
-							for (IPersist element : childArray)
-							{
-								if (element.getUUID().equals(rightSibling.getUUID()))
-								{
-									x = counter;
-									y = counter;
-									counter++;
-								}
-								((ISupportBounds)element).setLocation(new Point(counter, counter));
-								if (extraChangedPersists != null && element.isChanged()) extraChangedPersists.add(element);
-								counter++;
-							}
-						}
-						else
-						{
-							Debug.log("Could not find rightsibling with uuid '" + args.optString("rightSibling", null) + "', inserting on last position.");
-							Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
-							x = location.x + 1;
-							y = location.y + 1;
-						}
-					}
-					else
-					{
-						// insert as last element in flow layout because no right/bottom sibling was given
-						Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
-						x = location.x + 1;
-						y = location.y + 1;
-					}
-				}
-			}
 			if (args.has("name"))
 			{
 				String name = args.getString("name");
@@ -665,11 +610,13 @@ public class CreateComponentHandler implements IServerService
 							}
 						}
 						List<IPersist> changes = new ArrayList<>();
+						boolean addSiblingsToChanges = true;
 						if (editorPart.getForm().isResponsiveLayout() && initialDropTarget != null &&
 							!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
 						{
 							ISupportChilds parent = webComponent.getParent();
 							changes.add(webComponent.getParent());
+							addSiblingsToChanges = false;//no need to mark the siblings as changed because the whole parent was overridden
 
 							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 							parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
@@ -678,9 +625,10 @@ public class CreateComponentHandler implements IServerService
 							{
 								IPersist child = it.next();
 								IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, editorPart.getForm()));
-								if (!child.equals(overridePersist))
+								if (!overridePersist.getUUID().equals(child.getUUID()))
 								{
-									changes.add(overridePersist);
+									parent.removeChild(child);
+									parent.addChild(overridePersist);
 								}
 							}
 						}
@@ -688,6 +636,8 @@ public class CreateComponentHandler implements IServerService
 						{
 							changes.add(webComponent);
 						}
+						webComponent.setLocation(getLocationAndShiftSiblings(webComponent.getParent(), args, extraChangedPersists));
+						if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
 
 						return changes.toArray(new IPersist[changes.size()]);
 					}
@@ -814,6 +764,85 @@ public class CreateComponentHandler implements IServerService
 		}
 
 		return null;
+	}
+
+	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException
+	{
+		if (editorPart.getForm().isResponsiveLayout() && !CSSPositionUtils.isCSSPositionContainer(
+			parent instanceof LayoutContainer ? (LayoutContainer)parent : null))
+		{
+			List<IPersist> children = new ArrayList<IPersist>();
+			Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
+				parent).getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist persist = it.next();
+				if (persist instanceof ISupportBounds)
+				{
+					children.add(persist);
+				}
+			}
+
+			// default place it as the first element.
+			int x = 1;
+			int y = 1;
+			if (children.size() > 0)
+			{
+				IPersist[] childArray = children.toArray(new IPersist[0]);
+				Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
+				if (args.has("rightSibling"))
+				{
+					IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
+					if (rightSibling == null && editorPart.getForm().getExtendsForm() != null)
+					{
+
+						Form f = editorPart.getForm();
+						do
+						{
+							f = f.getExtendsForm();
+							rightSibling = AbstractRepository.searchPersist(f, UUID.fromString(args.optString("rightSibling", null)));
+						}
+						while (f.getExtendsForm() != null);
+						if (rightSibling != null)
+						{
+							rightSibling = ElementUtil.getOverridePersist(PersistContext.create(rightSibling, editorPart.getForm()));
+						}
+					}
+					if (rightSibling != null)
+					{
+						int counter = 1;
+						for (IPersist element : childArray)
+						{
+							if (element.getUUID().equals(rightSibling.getUUID()))
+							{
+								x = counter;
+								y = counter;
+								counter++;
+							}
+							((ISupportBounds)element).setLocation(new Point(counter, counter));
+							if (extraChangedPersists != null && element.isChanged()) extraChangedPersists.add(element);
+							counter++;
+						}
+					}
+					else
+					{
+						Debug.log("Could not find rightsibling with uuid '" + args.optString("rightSibling", null) + "', inserting on last position.");
+						Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
+						x = location.x + 1;
+						y = location.y + 1;
+					}
+				}
+				else
+				{
+					// insert as last element in flow layout because no right/bottom sibling was given
+					Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
+					x = location.x + 1;
+					y = location.y + 1;
+				}
+			}
+			return new Point(x, y);
+		}
+		return new Point(1, 1);
 	}
 
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWebComponent, PropertyDescription pd, String componentSpecName, String propertyName,
