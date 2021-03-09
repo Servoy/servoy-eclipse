@@ -55,6 +55,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizard
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RevertFormCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
@@ -104,6 +105,8 @@ public class EditorServiceHandler implements IServerService
 	{
 		configuredHandlers.put("getGhostComponents", new GhostHandler(editorPart));
 		configuredHandlers.put("setSelection", new SetSelectionHandler(editorPart, selectionListener, selectionProvider));
+		configuredHandlers.put("revertForm", new RevertFormCommand(editorPart));
+
 		configuredHandlers.put("setTabSequence", new SetTabSequenceCommand(editorPart, selectionProvider));
 
 		configuredHandlers.put("z_order_bring_to_front_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front_one_step"));

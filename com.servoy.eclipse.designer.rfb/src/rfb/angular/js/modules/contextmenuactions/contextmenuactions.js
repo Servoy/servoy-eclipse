@@ -99,6 +99,21 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			var shortcuts = result[0];
 			var forms = result[1];
 			$contextmenu.add({
+				text: "Revert Form",
+				getItemClass: function() { 
+					if (editorScope.isDirty === true){ 
+						return "enabled";
+						} else {
+							return "disabled";
+						}
+					}, 
+				execute:function()
+				{
+					$("#contextMenu").hide();
+					$editorService.executeAction('revertForm');
+				}
+			});
+			$contextmenu.add({
 				text: "Set Tab Sequence",
 				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.png)"};},
 				shortcut: shortcuts[SHORTCUT_IDS.SET_TAB_SEQUENCE_ID],

@@ -1607,6 +1607,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
 		},
 		
+		setDirty: function(isDirty){
+			editorScope.isDirty = isDirty;
+		},
+		
 		refreshPalette: function()
 		{
 			$rootScope.$broadcast(EDITOR_EVENTS.RENDER_PALETTE);

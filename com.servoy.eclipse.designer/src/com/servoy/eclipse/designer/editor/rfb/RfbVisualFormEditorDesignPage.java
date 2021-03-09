@@ -127,6 +127,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	// for updating selection in editor when selection changes in IDE
 	private RfbSelectionListener selectionListener;
 
+	private RfbDirtyListener dirtyListener;
+
 	private EditorWebsocketSession editorWebsocketSession;
 	private DesignerWebsocketSession designerWebsocketSession;
 
@@ -181,6 +183,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		refreshBrowserUrl(false);
 		openViewers();
+
+		dirtyListener = new RfbDirtyListener(editorPart, editorWebsocketSession);
+		editorPart.addPropertyListener(dirtyListener);
+
 	}
 
 	protected abstract void createBrowser(Composite parent);
