@@ -48,6 +48,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private log: LoggerService;
     private rowItems: Array<ComponentModel | FormComponentCache>;
 
+    private waitingForLoad = false;  
+
     constructor(protected readonly renderer: Renderer2,
         private formservice: FormService,
         private servoyService: ServoyService,
@@ -414,6 +416,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     calculateCells() {
+        // if it is still loading then don't calculate it right now again.
+        if (this.waitingForLoad) return;
         this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
             if (this.servoyApi.isInAbsoluteLayout()) {
@@ -437,10 +441,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             foundset.loadRecordsAsync(startIndex, this.numberOfCells);
         } else {
             if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
-                foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size));
+                this.waitingForLoad = true;
+                foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size))
+                    .finally(() => this.waitingForLoad = false);
             } else if (foundset.viewPort.size > this.numberOfCells) {
                 // the (initial) viewport  is bigger then the numberOfCells we have created rows for, adjust the viewport to be smaller.
-                foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size);
+                this.waitingForLoad = true;
+                foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size).finally(() => this.waitingForLoad = false);
             }
         }
         this.updatePagingControls();
