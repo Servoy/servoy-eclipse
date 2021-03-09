@@ -144,6 +144,11 @@
 			"description": "Array of keywords used for component search",
 			"type": "array"
 		},
+		"dependencies": 
+		{
+			"description": "Dependencies for NG2",
+			"type": "object"
+		},
 		"icon": 
 		{
 			"description": "The icon that is displayed in the designer",
