@@ -1,5 +1,6 @@
 @import "table/table.css";
 @import "sidenav/svy-sidenav.css";
+@import '~@circlon/angular-tree-component/src/lib/angular-tree-component.css'; 
 
 .svy-wrapper > * > .svy-slider-container {
     width: 100%;

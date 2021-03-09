@@ -28,6 +28,8 @@ import { Select2Module } from 'ng-select2-component';
 import { UppyAngularModule } from 'uppy-angular';
 import { LightboxModule } from 'ngx-lightbox';
 import { ServoyExtraCollapse } from './collapse/collapse';
+import { ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
+import { TreeModule } from '@circlon/angular-tree-component';
 
 @NgModule({
     declarations: [
@@ -46,6 +48,7 @@ import { ServoyExtraCollapse } from './collapse/collapse';
         ServoyExtraYoutubeVideoEmbedder,
         ServoyExtraSidenav,
         ServoyExtraCollapse,
+        ServoyExtraDbtreeview,
 		BGSplitter,
     	BGPane
     ],
@@ -62,8 +65,9 @@ import { ServoyExtraCollapse } from './collapse/collapse';
         NgxSliderModule,
 		Select2Module,
         UppyAngularModule,
-        LightboxModule
-    ],
+        LightboxModule,
+        TreeModule
+    ], 
     providers: [AsyncPipe
     ],
     exports: [ServoyExtraTable,
@@ -80,7 +84,8 @@ import { ServoyExtraCollapse } from './collapse/collapse';
               ServoyExtraMultiFileUpload,
               ServoyExtraYoutubeVideoEmbedder,
               ServoyExtraSidenav,
-              ServoyExtraCollapse
+              ServoyExtraCollapse,
+              ServoyExtraDbtreeview
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
