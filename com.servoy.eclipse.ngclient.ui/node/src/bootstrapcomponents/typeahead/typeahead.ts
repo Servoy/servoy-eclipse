@@ -91,7 +91,8 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
     }
 
     resultFormatter = (result: { displayValue: string; realValue: any }) => {
-        if (result.displayValue === null) return '';
+        // eslint-disable-next-line eqeqeq
+        if (result.displayValue === null || result.displayValue == '') return '\u00A0';
         return this.formatService.format(result.displayValue, this.format, false);
     };
 

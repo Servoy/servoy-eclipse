@@ -86,7 +86,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     }
 
     resultFormatter = (result: { displayValue: string; realValue: any }) => {
-        if (result.displayValue === null) return '';
+        // eslint-disable-next-line eqeqeq
+        if (result.displayValue === null || result.displayValue == '') return '\u00A0';
         return this.formattingService.format(result.displayValue, this.format, false);
     };
 
