@@ -91,7 +91,8 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
     }
 
     resultFormatter = (result: { displayValue: string; realValue: any }) => {
-        if (result.displayValue === null) return '';
+        // eslint-disable-next-line eqeqeq
+        if (result.displayValue === null || result.displayValue == '') return '\u00A0';
         return this.formatService.format(result.displayValue, this.format, false);
     };
 
@@ -110,7 +111,7 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield<HTMLInput
     };
 
     valueChanged(value: { displayValue: string; realValue: any }) {
-        if (value && value.realValue) this.dataProviderID = value.realValue;
+        if (value && value.realValue !== undefined) this.dataProviderID = value.realValue;
         else if (value) this.dataProviderID = value;
         else this.dataProviderID = null;
         this.dataProviderIDChange.emit(this.dataProviderID);

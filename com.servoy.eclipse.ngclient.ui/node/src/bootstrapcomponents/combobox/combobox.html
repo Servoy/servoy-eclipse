@@ -10,7 +10,7 @@
         #input><span class="bts-dropdown-text">{{formattedValue}}</span></button>
       <div ngbDropdownMenu [attr.aria-labelledby]="servoyApi.getMarkupId() + '_btn'" [ngStyle]="{ 'width.px': getDropDownWidth() }">
        <ng-container *ngIf="openState">
-        <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format}}</button>
+        <button *ngFor="let value of valuelistID" ngbDropdownItem class="svy-ngbdropdownitem" [ngClass]="{active:valueComparator(value)}" (click)="updateValue(value.realValue)">{{value.displayValue | formatFilter:format | emptyValue}}</button>
        </ng-container>
       </div>
 </div> 

@@ -5,6 +5,7 @@ import { TooltipService } from './tooltip/tooltip.service';
 import { MnemonicletterFilterPipe, NotNullOrEmptyPipe, HtmlFilterPipe} from './pipes/pipes';
 import { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.directive';
 import { FormatFilterPipe } from './format/format.pipe';
+import { EmptyValueFilterPipe } from './format/emptyvalue.pipe';
 import { StartEditDirective } from './utils/startedit.directive';
 import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
 import { AutosaveDirective } from './utils/autosave.directive';
@@ -19,6 +20,7 @@ import { FormattingService } from './format/formatting.service';
                     FormatDirective,
                     DecimalkeyconverterDirective,
                     FormatFilterPipe,
+                    EmptyValueFilterPipe,
                     StartEditDirective,
                     ImageMediaIdDirective,
                     AutosaveDirective
@@ -31,6 +33,7 @@ import { FormattingService } from './format/formatting.service';
               FormatDirective,
               DecimalkeyconverterDirective,
               FormatFilterPipe,
+              EmptyValueFilterPipe,
               StartEditDirective,
               ImageMediaIdDirective,
               AutosaveDirective

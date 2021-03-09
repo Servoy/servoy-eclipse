@@ -1,10 +1,10 @@
-import { Injector, Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform} from '@angular/core';
 import { Format, FormattingService } from './formatting.service';
 
 @Pipe( { name: 'formatFilter'} )
 export class FormatFilterPipe implements PipeTransform {
 
-    public constructor(private injector: Injector, private formatService: FormattingService) {
+    public constructor(private formatService: FormattingService) {
     }
 
     transform( input: any, format: Format): any {
