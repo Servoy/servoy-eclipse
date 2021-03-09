@@ -106,7 +106,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     };
 
     valueChanged(value: { displayValue: string; realValue: any }) {
-        if (value && value.realValue) this.dataProviderID = value.realValue;
+        if (value && value.realValue !== undefined) this.dataProviderID = value.realValue;
         else if (value) this.dataProviderID = value;
         else this.dataProviderID = null;
         this.dataProviderIDChange.emit(this.dataProviderID);
