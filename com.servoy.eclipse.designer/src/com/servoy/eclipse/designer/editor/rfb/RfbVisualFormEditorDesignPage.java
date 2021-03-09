@@ -248,7 +248,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault +
-				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
+				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()

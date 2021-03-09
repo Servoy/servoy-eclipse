@@ -465,9 +465,11 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					{
 						$("#contextMenu").hide();
 						$editorService.executeAction('openScript');
-					}
+					},
+					getItemClass: function() { if (!editorScope.isFormComponent()) return "enabled"; else return "disabled"}
 				};
-			if (forms.length > 1){
+				
+			if (forms.length > 1 && !editorScope.isFormComponent()){
 				var superFormsActions = [];
 				for (var i =0; i<forms.length; i++) {
 					superFormsActions.push({
