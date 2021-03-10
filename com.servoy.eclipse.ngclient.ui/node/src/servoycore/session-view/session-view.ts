@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -11,7 +11,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
 })
 export class SessionView implements OnInit {
 
-    constructor(public http: HttpClient, public servoyService: ServoyService, private sanitizer: DomSanitizer) {
+    constructor(public http: HttpClient, public servoyService: ServoyService, private sanitizer: DomSanitizer, protected cdRef: ChangeDetectorRef) {
     }
 
     htmlString: SafeHtml;
@@ -26,6 +26,7 @@ export class SessionView implements OnInit {
             responseType: 'text'
         }).subscribe(res => {
             this.htmlString = this.sanitizer.bypassSecurityTrustHtml(res.replace('{{redirectUrl}}', sessionProblem.redirectUrl).replace('ng-href', 'href'));
+            this.cdRef.detectChanges();
         });
 
         if (sessionProblem.redirectTimeout >= 0) {
