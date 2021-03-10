@@ -550,13 +550,13 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
-		StringBuilder sb = new StringBuilder("./war_export.");
+		StringBuilder sb = new StringBuilder(".\\war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
 		else sb.append("sh");
 
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 
-		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
+		sb.append(" \"-s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 
 		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
 		File warFile = new File(warFilePath);
@@ -659,6 +659,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -overwriteAllProperties", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
+		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
