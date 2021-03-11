@@ -122,20 +122,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         this.attachHandlers();
 
         this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-            if (event.sortColumnsChanged) {
-                this.sortColumnsChanged(event);
-            }
-
-            if (event.selectedRowIndexesChanged) {
-                this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
-            }
-
-            let newVal: ViewPortRow[];
-            if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
-            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue as ViewPortRow[];
-            if (event.fullValueChanged || event.viewportRowsCompletelyChanged) {
-                this.dataStream.next([...newVal]);
-            }
+            this.foundsetChanged(event);
         });
 
         this.idx = 0;
@@ -163,6 +150,23 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             this.dataStream.next(this.foundset.viewPort.rows);
             this.scrollToSelection();
         }, 50);
+    }
+    private foundsetChanged(event: FoundsetChangeEvent) {
+        if (event.sortColumnsChanged) {
+            this.sortColumnsChanged(event);
+        }
+
+        if (event.selectedRowIndexesChanged) {
+            this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
+        }
+
+        if (event.fullValueChanged || event.viewportRowsCompletelyChanged || event.viewportRowsUpdated) {
+            let newVal: ViewPortRow[];
+            if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
+            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue as ViewPortRow[];
+            if (event.viewportRowsUpdated) newVal = this.foundset.viewPort.rows;
+            this.dataStream.next([...newVal]);
+        }
     }
     loadMoreRecords(currIndex: number, scroll?: boolean) {
         if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.pageSize) ||
