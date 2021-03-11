@@ -82,6 +82,7 @@ public class KeyPressedHandler implements IServerService
 		boolean isCtrl = args.optBoolean("ctrl");
 		boolean isShift = args.optBoolean("shift");
 		boolean isAlt = args.optBoolean("alt");
+		boolean isMeta = args.optBoolean("meta");
 		// if default browser do not handle all actions, eclipse should do that; for chromium handle everything
 		if (new DesignerPreferences().useChromiumBrowser())
 		{
@@ -90,6 +91,7 @@ public class KeyPressedHandler implements IServerService
 			if (isCtrl) modifier = SWT.CTRL;
 			if (isShift) modifier = SWT.SHIFT | modifier;
 			if (isAlt) modifier = SWT.ALT | modifier;
+			if (isMeta) modifier = SWT.COMMAND | modifier;
 			if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
 			else if (keyCode == 115) keyCode = SWT.F4;
 			else if (keyCode == 37) keyCode = SWT.ARROW_LEFT;
@@ -166,7 +168,7 @@ public class KeyPressedHandler implements IServerService
 					break;
 
 				case 83 : // s
-					if (isCtrl && isShift) // ctrl+shift+s (save all)
+					if ((isCtrl && isShift) || (isMeta && isShift)) // ctrl+shift+s (save all)
 					{
 						Display.getDefault().asyncExec(new Runnable()
 						{
@@ -174,6 +176,17 @@ public class KeyPressedHandler implements IServerService
 							{
 								IWorkbenchPage page = editorPart.getSite().getPage();
 								((WorkbenchPage)page).saveAllEditors(false, false, true);
+							}
+						});
+					}
+					else if (isCtrl || isMeta)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								IWorkbenchPage page = editorPart.getSite().getPage();
+								((WorkbenchPage)page).saveEditor(editorPart, false);
 							}
 						});
 					}

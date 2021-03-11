@@ -1427,6 +1427,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				ctrl: event.ctrlKey,
 				shift: event.shiftKey,
 				alt: event.altKey,
+				meta: event.metaKey,
 				keyCode: event.keyCode
 			}, true)
 		},
