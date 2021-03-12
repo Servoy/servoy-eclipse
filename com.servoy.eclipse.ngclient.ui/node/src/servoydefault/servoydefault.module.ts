@@ -40,7 +40,6 @@ import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { UploadDirective } from '../ngclient/utils/upload.directive';
 import { Select2Module } from 'ng-select2-component';
 import { SpecTypesService } from '../sablo/spectypes.service';
@@ -83,7 +82,6 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     BrowserAnimationsModule,
     OwlDateTimeModule,
     OwlMomentDateTimeModule,
-    AngularEditorModule,
     ServoyPublicModule,
     Select2Module,
     EditorModule
