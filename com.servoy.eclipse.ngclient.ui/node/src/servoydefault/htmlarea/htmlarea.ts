@@ -1,8 +1,9 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
-import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-editor';
+import { LocaleService, FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
+import { ApplicationService } from '../../ngclient/services/application.service';
 import { DOCUMENT } from '@angular/common';
+import tinymce from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
@@ -11,51 +12,91 @@ import { DOCUMENT } from '@angular/common';
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild(AngularEditorComponent) editor: AngularEditorComponent;
-
-    config: AngularEditorConfig = {
-        editable: true,
-        spellcheck: true,
-        translate: 'no',
-        defaultParagraphSeparator: 'p'
+    tinyValue: any;
+    tinyConfig = {
+        base_url: '/tinymce',
+        suffix: '.min',
+        height: '100%',
+        menubar: false,
+        statusbar: false,
+        readonly: 0,
+        plugins: 'tabfocus',
+        tabfocus_elements: ':prev,:next',
+        toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected localeService: LocaleService, private appService: ApplicationService) {
         super(renderer, cdRef, formattingService, doc);
     }
 
-    attachFocusListeners() {
-        if ( this.onFocusGainedMethodID ) {
-            this.editor.focusEvent.subscribe(() => {
-                if ( this.mustExecuteOnFocus === true ) {
-                    this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
-                }
-                this.mustExecuteOnFocus = true;
-            } );
+    focus() {
+        if (this.onFocusGainedMethodID) {
+            if (this.mustExecuteOnFocus === true) {
+                this.onFocusGainedMethodID(new CustomEvent('focus'));
+            }
+            this.mustExecuteOnFocus = true;
         }
-
-        this.editor.blurEvent.subscribe(() => {
-            this.pushUpdate();
-            if ( this.onFocusLostMethodID ) this.onFocusLostMethodID( new CustomEvent( 'blur' ) );
-        } );
     }
 
+    blur() {
+        this.dataProviderID = '<html><body>' + this.tinyValue + '</body></html>'
+        this.pushUpdate();
+        if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
+    }
+
+    click() {
+        if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
+    }
+
+    ngOnInit(){
+        super.ngOnInit(); 
+        
+        this.tinyConfig['language'] = this.localeService.getLocale();
+
+        // app level configuration
+        let defaultConfiguration = this.appService.getUIProperty("config");
+        if (defaultConfiguration) {
+            try {
+                defaultConfiguration = JSON.parse(defaultConfiguration);
+            }
+            catch (e) {
+                console.error(e)
+            }
+            for (var key in defaultConfiguration) {
+                if (defaultConfiguration.hasOwnProperty(key)) {
+                    var value = defaultConfiguration[key]
+                    if (key === "plugins") {
+                        value += " tabindex";
+                    }
+                    this.tinyConfig[key] = value;
+                }
+            }
+        }
+
+        // element level configuration
+        let configuration = this.servoyApi.getClientProperty('config');
+        if (configuration) {
+            try {
+                configuration = JSON.parse(configuration);
+            }
+            catch (e) {
+                console.error(e)
+            }
+            for (var key in configuration) {
+                if (configuration.hasOwnProperty(key)) {
+                    var value = configuration[key];
+                    if (key === "plugins") {
+                        value += " tabindex";
+                    }
+                    this.tinyConfig[key] = value;
+                }
+            }
+        }   
+    }
+    
     svyOnInit() {
         super.svyOnInit();
-
-        // ugly hack to fix the height
-        const nativeElement = this.getNativeElement();
-        const componentHeight = nativeElement.offsetHeight;
-        // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        const initialContentHeight = (nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement).offsetHeight;
-        const initialEditorHeight = (nativeElement.childNodes[0].childNodes[0]as HTMLElement).offsetHeight;
-
-        this.renderer.setStyle(nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', (initialContentHeight + componentHeight - initialEditorHeight) + 'px');
-
-        // work around for https://github.com/kolkov/angular-editor/issues/341
-        setTimeout(() => {
-            this.cdRef.detectChanges();
-        }, 5);
+        this.tinyValue = this.dataProviderID;
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -78,7 +119,21 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                     case 'editable':
                     case 'readOnly':
                     case 'enabled':
-                        this.config.editable = this.editable && !this.readOnly && this.enabled;
+                        let editable = this.editable && !this.readOnly && this.enabled;
+                        if (tinymce.activeEditor) {
+                            if (editable) {
+                                if (!change.firstChange) {
+                                    tinymce.activeEditor.mode.set("design");
+                                }
+                            }
+                            else {
+                                tinymce.activeEditor.mode.set("readonly");
+                            }
+
+                        }
+                        break;
+                    case 'dataProviderID':
+                        this.tinyValue = this.dataProviderID;
                         break;
                 }
             }
@@ -86,45 +141,44 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         super.svyOnChanges(changes);
     }
 
-    getFocusElement() {
-        return this.editor.textArea.nativeElement;
+    getEditor() {
+        return tinymce.get(this.servoyApi.getMarkupId() + '_editor');
     }
 
-    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
-        this.getFocusElement().focus();
+        this.getEditor().focus();
     }
 
     public selectAll() {
-        const range = this.doc.createRange();
-        range.selectNodeContents(this.getFocusElement());
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+        let ed = this.getEditor();
+        ed.selection.select(ed.getBody(), true);
+    }
+
+    public getSelectedText(): string {
+        return this.getEditor().selection.getContent();
+    }
+
+    public getAsPlainText() {
+        return this.getEditor().getContent().replace(/<[^>]*>/g, '');
     }
 
     public getScrollX(): number {
-        return this.getNativeElement().scrollLeft;
+        return this.getEditor().getWin().scrollX;
     }
 
     public getScrollY(): number {
-        return this.getNativeElement().scrollTop;
-    }
-    
-    public replaceSelectedText( text: string ) {
-        var sel: any, range: any;
-        if ( window.getSelection ) {
-            sel = window.getSelection();
-            if ( sel.rangeCount ) {
-                range = sel.getRangeAt( 0 );
-                range.deleteContents();
-                range.insertNode( this.doc.createTextNode( text ) );
-            }
-        }
+        return this.getEditor().getWin().scrollY;
     }
 
-    public setScroll( x: number, y: number ) {
-        this.getNativeElement().scrollLeft = x;
-        this.getNativeElement().scrollTop = y;
+    public replaceSelectedText(text: string) {
+        this.getEditor().selection.setContent(text);
+        var edContent = this.getEditor().getContent();
+        this.dataProviderID = '<html><body>' + edContent + '</body></html>'
+        this.pushUpdate();
+    }
+
+    public setScroll(x: number, y: number) {
+        this.getEditor().getWin().scrollTo(x, y);
     }
 }

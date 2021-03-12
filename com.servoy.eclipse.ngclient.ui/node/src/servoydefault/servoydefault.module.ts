@@ -45,6 +45,7 @@ import { UploadDirective } from '../ngclient/utils/upload.directive';
 import { Select2Module } from 'ng-select2-component';
 import { SpecTypesService } from '../sablo/spectypes.service';
 import { Tab } from './tabpanel/basetabpanel';
+import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,8 @@ import { Tab } from './tabpanel/basetabpanel';
     OwlMomentDateTimeModule,
     AngularEditorModule,
     ServoyPublicModule,
-    Select2Module
+    Select2Module,
+    EditorModule
   ],
   exports: [
             ServoyDefaultTextField,
@@ -112,7 +114,8 @@ import { Tab } from './tabpanel/basetabpanel';
   ],
   providers: [
               FormattingService,
-              I18NProvider
+              I18NProvider,
+              { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
              ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

@@ -2,13 +2,15 @@
      class='svy-htmlarea'
      [id]="servoyApi.getMarkupId()" 
      [svyTooltip]="toolTipText"
-     [sabloTabseq]="tabSeq"
      #element>
-  <angular-editor 
-    [placeholder]="placeholderText" 
-    [id]="servoyApi.getMarkupId() + 'editor'"  
-    [(ngModel)]="dataProviderID" 
-    [config]="config"
-    #editor>
-  </angular-editor>
+  <editor
+   [init]="tinyConfig"
+   (onFocus)="focus()"
+   (onBlur)="blur()"
+   (onClick)="click()"
+   [(ngModel)]="tinyValue"
+   [id]="servoyApi.getMarkupId()+'_editor'"
+   style="height: 100%"
+   [sabloTabseq]="tabSeq"
+    ></editor>
 </div>

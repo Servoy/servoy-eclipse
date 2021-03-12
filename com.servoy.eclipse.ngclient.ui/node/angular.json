@@ -19,7 +19,10 @@
             "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
-              "src/favicon.ico"
+              "src/favicon.ico",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs", "output": "/tinymce/langs" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs5", "output": "/tinymce/langs5" }
             ],
             "styles": [
               "src/styles.css"
@@ -80,7 +83,8 @@
             ],
             "assets": [
               "src/assets",
-              "src/favicon.ico"
+              "src/favicon.ico",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
             ]
           }
         },
