@@ -5,7 +5,6 @@ import { SabloModule } from '../../sablo/sablo.module';
 import { FormsModule } from '@angular/forms';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { By } from '@angular/platform-browser';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { HttpClientModule } from '@angular/common/http';
 
 describe('TextfieldgroupComponent', () => {
@@ -18,7 +17,7 @@ describe('TextfieldgroupComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ ServoyExtraTextfieldGroup ],
-      imports: [SabloModule, FormsModule, AngularEditorModule, HttpClientModule, ServoyPublicModule],
+      imports: [SabloModule, FormsModule, HttpClientModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();
