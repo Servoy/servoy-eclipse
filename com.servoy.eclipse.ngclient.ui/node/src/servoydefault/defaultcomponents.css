@@ -67,7 +67,7 @@ div.svy-label-with-focus:focus{
 
 div[ngbDropdownMenu] {
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .svy-calendar-container .input-group-append {

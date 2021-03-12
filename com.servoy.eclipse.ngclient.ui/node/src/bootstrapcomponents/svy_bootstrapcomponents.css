@@ -177,7 +177,7 @@
 
 div[ngbDropdownMenu] {
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .svy-wrapper > * > .bts-radiogroup {
