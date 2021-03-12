@@ -38,9 +38,7 @@ module.exports = function (config) {
       headlessChrome: {
           base: "ChromeHeadless",
           flags: [
-              "--no-sandbox",
-              "--js-flags=--max-old-space-size=8196",
-              "--disable-dev-shm-usage"
+              "--no-sandbox"
           ],
       },
     },
