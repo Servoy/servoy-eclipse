@@ -1,7 +1,7 @@
-import { Component, ViewChild, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
-import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-editor';
-import { DOCUMENT } from '@angular/common';
+import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { ServoyBaseComponent, PropertyUtils, LocaleService } from '../../ngclient/servoy_public';
+import tinymce from 'tinymce';
+import { ApplicationService } from '../../ngclient/services/application.service';
 
 @Component( {
     selector: 'servoyextra-htmlarea',
@@ -10,7 +10,6 @@ import { DOCUMENT } from '@angular/common';
 } )
 export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
-    @ViewChild( AngularEditorComponent ) editor: AngularEditorComponent;
 
     @Input() onActionMethodID: ( e: Event ) => void;
     @Input() onRightClickMethodID: ( e: Event ) => void;
@@ -33,167 +32,182 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent<HTMLDivElement> {
 
     mustExecuteOnFocus = true;
 
-    config: AngularEditorConfig = {
-        editable: true,
-        enableToolbar: true,
-        spellcheck: true,
-        translate: 'no',
-        defaultParagraphSeparator: 'p'
+    tinyValue: any;
+    tinyConfig = {
+        base_url: '/tinymce',
+        suffix: '.min',
+        height: '100%',
+        menubar: false,
+        statusbar: false,
+        readonly: 0,
+        plugins: 'tabfocus',
+        tabfocus_elements: ':prev,:next',
+        toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) private doc: Document ) {
-        super( renderer, cdRef );
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, protected localeService: LocaleService, private appService: ApplicationService) {
+        super(renderer, cdRef);
     }
 
+    focus() {
+        if (this.onFocusGainedMethodID) {
+            if (this.mustExecuteOnFocus === true) {
+                this.onFocusGainedMethodID(new CustomEvent('focus'));
+            }
+            this.mustExecuteOnFocus = true;
+        }
+    }
+
+    blur() {
+        this.dataProviderID = '<html><body>' + this.tinyValue + '</body></html>'
+        this.pushUpdate();
+        if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
+    }
+
+    click() {
+        if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
+    }
+
+    ngOnInit(){
+        super.ngOnInit(); 
+        
+        this.tinyConfig['language'] = this.localeService.getLocale();
+
+        // app level configuration
+        let defaultConfiguration = this.appService.getUIProperty("config");
+        if (defaultConfiguration) {
+            try {
+                defaultConfiguration = JSON.parse(defaultConfiguration);
+            }
+            catch (e) {
+                console.error(e)
+            }
+            for (var key in defaultConfiguration) {
+                if (defaultConfiguration.hasOwnProperty(key)) {
+                    var value = defaultConfiguration[key]
+                    if (key === "plugins") {
+                        value += " tabindex";
+                    }
+                    this.tinyConfig[key] = value;
+                }
+            }
+        }
+
+        // element level configuration
+        let configuration = this.servoyApi.getClientProperty('config');
+        if (configuration) {
+            try {
+                configuration = JSON.parse(configuration);
+            }
+            catch (e) {
+                console.error(e)
+            }
+            for (var key in configuration) {
+                if (configuration.hasOwnProperty(key)) {
+                    var value = configuration[key];
+                    if (key === "plugins") {
+                        value += " tabindex";
+                    }
+                    this.tinyConfig[key] = value;
+                }
+            }
+        }   
+    }
+    
     svyOnInit() {
         super.svyOnInit();
-
-        this.attachHandlers();
-        this.attachFocusListeners();
-
-        if ( this.dataProviderID === undefined ) {
-            this.dataProviderID = null;
-        }
-        // ugly hack to fix the height
-        const nativeElement = this.getNativeElement();
-        const componentHeight = nativeElement.offsetHeight;
-        // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        const initialContentHeight = ( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0] as HTMLElement ).offsetHeight;
-        const initialEditorHeight = ( nativeElement.childNodes[0].childNodes[0] as HTMLElement ).offsetHeight;
-
-        this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
-
-        // work around for https://github.com/kolkov/angular-editor/issues/341
-        setTimeout(() => {
-            this.cdRef.detectChanges();
-        }, 5);
-
+        this.tinyValue = this.dataProviderID;
     }
 
-    public getScrollX(): number {
-        return this.getFocusElement().scrollLeft;
-    }
-
-    public getScrollY(): number {
-        return this.getFocusElement().scrollTop;
-    }
-
-    public setScroll( x: number, y: number ) {
-        this.getFocusElement().scrollLeft = x;
-        this.getFocusElement().scrollTop = y;
-    }
-
-    svyOnChanges( changes: SimpleChanges ) {
-        if ( changes ) {
-            for ( const property of Object.keys( changes ) ) {
+    svyOnChanges(changes: SimpleChanges) {
+        if (changes) {
+            for (const property of Object.keys(changes)) {
                 const change = changes[property];
-                switch ( property ) {
+                switch (property) {
                     case 'styleClass':
-                        if ( change.previousValue )
-                            this.renderer.removeClass( this.getNativeElement(), change.previousValue );
-                        if ( change.currentValue )
-                            this.renderer.addClass( this.getNativeElement(), change.currentValue );
+                        if (change.previousValue)
+                            this.renderer.removeClass(this.getNativeElement(), change.previousValue);
+                        if (change.currentValue)
+                            this.renderer.addClass(this.getNativeElement(), change.currentValue);
                         break;
                     case 'scrollbars':
-                        if ( change.currentValue ) {
-                            const element = this.getNativeChild().textarea;
-                            PropertyUtils.setScrollbars( element, this.renderer, change.currentValue );
+                        if (change.currentValue) {
+                            const element = this.getNativeChild().textArea;
+                            PropertyUtils.setScrollbars(element, this.renderer, change.currentValue);
                         }
                         break;
                     case 'editable':
-                        this.config.editable = this.editable;
-                        break;
+                    case 'readOnly':
                     case 'enabled':
-                        this.config.enableToolbar = this.enabled;
+                        let editable = this.editable && !this.readOnly && this.enabled;
+                        if (tinymce.activeEditor) {
+                            if (editable) {
+                                if (!change.firstChange) {
+                                    tinymce.activeEditor.mode.set("design");
+                                }
+                            }
+                            else {
+                                tinymce.activeEditor.mode.set("readonly");
+                            }
+
+                        }
                         break;
+                    case 'dataProviderID':
+                        this.tinyValue = this.dataProviderID;
+                        break;
+                    case 'responsiveHeight':
+                        if(!this.servoyApi.isInAbsoluteLayout()) {
+                            this.getNativeElement().style.minHeight = this.responsiveHeight +'px';
+                         }
+                    break;    
                 }
             }
         }
-        super.svyOnChanges( changes );
+        super.svyOnChanges(changes);
     }
 
-    getFocusElement() {
-        return this.editor.textArea.nativeElement;
+    getEditor() {
+        return tinymce.get(this.servoyApi.getMarkupId() + '_editor');
     }
 
-    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
-        this.getFocusElement().focus();
-    }
-
-    pushUpdate() {
-        this.dataProviderIDChange.emit( this.dataProviderID );
-    }
-
-    attachFocusListeners() {
-        if ( this.onFocusGainedMethodID ) {
-            this.editor.focusEvent.subscribe(() => {
-                if ( this.mustExecuteOnFocus === true ) {
-                    this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
-                }
-                this.mustExecuteOnFocus = true;
-            } );
-        }
-
-        this.editor.blurEvent.subscribe(() => {
-            this.pushUpdate();
-            if ( this.onFocusLostMethodID ) this.onFocusLostMethodID( new CustomEvent( 'blur' ) );
-        } );
+        this.getEditor().focus();
     }
 
     public selectAll() {
-        const range = this.doc.createRange();
-        range.selectNodeContents( this.getFocusElement() );
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange( range );
+        let ed = this.getEditor();
+        ed.selection.select(ed.getBody(), true);
     }
 
     public getSelectedText(): string {
-        const selection = window.getSelection();
-        let node = selection.anchorNode;
-        while ( node ) {
-            if ( node === this.getFocusElement() || node === this.getFocusElement().parentNode ) {
-                return selection.toString();
-            }
-            node = node.parentNode;
-        }
-        return '';
+        return this.getEditor().selection.getContent();
     }
 
-    public replaceSelectedText( text: string ) {
-        if ( window.getSelection ) {
-            const sel = window.getSelection();
-            if ( sel.rangeCount ) {
-                const range = sel.getRangeAt( 0 );
-                range.deleteContents();
-                range.insertNode( this.doc.createTextNode( text ) );
-            }
-        }
+    public getAsPlainText() {
+        return this.getEditor().getContent().replace(/<[^>]*>/g, '');
     }
 
-    public getAsPlainText(): string {
-        if ( this.dataProviderID ) {
-            return this.dataProviderID.replace( /<[^>]*>/g, '' );
-        }
-        return this.dataProviderID;
+    public getScrollX(): number {
+        return this.getEditor().getWin().scrollX;
     }
 
-    protected attachHandlers() {
-        if ( this.onActionMethodID ) {
+    public getScrollY(): number {
+        return this.getEditor().getWin().scrollY;
+    }
 
-            if ( this.getNativeElement().tagName === 'TEXTAREA' /*|| this.getNativeElement().type === 'text' */ ) {
-                this.renderer.listen( this.getNativeElement(), 'keydown', e => {
-                    if ( e.keyCode === 13 ) this.onActionMethodID( e );
-                } );
-            } else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
-            }
-        }
-        if ( this.onRightClickMethodID ) {
-            this.renderer.listen( this.getNativeElement(), 'contextmenu', e => {
-                this.onRightClickMethodID( e ); return false;
-            } );
-        }
+    public replaceSelectedText(text: string) {
+        this.getEditor().selection.setContent(text);
+        var edContent = this.getEditor().getContent();
+        this.dataProviderID = '<html><body>' + edContent + '</body></html>'
+        this.pushUpdate();
+    }
+
+    public setScroll(x: number, y: number) {
+        this.getEditor().getWin().scrollTo(x, y);
+    }
+    
+    pushUpdate() {
+        this.dataProviderIDChange.emit(this.dataProviderID);
     }
 }

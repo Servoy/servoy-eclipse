@@ -68,5 +68,12 @@ export class ServoyApi {
     public unRegisterComponent(_component: ServoyBaseComponent<any>) {
         // these are overwritten by components that needs this.
     }
+    
+    public getClientProperty(key){
+        if ( this.item.model && this.item.model.clientProperty ) {
+            return this.item.model.clientProperty[key];
+        }
+        return null;
+    }
 }
 

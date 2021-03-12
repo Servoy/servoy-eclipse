@@ -19,7 +19,6 @@ import { ResizableModule } from 'angular-resizable-element';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { FileUploadModule } from 'ng2-file-upload';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
@@ -30,6 +29,7 @@ import { LightboxModule } from 'ngx-lightbox';
 import { ServoyExtraCollapse } from './collapse/collapse';
 import { ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
 import { TreeModule } from '@circlon/angular-tree-component';
+import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 
 @NgModule({
     declarations: [
@@ -60,15 +60,16 @@ import { TreeModule } from '@circlon/angular-tree-component';
         ResizableModule,
         ScrollingModule,
         NgbModule,
-        AngularEditorModule,
         FileUploadModule,
         NgxSliderModule,
 		Select2Module,
         UppyAngularModule,
         LightboxModule,
-        TreeModule
+        TreeModule,
+        EditorModule
     ], 
-    providers: [AsyncPipe
+    providers: [AsyncPipe,
+            { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
     ],
     exports: [ServoyExtraTable,
               TableRow,
