@@ -50,21 +50,12 @@ export class DialogService{
       this.dialogConfig.data = {
           title: dialogTitle,
           message: dialogMessage,
-          btnsText: this.escapeString(buttonsText.toString(), true).split(','),
+          btnsText: buttonsText.toString().split(','),
           class: styleClass,
           initValues: values != null ? values.toString().split(',') : null
       };
 
       const dialogRef = this.matDialog.open(DialogBodyComponent, this.dialogConfig);
-      return await dialogRef.afterClosed().toPromise().then(
-          (value) => {return Promise.resolve(value)}
-        );
-    }
-    private escapeString(str: string, forDisplay: boolean): string {
-        return str.replace(/&/g, forDisplay ? '&amp;' : 'amp').
-            replace(/</g, forDisplay ? '&lt;' : 'lt').
-            replace(/>/g, forDisplay ? '&gt;' : 'gt').
-            replace(/'/g, forDisplay ? '&apos;' : 'apos').
-            replace(/"/g, forDisplay ? '&quot;' : 'quot');
+      return await dialogRef.afterClosed().toPromise().then((value) => Promise.resolve(value));
     }
 }
