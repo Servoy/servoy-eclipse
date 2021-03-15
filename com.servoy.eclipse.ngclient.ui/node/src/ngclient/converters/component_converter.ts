@@ -6,6 +6,7 @@ import { ViewportRowUpdates, IChangeAwareValue, instanceOfChangeAwareValue, isCh
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
 import { Deferred } from '../../sablo/util/deferred';
 import { ComponentCache } from '../types';
+import { SabloService } from '../../sablo/sablo.service';
 
 export class ComponentConverter implements IConverter {
 
@@ -21,7 +22,8 @@ export class ComponentConverter implements IConverter {
 
     private log: LoggerService;
 
-    constructor(private converterService: ConverterService, private viewportService: ViewportService, logFactory: LoggerFactory) {
+    constructor(private converterService: ConverterService, private viewportService: ViewportService, 
+        private sabloService: SabloService,logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
@@ -217,18 +219,19 @@ export class ComponentConverter implements IConverter {
             //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
             //     return $q.resolve(null);
             // }
-            const defered = new Deferred<{}>();
+            const deferred = this.sabloService.createDeferredWSEvent();
             const newargs = this.converterService.getEventArgs(args, type);
             state.getStateHolder().requests.push({
                 handlerExec: {
                     eventType: type,
                     args: newargs,
-                    rowId: row
+                    rowId: row,
+                    defid: deferred.cmsgid
                 }
             });
             state.getStateHolder().notifyChangeListener();
             // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
-            return defered.promise;
+            return deferred.deferred.promise;
         };
         const eventHandler = (args: any, rowId: any) => executeHandler(handler, args, rowId, state.name, state.model);
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
