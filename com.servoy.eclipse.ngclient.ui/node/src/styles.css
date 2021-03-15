@@ -16,6 +16,7 @@
 @import "12grid/lib/12grid.css";
 
 @import "~@ag-grid-community/core/dist/styles/ag-grid.css";
+@import "~@ag-grid-community/core/dist/styles/agGridClassicFont.css";
 @import "~@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 @import "nggrids/ag-grid-custom.css";
 @import "nggrids/datagrid/datagrid.css";
