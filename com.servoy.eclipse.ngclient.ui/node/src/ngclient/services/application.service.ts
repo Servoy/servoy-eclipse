@@ -69,6 +69,12 @@ export class ApplicationService {
         }
     }
 
+    public setUIProperties(properties: {[property: string]: string}) {
+            for(const key of Object.keys(properties)) {
+                this.setUIProperty(key, properties[key]);
+            }
+    }
+
     public getUserPropertyNames() {
         return Object.getOwnPropertyNames(this.getUserProperties());
     }
