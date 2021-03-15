@@ -125,6 +125,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 // copy the viewport data over to the cell
                 // TODO this only is working for "updates", what happens with deletes or inserts?
                 const changes = event.viewportRowsUpdated;
+                let insertOrDeletes = false;
                 changes.forEach(change => {
                     if (change.type === ChangeType.ROWS_CHANGED) {
                         const vpRows = this.foundset.viewPort.rows;
@@ -141,8 +142,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                                 }
                             });
                         }
-                    }
+                    } else insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                 });
+                if (insertOrDeletes)   this.calculateCells();
             } else {
                 if (event.serverFoundsetSizeChanged) {
                     this.updatePagingControls();
@@ -445,7 +447,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const startIndex = this.page * this.numberOfCells;
         const foundset = this.foundset;
         if (foundset.viewPort.startIndex !== startIndex) {
-            foundset.loadRecordsAsync(startIndex, this.numberOfCells);
+            this.waitingForLoad = true;
+            foundset.loadRecordsAsync(startIndex, this.numberOfCells).finally(() => this.waitingForLoad = false);
         } else {
             if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
                 this.waitingForLoad = true;
