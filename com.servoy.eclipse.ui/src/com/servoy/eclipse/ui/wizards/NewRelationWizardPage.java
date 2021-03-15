@@ -34,8 +34,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -228,10 +226,10 @@ public class NewRelationWizardPage extends WizardPage implements Listener
 		}
 		tableViewer.setSelection(new StructuredSelection(currentSolutionNames[counter]));
 
-		solutionNamePattern.addKeyListener(new KeyAdapter()
+		solutionNamePattern.addModifyListener(new ModifyListener()
 		{
 			@Override
-			public void keyReleased(KeyEvent e)
+			public void modifyText(ModifyEvent e)
 			{
 				filter.setSearchText(solutionNamePattern.getText());
 				tableViewer.refresh();
