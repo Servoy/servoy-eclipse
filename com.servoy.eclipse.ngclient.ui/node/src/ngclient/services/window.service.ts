@@ -55,9 +55,13 @@ export class WindowService {
         this.renderer2 = rendererFactory.createRenderer(null, null);
     }
 
-    public updateController(formName: string, formStructure: string) {
+    public updateController(formName: string, formStructure: string, url: string) {
         const formState = JSON.parse(formStructure)[formName];
-        this.formService.createFormCache(formName, formState);
+        this.formService.createFormCache(formName, formState, url);
+    }
+
+    public getLoadedFormState() {
+        this.formService.getLoadedFormState();
     }
 
     public create(name: string, type: number) {

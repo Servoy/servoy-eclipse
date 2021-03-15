@@ -91,8 +91,8 @@ export class FormService {
         return this.formsCache.has(name);
     }
 
-    public createFormCache(formName: string, jsonData) {
-        const formCache = new FormCache(formName, jsonData.size);
+    public createFormCache(formName: string, jsonData,  url: string) {
+        const formCache = new FormCache(formName, jsonData.size, url);
         this.walkOverChildren(jsonData.children, formCache);
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
@@ -117,6 +117,13 @@ export class FormService {
         //        delete this.touchedForms[formName];
     }
 
+    public getLoadedFormState() {
+        const loadedState: { [s: string]: {url: string; attached: boolean} } = {};
+        for ( const formName of Object.keys(this.formsCache) ) {
+            loadedState[formName] = {url: this.formsCache.get(formName).url, attached: instanceOfFormComponent(this.formComponentCache.get(formName))};
+        }
+        return loadedState;
+    }
 
     public executeEvent(formname: string, beanname: string, handler: string, args: IArguments | Array<any>, async?: boolean) {
         this.log.debug(this.log.buildMessage(() => (formname + ',' + beanname + ', executing: ' + handler + ' with values: ' + JSON.stringify(args))));
