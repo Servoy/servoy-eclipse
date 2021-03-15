@@ -3708,8 +3708,7 @@ class FoundsetServer {
 
         const currentGridSort = this.dataGrid.getFoundsetSortModel(this.dataGrid.getAgGridSortModel());
         const foundsetSort = this.dataGrid.stripUnsortableColumns(this.dataGrid.foundset.getSortColumns());
-        const isSortChanged = this.dataGrid.onSort /*&& rowGroupCols.length === groupKeys.length*/ && sortString !== foundsetSort
-        && currentGridSort.sortString !== foundsetSort;
+        const isSortChanged = !this.dataGrid.onSort && foundsetRefManager.isRoot && sortString !== foundsetSort && currentGridSort.sortString !== foundsetSort;
 
         if(isSortChanged) {
             this.dataGrid.log.debug('CHANGE SORT REQUEST');
