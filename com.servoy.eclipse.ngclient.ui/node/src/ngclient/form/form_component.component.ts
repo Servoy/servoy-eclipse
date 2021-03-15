@@ -211,7 +211,8 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef) {
+                private changeHandler: ChangeDetectorRef,
+                private el: ElementRef, private renderer: Renderer2) {
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -255,6 +256,8 @@ export class FormComponent implements OnDestroy, OnChanges {
             this.componentCache = {};
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
+
         }
     }
 
