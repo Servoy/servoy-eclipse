@@ -24,7 +24,7 @@ export class SvyUtilsService {
         const targetElNameChain = new Array();
         let contextMatch = false;
         while (parent) {
-            form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('ng-reflect-name') : undefined;
+            form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('name') : undefined;
             if (form) {
                 //global shortcut or context match
                 const shortcuthit = !contextFilter || (contextFilter && form == contextFilter);
@@ -38,8 +38,8 @@ export class SvyUtilsService {
                 break;
             }
 
-            if (parent.getAttribute('ng-reflect-name'))
-                targetElNameChain.push(parent.getAttribute('ng-reflect-name'));
+            if (parent.getAttribute('name'))
+                targetElNameChain.push(parent.getAttribute('name'));
             parent = parent.parentElement;
         }
 
@@ -48,7 +48,7 @@ export class SvyUtilsService {
             let dialog = this.doc.querySelector('.svy-dialog.window.active');
             if (dialog) {
                 let formInDialog = dialog.querySelector('svy-form');
-                if (formInDialog) form = formInDialog.getAttribute('ng-reflect-name');
+                if (formInDialog) form = formInDialog.getAttribute('name');
             }
         }
 
