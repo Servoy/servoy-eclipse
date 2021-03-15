@@ -324,16 +324,11 @@ public class ServoyRelationBuilder
 					}
 					if (dataProvider == null)
 					{
-						boolean isHiddenEnumProperty = ScopesUtils.isVariableScope(primaryDataProvider) &&
-							primaryDataProvider.split("\\.").length > 3;
-						if (!isHiddenEnumProperty)
-						{
-							mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-							errorsFound = true;
-							ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.RELATION_ITEM_DATAPROVIDER_NOT_FOUND,
-								IMarker.PRIORITY_NORMAL, null,
-								element);
-						}
+						mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
+						errorsFound = true;
+						ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.RELATION_ITEM_DATAPROVIDER_NOT_FOUND,
+							IMarker.PRIORITY_NORMAL, null,
+							element);
 					}
 					else
 					{
