@@ -50,7 +50,7 @@ export class NGUtilsService {
         const old = this._styleclasses;
         this._styleclasses = styleclasses;
         Object.keys(this._styleclasses).forEach((key: string) => {
-            const form = this.document.querySelector('svy-form[ng-reflect-name=' + key + '] > div');
+            const form = this.document.querySelector('svy-form[name=' + key + '] > div');
             if (form) {
                 const newCls = this._styleclasses[key] ? this._styleclasses[key].split(' ').filter((cls: string) => cls !== '') : [];
                 if (old && old[key]) {

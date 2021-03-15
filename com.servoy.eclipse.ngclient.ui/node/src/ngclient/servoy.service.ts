@@ -102,7 +102,7 @@ export class ServoyService {
         converterService.registerCustomPropertyHandler('fsLinked',
             new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
         converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
-        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, logFactory));
+        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, this.sabloService, logFactory));
         converterService.registerCustomPropertyHandler('clientfunction', new ClientFunctionConverter(this.windowRefService));
     }
 

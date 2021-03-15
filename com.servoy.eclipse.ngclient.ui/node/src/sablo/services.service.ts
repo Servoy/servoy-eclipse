@@ -22,12 +22,14 @@ export class ServicesService {
         return this.serviceProvider;
     }
 
-    public callServiceApi( service ) {
+    public callServiceApi( service: {name: string; call: string; args: []} ) {
         const serviceInstance = this.getServiceProvider().getService( service.name );
         if ( serviceInstance
             && serviceInstance[service.call] ) {
             // responseValue keeps last services call return value
             return serviceInstance[service.call].apply( serviceInstance, service.args );
+        } else {
+            this.log.warn('trying to call a service api '  + service.call + ' for service ' + service.name + ' but the sevice (' + serviceInstance + ') or the call was not found');
         }
     }
 

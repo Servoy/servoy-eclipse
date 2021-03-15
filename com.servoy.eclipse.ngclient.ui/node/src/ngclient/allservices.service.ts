@@ -18,6 +18,7 @@ import { DatagridService } from '../nggrids/datagrid/datagrid.service';
 import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
+import { SabloService } from '../sablo/sablo.service';
 // generated services end
 
 
@@ -34,6 +35,7 @@ export class AllServiceService implements ServiceProvider {
         private $windowService: WindowService,
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
+        private $sabloService: SabloService,
         private clientFunctionService: ClientFunctionService,
         // generated services start
         private ngclientutils: NGUtilsService,

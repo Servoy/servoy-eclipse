@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
         TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
@@ -211,7 +211,8 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef) {
+                private changeHandler: ChangeDetectorRef,
+                private el: ElementRef, private renderer: Renderer2) {
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -255,6 +256,8 @@ export class FormComponent implements OnDestroy, OnChanges {
             this.componentCache = {};
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
+
         }
     }
 
@@ -408,7 +411,7 @@ class FormComponentServoyApi extends ServoyApi {
 
 @Directive({ selector: '[svyContainerStyle]' })
 export class AddAttributeDirective implements OnInit {
-    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache;
+    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
 
     constructor(private el: ElementRef, private renderer: Renderer2) { }
 

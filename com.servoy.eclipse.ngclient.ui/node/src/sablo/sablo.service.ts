@@ -4,6 +4,7 @@ import { WindowRefService } from './util/windowref.service';
 import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory } from './logger.service';
+import { Deferred } from './util/deferred';
 
 @Injectable()
 export class SabloService {
@@ -54,6 +55,13 @@ export class SabloService {
         return this.wsSession;
     }
 
+    public createDeferredWSEvent(): {deferred: Deferred<any>; cmsgid: number } {
+        return this.wsSession.createDeferredEvent();
+    }
+
+    public resolveDeferedEvent(cmsgid: string, argument: any, success: boolean) {
+        this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
+    }
 
     public getClientnr() {
         const sessionnr = this.sessionStorage.get('clientnr');

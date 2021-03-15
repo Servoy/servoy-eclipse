@@ -13,7 +13,7 @@ export class FormCache {
     private _parts: Array<PartCache>;
     private conversionInfo = {};
 
-    constructor(readonly formname: string, size: Dimension) {
+    constructor(readonly formname: string, size: Dimension, public readonly url: string) {
         this.size = size;
         this.componentCache = new Map();
         this._parts = [];
@@ -165,7 +165,8 @@ export class FormComponentCache implements IComponentCache {
 
 export class FormComponentProperties {
     constructor(public readonly classes: Array<string>,
-        public readonly layout: { [property: string]: string }) {
+        public readonly layout: { [property: string]: string },
+        public readonly attributes: { [property: string]: string }) {
     }
 }
 

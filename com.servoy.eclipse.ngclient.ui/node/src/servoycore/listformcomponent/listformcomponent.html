@@ -1,7 +1,7 @@
 <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
     <div *ngIf="containedForm.absoluteLayout">
     	<div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-    		<div *ngFor="let item of getRowItems()" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+    		<div *ngFor="let item of cache.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
     			<ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this }"></ng-template>  <!-- component  -->
     		</div>
     	</div>

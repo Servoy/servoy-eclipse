@@ -12,6 +12,7 @@ import { SpecTypesService } from './spectypes.service';
 import { SabloDeferHelper} from './defer.service';
 import { SabloTabseq } from './util/sablotabseq.directive';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
+import { TestabilityService } from './testability.service';
 
 @NgModule( {
     declarations: [TrustAsHtmlPipe, SabloTabseq
@@ -24,6 +25,7 @@ import { LoadingIndicatorService } from './util/loading-indicator/loading-indica
         SabloService,
         ServicesService,
         WebsocketService,
+        TestabilityService,
         WindowRefService,
         LoadingIndicatorService,
         LoggerFactory,
