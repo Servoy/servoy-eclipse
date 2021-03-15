@@ -4,6 +4,7 @@ import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
 import { LoggerFactory } from '../sablo/logger.service';
 import { ServicesService } from '../sablo/services.service';
+import { TestabilityService } from '../sablo/testability.service';
 import { IDeferred } from '../sablo/util/deferred';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WindowRefService } from '../sablo/util/windowref.service';
@@ -28,17 +29,19 @@ class TestSabloDeferHelper extends SabloDeferHelper {
 
 @Injectable()
 export class TestWebsocketService extends WebsocketService {
-  constructor(private ref: WindowRefService,
-      private serv: ServicesService,
-      private conv: ConverterService,
-      private logFac: LoggerFactory,
-      private loading: LoadingIndicatorService,
-      private zone: NgZone) {
-     super(ref, serv, conv, logFac, loading,zone);
+  constructor(private _windowRef: WindowRefService,
+        private _services: ServicesService,
+        private _converterService: ConverterService,
+        private _logFactory: LoggerFactory,
+        private _loadingIndicatorService: LoadingIndicatorService,
+        private _ngZone: NgZone,
+        private _testability: TestabilityService) {
+     super(_windowRef, _services, _converterService, _logFactory, _loadingIndicatorService,_ngZone, _testability);
     }
 
   connect(): WebsocketSession {
-      return new WebsocketSession({} as ReconnectingWebSocket, this, this.serv, this.ref, this.conv, this.logFac, this.loading, this.zone);
+      return new WebsocketSession({} as ReconnectingWebSocket, this, this._services,
+        this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._testability, this._logFactory );
   }
 }
 
