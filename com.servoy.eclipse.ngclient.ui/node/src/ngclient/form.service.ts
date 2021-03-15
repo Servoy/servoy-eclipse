@@ -346,7 +346,7 @@ export class FormService {
                         }
                         formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                     }
-                    const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
+                    const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                     const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child], formCache, fcc);

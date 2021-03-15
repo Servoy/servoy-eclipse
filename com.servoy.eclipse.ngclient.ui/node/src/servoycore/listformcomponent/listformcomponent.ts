@@ -318,6 +318,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             const cache = row._cache.get(cm.name);
             if (cache) return cache;
         }
+        // special case for svyAttriutes and testing mode.
+        if (item?.model?.servoyAttributes['data-svy-name']) {
+            if (!cm.model.servoyAttributes) {
+                cm.model.servoyAttributes = {};
+            }
+            cm.model.servoyAttributes['data-svy-name'] = item?.model?.servoyAttributes['data-svy-name'];
+        }
 
         if (!cm.nestedPropertyChange) {
             cm.nestedPropertyChange = (property: string, value: any) => {

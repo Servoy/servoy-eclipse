@@ -7,7 +7,7 @@ import { ServoyApi } from './servoy_api';
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name: string;
     @Input() servoyApi: ServoyApi;
-    @Input() servoyAttributes: Array<{ key: string; value: string }>;
+    @Input() servoyAttributes: {  [property: string]: string };
 
     @ViewChild('element', { static: false }) elementRef: ElementRef<T>;
 
@@ -131,7 +131,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     protected addAttributes() {
         if (!this.servoyAttributes) return;
-        this.servoyAttributes.forEach(attribute => this.renderer.setAttribute(this.getNativeElement(), attribute.key, attribute.value));
+        for (const key of Object.keys(this.servoyAttributes)) {
+             this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes[key]);
+        }
     }
 }
 
