@@ -12,7 +12,9 @@
     "test_edge_nowatch": "ng test --watch=false --browsers Edge",
     "test_headless": "ng test --browsers ChromeHeadless --watch=false",
     "lint": "ng lint",
-    "e2e": "ng e2e",
+    "webdriver-manager-start-edge": "cd ./node_modules/protractor && npm i webdriver-manager@latest && webdriver-manager update --gecko=false && webdriver-manager start --edge ../../e2e/msedgedriver.exe",
+    "e2e-chrome": "ng e2e --protractorConfig=protractor-chrome.conf.js",
+    "e2e-edge": "ng e2e --protractorConfig=protractor-edge.conf.js",
     "update": "ng update"
   },
   "private": true,
