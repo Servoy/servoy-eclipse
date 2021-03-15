@@ -372,7 +372,6 @@ export class DataGrid extends NGGridDirective {
                     }
                 }, 150);
             },
-            popupParent: this.doc.getElementById('mainForm'),
             onCellEditingStopped: (event) => {
                 // don't allow escape if cell data is invalid
                 if(this.onColumnDataChangePromise == null) {
@@ -586,6 +585,7 @@ export class DataGrid extends NGGridDirective {
         } else {
             this.isRendered = true;
         }
+        this.agGridOptions['popupParent'] = this.agGridElementRef.nativeElement;
 
         this.agGridElementRef.nativeElement.addEventListener('click', (e: any) => {
             if(e.target.parentNode && e.target.parentNode.classList &&

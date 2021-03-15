@@ -298,7 +298,6 @@ export class PowerGrid extends NGGridDirective {
             navigateToNextCell: (params) => this.selectionChangeNavigation(params),
 
             sideBar,
-            popupParent: this.doc.getElementById('mainForm'),
             enableBrowserTooltips: true,
             onToolPanelVisibleChanged : () => this.sizeColumnsToFit(),
             onCellEditingStopped : (event) => {
