@@ -265,7 +265,7 @@ export class WebsocketSession {
             return {deferred, cmsgid};
     }
 
-    public resolveDeferedEvent(cmsgid: string, argument: any, success: boolean) {
+    public resolveDeferedEvent(cmsgid: number, argument: any, success: boolean) {
             const deferred = this.deferredEvents[cmsgid];
             if (deferred) {
                 delete this.deferredEvents[cmsgid];
