@@ -55,6 +55,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -115,8 +116,13 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			int res = nameDialog.open();
 			if (res == Window.OK)
 			{
+
+				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution();
 				// avoid NPE by closing all editors before deactivating the solution
-				EditorUtil.getActivePage().closeAllEditors(false);
+				if (flattenedSolution.getName() == editingSolution.getName())
+				{
+					EditorUtil.getActivePage().closeAllEditors(false);
+				}
 				final String name = nameDialog.getValue();
 				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
 				if (project == null)
@@ -130,7 +136,6 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 							{
 								IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 								boolean isActive = servoyModel.isSolutionActive(oldName);
-								ServoyProject activeProject = servoyModel.getActiveProject();
 								if (isActive)
 								{
 									servoyModel.setActiveProject(null, false);
@@ -171,6 +176,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								repository.updateNodes(toUpdate.toArray(new IPersist[toUpdate.size()]), false);
 								if (isActive)
 								{
+									ServoyProject activeProject = servoyModel.getActiveProject();
 									servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 									IWorkingSet[] allWorkingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
 									IJobManager jobManager = Job.getJobManager();
