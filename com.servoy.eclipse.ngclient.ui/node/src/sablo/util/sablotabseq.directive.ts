@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy } from '@angular/core';
+import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy, ChangeDetectorRef } from '@angular/core';
 
 @Directive({
     selector: '[sabloTabseq]'
@@ -16,7 +16,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
     initializing: boolean;
     isEnabled: boolean;
 
-    constructor(private _elemRef: ElementRef) {
+    constructor(private _elemRef: ElementRef, private cdRef: ChangeDetectorRef) {
     }
 
     // handle event: Child Servoy Tab Sequence registered
@@ -229,6 +229,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
     setDOMTabIndex(tabindex): void {
         this.tabindex = tabindex;
+        this.cdRef.detectChanges();
     }
 
     trigger(target, event: string, arg): void {
