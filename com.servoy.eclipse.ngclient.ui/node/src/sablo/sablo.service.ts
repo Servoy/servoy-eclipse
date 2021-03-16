@@ -59,7 +59,7 @@ export class SabloService {
         return this.wsSession.createDeferredEvent();
     }
 
-    public resolveDeferedEvent(cmsgid: string, argument: any, success: boolean) {
+    public resolveDeferedEvent(cmsgid: number, argument: any, success: boolean) {
         this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
     }
 

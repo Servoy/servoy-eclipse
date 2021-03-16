@@ -1,50 +1,64 @@
 import { Injectable } from '@angular/core';
 import { Deferred, IDeferred } from '../sablo/util/deferred';
 
-import {LoggerService, LoggerFactory} from './logger.service';
+import { LoggerService, LoggerFactory } from './logger.service';
+import { SabloService } from './sablo.service';
 
 @Injectable()
 export class SabloDeferHelper {
 
     private log: LoggerService;
-    constructor(private logFactory: LoggerFactory) {
+    constructor(private logFactory: LoggerFactory, private sabloService: SabloService) {
         this.log = logFactory.getLogger('SabloDeferHelper');
     }
 
     public initInternalStateForDeferringFromOldInternalState(state: IDeferedState, oldState: IDeferedState) {
-        state.init(oldState.deferred, oldState.currentMsgId, oldState.timeoutRejectLogPrefix);
+        state.init(oldState.deferred, oldState.timeoutRejectLogPrefix);
     }
 
     public initInternalStateForDeferring(state: IDeferedState, timeoutRejectLogPrefix: string) {
-        state.init({}, 0, timeoutRejectLogPrefix);
+        state.init({}, timeoutRejectLogPrefix);
     }
 
-    public retrieveDeferForHandling(msgId: number, state: IDeferedState): Deferred<any> {
+    /**
+     * this deletes the sate from the states.deferred list and returns it if it is found (and clears the timeout)
+     * Use SabloService.resolveDeferedEvent to resolve or reject the Deferred, dont call those directly on them.
+     */
+    public retrieveDeferForHandling(msgId: number, state: IDeferedState): IDeferred<any> {
         const deferred = state.deferred[msgId];
-        let defer;
+        let defer: IDeferred<any>;
         if (deferred) {
             defer = deferred.defer;
             clearTimeout(deferred.timeoutId);
             delete state.deferred[msgId];
-            // if (Object.keys(internalState.deferred).length == 0) $sabloTestability.block(false);
         }
         return defer;
     }
 
-    public getNewDeferId(state: IDeferedState): number {
-        // if (Object.keys(internalState.deferred).length == 0) $sabloTestability.block(true);
+    /**
+     * this one  gets the defered from the state, clears the timeout and resolved or rejects the defered if found.
+     */
+    public resolveDeferedEvent(msgId: number, state: IDeferedState, argument: any, resolve: boolean) {
+        const defer = this.retrieveDeferForHandling(msgId, state);
+        if (defer) {
+             this.sabloService.resolveDeferedEvent(msgId, argument, resolve);
+        }
+    }
 
-        const newMsgID = ++state.currentMsgId;
-        const d = new Deferred<any>();
-        state.deferred[newMsgID + ''] = { defer: d, timeoutId : setTimeout(() => {
-            // if nothing comes back for a while do cancel the promise to avoid memory leaks/infinite waiting
+    public getNewDeferId(state: IDeferedState): number {
+        const deferred = this.sabloService.createDeferredWSEvent();
+        const newMsgID = deferred.cmsgid;
+        const d = deferred.deferred;;
+        state.deferred[newMsgID + ''] = {
+            defer: d, timeoutId: setTimeout(() => {
+                // if nothing comes back for a while do cancel the promise to avoid memory leaks/infinite waiting
                 const defer = this.retrieveDeferForHandling(newMsgID, state);
                 if (defer) {
                     const rejMsg = 'deferred req. with id ' + newMsgID + ' was rejected due to timeout...';
-                    defer.reject(rejMsg);
+                    this.sabloService.resolveDeferedEvent(newMsgID, rejMsg, false);
                     this.log.spam((state.timeoutRejectLogPrefix ? state.timeoutRejectLogPrefix : '') + rejMsg);
                 }
-                }, 120000)
+            }, 120000)
         }; // is 2 minutes cancel-if-not-resolved too high or too low?
 
         return newMsgID;
@@ -60,8 +74,7 @@ export class SabloDeferHelper {
 }
 
 export interface IDeferedState {
-    deferred: {[key: string]: {defer: IDeferred<any>; timeoutId: any}};
-    currentMsgId: number;
+    deferred: { [key: string]: { defer: IDeferred<any>; timeoutId: any } };
     timeoutRejectLogPrefix: string;
-    init(deferred: {[key: string]: {defer: IDeferred<any>; timeoutId: any}}, currentMsgId: number, timeoutRejectLogPrefix: string): void;
+    init(deferred: { [key: string]: { defer: IDeferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string): void;
 }
