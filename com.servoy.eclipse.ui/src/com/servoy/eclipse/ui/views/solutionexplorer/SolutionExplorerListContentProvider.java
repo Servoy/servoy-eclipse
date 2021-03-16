@@ -1787,7 +1787,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (spec.getApiFunctions().size() > 0)
 		{
 			extractDocsFromJsFile(spec, spec.getDefinitionURL());
-			extractDocsFromJsFile(spec, spec.getServerScript(false));
+			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
 		}
 	}
 
