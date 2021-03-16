@@ -845,6 +845,11 @@ export class DataGrid extends NGGridDirective {
     }
 
     refreshDatasource() {
+        const currentEditCells = this.agGrid.api.getEditingCells();
+        if(currentEditCells.length !== 0) {
+            this.startEditFoundsetIndex = currentEditCells[0].rowIndex + 1;
+            this.startEditColumnIndex = this.getColumnIndex(currentEditCells[0].column.getColId());
+        }
         const foundsetServer = new FoundsetServer(this, []);
         const datasource = new FoundsetDatasource(this, foundsetServer);
         this.agGrid.api.setServerSideDatasource(datasource);
@@ -2251,17 +2256,18 @@ export class DataGrid extends NGGridDirective {
 
         if(foundsetManager.foundset.selectedRowIndexes.length) {
             const model: any = this.agGrid.api.getModel();
-            if(model.rootNode.childrenCache) {
-                // virtual row count must be multiple of CHUNK_SIZE (limitation/bug of aggrid)
-                const offset = foundsetManager.foundset.selectedRowIndexes[0] % CHUNK_SIZE;
-                const virtualRowCount = foundsetManager.foundset.selectedRowIndexes[0] + (CHUNK_SIZE - offset);
+            // 'model.rootNode.childrenCache' removed in recent ag-grid
+            // if(model.rootNode.childrenCache) {
+            //     // virtual row count must be multiple of CHUNK_SIZE (limitation/bug of aggrid)
+            //     const offset = foundsetManager.foundset.selectedRowIndexes[0] % CHUNK_SIZE;
+            //     const virtualRowCount = foundsetManager.foundset.selectedRowIndexes[0] + (CHUNK_SIZE - offset);
 
-                if(virtualRowCount > model.rootNode.childrenCache.getVirtualRowCount()) {
-                    const newVirtualRowCount = Math.min(virtualRowCount, foundsetManager.foundset.serverSize);
-                    const maxRowFound = newVirtualRowCount === foundsetManager.foundset.serverSize;
-                    model.rootNode.childrenCache.setVirtualRowCount(newVirtualRowCount, maxRowFound);
-                }
-            }
+            //     if(virtualRowCount > model.rootNode.childrenCache.getVirtualRowCount()) {
+            //         const newVirtualRowCount = Math.min(virtualRowCount, foundsetManager.foundset.serverSize);
+            //         const maxRowFound = newVirtualRowCount === foundsetManager.foundset.serverSize;
+            //         model.rootNode.childrenCache.setVirtualRowCount(newVirtualRowCount, maxRowFound);
+            //     }
+            // }
             this.agGrid.api.ensureIndexVisible(foundsetManager.foundset.selectedRowIndexes[0]);
         }
     }
