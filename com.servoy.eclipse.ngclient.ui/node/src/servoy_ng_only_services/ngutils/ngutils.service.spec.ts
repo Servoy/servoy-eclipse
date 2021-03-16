@@ -17,6 +17,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { PlatformLocation } from '@angular/common';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
+import { TestabilityService } from '../../sablo/testability.service';
 
 describe('NGUtilsService', () => {
   let windowRef: any;
@@ -31,7 +32,7 @@ describe('NGUtilsService', () => {
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
       providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef },
-                  ServiceChangeHandler, SabloService, WebsocketService, SessionStorageService,
+                  ServiceChangeHandler, SabloService, WebsocketService, TestabilityService, SessionStorageService,
                   ConverterService, LoggerFactory, ServicesService, LoadingIndicatorService,
                   {provide: ServoyService, useFactory:()=> servoyServiceRef},
                   {provide: PlatformLocation, useValue: platformLocation}]

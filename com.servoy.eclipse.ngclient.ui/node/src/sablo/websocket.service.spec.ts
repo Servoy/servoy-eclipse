@@ -7,6 +7,7 @@ import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
 import { LoggerFactory } from './logger.service';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
+import { TestabilityService } from './testability.service';
 
 describe('WebsocketService', () => {
     let windowRef;
@@ -20,7 +21,7 @@ describe('WebsocketService', () => {
       const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient', 'convertFromClientToServer', 'convertClientObject']);
       const loadingIndicatorService = jasmine.createSpyObj('SabloLoadingIndicator', ['showLoading', 'hideLoading', 'isShowing']);
       TestBed.configureTestingModule({
-      providers: [WebsocketService,
+      providers: [WebsocketService, TestabilityService,
                   {provide: WindowRefService, useFactory: () => windowRef},
                   {provide: ServicesService, useFactory: () => servicesService },
                   {provide: ConverterService, useFactory: () => converterService },

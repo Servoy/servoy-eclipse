@@ -12,6 +12,7 @@ import { IValuelist } from '../../sablo/spectypes.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { TestWebsocketService } from '../../testing/servoytesting.module';
 import { WebsocketService } from '../../sablo/websocket.service';
+import { TestabilityService } from '../../sablo/testability.service';
 
 describe('ValuelistConverter', () => {
 
@@ -26,7 +27,7 @@ describe('ValuelistConverter', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [ValuelistConverter, ConverterService, SabloService, SpecTypesService,
-        LoggerFactory, WindowRefService, SabloDeferHelper, ServicesService, SessionStorageService, LoadingIndicatorService,
+        LoggerFactory, WindowRefService, SabloDeferHelper, TestabilityService, ServicesService, SessionStorageService, LoadingIndicatorService,
         { provide: WebsocketService, useClass: TestWebsocketService }]
     });
 

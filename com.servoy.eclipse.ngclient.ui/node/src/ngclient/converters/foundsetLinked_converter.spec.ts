@@ -12,6 +12,7 @@ import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.ser
 import { ViewportService } from '../services/viewport.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { TestabilityService } from '../../sablo/testability.service';
 
 describe('FoundsetLinked Converter', () => {
     let converterService: ConverterService;
@@ -28,7 +29,7 @@ describe('FoundsetLinked Converter', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ServoyTestingModule],
-            providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, SpecTypesService, LoggerFactory,
+            providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService,TestabilityService, SpecTypesService, LoggerFactory,
                 WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
         });
 
