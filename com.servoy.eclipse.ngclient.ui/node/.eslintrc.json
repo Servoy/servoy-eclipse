@@ -3,9 +3,9 @@
   "ignorePatterns": [
     "projects/**/*"
   ],
-  "plugins":[
+  "plugins": [
     "only-warn"
-   ],
+  ],
   "overrides": [
     {
       "files": [
@@ -24,8 +24,18 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
-       "@typescript-eslint/naming-convention": ["error",
-        { "selector": "property", "modifiers": ["readonly","static"], "format": ["UPPER_CASE"] }
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "property",
+            "modifiers": [
+              "readonly",
+              "static"
+            ],
+            "format": [
+              "UPPER_CASE"
+            ]
+          }
         ],
         "@angular-eslint/component-class-suffix": "off",
         "@angular-eslint/component-selector": [
