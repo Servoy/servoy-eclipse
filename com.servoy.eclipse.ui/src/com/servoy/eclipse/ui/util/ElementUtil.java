@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.graphics.Image;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -149,7 +151,9 @@ public class ElementUtil
 
 			if (persist instanceof IWebComponent)
 			{
-				name = "components";
+				IWebComponent iw = (IWebComponent)persist;
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(iw.getTypeName());
+				name = spec != null && spec.getCategoryName() != null ? spec.getCategoryName() : "components";
 			}
 			else if (name.startsWith("combobox"))
 			{
