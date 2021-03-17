@@ -101,7 +101,9 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
                     }
                     break;
                 case 'foundsets': {
-                  this.refresh();
+                  if (change.currentValue) {
+                    this.initTree();
+                  }
                   break;
                 }
                 case 'selection': {
@@ -115,18 +117,34 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
                   }
                 }
                 case 'enabled': {
-                  if(change.previousValue !== change.currentValue && this.elementRef) {
-                    if(change.currentValue) {
-                      this.renderer.removeClass(this.elementRef, "dbtreeview-disabled");
-                    } else {
-                      this.renderer.addClass(this.elementRef, "dbtreeview-disabled");
-                    }
-                  }
+                  // TODO: element ref is not defined at this time, how to solve this?
+                  // if(change.previousValue !== change.currentValue && this.elementRef) {
+                  //   if(change.currentValue) {
+                  //     this.renderer.removeClass(this.elementRef, "dbtreeview-disabled");
+                  //   } else {
+                  //     this.renderer.addClass(this.elementRef, "dbtreeview-disabled");
+                  //   }
+                  // }
                   break;
                 }
               }
             }
           }
+    }
+
+    private initTree(): void {
+      let children = [];
+      if (this.foundsets) {
+        this.foundsets.forEach((elem) => {
+          elem.foundset.viewPort.rows.forEach((row, index) => {
+            let child = this.buildChild(row, elem, index, 1, null);
+            children.push(child);
+          });
+      }, this);
+      this.displayNodes = children;
+      this.nodes.push(children); 
+      this.cdRef.detectChanges();
+      }
     }
 
     async getChildren(node: TreeNode) {
@@ -233,19 +251,6 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
         node.data.indeterminate = true;
       }
       this.updateParentNodeCheckbox(node.parent);
-    }
-
-    private initTree(): void {
-        this.foundsets.forEach((elem) => {
-            let children = [];
-            elem.foundset.viewPort.rows.forEach((row, index) => {
-              let child = this.buildChild(row, elem, index, 1, null);
-              children.push(child);
-            });
-            this.displayNodes = children;
-            this.nodes.push(children); 
-            this.cdRef.detectChanges();
-        }, this);
     }
 
     private buildChild(row: any, foundsetInfo: any, index: number, level: number, parent: TreeNode) {
