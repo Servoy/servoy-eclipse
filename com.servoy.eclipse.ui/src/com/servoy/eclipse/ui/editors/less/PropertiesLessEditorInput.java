@@ -50,13 +50,15 @@ import com.servoy.j2db.util.Utils;
  */
 public class PropertiesLessEditorInput extends FileEditorInput
 {
+	public static final String CUSTOM_PROPERTIES_LESS = "custom_servoy_theme_properties";
+
 	public static PropertiesLessEditorInput createFromFileEditorInput(FileEditorInput input)
 	{
 		String content = null;
 		if (input != null)
 		{
 			String fileName = input.getName();
-			if (fileName.equals(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS))
+			if (fileName.startsWith(CUSTOM_PROPERTIES_LESS) && fileName.endsWith(".less"))
 			{
 				content = getFileContent(input);
 				if (content != null)
