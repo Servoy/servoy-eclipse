@@ -18,7 +18,7 @@
                 <li  *ngIf="menuItem.position == 'LEFT'" class="nav-item {{menuItem.subMenuItems ? 'dropdown' : ''}} {{menuItem.isActive ? 'active' : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}">
                     
                     <div *ngIf="menuItem.displayType == 'BUTTON'" class="svy-navbar-button">
-                        <a [tabindex]="menuItem.tabindex" [svyAttributes]="menuItem.attributes" [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-outline-dark'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
+                        <a [tabindex]="menuItem.tabindex" [svyAttributes]="menuItem.attributes" [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
                             <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.text}}
                         </a>
                     </div><!-- /.svy-navbar-button -->
@@ -174,7 +174,7 @@
                 <li *ngIf="menuItem.position == 'RIGHT'" class="svy-navbar-button nav-item {{menuItem.subMenuItems ? 'dropdown' : ''}} {{menuItem.isActive ? 'active' : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}">
                     
                    <div *ngIf="menuItem.displayType == 'BUTTON'" class="svy-navbar-button">
-                        <a [tabindex]="menuItem.tabindex" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-outline-dark'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
+                        <a [tabindex]="menuItem.tabindex" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
                             <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.text}}
                         </a>
                     </div><!-- /.svy-navbar-button -->
