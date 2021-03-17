@@ -966,7 +966,7 @@ export class PowerGrid extends NGGridDirective {
             params.node.setDataValue(params.column.colId, v ? 0 : 1);
         }
 
-        if (this.onCellClick && params.data && params.colDef.field) {
+        if (this.onCellClick && params.data) {
             this.onCellClick(params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
         }
     }
@@ -989,10 +989,8 @@ export class PowerGrid extends NGGridDirective {
 
     onCellDoubleClicked(params: any) {
         this.log.debug(params);
-        if (this.onCellDoubleClick) {
-            if (params.data && params.colDef.field) {
-                this.onCellDoubleClick(params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
-            }
+        if (this.onCellDoubleClick && params.data) {
+            this.onCellDoubleClick(params.data, params.colDef.colId !== undefined ? params.colDef.colId : params.colDef.field, params.value, params.event);
         }
     }
 
