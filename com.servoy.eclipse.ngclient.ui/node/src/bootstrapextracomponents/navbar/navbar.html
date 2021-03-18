@@ -40,7 +40,7 @@
                     </a>
                     <div *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" class="dropdown-menu">
                         <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
-                            <a *ngIf="subMenuItem.isDivider != true" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
                                 <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
                             </a>
                             <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
@@ -159,7 +159,7 @@
                     </a>
                     <div *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" class="dropdown-menu">
                          <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
-                            <a *ngIf="subMenuItem.isDivider != true" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
                                 <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
                             </a>
                             <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
@@ -196,7 +196,7 @@
                     </a>
                    <div *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" class="dropdown-menu">
                         <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
-                            <a *ngIf="subMenuItem.isDivider != true" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
                                 <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
                             </a>
                             <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
@@ -315,7 +315,7 @@
                     </a>
                     <div *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" class="dropdown-menu">
                         <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
-                            <a *ngIf="subMenuItem.isDivider != true" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
                                 <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
                             </a>
                             <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>

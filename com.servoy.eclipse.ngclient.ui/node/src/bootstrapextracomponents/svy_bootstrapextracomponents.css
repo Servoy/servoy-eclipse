@@ -10,3 +10,7 @@
     overflow: auto;
     white-space: nowrap;
 }
+
+.bts-extra-navbar .dropdown-item{
+    cursor: pointer;
+}
