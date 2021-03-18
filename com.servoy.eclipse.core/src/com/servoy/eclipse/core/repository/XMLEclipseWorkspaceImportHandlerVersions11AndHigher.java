@@ -131,18 +131,19 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final boolean forceActivateResourceProject, final boolean keepResourceProjectOpen)
+		final boolean forceActivateResourceProject, final boolean keepResourceProjectOpen, final Set<IProject> projectsToDeleteAfterImport)
 		throws RepositoryException
 	{
 		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
-			null, false, forceActivateResourceProject, keepResourceProjectOpen);
+			null, false, forceActivateResourceProject, keepResourceProjectOpen, projectsToDeleteAfterImport);
 	}
 
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final String projectLocation, final boolean reportImportFail, final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen)
+		final String projectLocation, final boolean reportImportFail, final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen,
+		final Set<IProject> projectsToDeleteAfterImport)
 		throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
@@ -204,9 +205,26 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						try
 						{
-							if (dummySolProject[0] != null && !keepResourcesProjectOpen)
+							if (dummySolProject[0] != null)
 							{
-								dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
+								if (projectsToDeleteAfterImport != null)
+								{
+									projectsToDeleteAfterImport.add(dummySolProject[0]);
+								}
+								else if (!keepResourcesProjectOpen)
+								{
+									// dummy did it's job - to activate correct resources project, now we must remove it
+									dummySolProject[0].delete(true, true, null);
+								}
+							}
+
+							if (projectsToDeleteAfterImport != null && !keepResourcesProjectOpen)
+							{
+								// dummy did it's job - to activate correct resources project, now we must remove it
+								for (IProject projectToDelete : projectsToDeleteAfterImport)
+								{
+									projectToDelete.delete(true, true, null);
+								}
 							}
 						}
 						finally

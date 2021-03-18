@@ -91,7 +91,7 @@ public class ImportSampleAction implements IIntroAction
 									IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
 										userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), "resources",
 										ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), monitor, true, false, false,
-										false);
+										false, null);
 									if (rootObjects != null && rootObjects.length > 0)
 									{
 										Display.getDefault().asyncExec(new Runnable()
