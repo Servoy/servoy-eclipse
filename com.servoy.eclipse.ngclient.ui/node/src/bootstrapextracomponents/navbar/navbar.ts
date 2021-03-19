@@ -101,9 +101,9 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         }
         if (menuItem.valuelist && menuItem.valuelist.length > 0 && menuItem.valuelist[0].displayValue) {
             let hasMatchingDisplayValue = false;
-            for (const i of Object.keys(menuItem.valuelist)) {
-                if ((event.target as HTMLInputElement).value === menuItem.valuelist[i].displayValue) {
-                    menuItem.dataProvider = menuItem.valuelist[i].realValue;
+            for (const vlValue of menuItem.valuelist) {
+                if ((event.target as HTMLInputElement).value === vlValue.displayValue) {
+                    menuItem.dataProvider = vlValue.realValue;
                     menuItem.getStateHolder().getChangedKeys().add('dataProvider');
                     hasMatchingDisplayValue = true;
                     break;
