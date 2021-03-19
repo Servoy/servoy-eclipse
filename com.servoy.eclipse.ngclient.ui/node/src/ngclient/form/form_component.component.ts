@@ -18,7 +18,7 @@ import { ServoyBaseComponent } from '../basecomponent';
     changeDetection: ChangeDetectionStrategy.OnPush,
     /* eslint-disable max-len */
     template: `
-      <div *ngIf="formCache.absolute" #refEl [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
            <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part"> <!-- part div -->
                <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
