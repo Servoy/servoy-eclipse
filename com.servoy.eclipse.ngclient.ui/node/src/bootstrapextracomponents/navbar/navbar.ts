@@ -279,17 +279,16 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
             if (!itemId) {
                 return null;
             } else {
-                for (const i of Object.keys(this.menuItems)) {
-                    const menuItem = this.menuItems[i];
+                for (const menuItem of this.menuItems) {
                     if (menuItem.itemId === itemId) {
                         itemClicked = menuItem;
                         break;
                     }
                     if (menuItem.subMenuItems) {
                         //dropdown
-                        for (const s of Object.keys(menuItem.subMenuItems)) {
-                            if (menuItem.subMenuItems[s].itemId === itemId) {
-                                itemClicked = menuItem.subMenuItems[s];
+                        for (const sub of menuItem.subMenuItems) {
+                            if (sub.itemId === itemId) {
+                                itemClicked = sub;
                                 break;
                             }
                         }
