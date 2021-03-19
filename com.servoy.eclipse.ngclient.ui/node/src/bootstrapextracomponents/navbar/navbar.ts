@@ -116,10 +116,27 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
             }
             menuItem.getStateHolder().notifyChangeListener();
         }
+        else if (menuItem.valuelist && !menuItem.valuelist.hasRealValues())
+        {
+             menuItem.dataProvider = (event.target as HTMLInputElement).value;
+             menuItem.getStateHolder().getChangedKeys().add('dataProvider');
+        }
         this.menuItemsChange.emit(this.menuItems);
         this.navBarClicked(event);
     }
-
+    
+    valueChanged(value: { displayValue: string; realValue: any }, index: number) {
+        const menuItem = this.menuItems[index];
+        if (!menuItem) {
+            return;
+        }
+        if (value && value.realValue !== undefined) menuItem.dataProvider = value.realValue;
+        else if (value) menuItem.dataProvider = value;
+        else menuItem.dataProvider = null;
+        menuItem.getStateHolder().getChangedKeys().add('dataProvider');
+        this.menuItemsChange.emit(this.menuItems);
+    }
+    
     navBarClicked(event: Event) {
         let $target = event.target as Element;
         if ($target.getAttribute('id') === 'navbar-collapse') {
