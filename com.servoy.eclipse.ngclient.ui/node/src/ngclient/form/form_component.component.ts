@@ -424,11 +424,6 @@ export class AddAttributeDirective implements OnInit {
             this.svyContainerStyle.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
 
-        if ('styles' in this.svyContainerStyle && this.svyContainerStyle.styles) {
-            for (const key of Object.keys(this.svyContainerStyle.styles)) {
-                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.styles[key]);
-            }
-        }
         if ('layout' in this.svyContainerStyle) {
             for (const key of Object.keys(this.svyContainerStyle.layout)) {
                 this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.layout[key]);
