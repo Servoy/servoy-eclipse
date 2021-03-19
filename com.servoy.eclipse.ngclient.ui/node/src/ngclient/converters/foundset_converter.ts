@@ -505,8 +505,8 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
     }
 
     public fireChanges(foundsetChanges: FoundsetChangeEvent) {
-        for (const i of Object.keys(this.changeListeners)) {
-            this.changeListeners[i](foundsetChanges);
+        for (const cl of this.changeListeners) {
+            cl(foundsetChanges);
         }
     }
 
