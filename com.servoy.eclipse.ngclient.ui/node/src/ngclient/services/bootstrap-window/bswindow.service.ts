@@ -121,7 +121,8 @@ export class BSWindow {
             this.setSize(this.options.size);
         }
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            this.renderer.listen(this.options.references.window.nativeWindow, 'orientationchange resize', () => _this.centerWindow());
+            this.renderer.listen(this.options.references.window.nativeWindow, 'orientationchange', () => _this.centerWindow());
+            this.renderer.listen(this.options.references.window.nativeWindow, 'resize', () => _this.centerWindow());
         }
 
         this.renderer.listen(this.element, 'touchmove', (e) => {
@@ -487,7 +488,7 @@ export class BSWindow {
         const active = this.element.classList.contains('active');
 
         const blinkInterval = setInterval(() => {
-            _this.renderer.addClass(_this.element, 'active');
+            _this.element.classList.toggle('active');
         }, 250);
         const blinkTimeout = setTimeout(() => {
             clearInterval(blinkInterval);
