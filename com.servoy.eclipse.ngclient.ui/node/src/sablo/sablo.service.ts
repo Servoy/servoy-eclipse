@@ -1,7 +1,7 @@
 import { Injectable, } from '@angular/core';
 import { SessionStorageService } from './webstorage/sessionstorage.service';
 import { WindowRefService } from './util/windowref.service';
-import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
+import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory } from './logger.service';
 import { Deferred } from './util/deferred';
@@ -18,9 +18,20 @@ export class SabloService {
     private log: LoggerService;
 
 
-    constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, 
-                        private windowRefService: WindowRefService, private logFactory: LoggerFactory) {
+    constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService,
+        private windowRefService: WindowRefService, private logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SabloService');
+        this.windowRefService.nativeWindow.window.addEventListener('unload', () => {
+            sessionStorage.remove('svy_session_lock');
+            websocketService.disconnect();
+        });
+
+        if (sessionStorage.has('svy_session_lock')) {
+            this.clearSabloInfo()
+            console.warn('Found a lock in session storage. The storage was cleared.');
+        }
+
+        sessionStorage.set('svy_session_lock', '1');
     }
 
     public connect(context, queryArgs, websocketUri): WebsocketSession {
@@ -30,9 +41,6 @@ export class SabloService {
             websocketUri
         };
 
-        if (this.websocketService.getURLParameter(WebsocketConstants.CLEAR_SESSION_PARAM) === 'true') {
-            this.clearSabloInfo();
-        }
         this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
 
         this.wsSession.onMessageObject((msg, conversionInfo) => {
@@ -55,7 +63,7 @@ export class SabloService {
         return this.wsSession;
     }
 
-    public createDeferredWSEvent(): {deferred: Deferred<any>; cmsgid: number } {
+    public createDeferredWSEvent(): { deferred: Deferred<any>; cmsgid: number } {
         return this.wsSession.createDeferredEvent();
     }
 
@@ -93,7 +101,7 @@ export class SabloService {
             if (browserLanguages.length > 1 && langAndCountry.indexOf('-') === -1
                 && browserLanguages[1].indexOf(langAndCountry + '-') === 0) {
                 // if the first language in the list doesn't specify country, see if the following one is the same language but with a country specified
-                 // (for example browser could give a list of "en", "en-GB", ...)
+                // (for example browser could give a list of "en", "en-GB", ...)
                 langAndCountry = browserLanguages[1];
             }
         } else {
@@ -138,7 +146,7 @@ export class SabloService {
             this.currentServiceCallTimeouts.map((id) => clearTimeout(id));
             const tmp = this.currentServiceCallCallbacks;
             this.currentServiceCallCallbacks = [];
-            tmp.map((func: () => void)  => {
+            tmp.map((func: () => void) => {
                 func();
             });
         }

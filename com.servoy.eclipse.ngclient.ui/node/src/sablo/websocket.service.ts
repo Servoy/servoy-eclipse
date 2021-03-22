@@ -122,6 +122,10 @@ export class WebsocketService {
         return this.wsSession.isConnected();
     }
 
+    public disconnect(){
+        this.wsSession.disconnect();
+    }
+    
     private generateURL(context, args, queryArgs, websocketUri) {
         let new_uri: string;
         if (this.windowRef.nativeWindow.location.protocol === 'https:') {
@@ -162,16 +166,6 @@ export class WebsocketService {
 
         let queryString = this.getQueryString();
         if (queryString) {
-            const index = queryString.indexOf(WebsocketConstants.CLEAR_SESSION_PARAM);
-            if (index >= 0) {
-                const params_arr = queryString.split('&');
-                for (let i = params_arr.length - 1; i >= 0; i -= 1) {
-                    if (params_arr[i].indexOf(WebsocketConstants.CLEAR_SESSION_PARAM) === 0) {
-                        params_arr.splice(i, 1);
-                    }
-                }
-                queryString = params_arr.join('&');
-            }
             new_uri += queryString;
         } else {
             new_uri = new_uri.substring(0, new_uri.length - 1);
@@ -600,9 +594,6 @@ class WsCloseCodes {
     static readonly SERVICE_RESTART: 1012; // indicates that the service will be restarted.
     static readonly TLS_HANDSHAKE_FAILURE: 1015; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
     static readonly TRY_AGAIN_LATER: 1013; // indicates that the service is experiencing overload
-}
-export class WebsocketConstants {
-    static readonly CLEAR_SESSION_PARAM = 'sabloClearSession';
 }
 
 export class SabloUtils {
