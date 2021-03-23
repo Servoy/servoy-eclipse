@@ -88,7 +88,9 @@ export class PopupFormService {
             this.formPopupComponent.instance.setPopupForm(popup);
             this._applicationRef.attachView(this.formPopupComponent.hostView);
             this.doc.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
-            this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
+            setTimeout(() => {
+                this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
+            }, 300);
         }
     }
 
