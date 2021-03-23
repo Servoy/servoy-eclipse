@@ -23,16 +23,18 @@ describe('NGUtilsService', () => {
   let windowRef: any;
   let servoyServiceRef: any;
   let platformLocation: any;
+  let sabloService : any;
   beforeEach(() => {
      windowRef =  {};
      servoyServiceRef =  {};
      windowRef.nativeWindow = {};
      windowRef.nativeWindow.location = {};
      platformLocation = jasmine.createSpyObj('PlatformLocation', ['onPopState']);
+     sabloService = jasmine.createSpyObj('SabloService', ['connect']);
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
       providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef },
-                  ServiceChangeHandler, SabloService, WebsocketService, TestabilityService, SessionStorageService,
+                  ServiceChangeHandler,  {provide: SabloService, useValue:sabloService}, WebsocketService, TestabilityService, SessionStorageService,
                   ConverterService, LoggerFactory, ServicesService, LoadingIndicatorService,
                   {provide: ServoyService, useFactory:()=> servoyServiceRef},
                   {provide: PlatformLocation, useValue: platformLocation}]
