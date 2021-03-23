@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISaveablePart;
@@ -48,23 +47,17 @@ public class RfbDirtyListener implements IPropertyListener
 	@Override
 	public void propertyChanged(Object source, int propId)
 	{
-		Display.getCurrent().asyncExec(new Runnable()
+		if (propId == IEditorPart.PROP_DIRTY)
 		{
-			public void run()
+			editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
 			{
-				if (propId == IEditorPart.PROP_DIRTY)
+				@Override
+				public void run()
 				{
-					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("setDirty",
-								new Object[] { ((ISaveablePart)editorPart).isDirty() });
-						}
-					});
+					editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("setDirty",
+						new Object[] { ((ISaveablePart)editorPart).isDirty() });
 				}
-			}
-		});
+			});
+		}
 	}
 }
