@@ -23,7 +23,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     @Input() toolTipText: string;
 	@Input() dataProviderID: any;
 	@Input() enabled: boolean;
-	
+
     @ViewChild(Select2) select2: Select2;
 
     data: Select2Option[] = [];
@@ -65,17 +65,17 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         this.select2.toggleOpenAndClose();
     }
 
-   
+
     setData() {
         if (this.valuelistID) {
             const options: Select2Option[] = [];
-            for (let i = 0; i < this.valuelistID.length; i++) {
-                if(this.valuelistID[i].realValue.trim() === ''){
+            for (const value of this.valuelistID) {
+                if(value.realValue === null || value.realValue === ''){
                     continue;
                 }
                 options.push({
-                    value: this.valuelistID[i].realValue,
-                    label: this.valuelistID[i].displayValue
+                    value: value.realValue,
+                    label: value.displayValue
                 });
             }
             this.data = options;
