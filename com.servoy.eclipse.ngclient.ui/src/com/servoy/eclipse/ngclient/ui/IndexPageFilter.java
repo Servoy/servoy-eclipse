@@ -46,7 +46,7 @@ import com.servoy.j2db.util.MimeTypes;
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD })
 public class IndexPageFilter implements Filter
 {
-	public static final String SOLUTIONS_PATH = "solution/";
+	public static final String SOLUTIONS_PATH = "/solution/";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
@@ -107,12 +107,11 @@ public class IndexPageFilter implements Filter
 
 	private String getSolutionNameFromURI(String uri)
 	{
-		int solutionIndex = uri.indexOf(SOLUTIONS_PATH);
-		int solutionEndIndex = uri.indexOf("/", solutionIndex + SOLUTIONS_PATH.length() + 1);
-		if (solutionEndIndex == -1) solutionEndIndex = uri.length();
-		if (solutionIndex >= 0 && solutionEndIndex > solutionIndex)
+		if (uri.startsWith(SOLUTIONS_PATH))
 		{
-			String possibleSolutionName = uri.substring(solutionIndex + SOLUTIONS_PATH.length(), solutionEndIndex);
+			int solutionEndIndex = uri.indexOf("/", SOLUTIONS_PATH.length() + 1);
+			if (solutionEndIndex == -1) solutionEndIndex = uri.length();
+			String possibleSolutionName = uri.substring(SOLUTIONS_PATH.length(), solutionEndIndex);
 			// skip all names that have a . in them
 			if (possibleSolutionName.contains(".")) return null;
 			return possibleSolutionName;

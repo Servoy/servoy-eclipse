@@ -32,7 +32,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     @Input() onModalClosed: () => void;
     @Input() onRestrictionFailed: (file: UploadFile, error: string) => void;
 
-    @ViewChild('element', { static: false }) uppyRef: UppyAngularComponent;
+    @ViewChild(UppyAngularComponent) uppy: UppyAngularComponent;
 
     settings: UppyConfig = null;
     filesToBeAdded: Array<string> = [];
@@ -50,37 +50,37 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     svyOnInit() {
         super.svyOnInit();
         if (this.onFileAdded) {
-            this.uppyRef.uppyInstance.on('file-added', (file: UppyFile) => {
+            this.uppy.uppyInstance.on('file-added', (file: UppyFile) => {
                 this.onFileAdded(this.createUppyFile(file));
             });
         }
 
         if (this.onFileRemoved) {
-            this.uppyRef.uppyInstance.on('file-removed', (file: UppyFile) => {
+            this.uppy.uppyInstance.on('file-removed', (file: UppyFile) => {
                 this.onFileRemoved(this.createUppyFile(file));
             });
         }
 
         if (this.onRestrictionFailed) {
-            this.uppyRef.uppyInstance.on('restriction-failed', (file: UppyFile, error: {message: string}) => {
+            this.uppy.uppyInstance.on('restriction-failed', (file: UppyFile, error: {message: string}) => {
                 this.onRestrictionFailed(this.createUppyFile(file), error.message);
             });
         }
 
         if (this.onModalOpened) {
-            this.uppyRef.uppyInstance.on('dashboard:modal-open', () => {
+            this.uppy.uppyInstance.on('dashboard:modal-open', () => {
                 this.onModalOpened();
             });
         }
 
         if (this.onModalClosed) {
-            this.uppyRef.uppyInstance.on('dashboard:modal-closed', () => {
+            this.uppy.uppyInstance.on('dashboard:modal-closed', () => {
                 this.onModalOpened();
             });
         }
 
         if (this.onUploadComplete) {
-            this.uppyRef.uppyInstance.on('complete', (result: {successful: []; failed: []}) => {
+            this.uppy.uppyInstance.on('complete', (result: {successful: []; failed: []}) => {
                 const filesSuccess = [];
                 if (result.successful) {
                     for (const o of Object.keys(result.successful)) {
@@ -96,7 +96,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
                 this.onUploadComplete(filesSuccess, filesFailed);
             });
         }
-        this.uppyRef.uppyInstance.setOptions({
+        this.uppy.uppyInstance.setOptions({
             onBeforeFileAdded: (currentFile: UppyFile) => this.onBeforeFileAddedEvent(currentFile)
         });
         const locale = null;
@@ -127,7 +127,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
                 dashBoardOptions[x] = this.options[x];
             }
         }
-        this.uppyRef.uppyInstance.getPlugin('Dashboard').setOptions(dashBoardOptions);
+        this.uppy.uppyInstance.getPlugin('Dashboard').setOptions(dashBoardOptions);
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -136,44 +136,44 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     reset(): void {
-        this.uppyRef.uppyInstance.reset();
+        this.uppy.uppyInstance.reset();
     }
 
     upload(): void {
-        this.uppyRef.uppyInstance.upload();
+        this.uppy.uppyInstance.upload();
     }
 
     retryAll(): void {
-        this.uppyRef.uppyInstance.retryAll();
+        this.uppy.uppyInstance.retryAll();
     }
 
     cancelAll(): void {
-        this.uppyRef.uppyInstance.cancelAll();
+        this.uppy.uppyInstance.cancelAll();
     }
 
     retryUpload(fileID: string): void {
-        this.uppyRef.uppyInstance.retryUpload(fileID);
+        this.uppy.uppyInstance.retryUpload(fileID);
     }
 
     removeFile(fileID: string): void {
-        this.uppyRef.uppyInstance.removeFile(fileID);
+        this.uppy.uppyInstance.removeFile(fileID);
     }
 
     info(message: any, type?: string, duration?: number): void {
-        this.uppyRef.uppyInstance.info(message, type, duration);
+        this.uppy.uppyInstance.info(message, type, duration);
     }
 
     initialize(): void {
-        this.uppyRef.uppyInstance.close();
+        this.uppy.uppyInstance.close();
         this.internalInit();
     }
 
     openModal(): void {
-        this.uppyRef.uppyInstance.getPlugin('Dashboard').openModal();
+        this.uppy.uppyInstance.getPlugin('Dashboard').openModal();
     }
 
     closeModal(): void {
-        this.uppyRef.uppyInstance.getPlugin('Dashboard').closeModal();
+        this.uppy.uppyInstance.getPlugin('Dashboard').closeModal();
     }
 
     internalInit(): void {
@@ -219,7 +219,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
 
         this.onBeforeFileAdded(this.createUppyFile(currentFile), currentFiles).then((result: boolean) => {
             if (result === true) {
-                this.uppyRef.uppyInstance.addFile(currentFile);
+                this.uppy.uppyInstance.addFile(currentFile);
             }
             this.filesToBeAdded.splice(this.filesToBeAdded.indexOf(currentFile.name), 1);
         });
@@ -227,7 +227,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     getFile(fileID: string): UploadFile {
-        const file = this.uppyRef.uppyInstance.getFile(fileID);
+        const file = this.uppy.uppyInstance.getFile(fileID);
         if (file != null) {
             return this.createUppyFile(file);
         }
@@ -235,7 +235,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     }
 
     getFiles(): UploadFile[] {
-        const files = this.uppyRef.uppyInstance.getFiles();
+        const files = this.uppy.uppyInstance.getFiles();
         const result = [];
         if (files) {
             for (const f of Object.keys(files)) {
