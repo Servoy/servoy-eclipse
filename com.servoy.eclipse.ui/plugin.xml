@@ -34,7 +34,7 @@
        <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.TutorialView"
-            icon="icons/tutorial/tinytutorial.png"
+            icon="icons/servoy-tutorials.png"
             id="com.servoy.eclipse.ui.views.TutorialView"
             name="Tutorial step by step">
       </view>
@@ -649,11 +649,20 @@
             label="StartPage"
             visible="true">
          <action
+               class="com.servoy.eclipse.ui.actions.OpenTutorialsView"
+               icon="icons/servoy-tutorials.png"
+               id="com.servoy.eclipse.ui.openStartPage"
+               label="Servoy Step By Step Tutorial"
+               menubarPath="help/updates"
+               style="push"
+               tooltip="Servoy Step By Step Tutorial">
+         </action>
+         <action
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
                label="Servoy First Start Guide"
                menubarPath="help/updates"
-               icon="icons/servoy-tutorials.png"
+               icon="icons/tips-and-tricks.png"
                style="push"
                tooltip="Open First Start Guide">
          </action>
