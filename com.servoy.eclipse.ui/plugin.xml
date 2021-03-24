@@ -554,21 +554,36 @@
          </action>
       </actionSet>
       <actionSet
+            id="com.servoy.eclipse.ui.ServoyAdmin"
+            label="Servoy Admin Page"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenAdminPage"
+               icon="icons/servoy-admin-page.png"
+               id="com.servoy.eclipse.ui.openAdminPage"
+               label="Servoy Admin Page"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Admin Page">
+         </action>
+      </actionSet>
+      <actionSet
             id="com.servoy.eclipse.ui.openURL"
             label="Open Url"
             visible="true">
          <action
                class="com.servoy.eclipse.ui.actions.OpenUrlAction"
                definitionId="com.servoy.eclipse.ui.OpenWikiAction"
+               icon="icons/servoy-wiki.png"
                id="com.servoy.eclipse.ui.openWiki"
                label="Servoy Wiki"
                menubarPath="help/intro"
-               style="push"
                tooltip="Open Servoy Wiki">
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.OpenUrlAction"
                definitionId="com.servoy.eclipse.ui.OpenForumAction"
+               icon="icons/forum.png"
                id="com.servoy.eclipse.ui.openForum"
                label="Servoy Forum"
                menubarPath="help/intro"
@@ -637,8 +652,8 @@
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
                label="Servoy First Start Guide"
-               menubarPath="help/intro"
-               icon="icons/tutorial/tinytutorial.png"
+               menubarPath="help/updates"
+               icon="icons/servoy-tutorials.png"
                style="push"
                tooltip="Open First Start Guide">
          </action>
@@ -659,19 +674,6 @@
          </action>
       </actionSet>
       -->
-      <actionSet
-            id="com.servoy.eclipse.ui.ServoyAdmin"
-            label="Servoy Admin Page"
-            visible="true">
-         <action
-               class="com.servoy.eclipse.ui.actions.OpenAdminPage"
-               id="com.servoy.eclipse.ui.openAdminPage"
-               label="Servoy Admin Page"
-               menubarPath="help/intro"
-               style="push"
-               tooltip="Open Servoy Admin Page">
-         </action>
-      </actionSet>
    </extension>
      <extension
            point="org.eclipse.ui.ide.markerResolution">
