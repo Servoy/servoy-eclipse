@@ -114,7 +114,6 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         this.scrollStrategy.updateItemAndBufferSize(this.averageRowHeight,minBuff, maxBuff );
         this.computeTableWidth();
         this.computeTableHeight();
-
         this.setColumnsToInitalWidthAndInitAutoColumns();
         for (let i = 0; i < this.columns.length; i++) {
             this.updateTableColumnStyleClass(i, { width: this.columns[i].width, minWidth: this.columns[i].width, maxWidth: this.columns[i].width });
@@ -151,23 +150,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             this.scrollToSelection();
         }, 50);
     }
-    private foundsetChanged(event: FoundsetChangeEvent) {
-        if (event.sortColumnsChanged) {
-            this.sortColumnsChanged(event);
-        }
 
-        if (event.selectedRowIndexesChanged) {
-            this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
-        }
-
-        if (event.fullValueChanged || event.viewportRowsCompletelyChanged || event.viewportRowsUpdated) {
-            let newVal: ViewPortRow[];
-            if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
-            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue as ViewPortRow[];
-            if (event.viewportRowsUpdated) newVal = this.foundset.viewPort.rows;
-            this.dataStream.next([...newVal]);
-        }
-    }
     loadMoreRecords(currIndex: number, scroll?: boolean) {
         if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.pageSize) ||
             currIndex + this.pageSize >= this.foundset.viewPort.rows.length) {
@@ -739,6 +722,24 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             if (selectionChanged) {
                 this.selectedRowIndexesChanged(oldSelectedIdxs);
             }
+        }
+    }
+
+    private foundsetChanged(event: FoundsetChangeEvent) {
+        if (event.sortColumnsChanged) {
+            this.sortColumnsChanged(event);
+        }
+
+        if (event.selectedRowIndexesChanged) {
+            this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
+        }
+
+        if (event.fullValueChanged || event.viewportRowsCompletelyChanged || event.viewportRowsUpdated) {
+            let newVal: ViewPortRow[];
+            if (event.fullValueChanged) newVal = event.fullValueChanged.newValue.viewPort.rows;
+            if (event.viewportRowsCompletelyChanged) newVal = event.viewportRowsCompletelyChanged.newValue as ViewPortRow[];
+            if (event.viewportRowsUpdated) newVal = this.foundset.viewPort.rows;
+            this.dataStream.next([...newVal]);
         }
     }
 
