@@ -1,6 +1,7 @@
 
 import { NgModule } from '@angular/core';
 import { ServoyBootstrapExtraBreadcrumbs } from './breadcrumbs/breadcrumbs';
+import { ServoyBootstrapExtraCarousel, Slide } from './carousel/carousel';
 import { MenuItem, ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
@@ -13,6 +14,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
     declarations: [
       ServoyBootstrapExtraBreadcrumbs,
       ServoyBootstrapExtraNavbar,
+      ServoyBootstrapExtraCarousel,
       SvyAttributes
     ],
     providers: [],
@@ -26,11 +28,13 @@ import { SpecTypesService } from '../sablo/spectypes.service';
     exports: [
         ServoyBootstrapExtraBreadcrumbs,
         ServoyBootstrapExtraNavbar,
+        ServoyBootstrapExtraCarousel,
         SvyAttributes
       ]
 })
 export class ServoyBootstrapExtraComponentsModule {
       constructor( specTypesService: SpecTypesService ) {
          specTypesService.registerType('bootstrapextracomponents-navbar.menuItem', MenuItem);
+         specTypesService.registerType('bootstrapextracomponents-carousel.slide', Slide);
     }
 }
