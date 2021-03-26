@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.compiler.problem.IProblem;
@@ -172,7 +173,9 @@ public class ScriptingUtils
 
 	public static boolean isMissingReturnDocs(ScriptMethod method)
 	{
-		final Script script = javascriptParser.parse(method.getDeclaration(), dummyReporter);
+		String declaration = method.getDeclaration();
+		if (Strings.isEmpty(declaration)) return false;
+		final Script script = javascriptParser.parse(declaration, dummyReporter);
 		List<Statement> statements = script.getStatements();
 		if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))
 		{

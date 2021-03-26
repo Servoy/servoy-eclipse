@@ -83,4 +83,10 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_components");
 	}
+
+	@Override
+	protected void restoreUsedFromModel()
+	{
+		componentsUsed = exportModel.getUsedComponents();
+	}
 }
