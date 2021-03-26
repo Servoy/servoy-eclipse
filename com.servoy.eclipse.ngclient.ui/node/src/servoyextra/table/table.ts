@@ -9,6 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap, first } from 'rxjs/operators';
 import { CustomVirtualScrollStrategy } from './scroll-strategy';
 import { DOCUMENT } from '@angular/common';
+import { BaseCustomObject } from '../../sablo/spectypes.service';
+import { IValuelist } from '../../sablo/spectypes.service';
 
 @Directive({
     selector: '[svyTableRow]'
@@ -39,7 +41,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     @ViewChildren(TableRow) renderedRows: QueryList<TableRow>;
 
     @Input() foundset: IFoundset;
-    @Input() columns: string | any[];
+    @Input() columns: Array<Column>;
     @Input() sortDirection: string;
     @Input() enableSort = true;
     @Input() sortStyleClass: string;
@@ -228,17 +230,17 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 window.clearTimeout(this.timeoutID);
                 innerThis.lastClicked = -1;
                 innerThis.timeoutID = null;
-                innerThis.onCellDoubleClick(rowIdx, colIdx, record, e, columnId);
+                innerThis.onCellDoubleClick(rowIdx + 1, colIdx, record, e, columnId);
             } else {
                 innerThis.lastClicked = rowIdx * colIdx;
                 innerThis.timeoutID = window.setTimeout(() => {
                     innerThis.timeoutID = null;
                     innerThis.lastClicked = -1;
-                    innerThis.onCellClick(rowIdx, colIdx, record, e, columnId);
+                    innerThis.onCellClick(rowIdx + 1, colIdx, record, e, columnId);
                 }, 250);
             }
         } else if (this.onCellClick) {
-            this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e, columnId);
+            this.onCellClick(rowIdx + 1, colIdx, this.foundset.viewPort.rows[rowIdx], e, columnId);
         }
     }
 
@@ -643,6 +645,22 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         return rowClass;
     }
 
+    getColumnClass(column : Column, idx: number) {
+        let columnClass = '';
+        if (column.styleClass) {
+            columnClass += column.styleClass + ' ';
+        }
+        if (column.styleClassDataprovider) {
+            let columnDP = column.styleClassDataprovider[idx];
+            if (columnDP)
+            {
+                 columnClass += columnDP;
+            }
+           
+        }
+        return columnClass;
+    }
+    
     keypressed(event: KeyboardEvent) {
         const fs = this.foundset;
         if (fs.selectedRowIndexes && fs.selectedRowIndexes.length > 0) {
@@ -893,4 +911,22 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
                 this.log.error(reason);
             });
     }
+}
+
+class Column extends BaseCustomObject {
+    id: string;
+    showAs: string;
+    headerText: string;
+    headerStyleClass: string;
+    styleClass : string;
+    styleClassDataprovider: LinkedDataproviders;
+    dataprovider: LinkedDataproviders;
+    autoResize: boolean;
+    valuelist: IValuelist;
+    width: string; 
+    initialWidth: string; 
+}
+
+class LinkedDataproviders extends Array<any>{
+    idForFoundset : string;
 }
