@@ -219,13 +219,15 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage impleme
 
 	public void restoreDefaults()
 	{
-		componentsUsed = exportModel.getUsedComponents();
+		restoreUsedFromModel();
 		selectedComponents = new TreeSet<String>(componentsUsed);
 		selectedComponentsList.setItems(selectedComponents.toArray(new String[selectedComponents.size()]));
 		availableComponents = getAvailableItems();
 		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));
 
 	}
+
+	protected abstract void restoreUsedFromModel();
 
 	private void addSelectedComponents()
 	{
