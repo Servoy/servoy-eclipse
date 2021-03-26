@@ -1,8 +1,6 @@
 package com.servoy.eclipse.designer.webpackage;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -11,12 +9,13 @@ import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.browser.BrowserFactory;
+import com.servoy.eclipse.ui.browser.IBrowser;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class WebPackageManager extends EditorPart
 {
-	private Browser browser;
+	private IBrowser browser;
 
 	@Override
 	public void doSave(IProgressMonitor monitor)
@@ -52,8 +51,6 @@ public class WebPackageManager extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		browser = new Browser(parent, new DesignerPreferences().useChromiumBrowser() ? SWT.CHROMIUM : SWT.NONE);
-
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
 		{
@@ -63,6 +60,7 @@ public class WebPackageManager extends EditorPart
 				url += "?solution=" + solutionName;
 			}
 		}
+		browser = BrowserFactory.createBrowser(parent);
 		try
 		{
 			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
@@ -71,7 +69,6 @@ public class WebPackageManager extends EditorPart
 		{
 			ServoyLog.logError("couldn't load the package manager: " + url, ex);
 		}
-
 	}
 
 	@Override

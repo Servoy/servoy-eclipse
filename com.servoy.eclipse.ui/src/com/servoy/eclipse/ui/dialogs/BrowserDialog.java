@@ -30,7 +30,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -61,7 +60,8 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.browser.BrowserFactory;
+import com.servoy.eclipse.ui.browser.IBrowser;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.eclipse.ui.views.TutorialView;
@@ -82,7 +82,8 @@ public class BrowserDialog extends Dialog
 {
 
 	private String url;
-	private Browser browser;
+	private IBrowser browser;
+	private org.eclipse.swt.browser.Browser swtBrowser;
 	private Shell shell;
 	private boolean showSkipNextTime;
 	private static final int MIN_WIDTH = 900;
@@ -140,7 +141,7 @@ public class BrowserDialog extends Dialog
 		}
 		final Button[] showNextTime = new Button[1];
 
-		browser = new Browser(shell, (useChromiumHint && new DesignerPreferences().useChromiumBrowser()) ? SWT.CHROMIUM : SWT.NONE);
+		browser = BrowserFactory.createBrowser(shell);
 		LocationListener locationListener = new LocationListener()
 		{
 			@Override
@@ -481,7 +482,7 @@ public class BrowserDialog extends Dialog
 		}
 		shell.setLocation(location);
 		// in chromium i have to set size, else it shows very small
-		if (Util.isMac() || Util.isLinux() || (browser.getStyle() & SWT.CHROMIUM) == SWT.CHROMIUM)
+		if (Util.isMac() || Util.isLinux() || browser.isChromium())
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);
