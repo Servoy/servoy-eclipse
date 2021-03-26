@@ -1,0 +1,10 @@
+<div [id]="servoyApi.getMarkupId() + '-wrapper'" #element>
+    <canvas  baseChart [id]="servoyApi.getMarkupId()"
+         [chartType]="type"
+         [options]="options"
+         [plugins]="plugin"
+         [datasets]="dataset"
+         [labels]="labels"
+         (chartClick)="handleClick($event.event)">
+    </canvas>
+</div>
