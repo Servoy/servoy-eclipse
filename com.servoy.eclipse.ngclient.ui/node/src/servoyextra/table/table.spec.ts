@@ -23,7 +23,9 @@ import { ServoyExtraTable } from './table';
   selector: 'test-wrapper',
   template: '<div style="position: absolute; left: 29px; top: 139px; width: 571px; height: 438px;">\
                     <servoyextra-table #table [servoyApi]="servoyApi" [foundset]="foundset" [columns]="columns" [minRowHeight]="minRowHeight"\
-                         [enableColumnResize]="enableColumnResize" [pageSize]="pageSize" [responsiveHeight]="responsiveHeight" [onCellClick]="cellClick" >\
+                         [enableColumnResize]="enableColumnResize" [pageSize]="pageSize" [responsiveHeight]="responsiveHeight"\
+                         [onCellClick]="cellClick" [onCellRightClick]="cellRightClick" [onCellDoubleClick]="cellDoubleClick"\
+                         [onHeaderClick]="headerClick" [onHeaderRightClick]="headerRightClick" >\
                     </servoyextra-table > </div>',
 })
 class TestWrapperComponent {
@@ -36,6 +38,10 @@ class TestWrapperComponent {
     @Input() pageSize: number;
     @Input() cellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
     @Input() responsiveHeight;
+    @Input() cellRightClick;
+    @Input() cellDoubleClick;
+    @Input() headerClick;
+    @Input() headerRightClick;
 }
 
 describe('ServoyExtraTable', () => {
@@ -50,6 +56,10 @@ describe('ServoyExtraTable', () => {
 
   const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner', 'registerComponent', 'unRegisterComponent', 'isInAbsoluteLayout']);
   const onCellClick = jasmine.createSpy('onCellClick');
+  const onCellRightClick = jasmine.createSpy('onCellRightClick');
+  const onCellDoubleClick = jasmine.createSpy('onCellDoubleClick');
+  const onHeaderClick = jasmine.createSpy('onHeaderClick');
+  const onHeaderRightClick = jasmine.createSpy('onHeaderRightClick');
 
  const getFoundset  = (): Foundset => {
     const fs_json = {
@@ -141,6 +151,8 @@ const finishInit = () => {
     fixture.componentInstance.servoyApi = servoyApi;
     component = fixture.componentInstance;
     component.foundset = getFoundset();
+    component.foundset.requestSelectionUpdate = jasmine.createSpy('requestSelectionUpdate');
+    component.foundset.sort = jasmine.createSpy('sort');
     component.columns = [
       {
         state: {
@@ -210,6 +222,10 @@ const finishInit = () => {
     component.pageSize = 5;
     component.responsiveHeight = 500;
     component.cellClick = onCellClick;
+    component.cellRightClick = onCellRightClick;
+    component.cellDoubleClick = onCellDoubleClick;
+    component.headerClick = onHeaderClick;
+    component.headerRightClick = onHeaderRightClick;
   });
 
 
@@ -219,10 +235,7 @@ const finishInit = () => {
     expect(component.table).toBeTruthy('table component should be created');
 
     const compiled = fixture.debugElement.nativeElement as HTMLElement;
-    expect(compiled.querySelectorAll('tr').length).toBeGreaterThan(0);
-
-    console.log('----------------------------------DP: '+component.table.columns[0].dataprovider[1]);
-    console.log('rendered rows '+component.table.renderedRows.length);
+    expect(compiled.querySelectorAll('tr').length).toBeGreaterThan(1);
 
     const headers = component.table.getNativeElement().getElementsByTagName('th');
     expect(headers).toBeDefined();
@@ -241,14 +254,34 @@ const finishInit = () => {
     expect(firstRow[2].innerText).toEqual('Reims');
   }));
 
-  it('should call cell handlers', fakeAsync(() => {
+  it('should call cell handlers and select row', fakeAsync(() => {
     finishInit();
+
+    expect(component.table.foundset.selectedRowIndexes).toHaveSize(1);
+    expect(component.table.foundset.selectedRowIndexes[0]).toEqual(0, 'first row should be selected');
+
     const rows = component.table.getNativeElement().getElementsByTagName('tr');
     const firstRow = rows[1].getElementsByTagName('td');
     firstRow[1].click();
     fixture.detectChanges();
     flush();
     expect(onCellClick).toHaveBeenCalled();
-    expect(onCellClick).toHaveBeenCalledWith(0, 1, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
+    expect(onCellClick).toHaveBeenCalledWith(1, 1, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
+    expect(component.table.foundset.selectedRowIndexes).toHaveSize(1);
+    //expect(component.table.foundset.selectedRowIndexes[0]).toEqual(1, 'second row should be selected');
+    //expect(component.table.foundset.requestSelectionUpdate).toHaveBeenCalledWith([1]);
+    //TODO check selected class
+
+    firstRow[2].dispatchEvent(new MouseEvent('contextmenu'));
+    fixture.detectChanges();
+    flush();
+    expect(onCellRightClick).toHaveBeenCalledWith(1, 2, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
+
+    firstRow[0].click();
+    firstRow[0].click();
+    fixture.detectChanges();
+    flush();
+    expect(onCellDoubleClick).toHaveBeenCalledWith(1, 0, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
+    expect(onCellClick).not.toHaveBeenCalledWith(1, 0, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
   }));
 });

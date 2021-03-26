@@ -20,7 +20,7 @@
 					    [ngClass]="getColumnClass(column, r + foundset.viewPort.startIndex)"
 						(click)="cellClick(r + foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
 						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r+ foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
-						(contextmenu)="onCellRightClick && onCellRightClick(r + foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)">
+						(contextmenu)="onCellRightClick && onCellRightClick(r + foundset.viewPort.startIndex + 1, i, foundset.viewPort.rows[r], $event, column.id)">
 						<div [innerHtml]="column.dataprovider ? column.dataprovider[foundset.viewPort.rows.indexOf(row)] : ''"></div>
 					</td>
 				</tr>
