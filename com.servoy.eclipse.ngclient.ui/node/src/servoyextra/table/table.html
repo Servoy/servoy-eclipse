@@ -17,10 +17,11 @@
 				<tr [svyTableRow]="r + foundset.viewPort.startIndex" cdk-row *cdkVirtualFor="let row of items; let r = index;"
 					(click)="selectRow(r + foundset.viewPort.startIndex, $event)" [ngClass]="getRowClass(r + foundset.viewPort.startIndex)">
 					<td cdk-cell *ngFor="let column of columns; let i = index;" [className]="'c' + i"
+					    [ngClass]="getColumnClass(column, r + foundset.viewPort.startIndex)"
 						(click)="cellClick(r + foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
 						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r+ foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
 						(contextmenu)="onCellRightClick && onCellRightClick(r + foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)">
-						<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
+						<div [innerHtml]="column.dataprovider ? column.dataprovider[foundset.viewPort.rows.indexOf(row)] : ''"></div>
 					</td>
 				</tr>
 			</cdk-virtual-scroll-viewport>
