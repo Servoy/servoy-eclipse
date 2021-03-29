@@ -194,6 +194,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('bootstrapcomponentsTypeahead', { static: true }) readonly bootstrapcomponentsTypeahead: TemplateRef<any>;
 
     @ViewChild('bootstrapextracomponentsBreadcrumbs', { static: true }) readonly bootstrapextracomponentsBreadcrumbs: TemplateRef<any>;
+    @ViewChild('bootstrapextracomponentsButtonsGroup', { static: true }) readonly bootstrapextracomponentsButtonsGroup: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsNavbar', { static: true }) readonly bootstrapextracomponentsNavbar: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsCarousel', { static: true }) readonly bootstrapextracomponentsCarousel: TemplateRef<any>;
     
