@@ -73,84 +73,84 @@
 							<type>eclipse-plugin</type>
 							<id>sablo</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>org.eclipse.dltk.javascript.rhino</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_base</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_shared</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_smart_client</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_headless_client</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_ngclient</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_debug</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_server</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_log4j</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.ui.tweaks</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.css.core</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 					</filters>
@@ -429,19 +429,19 @@
 									<target>
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 									</target>
 								</configuration>
