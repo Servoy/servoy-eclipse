@@ -1,10 +1,17 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, Renderer2, SimpleChanges, ViewChild } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, Renderer2, SimpleChanges, ViewChild } from "@angular/core";
 import { ServoyBaseComponent } from "../../ngclient/basecomponent";
 import { IActionMapping, ITreeOptions, TreeComponent, TreeNode} from '@circlon/angular-tree-component'
 import { LoggerService, LoggerFactory } from "../../sablo/logger.service";
 import { ApplicationService } from "../../ngclient/services/application.service";
 import { ServoyService } from "../../ngclient/servoy.service";
 import { ITreeNode } from "@circlon/angular-tree-component/lib/defs/api";
+import { LocalStorageService } from "../../sablo/webstorage/localstorage.service";
+import { Foundset, FoundsetChangeEvent } from "../../ngclient/converters/foundset_converter";
+
+interface FoundsetListener {
+  listener: () => void,
+  foundsetId: number
+}
 
 @Component({
     selector: 'servoyextra-dbtreeview', 
@@ -12,7 +19,7 @@ import { ITreeNode } from "@circlon/angular-tree-component/lib/defs/api";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> { 
+export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> implements OnDestroy { 
 
     @Input() levelVisibilityChange;
     @Input() foundsets: any[]; 
@@ -25,9 +32,8 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     @Input() levelVisibility;
     @Input() location;
     @Input() responsiveHeight;
-    @Input() selection;
-    @Input() size;
-    @Input() nodes: any[];
+    @Input() selection: Array<any>
+    @Input() size; 
     @Input() visible: boolean;
     @Input() onReady: (e: Event, data?: any) => void;
 
@@ -35,23 +41,25 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     folderImgPath = "../../assets/images/folder.png"
     fileImgPath = "../../assets/images/file.png"
     useCheckboxes = false;
-    expandedNodes: any;
+    expandedNodes: any = [];
     displayNodes = [];
+    removeListenerFunctionArray: Array<FoundsetListener> = [];
 
     @ViewChild('element', { static: true }) elementRef: ElementRef;
     @ViewChild('tree', { static: true }) tree: TreeComponent;
   
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,logFactory: LoggerFactory,
        private applicationService: ApplicationService,
-       private servoyService: ServoyService) {
+       private servoyService: ServoyService,
+       private localStorage: LocalStorageService) {
       super(renderer, cdRef);
       this.log = logFactory.getLogger('ServoyExtraDbtreeview');
     }
 
     @HostListener('window:beforeunload', ['$event'])
-    async onBeforeUnloadHander(event) {
-      console.log(event);
-      await this.servoyApi.callServerSideApi('saveNodes', [this.displayNodes]);
+    onBeforeUnloadHander() {
+      // TODO: find a way to store the inner children (i.d. the array of children)
+      // this.localStorage.set('dbtreeview', JSON.stringify(this.displayNodes));
     }
 
     actionMapping: IActionMapping = {
@@ -85,8 +93,15 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
 
     svyOnInit() {
         super.svyOnInit();
-        if (!this.nodes || this.nodes.length === 0) { this.initTree() }  else {
-          this.displayNodes = this.nodes;
+        if (this.localStorage.has('dbtreeview')) {
+          this.displayNodes = JSON.parse(this.localStorage.get('dbtreeview'));
+        }
+        if (!this.displayNodes || this.displayNodes.length === 0) { this.initTree() } 
+
+        if (this.foundsets) {
+          this.foundsets.forEach(foundsetInfo => {
+            this.addFoundsetListener(foundsetInfo.foundset);
+          });
         }
     }
 
@@ -104,6 +119,11 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
                   if (change.currentValue) {
                     this.initTree();
                   }
+                  this.addOrRemoveFoundsetListeners(change);
+                  break;
+                }
+                case 'relatedFoundsets': {
+                  this.addOrRemoveFoundsetListeners(change);
                   break;
                 }
                 case 'selection': {
@@ -117,14 +137,13 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
                   }
                 }
                 case 'enabled': {
-                  // TODO: element ref is not defined at this time, how to solve this?
-                  // if(change.previousValue !== change.currentValue && this.elementRef) {
-                  //   if(change.currentValue) {
-                  //     this.renderer.removeClass(this.elementRef, "dbtreeview-disabled");
-                  //   } else {
-                  //     this.renderer.addClass(this.elementRef, "dbtreeview-disabled");
-                  //   }
-                  // }
+                  if(change.previousValue !== change.currentValue && this.elementRef) {
+                    if(change.currentValue) {
+                      this.renderer.removeClass(this.elementRef.nativeElement, "dbtreeview-disabled");
+                    } else {
+                      this.renderer.addClass(this.elementRef.nativeElement, "dbtreeview-disabled");
+                    }
+                  }
                   break;
                 }
               }
@@ -132,8 +151,22 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
           }
     }
 
+    ngOnDestroy() {
+      if (this.removeListenerFunctionArray != null) {
+        this.removeListenerFunctionArray.forEach(removeListenerFunction => {
+          removeListenerFunction.listener();
+        })
+        this.removeListenerFunctionArray = null;
+      }
+      if (this.localStorage.has('dbtreeview')) {
+        this.localStorage.remove('dbtreeview');
+      }
+      super.ngOnDestroy();
+    }
+
     private initTree(): void {
       let children = [];
+      this.displayNodes = [];
       if (this.foundsets) {
         this.foundsets.forEach((elem) => {
           elem.foundset.viewPort.rows.forEach((row, index) => {
@@ -142,7 +175,6 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
           });
       }, this);
       this.displayNodes = children;
-      this.nodes.push(children); 
       this.cdRef.detectChanges();
       }
     }
@@ -150,17 +182,18 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     async getChildren(node: TreeNode) {
       let children = [];
       for (let index = 0; index < this.relatedFoundsets.length; index++) {
-        let relatedFoundsetsChecked = false;
-        const rows = this.relatedFoundsets[index].foundset.viewPort.rows;
-        for(const row of rows) {
-          if (row.parent_id === node.data.id) {
-            if (!relatedFoundsetsChecked!) {
-              await this.servoyApi.callServerSideApi('loadRelatedFoundset', [index]);
-              relatedFoundsetsChecked = true;
+          if (this.relatedFoundsets[index].foundsetInfoParentID === node.data.foundsetInfoID 
+            && this.relatedFoundsets[index].indexOfTheParentRecord === node.data.indexOfTheParentRecord) {
+
+            // load the next round of related foundsets
+            await this.servoyApi.callServerSideApi('loadRelatedFoundset', [index]);
+
+            const rows = this.relatedFoundsets[index].foundset.viewPort.rows;
+            for(let rowIndex = 0; rowIndex < rows.length; rowIndex++ ) {
+              children.push(this.buildChild(rows[rowIndex], this.relatedFoundsets[index], rowIndex, node.data.level + 1, node));
             }
-            children.push(this.buildChild(row, this.relatedFoundsets[index], index, node.data.level + 1, node));
-          }
-        }
+            break;
+         }
       }
       return children;
     }
@@ -178,7 +211,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     onTreeLoad(event) {
-      this.expandNodes(this.nodes);
+      this.expandNodes(this.displayNodes);
       if (this.onReady) {
         this.onReady(event);
       }
@@ -254,16 +287,21 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     private buildChild(row: any, foundsetInfo: any, index: number, level: number, parent: TreeNode) {
-      let child : {parent?: TreeNode, id?: number, name?: string, hasChildren?: boolean, image?: string,
+      let child : {parent?: TreeNode, id?: string, name?: string, hasChildren?: boolean, image?: string,
       checkbox?: boolean, checked?: boolean, active?: boolean, children?: Array<any>, tooltip?: string};
 
-      child = { id: row.node_id, name: row.text, hasChildren: this.hasChildren(row.node_id) };
+      child = { id: foundsetInfo.foundsetInfoID + '_' + row[foundsetInfo.foundsetPK],
+       name: row.text, hasChildren: this.hasChildren(foundsetInfo, index) };
+
+       // save info about parent 
+      if (child.hasChildren) {
+        child["indexOfTheParentRecord"] = index;
+        child["foundsetInfoID"] = foundsetInfo.foundsetInfoID;
+      }
 
       child["parent"] = parent;
       child["level"] = level;
 
-      // TODO get the foundsetpk
-      const foundsetpk = 'node_id';
       const binding = this.getBinding(foundsetInfo.datasourceID);
       if (binding.imageurldataprovider) {
         child["image"] = this.getIconURL(foundsetInfo.foundset.viewPort.rows[index][binding.imageurldataprovider]);
@@ -281,11 +319,12 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
         child["checkbox"] = Boolean(foundsetInfo.foundset.viewPort.rows[index][binding.hascheckboxdataprovider]);
       }
       else if (binding.hasCheckboxValue) {
-        child["checkbox"] = binding.hasCheckboxValue.indexOf("" + foundsetInfo.foundset.viewPort.rows[index][foundsetpk]) != -1;
+        child["checkbox"] = binding.hasCheckboxValue.indexOf("" + foundsetInfo.foundset.viewPort.rows[index][foundsetInfo.foundsetPK]) != -1;
       }
       else {
         child["checkbox"] = Boolean(binding.initialCheckboxValues);
       }
+
       if (child["checkbox"]) {
         if(parent && parent.data.checked) {
           child["checked"] = true;
@@ -294,16 +333,20 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
           child["checked"] = Boolean(foundsetInfo.foundset.viewPort.rows[index][binding.checkboxvaluedataprovider]);
         }
         else if (binding.initialCheckboxValues) {
-          child["checked"] = binding.initialCheckboxValues.indexOf("" + foundsetInfo.foundset.viewPort.rows[index][foundsetpk]) != -1;
+          child["checked"] = binding.initialCheckboxValues.indexOf("" + foundsetInfo.foundset.viewPort.rows[index][foundsetInfo.foundsetPK]) != -1;
         }
       }
 
-      // TODO get level
-      var isLevelVisible = this.levelVisibility && this.levelVisibility.state && (this.levelVisibility.level == level);
+      const isLevelVisible = this.levelVisibility && this.levelVisibility.state && (this.levelVisibility.level == level);
+      var isNodeExpanded = (level <= this.expandedNodes.length) && (this.expandedNodes[level - 1].toString() == this.getPKFromNodeID(child.id));
 
-      // if(this.isNodeSelected(child, this.selection)) {
-      //   child["active"] = true;
-      // }
+      if (isLevelVisible || isNodeExpanded) {
+        child["expanded"] = true;
+      }
+
+      if(this.isNodeSelected(child, this.selection)) {
+        child["active"] = true;
+      }
 
       if(binding.nRelationInfos && binding.nRelationInfos.length > 0) {
         child["image"] = this.folderImgPath;
@@ -345,23 +388,22 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
       return child;
     }
 
-    hasChildren(nodeID: number) {
+    hasChildren(foundsetInfo: any, index: number) {
       let hasChildren = false;
-      this.relatedFoundsets.forEach((foundsetInfo) => {
-          if (foundsetInfo.foundset.viewPort.rows.find(row => row.parent_id === nodeID)) { 
-            hasChildren = true;
-            return;
-          }
-          if(hasChildren) return;
-      }, this);
+      for(let fsInfo of this.relatedFoundsets) {
+        hasChildren = (foundsetInfo.foundsetInfoID === fsInfo.foundsetInfoParentID && index === fsInfo.indexOfTheParentRecord);
+        if(hasChildren) break;
+      }
       return hasChildren;
     }
 
-    public refresh(): void {}
+    public refresh(): void {
+      this.initTree();
+    }
 
     public isNodeExpanded(pk: Array<number>): boolean {
       if (this.tree) {
-          const node = this.tree.treeModel.getNodeByPath(pk);
+          const node = this.findNode(this.tree.treeModel.virtualRoot, pk, 0);
           if(node) {
 	  				return node.isExpanded;
 	  			}
@@ -369,13 +411,13 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
       return false;
     }
 
-    public setExpandNode(pk: Array<number>, state: boolean): void {
+    public setExpandNode(pk: Array<any>, state: boolean): void {
       if (this.tree) {
         if (pk && pk.length) {
           if(state) {
             this.expandedNodes = pk.slice(0, pk.length);
           }
-          const node = this.tree.treeModel.getNodeByPath(pk);
+          const node = this.tree ? this.findNode(this.tree.treeModel.virtualRoot, pk, 0) : null;
           if(node) {
             this.tree.treeModel.setExpandedNode(node, state);
           }
@@ -383,7 +425,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
       }
     }
 
-    public getSelectionPath() {
+    public getSelectionPath(): Array<any> {
       return this.selection;
     }
 
@@ -392,6 +434,25 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     public getCheckBoxValues(datasource) {}
+
+    findNode(node: TreeNode, pkarray: Array<any>, level: number) {
+      if(pkarray && pkarray.length > 0) {
+        const nodeChildren = node.children;
+        if(nodeChildren) {
+          for(let i = 0; i < nodeChildren.length; i++) {
+            if(this.getPKFromNodeID(nodeChildren[i].id) == pkarray[level].toString()) {
+              if(level + 1 < pkarray.length) {
+                return this.findNode(nodeChildren[i], pkarray, level + 1);
+              }
+              else {
+                return nodeChildren[i];
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
 
     expandChildNodes(node: TreeNode, level: number, state: boolean) {
       if(level >= 1) {
@@ -407,18 +468,22 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
       }
     }
 
-    isNodeSelected(node, selection) {
+    isNodeSelected(node: any, selection: Array<any>) {
 			if(selection && selection.length) {
-				var nodePKPath = [];
-				nodePKPath.unshift(this.getPKFromNodeKey(node.key));
-				var parentNode = node.data.parentItem;
-				while(parentNode) {
-					nodePKPath.unshift(this.getPKFromNodeKey(parentNode.key));
-					parentNode = parentNode.data.parentItem;
-				}
+				const nodePKPath = [];
+				nodePKPath.unshift(this.getPKFromNodeID(node.id));
 
+				let parentNode = node.parent;
+				while(parentNode) {
+          if (parentNode !== this.tree.treeModel.virtualRoot) {
+            nodePKPath.unshift(this.getPKFromNodeID(parentNode.data.id));
+            parentNode = parentNode.parent;
+          } else {
+            break;
+          }
+				}
 				if(nodePKPath.length == selection.length) {
-					for(var i = 0; i < nodePKPath.length; i++) {
+					for(let i = 0; i < nodePKPath.length; i++) {
 						if(nodePKPath[i] != selection[i].toString()) {
 							return false;
 						}
@@ -426,14 +491,13 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
 					return true;
 				}
 			}
-
 			return false;
 		}		
 
-    selectNode(selection: Array<number>) {
+    selectNode(selection: Array<any>) {
 			if(selection && selection.length) {
 				this.expandedNodes = selection.slice(0, selection.length);
-        const node = this.tree.treeModel.getNodeByPath(selection);
+        const node = this.findNode(this.tree.treeModel.virtualRoot, selection, 0);
 				if(node && !node.isActive) {
 					node.setActiveAndVisible(true);
 				}
@@ -443,9 +507,8 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
 	    }
   	}
 
-    getPKFromNodeKey(nodeKey) {
-			var pkIdx = nodeKey.indexOf('_');
-			return nodeKey.substring(pkIdx + 1);
+    getPKFromNodeID(nodeID: string) {
+			return nodeID.substring(nodeID.indexOf('_') + 1);
 		}
 
     private getBinding(datasource) {
@@ -463,4 +526,58 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> {
       }
       return iconPath;
     }
+
+    private addOrRemoveFoundsetListeners(change) {
+      if (change.currentValue) {
+        change.currentValue.forEach(fsInfoCV => {
+          if (change.previousValue && change.previousValue.length > 0) {
+            if (!change.previousValue.find(fsInfoPV => {
+              fsInfoCV.foundset.foundsetId === fsInfoPV.foundset.foundsetId;
+            })) {
+              this.addFoundsetListener(fsInfoCV.foundset);
+            }
+          } else {
+            this.addFoundsetListener(fsInfoCV.foundset);
+          }
+        });
+      }
+
+      if (change.previousValue) {
+        change.previousValue.forEach(fsInfoPV => {
+          if (change.currentValue && change.currentValue.length > 0) {
+            if (!change.currentValue.find(fsInfoCV => {
+              fsInfoPV.foundset.foundsetId === fsInfoCV.foundset.foundsetId;
+            })) {
+              this.removeFoundsetListener(fsInfoPV.foundset);
+            }
+          } else {
+            this.removeFoundsetListener(fsInfoPV.foundset);
+          }
+        });
+      }
+    }
+
+    private addFoundsetListener(foundset: Foundset) {
+      if (!this.removeListenerFunctionArray.find(listener => {
+        listener.foundsetId === foundset.foundsetId;
+      })) {
+        this.removeListenerFunctionArray.push({listener: foundset.addChangeListener((event: FoundsetChangeEvent) => {
+          if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.serverFoundsetSizeChanged) {
+            this.initTree();
+          }
+
+          // FIXME: when using the 'test_webcomponents' solution this event is triggered continuously
+          // if (event.fullValueChanged && event.fullValueChanged.oldValue !== event.fullValueChanged.newValue) {
+          //   this.initTree();
+          // }
+        }), foundsetId: foundset.foundsetId});
+      }
+    }
+
+    private removeFoundsetListener(foundset: Foundset) {
+      const fsListener = this.removeListenerFunctionArray.find(el => el.foundsetId === foundset.foundsetId);
+      if (fsListener) fsListener.listener();
+      this.removeListenerFunctionArray = this.removeListenerFunctionArray.filter(el => !(el.foundsetId === foundset.foundsetId));
+    }
+
 }
