@@ -136,7 +136,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
             })
         ).subscribe();
         this.renderedRows.changes.subscribe(() => {
-           const newAvg = this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length;
+           const newAvg = this.renderedRows.length > 0 ? this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length : 0;
            if (newAvg !== this.averageRowHeight || this.renderedRowsLength !== this.renderedRows.length) {
                 this.averageRowHeight = newAvg;
                 if (this.responsiveDynamicHeight) this.computeTableHeight();
