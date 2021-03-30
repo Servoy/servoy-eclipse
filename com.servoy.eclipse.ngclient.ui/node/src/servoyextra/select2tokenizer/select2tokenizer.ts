@@ -1,7 +1,8 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IValuelist } from '../../sablo/spectypes.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoyextra-select2tokenizer',
@@ -28,8 +29,9 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
 
     data: Select2Option[] = [];
     filteredDataProviderId: any;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+    listPosition : 'above' | 'below'= "below";
+    
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
     }
 
@@ -45,6 +47,13 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         super.svyOnInit();
         this.setData();
 		this.attachFocusListeners();
+        const position = this.getNativeElement().getBoundingClientRect();
+        let availableHeight = this.doc.defaultView.innerHeight - position.top - position.height;
+        let dropDownheight = this.valuelistID.length * 30;
+        if (dropDownheight > availableHeight)
+        {
+            this.listPosition = 'above';
+        }
     }
 
     attachFocusListeners() {
