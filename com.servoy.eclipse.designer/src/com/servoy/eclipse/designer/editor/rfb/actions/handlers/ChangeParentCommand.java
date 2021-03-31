@@ -117,7 +117,12 @@ public class ChangeParentCommand extends Command
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(child.getParent());
 
 		ISupportChilds initialParent = child instanceof ISupportExtendsID ? ((ISupportExtendsID)child).getRealParent() : child.getParent();
-		if (newParent == null) newParent = initialParent;
+		boolean sameParent = false;
+		if (newParent == null)
+		{
+			newParent = initialParent;
+			sameParent = true;
+		}
 		if (!form.equals(newParent.getAncestor(IRepository.FORMS)))
 		{
 			try
@@ -139,7 +144,7 @@ public class ChangeParentCommand extends Command
 			oldIndex = sortedChildren.indexOf(child);
 		}
 		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, newParent);
-		if (newParent == initialParent)
+		if (newParent == initialParent || sameParent)
 		{
 			oldParent = null;
 			//same parent
