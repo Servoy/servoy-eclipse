@@ -33,8 +33,8 @@ export class ServoyBootstrapExtraCarousel extends ServoyBaseComponent<HTMLDivEle
 
     innerSlides: Array<Slide>;
 
-    loadingImage = "bootstrapextracomponents/carousel/resources/loading.gif";
-    missingImage = "bootstrapextracomponents/carousel/resources/missing.png";
+    loadingImage = 'bootstrapextracomponents/carousel/resources/loading.gif';
+    missingImage = 'bootstrapextracomponents/carousel/resources/missing.png';
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, _config: NgbCarouselConfig ) {
         super( renderer, cdRef );
@@ -50,43 +50,42 @@ export class ServoyBootstrapExtraCarousel extends ServoyBaseComponent<HTMLDivEle
                 this.createSlides();
             }
             if ( changes.imageOptions ) {
-                let currentValue = changes.imageOptions.currentValue;
+                const currentValue = changes.imageOptions.currentValue;
                 if ( currentValue === 'Reduce' && !this.imageCss ) {
                     this.imageCssInternal = {
                         'max-width': '100%',
                         'max-height': '100%',
-                        'width': this.size ? this.size.width + 'px' : null,
-                        'height': this.size ? this.size.height + 'px' : null,
+                        width: this.size ? this.size.width + 'px' : null,
+                        height: this.size ? this.size.height + 'px' : null,
                         'object-fit': 'contain'
-                    }
+                    };
                 }
                 if ( currentValue === 'Reduce/Enlarge' && !this.imageCss ) {
                     this.imageCssInternal = {
-                        'width': this.size ? this.size.width + 'px' : null,
-                        'height': this.size ? this.size.height + 'px' : null
-                    }
+                        width: this.size ? this.size.width + 'px' : null,
+                        height: this.size ? this.size.height + 'px' : null
+                    };
                 }
                 if ( currentValue === 'Crop' && !this.imageCss ) {
                     this.imageCssInternal = {
-                        'width': 'auto',
-                        'height': 'auto'
-                    }
+                        width: 'auto',
+                        height: 'auto'
+                    };
                 }
                 if ( currentValue === 'Scale to fit' && !this.imageCss ) {
                     this.imageCssInternal = {
                         'max-width': '100%',
                         'max-height': '100%',
-                        'width': this.size ? this.size.width + 'px' : null || ( this.servoyApi.isInAbsoluteLayout() ? this.size.width + 'px' : '100%' ),
-                        'height': this.size ? this.size.height + 'px' : null || ( this.servoyApi.isInAbsoluteLayout() ? this.size.height + 'px' : this.responsiveHeight + 'px' ),
+                        width: this.size ? this.size.width + 'px' : null || ( this.servoyApi.isInAbsoluteLayout() ? this.size.width + 'px' : '100%' ),
+                        height: this.size ? this.size.height + 'px' : null || ( this.servoyApi.isInAbsoluteLayout() ? this.size.height + 'px' : this.responsiveHeight + 'px' ),
                         'object-fit': 'contain'
-                    }
+                    };
                 }
 
             }
             if ( changes.imageCss ) {
                 if ( changes.imageCss.currentValue !== undefined ) {
-                    for ( let i = 0; i < this.imageCss.length; i++ ) {
-                        const cssEntry = this.imageCss[i];
+                    for ( const cssEntry of this.imageCss) {
                         this.imageCssInternal[cssEntry.propertyName] = cssEntry.propertyValue;
                     }
                 }
@@ -96,8 +95,8 @@ export class ServoyBootstrapExtraCarousel extends ServoyBaseComponent<HTMLDivEle
     }
 
     getSelectedIndex() {
-        let activeId = this.ngCarousel.activeId;
-        return parseInt( activeId.substr( activeId.length - 1 ) );
+        const activeId = this.ngCarousel.activeId;
+        return parseInt( activeId.substr( activeId.length - 1 ), 10 );
     }
 
     setSelectedIndex( index: number ) {
@@ -105,11 +104,18 @@ export class ServoyBootstrapExtraCarousel extends ServoyBaseComponent<HTMLDivEle
         this.ngCarousel.select( this.ngCarousel.activeId );
     }
 
+    getStyle(): any {
+        const layoutStyle: any = {};
+        if ( !this.servoyApi.isInAbsoluteLayout() ) {
+            layoutStyle.height = this.responsiveHeight;
+        }
+        return layoutStyle;
+    }
+
     private createSlides = () => {
         this.innerSlides = [];
         if ( this.slidesFoundset !== null && this.slidesFoundset !== undefined ) {
-            for ( let i = 0; i < this.slidesFoundset.viewPort.rows.length; i++ ) {
-                const row = this.slidesFoundset.viewPort.rows[i];
+            for ( const row of this.slidesFoundset.viewPort.rows ) {
                 const slide = new Slide();
                 slide.imageUrl = row.image && row.image.url ? row.image.url : null;
                 slide.caption = row.caption ? row.caption : null;
@@ -121,14 +127,6 @@ export class ServoyBootstrapExtraCarousel extends ServoyBaseComponent<HTMLDivEle
             }
         }
     };
-
-    getStyle(): any {
-        let layoutStyle: any = {};
-        if ( !this.servoyApi.isInAbsoluteLayout() ) {
-            layoutStyle.height = this.responsiveHeight;
-        }
-        return layoutStyle;
-    }
 }
 
 export class Slide extends BaseCustomObject {

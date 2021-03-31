@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyBootstrapExtraCarousel } from './carousel';
 
-describe('FileUploadComponent', () => {
+describe('ServoyBootstrapExtraCarousel', () => {
   let component: ServoyBootstrapExtraCarousel;
   let fixture: ComponentFixture<ServoyBootstrapExtraCarousel>;
 
@@ -16,11 +16,11 @@ describe('FileUploadComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapExtraCarousel);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent', 'isInAbsoluteLayout']);
     fixture.detectChanges();
   });
 
-  xit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });
