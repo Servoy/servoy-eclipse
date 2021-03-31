@@ -16,16 +16,16 @@ import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/load
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyExtraTable } from './table';
+import { ServoyExtraTable, TableRow } from './table';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'test-wrapper',
-  template: '<div style="position: absolute; left: 29px; top: 139px; width: 571px; height: 438px;">\
+  template: '<div style="position: absolute; left: 29px; top: 139px; width: 571px; height: 300px;">\
                     <servoyextra-table #table [servoyApi]="servoyApi" [foundset]="foundset" [columns]="columns" [minRowHeight]="minRowHeight"\
                          [enableColumnResize]="enableColumnResize" [pageSize]="pageSize" [responsiveHeight]="responsiveHeight"\
                          [onCellClick]="cellClick" [onCellRightClick]="cellRightClick" [onCellDoubleClick]="cellDoubleClick"\
-                         [onHeaderClick]="headerClick" [onHeaderRightClick]="headerRightClick" >\
+                         [onHeaderClick]="headerClick" [onHeaderRightClick]="headerRightClick" [onFocusGainedMethodID]="focusGained" [onFocusLostMethodID]="focusLost" >\
                     </servoyextra-table > </div>',
 })
 class TestWrapperComponent {
@@ -36,12 +36,14 @@ class TestWrapperComponent {
     @Input() minRowHeight: string;
     @Input() enableColumnResize: boolean;
     @Input() pageSize: number;
-    @Input() cellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
     @Input() responsiveHeight;
+    @Input() cellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
     @Input() cellRightClick;
     @Input() cellDoubleClick;
     @Input() headerClick;
     @Input() headerRightClick;
+    @Input() focusGained;
+    @Input() focusLost;
 }
 
 describe('ServoyExtraTable', () => {
@@ -58,16 +60,20 @@ describe('ServoyExtraTable', () => {
   const onCellClick = jasmine.createSpy('onCellClick');
   const onCellRightClick = jasmine.createSpy('onCellRightClick');
   const onCellDoubleClick = jasmine.createSpy('onCellDoubleClick');
-  const onHeaderClick = jasmine.createSpy('onHeaderClick');
-  const onHeaderRightClick = jasmine.createSpy('onHeaderRightClick');
+  const onHeaderClick = jasmine.createSpy('onHeaderClick').and.returnValue(Promise.resolve('asc'));
+  const onHeaderRightClick = jasmine.createSpy('onHeaderRightClick').and.returnValue(Promise.resolve(''));
+  const onFocusGained = jasmine.createSpy('onFocusGained');
+  const onFocusLost = jasmine.createSpy('onFocusLost');
+  const sort = jasmine.createSpy('sort').and.returnValue(Promise.resolve(true));
+  const loadExtraRecordsAsync = jasmine.createSpy('loadExtraRecordsAsync').and.returnValue(Promise.resolve(true));
 
  const getFoundset  = (): Foundset => {
     const fs_json = {
       serverSize: 200,
       foundsetId: 1,
-      sortColumns: '08d25c66d8b38adb872a5ffec31ca906 asc',
+      sortColumns: 'ID_columnID asc',
       selectedRowIndexes: [
-        0
+        1
       ],
       multiSelect: false,
       hasMoreRows: true,
@@ -131,7 +137,7 @@ const finishInit = () => {
 
   beforeEach(  () =>  {
     TestBed.configureTestingModule({
-      declarations: [TestWrapperComponent, ServoyExtraTable],
+      declarations: [TestWrapperComponent, ServoyExtraTable, TableRow],
       imports: [ServoyTestingModule, ScrollingModule],
       providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, TestabilityService, SpecTypesService, LoggerFactory,
         WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
@@ -152,7 +158,8 @@ const finishInit = () => {
     component = fixture.componentInstance;
     component.foundset = getFoundset();
     component.foundset.requestSelectionUpdate = jasmine.createSpy('requestSelectionUpdate');
-    component.foundset.sort = jasmine.createSpy('sort');
+    component.foundset.sort = sort;
+    component.foundset.loadExtraRecordsAsync = loadExtraRecordsAsync;
     component.columns = [
       {
         state: {
@@ -217,15 +224,20 @@ const finishInit = () => {
         initialWidth: 'auto'
       }
     ];
+    component.columns[0].dataprovider.idForFoundset= 'ID_columnID'; //have some readable id for fs
+    component.columns[1].dataprovider.idForFoundset= 'Country_columnID';
+    component.columns[2].dataprovider.idForFoundset= 'City_columnID';
     component.minRowHeight = '25px';
     component.enableColumnResize = false;
     component.pageSize = 5;
-    component.responsiveHeight = 500;
+    component.responsiveHeight = 300;
     component.cellClick = onCellClick;
     component.cellRightClick = onCellRightClick;
     component.cellDoubleClick = onCellDoubleClick;
     component.headerClick = onHeaderClick;
     component.headerRightClick = onHeaderRightClick;
+    component.focusGained = onFocusGained;
+    component.focusLost = onFocusLost;
   });
 
 
@@ -243,7 +255,7 @@ const finishInit = () => {
     expect(headers[0].innerText.trim()).toEqual('ID', 'first header text should be ID');
     expect(headers[1].innerText.trim()).toEqual('Country', 'second header text should be Country');
     expect(headers[2].innerText.trim()).toEqual('City', 'third header text should be City');
-    expect(component.table.getNativeElement().clientHeight).toBe(500);
+    expect(component.table.getNativeElement().clientHeight).toBe(300);
     const rows = component.table.getNativeElement().getElementsByTagName('tr');
     expect(rows).toBeDefined();
     expect(rows.length).toBeGreaterThan(0, 'should have rows');
@@ -257,20 +269,23 @@ const finishInit = () => {
   it('should call cell handlers and select row', fakeAsync(() => {
     finishInit();
 
-    expect(component.table.foundset.selectedRowIndexes).toHaveSize(1);
-    expect(component.table.foundset.selectedRowIndexes[0]).toEqual(0, 'first row should be selected');
-
     const rows = component.table.getNativeElement().getElementsByTagName('tr');
     const firstRow = rows[1].getElementsByTagName('td');
+
+    expect(component.table.foundset.selectedRowIndexes).toHaveSize(1);
+    expect(component.table.foundset.selectedRowIndexes[0]).toEqual(1, 'second row should be selected');
+    expect(rows[2]).toHaveClass('table-servoyextra-selected', 'second row should have class "table-servoyextra-selected"');
+
     firstRow[1].click();
     fixture.detectChanges();
     flush();
     expect(onCellClick).toHaveBeenCalled();
     expect(onCellClick).toHaveBeenCalledWith(1, 1, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
     expect(component.table.foundset.selectedRowIndexes).toHaveSize(1);
-    //expect(component.table.foundset.selectedRowIndexes[0]).toEqual(1, 'second row should be selected');
-    //expect(component.table.foundset.requestSelectionUpdate).toHaveBeenCalledWith([1]);
-    //TODO check selected class
+    expect(component.table.foundset.selectedRowIndexes[0]).toEqual(0, 'first row should be selected');
+    expect(component.table.foundset.requestSelectionUpdate).toHaveBeenCalledWith([0]);
+    expect(rows[1]).toHaveClass('table-servoyextra-selected', 'second row should have class "table-servoyextra-selected"');
+    expect(rows[2]).not.toHaveClass('table-servoyextra-selected', 'second row should NOT have class "table-servoyextra-selected" anymore');
 
     firstRow[2].dispatchEvent(new MouseEvent('contextmenu'));
     fixture.detectChanges();
@@ -284,4 +299,96 @@ const finishInit = () => {
     expect(onCellDoubleClick).toHaveBeenCalledWith(1, 0, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
     expect(onCellClick).not.toHaveBeenCalledWith(1, 0, { _svyRowId: '5.10248;_0' }, jasmine.anything(), undefined);
   }));
+
+  it('should call header handlers and sort', fakeAsync(() => {
+    finishInit();
+    fixture.detectChanges();
+    flush();
+
+    const headers = component.table.getNativeElement().getElementsByTagName('th');
+    expect(headers).toBeDefined();
+
+    headers[2].click();
+    fixture.detectChanges();
+    flush();
+    expect(onHeaderClick).toHaveBeenCalledWith(2, undefined, jasmine.anything(), undefined);
+    expect(component.table.foundset.sort).toHaveBeenCalledWith([{ name: 'City_columnID', direction: 'asc' }]);
+
+    headers[1].dispatchEvent(new MouseEvent('contextmenu'));
+    fixture.detectChanges();
+    flush();
+    expect(onHeaderRightClick).toHaveBeenCalledWith(1, undefined, jasmine.anything(), undefined);
+  }));
+
+  it('should call focus and blur handlers', fakeAsync(() => {
+    finishInit();
+    fixture.detectChanges();
+    flush();
+
+    expect(component.table.getNativeElement().getElementsByTagName('table')[0]).toBeDefined();
+    component.table.getNativeElement().getElementsByTagName('table')[0].dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    flush();
+    expect(onFocusGained).toHaveBeenCalled();
+    
+    component.table.getNativeElement().getElementsByTagName('table')[0].dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    flush();
+    expect(onFocusLost).toHaveBeenCalled();
+  }));
+
+  /*it('should scroll to index', fakeAsync(() => {
+    finishInit();
+
+    component.table.viewPort.scrollToIndex(8);
+    fixture.detectChanges();
+    flush();
+    tick(5000);
+    fixture.detectChanges();
+    flush();
+    fixture.detectChanges();
+    flush();
+    expect(loadExtraRecordsAsync).not.toHaveBeenCalled();
+    expect(component.table.getFirstVisibleIndex()).toEqual(3);
+
+    component.table.viewPort.scrollToIndex(100);
+    fixture.detectChanges();
+    flush();
+    tick(9000);
+    fixture.detectChanges();
+    flush();
+    tick(9000);
+    fixture.detectChanges();
+    flush();
+    expect(loadExtraRecordsAsync).toHaveBeenCalled();
+    expect(component.table.getFirstVisibleIndex()).toEqual(20);
+  }));*/
+
+  /*it('should navigate pages', fakeAsync(() => {
+    finishInit();
+
+    expect(component.table.showPagination()).toBeTrue();
+
+    const pagination = component.table.getNativeElement().getElementsByTagName('ngb-pagination');
+    expect(pagination[0]).toBeDefined();
+    const paginationLinks = pagination[0].getElementsByClassName('page-link');
+    expect(paginationLinks.length).toEqual(2);
+    const prevPage = paginationLinks[0] as HTMLElement;
+    const nextPage = paginationLinks[1] as HTMLElement;
+
+    //expect(component.table.getFirstVisibleIndex()).toEqual(0, 'first visible index should be 0, current page is 1');
+    expect(component.table.pageSize).toEqual(5);
+
+
+    nextPage.click();
+    flush();
+    tick(500);
+    component.table.viewPort.scrollToIndex(5);
+    tick(500);
+    flush();
+
+    expect(component.table.getFirstVisibleIndex()).toEqual(5);
+    expect(component.table.getFirstVisibleIndex()).toEqual(5, 'first visible index should be 5, current page is 2');
+
+  }));*/
 });
