@@ -14,13 +14,6 @@
 		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.19/</eclipse.url>
 	</properties>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>tycho-staged</id>
-			<url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1066/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<repositories>
 		<repository>
 			<id>developer_repo</id>
