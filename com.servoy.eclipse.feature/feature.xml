@@ -300,7 +300,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.tomcat"
          download-size="0"
          install-size="0"
-         version="8.5.57"
+         version="8.5.64"
          unpack="false"/>
 
    <plugin
