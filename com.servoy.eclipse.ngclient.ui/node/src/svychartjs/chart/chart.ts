@@ -1,6 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
-import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { IFoundset } from '../../sablo/spectypes.service';
 import { ChartType, ChartOptions, ChartDataSets } from 'chart.js';
 import { BaseChartDirective, Label } from 'ng2-charts';
@@ -32,10 +31,10 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
 
     @ViewChild(BaseChartDirective, { static: true }) chart: BaseChartDirective;
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLDivElement>;
-     
+
     public dataset: ChartDataSets[] = [{}];
     public labels: Label[];
-    
+
     private removeListenerFunction: () => void;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
@@ -50,7 +49,7 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
             };
         }
         if (this.foundset) {
-            this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+            this.removeListenerFunction = this.foundset.addChangeListener(() => {
                 this.setupData();
             });
 
@@ -97,8 +96,7 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
                     case 'backgroundColor':
                         if (this.backgroundColor) {
                             this.dataset[0].backgroundColor = this.backgroundColor;
-                        }
-                        else {
+                        } else {
                             let color_scheme = ['#5DA5DA',
                                 '#FAA43A',
                                 '#60BD68',
@@ -110,7 +108,7 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
                                 '#4D4D4D'];
 
                             if (this.backgroundColorScheme) {
-                                color_scheme = this.getColorScheme(this.backgroundColorScheme)
+                                color_scheme = this.getColorScheme(this.backgroundColorScheme);
                             }
                             this.dataset[0].backgroundColor = color_scheme;
                         }
@@ -139,7 +137,7 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
                     '#B276B2',
                     '#DECF3F',
                     '#F15854',
-                    '#4D4D4D']
+                    '#4D4D4D'];
             case 'facebook':
                 return ['#3b5998',
                     '#8b9dc3',
@@ -166,97 +164,97 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
                     '#854442',
                     '#fff4e6',
                     '#3c2f2f',
-                    '#be9b7b']
+                    '#be9b7b'];
             case 'beach':
                 return ['#96ceb4',
                     '#ffeead',
                     '#ff6f69',
                     '#ffcc5c',
-                    '#88d8b0']
+                    '#88d8b0'];
             case 'blues':
                 return ['#011f4b',
                     '#03396c',
                     '#005b96',
                     '#6497b1',
-                    '#b3cde0']
+                    '#b3cde0'];
             case 'metro':
                 return ['#d11141',
                     '#00b159',
                     '#00aedb',
                     '#f37735',
-                    '#ffc425']
+                    '#ffc425'];
             case 'turquoise_shades':
                 return ['#b3ecec',
                     '#89ecda',
                     '#43e8d8',
                     '#40e0d0',
-                    '#3bd6c6']
+                    '#3bd6c6'];
             case 'retro':
                 return ['#666547',
                     '#fb2e01',
                     '#6fcb9f',
                     '#ffe28a',
-                    '#fffeb3']
+                    '#fffeb3'];
             case 'pastel_rainbow':
                 return ['#a8e6cf',
                     '#dcedc1',
                     '#ffd3b6',
                     '#ffaaa5',
-                    '#ff8b94']
+                    '#ff8b94'];
             case 'pwc_corp':
                 return ['#dc6900',
                     '#eb8c00',
                     '#e0301e',
                     '#a32020',
-                    '#602320']
+                    '#602320'];
             case 'sage_cream':
                 return ['#bbcbdb',
                     '#9ebd9e',
                     '#dd855c',
                     '#f1e8ca',
-                    '#745151']
+                    '#745151'];
             case 'pink_shades':
                 return ['#ff00a9',
                     '#fb9f9f',
                     '#ff0065',
                     '#ffbfd3',
-                    '#fb5858']
+                    '#fb5858'];
             case 'craftsman':
                 return ['#d7c797',
                     '#845422',
                     '#ead61c',
                     '#a47c48',
-                    '#000000']
+                    '#000000'];
             case 'minimal_fire':
                 return ['#eec82b',
                     '#d6961c',
                     '#a96232',
                     '#9a2511',
-                    '#560000']
+                    '#560000'];
             case 'modern_1':
                 return ['#99b898',
                     '#feceab',
                     '#ff847c',
                     '#e84a5f',
-                    '#2a363b']
+                    '#2a363b'];
             case 'modern_2':
                 return ['#192425',
                     '#d2aa6b',
                     '#fd9418',
                     '#475758',
-                    '#2b6c8c']
+                    '#2b6c8c'];
             case 'modern_3':
                 return ['#d75c37',
                     '#67727a',
                     '#6991ac',
                     '#c3d7df',
-                    '#f5f5f5']
+                    '#f5f5f5'];
             case 'modern_muted':
                 return ['#a9b7c0',
                     '#c7d8c6',
                     '#efd9c1',
                     '#cccbc6',
-                    '#aaaaaa']
+                    '#aaaaaa'];
             default:
                 break;
         }
@@ -265,37 +263,34 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
 
     setupData() {
         if (this.foundset) {
-            var labels = [];
+            const labels = [];
             this.dataset[0].data = [];
-            var rows = this.foundset.viewPort.rows
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
+            for (const row of  this.foundset.viewPort.rows) {
                 labels.push(row.label ? row.label : row.value);
                 this.dataset[0].data.push(row.value);
             }
             //update datamodel
             this.data = {
                 type: this.type,
-                data: { labels: labels, datasets: [this.dataset] }
+                data: { labels, datasets: [this.dataset] }
             };
-        }
-        else if (this.data) {
+        } else if (this.data) {
             this.dataset = this.data.data.datasets;
             this.labels = this.data.data.labels;
         }
     }
 
-    handleClick(e : Event) {
-        let activePoints = this.chart.chart.getElementsAtEvent(e);
-        let dataset = this.chart.chart.getDatasetAtEvent(e);
+    handleClick(e: Event) {
+        const activePoints = this.chart.chart.getElementsAtEvent(e);
+        const dataset = this.chart.chart.getDatasetAtEvent(e);
         if (!dataset[0]) return;
         //get selected dataset index (helps distinguish between multiple datasets)
-        let firstdataset : any= dataset[0]
-        let datasetIndex = firstdataset._datasetIndex;
-        let selected : any = activePoints[datasetIndex];
+        const firstdataset: any= dataset[0];
+        const datasetIndex = firstdataset._datasetIndex;
+        const selected: any = activePoints[datasetIndex];
         if (!selected) return;
-        let label = this.chart.chart.data.labels[selected._index];
-        let value = this.chart.chart.data.datasets[selected._datasetIndex].data[selected._index];
+        const label = this.chart.chart.data.labels[selected._index];
+        const value = this.chart.chart.data.datasets[selected._datasetIndex].data[selected._index];
         if (this.onClick) {
             this.onClick(datasetIndex, selected._index, label.toString(), value as number, e);
         }
@@ -305,7 +300,7 @@ export class SvyChartJS extends ServoyBaseComponent<HTMLDivElement> {
         return this.chart.chart.generateLegend().toString();
     }
 
-    getChartAsImage(): String {
+    getChartAsImage(): string {
         return this.chart.chart.toBase64Image();
     }
 
