@@ -174,6 +174,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('servoyextraSidenav', { static: true }) readonly servoyextraSidenav: TemplateRef<any>;
     @ViewChild('servoyextraCollapse', { static: true }) readonly servoyextraCollapse: TemplateRef<any>;
     @ViewChild('servoyextraDbtreeview', { static: true }) readonly servoyextraDbtreeview: TemplateRef<any>;
+    @ViewChild('servoyextraTreeview', { static: true }) readonly servoyextraTreeview: TemplateRef<any>;
  
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;

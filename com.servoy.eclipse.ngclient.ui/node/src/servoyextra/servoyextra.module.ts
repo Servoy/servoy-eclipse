@@ -30,6 +30,9 @@ import { ServoyExtraCollapse } from './collapse/collapse';
 import { ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
 import { TreeModule } from '@circlon/angular-tree-component';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
+import { ServoyExtraTreeview } from './treeview/treeview';
+import { AngularTreeGridModule } from 'angular-tree-grid';
+import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
 
 @NgModule({
     declarations: [
@@ -49,6 +52,8 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
         ServoyExtraSidenav,
         ServoyExtraCollapse,
         ServoyExtraDbtreeview,
+        ServoyExtraTreeview,
+        ServoyExtraTreeviewCellRenderer,
 		BGSplitter,
     	BGPane
     ],
@@ -66,7 +71,8 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
         UppyAngularModule,
         LightboxModule,
         TreeModule,
-        EditorModule
+        EditorModule,
+        AngularTreeGridModule
     ], 
     providers: [AsyncPipe,
             { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
@@ -86,7 +92,8 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
               ServoyExtraYoutubeVideoEmbedder,
               ServoyExtraSidenav,
               ServoyExtraCollapse,
-              ServoyExtraDbtreeview
+              ServoyExtraDbtreeview,
+              ServoyExtraTreeview
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
