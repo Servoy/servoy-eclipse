@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { ServoyBootstrapExtraBreadcrumbs } from './breadcrumbs/breadcrumbs';
 import { ServoyBootstrapExtraButtonsGroup } from './buttonsgroup/buttonsgroup';
 import { ServoyBootstrapExtraBadge } from './badge/badge';
+import { ServoyBootstrapExtraRating } from './rating/rating';
 import { ServoyBootstrapExtraCarousel, Slide } from './carousel/carousel';
 import { MenuItem, ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
@@ -19,6 +20,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
       ServoyBootstrapExtraCarousel,
       ServoyBootstrapExtraBadge,
       ServoyBootstrapExtraButtonsGroup,
+      ServoyBootstrapExtraRating,
       SvyAttributes
     ],
     providers: [],
@@ -35,6 +37,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
         ServoyBootstrapExtraCarousel,
         ServoyBootstrapExtraBadge,
         ServoyBootstrapExtraButtonsGroup,
+        ServoyBootstrapExtraRating,
         SvyAttributes
       ]
 })

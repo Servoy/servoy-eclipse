@@ -1,0 +1,11 @@
+<div class="bts-extra-rating" #element>
+    <ngb-rating 
+        [id]="servoyApi.getMarkupId()"
+        [(rate)]="dataProviderID" 
+        [max]="max" 
+        [readonly]="!enabled"
+        (leave)="onLeaveEvent()"
+        (hover)="onHoverEvent($event)"
+        (rateChange)="onChange()"></ngb-rating >
+    <span class="label badge-info" *ngIf="enabled != false && showPercentageOnHover && overStar">{{percent}}%</span>
+</div>
