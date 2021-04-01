@@ -1268,10 +1268,10 @@ export class PowerGrid extends NGGridDirective {
         const checkboxEditorIconConfig = this.iconConfig ? iconConfig : this.iconConfig;
 
         if(state) {
-            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorChecked ?
+            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorChecked && checkboxEditorIconConfig.iconEditorChecked !== 'glyphicon glyphicon-check' ?
             checkboxEditorIconConfig.iconEditorChecked : 'far fa-check-square';
         } else {
-            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorUnchecked ?
+            return checkboxEditorIconConfig && checkboxEditorIconConfig.iconEditorUnchecked && checkboxEditorIconConfig.iconEditorUnchecked !== 'glyphicon glyphicon-unchecked' ?
             checkboxEditorIconConfig.iconEditorUnchecked : 'far fa-square';
         }
     }
