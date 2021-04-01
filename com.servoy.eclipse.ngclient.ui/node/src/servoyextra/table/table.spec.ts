@@ -17,6 +17,7 @@ import { WindowRefService } from '../../sablo/util/windowref.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { ServoyExtraTable, TableRow } from './table';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -113,7 +114,7 @@ describe('ServoyExtraTable', () => {
 
     const fsl_json = {
       forFoundset: '08d25c66d8b38adb872a5ffec31ca906', vp: [10248, 10249, 10250, 10251, 10252, 10253, 10254, 10255, 10256, 10257, 10258, 10259,
-        10260, 10261, 10262, 10263, 10264, 10265, 10266, 10267]
+        10260, 10261, 10262, 10263, 10264, 10265, 10266, 10267, 10268]
     };
     converterService.convertFromServerToClient(fsl_json, 'fsLinked', undefined, componentModelGetter);
     return fs;
@@ -138,7 +139,7 @@ const finishInit = () => {
   beforeEach(  () =>  {
     TestBed.configureTestingModule({
       declarations: [TestWrapperComponent, ServoyExtraTable, TableRow],
-      imports: [ServoyTestingModule, ScrollingModule],
+      imports: [ServoyTestingModule, ScrollingModule, NgbModule],
       providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, TestabilityService, SpecTypesService, LoggerFactory,
         WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
     });
@@ -198,7 +199,7 @@ const finishInit = () => {
         showAs: 'text',
         dataprovider: [
           'France', 'Germany', 'Brazil', 'France', 'Belgium', 'Brazil', 'Switzerland', 'Switzerland', 'Brazil', 'Venezuela', 'Austria',
-          'Mexico', 'Germany', 'Brazil', 'USA', 'Austria', 'Sweden', 'France', 'Finland', 'Germany'],
+          'Mexico', 'Germany', 'Brazil', 'USA', 'Austria', 'Sweden', 'France', 'Finland', 'Germany', 'test'],
         initialWidth: 'auto'
       },
       {
@@ -220,7 +221,7 @@ const finishInit = () => {
         showAs: 'text',
         dataprovider: [
           'Reims', 'Münster', 'Rio de Janeiro', 'Lyon', 'Charleroi', 'Rio de Janeiro', 'Bern', 'Genève', 'Resende', 'San Cristóbal', 'Graz',
-          'México D.F.', 'Köln', 'Rio de Janeiro', 'Albuquerque', 'Graz', 'Bräcke', 'Strasbourg', 'Oulu', 'München'],
+          'México D.F.', 'Köln', 'Rio de Janeiro', 'Albuquerque', 'Graz', 'Bräcke', 'Strasbourg', 'Oulu', 'München', 'test'],
         initialWidth: 'auto'
       }
     ];
@@ -229,7 +230,7 @@ const finishInit = () => {
     component.columns[2].dataprovider.idForFoundset= 'City_columnID';
     component.minRowHeight = '25px';
     component.enableColumnResize = false;
-    component.pageSize = 5;
+    component.pageSize = 10;
     component.responsiveHeight = 300;
     component.cellClick = onCellClick;
     component.cellRightClick = onCellRightClick;
@@ -337,10 +338,13 @@ const finishInit = () => {
     expect(onFocusLost).toHaveBeenCalled();
   }));
 
-  /*it('should scroll to index', fakeAsync(() => {
+  it('should scroll to index', fakeAsync(() => {
     finishInit();
 
-    component.table.viewPort.scrollToIndex(8);
+    expect(component.table.renderedRows.length).toEqual(21, 'should have rendered 21 rows');
+    expect(component.table.getFirstVisibleIndex()).toEqual(0, 'first visible index should be 0');
+
+    component.table.viewPort.scrollToIndex(3);
     fixture.detectChanges();
     flush();
     tick(5000);
@@ -351,7 +355,8 @@ const finishInit = () => {
     expect(loadExtraRecordsAsync).not.toHaveBeenCalled();
     expect(component.table.getFirstVisibleIndex()).toEqual(3);
 
-    component.table.viewPort.scrollToIndex(100);
+    //scroll to the end to force it load more records
+    component.table.viewPort.scrollToIndex(22);
     fixture.detectChanges();
     flush();
     tick(9000);
@@ -360,35 +365,39 @@ const finishInit = () => {
     tick(9000);
     fixture.detectChanges();
     flush();
-    expect(loadExtraRecordsAsync).toHaveBeenCalled();
-    expect(component.table.getFirstVisibleIndex()).toEqual(20);
-  }));*/
 
-  /*it('should navigate pages', fakeAsync(() => {
+    expect(component.table.getFirstVisibleIndex()).toEqual(12, 'the first visible index should be 12 (21 is the last visible)');
+    expect(loadExtraRecordsAsync).toHaveBeenCalled();
+  }));
+
+  it('should navigate pages', fakeAsync(() => {
     finishInit();
 
     expect(component.table.showPagination()).toBeTrue();
 
     const pagination = component.table.getNativeElement().getElementsByTagName('ngb-pagination');
     expect(pagination[0]).toBeDefined();
-    const paginationLinks = pagination[0].getElementsByClassName('page-link');
-    expect(paginationLinks.length).toEqual(2);
-    const prevPage = paginationLinks[0] as HTMLElement;
-    const nextPage = paginationLinks[1] as HTMLElement;
+    //const paginationLinks = pagination[0].getElementsByClassName('page-link');
+    //expect(paginationLinks.length).toEqual(3);
+    //const prevPage = paginationLinks[0] as HTMLElement;
+    //const nextPage = paginationLinks[2] as HTMLElement;
 
-    //expect(component.table.getFirstVisibleIndex()).toEqual(0, 'first visible index should be 0, current page is 1');
-    expect(component.table.pageSize).toEqual(5);
+    expect(component.table.getFirstVisibleIndex()).toEqual(0, 'first visible index should be 0');
+    expect(component.table.pageSize).toEqual(10);
 
-
-    nextPage.click();
+    //nextPage.click();
+    component.table.modifyPage(2);
+    fixture.detectChanges();
     flush();
-    tick(500);
-    component.table.viewPort.scrollToIndex(5);
-    tick(500);
+    tick(9000);
+    expect(component.table.currentPage).toEqual(2, 'current page should be 2');
+    expect(component.table.getFirstVisibleIndex()).toEqual(10, 'first visible index should be 10');
+
+    component.table.modifyPage(1);
+    fixture.detectChanges();
     flush();
-
-    expect(component.table.getFirstVisibleIndex()).toEqual(5);
-    expect(component.table.getFirstVisibleIndex()).toEqual(5, 'first visible index should be 5, current page is 2');
-
-  }));*/
+    tick(9000);
+    expect(component.table.currentPage).toEqual(1, 'current page should be 1');
+    expect(component.table.getFirstVisibleIndex()).toEqual(0, 'first visible index should be 0');
+  }));
 });

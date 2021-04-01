@@ -95,6 +95,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     prevPage: number;
 
     averageRowHeight = 25;
+    averagePageSize = 20;
     renderedRowsLength: number;
 
     private log: LoggerService;
@@ -139,6 +140,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
            const newAvg = this.renderedRows.length > 0 ? this.renderedRows.reduce((a, b) => a + b.elRef.nativeElement.getBoundingClientRect().height, 0) / this.renderedRows.length : 0;
            if (newAvg !== this.averageRowHeight || this.renderedRowsLength !== this.renderedRows.length) {
                 this.averageRowHeight = newAvg;
+                this.averagePageSize = this.averageRowHeight > 0 ? this.getNativeElement().getElementsByTagName('tbody')[0].clientHeight / this.averageRowHeight : this.pageSize;
                 if (this.responsiveDynamicHeight) this.computeTableHeight();
            }
             this.renderedRowsLength = this.renderedRows.length;
@@ -154,9 +156,9 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     }
 
     loadMoreRecords(currIndex: number, scroll?: boolean) {
-        if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.pageSize) ||
-            currIndex + this.pageSize >= this.foundset.viewPort.rows.length) {
-            this.foundset.loadExtraRecordsAsync(currIndex + this.pageSize >= this.foundset.viewPort.rows.length ? this.pageSize : (-1) * this.pageSize, false).then(() => {
+        if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.averagePageSize) ||
+            currIndex + this.averagePageSize >= this.foundset.viewPort.rows.length) {
+            this.foundset.loadExtraRecordsAsync(currIndex + this.averagePageSize >= this.foundset.viewPort.rows.length ? this.pageSize : (-1) * this.pageSize, false).then(() => {
                 this.recordsLoaded();
                 if (scroll) this.scrollToSelection();
             });
@@ -164,7 +166,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     }
 
     getFirstVisibleIndex(): number {
-        const offset = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().height;
+        const offset = this.getNativeElement().getElementsByTagName('th')[0].getBoundingClientRect().bottom;
         const firstRow = this.renderedRows.find((element) => element.elRef.nativeElement.getBoundingClientRect().top >= offset);
         if (firstRow) return firstRow.svyTableRow;
         return -1;
