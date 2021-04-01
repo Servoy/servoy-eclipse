@@ -9,9 +9,10 @@ import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WindowService as WindowPlugin} from '../window_service/window.service';
-import { WindowServiceModule} from '../window_service/windowservice.module';
 
 // generated services start
+import { WindowServiceModule} from '../window_service/windowservice.module';
+import { DialogModule } from '../dialogservice/dialog.module';
 import { KeyListener } from '../keylistener/keylistener.service';
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
 import { DatagridService } from '../nggrids/datagrid/datagrid.service';
@@ -64,10 +65,14 @@ export class AllServiceService implements ServiceProvider {
                 NGUtilsService,
                 KeyListener,
                 DatagridService,
-                PowergridService,
-                DialogService
+                PowergridService
                 // generated services end
                 ],
-    imports: [WindowServiceModule]            
+    imports: [
+                // generated services modules start (only for dynamic services (servoy plugins))
+                WindowServiceModule,
+                DialogModule
+                // generated services modules end.
+                ]
 } )
 export class AllServicesModules { }

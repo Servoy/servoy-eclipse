@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 import { DialogBodyComponent } from '../dialogservice/dialog-body/dialog-body.component';
+import { DialogService } from './dialogs.service';
 
 
 @NgModule({
@@ -21,10 +22,12 @@ import { DialogBodyComponent } from '../dialogservice/dialog-body/dialog-body.co
         MatInputModule,
         MatSelectModule
     ],
+    providers: [
+        DialogService
+    ],
     declarations: [DialogBodyComponent],
     exports: [
         DialogBodyComponent
     ]
-
 })
 export class DialogModule { }
