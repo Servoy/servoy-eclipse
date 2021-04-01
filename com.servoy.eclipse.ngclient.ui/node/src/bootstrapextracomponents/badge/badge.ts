@@ -1,18 +1,15 @@
-import { Component, ChangeDetectorRef, ViewChild, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public';
-import { IFoundset } from '../../sablo/spectypes.service';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
 
-@Component( {
+@Component({
     selector: 'bootstrapextracomponents-badge',
     templateUrl: './badge.html',
-    styleUrls: ['./badge.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
-} )
+})
 export class ServoyBootstrapExtraBadge extends ServoyBaseComponent<HTMLDivElement> {
-    @Input() onAction: ( e: Event, data?: any ) => void;
-    @Input() onRightClick: ( e: Event, data?: any ) => void;
-    @Input() onDoubleClick: ( e: Event, data?: any ) => void;
+    @Input() onAction: (e: Event, data?: any) => void;
+    @Input() onRightClick: (e: Event, data?: any) => void;
+    @Input() onDoubleClick: (e: Event, data?: any) => void;
 
     @Input() enabled: boolean;
     @Input() displayType: string;
@@ -29,7 +26,7 @@ export class ServoyBootstrapExtraBadge extends ServoyBaseComponent<HTMLDivElemen
     timeoutID: number;
 
     isTrustedHTML(): boolean {
-        if ( this.servoyApi.trustAsHtml() ) {
+        if (this.servoyApi.trustAsHtml()) {
             return true;
         }
         return false;
@@ -41,28 +38,33 @@ export class ServoyBootstrapExtraBadge extends ServoyBaseComponent<HTMLDivElemen
 
     svyOnInit() {
         super.svyOnInit();
-        if ( this.onAction ) {
-            if ( this.onDoubleClick ) {
-                this.renderer.listen( this.getFocusElement(), 'click', e => {
-                    if ( this.timeoutID ) {
-                        window.clearTimeout( this.timeoutID );
+        if (this.onAction) {
+            if (this.onDoubleClick) {
+                this.renderer.listen(this.getFocusElement(), 'click', e => {
+                    if (this.timeoutID) {
+                        window.clearTimeout(this.timeoutID);
                         this.timeoutID = null;
                         // double click, do nothing will be done in sub classes
                     } else {
                         this.timeoutID = window.setTimeout(() => {
                             this.timeoutID = null;
-                            this.onAction( e );
-                        }, 250 );
+                            this.onAction(e);
+                        }, 250);
                     }
-                } );
+                });
             } else {
-                this.renderer.listen( this.getFocusElement(), 'click', e => this.onAction( e ) );
+                this.renderer.listen(this.getFocusElement(), 'click', e => this.onAction(e));
             }
         }
-        if ( this.onRightClick ) {
-            this.renderer.listen( this.getFocusElement(), 'contextmenu', e => {
-                this.onRightClick( e ); return false;
-            } );
+        if (this.onRightClick) {
+            this.renderer.listen(this.getFocusElement(), 'contextmenu', e => {
+                this.onRightClick(e); return false;
+            });
+        }
+        if (this.onDoubleClick) {
+            this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
+                this.onDoubleClick(e);
+            });
         }
     }
 

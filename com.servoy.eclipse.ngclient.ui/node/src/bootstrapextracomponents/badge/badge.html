@@ -6,10 +6,10 @@
         [svyTooltip]="toolTipText"
         [class.disabled] = '!enabled'
         [id]="servoyApi.getMarkupId()">
-            <span class="badge badge-light" aria-hidden="true">
+            <span class="badge-icon" aria-hidden="true">
                 <i [ngClass]="imageStyleClass" aria-hidden="true"></i>
             </span>
-            <span [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
+            <span class="badge-text" [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
             </span>
             <span *ngIf="badgeText != null" class="badge badge-pill badge-dark">
                 {{badgeText}}
@@ -22,10 +22,10 @@
         *ngIf="!displayType || displayType == 'BUTTON'"    
         [disabled] = '!enabled'
         [id]="servoyApi.getMarkupId()">
-	        <span class="badge badge-light" aria-hidden="true">
+	        <span class="badge-icon" aria-hidden="true">
                 <i  [ngClass]="imageStyleClass" aria-hidden="true"></i>
 	        </span>
-	        <span [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
+	        <span class="badge-text" [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
             </span> 
 	        <span *ngIf="badgeText != null" 
 	            class="badge badge-pill badge-dark">
