@@ -2032,19 +2032,29 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			throw new RepositoryException("Object to revert out of sync");
 		}
 
+		// we do not know what is changed, just assume everything
 		final List<IPersist> changed = new ArrayList<IPersist>();
 		persist.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist o)
 			{
-				if (o.isChanged())
-				{
-					changed.add(o);
-				}
+				changed.add(o);
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 		});
-		sp.updateEditingPersist(persist, true);
+		IPersist updatedPersist = sp.updateEditingPersist(persist, true);
+		if (updatedPersist != null)
+		{
+			changed.add(updatedPersist);
+			updatedPersist.acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (!changed.contains(o)) changed.add(o);
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				}
+			});
+		}
 		firePersistsChanged(false, changed);
 	}
 
