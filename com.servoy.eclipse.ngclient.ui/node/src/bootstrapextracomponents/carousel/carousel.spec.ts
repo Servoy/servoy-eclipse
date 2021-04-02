@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ServoyBootstrapExtraCarousel } from './carousel';
 
@@ -8,7 +9,8 @@ describe('ServoyBootstrapExtraCarousel', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapExtraCarousel ]
+      declarations: [ ServoyBootstrapExtraCarousel ],
+      imports: [NgbModule]
     })
     .compileComponents();
   }));

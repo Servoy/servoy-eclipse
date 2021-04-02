@@ -18,6 +18,9 @@ import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.ser
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { ServoyExtraTable, TableRow } from './table';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ServoyExtraComponentsModule } from '../servoyextra.module';
+import { ResizableModule } from 'angular-resizable-element';
+import { SabloModule } from '../../sablo/sablo.module';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -139,7 +142,7 @@ const finishInit = () => {
   beforeEach(  () =>  {
     TestBed.configureTestingModule({
       declarations: [TestWrapperComponent, ServoyExtraTable, TableRow],
-      imports: [ServoyTestingModule, ScrollingModule, NgbModule],
+      imports: [ServoyTestingModule, ScrollingModule, NgbModule, ResizableModule, SabloModule],
       providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, TestabilityService, SpecTypesService, LoggerFactory,
         WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
     });
