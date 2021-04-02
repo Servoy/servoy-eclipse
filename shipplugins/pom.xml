@@ -18,7 +18,7 @@
 		<repository>
 			<id>developer_repo</id>
 			<name>developer_repo</name>
-			<url>http://developer.servoy.com/mvn_repository/</url>
+			<url>https://developer.servoy.com/mvn_repository/</url>
 		</repository>
 		<repository>
 			<id>servoy</id>
@@ -295,7 +295,7 @@
 		<dependency>
 			<groupId>com.github.ua-parser</groupId>
 			<artifactId>uap-java</artifactId>
-			<version>1.4.4-SERVOY</version>
+			<version>1.5.3.SERVOY</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
 		<dependency>

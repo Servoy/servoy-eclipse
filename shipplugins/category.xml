@@ -85,7 +85,7 @@
 	<bundle id='de.inetsoftware.jlessc' >
 		<category name="bundles" />
 	</bundle>
-	<bundle id='com.github.ua-parser.uap-java' version='1.4.4.SERVOY'>
+	<bundle id='com.github.ua-parser.uap-java'>
 		<category name="bundles" />
 	</bundle>
 	<bundle id='org.yaml.snakeyaml'>
