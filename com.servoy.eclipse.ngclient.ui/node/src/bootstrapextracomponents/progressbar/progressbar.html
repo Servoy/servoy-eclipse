@@ -1,0 +1,12 @@
+<ngb-progressbar #element
+    class="bts-extra-progressbar {{styleClass}}"
+    [id]="servoyApi.getMarkupId()"
+    [value]="value"
+    [type]="type"
+    [animated]="animate"
+    [max]="max"
+    [sabloTabseq]="tabSeq">
+    <b *ngIf="!valueText &&showValue && showValueAsPercentage">{{(100* value/ max) | number}}%</b>
+    <b *ngIf="!valueText && showValue && !showValueAsPercentage">{{value + ' / ' + max}}</b>
+    <b *ngIf="valueText">{{valueText}}</b>
+</ngb-progressbar>

@@ -42,3 +42,16 @@
     padding-top: initial;
     padding-bottom: initial;
 }
+
+.svy-wrapper > * > .bts-extra-progressbar {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.bts-extra-progressbar {
+    height: 20px;
+}
+
+.bts-extra-progressbar > .progress-bar {
+    line-height: 20px;
+}
