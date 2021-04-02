@@ -1,5 +1,5 @@
 <div class="bts-extra-badge" #element>
-    <a href="javascript:;" #a
+    <a
         *ngIf="displayType == 'LABEL'"
         [ngClass] = 'styleClass'
         class="badge"    
@@ -15,7 +15,7 @@
                 {{badgeText}}
             </span>
     </a>
-    <button #button
+    <button
         type='button'
         [svyTooltip]="toolTipText"
         class = 'btn {{styleClass ? styleClass : buttonClass}}'
