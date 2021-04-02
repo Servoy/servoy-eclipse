@@ -56,7 +56,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     @Input() responsiveHeight: number;
     @Input() responsiveDynamicHeight: boolean;
     @Input() lastSelectionFirstElement: number;
-    @Input() keyCodeSettings: { arrowUp: boolean; arrowDown: boolean; end: boolean; enter: boolean; home: boolean; pageDown: boolean; pageUp: boolean };
+    @Input() keyCodeSettings: KeycodeSettings;
 
     @Input() onViewPortChanged: (start: number, end: number) => void;
     @Input() onCellClick: (rowIdx: number, colIdx: number, record?: ViewPortRow, e?: MouseEvent, columnId?: string) => void;
@@ -919,7 +919,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     }
 }
 
-class Column extends BaseCustomObject {
+export class Column extends BaseCustomObject {
     id: string;
     showAs: string;
     headerText: string;
@@ -931,6 +931,16 @@ class Column extends BaseCustomObject {
     valuelist: IValuelist;
     width: string; 
     initialWidth: string; 
+}
+
+export class KeycodeSettings extends BaseCustomObject {
+    arrowUp: boolean;
+    arrowDown: boolean;
+    end: boolean;
+    enter: boolean;
+    home: boolean;
+    pageDown: boolean;
+    pageUp: boolean;
 }
 
 class LinkedDataproviders extends Array<any>{

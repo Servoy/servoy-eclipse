@@ -1,5 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ServoyExtraTable, TableRow } from './table/table';
+import { Column, ServoyExtraTable, TableRow, KeycodeSettings } from './table/table';
 import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
 import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyExtraFileUpload } from './fileupload/fileupload';
@@ -33,6 +33,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ServoyExtraTreeview } from './treeview/treeview';
 import { AngularTreeGridModule } from 'angular-tree-grid';
 import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
+import { SpecTypesService } from '../sablo/spectypes.service';
 
 @NgModule({
     declarations: [
@@ -99,4 +100,9 @@ import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
              CUSTOM_ELEMENTS_SCHEMA
     ]
 })
-export class ServoyExtraComponentsModule {}
+export class ServoyExtraComponentsModule {
+    constructor( specTypesService: SpecTypesService ) {
+        specTypesService.registerType('servoyextra-table.column', Column);
+        specTypesService.registerType('servoyextra-table.settings', KeycodeSettings);
+   }
+}
