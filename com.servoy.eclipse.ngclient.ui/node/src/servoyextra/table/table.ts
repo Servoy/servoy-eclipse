@@ -848,8 +848,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
-        const old = this.scrollWidth;
-        if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
+        if ( tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
             this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 17;
         } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
             this.scrollWidth = 0;
