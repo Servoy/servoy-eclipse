@@ -272,8 +272,12 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
     }
     getComponentWidth() {
         if (!this.rendered) return 0;
-        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.offsetWidth !== 0) {
-            this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.offsetWidth);
+        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.clientWidth !== 0) {
+            this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.clientWidth);
+            const computedStyle = window.getComputedStyle(this.getNativeElement().parentElement.parentElement);
+            //clientWidth of the parent container also contains the padding, we need to remove it
+            this.componentWidth -= this.getNumberFromPxString(computedStyle.paddingLeft);
+            this.componentWidth -= this.getNumberFromPxString(computedStyle.paddingRight);
         }
         return this.componentWidth;
     }
@@ -844,6 +848,7 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
 
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
+        const old = this.scrollWidth;
         if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
             this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 17;
         } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
