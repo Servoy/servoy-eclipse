@@ -102,7 +102,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
 
-	private AbstractComponentsSelectionPage componentsSelectionPage;
+	private AbstractWebObjectSelectionPage componentsSelectionPage;
 
 	private WizardPage errorPage;
 
@@ -451,8 +451,10 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			return super.getNextPage(nonActiveSolutionPage);
 		}
-		if (page.equals(componentsSelectionPage))
+		IWizardPage supersNextPage = super.getNextPage(page);
+		if (componentsSelectionPage.equals(supersNextPage))
 		{
+			// make sure solution explicitly used components/services are added to these pages
 			if (!exportModel.isReady())
 			{
 				try
@@ -493,7 +495,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			}
 
 		}
-		return super.getNextPage(page);
+		return supersNextPage;
 	}
 
 	private void setupComponentsPages()
@@ -503,8 +505,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			componentsSelectionPage.setMessage("There was a problem finding used components, please select them manually.", IMessageProvider.WARNING);
 			servicesSelectionPage.setMessage("There was a problem finding used services, please select them manually.", IMessageProvider.WARNING);
 		}
-		componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-		servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+		componentsSelectionPage.setWebObjectsExplicitlyUsedBySolution(exportModel.getComponentsUsedExplicitlyBySolution());
+		servicesSelectionPage.setWebObjectsExplicitlyUsedBySolution(exportModel.getServicesUsedExplicitlyBySolution());
 	}
 
 	@Override
@@ -525,6 +527,11 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		beanSelectionPage.storeInput();
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
+		if (isNGExport)
+		{
+			componentsSelectionPage.storeInput();
+			servicesSelectionPage.storeInput();
+		}
 
 		StringBuilder sb = new StringBuilder("./war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
@@ -535,7 +542,13 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
 		File warFile = new File(warFilePath);
-		appendToBuilder(sb, " -o ", warFile.getParentFile() != null ? warFile.getParentFile().getPath() : " . ");
+		appendToBuilder(sb, " -o ", warFile.getParentFile() != null ? warFile.getParentFile().getPath() : ".");
+
+		if (!"".equals(warFile.getName()) &&
+			!(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName() + ".war").equals(warFile.getName()))
+		{
+			appendToBuilder(sb, " -warFileName ", warFile.getName());
+		}
 
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
@@ -556,20 +569,42 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		if (exportModel.getPluginLocations().size() > 1 && !exportModel.getPluginLocations().get(0).equals("plugins/"))
 			appendToBuilder(sb, " -pluginLocations", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber());
 
-		if (exportModel.getUsedComponents().size() == exportModel.getExportedComponents().size()) sb.append(" -crefs ");
-		else if (componentsSelectionPage.getAvailableItems().size() != 0)
+		// see how components are to be exported
+		int underTheHoodPlusExplicitlyUsedInSolution = exportModel.getComponentsNeededUnderTheHood().size() +
+			exportModel.getComponentsUsedExplicitlyBySolution().size();
+		int allToBeExported = exportModel.getAllExportedComponents().size();
+
+		if (underTheHoodPlusExplicitlyUsedInSolution == allToBeExported) sb.append(" -crefs"); // so nothing extra selected by user; and the user cannot select anything less then this
+		else if (componentsSelectionPage.checkThatAllPickableArePresentIn(exportModel.getAllExportedComponents()))
 		{
-			List<String> notUsedComponents = exportModel.getExportedComponents().stream().filter(
-				comp -> !exportModel.getUsedComponents().contains(comp)).collect(Collectors.toList());
-			appendToBuilder(sb, " -crefs", notUsedComponents, -1);
+			// all is exported
+			sb.append(" -crefs all");
+		}
+		else
+		{
+			// not all is exported and not just defaults, so specify what are the extra/optional components to be exported
+			List<String> userPickedComponents = exportModel.getComponentsToExportWithoutUnderTheHoodOnes().stream().filter(
+				comp -> !exportModel.getComponentsUsedExplicitlyBySolution().contains(comp)).collect(Collectors.toList());
+			appendToBuilder(sb, " -crefs", userPickedComponents, -1);
 		}
 
-		if (exportModel.getUsedServices().size() == exportModel.getExportedServices().size()) sb.append(" -srefs ");
-		else if (servicesSelectionPage.getAvailableItems().size() != 0)
+		// see how services are to be exported
+		underTheHoodPlusExplicitlyUsedInSolution = exportModel.getServicesNeededUnderTheHood().size() +
+			exportModel.getServicesUsedExplicitlyBySolution().size();
+		allToBeExported = exportModel.getAllExportedServices().size();
+
+		if (underTheHoodPlusExplicitlyUsedInSolution == allToBeExported) sb.append(" -srefs"); // so nothing extra selected by user; and the user cannot select anything less then this
+		else if (servicesSelectionPage.checkThatAllPickableArePresentIn(exportModel.getAllExportedServices()))
 		{
-			List<String> notUsedServices = exportModel.getExportedServices().stream().filter(svc -> !exportModel.getUsedServices().contains(svc)).collect(
-				Collectors.toList());
-			appendToBuilder(sb, " -srefs", notUsedServices, -1);
+			// all is exported
+			sb.append(" -srefs all");
+		}
+		else
+		{
+			// not all is exported and not just defaults, so specify what are the extra/optional services to be exported
+			List<String> userPickedServices = exportModel.getServicesToExportWithoutUnderTheHoodOnes().stream().filter(
+				svc -> !exportModel.getServicesUsedExplicitlyBySolution().contains(svc)).collect(Collectors.toList());
+			appendToBuilder(sb, " -srefs", userPickedServices, -1);
 		}
 
 		appendToBuilder(sb, " -md", exportModel.isExportMetaData());
@@ -580,13 +615,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -i18n", exportModel.isExportI18NData());
 		appendToBuilder(sb, " -users", exportModel.isExportUsers());
 		appendToBuilder(sb, " -tables", exportModel.isExportAllTablesFromReferencedServers());
-
-		if (exportModel.getWarFileName() != null)
-		{
-			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName();
-			if (!"".equals(warFile.getName()) && !warFile.getName().replace(".war", "").equals(solutionName))
-				appendToBuilder(sb, " -warFileName ", warFile.getName());
-		}
 
 		appendToBuilder(sb, " -overwriteGroups", exportModel.isOverwriteGroups());
 		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isExportSampleData());

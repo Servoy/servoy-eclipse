@@ -822,7 +822,7 @@ public class EditorUtil
 								}
 							}
 						}
-						if (noOfDirtyEditors > parts.length)
+						if (noOfDirtyEditors > (parts != null ? parts.length : 0))
 						{
 							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.SOME_SAVED;
 						}

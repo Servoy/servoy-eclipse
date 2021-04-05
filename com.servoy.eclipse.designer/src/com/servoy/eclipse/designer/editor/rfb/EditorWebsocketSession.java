@@ -24,6 +24,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
+import org.sablo.websocket.IWindow;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
@@ -79,6 +80,12 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	public boolean shouldTest()
 	{
 		return false;
+	}
+
+	@Override
+	protected IWindow createWindow(int windowNr, String windowName)
+	{
+		return new EditorBaseWindow(this, windowNr, windowName);
 	}
 
 }

@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
@@ -32,7 +31,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
  * Shows the user the list of needed components for export and allows him to add more components to export.
  * @author emera
  */
-public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
+public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 {
 
 	private final SpecProviderState componentsSpecProviderState;
@@ -42,45 +41,53 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	{
 		super(exportModel, pageName, title, description, "component");
 		this.componentsSpecProviderState = componentsSpecProviderState;
-		componentsUsed = exportModel.getUsedComponents();
-		selectedComponents = new TreeSet<String>(componentsUsed);
 		joinWithLastUsed();
+	}
+
+	@Override
+	protected Set<String> getWebObjectsExplicitlyUsedBySolution()
+	{
+		return exportModel.getComponentsUsedExplicitlyBySolution();
 	}
 
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getExportedComponents() == null ||
-			exportModel.getExportedComponents().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedComponents())) return;
-		for (String component : exportModel.getExportedComponents())
+		if (exportModel.getComponentsToExportWithoutUnderTheHoodOnes() == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(exportModel.getComponentsToExportWithoutUnderTheHoodOnes())) return;
+
+		for (String component : exportModel.getComponentsToExportWithoutUnderTheHoodOnes())
 		{
-			//make sure that the component exported the last time was not removed
-			if (componentsSpecProviderState.getWebObjectSpecification(component) != null) selectedComponents.add(component);
+			// make sure that the component exported the last time was not removed
+			if (componentsSpecProviderState.getWebObjectSpecification(component) != null) selectedWebObjectsForListCreation.add(component);
 		}
 	}
 
 	@Override
-	protected Set<String> getAvailableItems()
+	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
 		Set<String> availableComponents = new TreeSet<String>();
 		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
 		{
-			if (exportModel.getExcludedComponentPackages().contains(spec.getPackageName())) continue;
-			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
+			if (!exportModel.getPreferencesExcludedDefaultComponentPackages().contains(spec.getPackageName()) &&
+				!exportModel.getComponentsNeededUnderTheHood().contains(spec.getName()) &&
+				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
+			{
+				availableComponents.add(spec.getName());
+			}
 		}
 		return availableComponents;
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		exportModel.setExportedComponents(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		return super.getNextPage();
 	}
 
 	@Override
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_components");
+	}
+
+	@Override
+	public void storeInput()
+	{
+		exportModel.setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(selectedWebObjectsList.getItems())));
 	}
 }

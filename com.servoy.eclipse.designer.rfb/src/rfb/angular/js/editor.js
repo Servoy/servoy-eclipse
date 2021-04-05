@@ -53,7 +53,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		transclude: true,
 		scope: {},
 		link: function($scope, $element) {
-			var timeout;
+            var markDirtyTimeoutRef;
+            var markDirtyTimeoutMs = 1;
 			var delta = {
 				addedNodes: [],
 				removedNodes: []
@@ -63,11 +64,27 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var selectedConfigGhosts = [];
 
 			function markDirty() {
-				if (timeout) {
-					clearTimeout(timeout)
+				if (markDirtyTimeoutRef) {
+					clearTimeout(markDirtyTimeoutRef);
 				}
-				timeout = $timeout(fireSelectionChanged, 1)
+                markDirtyTimeoutMs = 1;
+                markDirtyTimeoutRef = $timeout(executeMarkDirtyLater, markDirtyTimeoutMs);
 			}
+			
+			function executeMarkDirtyLater() {
+                if (markDirtyTimeoutMs < 250 && !editorContentRootScope.getDesignFormControllerScope) {
+                    // postpone until editorContentRootScope gets initialized
+                    markDirtyTimeoutRef = $timeout(executeMarkDirtyLater, markDirtyTimeoutMs);
+                    markDirtyTimeoutMs += 50;
+                } else {
+                    //Reference to editor should be gotten from Editor instance somehow
+                    //instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
+                    $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection)
+                    delta.addedNodes.length = delta.removedNodes.length = 0
+                    
+                    markDirtyTimeoutRef = null;
+                }
+            }
 
 			 $document.bind('selectstart', function(event) {
 				 if (!$editorService.isInlineEditMode())
@@ -85,14 +102,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var editorContentRootScope = null;
 			var servoyInternal = null;
 			var fieldLocation = null;
-
-			function fireSelectionChanged() {
-				//Reference to editor should be gotten from Editor instance somehow
-				//instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
-				$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection)
-				delta.addedNodes.length = delta.removedNodes.length = 0
-				timeout = null
-			}
 
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
@@ -438,7 +447,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.getBeanModel = function(node) {
 				if (node) {
 					var name = node.getAttribute("svy-id");
-					if (name) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
+					if (name && editorContentRootScope.getDesignFormControllerScope) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
 				}
 				return null;
 			}
@@ -1250,7 +1259,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			})
 			
 			function areAllGhostContainersVisible() {
-				if ($scope.ghosts.ghostContainers) {
+				if ($scope.ghosts && $scope.ghosts.ghostContainers) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 						if (!$scope.ghosts.ghostContainers[i].style || $scope.ghosts.ghostContainers[i].style.display !== "block") {
 							return false;
@@ -1534,12 +1543,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 		},
 
-		updateSelection: function(ids,timeout) {
+		updateSelection: function(ids, timeout) {
 			if (editorScope.updateSel)
 			{
 				$timeout.cancel(editorScope.updateSel);
 			}
-			function tryUpdateSelection (){
+			function tryUpdateSelection () {
 				var prevSelection = editorScope.getSelection();
 				var changed = false;
 				var selection = [];
@@ -1572,7 +1581,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				if (changed) editorScope.setSelection(selection);
 			}
-			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
+			editorScope.updateSel = $timeout(tryUpdateSelection, typeof timeout == 'number' ? timeout : 400);
 		},
 		
 		refreshPalette: function()

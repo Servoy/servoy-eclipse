@@ -33,7 +33,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
-import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.ICustomType;
 
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -242,8 +242,8 @@ public class TypeProvider implements ITypeProvider
 				Collections.addAll(specs, webServiceSpecifications);
 				for (WebObjectSpecification webComponentSpecification : specs)
 				{
-					Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
-					for (IPropertyType< ? > type : foundTypes.values())
+					Map<String, ICustomType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
+					for (ICustomType< ? > type : foundTypes.values())
 					{
 						names.add(TypeCreator.CUSTOM_TYPE + '<' + type.getName() + '>');
 					}

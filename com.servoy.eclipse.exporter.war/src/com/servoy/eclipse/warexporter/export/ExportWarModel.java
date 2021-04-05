@@ -93,8 +93,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean overwriteGroups;
 	private boolean addUsersToAdminGroup;
 	private int importUserPolicy;
-	private Set<String> exportedComponents;
-	private Set<String> exportedServices;
+	private Set<String> componentsToExportWithoutUnderTheHoodOnes;
+	private Set<String> servicesToExportWithoutUnderTheHoodOnes;
 	private boolean upgradeRepository;
 	private boolean createTomcatContextXML;
 	private boolean antiResourceLocking;
@@ -104,7 +104,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String defaultAdminUser;
 	private String defaultAdminPassword;
 
-	private final List<String> excludedPackages = new ArrayList<>();
+	private final List<String> preferencesExcludedDefaultComponentPackages = new ArrayList<>();
 
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
@@ -128,7 +128,23 @@ public class ExportWarModel extends AbstractWarExportModel
 				{
 					try
 					{
-						search();
+						searchForComponentsAndServicesBothDefaultAndInSolution();
+
+						// at one point we were showing under-the-hood components that are always needed to the user in the pick services/components dialog;
+						// that is no longer the case, but old exports might have saved those in settings; update the model to not include setComponentsToExportWithoutUnderTheHoodOnes
+						// they were initially set in code below, outside of this runInWorkspace
+						if (getComponentsToExportWithoutUnderTheHoodOnes() != null)
+						{
+							Set<String> previouslySelectedComponents = getComponentsToExportWithoutUnderTheHoodOnes();
+							previouslySelectedComponents.removeAll(getComponentsNeededUnderTheHood());
+							setComponentsToExportWithoutUnderTheHoodOnes(previouslySelectedComponents);
+						}
+						if (getServicesToExportWithoutUnderTheHoodOnes() != null)
+						{
+							Set<String> previouslySelectedServices = getServicesToExportWithoutUnderTheHoodOnes();
+							previouslySelectedServices.removeAll(getServicesNeededUnderTheHood());
+							setServicesToExportWithoutUnderTheHoodOnes(previouslySelectedServices);
+						}
 					}
 					catch (final Exception e)
 					{
@@ -215,11 +231,11 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			if (settings.getArray("export.components") != null)
 			{
-				setExportedComponents(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
+				setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
 			}
 			if (settings.getArray("export.services") != null)
 			{
-				setExportedServices(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
+				setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
 			}
 		}
 		pluginLocations = new ArrayList<String>();
@@ -322,7 +338,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			if (!PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName))
 			{
-				excludedPackages.add(packageName);
+				preferencesExcludedDefaultComponentPackages.add(packageName);
 			}
 		}
 
@@ -399,8 +415,10 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteAllProperties", isOverwriteDeployedServoyProperties());
 
 
-		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
-		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
+		if (componentsToExportWithoutUnderTheHoodOnes != null)
+			settings.put("export.components", componentsToExportWithoutUnderTheHoodOnes.toArray(new String[componentsToExportWithoutUnderTheHoodOnes.size()]));
+		if (servicesToExportWithoutUnderTheHoodOnes != null)
+			settings.put("export.services", servicesToExportWithoutUnderTheHoodOnes.toArray(new String[servicesToExportWithoutUnderTheHoodOnes.size()]));
 
 		if (pluginLocations.size() > 1)
 		{
@@ -836,34 +854,32 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.importUserPolicy = importUserPolicy;
 	}
 
-	public void setExportedComponents(Set<String> selectedComponents)
+	public void setComponentsToExportWithoutUnderTheHoodOnes(Set<String> selectedComponents)
 	{
-		this.exportedComponents = selectedComponents;
-		exportedComponentPackages = exportedComponents.stream() //
+		this.componentsToExportWithoutUnderTheHoodOnes = selectedComponents;
+		exportedComponentPackages = componentsToExportWithoutUnderTheHoodOnes.stream() //
 			.filter(component -> componentsSpecProviderState.getWebObjectSpecification(component) != null) //
 			.map(component -> componentsSpecProviderState.getWebObjectSpecification(component).getPackageName()) //
 			.collect(Collectors.toSet());
 	}
 
-	public void setExportedServices(Set<String> selectedServices)
+	public void setServicesToExportWithoutUnderTheHoodOnes(Set<String> selectedServices)
 	{
-		this.exportedServices = selectedServices;
-		exportedServicePackages = exportedServices.stream() //
+		this.servicesToExportWithoutUnderTheHoodOnes = selectedServices;
+		exportedServicePackages = servicesToExportWithoutUnderTheHoodOnes.stream() //
 			.filter(service -> servicesSpecProviderState.getWebObjectSpecification(service) != null) //
 			.map(service -> servicesSpecProviderState.getWebObjectSpecification(service).getPackageName()) //
 			.collect(Collectors.toSet());
 	}
 
-	@Override
-	public Set<String> getExportedComponents()
+	public Set<String> getComponentsToExportWithoutUnderTheHoodOnes()
 	{
-		return exportedComponents != null ? exportedComponents : new TreeSet<String>();
+		return componentsToExportWithoutUnderTheHoodOnes != null ? componentsToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
 	}
 
-	@Override
-	public Set<String> getExportedServices()
+	public Set<String> getServicesToExportWithoutUnderTheHoodOnes()
 	{
-		return exportedServices != null ? exportedServices : new TreeSet<String>();
+		return servicesToExportWithoutUnderTheHoodOnes != null ? servicesToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
 	}
 
 	public void setAutomaticallyUpgradeRepository(boolean upgrade)
@@ -927,14 +943,14 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.antiResourceLocking = antiResourceLocking;
 	}
 
-	public List<String> getExcludedComponentPackages()
+	public List<String> getPreferencesExcludedDefaultComponentPackages()
 	{
-		return excludedPackages;
+		return preferencesExcludedDefaultComponentPackages;
 	}
 
-	public List<String> getExcludedServicePackages()
+	public List<String> getPreferencesExcludedDefaultServicePackages()
 	{
-		return excludedPackages;
+		return preferencesExcludedDefaultComponentPackages;
 	}
 
 	public String getDefaultAdminUser()
@@ -1027,6 +1043,22 @@ public class ExportWarModel extends AbstractWarExportModel
 		return Stream.of(exportedComponentPackages, exportedServicePackages, exportedLayoutPackages) //
 			.flatMap(Set::stream) //
 			.collect(Collectors.toSet());
+	}
+
+	@Override
+	public Set<String> getAllExportedComponents()
+	{
+		Set<String> allComponentsThatShouldBeExported = new HashSet<>(getComponentsNeededUnderTheHood());
+		allComponentsThatShouldBeExported.addAll(getComponentsToExportWithoutUnderTheHoodOnes());
+		return allComponentsThatShouldBeExported;
+	}
+
+	@Override
+	public Set<String> getAllExportedServices()
+	{
+		Set<String> allServicesThatShouldBeExported = new HashSet<>(getServicesNeededUnderTheHood());
+		allServicesThatShouldBeExported.addAll(getServicesToExportWithoutUnderTheHoodOnes());
+		return allServicesThatShouldBeExported;
 	}
 
 }

@@ -77,8 +77,12 @@ import com.servoy.j2db.util.Utils;
 public abstract class AbstractWarExportModel implements IWarExportModel
 {
 
-	private final Set<String> usedComponents;
-	private final Set<String> usedServices;
+	private final Set<String> componentsUsedExplicitlyBySolution;
+	private final Set<String> servicesUsedExplicitlyBySolution;
+
+	private final Set<String> componentsNeededUnderTheHood;
+	private final Set<String> servicesNeededUnderTheHood;
+
 	protected final Set<String> exportedLayoutPackages;
 	protected final Map<String, License> licenses;
 
@@ -93,8 +97,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	public AbstractWarExportModel(boolean isNGExport)
 	{
-		usedComponents = new TreeSet<String>();
-		usedServices = new TreeSet<String>();
+		componentsUsedExplicitlyBySolution = new TreeSet<String>();
+		servicesUsedExplicitlyBySolution = new TreeSet<String>();
+		componentsNeededUnderTheHood = new TreeSet<String>();
+		servicesNeededUnderTheHood = new TreeSet<String>();
+
 		exportedLayoutPackages = new HashSet<String>();
 		licenses = new HashMap<String, License>();
 
@@ -200,7 +207,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			IPersist persist = persists.next();
 			if (persist instanceof IFormElement)
 			{
-				usedComponents.add(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+				componentsUsedExplicitlyBySolution.add(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
 			}
 			if (persist instanceof ISupportChilds)
 			{
@@ -244,7 +251,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 									if (parts.length > 1)
 									{
 										WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
-										if (serviceSpec != null) usedServices.add(serviceSpec.getName());
+										if (serviceSpec != null) servicesUsedExplicitlyBySolution.add(serviceSpec.getName());
 									}
 								}
 								else if (expr.contains("newWebComponent"))
@@ -258,7 +265,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 											componentName = componentName.replaceAll("'|\"", "");
 											if (WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentName) != null)
 											{
-												usedComponents.add(componentName);
+												componentsUsedExplicitlyBySolution.add(componentName);
 											}
 										}
 									}
@@ -281,15 +288,27 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	}
 
 	@Override
-	public Set<String> getUsedComponents()
+	public Set<String> getComponentsUsedExplicitlyBySolution()
 	{
-		return usedComponents;
+		return componentsUsedExplicitlyBySolution;
 	}
 
 	@Override
-	public Set<String> getUsedServices()
+	public Set<String> getComponentsNeededUnderTheHood()
 	{
-		return usedServices;
+		return componentsNeededUnderTheHood;
+	}
+
+	@Override
+	public Set<String> getServicesUsedExplicitlyBySolution()
+	{
+		return servicesUsedExplicitlyBySolution;
+	}
+
+	@Override
+	public Set<String> getServicesNeededUnderTheHood()
+	{
+		return servicesNeededUnderTheHood;
 	}
 
 	@Override
@@ -345,7 +364,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		return null;
 	}
 
-	protected void search()
+	protected void searchForComponentsAndServicesBothDefaultAndInSolution()
 	{
 		if (!isNGExport()) return;
 		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
@@ -357,8 +376,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(form, false) + form.getName() + SolutionSerializer.JS_FILE_EXTENSION);
 			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT)
 			{
-				usedComponents.add("servoycore-navigator");
-				usedComponents.add("servoycore-slider");
+				componentsNeededUnderTheHood.add("servoycore-navigator");
+				componentsNeededUnderTheHood.add("servoycore-slider");
 			}
 		}
 
@@ -369,10 +388,12 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		}
 
 		// these are always required
-		usedComponents.add("servoycore-defaultLoadingIndicator");
-		usedComponents.add("servoycore-errorbean");
-		usedComponents.add("servoycore-portal");
-		usedServices.addAll(servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices").getSpecifications().keySet());
+		componentsNeededUnderTheHood.add("servoycore-defaultLoadingIndicator");
+		componentsNeededUnderTheHood.add("servoycore-errorbean");
+		componentsNeededUnderTheHood.add("servoycore-portal");
+
+		// NOTE: this currently won't include any sablo content as all needed sablo js files are referenced staticly from the page when serving ng clients.
+		servicesNeededUnderTheHood.addAll(servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices").getSpecifications().keySet());
 	}
 
 	@Override

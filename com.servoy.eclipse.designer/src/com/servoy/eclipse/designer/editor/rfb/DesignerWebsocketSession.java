@@ -46,8 +46,10 @@ import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.IWindow;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
+import org.sablo.websocket.utils.JSONUtils.EmbeddableJSONWriter;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -101,9 +103,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	private final BaseVisualFormEditor editor;
 
-	/**
-	 * @param uuid
-	 */
+	private final Set<String> clientSideSpecs = new HashSet<>();
+
 	public DesignerWebsocketSession(WebsocketSessionKey sessionKey, BaseVisualFormEditor editor)
 	{
 		super(sessionKey);
@@ -811,8 +812,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			Collections.reverse(components);
+			EmbeddableJSONWriter compSpecNames = new EmbeddableJSONWriter();
+			EmbeddableJSONWriter compSpecsToSend = null;
 			writer.key("components");
 			writer.object();
+			compSpecNames.object();
+
 			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
 			for (IFormElement baseComponent : components)
 			{
@@ -820,11 +825,33 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				if (fe.getDesignId() != null)
 				{
 					writer.key(fe.getDesignId());
+					compSpecNames.key(fe.getDesignId());
 				}
 				else
 				{
 					writer.key(fe.getName());
+					compSpecNames.key(fe.getName());
 				}
+				String specName = fe.getWebComponentSpec().getName();
+				compSpecNames.value(specName);
+				if (!clientSideSpecs.contains(specName))
+				{
+					clientSideSpecs.add(specName);
+
+					EmbeddableJSONWriter clSideTypesForThisComponent = WebComponentSpecProvider.getInstance().getClientSideTypeCache().getClientSideSpecFor(
+						fe.getWebComponentSpec());
+					if (clSideTypesForThisComponent != null)
+					{
+						if (compSpecsToSend == null)
+						{
+							compSpecsToSend = new EmbeddableJSONWriter();
+							compSpecsToSend.object();
+						}
+						compSpecsToSend.key(specName).value(clSideTypesForThisComponent);
+					}
+
+				}
+
 				fe.propertiesAsTemplateJSON(writer,
 					new FormElementContext(fe, new ServoyDataConverterContext(ServoyModelFinder.getServoyModel().getFlattenedSolution(),
 						ServoyModelFinder.getServoyModel().getMessagesManager()), null));
@@ -843,6 +870,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 			writer.endObject();
+			compSpecNames.endObject();
+
+			writer.key("componentSpecNames");
+			writer.value(compSpecNames);
+
+			if (compSpecsToSend != null)
+			{
+				compSpecsToSend.endObject();
+				writer.key("componentSpecs");
+				writer.value(compSpecsToSend);
+			}
+
 			if (formComponentTemplates.size() > 0)
 			{
 				writer.key("formcomponenttemplates");
@@ -868,4 +907,16 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 
 	}
+
+	public void handleBrowserWindowRefresh()
+	{
+		clientSideSpecs.clear();
+	}
+
+	@Override
+	protected IWindow createWindow(int windowNr, String windowName)
+	{
+		return new DesignerBaseWindow(this, windowNr, windowName);
+	}
+
 }

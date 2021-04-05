@@ -48,7 +48,8 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
- * Eclipse application that can be used for exporting servoy solutions in .war format.
+ * Eclipse application that can be used for exporting servoy solutions in .war format from command line.
+ *
  * @author gboros
  */
 public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentChest>
@@ -56,20 +57,20 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	private final class CommandLineWarExportModel extends AbstractWarExportModel
 	{
-		private final WarArgumentChest configuration;
+		private final WarArgumentChest cmdLineArguments;
 		private Set<String> exportedPackages;
 
 		private CommandLineWarExportModel(WarArgumentChest configuration, boolean isNGExport)
 		{
 			super(isNGExport);
-			this.configuration = configuration;
-			search();
+			this.cmdLineArguments = configuration;
+			searchForComponentsAndServicesBothDefaultAndInSolution();
 		}
 
 		@Override
 		public boolean isExportActiveSolution()
 		{
-			return configuration.isExportActiveSolutionOnly();
+			return cmdLineArguments.isExportActiveSolutionOnly();
 		}
 
 		@Override
@@ -87,10 +88,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public String getServoyPropertiesFileName()
 		{
-			String warSettingsFileName = configuration.getWarSettingsFileName();
+			String warSettingsFileName = cmdLineArguments.getWarSettingsFileName();
 			if (warSettingsFileName == null)
 			{
-				String servoyPropertiesFileName = configuration.getSettingsFileName();
+				String servoyPropertiesFileName = cmdLineArguments.getSettingsFileName();
 				if (servoyPropertiesFileName == null)
 				{
 					servoyPropertiesFileName = getServoyApplicationServerDir() + File.separator + "servoy.properties";
@@ -103,13 +104,13 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public String getWebXMLFileName()
 		{
-			return configuration.getWebXMLFileName();
+			return cmdLineArguments.getWebXMLFileName();
 		}
 
 		@Override
 		public String getLog4jConfigurationFile()
 		{
-			return configuration.getLog4jConfigurationFile();
+			return cmdLineArguments.getLog4jConfigurationFile();
 		}
 
 		@Override
@@ -127,14 +128,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public boolean isExportNonActiveSolutions()
 		{
-			return configuration.getNoneActiveSolutions() != null;
+			return cmdLineArguments.getNoneActiveSolutions() != null;
 		}
 
 		public List<String> getNonActiveSolutions()
 		{
-			if (configuration.getNoneActiveSolutions() != null)
+			if (cmdLineArguments.getNoneActiveSolutions() != null)
 			{
-				return Arrays.asList(configuration.getNoneActiveSolutions().split(" "));
+				return Arrays.asList(cmdLineArguments.getNoneActiveSolutions().split(" "));
 			}
 			return Collections.emptyList();
 		}
@@ -142,41 +143,42 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public List<String> getPlugins()
 		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), configuration.getExcludedPlugins(),
-				configuration.getPlugins());
+			return getFilteredFileNames(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), cmdLineArguments.getExcludedPlugins(),
+				cmdLineArguments.getPlugins());
 		}
 
 		@Override
 		public List<String> getLafs()
 		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getLafManager().getLAFDir(), configuration.getExcludedLafs(), configuration.getLafs());
+			return getFilteredFileNames(ApplicationServerRegistry.get().getLafManager().getLAFDir(), cmdLineArguments.getExcludedLafs(),
+				cmdLineArguments.getLafs());
 		}
 
 		@Override
 		public String getWarFileName()
 		{
-			String warFileName = configuration.getWarFileName();
+			String warFileName = cmdLineArguments.getWarFileName();
 			if (warFileName == null)
 			{
 				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 				warFileName = activeProject.getProject().getName();
 			}
 			if (!warFileName.endsWith(".war")) warFileName += ".war";
-			return configuration.getExportFilePath() + File.separator + warFileName;
+			return cmdLineArguments.getExportFilePath() + File.separator + warFileName;
 		}
 
 		@Override
 		public List<String> getDrivers()
 		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getServerManager().getDriversDir(), configuration.getExcludedDrivers(),
-				configuration.getDrivers());
+			return getFilteredFileNames(ApplicationServerRegistry.get().getServerManager().getDriversDir(), cmdLineArguments.getExcludedDrivers(),
+				cmdLineArguments.getDrivers());
 		}
 
 		@Override
 		public List<String> getBeans()
 		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), configuration.getExcludedBeans(),
-				configuration.getBeans());
+			return getFilteredFileNames(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), cmdLineArguments.getExcludedBeans(),
+				cmdLineArguments.getBeans());
 		}
 
 		@Override
@@ -188,7 +190,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public String getServoyApplicationServerDir()
 		{
-			return configuration.getAppServerDir();
+			return cmdLineArguments.getAppServerDir();
 		}
 
 		List<String> getFilteredFileNames(File folder, String excluded, String included)
@@ -229,32 +231,39 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public List<String> getPluginLocations()
 		{
-			return Arrays.asList(configuration.getPluginLocations().split(" "));
+			return Arrays.asList(cmdLineArguments.getPluginLocations().split(" "));
 		}
 
 		@Override
-		public Set<String> getExportedComponents()
+		public Set<String> getAllExportedComponents()
 		{
-			if (configuration.getExcludedComponentPackages() != null)
+			if (cmdLineArguments.getExcludedComponentPackages() != null)
 			{
-				List<String> excludedPackages = Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
+				Set<String> internallyNeededComponents = getComponentsNeededUnderTheHood();
+				List<String> excludedPackages = Arrays.asList(cmdLineArguments.getExcludedComponentPackages().split(" "));
 				return Arrays.stream(componentsSpecProviderState.getAllWebObjectSpecifications()) //
-					.filter(spec -> !excludedPackages.contains(spec.getPackageName())) //
+					.filter(spec -> (internallyNeededComponents.contains(spec.getName()) || !excludedPackages.contains(spec.getPackageName())))
 					.map(spec -> spec.getName()) //
 					.collect(Collectors.toSet());
 			}
 			else
 			{
-				if (configuration.getSelectedComponents() == null || configuration.getSelectedComponents().equals("")) return getUsedComponents();
+				if (cmdLineArguments.getSelectedComponents() == null || cmdLineArguments.getSelectedComponents().equals(""))
+				{
+					// auto-export components explicitly used by solution and under-the-hood-components
+					Set<String> defaultExportedComponents = new HashSet<>(getComponentsUsedExplicitlyBySolution());
+					defaultExportedComponents.addAll(getComponentsNeededUnderTheHood());
+					return defaultExportedComponents;
+				}
 
 				Set<String> set = new HashSet<String>();
-				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
+				if (cmdLineArguments.getSelectedComponents().trim().equalsIgnoreCase("all"))
 				{
 					Arrays.stream(componentsSpecProviderState.getAllWebObjectSpecifications()).map(spec -> spec.getName()).forEach(set::add);
 				}
 				else
 				{
-					set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
+					set.addAll(Arrays.asList(cmdLineArguments.getSelectedComponents().split(" ")));
 					for (String componentName : set)
 					{
 						if (componentsSpecProviderState.getWebObjectSpecification(componentName) == null)
@@ -264,33 +273,42 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 							set.remove(componentName);
 						}
 					}
-					set.addAll(getUsedComponents());
+					set.addAll(getComponentsUsedExplicitlyBySolution());
+					set.addAll(getComponentsNeededUnderTheHood());
 				}
 				return set;
 			}
 		}
 
 		@Override
-		public Set<String> getExportedServices()
+		public Set<String> getAllExportedServices()
 		{
-			if (configuration.getExcludedServicePackages() != null)
+			if (cmdLineArguments.getExcludedServicePackages() != null)
 			{
-				List<String> excludedPackages = Arrays.asList(configuration.getExcludedServicePackages().split(" "));
+				Set<String> internallyNeededServices = getServicesNeededUnderTheHood();
+				List<String> excludedPackages = Arrays.asList(cmdLineArguments.getExcludedServicePackages().split(" "));
 				return Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()) //
-					.filter(spec -> !excludedPackages.contains(spec.getPackageName())) //
+					.filter(spec -> (internallyNeededServices.contains(spec.getName()) || !excludedPackages.contains(spec.getPackageName())))
 					.map(spec -> spec.getName()).collect(Collectors.toSet());
 			}
 			else
 			{
-				if (configuration.getSelectedServices() == null || configuration.getSelectedServices().equals("")) return getUsedServices();
+				if (cmdLineArguments.getSelectedServices() == null || cmdLineArguments.getSelectedServices().equals(""))
+				{
+					// auto-export services explicitly used by solution and under-the-hood-services
+					Set<String> defaultExportedServices = new HashSet<>(getServicesUsedExplicitlyBySolution());
+					defaultExportedServices.addAll(getServicesNeededUnderTheHood());
+					return defaultExportedServices;
+				}
+
 				Set<String> set = new HashSet<String>();
-				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
+				if (cmdLineArguments.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
 					Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()).map(spec -> spec.getName()).forEach(set::add);
 				}
 				else
 				{
-					set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
+					set.addAll(Arrays.asList(cmdLineArguments.getSelectedServices().split(" ")));
 					for (String serviceName : set)
 					{
 						if (servicesSpecProviderState.getWebObjectSpecification(serviceName) == null)
@@ -300,7 +318,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 							set.remove(serviceName);
 						}
 					}
-					set.addAll(getUsedServices());
+					set.addAll(getServicesUsedExplicitlyBySolution());
+					set.addAll(getServicesNeededUnderTheHood());
 				}
 				return set;
 			}
@@ -315,191 +334,191 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public boolean isExportMetaData()
 		{
-			return configuration.shouldExportMetadata();
+			return cmdLineArguments.shouldExportMetadata();
 		}
 
 		@Override
 		public boolean isExportSampleData()
 		{
-			return configuration.isExportSampleData();
+			return cmdLineArguments.isExportSampleData();
 		}
 
 		@Override
 		public boolean isExportI18NData()
 		{
-			return configuration.isExportI18NData();
+			return cmdLineArguments.isExportI18NData();
 		}
 
 		@Override
 		public int getNumberOfSampleDataExported()
 		{
-			return configuration.getNumberOfSampleDataExported();
+			return cmdLineArguments.getNumberOfSampleDataExported();
 		}
 
 		@Override
 		public boolean isExportAllTablesFromReferencedServers()
 		{
-			return configuration.isExportAllTablesFromReferencedServers();
+			return cmdLineArguments.isExportAllTablesFromReferencedServers();
 		}
 
 		@Override
 		public boolean isCheckMetadataTables()
 		{
-			return configuration.checkMetadataTables();
+			return cmdLineArguments.checkMetadataTables();
 		}
 
 		@Override
 		public boolean isExportUsingDbiFileInfoOnly()
 		{
-			return configuration.shouldExportUsingDbiFileInfoOnly();
+			return cmdLineArguments.shouldExportUsingDbiFileInfoOnly();
 		}
 
 		@Override
 		public boolean isExportUsers()
 		{
-			return configuration.exportUsers();
+			return cmdLineArguments.exportUsers();
 		}
 
 		@Override
 		public boolean isOverwriteGroups()
 		{
-			return configuration.isOverwriteGroups();
+			return cmdLineArguments.isOverwriteGroups();
 		}
 
 		@Override
 		public boolean isAllowSQLKeywords()
 		{
-			return configuration.isAllowSQLKeywords();
+			return cmdLineArguments.isAllowSQLKeywords();
 		}
 
 		@Override
 		public boolean isOverrideSequenceTypes()
 		{
-			return configuration.isOverrideSequenceTypes();
+			return cmdLineArguments.isOverrideSequenceTypes();
 		}
 
 		@Override
 		public boolean isInsertNewI18NKeysOnly()
 		{
-			return configuration.isInsertNewI18NKeysOnly();
+			return cmdLineArguments.isInsertNewI18NKeysOnly();
 		}
 
 		@Override
 		public boolean isOverrideDefaultValues()
 		{
-			return configuration.isOverrideDefaultValues();
+			return cmdLineArguments.isOverrideDefaultValues();
 		}
 
 		@Override
 		public int getImportUserPolicy()
 		{
-			return configuration.getImportUserPolicy();
+			return cmdLineArguments.getImportUserPolicy();
 		}
 
 		@Override
 		public boolean isAddUsersToAdminGroup()
 		{
-			return configuration.isAddUsersToAdminGroup();
+			return cmdLineArguments.isAddUsersToAdminGroup();
 		}
 
 		@Override
 		public String getAllowDataModelChanges()
 		{
-			if (configuration.getAllowDataModelChanges() != null)
+			if (cmdLineArguments.getAllowDataModelChanges() != null)
 			{
-				return configuration.getAllowDataModelChanges();
+				return cmdLineArguments.getAllowDataModelChanges();
 			}
-			return Boolean.toString(!configuration.isStopOnAllowDataModelChanges());
+			return Boolean.toString(!cmdLineArguments.isStopOnAllowDataModelChanges());
 		}
 
 		@Override
 		public boolean isUpdateSequences()
 		{
-			return configuration.isUpdateSequences();
+			return cmdLineArguments.isUpdateSequences();
 		}
 
 		@Override
 		public boolean isAutomaticallyUpgradeRepository()
 		{
-			return configuration.automaticallyUpdateRepository();
+			return cmdLineArguments.automaticallyUpdateRepository();
 		}
 
 		@Override
 		public boolean isCreateTomcatContextXML()
 		{
-			return configuration.isCreateTomcatContextXML();
+			return cmdLineArguments.isCreateTomcatContextXML();
 		}
 
 		@Override
 		public boolean isClearReferencesStatic()
 		{
-			return configuration.isClearReferencesStatic();
+			return cmdLineArguments.isClearReferencesStatic();
 		}
 
 		@Override
 		public boolean isClearReferencesStopThreads()
 		{
-			return configuration.isClearReferencesStopThreads();
+			return cmdLineArguments.isClearReferencesStopThreads();
 		}
 
 		@Override
 		public boolean isClearReferencesStopTimerThreads()
 		{
-			return configuration.isClearReferencesStopTimerThreads();
+			return cmdLineArguments.isClearReferencesStopTimerThreads();
 		}
 
 		@Override
 		public boolean isAntiResourceLocking()
 		{
-			return configuration.isAntiResourceLocking();
+			return cmdLineArguments.isAntiResourceLocking();
 		}
 
 		@Override
 		public String getDefaultAdminUser()
 		{
-			return configuration.getDefaultAdminUser();
+			return cmdLineArguments.getDefaultAdminUser();
 		}
 
 		@Override
 		public String getDefaultAdminPassword()
 		{
-			return configuration.getDefaultAdminPassword();
+			return cmdLineArguments.getDefaultAdminPassword();
 		}
 
 		@Override
 		public boolean isUseAsRealAdminUser()
 		{
-			return configuration.isUseAsRealAdminUser();
+			return cmdLineArguments.isUseAsRealAdminUser();
 		}
 
 		@Override
 		public Collection<License> getLicenses()
 		{
-			return configuration.getLicenses().values();
+			return cmdLineArguments.getLicenses().values();
 		}
 
 		@Override
 		public boolean isOverwriteDeployedDBServerProperties()
 		{
-			return configuration.isOverwriteDeployedDBServerProperties();
+			return cmdLineArguments.isOverwriteDeployedDBServerProperties();
 		}
 
 		@Override
 		public boolean isOverwriteDeployedServoyProperties()
 		{
-			return configuration.isOverwriteDeployedServoyProperties();
+			return cmdLineArguments.isOverwriteDeployedServoyProperties();
 		}
 
 		@Override
 		public String getUserHome()
 		{
-			return configuration.getUserHome();
+			return cmdLineArguments.getUserHome();
 		}
 
 		@Override
 		public boolean isSkipDatabaseViewsUpdate()
 		{
-			return configuration.skipDatabaseViewsUpdate();
+			return cmdLineArguments.skipDatabaseViewsUpdate();
 		}
 
 		@Override
@@ -507,10 +526,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			if (exportedPackages == null)
 			{
-				exportedPackages = Stream.of(getExportedComponents().stream() //
+				exportedPackages = Stream.of(getAllExportedComponents().stream() //
 					.map(comp -> componentsSpecProviderState.getWebObjectSpecification(comp).getPackageName()) //
 					.collect(Collectors.toSet()), //
-					getExportedServices().stream() //
+					getAllExportedServices().stream() //
 						.map(comp -> servicesSpecProviderState.getWebObjectSpecification(comp).getPackageName()) //
 						.collect(Collectors.toSet())) //
 					.flatMap(Set::stream) //

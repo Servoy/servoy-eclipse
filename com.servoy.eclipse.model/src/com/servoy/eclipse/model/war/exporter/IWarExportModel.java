@@ -50,13 +50,16 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public List<String> getPluginLocations();
 
-	public Set<String> getExportedComponents();
+	public Set<String> getComponentsUsedExplicitlyBySolution();
 
-	public Set<String> getExportedServices();
+	public Set<String> getComponentsNeededUnderTheHood();
 
-	public Set<String> getUsedComponents();
+	public Set<String> getServicesUsedExplicitlyBySolution();
 
-	public Set<String> getUsedServices();
+	/**
+	 * NOTE: this currently won't include any sablo content as all needed sablo js files are referenced staticly from the page when serving ng clients.
+	 */
+	public Set<String> getServicesNeededUnderTheHood();
 
 	public boolean isOverwriteGroups();
 
@@ -134,4 +137,17 @@ public interface IWarExportModel extends IExportSolutionModel
 	public void setSkipDatabaseViewsUpdate(boolean skip);
 
 	public Set<String> getExportedPackages();
+
+	/**
+	 * Gets all components that are to be exported. This includes under-the-hood components, components that are explicitly used by solution and any
+	 * optional components that the user picked during export.
+	 */
+	Set<String> getAllExportedComponents();
+
+	/**
+	 * Gets all services that are to be exported. This includes under-the-hood services, services that are explicitly used by solution and any
+	 * optional services that the user picked during export.
+	 */
+	Set<String> getAllExportedServices();
+
 }

@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
@@ -33,7 +32,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
  * Shows the user the list of needed services and allows him to select more to export.
  * @author emera
  */
-public class ServicesSelectionPage extends AbstractComponentsSelectionPage
+public class ServicesSelectionPage extends AbstractWebObjectSelectionPage
 {
 	private final SpecProviderState servicesSpecProviderState;
 
@@ -41,39 +40,40 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	{
 		super(exportModel, pageName, title, description, "service");
 		this.servicesSpecProviderState = servicesSpecProviderState;
-		componentsUsed = exportModel.getUsedServices();
-		selectedComponents = new TreeSet<String>(componentsUsed);
 		joinWithLastUsed();
+	}
+
+	@Override
+	protected Set<String> getWebObjectsExplicitlyUsedBySolution()
+	{
+		return exportModel.getServicesUsedExplicitlyBySolution();
 	}
 
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getExportedServices() == null ||
-			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
-		for (String service : exportModel.getExportedServices())
+		if (exportModel.getServicesToExportWithoutUnderTheHoodOnes() == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(exportModel.getServicesToExportWithoutUnderTheHoodOnes())) return;
+		for (String service : exportModel.getServicesToExportWithoutUnderTheHoodOnes())
 		{
-			if (servicesSpecProviderState.getWebObjectSpecification(service) != null) selectedComponents.add(service);
+			if (servicesSpecProviderState.getWebObjectSpecification(service) != null) selectedWebObjectsForListCreation.add(service);
 		}
 	}
 
 	@Override
-	protected Set<String> getAvailableItems()
+	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
-		Set<String> availableComponents = new TreeSet<String>();
+		Set<String> availableServices = new TreeSet<String>();
 		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 		{
-			if (exportModel.getExcludedServicePackages().contains(spec.getPackageName())) continue;
-			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
+			if (!exportModel.getPreferencesExcludedDefaultServicePackages().contains(spec.getPackageName()) &&
+				!exportModel.getServicesNeededUnderTheHood().contains(spec.getName()) && // normally under the hood services would not be returned anyway by NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport
+				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
+			{
+				availableServices.add(spec.getName());
+			}
 		}
-		return availableComponents;
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		return super.getNextPage();
+		return availableServices;
 	}
 
 	@Override
@@ -81,4 +81,11 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_services");
 	}
+
+	@Override
+	public void storeInput()
+	{
+		exportModel.setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(selectedWebObjectsList.getItems())));
+	}
+
 }

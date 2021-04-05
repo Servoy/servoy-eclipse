@@ -34,9 +34,9 @@
 		<script src="js/servoytooltip.js"></script>
 		<script src="js/fileupload.js"></script>
 		<script src="sablo/lib/reconnecting-websocket.js"></script>
+        <script src="sablo/js/types_registry.js"></script>
 		<script src="sablo/js/websocket.js"></script>
-		<script src="spec/pushToServerData.js"></script>
-		<script src="sablo/js/sablo_app.js"></script>
+        <script src="sablo/js/sablo_app.js"></script>
 		<script src="js/servoy_app.js"></script>
 		<script src="js/jquery.maskedinput.js"></script>
 
@@ -63,7 +63,7 @@
 			}
 	
 			$(document).ready(function(){
-				editorNode.trigger('documentReady.content', document)
+				editorNode.trigger('documentReady.content', document);
 
 				/* 
 				 * Attach scroll listeners on all elements to update decorators when scrolling

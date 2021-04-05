@@ -121,7 +121,6 @@ import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
@@ -332,7 +331,7 @@ public class WarExporter
 
 			//generate servoy-components.js
 			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
-			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getExportedServices(), exportModel.getExportedComponents());
+			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getAllExportedServices(), exportModel.getAllExportedComponents());
 			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
 
 			//generate wro.xml
@@ -443,11 +442,11 @@ public class WarExporter
 		rootElement.setAttributeNode(attr);
 
 		Set<String> exportedWebObjects = null;
-		if (exportModel.getExportedComponents() != null || exportModel.getExportedServices() != null)
+		if (exportModel.getAllExportedComponents() != null || exportModel.getAllExportedServices() != null)
 		{
 			exportedWebObjects = new HashSet<>();
-			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
-			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
+			if (exportModel.getAllExportedComponents() != null) exportedWebObjects.addAll(exportModel.getAllExportedComponents());
+			if (exportModel.getAllExportedServices() != null) exportedWebObjects.addAll(exportModel.getAllExportedServices());
 		}
 		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackages(), Boolean.TRUE,
 			NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
@@ -563,8 +562,8 @@ public class WarExporter
 	 */
 	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir, IProgressMonitor m) throws ExportException
 	{
-		Set<String> exportedComponents = exportModel.getExportedComponents();
-		Set<String> exportedServices = exportModel.getExportedServices();
+		Set<String> exportedComponents = exportModel.getAllExportedComponents();
+		Set<String> exportedServices = exportModel.getAllExportedServices();
 		if (exportedComponents != null)
 		{
 			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
@@ -572,8 +571,9 @@ public class WarExporter
 
 		if ((exportedComponents == null && exportedServices == null) ||
 			(exportedComponents.size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportedServices.size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
-			return;
+				exportedServices.size() == servicesSpecProviderState.getWebObjectSpecifications().size()))
+			return; // all of them will be loaded in app; if we do not generate a properties file at all then that will be the case
+
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
 		Properties properties = new Properties();
 		StringBuilder webObjects = new StringBuilder();

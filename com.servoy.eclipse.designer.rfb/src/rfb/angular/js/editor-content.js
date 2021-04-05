@@ -57,7 +57,11 @@ window.onerror = function(message, source, lineno, colno, error) {
 }
 
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal, $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService, $element){
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal,
+                $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService, $element, $typesRegistry, $pushToServerUtils) {
+                    
+  $typesRegistry.disablePushToServerWatchesReceivedFromServer(); // we don't want watches to try to send client side changes to server; we are in designer; we only want to show things
+                    
   $rootScope.createComponent = function(html, model) {
     if (model) $rootScope.getDesignFormControllerScope().setModel(model.componentName, model);
     var el = $compile(html)($rootScope.getDesignFormControllerScope());
@@ -449,7 +453,7 @@ angular.module('editorContent',['servoyApp'])
       delete layout;
   }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
-  $webSocket, $compile, $sabloConverters, $templateCache, $timeout) {
+  $webSocket, $compile, $sabloConverters, $templateCache, $timeout, $typesRegistry, $pushToServerUtils) {
   var formData = null;
   var layoutData = null;
 
@@ -567,14 +571,21 @@ angular.module('editorContent',['servoyApp'])
       }
       
       if (designControllerReady && formData) {
-    	// we need the scope from DesignFormController so we will only be able to do the property conversions ($sabloConverters.convertFromServerToClient) when that controller is available
-        function compModelGetter(compName) {
-        	return function() { return formData.components[compName]; }
+        if (formData.componentSpecs) {
+            $typesRegistry.addComponentClientSideSpecs(formData.componentSpecs);
         }
+
+    	// we need the scope from DesignFormController so we will only be able to do the property conversions ($sabloConverters.convertFromServerToClient) when that controller is available
         for (var name in formData.components) {
-          var compData = formData.components[name];
-          if (compData[$sabloConverters.TYPES_KEY]) {
-        	  formData.components[name] = $sabloConverters.convertFromServerToClient(compData, compData[$sabloConverters.TYPES_KEY], undefined, $rootScope.getDesignFormControllerScope(), compModelGetter(name));
+          var componentSpecification = $typesRegistry.getComponentSpecification(formData.componentSpecNames[name]);
+          var propertyContextCreator = $pushToServerUtils.newRootPropertyContextCreator(function(propertyName) { return formData.components[name][propertyName]; }, componentSpecification);
+          
+          var serverDataForComponent = formData.components[name];
+          formData.components[name] = {};
+          for (var propName in serverDataForComponent) {
+        	  formData.components[name][propName] = $sabloConverters.convertFromServerToClient(serverDataForComponent[propName],
+        	                   componentSpecification ? componentSpecification.getPropertyType(propName): undefined,
+        	                   undefined, undefined, undefined, $rootScope.getDesignFormControllerScope(), propertyContextCreator.withPushToServerFor(propName));
           }
         }
         for (var template in formData.formcomponenttemplates) {
@@ -613,9 +624,6 @@ angular.module('editorContent',['servoyApp'])
     	  var setCSSPositionProperties = this.setCSSPositionProperties;
         // TODO should it be converted??
         $rootScope.$apply(function() {
-          function compModelGetter(compName) {
-            return function() { return formData.components[compName]; }
-          }
 
           var toDeleteA = [];
           var domElementsToRemove = [];
@@ -664,16 +672,22 @@ angular.module('editorContent',['servoyApp'])
               $rootScope.getDesignFormControllerScope().removeComponent(toDeleteA[index]);
           }          
           
+          if (data.componentSpecs) {
+              $typesRegistry.addComponentClientSideSpecs(data.componentSpecs);
+          }
+          
           for (var name in data.components) {
+            var componentSpecification = $typesRegistry.getComponentSpecification(data.componentSpecNames[name]);
+            var propertyContextCreator = $pushToServerUtils.newRootPropertyContextCreator(function(propertyName) { return data.components[name][propertyName]; }, componentSpecification);
+            
         	var forceUpdate = false;
             var compData = formData.components[name];
             var newCompData = data.components[name];
-            if (newCompData[$sabloConverters.TYPES_KEY]) {
-              newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData[$sabloConverters.TYPES_KEY], compData, $rootScope.getDesignFormControllerScope(), compModelGetter(name))
-            }
+
+            var modifyFunction = undefined;
             if (compData) {
             	
-              if(data.updatedFormComponentsDesignId) {
+              if (data.updatedFormComponentsDesignId) {
             	  var fixedName = name.replace(/-/g, "_");
             	  if(!isNaN(fixedName[0])) {
             		  fixedName = "_" + fixedName;
@@ -683,7 +697,9 @@ angular.module('editorContent',['servoyApp'])
             	  }
               }
             	
-              var modifyFunction = compData[$sabloConstants.modelChangeNotifier];
+              modifyFunction = compData[$sabloConstants.modelChangeNotifier];
+              
+              // keys that were there and are no longer there should get cleared
               var key;
               for (key in compData) {
                 if (!newCompData[key]) {
@@ -691,14 +707,18 @@ angular.module('editorContent',['servoyApp'])
                   if (modifyFunction) modifyFunction(key, null)
                 }
               }
-              // copy it inside so that we update the data inside the model
-              for (key in newCompData) {
-                compData[key] = newCompData[key];
-                if (modifyFunction) modifyFunction(key, newCompData[key])
-              }
-            } else {
-              formData.components[name] = newCompData;
             }
+            
+            if (!compData) compData = formData.components[name] = {};
+            
+            for (var propName in newCompData) {
+              compData[propName] = $sabloConverters.convertFromServerToClient(newCompData[propName],
+                               componentSpecification ? componentSpecification.getPropertyType(propName) : undefined,
+                               compData ? compData[propName] : undefined, undefined, undefined, $rootScope.getDesignFormControllerScope(),
+                               propertyContextCreator.withPushToServerFor(propName));
+              if (modifyFunction) modifyFunction(key, newCompData[key])
+            }
+
 
             if (!forceUpdate && data.refreshTemplate)
             {

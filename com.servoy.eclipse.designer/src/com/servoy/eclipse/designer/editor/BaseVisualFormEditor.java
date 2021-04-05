@@ -414,6 +414,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			public void run()
 			{
+				if (getSite() == null || getSite().getPage() == null) return; // already closed before this async exec happened?
+
 				boolean wasClosed = getSite().getPage().closeEditor(BaseVisualFormEditor.this, save);
 				if (save && !wasClosed) // the user clicked cancel
 					getSite().getPage().closeEditor(BaseVisualFormEditor.this, false);
