@@ -69,7 +69,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				var i;
 				for (i = 0; i < $scope.actions.length; i++){
 					if ($scope.actions[i].text === "Add") {
-						var allowedChildren = $allowedChildren.get(selection.getAttribute("svy-layoutname"));
+						var allowedChildren = selection.getAttribute("svy-types") != null ? [] : $allowedChildren.get(selection.getAttribute("svy-layoutname"));
 						var types = selection.getAttribute("svy-types");
 						if (allowedChildren || types){
 							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
@@ -112,7 +112,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 													}
 													else {
 														component.type = typesArray[k].type; 
-														component.propertyName = typesArray[k].property;
+														component.ghostPropertyName = typesArray[k].property;
 													}
 
 													component = $scope.convertToContentPoint(component);
