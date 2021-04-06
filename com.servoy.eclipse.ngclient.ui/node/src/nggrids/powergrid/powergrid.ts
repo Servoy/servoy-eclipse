@@ -467,25 +467,27 @@ export class PowerGrid extends NGGridDirective {
                         }
                         break;
                     case 'columns':
-                        // need a better way to detect if columns array are changed
-                        if(change.currentValue !== change.previousValue) {
-                            this.updateColumnDefs();
-                        } else {
-                            for(let i = 0; i < this.columns.length; i++) {
-                                for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
-                                    const oldPropertyValue = change.previousValue[i][prop];
-                                    const newPropertyValue = change.currentValue[i][prop];
-                                    if(newPropertyValue !== oldPropertyValue) {
-                                        this.log.debug('column property changed');
-                                        if(this.isGridReady) {
-                                            this.updateColumnDefs();
-                                            if(prop !== 'visible' && prop !== 'width') {
-                                                this.restoreColumnsState();
+                        if(!change.firstChange) {
+                            // need a better way to detect if columns array are changed
+                            if(change.currentValue !== change.previousValue) {
+                                this.updateColumnDefs();
+                            } else {
+                                for(let i = 0; i < this.columns.length; i++) {
+                                    for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                        const oldPropertyValue = change.previousValue[i][prop];
+                                        const newPropertyValue = change.currentValue[i][prop];
+                                        if(newPropertyValue !== oldPropertyValue) {
+                                            this.log.debug('column property changed');
+                                            if(this.isGridReady) {
+                                                this.updateColumnDefs();
+                                                if(prop !== 'visible' && prop !== 'width') {
+                                                    this.restoreColumnsState();
+                                                }
                                             }
-                                        }
 
-                                        if(prop === 'headerTitle') {
-                                            this.handleColumnHeaderTitle(i, newPropertyValue);
+                                            if(prop === 'headerTitle') {
+                                                this.handleColumnHeaderTitle(i, newPropertyValue);
+                                            }
                                         }
                                     }
                                 }

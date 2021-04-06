@@ -675,31 +675,33 @@ export class DataGrid extends NGGridDirective {
                         });
                         break;
                     case 'columns':
-                        // need a better way to detect if columns array are changed
-                        if(change.currentValue !== change.previousValue) {
-                            this.updateColumnDefs();
-                        } else {
-                            for(let i = 0; i < this.columns.length; i++) {
-                                for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
-                                    const oldPropertyValue = change.previousValue[i][prop];
-                                    const newPropertyValue = change.currentValue[i][prop];
-                                    if(newPropertyValue !== oldPropertyValue) {
-                                        this.log.debug('column property changed');
-                                        if(this.isGridReady) {
-                                            if(prop !== 'footerText') {
-                                                this.updateColumnDefs();
+                        if(!change.firstChange) {
+                            // need a better way to detect if columns array are changed
+                            if(change.currentValue !== change.previousValue) {
+                                this.updateColumnDefs();
+                            } else {
+                                for(let i = 0; i < this.columns.length; i++) {
+                                    for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                        const oldPropertyValue = change.previousValue[i][prop];
+                                        const newPropertyValue = change.currentValue[i][prop];
+                                        if(newPropertyValue !== oldPropertyValue) {
+                                            this.log.debug('column property changed');
+                                            if(this.isGridReady) {
+                                                if(prop !== 'footerText') {
+                                                    this.updateColumnDefs();
+                                                }
+                                                if(prop !== 'visible' && prop !== 'width') {
+                                                    this.restoreColumnsState();
+                                                }
+                                            } else {
+                                                this.isColumnModelChangedBeforeGridReady = true;
                                             }
-                                            if(prop !== 'visible' && prop !== 'width') {
-                                                this.restoreColumnsState();
-                                            }
-                                        } else {
-                                            this.isColumnModelChangedBeforeGridReady = true;
-                                        }
 
-                                        if(prop === 'headerTitle') {
-                                            this.handleColumnHeaderTitle(i, newPropertyValue);
-                                        } else if (prop === 'footerText') {
-                                            this.handleColumnFooterText();
+                                            if(prop === 'headerTitle') {
+                                                this.handleColumnHeaderTitle(i, newPropertyValue);
+                                            } else if (prop === 'footerText') {
+                                                this.handleColumnFooterText();
+                                            }
                                         }
                                     }
                                 }
