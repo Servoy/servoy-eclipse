@@ -12,11 +12,11 @@ export class SvyUtilsService {
         this.log = logFactory.getLogger('SvyUtilsService');
     }
 
-    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any) : JSEvent{
+    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent{
         if (!event) {
             if (contextFilter || contextFilterElement) return null;
-            this.log.error("event is undefined, returning default event");
-            return { svyType: 'JSEvent', eventType: eventType, "timestamp": new Date().getTime() };
+            this.log.error('event is undefined, returning default event');
+            return { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
         }
         const targetEl = event.target as Element;
         let form;
@@ -32,8 +32,7 @@ export class SvyUtilsService {
                     break;
                 contextMatch = true;
                 break;
-            }
-            else if (parent.tagName.toLowerCase() === 'body' && !contextFilter) {
+            } else if (parent.tagName.toLowerCase() === 'body' && !contextFilter) {
                 contextMatch = true;
                 break;
             }
@@ -45,16 +44,16 @@ export class SvyUtilsService {
 
         if (!form) {
             // form not found, search for an active dialog
-            let dialog = this.doc.querySelector('.svy-dialog.window.active');
+            const dialog = this.doc.querySelector('.svy-dialog.window.active');
             if (dialog) {
-                let formInDialog = dialog.querySelector('svy-form');
+                const formInDialog = dialog.querySelector('svy-form');
                 if (formInDialog) form = formInDialog.getAttribute('name');
             }
         }
 
         if (!contextMatch)
             return null;
-        const jsEvent : JSEvent = { svyType: 'JSEvent', eventType : eventType, timestamp: new Date().getTime() } ;
+        const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() } ;
         const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
         jsEvent.modifiers = modifiers;
         jsEvent.x = event['pageX'];//TODO check
@@ -73,11 +72,16 @@ export class SvyUtilsService {
         return jsEvent;
     }
 
-    public generateUploadUrl(formname, componentName, propertyName) {
+    public generateUploadUrl(formname: string, componentName: string, propertyName: string) {
         return 'resources/upload/' + this.sabloService.getClientnr() +
             (formname ? '/' + formname : '') +
             (componentName ? '/' + componentName : '') +
             (propertyName ? '/' + propertyName : '');
+    }
+
+    public generateServiceUploadUrl(serviceName: string, apiFunctionName: string){
+            // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
+            return 'resources/upload/' +  this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
     }
 
     /**
