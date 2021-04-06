@@ -1,0 +1,44 @@
+<div class="bts-extra-drop-down {{styleClass}}" 
+    #element
+    [id]="servoyApi.getMarkupId()"
+    [svyTooltip]="toolTipText"
+    ngbDropdown>
+    <div 
+        class="btn-group">
+        <button
+                *ngIf="!isSplitButton"  
+                class="btn {{isButton ?  'btn-default dropdown-toggle' : 'btn-link'}} {{buttonStyleClass}}" 
+                type="button"
+                ngbDropdownToggle 
+                id="button-{{servoyApi.getMarkupId()}}"
+                [disabled]="!enabled"
+                (click)="buttonClicked($event)">
+                <span class="{{imageStyleClass}}"></span> {{text ? text : 'Button'}}
+        </button>
+        <button 
+                *ngIf="isSplitButton"
+                class="btn btn-default{{buttonStyleClass}}" 
+                type="button"
+                id="button-{{servoyApi.getMarkupId()}}"
+                [disabled]="!enabled"
+                (click)="buttonClicked($event)">
+                <span class="{{imageStyleClass}}"></span> {{text ? text : 'Button'}}
+        </button>
+        <button 
+                *ngIf="isSplitButton"
+                class="btn btn-default dropdown-toggle dropdown-toggle-split {{buttonStyleClass}}" 
+                type="button"
+                ngbDropdownToggle 
+                id="button-dropdown-{{servoyApi.getMarkupId()}}"
+                [disabled]="!enabled">
+        </button>
+        <div ngbDropdownMenu [attr.aria-labelledby]="'button-' + servoyApi.getMarkupId()">
+          <ng-container *ngFor="let menuItem of menuItems" >
+            <button *ngIf="menuItem.isDivider != true" ngbDropdownItem class="{{menuItem.enabled == false ? 'disabled' : ''}}" (click)="menuClicked($event, menuItem)">
+                <span *ngIf="menuItem.iconName" class="{{menuItem.iconName}}"></span>{{menuItem.text}}
+            </button>
+            <div *ngIf="menuItem.isDivider == true" class="dropdown-divider"></div>
+          </ng-container>  
+        </div>
+    </div>
+</div>    
