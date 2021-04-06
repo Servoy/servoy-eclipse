@@ -54,7 +54,7 @@ public class ModuleListValueListSelectionDialog extends ModuleListSelectionDialo
 	public ModuleListValueListSelectionDialog(Shell shell, String dialogTitle,
 		String dialogMessage)
 	{
-		super(shell, dialogTitle);
+		super(shell, dialogTitle, dialogMessage);
 		this.message = dialogMessage;
 	}
 

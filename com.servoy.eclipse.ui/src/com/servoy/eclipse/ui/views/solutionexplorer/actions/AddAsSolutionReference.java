@@ -91,7 +91,7 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 		{
 			ServoyProject activeProject = servoyModel.getActiveProject();
 
-			ModuleListSelectionDialog nameDialog = new ModuleListSelectionDialog(shell, "Choose parent solution");
+			ModuleListSelectionDialog nameDialog = new ModuleListSelectionDialog(shell, "Choose parent solution", solutionChooseDialogMessage());
 			nameDialog.setInitialSelections(activeProject.getSolution().getName());
 			int res = nameDialog.open();
 			if (res == Window.OK)
