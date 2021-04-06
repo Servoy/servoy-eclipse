@@ -22,6 +22,7 @@ import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
 import { NGDesktopFileService } from '../ngdesktopfile/ngdesktopfile.service';
 import { NGDesktopUtilsService } from '../ngdesktoputils/ngdesktoputils.service';
+import { NGDesktopUIService } from '../ngdesktopui/ngdesktopui.service';
 // generated services end
 
 
@@ -49,6 +50,7 @@ export class AllServiceService implements ServiceProvider {
         private dialogs: DialogService,
         private ngdesktopfile: NGDesktopFileService,
         private ngdesktoputils: NGDesktopUtilsService,
+        private ngdesktopui: NGDesktopUIService
         // generated services end
     ) {
         services.setServiceProvider( this );
@@ -72,6 +74,7 @@ export class AllServiceService implements ServiceProvider {
                 PowergridService,
                 NGDesktopFileService,
                 NGDesktopUtilsService,
+                NGDesktopUIService
                 // generated services end
                 ],
     imports: [
