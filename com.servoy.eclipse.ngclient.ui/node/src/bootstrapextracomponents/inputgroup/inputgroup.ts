@@ -104,7 +104,7 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
 
     buttonClicked( event: any, btnText: string, btnIndex: number ) {
         const addOnButton = this.addOnButtons[btnIndex];
-        if ( addOnButton && addOnButton.onAction ) {
+        if ( addOnButton && addOnButton.onAction && event.type == 'click') {
             const jsEvent = this.utils.createJSEvent( event, 'action' );
             this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
         }
