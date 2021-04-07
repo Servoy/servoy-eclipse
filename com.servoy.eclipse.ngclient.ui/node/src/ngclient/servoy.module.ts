@@ -25,6 +25,7 @@ import { DefaultNavigator } from '../servoycore/default-navigator/default-naviga
 import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 import { SessionView } from '../servoycore/session-view/session-view';
+import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
 import { ViewportService } from './services/viewport.service';
 
 import { ComponentContributor } from './component_contributor.service';
@@ -51,6 +52,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
         SessionView,
         ErrorBean,
         ServoyCoreSlider,
+        ServoyCoreFormContainer,
         DialogWindowComponent,
         ServoyFormPopupComponent,
         LoadingIndicatorComponent,
