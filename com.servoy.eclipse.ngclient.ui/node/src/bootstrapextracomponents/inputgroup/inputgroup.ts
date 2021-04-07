@@ -44,17 +44,17 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     }
 
     public getFocusElement(): HTMLElement {
-        return this.getNativeElement();
+        return this.input.nativeElement;
     }
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachFocusListeners( this.input.nativeElement );
+        this.attachFocusListeners( this.getFocusElement() );
         if ( this.onAction ) {
-            this.renderer.listen( this.input.nativeElement, 'click', e => this.onAction( e ) );
+            this.renderer.listen( this.getFocusElement(), 'click', e => this.onAction( e ) );
         }
         if ( this.onRightClick ) {
-            this.renderer.listen( this.input.nativeElement, 'contextmenu', e => {
+            this.renderer.listen( this.getFocusElement(), 'contextmenu', e => {
                 this.onRightClick( e ); return false;
             } );
         }
@@ -102,18 +102,47 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
         return this.addOnButtons.filter( filterButtons );
     }
 
+    preventSimpleClick: Boolean = false;
+    timer: any;
+
     buttonClicked( event: any, btnText: string, btnIndex: number ) {
         const addOnButton = this.addOnButtons[btnIndex];
-        if ( addOnButton && addOnButton.onAction && event.type == 'click') {
-            const jsEvent = this.utils.createJSEvent( event, 'action' );
-            this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
+        this.timer = 0;
+        this.preventSimpleClick = false;
+
+        if ( addOnButton && addOnButton.onAction && event.type == 'click' ) {
+            if ( addOnButton.onDoubleClick ) {
+                this.timer = setTimeout(() => {
+                    if ( !this.preventSimpleClick ) {
+                        const jsEvent = this.utils.createJSEvent( event, 'action' );
+                        this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
+                    }
+                }, 250 );
+
+            } else {
+                const jsEvent = this.utils.createJSEvent( event, 'action' );
+                this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
+            }
         }
-        else if ( addOnButton && event.type == 'dblclick' && addOnButton.onDoubleClick ) {
+    }
+
+    buttonDoubleClicked( event: any, btnText: string, btnIndex: number ) {
+        const addOnButton = this.addOnButtons[btnIndex];
+
+        if ( addOnButton && event.type == 'dblclick' && addOnButton.onDoubleClick ) {
+            this.preventSimpleClick = true;
+            clearTimeout( this.timer );
             const jsEvent = this.utils.createJSEvent( event, 'doubleclick' );
             this.servoyService.executeInlineScript( addOnButton.onDoubleClick.formname, addOnButton.onDoubleClick.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
 
         }
-        else if ( addOnButton && event.type == 'contextmenu' && addOnButton.onRightClick ) {
+
+    }
+
+    buttonRightClicked( event: any, btnText: string, btnIndex: number ) {
+        const addOnButton = this.addOnButtons[btnIndex];
+        if ( addOnButton && event.type == 'contextmenu' && addOnButton.onRightClick ) {
+            event.preventDefault();
             const jsEvent = this.utils.createJSEvent( event, 'rightclick' );
             this.servoyService.executeInlineScript( addOnButton.onRightClick.formname, addOnButton.onRightClick.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
         }

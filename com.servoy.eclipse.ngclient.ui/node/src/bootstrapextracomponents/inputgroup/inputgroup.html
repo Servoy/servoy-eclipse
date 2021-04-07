@@ -13,8 +13,8 @@
 	            class="btn {{button.styleClass ? button.styleClass : 'btn-outline-secondary'}}" 
 	            type="button"
 	            (click)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
-                (dblclick)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
-                (contextmenu)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
+                (dblclick)='buttonDoubleClicked($event, button.text, addOnButtons.indexOf(button))'
+                (contextmenu)='buttonRightClicked($event, button.text, addOnButtons.indexOf(button))'
                 [sabloTabseq]="tabSeq"
 	            [svyAttributesInputGroup]="button.attributes">
 	            <span [ngClass]="button.imageStyleClass" aria-hidden="true"></span> {{button.text}}
@@ -64,8 +64,8 @@
 	            class="btn {{button.styleClass ? button.styleClass : 'btn-default'}}" 
 	            type="button"
 	            (click)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
-                (dblclick)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
-                (contextmenu)='buttonClicked($event, button.text, addOnButtons.indexOf(button))'
+                (dblclick)='buttonDoubleClicked($event, button.text, addOnButtons.indexOf(button))'
+                (contextmenu)='buttonRightClicked($event, button.text, addOnButtons.indexOf(button))'
 	            [sabloTabseq]="tabSeq"
 	            [svyAttributesInputGroup]="button.attributes">
 	            <span [ngClass]="button.imageStyleClass" aria-hidden="true"></span> {{button.text}}
