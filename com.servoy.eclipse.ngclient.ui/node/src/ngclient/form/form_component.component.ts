@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
-        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
+        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties } from '../types';
 
@@ -11,6 +11,7 @@ import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
 import { ServoyBaseComponent } from '../basecomponent';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     // eslint-disable-next-line
@@ -225,7 +226,8 @@ export class FormComponent implements OnDestroy, OnChanges {
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, private renderer: Renderer2) {
+                private el: ElementRef, private renderer: Renderer2,
+                @Inject(DOCUMENT) private document: Document) {
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -250,6 +252,37 @@ export class FormComponent implements OnDestroy, OnChanges {
             comp.ngOnChanges(change);
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
+        }
+    }
+
+    @Input('containers')
+    set containers(containers: {added: any, removed: any}) {
+        if (!containers) return;
+        for (let containername in containers.added) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
+            }
+        }
+        for (let containername in containers.removed) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
+            }
+        }
+    }
+
+    @Input('cssStyles')
+    set cssstyles(cssStyles: { [x: string]: any; }) {
+        if (!cssStyles) return;
+        for (let containername in cssStyles) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                const stylesMap = cssStyles[containername];
+                for (let key in stylesMap) {
+                    this.renderer.setStyle(container, key, stylesMap[key]);
+                }
+            }
         }
     }
 
@@ -404,6 +437,10 @@ export class FormComponent implements OnDestroy, OnChanges {
                 return null;
             }
         }
+    }
+
+    private getContainerByName(containername: string) : Element {
+       return this.document.querySelector('[name="'+this.name+'_'+containername+'"]');
     }
 }
 

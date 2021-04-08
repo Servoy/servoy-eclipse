@@ -272,7 +272,17 @@ export class FormService {
         const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
         const formData = msg.forms[formname];
+        var newFormProperties = formData['']; // form properties
+        if (newFormProperties) {
+            if (formConversion)
+                newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion, formComponent,
+                  (propertyName: string) => formComponent ? formComponent[propertyName] : formComponent);
+            for (var p in newFormProperties) {
+                formComponent[p] = newFormProperties[p];
+            }
+        }
         for (const beanname of Object.keys(formData)) {
+            if (beanname === '') continue; // skip form properties
             let comp: IComponentCache = formCache.getComponent(beanname);
             if (!comp) { // is it a form component?
                 comp = formCache.getFormComponent(beanname);
