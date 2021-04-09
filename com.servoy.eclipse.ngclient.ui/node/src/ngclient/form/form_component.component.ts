@@ -206,7 +206,8 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('bootstrapextracomponentsRating', { static: true }) readonly bootstrapextracomponentsRating: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsProgressbar', { static: true }) readonly bootstrapextracomponentsProgressbar: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsDropdown', { static: true }) readonly bootstrapextracomponentsDropdown: TemplateRef<any>;
-    
+    @ViewChild('bootstrapextracomponentsSwitch', { static: true }) readonly bootstrapextracomponentsSwitch: TemplateRef<any>;
+
     @ViewChild('svychartjsChart', { static: true }) readonly svychartjsChart: TemplateRef<any>;
     // component template generate end
 

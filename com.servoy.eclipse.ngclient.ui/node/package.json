@@ -45,6 +45,7 @@
     "chart.js": "^2.9.4",
     "core-js": "^3.9.1",
     "custom-event-polyfill": "^1.0.7",
+    "jw-bootstrap-switch-ng2": "^2.0.5",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "ng-select2-component": "^7.2.3",

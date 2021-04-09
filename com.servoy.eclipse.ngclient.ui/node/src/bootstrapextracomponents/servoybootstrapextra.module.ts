@@ -15,6 +15,8 @@ import { SabloModule } from '../sablo/sablo.module';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { SpecTypesService } from '../sablo/spectypes.service';
+import { ServoyBootstrapExtraSwitch } from './switch/switch';
+import { JwBootstrapSwitchNg2Module } from 'jw-bootstrap-switch-ng2';
 
 @NgModule({
     declarations: [
@@ -28,6 +30,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
       ServoyBootstrapExtraRating,
       ServoyBootstrapExtraProgressBar,
       ServoyBootstrapExtraDropdown,
+      ServoyBootstrapExtraSwitch,
       SvyAttributes
     ],
     providers: [],
@@ -36,7 +39,8 @@ import { SpecTypesService } from '../sablo/spectypes.service';
       ServoyPublicModule,
       SabloModule,
       NgbModule,
-      FormsModule
+      FormsModule,
+      JwBootstrapSwitchNg2Module
     ],
     exports: [
         ServoyBootstrapExtraBreadcrumbs,
@@ -49,6 +53,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
         ServoyBootstrapExtraRating,
         ServoyBootstrapExtraProgressBar,
         ServoyBootstrapExtraDropdown,
+        ServoyBootstrapExtraSwitch,
         SvyAttributes
       ]
 })
