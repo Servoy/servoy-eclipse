@@ -15,7 +15,7 @@
 				<SizeBasedTriggeringPolicy size="10MB" />
 			</Policies>
 			<PatternLayout
-				pattern="%d %p [%t] %c - %m [%X{clientid} %X{solution}]%n" />
+				pattern="%d %p [%t] %c - %m [$${servoy:clientid:-} $${servoy:solution:-}]%n" />
 		</RollingFile>
 		<Async name="asyncfile">
 			<AppenderRef ref="file" />
