@@ -223,6 +223,8 @@ export class FormComponent implements OnDestroy, OnChanges {
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
+    private _containers: { added: any; removed: any; };
+    private _cssstyles: { [x: string]: any; };
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -259,6 +261,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @Input('containers')
     set containers(containers: {added: any, removed: any}) {
         if (!containers) return;
+        this._containers = containers;
         for (let containername in containers.added) {
             const container = this.getContainerByName(containername);
             if (container) {
@@ -273,9 +276,14 @@ export class FormComponent implements OnDestroy, OnChanges {
         }
     }
 
+    get containers() {
+        return this._containers;
+    }
+
     @Input('cssStyles')
     set cssstyles(cssStyles: { [x: string]: any; }) {
         if (!cssStyles) return;
+        this._cssstyles = cssStyles;
         for (let containername in cssStyles) {
             const container = this.getContainerByName(containername);
             if (container) {
@@ -285,6 +293,10 @@ export class FormComponent implements OnDestroy, OnChanges {
                 }
             }
         }
+    }
+
+    get cssstyles() {
+        return this._cssstyles;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -468,7 +480,7 @@ class FormComponentServoyApi extends ServoyApi {
 export class AddAttributeDirective implements OnInit {
     @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
 
-    constructor(private el: ElementRef, private renderer: Renderer2) { }
+    constructor(private el: ElementRef, private renderer: Renderer2, @Inject(FormComponent) private parent: FormComponent) { }
 
     ngOnInit() {
         if ('classes' in this.svyContainerStyle) {
@@ -483,6 +495,27 @@ export class AddAttributeDirective implements OnInit {
         if ('attributes' in this.svyContainerStyle) {
               for (const key of Object.keys(this.svyContainerStyle.attributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
+                if (key === 'name') this.restoreCss(key); //set the containers css and classes after a refresh if it's the case
+            }
+        }
+    }
+
+    private restoreCss(key: string) {
+        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes[key].indexOf('_') > 0) {
+            const name = this.svyContainerStyle.attributes.name.split('_')[1];
+            if (this.parent.cssstyles && this.parent.cssstyles[name]) {
+                const stylesMap = this.parent.cssstyles[name];
+                for (let k in Object.keys(stylesMap)) {
+                    this.renderer.setStyle(this.el.nativeElement, k, stylesMap[key]);
+                }
+            }
+            if (this.parent.containers) {
+                if (this.parent.containers.added && this.parent.containers.added[name]) {
+                    this.parent.containers.added[name].forEach((cls: string) => this.renderer.addClass(this.el.nativeElement, cls));
+                }
+                if (this.parent.containers.removed && this.parent.containers.removed[name]) {
+                    this.parent.containers.removed[name].forEach((cls: string) => this.renderer.removeClass(this.el.nativeElement, cls));
+                }
             }
         }
     }
