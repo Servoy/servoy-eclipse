@@ -306,10 +306,11 @@ export class FormComponent implements OnDestroy, OnChanges {
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
             if (styleClasses)
-                this.formClasses =styleClasses.split(' ');
+                this.formClasses = styleClasses.split(' ');
             else
-                this.formClasses = null;;
-
+                this.formClasses = null;
+            this._containers = this.formCache.getComponent('').model.containers;
+            this._cssstyles = this.formCache.getComponent('').model.cssstyles;
             this.handlerCache = {};
             this.servoyApiCache = {};
             this.componentCache = {};
@@ -453,7 +454,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     }
 
     private getContainerByName(containername: string) : Element {
-       return this.document.querySelector('[name="'+this.name+'_'+containername+'"]');
+       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
     }
 }
 
@@ -495,18 +496,18 @@ export class AddAttributeDirective implements OnInit {
         if ('attributes' in this.svyContainerStyle) {
               for (const key of Object.keys(this.svyContainerStyle.attributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
-                if (key === 'name') this.restoreCss(key); //set the containers css and classes after a refresh if it's the case
+                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }
     }
 
-    private restoreCss(key: string) {
-        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes[key].indexOf('_') > 0) {
-            const name = this.svyContainerStyle.attributes.name.split('_')[1];
+    private restoreCss() {
+        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
+            const name = this.svyContainerStyle.attributes.name.split('.')[1];
             if (this.parent.cssstyles && this.parent.cssstyles[name]) {
                 const stylesMap = this.parent.cssstyles[name];
-                for (let k in Object.keys(stylesMap)) {
-                    this.renderer.setStyle(this.el.nativeElement, k, stylesMap[key]);
+                for (let k in stylesMap) {
+                    this.renderer.setStyle(this.el.nativeElement, k, stylesMap[k]);
                 }
             }
             if (this.parent.containers) {
