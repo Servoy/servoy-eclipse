@@ -1,8 +1,8 @@
 import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { Format, ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { Format, ServoyBaseComponent } from 'servoy-public'
 
 import { Options, ChangeContext, LabelType } from '@angular-slider/ngx-slider';
-import { FormattingService } from '../../ngclient/servoy_public';
+import { FormattingService } from 'servoy-public';
 
 @Component({
 	selector: 'servoyextra-slider',

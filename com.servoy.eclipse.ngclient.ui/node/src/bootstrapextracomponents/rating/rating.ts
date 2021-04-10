@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from 'servoy-public';
 
 @Component({
     selector: 'bootstrapextracomponents-rating',

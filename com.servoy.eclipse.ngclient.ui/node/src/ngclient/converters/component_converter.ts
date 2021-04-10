@@ -1,10 +1,9 @@
 import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
+import { LoggerService, LoggerFactory } from 'servoy-public';
 import { FoundsetViewportState, ViewportService } from '../services/viewport.service';
 import { FoundsetChangeEvent, FoundsetConverter } from './foundset_converter';
-import { ViewportRowUpdates, IChangeAwareValue, instanceOfChangeAwareValue, isChanged, ChangeAwareState } from '../../sablo/spectypes.service';
+import { ViewportRowUpdates, IChangeAwareValue, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
-import { Deferred } from '../../sablo/util/deferred';
 import { ComponentCache } from '../types';
 import { SabloService } from '../../sablo/sablo.service';
 

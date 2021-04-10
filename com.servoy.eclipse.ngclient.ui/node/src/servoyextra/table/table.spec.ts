@@ -7,13 +7,13 @@ import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloDeferHelper } from '../../sablo/defer.service';
-import { LoggerFactory } from '../../sablo/logger.service';
+import { LoggerFactory, ServoyPublicModule } from 'servoy-public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ServicesService } from '../../sablo/services.service';
 import { SpecTypesService, ViewPortRow } from '../../sablo/spectypes.service';
 import { TestabilityService } from '../../sablo/testability.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { WindowRefService } from 'servoy-public';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { ServoyExtraTable, TableRow } from './table';
@@ -142,8 +142,8 @@ const finishInit = () => {
   beforeEach(  () =>  {
     TestBed.configureTestingModule({
       declarations: [TestWrapperComponent, ServoyExtraTable, TableRow],
-      imports: [ServoyTestingModule, ScrollingModule, NgbModule, ResizableModule, SabloModule],
-      providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, TestabilityService, SpecTypesService, LoggerFactory,
+      imports: [ServoyTestingModule, ScrollingModule, NgbModule, ResizableModule, ServoyPublicModule],
+      providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, TestabilityService, SpecTypesService, LoggerFactory,
         WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
     });
 

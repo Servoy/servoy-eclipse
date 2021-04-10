@@ -1,5 +1,4 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy } from '@angular/core';
-import { ComponentContributor } from '../ngclient/component_contributor.service';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
 @Directive()
@@ -72,8 +71,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
     }
 
     // our change event that is called when dom is ready
-    svyOnChanges(changes: SimpleChanges) {
-
+    svyOnChanges(_changes: SimpleChanges) {
     }
 
     public detectChanges() {
@@ -139,4 +137,23 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
 export interface IViewStateListener {
     afterViewInit(): void;
+}
+
+@Injectable()
+export class ComponentContributor {
+    private static listeners: Set<IComponentContributorListener> = new Set();
+
+    public componentCreated(component: ServoyBaseComponent<any>) {
+        ComponentContributor.listeners.forEach(listener => listener.componentCreated(component));
+    }
+
+    public addComponentListener(listener: IComponentContributorListener) {
+       ComponentContributor.listeners.add(listener);
+    }
+}
+
+export interface IComponentContributorListener {
+
+    componentCreated(component: ServoyBaseComponent<any>): void;
+
 }

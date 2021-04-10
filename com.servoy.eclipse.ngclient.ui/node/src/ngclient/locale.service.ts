@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '../sablo/util/deferred';
+import { Deferred } from 'servoy-public';
 import { registerLocaleData } from '@angular/common';
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
 
@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import numbro from 'numbro';
 
 import { I18NProvider } from './services/i18n_provider.service';
-import { LoggerFactory, LoggerService } from '../sablo/logger.service';
+import { LoggerFactory, LoggerService } from 'servoy-public';
 
 @Injectable()
 export class LocaleService {

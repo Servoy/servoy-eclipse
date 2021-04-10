@@ -2,15 +2,19 @@ import { NgModule } from '@angular/core';
 
 import { TooltipDirective } from './tooltip/tooltip.directive';
 import { TooltipService } from './tooltip/tooltip.service';
-import { MnemonicletterFilterPipe, NotNullOrEmptyPipe, HtmlFilterPipe} from './pipes/pipes';
-import { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.directive';
+import { DecimalkeyconverterDirective } from './directives/decimalkeyconverter.directive';
+import { MnemonicletterFilterPipe, NotNullOrEmptyPipe, HtmlFilterPipe, TrustAsHtmlPipe} from './format/pipes';
 import { FormatFilterPipe } from './format/format.pipe';
 import { EmptyValueFilterPipe } from './format/emptyvalue.pipe';
-import { StartEditDirective } from './utils/startedit.directive';
-import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
-import { AutosaveDirective } from './utils/autosave.directive';
+import { StartEditDirective } from './directives/startedit.directive';
+import { ImageMediaIdDirective } from './directives/imagemediaid.directive';
+import {AutosaveDirective } from './directives/autosave.directive';
+import { UploadDirective } from './directives/upload.directive';
 import { FormatDirective } from './format/formatcontrolvalueaccessor.directive';
 import { FormattingService } from './format/formatting.service';
+import { ComponentContributor } from './basecomponent';
+import { SabloTabseq } from './directives/sablotabseq.directive';
+import { WindowRefService } from './services/windowref.service';
 
 @NgModule({
     declarations: [ TooltipDirective,
@@ -23,7 +27,10 @@ import { FormattingService } from './format/formatting.service';
                     EmptyValueFilterPipe,
                     StartEditDirective,
                     ImageMediaIdDirective,
-                    AutosaveDirective
+                    AutosaveDirective,
+                    UploadDirective,
+                    SabloTabseq, 
+                    TrustAsHtmlPipe
                   ],
     imports: [],
     exports: [TooltipDirective,
@@ -36,9 +43,11 @@ import { FormattingService } from './format/formatting.service';
               EmptyValueFilterPipe,
               StartEditDirective,
               ImageMediaIdDirective,
-              AutosaveDirective
+              AutosaveDirective,
+              UploadDirective,
+              SabloTabseq,
+              TrustAsHtmlPipe
              ],
-    providers: [ TooltipService, FormattingService ]
-  })
-
+    providers: [ TooltipService, FormattingService, ComponentContributor, WindowRefService ]
+})
 export class ServoyPublicModule { }

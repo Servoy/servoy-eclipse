@@ -1,11 +1,10 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { Tab } from '../bts_basetabpanel';
 import { ServoyBootstrapAccordion } from './accordion';
-import { WindowRefService } from '../../sablo/util/windowref.service'
+import { WindowRefService } from 'servoy-public'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyApi } from '../../ngclient/servoy_public'
+import { ServoyApi } from 'servoy-public'
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('AccordionComponent', () => {
   let component: ServoyBootstrapAccordion;
@@ -15,7 +14,7 @@ describe('AccordionComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapAccordion ],
-      imports: [NgbModule, SabloModule],
+      imports: [NgbModule, ServoyTestingModule],
       providers: [WindowRefService]
     })
     .compileComponents();

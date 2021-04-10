@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
-import { Deferred, IDeferred } from '../../sablo/util/deferred';
+import { Deferred, IDeferred } from 'servoy-public';
 
 @Injectable()
 export class ClientFunctionService {
@@ -10,9 +10,11 @@ export class ClientFunctionService {
 
     private script: HTMLScriptElement;
     private deferred: IDeferred<void>;
+    private doc: Document;
 
-    constructor(private sabloService: SabloService, rendererFactory: RendererFactory2,  @Inject(DOCUMENT) private doc: Document) {
+    constructor(private sabloService: SabloService, rendererFactory: RendererFactory2,  @Inject(DOCUMENT) _doc: any) {
         this.renderer = rendererFactory.createRenderer(null, null);
+        this.doc = _doc;
     }
 
     public reloadClientFunctions() {

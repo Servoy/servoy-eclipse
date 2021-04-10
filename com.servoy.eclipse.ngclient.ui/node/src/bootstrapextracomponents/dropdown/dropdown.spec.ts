@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ServoyService } from '../../ngclient/servoy.service';
 import { ServoyBootstrapExtraDropdown } from './dropdown';
-import { SvyUtilsService, LocaleService} from '../../ngclient/servoy_public';
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyPublicModule } from 'servoy-public';
 import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { FormService } from '../../ngclient/form.service';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('ServoyBootstrapExtraDropdown', () => {
   let component: ServoyBootstrapExtraDropdown;
@@ -15,8 +12,8 @@ describe('ServoyBootstrapExtraDropdown', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapExtraDropdown ],
-      imports: [SabloModule, ServoyPublicModule],
-      providers: [SvyUtilsService, ServoyService, FormService, ClientFunctionService, ViewportService, { provide: LocaleService, useValue: {getLocale: () => 'en' }}]
+      imports: [ServoyTestingModule, ServoyPublicModule],
+      providers: [ClientFunctionService, ViewportService ]
     })
     .compileComponents();
   }));

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { I18NProvider } from '../../../ngclient/servoy_public';
+import { I18NProvider } from '../i18n_provider.service';
 
 @Component({
   selector: 'servoycore-file-upload-window',

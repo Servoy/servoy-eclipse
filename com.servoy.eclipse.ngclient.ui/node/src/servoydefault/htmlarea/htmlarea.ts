@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { LocaleService, FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
+import {  FormattingService, PropertyUtils, ServoyPublicService } from 'servoy-public';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { DOCUMENT } from '@angular/common';
 import tinymce from 'tinymce';
@@ -25,7 +25,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected localeService: LocaleService, private appService: ApplicationService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService, private appService: ApplicationService) {
         super(renderer, cdRef, formattingService, doc);
     }
 
@@ -51,7 +51,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     ngOnInit(){
         super.ngOnInit(); 
         
-        this.tinyConfig['language'] = this.localeService.getLocale();
+        this.tinyConfig['language'] = this.servoyService.getLocale();
 
         // app level configuration
         let defaultConfiguration = this.appService.getUIProperty("config");

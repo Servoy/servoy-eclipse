@@ -23,8 +23,10 @@ export class Format {
 
 @Injectable()
 export class FormattingService {
-
-    constructor(@Inject(DOCUMENT) private doc: Document) {}
+    private doc: Document
+    constructor(@Inject(DOCUMENT) _doc: any) {
+        this.doc = _doc;
+    }
     // formatting stufff
     public format(data: any, format: Format, useEditFormat: boolean): string {
         const formatString = useEditFormat ? format.edit : format.display;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { WindowRefService } from './util/windowref.service';
+import { WindowRefService } from './services/windowref.service';
 
 // log levels for when debugEnabled(true) is called - if that is false, these levels are irrelevant
 // any custom debug levels can be used as well - these are just stored here so that custom code can test the level and see if it should log its message

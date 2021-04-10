@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, Renderer2, SimpleChanges, ViewChild } from "@angular/core";
-import { ServoyBaseComponent } from "../../ngclient/basecomponent";
+import { ServoyBaseComponent } from "servoy-public";
 import { IActionMapping, ITreeOptions, TreeComponent, TreeNode} from '@circlon/angular-tree-component'
-import { LoggerService, LoggerFactory } from "../../sablo/logger.service";
+import { LoggerService, LoggerFactory } from "servoy-public";
 import { ApplicationService } from "../../ngclient/services/application.service";
 import { ServoyService } from "../../ngclient/servoy.service";
 import { ITreeNode } from "@circlon/angular-tree-component/lib/defs/api";

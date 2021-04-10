@@ -1,14 +1,13 @@
-import { Injectable, Renderer2 } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import { SvyUtilsService, ComponentContributor, IComponentContributorListener, ServoyBaseComponent } from '../ngclient/servoy_public';
+import { ComponentContributor, IComponentContributorListener, ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
-import { ServoyService } from '../ngclient/servoy.service';
 
 @Injectable()
 export class KeyListener implements IComponentContributorListener {
     private _callbacks: Callback[] = [];
 
-    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: SvyUtilsService, private changeHandler: ServiceChangeHandler) {
+    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyPublicService, private changeHandler: ServiceChangeHandler) {
         componentContributor.addComponentListener(this);
     }
 
@@ -29,7 +28,7 @@ export class KeyListener implements IComponentContributorListener {
                 renderer.listen(element, 'keyup', (event) => {
                     const callback = this.getCallback(attribute);
                     if (callback) {
-                        const ev = this.utils.createJSEvent(event, 'keyup');
+                        const ev = this.servoyService.createJSEvent(event, 'keyup');
                         let capsLockEnabled = false;
                         if (event instanceof KeyboardEvent) {
                             capsLockEnabled = event.getModifierState('CapsLock');

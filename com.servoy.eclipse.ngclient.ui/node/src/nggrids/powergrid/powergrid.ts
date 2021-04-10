@@ -1,7 +1,7 @@
 import { GridOptions, GroupCellRenderer } from '@ag-grid-community/core';
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, Output, Renderer2, SecurityContext, SimpleChanges, ViewChild } from '@angular/core';
-import { FormattingService } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { FormattingService } from 'servoy-public';
+import { LoggerFactory, LoggerService } from 'servoy-public';
 import { NGGridDirective } from '../nggrid';
 import { DatePicker } from '../editors/datepicker';
 import { FormEditor } from '../editors/formeditor';

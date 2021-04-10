@@ -4,7 +4,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
 import { DOCUMENT } from '@angular/common';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { LoggerFactory, LoggerService } from '../logger.service';
 
 
 @Directive({

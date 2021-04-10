@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoggerFactory, LoggerService } from './logger.service';
+import { LoggerFactory, LoggerService } from 'servoy-public';
 
 
 @Injectable()

@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from 'servoy-public';
 import { ServoyDefaultImageMedia } from './imagemedia';
 import { ServoyService } from '../../ngclient/servoy.service';
+import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
-import { FormattingService, TooltipService, SvyUtilsService, ServoyApi, LocaleService} from '../../ngclient/servoy_public';
-import { UploadDirective } from '../../ngclient/utils/upload.directive';
-import { DebugElement, NgModule } from '@angular/core';
+import { FormattingService, TooltipService, ServoyApi} from 'servoy-public';
+import { UploadDirective } from 'servoy-public';
+import { DebugElement } from '@angular/core';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { By } from '@angular/platform-browser';
 import { ViewportService } from '../../ngclient/services/viewport.service';
@@ -23,14 +24,14 @@ describe('ServoyDefaultImageMedia', () => {
 
   beforeEach(() => {
 
-    applicationService = jasmine.createSpyObj('ApplicationService', ['showFileOpenDialog']);
+    applicationService = jasmine.createSpyObj('ApplicationService', ['showFileOpenDialog', 'generateUploadUrl']);
     servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'getFormName','registerComponent','unRegisterComponent']);
 
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultImageMedia, UploadDirective],
-        imports: [SabloModule, ServoyPublicModule],
+        imports: [ServoyTestingModule, ServoyPublicModule],
         providers: [FormattingService, TooltipService, ClientFunctionService, { provide: ApplicationService, useValue: applicationService},
-          ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi},
+          ServoyService, I18NProvider, {provide: ServoyApi, useValue: servoyApi},
           ViewportService, FormService , { provide: LocaleService, useValue: {getLocale: () => 'en' }}],
       })
       .compileComponents();

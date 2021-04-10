@@ -4,11 +4,11 @@ import { Subscription, interval, Subject } from 'rxjs';
 
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
-import { WindowRefService } from './util/windowref.service';
-import { Deferred } from './util/deferred';
+import { WindowRefService } from 'servoy-public';
+import { Deferred } from 'servoy-public';
 import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
-import { LoggerService, LogLevel, LoggerFactory } from './logger.service';
+import { LoggerService, LogLevel, LoggerFactory } from 'servoy-public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 import { TestabilityService } from './testability.service';
 

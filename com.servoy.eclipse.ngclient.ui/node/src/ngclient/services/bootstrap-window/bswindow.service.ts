@@ -1,8 +1,8 @@
-import { WindowRefService } from '../../../sablo/util/windowref.service';
+import { WindowRefService } from 'servoy-public';
 import { Renderer2, Injectable, RendererFactory2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { SvyUtilsService } from '../utils.service';
 import { BSWindowManager } from './bswindow_manager.service';
+import { SvyUtilsService } from '../../utils.service';
 
 const NORTH = 1;
 const SOUTH = 2;

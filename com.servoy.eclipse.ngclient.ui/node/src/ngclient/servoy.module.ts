@@ -28,18 +28,18 @@ import { SessionView } from '../servoycore/session-view/session-view';
 import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
 import { ViewportService } from './services/viewport.service';
 
-import { ComponentContributor } from './component_contributor.service';
-import { ServoyPublicModule } from './servoy_public.module';
+import { ServoyPublicModule, ServoyPublicService } from 'servoy-public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 
 import { LocaleService } from './locale.service';
 import { NGGridsModule } from '../nggrids/nggrids.module';
-import { SvyUtilsService } from './services/utils.service';
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
+import { SvyUtilsService } from './utils.service';
 
 @NgModule( {
     declarations: [
@@ -71,8 +71,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
         BrowserAnimationsModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
-					SvyUtilsService,ServerDataService, BSWindow, BSWindowManager,
-                DatePipe, DecimalPipe, ComponentContributor, ViewportService],
+					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe, ViewportService, SvyUtilsService,
+					ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],
     schemas: [

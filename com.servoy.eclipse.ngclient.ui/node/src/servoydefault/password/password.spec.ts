@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultPassword } from './password';
-import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { FormsModule } from '@angular/forms';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { FormattingService, ServoyApi, TooltipService} from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from 'servoy-public';
+import { FormattingService, ServoyApi, TooltipService} from 'servoy-public';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { TooltipDirective } from '../../ngclient/tooltip/tooltip.directive';
+import { TooltipDirective } from 'servoy-public';
 
 import { runOnPushChangeDetection } from '../../testing';
 
@@ -22,7 +22,7 @@ describe('PasswordComponent', () => {
       servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
       TestBed.configureTestingModule({
         declarations: [ServoyDefaultPassword, TooltipDirective],
-        imports: [SabloModule, FormsModule, ServoyPublicModule],
+        imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
         providers: [FormattingService, TooltipService]
       })
       .compileComponents();

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService } from './converter.service';
-import { LoggerService, LoggerFactory } from './logger.service';
+import { LoggerService, LoggerFactory } from 'servoy-public';
 
 @Injectable()
 export class ServicesService {

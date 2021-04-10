@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from 'servoy-public';
 
 @Component({
     selector: 'bootstrapextracomponents-switch',

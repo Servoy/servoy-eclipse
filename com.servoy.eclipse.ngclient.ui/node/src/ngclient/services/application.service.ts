@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service';
 
-import {WindowRefService} from '../../sablo/util/windowref.service';
+import {WindowRefService} from 'servoy-public';
 
 import {SabloService} from '../../sablo/sablo.service';
 
@@ -13,7 +13,6 @@ import { FileUploadWindowComponent } from './file-upload-window/file-upload-wind
 import { LocalStorageService } from '../../sablo/webstorage/localstorage.service';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
-import { SvyUtilsService } from './utils.service';
 
 @Injectable()
 export class ApplicationService {
@@ -26,8 +25,7 @@ export class ApplicationService {
                             private sabloService: SabloService,
                             @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
-                            private serverData: ServerDataService,
-                             private utilsService: SvyUtilsService) {
+                            private serverData: ServerDataService) {
     }
 
     public setLocale(language: string, country: string ) {
@@ -181,7 +179,7 @@ export class ApplicationService {
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string ) {
         if (!url) {
-           url = this.utilsService.generateUploadUrl(null, null, null);
+           url = this.generateUploadUrl(null, null, null);
         }
         const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
         modalRef.componentInstance.url = url;
@@ -202,6 +200,18 @@ export class ApplicationService {
         return this.servoyService.getUIProperties().getUIProperty('trustDataAsHtml');
     }
 
+    public generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
+        return 'resources/upload/' + this.sabloService.getClientnr() +
+            (formname ? '/' + formname : '') +
+            (componentName ? '/' + componentName : '') +
+            (propertyName ? '/' + propertyName : '');
+    }
+
+    public generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string{
+            // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
+            return 'resources/upload/' +  this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
+    }
+    
     private  showDefaultLoginWindow() {
         this.modalService.open(DefaultLoginWindowComponent, { backdrop: 'static' });
     }

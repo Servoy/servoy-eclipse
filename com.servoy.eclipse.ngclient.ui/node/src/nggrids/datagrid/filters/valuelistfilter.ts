@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { NgbTypeahead, NgbTypeaheadConfig } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
-import { FormattingService } from '../../../ngclient/servoy_public';
+import { FormattingService } from 'servoy-public';
 import { DatagridFilterDirective } from './datagridfilter';
 
 @Component({

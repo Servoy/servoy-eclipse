@@ -1,19 +1,20 @@
 import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyPublicModule } from 'servoy-public';
 
+import { LocaleService } from '../../ngclient/locale.service';
+import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 
-import { LocaleService, I18NProvider, Format} from '../../ngclient/servoy_public';
+import { Format} from 'servoy-public';
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from './calendar';
 import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { Renderer2 } from '@angular/core';
-import { SabloService } from '../../sablo/sablo.service';
 import { FormsModule } from '@angular/forms';
 const moment = require('moment');
 
 import { runOnPushChangeDetection } from '../../testing';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('ServoyDefaultCalendar', () => {
     let component: ServoyDefaultCalendar;
@@ -31,9 +32,9 @@ describe('ServoyDefaultCalendar', () => {
 
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
-            imports: [BrowserModule, SabloModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
+            imports: [ServoyTestingModule, BrowserModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
             providers: [Renderer2, FormsModule, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
-                OwlDateTimeIntl, SabloService]
+                OwlDateTimeIntl]
         }).compileComponents();
     });
 

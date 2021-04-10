@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
+import { LoggerService, LoggerFactory } from 'servoy-public';
 import { ChangeAwareState, ChangeListener, IChangeAwareValue, instanceOfChangeAwareValue, ViewportChangeEvent } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';

@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyBootstrapCombobox } from './combobox';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
-import { FormattingService, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { FormattingService, TooltipService } from 'servoy-public';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -15,7 +15,7 @@ describe('ComboboxComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapCombobox ],
       providers: [ FormattingService, TooltipService],
-      imports: [ServoyPublicModule, SabloModule, NgbModule, FormsModule]
+      imports: [ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule]
     })
     .compileComponents();
   });

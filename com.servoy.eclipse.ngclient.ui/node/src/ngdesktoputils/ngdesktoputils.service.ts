@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { NGDesktopFileService } from '../ngdesktopfile/ngdesktopfile.service';
-import { Deferred } from '../sablo/util/deferred';
+import { Deferred, WindowRefService } from 'servoy-public';
 
-import { WindowRefService } from '../sablo/util/windowref.service';
-import { LoggerFactory, LoggerService } from '../sablo/logger.service';
+import { LoggerFactory, LoggerService } from 'servoy-public';
 
 import * as child_process from 'node:child_process';
 import * as electron from 'electron';

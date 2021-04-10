@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync, tick, fakeAsync } from '@angular/core/testing';
-import { ServoyApi } from '../../ngclient/servoy_public';
+import { ServoyApi } from 'servoy-public';
 import { ServoyBootstrapLabel } from './label';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 import { runOnPushChangeDetection } from '../../testing';
 import { By } from '@angular/platform-browser';
@@ -19,7 +19,7 @@ describe('ServoyBootstrapLabel', () => {
             declarations: [ServoyBootstrapLabel],
             providers: [],
             imports: [
-                SabloModule, ServoyPublicModule]
+                ServoyTestingModule, ServoyPublicModule]
         })
             .compileComponents();
     }));

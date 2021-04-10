@@ -1,7 +1,6 @@
 {
   "root": true,
   "ignorePatterns": [
-    "projects/**/*"
   ],
   "plugins": [
     "only-warn"

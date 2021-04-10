@@ -1,6 +1,6 @@
-import { Directive , Input , HostListener, ViewContainerRef} from '@angular/core';
-import {LoggerService, LoggerFactory} from '../../sablo/logger.service';
-import { ServoyBaseComponent } from '../servoy_public';
+import { Directive , Input , HostListener} from '@angular/core';
+import {LoggerService, LoggerFactory} from '../logger.service';
+import { ServoyBaseComponent } from '../basecomponent';
 
 @Directive({
   selector: '[svyStartEdit]'

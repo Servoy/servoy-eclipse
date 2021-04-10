@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LoggerFactory, LoggerService } from '../sablo/logger.service';
-import { WindowRefService } from '../sablo/util/windowref.service';
+import { LoggerFactory, LoggerService, WindowRefService } from 'servoy-public';
 
 import * as electron from 'electron';
 import { ServoyService } from '../ngclient/servoy.service';

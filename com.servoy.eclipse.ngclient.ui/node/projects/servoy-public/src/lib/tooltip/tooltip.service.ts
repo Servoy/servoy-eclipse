@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { WindowRefService } from '../services/windowref.service';
 
 @Injectable()
 export class TooltipService {
@@ -12,23 +12,24 @@ export class TooltipService {
     private tipmousemouveEventX: any;
     private tipmousemouveEventY: any;
     private tipmousemouveEventIsPage: boolean;
-    constructor(@Inject(DOCUMENT) private doc: Document, private windowRefService: WindowRefService) {
+    private doc: Document;
+    constructor(@Inject(DOCUMENT) _doc: any, private windowRefService: WindowRefService) {
         this.isTooltipActive = new Subject<boolean>();
+        this.doc = _doc;
     }
 
 
-    public showTooltip(event, message, initialDelay, dismissDelay) {
+    public showTooltip(event: MouseEvent, message: string, initialDelay: number, dismissDelay: number) {
         let e = event;
-        if (!e) e = this.windowRefService.nativeWindow.event;
+        if (!e) e = this.windowRefService.nativeWindow.event as MouseEvent;
 
         let targ;
         if (e.target) targ = e.target;
         else if (e.srcElement) targ = e.srcElement;
-        if (targ.nodeType == 3) // defeat Safari bug
+        if (targ.nodeType === 3) // defeat Safari bug
             targ = targ.parentNode;
 
-        if (targ.tagName && targ.tagName.toLowerCase() == 'option') // stop tooltip if over option element
-        {
+        if (targ.tagName && targ.tagName.toLowerCase() === 'option') { // stop tooltip if over option element
             this.hideTooltip();
             return;
         }
@@ -60,7 +61,7 @@ export class TooltipService {
         return this.tooltipDiv;
     }
 
-    private tipmousemove = (e) => {
+    private tipmousemove = (e: MouseEvent) => {
         if (e.pageX || e.pageY) {
             this.tipmousemouveEventIsPage = true;
             this.tipmousemouveEventX = e.pageX;
@@ -70,9 +71,9 @@ export class TooltipService {
             this.tipmousemouveEventX = e.clientX;
             this.tipmousemouveEventY = e.clientY;
         }
-    }
+    };
 
-    private adjustAndShowTooltip(dismissDelay) {
+    private adjustAndShowTooltip(dismissDelay: number) {
         let x = 0;
         let y = 0;
 
@@ -110,7 +111,7 @@ export class TooltipService {
                 newLeft = 0;
                 tDiv.style.width = x - 10 + 'px';
             }
-            if (newLeft == 0)
+            if (newLeft === 0)
                 newLeft = tDiv.offsetWidth;
             tDiv.style.left = newLeft + 'px';
         }

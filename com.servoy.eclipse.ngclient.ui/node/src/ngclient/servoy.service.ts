@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { WindowRefService } from '../sablo/util/windowref.service';
-import { LoggerFactory } from '../sablo/logger.service';
+import { WindowRefService } from 'servoy-public';
+import { LoggerFactory } from 'servoy-public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
@@ -163,7 +163,7 @@ export class ServoyService {
         return this.uiProperties;
     }
 
-    public executeInlineScript(formname: string, script: string, params: any[]) {
+    public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
         return this.sabloService.callService('formService', 'executeInlineScript',
             { formname, script, params }, false);
     }

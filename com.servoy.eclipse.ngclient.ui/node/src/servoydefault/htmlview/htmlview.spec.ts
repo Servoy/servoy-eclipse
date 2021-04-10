@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from 'servoy-public';
 
 import { ServoyDefaultHTMLView } from './htmlview';
 
-import { FormattingService, TooltipService, ServoyApi } from '../../ngclient/servoy_public';
+import { FormattingService, TooltipService, ServoyApi } from 'servoy-public';
 import { By } from '@angular/platform-browser';
 
 import { runOnPushChangeDetection } from '../../testing';
@@ -18,7 +18,7 @@ describe('ServoyDefaultHTMLView', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultHTMLView],
-      imports: [SabloModule, ServoyPublicModule ],
+      imports: [ServoyTestingModule, ServoyPublicModule ],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();

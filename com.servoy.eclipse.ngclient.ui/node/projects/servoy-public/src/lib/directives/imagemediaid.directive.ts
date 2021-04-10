@@ -1,5 +1,5 @@
 import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy } from '@angular/core';
-import { ServoyBaseComponent } from '../servoy_public';
+import { ServoyBaseComponent } from '../basecomponent';
 import { IViewStateListener } from '../basecomponent';
 
 @Directive({

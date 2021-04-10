@@ -3,10 +3,9 @@ import {SimpleChange} from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
-
+import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from 'servoy-public';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { runOnPushChangeDetection } from '../../testing';
 
 describe( 'SvLabel', () => {
@@ -20,7 +19,7 @@ describe( 'SvLabel', () => {
             declarations: [ServoyDefaultLabel],
             providers: [TooltipService, FormattingService, ComponentContributor],
             imports: [
-                SabloModule, ServoyPublicModule],
+                ServoyTestingModule, ServoyPublicModule],
         } )
             .compileComponents();
     } ) );

@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import {PropertyUtils} from '../utils/property_utils';
 
 @Pipe( { name: 'mnemonicletterFilter' } )
@@ -23,5 +24,18 @@ export class HtmlFilterPipe implements PipeTransform {
         input = input.substring(input.indexOf('<body')+6,input.lastIndexOf('</body'));
       }
       return input;
+    }
+}
+
+@Pipe( { name: 'trustAsHtml' } )
+export class TrustAsHtmlPipe implements PipeTransform {
+    constructor( private domSanitizer: DomSanitizer ) {
+    }
+
+    transform( input: string, trustAsHtml: boolean ): any {
+        if ( trustAsHtml ) {
+            return this.domSanitizer.bypassSecurityTrustHtml(input);
+        }
+        return input;
     }
 }

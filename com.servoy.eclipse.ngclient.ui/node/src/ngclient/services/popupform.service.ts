@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
-import { SvyUtilsService } from '../servoy_public';
+import { SvyUtilsService } from '../utils.service';
 
 @Injectable({
     providedIn: 'root',

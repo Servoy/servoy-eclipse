@@ -1,7 +1,7 @@
 import { BSWindow, BSWindowOptions } from './bswindow.service';
 import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { SvyUtilsService } from '../utils.service';
+import { SvyUtilsService } from '../../utils.service';
 
 @Injectable()
 export class BSWindowManager {

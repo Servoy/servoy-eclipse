@@ -2,13 +2,24 @@ import { Injectable, NgModule, NgZone } from '@angular/core';
 import { ConverterService } from '../sablo/converter.service';
 import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
-import { LoggerFactory } from '../sablo/logger.service';
+import { LoggerFactory, ServoyPublicService } from 'servoy-public';
 import { ServicesService } from '../sablo/services.service';
 import { TestabilityService } from '../sablo/testability.service';
-import { IDeferred } from '../sablo/util/deferred';
+import { IDeferred } from 'servoy-public';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
-import { WindowRefService } from '../sablo/util/windowref.service';
+import { WindowRefService } from 'servoy-public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
+import { ServoyPublicServiceImpl } from '../ngclient/services/servoy_public_impl.service';
+import { FormService } from '../ngclient/form.service';
+import { LocaleService } from '../ngclient/locale.service';
+import { ApplicationService } from '../ngclient/services/application.service';
+import { ServoyService } from '../ngclient/servoy.service';
+import { I18NProvider } from '../ngclient/services/i18n_provider.service';
+import { SvyUtilsService } from '../ngclient/utils.service';
+import { SabloModule } from '../sablo/sablo.module';
+import { SabloService } from '../sablo/sablo.service';
+import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
+import { WebStorageModule } from '../sablo/webstorage/webstorage.module';
 
 
 class TestDeferred implements IDeferred<any> {
@@ -45,12 +56,22 @@ export class TestWebsocketService extends WebsocketService {
   }
 }
 
+@Injectable()
+export class TestSabloService extends SabloService {
+        constructor(private wService: WebsocketService, sessionStorage: SessionStorageService, converterService: ConverterService,
+         windowRefService: WindowRefService, logFactory: LoggerFactory) {
+            super(wService, sessionStorage, converterService, windowRefService, logFactory);
+             sessionStorage.remove('svy_session_lock');
+        }
+}
+
 @NgModule({
   declarations: [
 
   ],
   imports: [
-
+    WebStorageModule,
+    SabloModule
   ],
   exports: [
 
@@ -58,7 +79,13 @@ export class TestWebsocketService extends WebsocketService {
   ],
   providers: [
     { provide: SabloDeferHelper, useClass: TestSabloDeferHelper },
-    { provide: WebsocketService, useClass: TestWebsocketService }
+    { provide: WebsocketService, useClass: TestWebsocketService },
+    { provide: SabloService, useClass: TestSabloService },
+    { provide: FormService, useValue: {} },
+    { provide: ApplicationService, useValue: {} },
+    { provide: ServoyService, useValue: {} },
+    ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+    LocaleService, I18NProvider, SvyUtilsService
              ],
   schemas: [
 

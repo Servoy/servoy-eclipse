@@ -57,7 +57,7 @@ public class IndexPageFilter implements Filter
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException
 	{
 		File projectFolder = Activator.getInstance().getProjectFolder();
-		File distFolder = new File(projectFolder, "dist");
+		File distFolder = new File(projectFolder, "dist/app");
 		if (distFolder.exists())
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;

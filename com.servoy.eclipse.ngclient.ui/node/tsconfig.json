@@ -1,6 +1,7 @@
 {
-  "compileOnSave": true,
+  "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
     "downlevelIteration": true,
     "importHelpers": true,
     "module": "es2020",
@@ -19,12 +20,17 @@
       "es2018.promise"
     ],
     "paths": {
-     "core-js/es7/reflect": ["../node_modules/core-js/proposals/reflect-metadata"]
+      "servoy-public": [
+        "dist/servoy-public/servoy-public",
+        "dist/servoy-public"
+      ]
     },
 	"outDir": "./out-tsc/app"
   },
   "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-	"buildOnSave": true
+  }
 }

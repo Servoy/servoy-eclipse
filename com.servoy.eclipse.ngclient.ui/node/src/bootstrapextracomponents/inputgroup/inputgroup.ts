@@ -1,8 +1,7 @@
 import { Component, ChangeDetectorRef, SimpleChanges, ViewChild, Directive, ElementRef, OnInit, EventEmitter, Output, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
-import { Format } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
+import { Format } from 'servoy-public';
 import { ServoyService } from '../../ngclient/servoy.service';
-import { SvyUtilsService } from '../../ngclient/servoy_public';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component( {
@@ -38,8 +37,10 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     @Input() toolTipText: string;
 
     mustExecuteOnFocus = true;
+    preventSimpleClick = false;
+    timer: any;
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private utils: SvyUtilsService, private servoyService: ServoyService ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService ) {
         super( renderer, cdRef );
     }
 
@@ -96,31 +97,26 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
         if ( !this.addOnButtons ) {
             return [];
         }
-        function filterButtons( addOnBtn: any ) {
-            return addOnBtn.position === position;
-        }
-        return this.addOnButtons.filter( filterButtons );
+        return this.addOnButtons.filter( ( addOnBtn: any ) => addOnBtn.position === position );
     }
 
-    preventSimpleClick: Boolean = false;
-    timer: any;
 
     buttonClicked( event: any, btnText: string, btnIndex: number ) {
         const addOnButton = this.addOnButtons[btnIndex];
         this.timer = 0;
         this.preventSimpleClick = false;
 
-        if ( addOnButton && addOnButton.onAction && event.type == 'click' ) {
+        if ( addOnButton && addOnButton.onAction && event.type === 'click' ) {
             if ( addOnButton.onDoubleClick ) {
                 this.timer = setTimeout(() => {
                     if ( !this.preventSimpleClick ) {
-                        const jsEvent = this.utils.createJSEvent( event, 'action' );
+                        const jsEvent = this.servoyService.createJSEvent( event, 'action' );
                         this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
                     }
                 }, 250 );
 
             } else {
-                const jsEvent = this.utils.createJSEvent( event, 'action' );
+                const jsEvent = this.servoyService.createJSEvent( event, 'action' );
                 this.servoyService.executeInlineScript( addOnButton.onAction.formname, addOnButton.onAction.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
             }
         }
@@ -129,10 +125,10 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     buttonDoubleClicked( event: any, btnText: string, btnIndex: number ) {
         const addOnButton = this.addOnButtons[btnIndex];
 
-        if ( addOnButton && event.type == 'dblclick' && addOnButton.onDoubleClick ) {
+        if ( addOnButton && event.type === 'dblclick' && addOnButton.onDoubleClick ) {
             this.preventSimpleClick = true;
             clearTimeout( this.timer );
-            const jsEvent = this.utils.createJSEvent( event, 'doubleclick' );
+            const jsEvent = this.servoyService.createJSEvent( event, 'doubleclick' );
             this.servoyService.executeInlineScript( addOnButton.onDoubleClick.formname, addOnButton.onDoubleClick.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
 
         }
@@ -141,9 +137,9 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
 
     buttonRightClicked( event: any, btnText: string, btnIndex: number ) {
         const addOnButton = this.addOnButtons[btnIndex];
-        if ( addOnButton && event.type == 'contextmenu' && addOnButton.onRightClick ) {
+        if ( addOnButton && event.type === 'contextmenu' && addOnButton.onRightClick ) {
             event.preventDefault();
-            const jsEvent = this.utils.createJSEvent( event, 'rightclick' );
+            const jsEvent = this.servoyService.createJSEvent( event, 'rightclick' );
             this.servoyService.executeInlineScript( addOnButton.onRightClick.formname, addOnButton.onRightClick.script, [jsEvent, addOnButton.name, btnText, btnIndex] );
         }
     }

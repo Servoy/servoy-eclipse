@@ -1,6 +1,5 @@
 import {Directive, HostListener, Input, OnDestroy} from '@angular/core';
 import {TooltipService} from './tooltip.service';
-import {ServoyService} from '../servoy.service';
 
 @Directive({ selector: '[svyTooltip]' })
 export class TooltipDirective implements OnDestroy {

@@ -1,6 +1,5 @@
 import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
-import { ServoyBaseComponent } from '../../ngclient/basecomponent';
 import { ServoyDefaultBaseComponent } from '../../servoydefault/basecomponent';
 
 @Component({
@@ -82,12 +81,11 @@ export class ServoyCoreFormContainer extends ServoyDefaultBaseComponent<HTMLDivE
     }
 
     getContainerStyle() {
-        let style = { position: "relative" }
+        const style = { position: 'relative' };
         let minHeight = 0;
         if (this.height) {
-            minHeight = this.height
-        }
-        else if (this.containedForm) {
+            minHeight = this.height;
+        } else if (this.containedForm) {
             // for absolute form default height is design height, for responsive form default height is 0
             const formCache = this.formService.getFormCacheByName(this.containedForm);
             if (formCache && formCache.absolute) {
@@ -95,7 +93,7 @@ export class ServoyCoreFormContainer extends ServoyDefaultBaseComponent<HTMLDivE
             }
         }
         if (minHeight > 0) {
-            style['minHeight'] = minHeight + "px";
+            style['minHeight'] = minHeight + 'px';
         }
         return style;
     }

@@ -6,7 +6,13 @@
     "types": [
       "jasmine",
       "node"
-    ]
+    ],
+    "paths": {
+      "servoy-public": [
+        "../dist/servoy-public/servoy-public",
+        "../dist/servoy-public"
+      ]
+    }
   },
   "files": [
     "test.ts",

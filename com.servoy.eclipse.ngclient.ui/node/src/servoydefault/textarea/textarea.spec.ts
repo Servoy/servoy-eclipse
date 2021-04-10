@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from 'servoy-public';
 
 import { ServoyDefaultTextArea } from './textarea';
-import { FormattingService, TooltipService} from '../../ngclient/servoy_public';
-import { StartEditDirective } from '../../ngclient/utils/startedit.directive';
+import { FormattingService, TooltipService} from 'servoy-public';
+import { StartEditDirective } from 'servoy-public';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +20,7 @@ describe('ServoyDefaultTextArea', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTextArea, StartEditDirective],
-      imports: [SabloModule, ServoyPublicModule, FormsModule],
+      imports: [ServoyTestingModule, ServoyPublicModule, FormsModule],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();

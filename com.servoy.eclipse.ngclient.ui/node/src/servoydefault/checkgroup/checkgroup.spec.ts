@@ -1,11 +1,11 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultCheckGroup } from './checkgroup';
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from 'servoy-public';
+import { FormattingService, ServoyApi, TooltipService } from 'servoy-public';
 import {FormsModule} from '@angular/forms';
-import {NotNullOrEmptyPipe} from '../../ngclient/pipes/pipes';
+import {NotNullOrEmptyPipe} from 'servoy-public';
 import {By} from '@angular/platform-browser';
 import { IValuelist } from '../../sablo/spectypes.service';
 
@@ -37,7 +37,7 @@ describe('ServoyDefaultCheckGroup', () => {
 
     TestBed.configureTestingModule({
       declarations: [ServoyDefaultCheckGroup,ChoiceElementDirective],
-      imports: [SabloModule, FormsModule, ServoyPublicModule],
+      imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })
       .compileComponents();

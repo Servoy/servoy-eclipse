@@ -1,26 +1,28 @@
 import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import { ServoyBootstrapTextbox } from './textbox';
-import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
+import { Format, FormattingService, TooltipService } from 'servoy-public';
+import { ServoyPublicModule } from 'servoy-public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { runOnPushChangeDetection } from '../../testing';
+import { LocaleService } from '../../ngclient/locale.service';
+import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('TextboxComponent', () => {
     let component: ServoyBootstrapTextbox;
     let fixture: ComponentFixture<ServoyBootstrapTextbox>;
     let textField;
 
-    beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({
-            declarations: [ServoyBootstrapTextbox],
-            imports: [SabloModule, ServoyPublicModule, FormsModule],
-            providers: [I18NProvider, FormattingService, TooltipService, LocaleService]
-        })
-            .compileComponents();
-    }));
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [ ServoyBootstrapTextbox ],
+      imports: [ServoyTestingModule, ServoyPublicModule, FormsModule],
+      providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
+    })
+    .compileComponents();
+  }));
 
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyBootstrapTextbox);
@@ -28,6 +30,8 @@ describe('TextboxComponent', () => {
         component = fixture.componentInstance;
         component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit', 'registerComponent', 'unRegisterComponent']);
         component.inputType = 'text';
+        component.format = new Format();
+        component.format.type = 'TEXT';
         fixture.detectChanges();
     });
 
@@ -86,12 +90,11 @@ describe('TextboxComponent', () => {
         await runOnPushChangeDetection(fixture);
         expect(component.getNativeElement().value).toBe('mytest2');
     });
-    
+
      it('should apply dataprovider from UI', async () => {
         component.getNativeElement().value = 'uitest';
         textField.nativeElement.dispatchEvent(new Event('change'));
         await runOnPushChangeDetection(fixture);
         expect(component.dataProviderID).toBe('uitest');
     });
-    
 });

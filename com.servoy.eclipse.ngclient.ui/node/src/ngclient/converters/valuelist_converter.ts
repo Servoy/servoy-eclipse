@@ -3,7 +3,7 @@ import { IConverter, ConverterService, PropertyContext } from '../../sablo/conve
 import { IValuelist, IChangeAwareValue, ChangeAwareState } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { Deferred, IDeferred } from '../../sablo/util/deferred';
+import { Deferred, IDeferred } from 'servoy-public';
 import { Observable, of, from } from 'rxjs';
 
 @Injectable()

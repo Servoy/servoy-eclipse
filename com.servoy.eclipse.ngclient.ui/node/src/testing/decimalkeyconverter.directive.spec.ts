@@ -1,12 +1,10 @@
-import { DecimalkeyconverterDirective } from './decimalkeyconverter.directive';
-import { TestBed, ComponentFixture, fakeAsync, tick, flushMicrotasks, async, waitForAsync, inject } from '@angular/core/testing';
+import { TestBed, ComponentFixture, fakeAsync, tick, waitForAsync, inject } from '@angular/core/testing';
 import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { SabloService } from '../../sablo/sablo.service';
-import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
-import { I18NProvider } from '../services/i18n_provider.service';
-import { ServoyModule } from '../servoy.module';
-import { LocaleService } from '../locale.service';
+import { I18NProvider } from '../ngclient/services/i18n_provider.service';
+import { LocaleService } from '../ngclient/locale.service';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from './servoytesting.module';
 
 @Component({
     template: '<input type="text" [svyDecimalKeyConverter]="format" #element>'
@@ -26,10 +24,9 @@ describe('Directive: DecimalKeyConverter', () => {
         TestBed.configureTestingModule({
             declarations: [
                 TestDecimalKeyConverterComponent,
-                DecimalkeyconverterDirective
             ],
-            imports: [ServoyModule],
-            providers: [I18NProvider, SessionStorageService, SabloService, LocaleService]
+            imports: [ServoyTestingModule, ServoyPublicModule],
+            providers: [I18NProvider,  LocaleService]
         });
         fixture = TestBed.createComponent(TestDecimalKeyConverterComponent);
         component = fixture.componentInstance;

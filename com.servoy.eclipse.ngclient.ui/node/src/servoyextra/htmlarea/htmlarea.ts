@@ -1,5 +1,6 @@
 import { Component, SimpleChanges, Input, Renderer2, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { ServoyBaseComponent, PropertyUtils, LocaleService } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, PropertyUtils } from 'servoy-public';
+import { LocaleService } from '../../ngclient/locale.service';
 import tinymce from 'tinymce';
 import { ApplicationService } from '../../ngclient/services/application.service';
 

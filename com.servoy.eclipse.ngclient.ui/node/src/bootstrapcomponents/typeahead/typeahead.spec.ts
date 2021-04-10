@@ -3,9 +3,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyBootstrapTypeahead } from './typeahead';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService, TooltipService } from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
+import { FormattingService, TooltipService } from 'servoy-public';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { FormsModule } from '@angular/forms';
 
 describe('TypeaheadComponent', () => {
@@ -16,7 +16,7 @@ describe('TypeaheadComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTypeahead ],
       providers: [ FormattingService, TooltipService],
-      imports: [ServoyPublicModule, SabloModule, NgbModule, FormsModule]
+      imports: [ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule]
     })
     .compileComponents();
   }));

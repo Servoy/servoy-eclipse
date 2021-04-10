@@ -1,10 +1,7 @@
 /// <reference path="./electron.d.ts"/>
 import { Injectable } from '@angular/core';
-import { ServoyService } from '../ngclient/servoy.service';
-import { SvyUtilsService } from '../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../sablo/logger.service';
-import { Deferred } from '../sablo/util/deferred';
-import { WindowRefService } from '../sablo/util/windowref.service';
+import { LoggerFactory, LoggerService, Deferred, WindowRefService, ServoyPublicService } from 'servoy-public';
+
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -27,8 +24,7 @@ export class NGDesktopFileService {
 //    private session: typeof electron.Session;
     private dialog: electron.Dialog;
 
-    constructor(private servoyService: ServoyService, private utilsService: SvyUtilsService,
-            private windowRef: WindowRefService, logFactory: LoggerFactory) {
+    constructor(private servoyService: ServoyPublicService, private windowRef: WindowRefService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('NGDesktopFileService');
         const userAgent = navigator.userAgent.toLowerCase();
         const r = this.windowRef.nativeWindow['require'];
@@ -41,8 +37,7 @@ export class NGDesktopFileService {
             this.shell = r('electron').shell;
 //            this.session = this.remote.session;
             this.dialog = this.remote.dialog;
-        }
-        else {
+        } else {
             this.log.warn('ngdesktopfile service/plugin loaded in a none electron environment');
         }
     }
@@ -214,7 +209,7 @@ export class NGDesktopFileService {
                             this.defer = null;
                         }
                     }).catch((err) => {
-                        console.log(err);
+                        this.log.info(err);
                         this.defer.resolve(false);
                         this.defer = null;
                     });
@@ -249,7 +244,7 @@ export class NGDesktopFileService {
                             this.readUrlFromPath(result.filePaths[0].replace(/\\/g, '/'), id); //on Windows the path contains backslash
                         }
                     }).catch((err) => {
-                        console.log(err);
+                        this.log.info(err);
                     });
             }
         });
@@ -271,7 +266,7 @@ export class NGDesktopFileService {
                         this.servoyService.executeInlineScript(callback.formname, callback.script, [result.filePaths[0]]);
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    this.log.info(err);
                 });
         });
     }
@@ -302,7 +297,7 @@ export class NGDesktopFileService {
                         this.servoyService.executeInlineScript(callback.formname, callback.script, [result.filePath]);
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    this.log.info(err);
                 });
         });
     }
@@ -329,7 +324,7 @@ export class NGDesktopFileService {
         try {
             return this.dialog.showSaveDialogSync(this.remote.getCurrentWindow(), options);
         } catch (e) {
-            console.log(e);
+            this.log.info(e);
         }
     }
 
@@ -363,7 +358,7 @@ export class NGDesktopFileService {
                         this.servoyService.executeInlineScript(callback.formname, callback.script, [result.filePaths]);
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    this.log.info(err);
                 });
         });
     }
@@ -393,7 +388,7 @@ export class NGDesktopFileService {
         try {
             return this.dialog.showOpenDialogSync(this.remote.getCurrentWindow(), options);
         } catch (e) {
-            console.log(e);
+            this.log.info(e);
         }
     }
 
@@ -448,7 +443,7 @@ export class NGDesktopFileService {
             };
             return retStats;
         } catch (err) {
-            console.log(err);
+            this.log.info(err);
         }
     }
 
@@ -481,7 +476,7 @@ export class NGDesktopFileService {
 
             return result;
         } catch (err) {
-            console.log(err);
+            this.log.info(err);
         }
     }
 
@@ -506,7 +501,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -531,7 +526,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -554,7 +549,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -577,7 +572,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -601,7 +596,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -633,7 +628,7 @@ export class NGDesktopFileService {
             }
         } catch (err) {
             result = false;
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -660,7 +655,7 @@ export class NGDesktopFileService {
                 result = this.fs.readFileSync(path, options);
             }
         } catch (err) {
-            console.log(err);
+            this.log.info(err);
         }
         return result;
     }
@@ -698,10 +693,10 @@ export class NGDesktopFileService {
             id,
             file: this.fs.createReadStream(path)
         };
-        this.request.post({ url: this.getFullUrl(this.utilsService.generateServiceUploadUrl('ngdesktopfile', 'callback')), formData },
+        this.request.post({ url: this.getFullUrl(this.servoyService.generateServiceUploadUrl('ngdesktopfile', 'callback')), formData },
             (err, httpResponse, body) => {
                 if (err) {
-                    return console.error('upload failed:', err);
+                    return this.log.error('upload failed:', err);
                 }
             });
     }

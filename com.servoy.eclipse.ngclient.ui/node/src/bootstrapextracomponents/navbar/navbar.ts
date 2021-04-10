@@ -2,11 +2,8 @@ import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Directiv
 import { DOCUMENT } from '@angular/common';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, FormattingService, ServoyPublicService } from 'servoy-public';
 import { IValuelist } from '../../sablo/spectypes.service';
-import { FormattingService } from '../../ngclient/servoy_public';
-import { ServoyService } from '../../ngclient/servoy.service';
-import { SvyUtilsService } from '../../ngclient/servoy_public';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component({
@@ -39,7 +36,7 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
     typeaheadInit = false;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService,
-        @Inject(DOCUMENT) private document: Document, private servoyService: ServoyService, private utils: SvyUtilsService) {
+        @Inject(DOCUMENT) private document: Document, private servoyService: ServoyPublicService) {
         super(renderer, cdRef);
     }
 
@@ -236,7 +233,7 @@ export class ServoyBootstrapExtraNavbar extends ServoyBaseComponent<HTMLDivEleme
         const itemClicked = this.getItem(event);
         this.makeItemActive(itemClicked);
         if (itemClicked && itemClicked.onAction) {
-            const jsEvent = this.utils.createJSEvent(event, 'action');
+            const jsEvent = this.servoyService.createJSEvent(event, 'action');
             this.servoyService.executeInlineScript(itemClicked.onAction.formname, itemClicked.onAction.script, [jsEvent, this.createItemArg(itemClicked)]);
         } else if (itemClicked && this.onMenuItemClicked) {
             this.onMenuItemClicked(event, this.createItemArg(itemClicked));

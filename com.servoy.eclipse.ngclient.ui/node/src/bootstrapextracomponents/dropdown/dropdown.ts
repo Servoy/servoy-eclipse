@@ -1,8 +1,6 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
-import { ServoyService } from '../../ngclient/servoy.service';
-import { SvyUtilsService } from '../../ngclient/servoy_public';
 
 @Component({
     selector: 'bootstrapextracomponents-dropdown',
@@ -26,7 +24,7 @@ export class ServoyBootstrapExtraDropdown extends ServoyBaseComponent<HTMLDivEle
     @Input() onAction: (e: Event) => void;
 
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyService, private utils: SvyUtilsService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService) {
         super(renderer, cdRef);
     }
 
@@ -40,21 +38,20 @@ export class ServoyBootstrapExtraDropdown extends ServoyBaseComponent<HTMLDivEle
 
     buttonClicked(e: Event) {
         if (this.onAction) {
-            this.onAction(e)
+            this.onAction(e);
         }
     }
 
     menuClicked(e: Event, menuItem: MenuItem) {
         if (menuItem.onAction) {
-            const jsEvent = this.utils.createJSEvent(e, 'action');
+            const jsEvent = this.servoyService.createJSEvent(e, 'action');
             this.servoyService.executeInlineScript(menuItem.onAction.formname, menuItem.onAction.script, [jsEvent, this.createItemArg(menuItem)]);
-        }
-        else if (this.onMenuItemSelected) {
+        } else if (this.onMenuItemSelected) {
              this.onMenuItemSelected(event, this.createItemArg(menuItem));
         }
     }
-    
-    createItemArg(menuItem: MenuItem) : BaseMenuItem{
+
+    createItemArg(menuItem: MenuItem): BaseMenuItem {
         return {itemId : menuItem.itemId , text: menuItem.text, userData : menuItem.userData} as BaseMenuItem;
     }
 }

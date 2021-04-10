@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from 'servoy-public';
 
 import { ServoyCoreSlider } from './slider';
-import { TooltipService } from '../../ngclient/servoy_public';
+import { TooltipService } from 'servoy-public';
 
 
 describe('ServoyCoreSlider', () => {
@@ -14,7 +14,7 @@ describe('ServoyCoreSlider', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyCoreSlider],
-      imports: [SabloModule, ServoyPublicModule],
+      imports: [ServoyTestingModule, ServoyPublicModule],
       providers: [TooltipService]
     })
     .compileComponents();

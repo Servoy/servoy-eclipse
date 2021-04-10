@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '../sablo/util/deferred';
+import { Deferred } from 'servoy-public';
 import { ConverterService } from '../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '../sablo/logger.service';
+import { LoggerService, LoggerFactory } from 'servoy-public';
 import { ServoyService } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { get } from 'lodash-es';

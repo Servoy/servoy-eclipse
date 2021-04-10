@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormService } from '../../ngclient/form.service';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from 'servoy-public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 import { ServoyCoreFormContainer } from './formcontainer';
 
@@ -13,7 +13,7 @@ describe('ServoyCoreFormContainer', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyCoreFormContainer ],
-      imports: [NgbModule, SabloModule, ServoyPublicModule, SabloModule],
+      imports: [NgbModule, ServoyTestingModule, ServoyPublicModule],
       providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ]
     })
     .compileComponents();

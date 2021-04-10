@@ -2,7 +2,14 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "servoy-public": [
+        "../dist/servoy-public/servoy-public",
+        "../dist/servoy-public"
+      ]
+    }
+    
   },
   "files": [
     "main.ts",
