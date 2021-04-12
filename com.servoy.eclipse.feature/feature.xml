@@ -107,6 +107,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="0.0.0"/>
 
    <requires>
+      <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.5.0.0" match="greaterOrEqual"/>
@@ -117,8 +119,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.emf.common.ui" version="2.8.0.v20130610-0406"/>
       <import feature="org.eclipse.emf.ecore" version="2.9.0.v20130528-0742"/>
-      <import feature="org.eclipse.swt.chromium.feature" version="76.0.14.202103240507"/>
-      <import feature="com.make.chromium.cef.feature" version="76.0.2.202012180206"/>
+      <import feature="org.eclipse.swt.chromium.feature" version="76.0.14.202103240507" match="greaterOrEqual"/>
+      <import feature="com.make.chromium.cef.feature" version="76.0.2.202012180206" match="greaterOrEqual"/>
    </requires>
 
    <plugin

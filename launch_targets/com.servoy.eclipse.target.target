@@ -13,8 +13,8 @@
 	    </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.maketechnology.io/chromium-swt-ee/servoy/p2"/>
+            <unit id="org.eclipse.swt.chromium.feature.feature.group" version="76.0.15.202104120141"/>
             <unit id="com.make.chromium.cef.feature.feature.group" version="76.0.2.202012180206"/>
-            <unit id="org.eclipse.swt.chromium.feature.feature.group" version="76.0.14.202103240507"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2021.06/"/>
