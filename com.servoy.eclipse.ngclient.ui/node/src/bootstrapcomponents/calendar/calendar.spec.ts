@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyBootstrapCalendar } from './calendar';
 
@@ -17,19 +17,18 @@ import { runOnPushChangeDetection } from '../../testing';
 describe('CalendarComponent', () => {
     let component: ServoyBootstrapCalendar;
     let fixture: ComponentFixture<ServoyBootstrapCalendar>;
-    let i18nProvider;
     let inputField;
 
     beforeEach(() => {
-        i18nProvider = jasmine.createSpyObj('I18NProvider', ['getI18NMessages']);
+        let i18nProvider = jasmine.createSpyObj('I18NProvider', ['getI18NMessages']);
         const promise = Promise.resolve({});
-        i18nProvider.getI18NMessages.and.returnValue(promise); TestBed.configureTestingModule({
+        i18nProvider.getI18NMessages.and.returnValue(promise); 
+        TestBed.configureTestingModule({
             declarations: [ServoyBootstrapCalendar],
             imports: [ServoyTestingModule, BrowserModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
             providers: [Renderer2, FormsModule, { provide: LocaleService, useValue: { getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
                 OwlDateTimeIntl]
-        })
-            .compileComponents();
+        }).compileComponents();
     });
 
     beforeEach(() => {
