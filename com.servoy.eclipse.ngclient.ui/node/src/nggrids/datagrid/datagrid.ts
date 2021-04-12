@@ -3107,6 +3107,7 @@ export class DataGrid extends NGGridDirective {
         if (changeEvent.selectedRowIndexesChanged && !this.requestSelectionPromises.length) {
             this.log.debug(idRandom + ' - 3. Request selection changed');
             this.selectedRowIndexesChanged();
+            this.scrollToSelection();
         }
 
     }
