@@ -11,6 +11,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
 export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivElement> {
 
     @Input() showAs: string;
+    @Input() selectedValue: string;
 
     @ViewChild('input') input: ElementRef;
 
@@ -22,7 +23,12 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivEle
 
     svyOnInit() {
         super.svyOnInit();
-        this.attachEventHandlers(this.getNativeElement());
+        this.renderer.listen(this.getFocusElement(), 'click', (e) => {
+            if (!this.readOnly && this.enabled) {
+                this.itemClicked(e);
+                if (this.onActionMethodID) this.onActionMethodID(e);
+            }
+        });
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -41,21 +47,9 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivEle
         return this.input.nativeElement;
     }
 
-    requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
-        ( this.getFocusElement() as HTMLElement ).focus();
-    }
-
-    attachEventHandlers( element: any ) {
-        if ( !element )
-            element = this.getNativeElement();
-        this.renderer.listen( element, 'click', ( e ) => {
-            if ( !this.readOnly && this.enabled ) {
-                this.itemClicked( e );
-                if ( this.onActionMethodID ) this.onActionMethodID( e );
-            }
-        } );
-        super.attachFocusListeners( element );
+        (this.getFocusElement() as HTMLElement).focus();
     }
 
     itemClicked(event) {
@@ -65,11 +59,15 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivEle
             this.selected = !this.selected;
             event.preventDefault();
         }
-        if (typeof this.dataProviderID === 'string') {
-            this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
-        } else {
-            this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
+        if (this.selectedValue) {
+            this.dataProviderID = this.dataProviderID == this.selectedValue ? null : this.selectedValue;
         }
+        else
+            if (typeof this.dataProviderID === 'string') {
+                this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
+            } else {
+                this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
+            }
         this.pushUpdate();
         event.target.blur();
     }
@@ -81,7 +79,11 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield<HTMLDivEle
     getSelectionFromDataprovider() {
         if (!this.dataProviderID) {
             return false;
-        } else if (typeof this.dataProviderID === 'string') {
+        }
+        if (this.selectedValue) {
+            return this.dataProviderID == this.selectedValue;
+        }
+        if (typeof this.dataProviderID === 'string') {
             return this.dataProviderID === '1';
         } else {
             return this.dataProviderID > 0;
