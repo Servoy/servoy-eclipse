@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTabpanel } from './tabpanel';
-import { ServoyPublicModule, WindowRefService } from 'servoy-public';
+import { ServoyPublicModule, WindowRefService } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyApi } from 'servoy-public';
+import { ServoyApi } from '@servoy/public';
 
 describe('TabpanelComponent', () => {
   let component: ServoyBootstrapTabpanel;

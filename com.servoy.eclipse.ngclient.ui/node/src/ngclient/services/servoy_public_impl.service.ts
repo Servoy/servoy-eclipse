@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, JSEvent, ServoyPublicService } from 'servoy-public';
+import { EventLike, JSEvent, ServoyPublicService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { LocaleService } from '../locale.service';
 import { ServoyService } from '../servoy.service';

@@ -3,11 +3,11 @@ import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/te
 import { ServoyDefaultPassword } from './password';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { FormsModule } from '@angular/forms';
-import { ServoyPublicModule } from 'servoy-public';
-import { FormattingService, ServoyApi, TooltipService} from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService} from '@servoy/public';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { TooltipDirective } from 'servoy-public';
+import { TooltipDirective } from '@servoy/public';
 
 import { runOnPushChangeDetection } from '../../testing';
 

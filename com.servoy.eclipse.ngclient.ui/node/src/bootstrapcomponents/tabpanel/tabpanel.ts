@@ -1,5 +1,5 @@
 import { Component, Renderer2, Input, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 
 import { ServoyBootstrapBaseTabPanel, Tab } from '../bts_basetabpanel';
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';

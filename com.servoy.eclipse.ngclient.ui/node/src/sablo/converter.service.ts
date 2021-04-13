@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LoggerService, LoggerFactory } from 'servoy-public';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 
 
 class SwingModifiers {

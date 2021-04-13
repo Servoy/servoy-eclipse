@@ -3,8 +3,8 @@ import {SimpleChange} from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from 'servoy-public';
-import { ServoyPublicModule } from 'servoy-public';
+import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { runOnPushChangeDetection } from '../../testing';
 

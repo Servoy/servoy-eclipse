@@ -1,6 +1,6 @@
 import { Component, OnInit, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
-import { FormattingService, PropertyUtils } from 'servoy-public';
+import { FormattingService, PropertyUtils } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
 
 @Component({

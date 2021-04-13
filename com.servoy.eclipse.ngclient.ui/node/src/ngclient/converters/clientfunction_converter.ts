@@ -1,5 +1,5 @@
 import { IConverter, PropertyContext } from '../../sablo/converter.service';
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 
 export class ClientFunctionConverter implements IConverter {
 

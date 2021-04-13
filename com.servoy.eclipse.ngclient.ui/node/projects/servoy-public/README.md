@@ -1,24 +1,7 @@
-# ServoyPublic
+# Servoy NGClient Public Library
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.7.
+This libray must be used to create component or service packages for the Servoy NGClient Angular based application.
 
-## Code scaffolding
+Install it with npm install @servoy/public
 
-Run `ng generate component component-name --project servoy-public` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project servoy-public`.
-> Note: Don't forget to add `--project servoy-public` or else it will be added to the default project in your `angular.json` file. 
 
-## Build
-
-Run `ng build servoy-public` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Publishing
-
-After building your library with `ng build servoy-public`, go to the dist folder `cd dist/servoy-public` and run `npm publish`.
-
-## Running unit tests
-
-Run `ng test servoy-public` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.

@@ -1,5 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-badge',

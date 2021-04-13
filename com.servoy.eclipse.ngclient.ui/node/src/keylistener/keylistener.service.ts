@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { ComponentContributor, IComponentContributorListener, ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
+import { ComponentContributor, IComponentContributorListener, ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 
 @Injectable()

@@ -20,9 +20,9 @@ import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
-import { NGDesktopFileService } from '../ngdesktopfile/ngdesktopfile.service';
-import { NGDesktopUtilsService } from '../ngdesktoputils/ngdesktoputils.service';
-import { NGDesktopUIService } from '../ngdesktopui/ngdesktopui.service';
+import { NGDesktopFileService } from '@servoy/ngdesktopfile';
+import { NGDesktopUtilsService } from '@servoy/ngdesktoputils';
+import { NGDesktopUIService } from '@servoy/ngdesktopui';
 // generated services end
 
 

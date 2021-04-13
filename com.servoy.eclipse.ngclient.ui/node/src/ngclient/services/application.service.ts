@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service';
 
-import {WindowRefService} from 'servoy-public';
+import {WindowRefService} from '@servoy/public';
 
 import {SabloService} from '../../sablo/sablo.service';
 

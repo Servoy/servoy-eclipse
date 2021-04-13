@@ -4,7 +4,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
 import * as moment from 'moment';
 import { DateTimeAdapter } from '@danielmoncada/angular-datetime-picker';
 import { DOCUMENT } from '@angular/common';
-import { ServoyPublicService } from 'servoy-public';
+import { ServoyPublicService } from '@servoy/public';
 
 export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDivElement> {
 

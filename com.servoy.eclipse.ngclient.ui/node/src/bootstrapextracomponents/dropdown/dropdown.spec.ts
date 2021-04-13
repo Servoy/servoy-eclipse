@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyBootstrapExtraDropdown } from './dropdown';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';

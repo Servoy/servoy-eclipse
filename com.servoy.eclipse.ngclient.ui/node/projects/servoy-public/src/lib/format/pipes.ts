@@ -11,7 +11,7 @@ export class MnemonicletterFilterPipe implements PipeTransform {
 }
 @Pipe({name: 'notNullOrEmpty'})
 export class NotNullOrEmptyPipe implements PipeTransform {
-  transform(value: any[], args?: any): any {
+  transform(value: any[], _args?: any): any {
       if(value)
     return value.filter(a => PropertyUtils.getPropByStringPath(a, 'realValue')!=='' && PropertyUtils.getPropByStringPath(a, 'realValue')!==null );
   }

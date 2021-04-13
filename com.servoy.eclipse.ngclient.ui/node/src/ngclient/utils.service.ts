@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { EventLike, JSEvent, LoggerFactory, LoggerService } from 'servoy-public';
+import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public';
 import { FormService } from './form.service';
 
 @Injectable()

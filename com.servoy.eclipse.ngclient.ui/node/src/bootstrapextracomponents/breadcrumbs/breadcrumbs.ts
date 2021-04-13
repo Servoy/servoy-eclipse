@@ -1,5 +1,5 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, Output, EventEmitter } from '@angular/core';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-breadcrumbs',

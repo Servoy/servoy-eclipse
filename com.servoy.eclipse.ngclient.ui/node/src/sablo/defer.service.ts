@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Deferred, IDeferred } from 'servoy-public';
+import { Deferred, IDeferred } from '@servoy/public';
 
-import { LoggerService, LoggerFactory } from 'servoy-public';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 import { SabloService } from './sablo.service';
 
 @Injectable()

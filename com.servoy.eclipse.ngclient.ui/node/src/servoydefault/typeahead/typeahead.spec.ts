@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultTypeahead } from './typeahead';
-import { FormattingService, TooltipService, ServoyApi, Format} from 'servoy-public';
-import { ServoyPublicModule } from 'servoy-public';
+import { FormattingService, TooltipService, ServoyApi, Format} from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {IValuelist} from '../../sablo/spectypes.service';

@@ -1,5 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 
 @Component( {
     selector: 'servoyextra-imagelabel',

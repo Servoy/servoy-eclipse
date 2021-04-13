@@ -1,6 +1,6 @@
 import { Input, ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
 
-import { PropertyUtils } from 'servoy-public';
+import { PropertyUtils } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 

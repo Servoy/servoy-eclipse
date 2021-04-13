@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 
-import { Format} from 'servoy-public';
+import { Format} from '@servoy/public';
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from './calendar';
 import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';

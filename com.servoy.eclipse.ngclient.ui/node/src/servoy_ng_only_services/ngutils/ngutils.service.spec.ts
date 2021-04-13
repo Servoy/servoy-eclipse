@@ -4,7 +4,7 @@ import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.ser
 
 import { NGUtilsService } from './ngutils.service';
 
-import {WindowRefService} from 'servoy-public';
+import {WindowRefService} from '@servoy/public';
 
 import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler';
 
@@ -12,7 +12,7 @@ import { SabloService } from '../../sablo/sablo.service';
 
 import { WebsocketService } from '../../sablo/websocket.service';
 import { ConverterService } from '../../sablo/converter.service';
-import { LoggerFactory } from 'servoy-public';
+import { LoggerFactory } from '@servoy/public';
 import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { PlatformLocation } from '@angular/common';

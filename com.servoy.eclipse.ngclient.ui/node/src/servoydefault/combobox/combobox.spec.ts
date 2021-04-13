@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicModule } from 'servoy-public';
-import { Format, FormattingService, ServoyApi, TooltipService } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
+import { Format, FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -14,8 +14,8 @@ import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/load
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { WindowRefService } from 'servoy-public';
-import { LoggerFactory } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';

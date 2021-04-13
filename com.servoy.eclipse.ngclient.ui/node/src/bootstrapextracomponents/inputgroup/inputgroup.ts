@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, SimpleChanges, ViewChild, Directive, ElementRef, OnInit, EventEmitter, Output, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
-import { Format } from 'servoy-public';
+import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
+import { Format } from '@servoy/public';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
 

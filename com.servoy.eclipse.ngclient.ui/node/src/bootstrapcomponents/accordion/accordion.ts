@@ -1,5 +1,5 @@
 import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 
 import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
 import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap';

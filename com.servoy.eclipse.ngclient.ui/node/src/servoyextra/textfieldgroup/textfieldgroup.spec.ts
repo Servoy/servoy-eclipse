@@ -1,9 +1,9 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyExtraTextfieldGroup  } from './textfieldgroup';
-import { FormattingService, ServoyApi, TooltipService } from 'servoy-public';
+import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { SabloModule } from '../../sablo/sablo.module';
 import { FormsModule } from '@angular/forms';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 

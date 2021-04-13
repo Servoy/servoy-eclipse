@@ -1,6 +1,6 @@
 
 import { NgModule } from '@angular/core';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { SabloModule } from '../sablo/sablo.module';
 import { ServoyBootstrapButton } from './button/button';
 import { ServoyBootstrapLabel } from './label/label';

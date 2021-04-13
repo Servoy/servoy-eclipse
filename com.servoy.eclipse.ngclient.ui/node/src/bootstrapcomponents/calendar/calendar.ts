@@ -2,8 +2,8 @@ import { DOCUMENT } from '@angular/common';
 import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeComponent, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
-import { Format  } from 'servoy-public';
-import { LoggerFactory, LoggerService, ServoyPublicService } from 'servoy-public';
+import { Format  } from '@servoy/public';
+import { LoggerFactory, LoggerService, ServoyPublicService } from '@servoy/public';
 import { ServoyBootstrapBaseCalendar } from './basecalendar';
 
 @Component({

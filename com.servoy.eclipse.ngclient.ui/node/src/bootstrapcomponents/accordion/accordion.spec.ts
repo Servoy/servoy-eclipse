@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapAccordion } from './accordion';
-import { WindowRefService } from 'servoy-public'
+import { WindowRefService } from '@servoy/public'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ServoyApi } from 'servoy-public'
+import { ServoyApi } from '@servoy/public'
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('AccordionComponent', () => {

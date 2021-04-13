@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { ServoyDefaultTextArea } from './textarea';
-import { FormattingService, TooltipService} from 'servoy-public';
-import { StartEditDirective } from 'servoy-public';
+import { FormattingService, TooltipService} from '@servoy/public';
+import { StartEditDirective } from '@servoy/public';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';

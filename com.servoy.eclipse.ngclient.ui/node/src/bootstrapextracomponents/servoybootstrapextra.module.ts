@@ -10,7 +10,7 @@ import {ServoyBootstrapExtraDropdown} from './dropdown/dropdown';
 import { ServoyBootstrapExtraCarousel, Slide } from './carousel/carousel';
 import { MenuItem, ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { SabloModule } from '../sablo/sablo.module';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';

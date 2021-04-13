@@ -6,12 +6,12 @@ import { FormCache, StructureCache, FormComponentCache, ComponentCache, instance
 import { ServoyService } from '../servoy.service';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerService, LoggerFactory } from 'servoy-public';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
 import { DOCUMENT } from '@angular/common';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
     // eslint-disable-next-line

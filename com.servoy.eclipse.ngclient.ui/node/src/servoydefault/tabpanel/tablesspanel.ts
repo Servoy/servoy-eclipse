@@ -2,9 +2,9 @@ import { Component, Renderer2,ChangeDetectorRef, ChangeDetectionStrategy} from '
 
 import {BaseTabpanel,Tab} from './basetabpanel';
 
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 
-import { LoggerFactory } from 'servoy-public';
+import { LoggerFactory } from '@servoy/public';
 
 @Component( {
     selector: 'servoydefault-tablesspanel',

@@ -1,9 +1,9 @@
 import { async, ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ServoyPublicModule, } from 'servoy-public';
+import { ServoyPublicModule, } from '@servoy/public';
 
 import { ServoyDefaultTextField } from './textfield';
-import { FormattingService, TooltipService, Format} from 'servoy-public';
+import { FormattingService, TooltipService, Format} from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { LocaleService } from '../../ngclient/locale.service';

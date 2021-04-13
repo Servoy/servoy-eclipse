@@ -4,8 +4,7 @@ import { ServoyBootstrapChoicegroup, ChoiceElementDirective } from './choicegrou
 import { IValuelist } from '../../sablo/spectypes.service';
 import { By } from '@angular/platform-browser';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
-import {NotNullOrEmptyPipe} from 'servoy-public';
+import { ServoyPublicModule, NotNullOrEmptyPipe } from '@servoy/public';
 import { runOnPushChangeDetection } from '../../testing';
 import { SimpleChange } from '@angular/core';
 

@@ -3,15 +3,15 @@ import { TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultTablesspanel } from './tablesspanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi } from 'servoy-public';
+import { ServoyApi } from '@servoy/public';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
-import { WindowRefService } from 'servoy-public';
-import { LoggerFactory } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;

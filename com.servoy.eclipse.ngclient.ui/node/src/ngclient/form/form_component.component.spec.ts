@@ -11,7 +11,7 @@ import { ErrorBean } from '../../servoycore/error-bean/error-bean';
 import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyExtraComponentsModule } from '../../servoyextra/servoyextra.module';
 import { ServoyBootstrapComponentsModule } from '../../bootstrapcomponents/servoybootstrap.module';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';

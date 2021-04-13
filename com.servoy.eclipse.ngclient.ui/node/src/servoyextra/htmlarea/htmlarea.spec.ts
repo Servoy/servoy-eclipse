@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyExtraHtmlarea  } from './htmlarea';
-import { FormattingService, ServoyApi, TooltipService } from 'servoy-public';
+import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 import { FormsModule } from '@angular/forms';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { HttpClientModule } from '@angular/common/http';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { ServoyService } from '../../ngclient/servoy.service';

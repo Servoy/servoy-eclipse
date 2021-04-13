@@ -29,7 +29,7 @@ import { WindowRefService } from './services/windowref.service';
                     ImageMediaIdDirective,
                     AutosaveDirective,
                     UploadDirective,
-                    SabloTabseq, 
+                    SabloTabseq,
                     TrustAsHtmlPipe
                   ],
     imports: [],

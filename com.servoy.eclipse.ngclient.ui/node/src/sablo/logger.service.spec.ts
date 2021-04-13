@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import {LoggerService, LogLevel, LoggerFactory} from 'servoy-public';
-import {WindowRefService} from 'servoy-public';
+import {LoggerService, LogLevel, LoggerFactory} from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
 
 describe('LoggerService', () => {
   let windowRef;

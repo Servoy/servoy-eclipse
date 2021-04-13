@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { ServoyCoreSlider } from './slider';
-import { TooltipService } from 'servoy-public';
+import { TooltipService } from '@servoy/public';
 
 
 describe('ServoyCoreSlider', () => {

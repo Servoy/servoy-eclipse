@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FormattingService } from 'servoy-public';
+import { FormattingService } from '@servoy/public';
 
 import { ServoyExtraSlider } from './slider';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('ServoyExtraSlider', () => {
   let component: ServoyExtraSlider;

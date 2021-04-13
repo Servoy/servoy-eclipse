@@ -1,6 +1,6 @@
 import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { ComponentCache } from './types';
 
 export class ServoyApi {

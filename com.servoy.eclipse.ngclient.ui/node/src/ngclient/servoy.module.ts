@@ -28,7 +28,7 @@ import { SessionView } from '../servoycore/session-view/session-view';
 import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
 import { ViewportService } from './services/viewport.service';
 
-import { ServoyPublicModule, ServoyPublicService } from 'servoy-public';
+import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 

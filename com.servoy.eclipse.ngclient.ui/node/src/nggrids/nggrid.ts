@@ -1,6 +1,6 @@
 import { AgGridAngular } from '@ag-grid-community/angular';
 import { ContentChild, Directive, Input, TemplateRef, ViewChild } from '@angular/core';
-import { FormattingService, ServoyBaseComponent } from 'servoy-public';
+import { FormattingService, ServoyBaseComponent } from '@servoy/public';
 
 @Directive()
 export abstract class NGGridDirective extends ServoyBaseComponent<HTMLDivElement> {

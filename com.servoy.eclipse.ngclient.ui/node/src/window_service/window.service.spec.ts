@@ -5,7 +5,7 @@ import { ShortcutService } from './shortcut.service';
 import {PopupMenuService} from './popupmenu.service';
 import { LocaleService } from '../ngclient/locale.service';
 import { SabloModule } from '../sablo/sablo.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
 import { ViewportService } from '../ngclient/services/viewport.service';

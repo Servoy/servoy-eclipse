@@ -1,10 +1,10 @@
 import { Injectable, } from '@angular/core';
 import { SessionStorageService } from './webstorage/sessionstorage.service';
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
-import { LoggerService, LoggerFactory } from 'servoy-public';
-import { Deferred } from 'servoy-public';
+import { LoggerService, LoggerFactory } from '@servoy/public';
+import { Deferred } from '@servoy/public';
 
 @Injectable()
 export class SabloService {

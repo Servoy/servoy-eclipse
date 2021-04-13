@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
-import { WindowRefService } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { ServoyService } from '../servoy.service';
 import { I18NProvider } from './i18n_provider.service';

@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ChangeDetectorRef, Renderer2, Input, ChangeDetectionStrategy, Inject, Output, EventEmitter } from '@angular/core';
-import { Format } from 'servoy-public';
+import { Format } from '@servoy/public';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({

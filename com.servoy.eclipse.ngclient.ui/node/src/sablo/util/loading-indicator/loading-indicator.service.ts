@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { Injectable, NgZone } from '@angular/core';
-import { LoggerFactory, LoggerService } from 'servoy-public';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 
 export interface ICustomLoadingIndicator {
     showLoading(): void;

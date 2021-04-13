@@ -1,7 +1,12 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../dist/servoy-public",
+  "dest": "../../dist/servoy/public",
   "lib": {
-    "entryFile": "src/public-api.ts"
+    "entryFile": "src/public-api.ts",
+    "umdModuleIds": {
+      "moment": "moment",
+      "numbro": "numbro"
+    },
+    "umdId": "servoy.public"
   }
 }

@@ -1,7 +1,7 @@
 import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject } from '@angular/core';
-import { ServoyBaseComponent } from 'servoy-public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
-import { LoggerFactory, LoggerService } from 'servoy-public';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ResizeEvent } from 'angular-resizable-element';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/scrolling';

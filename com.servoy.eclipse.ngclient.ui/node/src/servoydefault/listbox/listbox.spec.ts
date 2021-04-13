@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, waitForAsync } from '@angular/core/testing';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { ServoyDefaultListBox } from './listbox';
-import {  FormattingService, TooltipService, ServoyApi} from 'servoy-public';
+import {  FormattingService, TooltipService, ServoyApi} from '@servoy/public';
 
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';

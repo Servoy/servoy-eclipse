@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import { ServoyBootstrapTextbox } from './textbox';
-import { Format, FormattingService, TooltipService } from 'servoy-public';
-import { ServoyPublicModule } from 'servoy-public';
+import { Format, FormattingService, TooltipService } from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { runOnPushChangeDetection } from '../../testing';

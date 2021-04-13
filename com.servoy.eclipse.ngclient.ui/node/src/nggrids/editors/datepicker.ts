@@ -5,7 +5,7 @@ import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
 import { DOCUMENT } from '@angular/common';
 import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
-import { ServoyPublicService } from 'servoy-public';
+import { ServoyPublicService } from '@servoy/public';
 
 @Component({
   selector: 'aggrid-datepicker',

@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, ServoyPublicService } from 'servoy-public';
+import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 import { UppyConfig, UppyAngularComponent } from 'uppy-angular';
 
 @Component({

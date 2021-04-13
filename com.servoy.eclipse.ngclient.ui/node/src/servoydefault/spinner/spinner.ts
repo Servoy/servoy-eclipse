@@ -1,6 +1,6 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { FormattingService } from 'servoy-public';
+import { FormattingService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
 
 @Component({

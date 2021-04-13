@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from 'servoy-public';
-import { WindowRefService } from 'servoy-public';
+import { LoggerFactory } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 import { SpecTypesService } from '../../sablo/spectypes.service';
 import { ServicesService } from '../../sablo/services.service';
 import { FoundsetConverter } from './foundset_converter';

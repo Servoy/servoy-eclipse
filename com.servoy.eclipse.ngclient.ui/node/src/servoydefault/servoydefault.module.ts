@@ -32,7 +32,7 @@ import {ServoyDefaultSpinner} from './spinner/spinner';
 import {ChoiceElementDirective} from './basechoice';
 
 import { SabloModule } from '../sablo/sablo.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';

@@ -3,7 +3,7 @@ import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/
 import { By } from '@angular/platform-browser';
 import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 import { LocaleService } from '../ngclient/locale.service';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from './servoytesting.module';
 
 @Component({

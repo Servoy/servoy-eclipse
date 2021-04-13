@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, Format } from 'servoy-public';
+import { ServoyBaseComponent, Format } from '@servoy/public';
 
 @Component( {
     selector: 'servoyextra-textfieldgroup',

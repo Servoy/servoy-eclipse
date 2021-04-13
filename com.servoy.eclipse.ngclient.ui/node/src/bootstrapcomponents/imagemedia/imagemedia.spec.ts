@@ -4,7 +4,7 @@ import { ServoyBootstrapImageMedia } from './imagemedia';
 import { By } from '@angular/platform-browser';
 import { SimpleChange } from '@angular/core';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('ImagemediaComponent', () => {
     let component: ServoyBootstrapImageMedia;

@@ -2,8 +2,8 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
 
-import { ServoyPublicModule } from 'servoy-public';
-import { FormattingService, ServoyApi, TooltipService} from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService} from '@servoy/public';
 import {FormsModule} from '@angular/forms';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 

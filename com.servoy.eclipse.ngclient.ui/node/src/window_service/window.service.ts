@@ -5,7 +5,7 @@ import { ShortcutService } from './shortcut.service';
 import { PopupMenuService, Popup } from './popupmenu.service';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 import { PopupFormService, PopupForm, Callback } from '../ngclient/services/popupform.service';
-import { LoggerFactory, LoggerService, ServoyPublicService } from 'servoy-public';
+import { LoggerFactory, LoggerService, ServoyPublicService } from '@servoy/public';
 
 @Injectable()
 export class WindowService {

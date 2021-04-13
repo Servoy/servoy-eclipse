@@ -2,8 +2,8 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 
 import { ServoyExtraSpinner } from './spinner';
 import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from 'servoy-public';
-import { FormattingService, ServoyApi, TooltipService } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { IValuelist } from '../../sablo/spectypes.service';

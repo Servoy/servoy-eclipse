@@ -2,10 +2,10 @@ import { TestBed, inject , fakeAsync, flush, discardPeriodicTasks} from '@angula
 
 import { WebsocketService } from './websocket.service';
 
-import {WindowRefService} from 'servoy-public';
+import {WindowRefService} from '@servoy/public';
 import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
-import { LoggerFactory } from 'servoy-public';
+import { LoggerFactory } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 import { TestabilityService } from './testability.service';
 

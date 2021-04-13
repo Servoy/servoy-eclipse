@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyDefaultImageMedia } from './imagemedia';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
-import { FormattingService, TooltipService, ServoyApi} from 'servoy-public';
-import { UploadDirective } from 'servoy-public';
+import { FormattingService, TooltipService, ServoyApi} from '@servoy/public';
+import { UploadDirective } from '@servoy/public';
 import { DebugElement } from '@angular/core';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { By } from '@angular/platform-browser';

@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultRectangle } from './rectangle';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import {FormsModule} from '@angular/forms';
-import {ServoyApi,TooltipService,FormattingService} from 'servoy-public';
+import {ServoyApi,TooltipService,FormattingService} from '@servoy/public';
 import { SimpleChange } from '@angular/core';
 import { By } from '@angular/platform-browser';
 describe('ServoyDefaultRectangle', () => {

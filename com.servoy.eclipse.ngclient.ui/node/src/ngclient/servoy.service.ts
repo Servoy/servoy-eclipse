@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { WindowRefService } from 'servoy-public';
-import { LoggerFactory } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';

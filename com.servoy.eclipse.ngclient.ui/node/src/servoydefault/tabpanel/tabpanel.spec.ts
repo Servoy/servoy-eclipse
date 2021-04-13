@@ -3,13 +3,13 @@ import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@a
 import { ServoyDefaultTabpanel } from './tabpanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi, ServoyPublicModule } from 'servoy-public';
+import { ServoyApi, ServoyPublicModule } from '@servoy/public';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
-import { WindowRefService } from 'servoy-public';
-import { LoggerFactory } from 'servoy-public';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe( 'ServoyDefaultTabpanel', () => {

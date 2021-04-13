@@ -3,15 +3,15 @@ import { ComponentFixture, TestBed, waitForAsync, tick, fakeAsync } from '@angul
 import { ServoyBootstrapTypeahead } from './typeahead';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService, TooltipService } from 'servoy-public';
-import { ServoyPublicModule } from 'servoy-public';
+import { FormattingService, TooltipService } from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { runOnPushChangeDetection } from '../../testing';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { of } from 'rxjs';
-import { Format } from 'servoy-public';
+import { Format } from '@servoy/public';
 
 const mockData = [
   {

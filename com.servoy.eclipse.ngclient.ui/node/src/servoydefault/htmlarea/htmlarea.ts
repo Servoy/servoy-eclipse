@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import {  FormattingService, PropertyUtils, ServoyPublicService } from 'servoy-public';
+import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { DOCUMENT } from '@angular/common';
 import tinymce from 'tinymce';

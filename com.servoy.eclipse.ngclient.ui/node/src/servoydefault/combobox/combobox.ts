@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService } from 'servoy-public';
+import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({

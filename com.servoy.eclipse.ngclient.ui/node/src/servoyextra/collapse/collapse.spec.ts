@@ -8,7 +8,7 @@ import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('ServoyExtraCollapse', () => {
   let component: ServoyExtraCollapse;

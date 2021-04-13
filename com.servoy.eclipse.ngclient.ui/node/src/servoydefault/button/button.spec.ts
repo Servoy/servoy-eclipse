@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultButton } from './button';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { TooltipService, ComponentContributor, ServoyApi} from 'servoy-public';
-import { ServoyPublicModule } from 'servoy-public';
+import { TooltipService, ComponentContributor, ServoyApi} from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { runOnPushChangeDetection } from '../../testing';
 

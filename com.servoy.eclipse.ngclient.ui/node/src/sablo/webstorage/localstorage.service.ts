@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LoggerFactory, LoggerService } from 'servoy-public';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 import { WebStorage } from './webstorage.interface';
 
 @Injectable()

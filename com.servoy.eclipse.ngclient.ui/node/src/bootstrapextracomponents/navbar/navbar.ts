@@ -2,7 +2,7 @@ import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Directiv
 import { DOCUMENT } from '@angular/common';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { ServoyBaseComponent, FormattingService, ServoyPublicService } from 'servoy-public';
+import { ServoyBaseComponent, FormattingService, ServoyPublicService } from '@servoy/public';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
 

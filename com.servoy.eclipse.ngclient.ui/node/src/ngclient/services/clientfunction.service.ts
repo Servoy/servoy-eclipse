@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
-import { Deferred, IDeferred } from 'servoy-public';
+import { Deferred, IDeferred } from '@servoy/public';
 
 @Injectable()
 export class ClientFunctionService {

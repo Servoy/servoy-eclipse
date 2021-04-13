@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync, tick, fakeAsync } from '@angular/core/testing';
-import { ServoyApi } from 'servoy-public';
+import { ServoyApi } from '@servoy/public';
 import { ServoyBootstrapButton } from './button';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 import { runOnPushChangeDetection } from '../../testing';

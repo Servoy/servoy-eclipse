@@ -3,8 +3,8 @@ import { TestBed, inject } from '@angular/core/testing';
 import {WebsocketService} from '../sablo/websocket.service';
 import {SabloService} from '../sablo/sablo.service';
 import {ConverterService} from '../sablo/converter.service';
-import {LoggerFactory} from 'servoy-public';
-import {WindowRefService} from 'servoy-public';
+import {LoggerFactory} from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
 
 import { FormService } from './form.service';
 import {ServoyService} from './servoy.service';

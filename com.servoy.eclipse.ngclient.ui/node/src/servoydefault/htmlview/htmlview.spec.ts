@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { ServoyDefaultHTMLView } from './htmlview';
 
-import { FormattingService, TooltipService, ServoyApi } from 'servoy-public';
+import { FormattingService, TooltipService, ServoyApi } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 
 import { runOnPushChangeDetection } from '../../testing';

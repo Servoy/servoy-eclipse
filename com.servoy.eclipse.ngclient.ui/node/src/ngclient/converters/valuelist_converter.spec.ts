@@ -1,8 +1,8 @@
 import { TestBed, inject, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from 'servoy-public';
-import { WindowRefService } from 'servoy-public';
+import { LoggerFactory } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 import { SpecTypesService, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
 import { ServicesService } from '../../sablo/services.service';
 import { ValuelistConverter } from './valuelist_converter';
