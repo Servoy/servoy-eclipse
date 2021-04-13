@@ -1577,7 +1577,8 @@ export class DataGrid extends NGGridDirective {
                         _this.getColumnIndex(params.column.colId),
                         oldValue,
                         newValue,
-                        _this.createJSEvent()
+                        _this.createJSEvent(),
+                        _this.getRecord(params)
                     );
                     _this.onColumnDataChangePromise.then((r: any) => {
                         if(r === false) {
