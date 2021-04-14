@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Renderer2, Pipe, PipeTransform, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
 
 @Component({
@@ -25,17 +25,6 @@ export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel<HTMLSpanE
                 this.onDoubleClickMethodID(e);
             });
         }
-    }
-
-}
-
-@Pipe({ name: 'designFilter' })
-export class DesignFilterPipe implements PipeTransform {
-    transform(input: any, inDesigner: boolean) {
-        if (inDesigner) {
-            return 'DataLabel';
-        }
-        return input;
     }
 
 }
