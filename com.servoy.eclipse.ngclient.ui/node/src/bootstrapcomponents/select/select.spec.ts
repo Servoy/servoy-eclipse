@@ -4,7 +4,7 @@ import { ServoyBootstrapSelect } from './select';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from 'servoy-public';
+import { ServoyPublicModule } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { runOnPushChangeDetection } from '../../testing';
