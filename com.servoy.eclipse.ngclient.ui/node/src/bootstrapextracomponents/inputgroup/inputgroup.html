@@ -33,7 +33,7 @@
     </ng-container>
     <!-- end addOns left -->
 
-    <input type="inputType" #input
+    <input [type]="inputType" #input
         class='form-control bts-textbox'
         [disabled]="!enabled"
         [readonly]="readOnly || !editable" 
