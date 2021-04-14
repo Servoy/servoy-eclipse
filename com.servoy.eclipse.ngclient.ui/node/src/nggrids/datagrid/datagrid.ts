@@ -894,6 +894,7 @@ export class DataGrid extends NGGridDirective {
         //create the column definitions from the specified columns in designer
         const colDefs = [];
         let colDef: any = { };
+        const colGroups = { };
         let column: any;
         for (let i = 0; this.columns && i < this.columns.length; i++) {
             column = this.columns[i];
@@ -1008,7 +1009,27 @@ export class DataGrid extends NGGridDirective {
                 }
             }
 
-            colDefs.push(colDef);
+            if(column.headerGroup) {
+                if(!colGroups[column.headerGroup]) {
+                    colGroups[column.headerGroup] = {};
+                    colGroups[column.headerGroup]['headerClass'] = column.headerGroupStyleClass;
+                    colGroups[column.headerGroup]['children'] = [];
+
+                }
+                colGroups[column.headerGroup]['children'].push(colDef);
+            } else {
+                colDefs.push(colDef);
+            }
+        }
+
+        for(const groupName in colGroups) {
+            if(colGroups.hasOwnProperty(groupName)) {
+                const group: any = {};
+                group.headerName = groupName;
+                group.headerClass = colGroups[groupName]['headerClass'];
+                group.children = colGroups[groupName]['children'];
+                colDefs.push(group);
+            }
         }
 
         // TODO svyRowId should not be visible. I need the id for the selection
