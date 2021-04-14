@@ -11,7 +11,7 @@ import { DOCUMENT } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ShowDisplayValuePipe]
 })
-export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLDivElement> {
+export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLInputElement> {
 
   @Input() valuelistID: IValuelist;
 
