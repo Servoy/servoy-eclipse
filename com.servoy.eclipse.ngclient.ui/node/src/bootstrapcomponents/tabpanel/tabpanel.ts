@@ -47,10 +47,10 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 			}
 
 			if (this.onTabClickedMethodID) {
-				/*var dataTargetAttr = $(event.target).closest('[data-target]');
-				var dataTarget = dataTargetAttr ? dataTargetAttr.attr('data-target') : null;*/
+				let dataTargetAttr = (event.target as Element).closest('[data-target]');
+				let dataTarget = dataTargetAttr ? dataTargetAttr.getAttribute('data-target') : null;
 				const promise = this.onTabClickedMethodID(this.windowRefService.nativeWindow.event != null ?
-				                                this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, null);
+				                                this.windowRefService.nativeWindow.event : null /*$.Event("tabclicked")*/, tabIndexClicked + 1, dataTarget);
 				promise.then((ok) => {
 					if (ok) {
 						this.select(this.tabs[tabIndexClicked]);
@@ -131,7 +131,7 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel<HTMLULi
 	}
 
 	 selectTabAt( selectionIndex: number ) {
-	        if ( selectionIndex >= 0 && selectionIndex <= this.tabs.length ) {
+	        if ( selectionIndex >= 0 && selectionIndex < this.tabs.length ) {
 	            const tabToSelect = this.tabs[selectionIndex];
 	            if ( tabToSelect.disabled === true ) {
 	                return;

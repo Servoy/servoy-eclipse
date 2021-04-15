@@ -40,7 +40,7 @@ describe('ServoyBootstrapSelect', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyBootstrapSelect);
         component = fixture.componentInstance;
-        component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'registerComponent', 'unRegisterComponent']);
+        component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'registerComponent', 'unRegisterComponent', 'startEdit']);
         component.valuelistID = mockData;
         mockData.getDisplayValue = (value) => { return of(value) };
         component.multiselect = false;

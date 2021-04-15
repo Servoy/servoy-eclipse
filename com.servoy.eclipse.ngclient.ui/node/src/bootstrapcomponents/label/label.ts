@@ -26,9 +26,9 @@ export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel<HTMLSpanEleme
     }
 
     private getDataTarget(event): any {
-        const dataTarget = event.target.closest('data-target');
-        if (dataTarget && dataTarget[0]) {
-            return dataTarget[0].getAttribute('data-target');
+        const dataTarget = event.target.closest('[data-target]');
+        if (dataTarget) {
+            return dataTarget.getAttribute('data-target');
         }
         return null;
     }

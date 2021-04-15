@@ -4,6 +4,8 @@ import { ServoyBootstrapCheckbox } from './checkbox';
 import { By } from '@angular/platform-browser';
 import { runOnPushChangeDetection } from '../../testing';
 import { SimpleChange } from '@angular/core';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('ServoyBootstrapCheckbox', () => {
     let component: ServoyBootstrapCheckbox;
@@ -12,7 +14,8 @@ describe('ServoyBootstrapCheckbox', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            declarations: [ServoyBootstrapCheckbox]
+            declarations: [ServoyBootstrapCheckbox],
+            imports: [ServoyTestingModule, ServoyPublicModule],
         })
             .compileComponents();
     }));
