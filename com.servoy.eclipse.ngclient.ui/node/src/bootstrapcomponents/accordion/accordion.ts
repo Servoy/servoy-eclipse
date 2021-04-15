@@ -51,7 +51,7 @@ export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel<HTMLDi
     }
 
     selectTabAt( selectionIndex: number ) {
-        if ( selectionIndex >= 0 && selectionIndex <= this.tabs.length ) {
+        if ( selectionIndex >= 0 && selectionIndex < this.tabs.length ) {
             let tabToSelect = this.tabs[selectionIndex];
             if ( tabToSelect.disabled == true ) {
                 return;
