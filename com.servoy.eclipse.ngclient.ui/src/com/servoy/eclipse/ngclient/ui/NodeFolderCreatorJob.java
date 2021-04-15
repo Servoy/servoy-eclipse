@@ -67,63 +67,81 @@ public class NodeFolderCreatorJob extends Job
 		{
 			createFolder(nodeFolder);
 		}
-		boolean executeInstall = true;
-		File packageJsonFile = new File(nodeFolder, "package.json");
+		boolean packageJsonChanged = true;
+		File packageJsonFile = new File(nodeFolder, "package_original.json");
+		URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
+		String bundleContent = Utils.getURLContent(packageJsonUrl);
 		if (packageJsonFile.exists())
 		{
 			try
 			{
 				String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
-				URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
-				String bundleContent = Utils.getURLContent(packageJsonUrl);
-				executeInstall = !fileContent.equals(bundleContent);
+				packageJsonChanged = !fileContent.equals(bundleContent);
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
 		}
-		System.err.println("tested " + (System.currentTimeMillis() - time));
-		// copy over the latest resources
-		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries("/node", "*", true);
-		while (entries.hasMoreElements())
+		if (packageJsonChanged)
 		{
-			URL entry = entries.nextElement();
-			String filename = entry.getFile();
-			if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
-			else filename = filename.substring("node".length());
-			if (ignoredResource(filename)) continue;
 			try
 			{
-				if (filename.endsWith("/"))
+				// create the package_original.json
+				FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
+
+				// delete the source dirs so we start clean
+				FileUtils.deleteDirectory(new File(nodeFolder, "src"));
+				FileUtils.deleteDirectory(new File(nodeFolder, "projects"));
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			System.err.println("tested " + (System.currentTimeMillis() - time));
+			// copy over the latest resources
+			Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries("/node", "*", true);
+			while (entries.hasMoreElements())
+			{
+				URL entry = entries.nextElement();
+				String filename = entry.getFile();
+				if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
+				else filename = filename.substring("node".length());
+				if (ignoredResource(filename)) continue;
+				try
 				{
-					File folder = new File(nodeFolder, filename);
-					createFolder(folder);
-				}
-				else
-				{
-					try (InputStream is = entry.openStream())
+					if (filename.endsWith("/"))
 					{
-						copyOrCreateFile(filename, nodeFolder, is);
+						File folder = new File(nodeFolder, filename);
+						createFolder(folder);
+					}
+					else
+					{
+						try (InputStream is = entry.openStream())
+						{
+							copyOrCreateFile(filename, nodeFolder, is);
+						}
 					}
 				}
+				catch (Exception e)
+				{
+					Activator.getInstance().getLog().error("Error copy file " + filename + "to node folder " + nodeFolder, e);
+				}
 			}
-			catch (Exception e)
-			{
-				Activator.getInstance().getLog().error("Error copy file " + filename + "to node folder " + nodeFolder, e);
-			}
+			System.err.println("copied " + (System.currentTimeMillis() - time));
 		}
-		System.err.println("copied " + (System.currentTimeMillis() - time));
-		if (executeInstall) Activator.getInstance().executeNPMInstall();
-		else Activator.getInstance().executeNPMBuild();
+//		if (packageJsonChanged) Activator.getInstance().executeNPMInstall();
+//		else Activator.getInstance().executeNPMBuild();
 		createFileWatcher(nodeFolder, null);
 		System.err.println("done " + (System.currentTimeMillis() - time));
+		Activator.getInstance().countDown();
 		return Status.OK_STATUS;
 	}
 
 	private static boolean ignoredResource(String filename)
 	{
-		return filename.startsWith("/node_modules/") || filename.startsWith("/node/") || filename.endsWith(".spec.ts");
+		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/node_modules/") || filename.startsWith("/node/") ||
+			filename.endsWith(".spec.ts");
 	}
 
 

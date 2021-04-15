@@ -3,6 +3,7 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -16,6 +17,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
@@ -24,12 +26,13 @@ public class Activator extends Plugin
 	private final String PLUGIN_ID = "com.servoy.eclipse.ngclient.ui";
 	private final String NODEJS_EXTENSION = "nodejs";
 
+	private final CountDownLatch nodeReady = new CountDownLatch(2);
+
 	// The shared instance
 	private static Activator plugin;
 
 	private File nodePath;
 	private File npmPath;
-	private Job extractingNode;
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
 
@@ -47,47 +50,49 @@ public class Activator extends Plugin
 		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(this::exportNG2ToWar);
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
-		new DistFolderCreatorJob(projectFolder, false).schedule();
-//		extractNode();
-//		copyNodeFolder();
+//		new DistFolderCreatorJob(projectFolder, true).schedule();
+		extractNode();
+		copyNodeFolder();
 	}
 
-	public void copyNodeFolder()
+	void countDown()
+	{
+		nodeReady.countDown();
+		if (nodeReady.getCount() == -0)
+		{
+			ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
+		}
+	}
+
+	private void copyNodeFolder()
 	{
 		new NodeFolderCreatorJob(this.projectFolder).schedule();
 	}
 
-	public void extractNode()
+	private void extractNode()
 	{
-		synchronized (plugin)
+		Job extractingNode = new Job("extracting nodejs")
 		{
-			extractingNode = new Job("extracting nodejs")
-			{
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor)
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				IExtensionRegistry registry = Platform.getExtensionRegistry();
+				IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
+				File node = null;
+				File npm = null;
+				if (cf.length > 0)
 				{
-					IExtensionRegistry registry = Platform.getExtensionRegistry();
-					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
-					File node = null;
-					File npm = null;
-					if (cf.length > 0)
-					{
-						node = extractPath(cf[0], "nodePath");
-						node.setExecutable(true);
-						npm = extractPath(cf[0], "npmPath");
-					}
-					synchronized (plugin)
-					{
-						nodePath = node;
-						npmPath = npm;
-						extractingNode = null;
-						plugin.notifyAll();
-					}
-					return Status.OK_STATUS;
+					node = extractPath(cf[0], "nodePath");
+					node.setExecutable(true);
+					npm = extractPath(cf[0], "npmPath");
 				}
-			};
-		}
+				nodePath = node;
+				npmPath = npm;
+				countDown();
+				return Status.OK_STATUS;
+			}
+		};
 		extractingNode.schedule();
 	}
 
@@ -141,10 +146,15 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public void executeNPMInstall()
+	public RunNPMCommand createNPMCommand(String... commands)
 	{
 		waitForNodeExtraction();
-		RunNPMCommand installCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, NGClientConstants.NPM_INSTALL);
+		return new RunNPMCommand(nodePath, npmPath, projectFolder, commands);
+	}
+
+	public void executeNPMInstall()
+	{
+		RunNPMCommand installCommand = createNPMCommand(NGClientConstants.NPM_INSTALL);
 		installCommand.setUser(false);
 		createBuildCommand();
 		installCommand.setNextJob(buildCommand);
@@ -175,18 +185,13 @@ public class Activator extends Plugin
 	 */
 	private void waitForNodeExtraction()
 	{
-		synchronized (plugin)
+		try
 		{
-			while (extractingNode != null)
-			{
-				try
-				{
-					plugin.wait();
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
+			nodeReady.await();
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -201,14 +206,21 @@ public class Activator extends Plugin
 	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
 	 * @throws IOException
 	 */
-	public void exportNG2ToWar(File location) throws IOException
+	public void exportNG2ToWar(File location)
 	{
 		waitForStateLocation();
 
 		File distFolder = new File(projectFolder, "dist");
-		FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
+		try
+		{
+			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
 
-		FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+		}
+		catch (IOException e)
+		{
+			getLog().error("exceptions when exporting NG2 to WAR", e);
+		}
 	}
 
 	void stateLocationDone()

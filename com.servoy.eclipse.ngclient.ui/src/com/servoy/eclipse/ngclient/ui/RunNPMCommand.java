@@ -19,6 +19,7 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,42 +90,9 @@ public class RunNPMCommand extends WorkspaceJob
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 	{
-		ProcessBuilder builder = new ProcessBuilder();
-		builder.directory(projectFolder);
 		try
 		{
-			builder.redirectErrorStream(true);
-			for (String command : commands)
-			{
-				if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
-				{
-					ngBuildRunning = true;
-				}
-				List<String> lst = new ArrayList<>();
-				lst.add(nodePath.getCanonicalPath());
-				lst.add(npmPath.getCanonicalPath());
-				lst.addAll(Arrays.asList(command.split(" ")));
-				lst.add("--scripts-prepend-node-path");
-				builder.command(lst);
-				process = builder.start();
-				try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
-				{
-					String str = null;
-					while ((str = br.readLine()) != null)
-					{
-						str = str.replaceAll(".*?m", "");
-						str = str.replaceAll("\b", "");
-						System.err.println(str.trim());
-						// The date, hash and time represents the last output line of the NG build process.
-						// The NG build is finished when this conditions is met.
-						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
-						{
-							ngBuildRunning = false;
-						}
-					}
-				}
-				process.waitFor();
-			}
+			runCommands();
 			if (nextJob != null) nextJob.schedule();
 		}
 		catch (Exception e)
@@ -132,6 +100,48 @@ public class RunNPMCommand extends WorkspaceJob
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
+	}
+
+	/**
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void runCommands() throws IOException, InterruptedException
+	{
+		ProcessBuilder builder = new ProcessBuilder();
+		builder.directory(projectFolder);
+		builder.redirectErrorStream(true);
+		for (String command : commands)
+		{
+			if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
+			{
+				ngBuildRunning = true;
+			}
+			List<String> lst = new ArrayList<>();
+			lst.add(nodePath.getCanonicalPath());
+			lst.add(npmPath.getCanonicalPath());
+			lst.addAll(Arrays.asList(command.split(" ")));
+			lst.add("--scripts-prepend-node-path");
+			builder.command(lst);
+			process = builder.start();
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
+			{
+				String str = null;
+				while ((str = br.readLine()) != null)
+				{
+					str = str.replaceAll(".*?m", "");
+					str = str.replaceAll("\b", "");
+					System.err.println(str.trim());
+					// The date, hash and time represents the last output line of the NG build process.
+					// The NG build is finished when this conditions is met.
+					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					{
+						ngBuildRunning = false;
+					}
+				}
+			}
+			process.waitFor();
+		}
 	}
 
 	/**
