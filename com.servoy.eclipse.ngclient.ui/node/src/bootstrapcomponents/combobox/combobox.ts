@@ -8,7 +8,6 @@ import { DOCUMENT } from '@angular/common';
 @Component({
     selector: 'bootstrapcomponents-combobox',
     templateUrl: './combobox.html',
-    styleUrls: ['./combobox.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivElement> {
