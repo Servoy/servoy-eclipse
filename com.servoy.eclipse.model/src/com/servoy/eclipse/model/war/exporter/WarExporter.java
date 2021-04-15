@@ -95,6 +95,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -108,7 +109,6 @@ import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
-import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -270,14 +270,7 @@ public class WarExporter
 	 */
 	private void copyNGClient2(File tmpWarDir) throws ExportException
 	{
-		try
-		{
-			Activator.getInstance().exportNG2ToWar(tmpWarDir);
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Can't copy the NG2 resources to " + tmpWarDir, e);
-		}
+		Activator.getDefault().exportNG2ToWar(tmpWarDir);
 	}
 
 	/**

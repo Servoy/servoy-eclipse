@@ -44,6 +44,7 @@ public class Activator extends Plugin
 	public void start(BundleContext context) throws Exception
 	{
 		plugin = this;
+		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(this::exportNG2ToWar);
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
 		new DistFolderCreatorJob(projectFolder, false).schedule();
