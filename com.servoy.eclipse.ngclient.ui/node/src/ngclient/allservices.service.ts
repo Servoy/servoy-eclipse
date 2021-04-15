@@ -10,7 +10,7 @@ import { SessionService } from './services/session.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WindowService as WindowPlugin} from '../window_service/window.service';
 
-// generated services start
+// TODO move to generated
 import { WindowServiceModule} from '../window_service/windowservice.module';
 import { DialogModule } from '../dialogservice/dialog.module';
 import { KeyListener } from '../keylistener/keylistener.service';
@@ -20,10 +20,10 @@ import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
-import { NGDesktopFileService } from '@servoy/ngdesktopfile';
 import { NGDesktopUtilsService } from '@servoy/ngdesktoputils';
 import { NGDesktopUIService } from '@servoy/ngdesktopui';
-// generated services end
+// generated imports start
+// generated imports end
 
 
 /**
@@ -40,18 +40,18 @@ export class AllServiceService implements ServiceProvider {
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
         private $sabloService: SabloService,
-        private clientFunctionService: ClientFunctionService,
-        // generated services start
+        // TODO move to generated
         private ngclientutils: NGUtilsService,
         private keyListener: KeyListener,
         private window: WindowPlugin,
         private ngDataGrid: DatagridService,
         private ngPowerGrid: PowergridService,
         private dialogs: DialogService,
-        private ngdesktopfile: NGDesktopFileService,
         private ngdesktoputils: NGDesktopUtilsService,
-        private ngdesktopui: NGDesktopUIService
+        private ngdesktopui: NGDesktopUIService,
+        // generated services start
         // generated services end
+        private clientFunctionService: ClientFunctionService,
     ) {
         services.setServiceProvider( this );
     }
@@ -66,22 +66,23 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SessionService, ClientFunctionService,
-                // generated services start (only for dynamic services (servoy plugins))
+    providers: [AllServiceService, ApplicationService, WindowService, SessionService,
+                // TODO move to generated
                 NGUtilsService,
                 KeyListener,
                 DatagridService,
                 PowergridService,
-                NGDesktopFileService,
                 NGDesktopUtilsService,
-                NGDesktopUIService
-                // generated services end
+                NGDesktopUIService,
+                // generated providers start
+                // generated providers end
+                ClientFunctionService
                 ],
     imports: [
-                // generated services modules start (only for dynamic services (servoy plugins))
-                WindowServiceModule,
-                DialogModule
-                // generated services modules end.
+                DialogModule,
+                // generated modules start
+                // generated modules end
+                WindowServiceModule
                 ]
 } )
 export class AllServicesModules { }
