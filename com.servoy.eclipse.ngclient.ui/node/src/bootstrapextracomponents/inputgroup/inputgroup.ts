@@ -63,6 +63,15 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
 
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes ) {
+            for ( const property of Object.keys( changes ) ) {
+                const change = changes[property];
+                switch ( property ) {
+                    case 'placeholderText':
+                        if ( change.currentValue ) this.renderer.setAttribute( this.getFocusElement(), 'placeholder', change.currentValue );
+                        else this.renderer.removeAttribute( this.getFocusElement(), 'placeholder' );
+                        break;
+                }
+            }
             super.svyOnChanges( changes );
         }
     }
@@ -97,7 +106,7 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
         if ( !this.addOnButtons ) {
             return [];
         }
-        return this.addOnButtons.filter( ( addOnBtn: any ) => addOnBtn.position === position );
+        return this.addOnButtons.filter(( addOnBtn: any ) => addOnBtn.position === position );
     }
 
 
