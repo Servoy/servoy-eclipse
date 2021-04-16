@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyBootstrapCombobox } from './combobox';
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { FormattingService, TooltipService } from '@servoy/public';
+import { Format, FormattingService, TooltipService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { By } from '@angular/platform-browser';
@@ -27,6 +27,8 @@ describe('ServoyBootstrapCombobox', () => {
         textField = fixture.debugElement.query(By.css('button'));
         component = fixture.componentInstance;
         component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit', 'registerComponent', 'unRegisterComponent']);
+        component.format = new Format();
+        component.format.type = 'TEXT';
         fixture.detectChanges();
     });
 
