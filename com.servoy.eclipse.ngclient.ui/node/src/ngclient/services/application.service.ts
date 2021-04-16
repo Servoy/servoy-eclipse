@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service';
 
-import {WindowRefService} from '@servoy/public';
+import {LoggerFactory, LoggerService, WindowRefService} from '@servoy/public';
 
 import {SabloService} from '../../sablo/sablo.service';
 
@@ -17,6 +17,7 @@ import { ServerDataService } from './serverdata.service';
 @Injectable()
 export class ApplicationService {
     private userProperties: {[property: string]: any};
+    private log: LoggerService;
 
     constructor(private servoyService: ServoyService,
                             private localStorageService: LocalStorageService,
@@ -25,7 +26,9 @@ export class ApplicationService {
                             private sabloService: SabloService,
                             @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
-                            private serverData: ServerDataService) {
+                            private serverData: ServerDataService,
+                            private logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('ApplicationService');
     }
 
     public setLocale(language: string, country: string ) {
@@ -128,6 +131,13 @@ export class ApplicationService {
     public getClientBrowserInformation() {
         const locale = this.sabloService.getLocale();
         const userAgent = this.getUserAgentAndPlatform();
+        let timeZone: string;
+        try {
+            timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+        } catch(e) {
+            this.log.warn('Cant get client timeZone ' + e);
+        }
+
         return {
             serverURL: this.getServerURL(),
             userAgent : userAgent.userAgent,
@@ -135,6 +145,7 @@ export class ApplicationService {
             locale : locale.full,
             remote_ipaddress : this.serverData.getIPAdress(),
             remote_host : this.serverData.getHostAdress(),
+            timeZone,
             utcOffset : (new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0).getTimezoneOffset() / -60), utcDstOffset: (new Date(new Date().getFullYear(), 6, 1, 0, 0, 0, 0).getTimezoneOffset() / -60)
         };
     }
@@ -211,7 +222,7 @@ export class ApplicationService {
             // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
             return 'resources/upload/' +  this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
     }
-    
+
     private  showDefaultLoginWindow() {
         this.modalService.open(DefaultLoginWindowComponent, { backdrop: 'static' });
     }
