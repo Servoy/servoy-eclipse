@@ -1,0 +1,17 @@
+<input #element
+    [id]="servoyApi.getMarkupId()"
+    class="bts-textbox"
+    [type]="inputType"
+    (change)="pushUpdate()"
+    [ngClass]="styleClass"
+    [(ngModel)]="dataProviderID"
+    [svyFormat]="format"
+    [svyDecimalKeyConverter]="format"
+    [svyStartEdit]="'dataProviderID'"
+    [hostComponent]="this"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [disabled]="!enabled"
+    [readOnly]="readOnly || !editable"
+    [autocomplete]="autocomplete"
+/>

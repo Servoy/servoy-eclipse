@@ -1,0 +1,13 @@
+<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}" [ngClass]="{'svy-reconnecting' : (this.websocketService.reconnectingEmitter | async) === true}">
+<!--The content below is only a placeholder and can be replaced.-->
+<div *ngIf="(this.websocketService.reconnectingEmitter | async)" >{{i18n_reconnecting_feedback}}</div>
+<div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null" [ngStyle]="getNavigatorStyle()">
+<svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
+<svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>
+</div>
+<div id="mainForm" class="svy-main-window-container" autoscroll="true" [ngStyle]="getFormStyle()"  *ngIf="mainForm != null" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true}">
+<svy-form [name]="mainForm"></svy-form>
+</div> 
+<session-view *ngIf="sessionProblem != null"></session-view>
+<loading-indicator *ngIf="(this.loadingIndicatorService.showLoadingIndicator | async)"></loading-indicator>
+</div> 

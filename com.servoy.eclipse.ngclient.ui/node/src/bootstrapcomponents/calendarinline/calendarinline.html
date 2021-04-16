@@ -1,0 +1,12 @@
+<div #element [id]="servoyApi.getMarkupId()">
+    <owl-date-time-inline 
+        [ngModel]="dataProviderID" 
+        (ngModelChange)="dateChanged($event)" 
+        [pickerType]="'calendar'" 
+        [min]="min" 
+        [max]="max" 
+        [firstDayOfWeek]="firstDayOfWeek"
+        [disabled]="readOnly || !enabled"
+        [owlDateTimeFilter]="filter">
+    </owl-date-time-inline>
+</div>

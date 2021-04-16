@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
  *     [Dialogs] Bug with Image in TitleAreaDialog
  *     Sebastian Davids <sdavids@gmx.de> - Fix for bug 82064
  *     [Dialogs] TitleAreaDialog#setTitleImage cannot be called before open()
+ *     Christoph Läubrich - Fix for bug 563472
  *******************************************************************************/
 package org.eclipse.jface.dialogs;
 
@@ -28,7 +29,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -103,7 +103,7 @@ public class TitleAreaDialog extends TrayDialog {
 
 	private String errorMessage;
 
-	private Text messageLabel;
+	private Label messageLabel;
 
 	private Composite workArea;
 
@@ -118,10 +118,6 @@ public class TitleAreaDialog extends TrayDialog {
 	private int messageLabelHeight;
 
 	private Image titleAreaImage;
-
-	private int xTrim;
-
-	private int yTrim;
 
 	/**
 	 * Instantiate a new title area dialog.
@@ -160,11 +156,6 @@ public class TitleAreaDialog extends TrayDialog {
 		// create the dialog area and button bar
 		dialogArea = createDialogArea(workArea);
 		buttonBar = createButtonBar(workArea);
-
-		// computing trim for later
-		Rectangle rect = messageLabel.computeTrim(0, 0, 100, 100);
-		xTrim = rect.width - 100;
-		yTrim = rect.height - 100;
 
 		// need to react to new size of title area
 		getShell().addListener(SWT.Resize, event -> layoutForNewMessage(true));
@@ -212,12 +203,6 @@ public class TitleAreaDialog extends TrayDialog {
 	 */
 	private Control createTitleArea(Composite parent) {
 
-		// add a dispose listener
-		parent.addDisposeListener(e -> {
-			if (titleAreaColor != null) {
-				titleAreaColor.dispose();
-			}
-		});
 		// Determine the background color of the title bar
 		Display display = parent.getDisplay();
 		Color background;
@@ -237,7 +222,7 @@ public class TitleAreaDialog extends TrayDialog {
 		// Dialog image @ right
 		titleImageLabel = new Label(parent, SWT.CENTER);
 		titleImageLabel.setBackground(background);
-		if (titleAreaImage == null)
+		if (titleAreaImage == null || titleAreaImage.isDisposed())
 			titleImageLabel.setImage(JFaceResources
 					.getImage(DLG_IMG_TITLE_BANNER));
 		else
@@ -266,7 +251,8 @@ public class TitleAreaDialog extends TrayDialog {
 		messageImageLabel = new Label(parent, SWT.CENTER);
 		messageImageLabel.setBackground(background);
 		// Message label @ bottom, center
-		messageLabel = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
+		// messageLabel = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
+		messageLabel = new Label(parent, SWT.WRAP);
 		JFaceColors.setColors(messageLabel, foreground, background);
 		messageLabel.setText(" \n "); // two lines//$NON-NLS-1$
 		messageLabel.setFont(JFaceResources.getDialogFont());
@@ -491,8 +477,9 @@ public class TitleAreaDialog extends TrayDialog {
 				workArea.getParent().layout(true);
 		}
 
-		int messageLabelUnclippedHeight = messageLabel.computeSize(messageLabel.getSize().x - xTrim, SWT.DEFAULT, true).y;
-		boolean messageLabelClipped = messageLabelUnclippedHeight > messageLabel.getSize().y - yTrim;
+		Point messageSize = messageLabel.getSize();
+		int messageLabelUnclippedHeight = messageLabel.computeSize(messageSize.x, SWT.DEFAULT, true).y;
+		boolean messageLabelClipped = messageLabelUnclippedHeight > messageSize.y;
 		if (messageLabel.getData() instanceof ToolTip) {
 			ToolTip toolTip = (ToolTip) messageLabel.getData();
 			toolTip.hide();
@@ -512,7 +499,7 @@ public class TitleAreaDialog extends TrayDialog {
 					text.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 					text.setText(messageLabel.getText());
 					GridData gridData = new GridData();
-					gridData.widthHint = messageLabel.getSize().x;
+					gridData.widthHint = messageSize.x;
 					text.setLayoutData(gridData);
 					Dialog.applyDialogFont(result);
 					return result;

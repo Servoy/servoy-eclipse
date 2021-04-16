@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -82,6 +83,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -377,7 +379,16 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 
 		IPersist superPersist = PersistHelper.getSuperPersist(persist);
-		if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
+		if (superPersist instanceof IFormElement)
+		{
+			deletedComponents.add((IFormElement)superPersist);
+			if (persist instanceof WebComponent)
+			{
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+					.getWebComponentSpecification(((WebComponent)persist).getTypeName());
+				ghost = !spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty();
+			}
+		}
 
 
 		if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
@@ -421,7 +432,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				ghost = true;
 			}
 			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
-				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
+				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>());
 		}
 		else
 		{
@@ -729,7 +740,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
-		FlattenedSolution fs)
+		FlattenedSolution fs, HashSet<String> forms)
 	{
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
@@ -742,14 +753,20 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					Object propertyValue = formElement.getPropertyValue(pd.getName());
 					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 					if (frm == null) continue;
+					if (!forms.add(frm.getName()))
+					{
+						Debug.error("recursive reference found between (List)FormComponents: " + forms);
+						continue;
+					}
 					updatedFormComponentsDesignId.add(
 						formElement.getName(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName()));
 					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, (JSONObject)propertyValue, frm, fs);
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs);
+						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms);
 					}
+					forms.remove(frm.getName());
 				}
 			}
 		}

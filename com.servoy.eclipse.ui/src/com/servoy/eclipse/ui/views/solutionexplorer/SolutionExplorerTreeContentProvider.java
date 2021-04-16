@@ -2248,7 +2248,8 @@ public class SolutionExplorerTreeContentProvider
 					if (icon == null)
 					{
 						URI u = reader.getResource().toURI();
-						try (ZipFile zip = new ZipFile(u.toURL().getFile()))
+
+						try (ZipFile zip = new ZipFile(new File(u)))
 						{
 							ZipEntry entry = zip.getEntry(iconPath);
 							try (InputStream is = zip.getInputStream(entry))
@@ -2697,8 +2698,9 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormContainersChildren(PlatformSimpleUserNode elementsNode)
 	{
 		Form form = (Form)elementsNode.getRealObject();
+		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		Set<String> allLayoutNames = ContainersScope.getAllLayoutNames(
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getFlattenedForm(form));
+			flattenedSolution.getFlattenedForm(form), flattenedSolution);
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
 		for (String name : allLayoutNames)
 		{

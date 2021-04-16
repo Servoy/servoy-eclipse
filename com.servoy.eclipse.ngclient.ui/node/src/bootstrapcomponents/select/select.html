@@ -1,0 +1,64 @@
+<select #element
+    *ngIf="multiselect; else notMultiselect"
+    (change)="onChange($event)"
+    class="bts-select"
+    [ngClass]="styleClass"
+    [id]="servoyApi.getMarkupId()"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [(ngModel)]="selectedValues"
+    [svyStartEdit]="'dataProviderID'"
+    [hostComponent]="this"
+    [disabled]="readOnly || !enabled"
+    [size]="selectSize"
+    multiple
+    >
+    <ng-template [ngTemplateOutlet]="commonOptions"></ng-template>
+    <option
+        *ngFor="let value of valuelistID"
+        [value]="value.realValue"
+        [selected]="dataProviderID?.split('\n').indexOf(value.realValue) >= 0"
+        [innerHTML]="value.realValue | showDisplayValue:valuelistID">
+    </option>
+</select>
+
+<ng-template #notMultiselect>
+    <select #element
+    (change)="onChange($event)"
+    class="bts-select"
+    [ngClass]="styleClass"
+    [id]="servoyApi.getMarkupId()"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [(ngModel)]="dataProviderID"
+    [svyStartEdit]="'dataProviderID'"
+    [hostComponent]="this"
+    [disabled]="readOnly || !enabled"
+    >
+    <ng-template [ngTemplateOutlet]="commonOptions"></ng-template>
+    <option
+        *ngFor="let value of valuelistID"
+        [value]="value.realValue"
+        [selected]="(dataProviderID + '') === (value.realValue + '')"
+        [innerHTML]="value.realValue | showDisplayValue:valuelistID">
+    </option>
+</select>
+</ng-template>
+
+<ng-template #commonOptions>
+    <option
+    *ngIf="showPlaceholder()"
+    class="placeholderOption"
+    [innerHTML]="placeholderText"
+    hidden
+    disabled
+    selected>
+</option>
+<option
+    *ngIf="!showPlaceholder() && valuelistID && valuelistID.length && !isDPinValuelist()"
+    disabled
+    [selected]="!isDPinValuelist()"
+    [innerHTML]="dataProviderID | showDisplayValue:valuelistID"
+    [value]="dataProviderID">
+</option>
+</ng-template>

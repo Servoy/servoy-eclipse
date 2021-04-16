@@ -49,7 +49,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		if (getNGPackageManager() == null) initNGPackageManager();
 
 		setActiveProjectReferenceInternal(getServoyProject(solutionName));
-		updateFlattenedSolution();
+		updateFlattenedSolution(true);
 
 		ServoyResourcesProject servoyResourcesProject = (activeProject != null ? activeProject.getResourcesProject() : null);
 		if (activeResourcesProject != servoyResourcesProject)

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -79,7 +80,6 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -401,15 +401,18 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			public void modifyText(ModifyEvent e)
 			{
 				String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
-				for (int i = 0; i < urlPropertiesFields.size(); i++)
+				if (urlValues != null && urlValues.length == urlPropertiesFields.size())
 				{
-					if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+					for (int i = 0; i < urlPropertiesFields.size(); i++)
 					{
-						if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
-						urlPropertiesFields.get(i).setText(urlValues[i]);
-						if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
-					}
+						if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+						{
+							if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
+							urlPropertiesFields.get(i).setText(urlValues[i]);
+							if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
+						}
 
+					}
 				}
 			}
 		});
@@ -597,7 +600,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new EnableServerListener());
 
 		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
 
@@ -1097,14 +1100,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class //
+			String.class, List.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass" });
-
+			"dialectClass", "quoteList" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew())
@@ -1475,7 +1477,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == ServerConfig.CONNECTION_QUERY_VALIDATION);
 
-		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
+		logServerButton
+			.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
 
 		logTableName.setText(ApplicationServerRegistry.get().getServerManager().getLogTableName());
 
@@ -1584,7 +1587,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			{
 				createLogTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
-				createLogTableButton.setToolTipText("Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
+				createLogTableButton
+					.setToolTipText("Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
@@ -1616,10 +1620,20 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 	}
 
-	class LogServerListener implements IServerConfigListener
+	class EnableServerListener implements IServerConfigListener
 	{
 		public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 		{
+			ServerEditorInput currentServerEditorInput = (ServerEditorInput)getEditorInput();
+			boolean isUpdateForDifferenServer = oldServerConfig != null && currentServerEditorInput != null &&
+				oldServerConfig.getServerName() != currentServerEditorInput.getServerConfig().getServerName();
+
+			// if it is an update for a diff server or it is a delete (newServerConfig == null), skip ui update
+			if (isUpdateForDifferenServer || newServerConfig == null) return;
+
+			setInput(new ServerEditorInput(newServerConfig));
+			initDataBindings();
+			relayout();
 			if (serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()))
 			{
 				logServerButton.setSelection(true);
@@ -1636,5 +1650,4 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		return new ShowInContext(getEditorInput(), null);
 	}
-
 }

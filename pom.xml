@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
-		<maven>3.6.0</maven>
+		<maven>3.6.3</maven>
 	</prerequisites>
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2020.12.0.3620_rc</version>
+	<version>2021.6.0.3680_rc</version>
 	<properties>
-		<tycho.version>1.7.0</tycho.version>
+		<tycho.version>2.3.0</tycho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -34,6 +34,7 @@
 					<compilerArgument>-warn:none</compilerArgument>
 					<useProjectSettings>false</useProjectSettings>
 					<useJDK>BREE</useJDK>
+					<deriveReleaseCompilerArgumentFromTargetLevel>false</deriveReleaseCompilerArgumentFromTargetLevel>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -72,77 +73,84 @@
 							<type>eclipse-plugin</type>
 							<id>sablo</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>org.eclipse.dltk.javascript.rhino</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_base</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_shared</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_smart_client</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_headless_client</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_ngclient</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_debug</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_server</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_log4j</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.ui.tweaks</id>
 							<restrictTo>
-								<version>${project.version}</version>
+								<version>${project.parent.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>com.servoy.css.core</id>
+							<restrictTo>
+								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
 					</filters>
@@ -331,15 +339,39 @@
 		<profile>
 			<id>product</id>
 			<modules>
-				<module>com.servoy.jre.linux.x86_64</module>
-				<module>com.servoy.jre.macosx.x86_64</module>
-				<module>com.servoy.jre.win32.x86_64</module>
 				<module>com.servoy.eclipse.jre.linux.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
 				<module>com.servoy.eclipse.jre.win32.x86_64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<delete>
+											<fileset
+												dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
+												includes="TEST*.xml" />
+										</delete>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>plugins</id>
@@ -348,6 +380,7 @@
 			</activation>
 			<modules>
 				<module>launch_targets</module>
+				<module>com.servoy.css.core</module>
 				<module>com.servoy.eclipse.model</module>
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
@@ -368,8 +401,11 @@
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>org.eclipse.jface</module>
-				<module>org.eclipse.e4.ui.workbench.swt</module>
 				<module>j2db_documentation</module>
+				<module>com.servoy.eclipse.ngclient.ui</module>
+				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 			</modules>
 		</profile>
 		<profile>
@@ -390,19 +426,19 @@
 									<target>
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.version}" replace="${newVersion}"
+											match="${project.parent.version}" replace="${newVersion}"
 											byline="true" />
 									</target>
 								</configuration>

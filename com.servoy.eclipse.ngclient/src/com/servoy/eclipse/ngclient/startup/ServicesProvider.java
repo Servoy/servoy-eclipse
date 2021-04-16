@@ -11,6 +11,7 @@ import org.sablo.filter.SeparateSessionFilter;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.DeveloperMediaResourcesServlet;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.main.Activator;
+import com.servoy.j2db.server.ngclient.ClientFunctionsServlet;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.SelectNGSolutionFilter;
@@ -41,6 +42,7 @@ public class ServicesProvider implements IServicesProvider
 			set.add(RecordingEndpoint.class);
 			set.add(ResourceProvider.class);
 			set.add(SelectNGSolutionFilter.class);
+			set.add(ClientFunctionsServlet.class);
 			return set;
 		}
 		return null;

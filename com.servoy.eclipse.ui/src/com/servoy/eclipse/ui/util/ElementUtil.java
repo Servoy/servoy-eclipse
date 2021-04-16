@@ -27,7 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.SwingUtilities;
+
 import org.eclipse.swt.graphics.Image;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -47,8 +51,6 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
-import com.servoy.j2db.documentation.persistence.docs.DocsTextArea;
-import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.documentation.persistence.docs.DocsButton;
 import com.servoy.j2db.documentation.persistence.docs.DocsCalendar;
 import com.servoy.j2db.documentation.persistence.docs.DocsCheckBoxes;
@@ -61,6 +63,8 @@ import com.servoy.j2db.documentation.persistence.docs.DocsPortal;
 import com.servoy.j2db.documentation.persistence.docs.DocsRadioButtons;
 import com.servoy.j2db.documentation.persistence.docs.DocsRectShape;
 import com.servoy.j2db.documentation.persistence.docs.DocsTabPanel;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextArea;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -147,7 +151,9 @@ public class ElementUtil
 
 			if (persist instanceof IWebComponent)
 			{
-				name = "components";
+				IWebComponent iw = (IWebComponent)persist;
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(iw.getTypeName());
+				name = spec != null && spec.getCategoryName() != null ? spec.getCategoryName() : "components";
 			}
 			else if (name.startsWith("combobox"))
 			{
@@ -493,23 +499,29 @@ public class ElementUtil
 					beanClass = bcl.loadClass(beanClassName);
 					if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
 					{
-						try
-						{
-							Form form = (Form)bean.getParent();
-							IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-							Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
-								(IClientPluginAccess)application.getPluginAccess(),
-								new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-							beanClass = beanInstance.getClass();
-							if (beanInstance instanceof IScriptObject)
+						// these beans are always swing and or web, try to make them in the even thread then
+						final Class< ? >[] retValue = new Class[1];
+						final Class< ? > bc = beanClass;
+						SwingUtilities.invokeAndWait(() -> {
+							try
 							{
-								ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+								Form form = (Form)bean.getParent();
+								IServoyBeanFactory beanFactory = (IServoyBeanFactory)bc.newInstance();
+								Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
+									(IClientPluginAccess)application.getPluginAccess(),
+									new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+								retValue[0] = beanInstance.getClass();
+								if (beanInstance instanceof IScriptObject)
+								{
+									ScriptObjectRegistry.registerScriptObjectForClass(retValue[0], (IScriptObject)beanInstance);
+								}
 							}
-						}
-						catch (Throwable t)
-						{
-							Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClass, t);
-						}
+							catch (Throwable t)
+							{
+								Debug.error("Error loading bean: " + bean.getName() + " clz: " + bc, t);
+							}
+						});
+						beanClass = retValue[0];
 					}
 					beanClassCache.put(beanClassName, new WeakReference<Class< ? >>(beanClass));
 				}

@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
@@ -104,12 +105,15 @@ import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
+import com.servoy.eclipse.ui.editors.AddPersistButtonComposite;
 import com.servoy.eclipse.ui.editors.BeanCustomCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.FormatCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
+import com.servoy.eclipse.ui.editors.ListSelectCellEditor.ListSelectControlFactory;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -138,10 +142,10 @@ import com.servoy.eclipse.ui.util.IDefaultValue;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.component.ComponentFormat;
-import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
@@ -3015,17 +3019,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 							else
 							{
-								try
+								List<Form> forms = flattenedEditingSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
+								if (forms.size() > 0)
 								{
-									IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
-									if (foundset != null)
-									{
-										forFoundsetTable = dsm.getDataSource(foundset.getDataSource());
-									}
-								}
-								catch (Exception ex)
-								{
-									ServoyLog.logError(ex);
+									forFoundsetTable = dsm.getDataSource(forms.get(0).getDataSource());
 								}
 							}
 						}
@@ -3080,8 +3077,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
-				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
-					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null,
+					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 
 			}
 
@@ -3144,7 +3141,35 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null), SWT.NONE, null,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null), SWT.NONE,
+						new ListSelectControlFactory()
+						{
+							private TreeSelectDialog dialog = null;
+
+							public void setTreeSelectDialog(TreeSelectDialog dialog)
+							{
+								this.dialog = dialog;
+							}
+
+							public Control createControl(Composite composite)
+							{
+								AddPersistButtonComposite buttons = new AddPersistButtonComposite(composite, SWT.NONE, "Create form")
+								{
+									@Override
+									protected IPersist createPersist(Solution editingSolution)
+									{
+										OpenNewFormWizardAction newFormWizardAction = new OpenNewFormWizardAction(false);
+										newFormWizardAction.run();
+										return newFormWizardAction.getNewForm();
+									}
+								};
+								buttons.setDialog(dialog);
+								buttons.setPersist(
+									Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
+										: persistContext.getPersist());
+								return buttons;
+							}
+						},
 						"Select form dialog");
 				}
 			};
@@ -3173,7 +3198,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							dataSource = null;
 						}
 					}
-					return new ListSelectCellEditor(parent, "Select form",
+					return new ListSelectCellEditor(parent, "Select form component",
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
@@ -3248,11 +3273,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 										}
 										else if (persistContext.getPersist() instanceof AbstractContainer)
-										{
-											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-												persistContext.getPersist().getID(),
-												new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
-										}
+									{
+										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+											persistContext.getPersist().getID(),
+											new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
+									}
 									}
 									catch (RepositoryException e)
 									{

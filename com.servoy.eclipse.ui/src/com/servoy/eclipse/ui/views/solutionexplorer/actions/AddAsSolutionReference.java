@@ -25,13 +25,14 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.ModuleListSelectionDialog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
@@ -89,28 +90,22 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 		else if (activeModules.length > 1)
 		{
 			ServoyProject activeProject = servoyModel.getActiveProject();
-			int defaultIndex = 0;
-			String options[] = new String[activeModules.length];
-			for (int i = activeModules.length - 1; i >= 0; i--)
-			{
-				if (activeModules[i] == activeProject)
-				{
-					defaultIndex = i;
-				}
-				options[i] = activeModules[i].getProject().getName();
-			}
-			int selectedProject = UIUtils.showOptionDialog(shell, "Choose parent solution", solutionChooseDialogMessage(), options, defaultIndex);
 
-			if (selectedProject >= 0)
+			ModuleListSelectionDialog nameDialog = new ModuleListSelectionDialog(shell, "Choose parent solution", solutionChooseDialogMessage());
+			nameDialog.setInitialSelections(activeProject.getSolution().getName());
+			int res = nameDialog.open();
+			if (res == Window.OK)
 			{
-				// the user selected a project
-				return activeModules[selectedProject];
+				String moduleSelectd = nameDialog.getFirstResult().toString();
+				for (final ServoyProject project : activeModules)
+				{
+					if (moduleSelectd == project.getEditingSolution().getName())
+					{
+						return project;
+					}
+				}
 			}
-			else
-			{
-				// the user canceled the dialog
-				return null;
-			}
+			return null;
 		}
 		else
 		{

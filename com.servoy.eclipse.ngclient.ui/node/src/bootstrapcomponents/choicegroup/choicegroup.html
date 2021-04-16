@@ -1,0 +1,25 @@
+<div #element
+    class="bts-radiogroup"
+    [ngClass]="styleClass">
+    <label *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
+        <input [type]="inputType"
+            [checked]="selection[i]"
+            [value]="item.realValue"
+            (change)="itemClicked($event, i)"
+            [disabled]="readOnly || !enabled"
+            [id]="servoyApi.getMarkupId()"
+            [svyTooltip]="toolTipText"
+            [sabloTabseq]="tabSeq"
+            [bootstrapBaseChoiceElement]="this"
+            [index]="i"
+            #input/>
+            <span 
+                [textContent]="item.displayValue"
+                *ngIf="showAs != 'html' && showAs != 'trusted_html'">
+             </span>
+            <span 
+                [innerHtml]="item.displayValue | htmlFilter | trustAsHtml: servoyApi.trustAsHtml()"
+                *ngIf="showAs == 'html' || showAs == 'trusted_html'">
+            </span>
+    </label>
+</div>

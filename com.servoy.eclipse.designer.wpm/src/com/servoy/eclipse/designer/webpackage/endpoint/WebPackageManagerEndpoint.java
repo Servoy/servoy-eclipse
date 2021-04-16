@@ -54,9 +54,23 @@ public class WebPackageManagerEndpoint
 		this.session = newSession;
 	}
 
+	private final StringBuilder incomingPartialMessage = new StringBuilder();
+
 	@OnMessage
 	public void incoming(String msg, boolean lastPart)
 	{
+		String message = msg;
+		if (!lastPart)
+		{
+			incomingPartialMessage.append(message);
+			return;
+		}
+		if (incomingPartialMessage.length() > 0)
+		{
+			incomingPartialMessage.append(message);
+			message = incomingPartialMessage.toString();
+			incomingPartialMessage.setLength(0);
+		}
 		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
 		send(handleMessage);
 	}

@@ -149,6 +149,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 	private ServoyProject servoyProject;
 
 	private IDefaultSettings defaultSettings;
+	private Form form;
+	private boolean openDesigner = true;
 
 	public NewFormWizard()
 	{
@@ -347,7 +349,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			// create empty form
 			String dataSource = newFormWizardPage.getDataSource();
-			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
+			form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
 				true, null);
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
@@ -467,8 +469,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// open newly created form in the form editor (as new editor) except abstract form
 			// which will be opened in script editor
-			boolean returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
-				? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
+			boolean returnValue = true;
+			if (openDesigner)
+			{
+				returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
+					? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
+			}
 
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
@@ -751,7 +757,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			dataSourceViewer.setContentProvider(new TableContentProvider());
 			dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
+			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
 			dataSourceViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
@@ -780,13 +786,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				protected Object determineValue(String contents)
 				{
 					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
-					Form form = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
-					if (form != null)
+					Form frm = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
+					if (frm != null)
 					{
-						if (servoyProject.getEditingSolution().getAllObjectsAsList().contains(form))
-						{
-							return new Integer(form.getID());
-						}
+						return new Integer(frm.getID());
 					}
 					return null;
 				}
@@ -1620,5 +1623,18 @@ public class NewFormWizard extends Wizard implements INewWizard
 	interface IDefaultSettings
 	{
 		boolean isReferenceForm();
+	}
+
+	/**
+	 * @return the form
+	 */
+	public Form getForm()
+	{
+		return form;
+	}
+
+	public void setOpenDesigner(boolean openDesigner)
+	{
+		this.openDesigner = openDesigner;
 	}
 }

@@ -1,0 +1,6 @@
+{
+  "name": "electron",
+  "license": "MIT",
+  "types": "electron.d.ts",
+  "version": "11.0.3"
+}

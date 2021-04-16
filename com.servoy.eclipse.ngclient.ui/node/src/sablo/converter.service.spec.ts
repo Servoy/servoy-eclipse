@@ -1,0 +1,21 @@
+import { TestBed, inject } from '@angular/core/testing';
+
+import { ConverterService } from './converter.service';
+
+import {SpecTypesService} from '../sablo/spectypes.service';
+
+import {LoggerService, LoggerFactory} from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
+
+
+describe('ConverterService', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ConverterService,SpecTypesService,LoggerFactory,WindowRefService]
+    });
+  });
+
+  it('should be created', inject([ConverterService], (service: ConverterService) => {
+    expect(service).toBeTruthy();
+  }));
+});

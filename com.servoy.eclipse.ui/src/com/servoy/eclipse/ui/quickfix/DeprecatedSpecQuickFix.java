@@ -101,6 +101,11 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 								.collect(Collectors.toMap(pd -> (String)pd.getTag("replacement"), pd -> webComponent.getProperty(pd.getName())))
 							: Collections.EMPTY_MAP;
 
+						for (PropertyDescription property : deprecated)
+						{
+							webComponent.clearProperty(property.getName());
+						}
+
 						webComponent.setTypeName(replacement);
 
 						//copy the values for the replaced properties

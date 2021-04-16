@@ -1,0 +1,18 @@
+<div class="bts-list">
+    <input #element
+        type="text"
+        [attr.list]="servoyApi.getMarkupId() + '_datalist'"
+        (change)="updateDataprovider()"
+        [svyTooltip]="toolTipText"
+        [sabloTabseq]="tabSeq"
+        [readOnly]="readOnly || !editable"
+        [id]="servoyApi.getMarkupId()"
+    />
+    <datalist [id]="servoyApi.getMarkupId() + '_datalist'" > 
+        <option 
+            *ngFor="let value of valuelistID"
+            [value]="value.realValue | showDisplayValue:valuelistID:true"
+            [selected]="dataProviderID == value.realValue">
+        </option>
+    </datalist>
+</div>

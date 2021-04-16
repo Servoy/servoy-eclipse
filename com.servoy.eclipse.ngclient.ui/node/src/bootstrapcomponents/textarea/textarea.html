@@ -1,0 +1,16 @@
+<textarea #element
+    [ngClass]="styleClass" 
+    class="bts-textarea"
+    placeholder="{{placeholderText}}"
+    [disabled]="!enabled"
+    [readOnly]="readOnly || !editable"
+    [sabloTabseq]="tabSeq"
+	[(ngModel)]="dataProviderID"
+	(change)="pushUpdate()"
+	[svyTooltip]="toolTipText"
+	[id]="servoyApi.getMarkupId()"
+	[svyStartEdit]="'dataProviderID'"
+    [hostComponent]="this"
+    maxLength="{{maxLength}}"
+    >
+</textarea>

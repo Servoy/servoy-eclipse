@@ -1241,12 +1241,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// the icon will be rendered with an error icon on the bottom left
 					for (String name : invalidBecauseNoPK)
 					{
-						String dataSource = server.getTable(name).getDataSource();
-						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
-						//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
-						node.setFlags(SimpleUserNode.FLAG_NO_PK);
-						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
-						dlm.add(node);
+						String dataSource = server.getTableDatasource(name);
+						if (dataSource != null)
+						{
+							UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
+							//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+							node.setFlags(SimpleUserNode.FLAG_NO_PK);
+							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
+							dlm.add(node);
+						}
 					}
 				}
 
@@ -1784,7 +1787,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (spec.getApiFunctions().size() > 0)
 		{
 			extractDocsFromJsFile(spec, spec.getDefinitionURL());
-			extractDocsFromJsFile(spec, spec.getServerScript());
+			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
 		}
 	}
 

@@ -124,7 +124,6 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
-import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
@@ -143,7 +142,6 @@ import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.BodyPortal;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -891,8 +889,6 @@ public class Activator extends Plugin
 											}
 										}
 									}
-									PersistIndexCache.reload();
-									FormElementHelper.INSTANCE.reload();
 								}
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);

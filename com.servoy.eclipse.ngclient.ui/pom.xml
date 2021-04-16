@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>2021.6.0.3680_rc</version>
+	</parent>
+	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
+	<version>2021.6.0.3680_rc</version>
+	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<test.script>test_headless</test.script>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.11.0</version>
+				<executions>
+
+					<!-- 1. Install node and npm locally -->
+					<execution>
+						<id>install node and npm</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<nodeVersion>v14.15.4</nodeVersion>
+						</configuration>
+					</execution>
+
+					<!-- 2. Install karma and karma plugins -->
+					<execution>
+						<id>npm install</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+						</configuration>
+					</execution>
+
+					<!-- 3. npm run build_lib -->
+					<execution>
+						<id>npm run build_lib</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<arguments>run build_lib</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 4. npm run fix_lib -->
+					<execution>
+						<id>npm run fix_lib</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<arguments>run fix_lib</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 5. npm run build -->
+					<execution>
+						<id>npm run build</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 6. Run karma tests -->
+					<execution>
+						<id>angular karma test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<skipTests>${maven.test.skip}</skipTests>
+							<failOnError>true</failOnError>
+							<arguments>run ${test.script}</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

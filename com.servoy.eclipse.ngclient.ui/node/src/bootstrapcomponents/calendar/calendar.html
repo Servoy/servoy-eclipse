@@ -1,0 +1,19 @@
+<div class='input-group date bts-calendar-container'
+	[svyTooltip]="toolTipText"
+    [id]="servoyApi.getMarkupId()"
+    #element>
+    <input class='bts-calendar form-control form-control svy-padding-xs svy-line-height-normal'
+    	[sabloTabseq]="tabSeq"
+		[(ngModel)]="dataProviderID"
+		[svyFormat]="format"
+    	(change)="pushUpdate()"
+     	[svyStartEdit]="'dataProviderID'"
+      	[hostComponent]="this"
+        [disabled]="!enabled"
+        [readonly]="readOnly || pickerOnly"
+     	#inputElement/>
+    <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;" [hidden]="readOnly || !enabled"><span class="far fa-calendar-alt"></span></span>
+    <owl-date-time #datetime [disabled]="readOnly || !enabled" [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
+	<input (dateTimeChange)="dateChanged($event)" [owlDateTime]="datetime" [value]="dataProviderID"  style="position:absolute;bottom:0px;width:0px;height:0px;border:0px;padding:0px"
+		[min]="min" [max]="max" [owlDateTimeFilter]="filter">
+</div>

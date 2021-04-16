@@ -18,11 +18,13 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -95,7 +97,17 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 				}
 				else if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
 				{
-					PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(projectFiles[0], new IWorkingSet[] { ws });
+					for (IFile file : projectFiles)
+					{
+						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						if (files.size() > 0)
+						{
+							if (!files.contains(file))
+							{
+								PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
+							}
+						}
+					}
 				}
 				else
 				{

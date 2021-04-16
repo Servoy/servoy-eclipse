@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="2020.12.0.3620_rc"
+      version="2021.6.0.3680_rc"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2018 Servoy BV. All rights reserved.
+      Copyright © 1997-2021 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -62,13 +62,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
+      <update label="Servoy Update Site" url="https://download.servoy.com/developer/latest/"/>
       <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
    </url>
 
    <includes
          id="com.servoy.css.core"
-         version="0.0.0"/>
+         version="2021.6.0.3680_rc"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
@@ -106,25 +106,9 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.jgit.ssh.apache"
          version="0.0.0"/>
 
-   <includes
-         id="com.servoy.jre.linux.x86_64.feature"
-         version="12.0.0"
-         os="linux"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.macosx.x86_64.feature"
-         version="12.0.0"
-         os="macosx"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.win32.x86_64.feature"
-         version="12.0.0"
-         os="win32"
-         arch="x86_64"/>
-
    <requires>
+      <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.5.0.0" match="greaterOrEqual"/>
@@ -135,204 +119,204 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.emf.common.ui" version="2.8.0.v20130610-0406"/>
       <import feature="org.eclipse.emf.ecore" version="2.9.0.v20130528-0742"/>
-      <import feature="com.make.chromium.cef.feature" version="0.4.0.201904250337"/>
-      <import feature="org.eclipse.swt.chromium.feature" version="0.9.1.201905200749" match="greaterOrEqual"/>
+      <import feature="org.eclipse.swt.chromium.feature" version="76.0.14.202103240507" match="greaterOrEqual"/>
+      <import feature="com.make.chromium.cef.feature" version="76.0.2.202012180206" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="com.servoy.eclipse.core"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_log4j"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_base"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="org.apache.tomcat"
          download-size="0"
          install-size="0"
-         version="8.5.57"
+         version="8.5.64"
          unpack="false"/>
 
    <plugin
          id="sablo"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
@@ -381,7 +365,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="2.3.30.stable"
+         version="2.3.31.stable"
          unpack="false"/>
 
    <plugin
@@ -395,7 +379,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="1.13.0.v20200108-0001"
+         version="1.14.0.v20200818-1422"
          unpack="false"/>
 
    <plugin
@@ -409,7 +393,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="4.5.10.v20200114-1512"
+         version="4.5.10.v20200830-2311"
          unpack="false"/>
 
    <plugin
@@ -430,7 +414,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.500.v20200106-1437"
+         version="1.2.0.v20210202-1157"
          unpack="false"/>
 
    <plugin
@@ -444,7 +428,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="jabsorb"
          download-size="0"
          install-size="0"
-         version="1.3.2.s4"
+         version="1.3.2.s5"
          unpack="false"/>
 
    <plugin
@@ -458,42 +442,42 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.designer.wpm"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="2.13.3"
+         version="2.14.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="2.13.3"
+         version="2.14.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j18-impl"
          download-size="0"
          install-size="0"
-         version="2.13.3"
+         version="2.14.1"
          unpack="false"/>
 
    <plugin
@@ -521,7 +505,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.lang3"
          download-size="0"
          install-size="0"
-         version="3.10.0"
+         version="3.12.0"
          unpack="false"/>
 
    <plugin
@@ -535,21 +519,28 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.commons-dbcp2"
          download-size="0"
          install-size="0"
-         version="2.7.0"
+         version="2.8.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.commons-pool2"
          download-size="0"
          install-size="0"
-         version="2.8.0"
+         version="2.9.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.guava"
+         download-size="0"
+         install-size="0"
+         version="30.1.0.v20210127-2300"
          unpack="false"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
-         version="1.2.4"
+         version="1.3.2"
          unpack="false"/>
 
    <plugin
@@ -560,17 +551,51 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
+         id="com.servoy.eclipse.ngclient.ui"
+         download-size="0"
+         install-size="0"
+         version="2021.6.0.3680_rc"
+         unpack="false"/>
+
+   <plugin
+         id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
+         os="linux"
+         ws="gtk"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="14.16.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
+         os="macosx"
+         ws="cocoa"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="14.16.0"/>
+
+   <plugin
+         id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
+         os="win32"
+         ws="win32"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="14.16.0"/>
+
+   <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
          download-size="0"
          install-size="0"
-         version="2020.12.0.3620_rc"
+         version="2021.6.0.3680_rc"
          unpack="false"/>
 
    <plugin
@@ -579,7 +604,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="14.0.1"/>
+         version="16.0.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -587,7 +612,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="14.0.1"/>
+         version="16.0.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -595,6 +620,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="14.0.1"/>
+         version="16.0.0"/>
 
 </feature>

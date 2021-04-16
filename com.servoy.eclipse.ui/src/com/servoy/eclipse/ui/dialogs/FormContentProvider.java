@@ -17,10 +17,13 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +33,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -37,7 +44,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
-import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 
 /**
  * Content provider class for forms.
@@ -139,7 +146,7 @@ public class FormContentProvider implements ITreeContentProvider
 	@Override
 	public void inputChanged(final Viewer viewer, Object oldInput, final Object inputElement)
 	{
-		if (inputElement instanceof FormListOptions && !inputElement.equals(options))
+		if (inputElement instanceof FormListOptions)
 		{
 			Job job = new Job("Searching possible parent forms")
 			{
@@ -177,16 +184,25 @@ public class FormContentProvider implements ITreeContentProvider
 							{
 								Form obj = forms.next();
 								if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
-									(options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != obj &&
+									(options.showTemplates == obj.isFormComponent().booleanValue()) && childForm != obj &&
 									!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 								{
 									// skip if form component list and isAbsoluteCSSPositionMix
-									if ((options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != null &&
+									if ((options.showTemplates == obj.isFormComponent().booleanValue()) && childForm != null &&
 										!childForm.isResponsiveLayout() && !obj.isResponsiveLayout() &&
 										(childForm.getUseCssPosition() != obj.getUseCssPosition()))
 									{
 										continue;
 									}
+									if (options.showTemplates && childForm != null && childForm.isFormComponent().booleanValue())
+									{
+										// check for recursion.
+										Set<String> usedFormComponents = new HashSet<>();
+										getAllFormComponents(obj, usedFormComponents);
+										if (usedFormComponents.contains(childForm.getName()))
+											continue;
+									}
+
 									addFormInList(activeProject, obj, solutionNames, list);
 								}
 							}
@@ -224,6 +240,37 @@ public class FormContentProvider implements ITreeContentProvider
 						}
 					});
 					return Status.OK_STATUS;
+				}
+
+				/**
+				 * @param usedFormComponents
+				 */
+				private void getAllFormComponents(Form form, Set<String> usedFormComponents)
+				{
+					SpecProviderState specs = WebComponentSpecProvider.getSpecProviderState();
+					Form ff = flattenedSolution.getFlattenedForm(form);
+					ff.getWebComponents().forEachRemaining(comp -> {
+						String typeName = comp.getTypeName();
+						WebObjectSpecification spec = specs.getWebComponentSpecification(typeName);
+						if (spec != null)
+						{
+							Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+							if (properties != null && properties.size() > 0)
+							{
+								properties.forEach(property -> {
+									Object frmValue = comp.getProperty(property.getName());
+									Form frm = FormComponentPropertyType.INSTANCE.getForm(frmValue, flattenedSolution);
+									if (frm != null)
+									{
+										if (usedFormComponents.add(frm.getName()))
+										{
+											getAllFormComponents(frm, usedFormComponents);
+										}
+									}
+								});
+							}
+						}
+					});
 				}
 			};
 			job.schedule();

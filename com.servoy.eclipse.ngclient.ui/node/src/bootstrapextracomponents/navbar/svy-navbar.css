@@ -1,0 +1,39 @@
+/* Brand Logo */
+.navbar-brand > img {
+    height: 100%;
+    width: auto;
+}
+
+.navbar-brand {
+    cursor: default;
+    height: 30px;
+    margin: 0px;
+}
+
+.navbar-brand.clickable {
+    cursor: auto;
+}
+
+nav .navbar-right .dropdown-menu {
+    right: auto;
+}
+
+.bts-extra-navbar .navbar-nav .navbar-form {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* Type IMAGE*/
+.svy-navbar-img {
+    height: 50px;
+    padding: 5px 15px;
+}
+
+.svy-navbar-item-img {
+    height: 100%;
+    max-width: 100%;
+}
+
+.bts-extra-navbar .container-fluid{
+    padding: 0px;
+}

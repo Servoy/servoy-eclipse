@@ -644,13 +644,13 @@ public class ElementFactory
 					else
 					{
 						label = createLabel(parent, labelText, loc);
-						java.awt.Dimension labeldim = label.getSize();
+						java.awt.Dimension labeldim = CSSPositionUtils.getSize(label);
 						labeldim.width = configuration.isPlaceHorizontally() ? 140 /* field width */ : 80;
 						CSSPositionUtils.setSize(label, labeldim.width, labeldim.height);
 					}
 					lst.add(label);
 
-					Dimension currentSize = label.getSize();
+					Dimension currentSize = CSSPositionUtils.getSize(label);
 					Dimension labelSize = configuration.getLabelSize();
 					if (labelSize.height > 0)
 					{
@@ -664,7 +664,7 @@ public class ElementFactory
 
 					if (configuration.isFillName())
 					{
-						label.setName(name + "_label");
+						label.setName(getCorrectName(parent, name + "_label"));
 						if (label instanceof GraphicalComponent)
 						{
 							((GraphicalComponent)label).setLabelFor(name);
@@ -685,19 +685,20 @@ public class ElementFactory
 
 					int labelSpacing = configuration.getLabelSpacing() >= 0 ? configuration.getLabelSpacing() : 20;
 
+					currentSize = CSSPositionUtils.getSize(label);
 					if (configuration.isPlaceHorizontally())
 					{
-						loc = new Point(loc.x, loc.y + label.getSize().height + labelSpacing);
+						loc = new Point(loc.x, loc.y + currentSize.height + labelSpacing);
 					}
 					else
 					{
 						if (configuration.isPlaceOnTop())
 						{
-							loc = new Point(loc.x, loc.y + label.getSize().height + labelSpacing);
+							loc = new Point(loc.x, loc.y + currentSize.height + labelSpacing);
 						}
 						else
 						{
-							loc = new Point(loc.x + label.getSize().width + labelSpacing, loc.y);
+							loc = new Point(loc.x + currentSize.width + labelSpacing, loc.y);
 						}
 					}
 					if (fieldPositioner != null)
@@ -749,14 +750,14 @@ public class ElementFactory
 					else
 					{
 						bc = createField(parent, dataProvider, loc);
-						java.awt.Dimension dim = bc.getSize();
+						java.awt.Dimension dim = CSSPositionUtils.getSize(bc);
 						dim.width = 140;
 						CSSPositionUtils.setSize(bc, dim.width, dim.height);
 					}
 				}
 				lst.add(bc);
 
-				Dimension currentSize = bc.getSize();
+				Dimension currentSize = CSSPositionUtils.getSize(bc);
 				Dimension fieldSize = configuration.getFieldSize();
 				if (fieldSize.height > 0)
 				{
@@ -772,7 +773,7 @@ public class ElementFactory
 					bc.setName(name);
 				}
 				fillTextProperty(bc, configuration, name, labelText, true, false);
-				lastSize = bc.getSize();
+				lastSize = CSSPositionUtils.getSize(bc);
 			}
 		}
 

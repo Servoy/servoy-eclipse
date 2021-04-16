@@ -1440,7 +1440,9 @@ public class SolutionDeserializer
 					hasDocs = true;
 				}
 
-				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && !hasDocs)
+				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && resource.getParent() != null &&
+					resource.getParent().getParent() != null &&
+					resource.getParent().getParent().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && !hasDocs)
 				{
 
 					if (calculationTypeInferencer == null)
@@ -1579,7 +1581,7 @@ public class SolutionDeserializer
 	 */
 	private int getServoyType(String name)
 	{
-		if ("String".equals(name))
+		if ("String".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.TEXT;
 		}
@@ -1587,7 +1589,7 @@ public class SolutionDeserializer
 		{
 			return IColumnTypes.DATETIME;
 		}
-		else if ("Number".equals(name))
+		else if ("Number".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.NUMBER;
 		}
@@ -1658,7 +1660,7 @@ public class SolutionDeserializer
 				ServoyLog.logError("Could not parse UUID -- generating new uuid", e);
 				uuid = UUID.randomUUID();
 			}
-			existingNode = AbstractRepository.searchPersist(parent, uuid);
+			existingNode = AbstractRepository.searchPersist(parent, uuid, parent);
 
 			if (existingNode == null)
 			{

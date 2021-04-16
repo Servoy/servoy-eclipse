@@ -496,6 +496,7 @@ public class ColumnComposite extends Composite
 	private TableColumn allowNullColumn;
 	private TableColumn seqType;
 	private TableColumn delColumn;
+	private ColumnAllowNullEditingSupport colomnAllowNullEditingSupport;
 
 	private void createTableColumns(final ITable table)
 	{
@@ -533,7 +534,8 @@ public class ColumnComposite extends Composite
 		allowNullColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_ALLOW_NULL);
 		allowNullColumn.setText("Allow Null");
 		TableViewerColumn allowNullViewerColumn = new TableViewerColumn(tableViewer, allowNullColumn);
-		allowNullViewerColumn.setEditingSupport(new ColumnAllowNullEditingSupport(tableViewer));
+		colomnAllowNullEditingSupport = new ColumnAllowNullEditingSupport(tableViewer);
+		allowNullViewerColumn.setEditingSupport(colomnAllowNullEditingSupport);
 		allowNullColumn.setToolTipText("Modifying allow null after table is created in database may break existing tables at deployment.");
 
 		seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
@@ -649,7 +651,7 @@ public class ColumnComposite extends Composite
 				tname = tname.substring(0, tname.length() - 1);
 			}
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 5)) + "_uuid";
+			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 5));
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
@@ -657,10 +659,12 @@ public class ColumnComposite extends Composite
 				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
 				{
 					keyType = new DesignerPreferences().getPrimaryKeyUuidType();
+					colname += "_uuid";
 				}
 				else
 				{
 					keyType = PrimaryKeyType.INTEGER;
+					colname += "_id";
 				}
 				Column id = t.createNewColumn(nameValidator, colname, keyType.getColumnType(), keyType.getLength());
 				id.setDatabasePK(true);
@@ -755,6 +759,11 @@ public class ColumnComposite extends Composite
 		{
 			nameEditor.checkValidState();
 		}
+	}
+
+	public boolean shouldDropTable()
+	{
+		return colomnAllowNullEditingSupport.getAndResetDropTable();
 	}
 
 	public boolean isDataProviderIdDisplayed()

@@ -83,7 +83,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildren(Object parentElement)
 	{
-		if (displayType) return getChildrenGrouped(parentElement);
+		if (displayType && !form.isResponsiveLayout()) return getChildrenGrouped(parentElement);
 		else return getChildrenNonGrouped(parentElement);
 	}
 

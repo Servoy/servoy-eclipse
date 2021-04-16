@@ -144,6 +144,11 @@
 			"description": "Array of keywords used for component search",
 			"type": "array"
 		},
+		"dependencies": 
+		{
+			"description": "Dependencies for NG2",
+			"type": "object"
+		},
 		"icon": 
 		{
 			"description": "The icon that is displayed in the designer",
@@ -449,8 +454,21 @@
 										],
 										"additionalProperties": false
 									}
+								},
+								"private": {
+											"type": "boolean"
+								},
+								"ignoreNGBlockDuplicateEvents": {
+											"type": "boolean"
+								},
+								"doc": {
+											"type": "string"
+								},
+								"code": {
+											"type": "string"
 								}
-							}
+							},
+							"additionalProperties": false
 						}
 					]
 				}
@@ -759,7 +777,6 @@
 		[
 		"name",
 		"displayName",
-		"definition",
 		"version"
 	],
 	"additionalProperties": false

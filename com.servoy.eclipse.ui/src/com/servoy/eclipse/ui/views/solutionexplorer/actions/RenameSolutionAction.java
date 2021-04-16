@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -55,6 +56,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -115,8 +117,13 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			int res = nameDialog.open();
 			if (res == Window.OK)
 			{
+
+				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution();
 				// avoid NPE by closing all editors before deactivating the solution
-				EditorUtil.getActivePage().closeAllEditors(false);
+				if (flattenedSolution.getName() == editingSolution.getName())
+				{
+					EditorUtil.getActivePage().closeAllEditors(false);
+				}
 				final String name = nameDialog.getValue();
 				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
 				if (project == null)
@@ -212,19 +219,21 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 									catch (Exception e)
 									{
 										ServoyLog.logError(e);
-										MessageDialog.openError(viewer.getViewSite().getShell(), "Could not set active solution ", e.getMessage());
+										Display.getDefault().asyncExec(
+											() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Could not set active solution ", e.getMessage()));
 									}
 								}
 							}
 							catch (RepositoryException e)
 							{
 								ServoyLog.logError(e);
-								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage());
+								Display.getDefault().asyncExec(() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage()));
 							}
 							catch (CoreException e)
 							{
 								ServoyLog.logError(e);
-								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", "Could not move the project to new directory");
+								Display.getDefault().asyncExec(() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed",
+									"Could not move the project to new directory"));
 							}
 						}
 					});

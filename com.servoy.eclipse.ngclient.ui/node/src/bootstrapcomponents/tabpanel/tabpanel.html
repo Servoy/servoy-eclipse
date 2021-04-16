@@ -1,0 +1,20 @@
+<ul ngbNav #element #nav="ngbNav" class="nav-tabs bts-tabpanel" [(activeId)]="selectedTabID" (navChange)="onTabChange($event)"
+	[id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reservedGap: 50}">
+	<li *ngFor="let tab of tabs;let i = index" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !tab.containedForm"
+		[id]="tab._id">
+		<a ngbNavLink>
+			<div (click)="tabClicked(tab, i , $event)">
+				<img *ngIf="tab.imageMediaID" [src]='tab.imageMediaID' />
+				<span *ngIf="tab.iconStyleClass !== null" [class]="tab.iconStyleClass"></span>
+				<i *ngIf="tab.hideCloseIcon !== true && showTabCloseIcon" class="bts-tabpanel-close-icon"
+					[class]="closeIconStyleClass"></i>
+				<span [innerHTML]='tab?.text'></span>
+			</div>
+		</a>
+		<ng-template ngbNavContent>
+			<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
+			</ng-template>
+		</ng-template>
+	</li>
+</ul>
+<div [ngbNavOutlet]="nav" style="position: absolute;overflow: auto;top: 39px;bottom: 0px;left: 0px;right: 0px;"></div>

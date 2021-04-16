@@ -313,6 +313,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public boolean isExportNG2()
+		{
+			return configuration.isNG2Export();
+		}
+
+		@Override
 		public boolean isExportMetaData()
 		{
 			return configuration.shouldExportMetadata();
@@ -422,6 +428,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public boolean isAutomaticallyUpgradeRepository()
 		{
 			return configuration.automaticallyUpdateRepository();
+		}
+
+		@Override
+		public String getTomcatContextXMLFileName()
+		{
+			return configuration.getTomcatContextXMLFileName();
 		}
 
 		@Override

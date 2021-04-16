@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.servoy.j2db.ISolutionModelPersistIndex;
@@ -52,6 +53,7 @@ import com.servoy.j2db.util.Utils;
 public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
 	private final Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
+	private final ConcurrentMap<String, List<Form>> formCacheByNamedFoundset = new ConcurrentHashMap<>();
 	private final Map<UUID, List<IPersist>> duplicatesUUIDs = new HashMap<UUID, List<IPersist>>();
 	private final Map<String, Map<String, List<IPersist>>> duplicateNames = new HashMap<String, Map<String, List<IPersist>>>();
 	private final Map<Form, String> formToDataSource = new HashMap<>();
@@ -87,6 +89,18 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 					formCacheByDataSource.put(ds, set);
 				}
 				set.add(f);
+
+				String namedFoundset = f.getNamedFoundSet();
+				if (namedFoundset != null)
+				{
+					List<Form> list = formCacheByNamedFoundset.get(namedFoundset);
+					if (list == null)
+					{
+						list = new ArrayList<Form>();
+						formCacheByNamedFoundset.put(namedFoundset, list);
+					}
+					list.add(f);
+				}
 			}
 			return IPersistVisitor.CONTINUE_TRAVERSAL;
 		});
@@ -100,6 +114,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	{
 		super.destroy();
 		formCacheByDataSource.clear();
+		formCacheByNamedFoundset.clear();
 		formToDataSource.clear();
 		duplicatesUUIDs.clear();
 		duplicateNames.clear();
@@ -130,6 +145,17 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
 			}
 		}
+		for (String namedFoundset : formCacheByNamedFoundset.keySet())
+		{
+			if (formCacheByNamedFoundset.get(namedFoundset).remove(form))
+			{
+				break;
+			}
+		}
+		if (form.getNamedFoundSet() != null)
+		{
+			getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
+		}
 	}
 
 	Set<Form> getFormsByDatasource(String datasource, boolean includeNone)
@@ -157,6 +183,27 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		return datasourceSet;
 	}
 
+	public List<Form> getFormsByNamedFoundset(String namedFoundset)
+	{
+		List<Form> list = getFormsByNamedFoundsetImpl(namedFoundset, false);
+		if (list == null) return Collections.emptyList();
+		return Collections.unmodifiableList(list);
+	}
+
+	private List<Form> getFormsByNamedFoundsetImpl(String namedFoundset, boolean create)
+	{
+		if (namedFoundset != null)
+		{
+			List<Form> namedFoundsetSet = formCacheByNamedFoundset.get(namedFoundset);
+			if (namedFoundsetSet == null && create)
+			{
+				namedFoundsetSet = new ArrayList<Form>(6);
+				formCacheByNamedFoundset.put(namedFoundset, namedFoundsetSet);
+			}
+			return namedFoundsetSet;
+		}
+		return null;
+	}
 
 	/**
 	 * @param datasource
@@ -188,6 +235,10 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 			formToDataSource.put(form, ds);
 			getFormsByDatasource(ds, false).add(form);
+			if (form.getNamedFoundSet() != null)
+			{
+				getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
+			}
 		}
 	}
 
@@ -201,7 +252,11 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			getFormsByDatasource(null, false).remove(form);
 			formToDataSource.remove(form);
 			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
-
+			if (form.getNamedFoundSet() != null)
+			{
+				List<Form> lst = getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), false);
+				if (lst != null) lst.remove(form);
+			}
 			if (form.isFormComponent().booleanValue())
 			{
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();

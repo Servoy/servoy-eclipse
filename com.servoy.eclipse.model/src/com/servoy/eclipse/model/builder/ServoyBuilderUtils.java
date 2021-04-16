@@ -201,6 +201,20 @@ public class ServoyBuilderUtils
 			ServoyBuilder.checkPersistDuplicateUUID();
 			ServoyBuilder.checkDuplicateScopes(file);
 
+			try
+			{
+				file.deleteMarkers(ServoyBuilder.SCRIPT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+			Iterator<ScriptMethod> it = servoyModel.getFlattenedSolution().getScriptMethods(scopeName, false);
+			while (it.hasNext())
+			{
+				ScriptMethod scriptMethod = it.next();
+				addScriptMethodErrorMarkers(file, scriptMethod);
+			}
 			if (persists != null)
 			{
 				Set<UUID> methodsParsed = new HashSet<UUID>();
@@ -645,6 +659,29 @@ public class ServoyBuilderUtils
 							IMarker.PRIORITY_LOW, null, o);
 					}
 				}
+			}
+		}
+	}
+
+	public static void addScriptMethodErrorMarkers(IResource markerResource, ScriptMethod method)
+	{
+		if (ScriptingUtils.isMissingReturnDocs(method))
+		{
+			ServoyMarker mk = MarkerMessages.MethodNoReturn.fill(method.getName());
+			IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), method.getLineNumberOffset(),
+				ServoyBuilder.METHOD_NO_RETURN,
+				IMarker.PRIORITY_NORMAL, null, method);
+			try
+			{
+				if (marker != null)
+				{
+					marker.setAttribute("Uuid", method.getUUID().toString());
+					marker.setAttribute("SolutionName", method.getRootObject().getName());
+				}
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
 			}
 		}
 	}

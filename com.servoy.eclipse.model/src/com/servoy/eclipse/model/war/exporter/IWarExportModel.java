@@ -78,6 +78,8 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	boolean isAutomaticallyUpgradeRepository();
 
+	String getTomcatContextXMLFileName();
+
 	boolean isCreateTomcatContextXML();
 
 	boolean isAntiResourceLocking();
@@ -134,4 +136,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public void setSkipDatabaseViewsUpdate(boolean skip);
 
 	public Set<String> getExportedPackages();
+
+	public boolean isExportNG2();
 }

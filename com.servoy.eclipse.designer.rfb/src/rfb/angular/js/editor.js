@@ -47,7 +47,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval,$allowedChildren,$document,$websocketConstants) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren,$document) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -82,6 +82,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
+			var formComponent = $webSocket.getURLParameter("fc");
 			var editorContentRootScope = null;
 			var servoyInternal = null;
 			var fieldLocation = null;
@@ -263,6 +264,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			function getRealContainerElement(uuid) {
 				var parent = $scope.ghostContainerElements[uuid];
 
+				if (!$scope.testElementTimeouts) $scope.testElementTimeouts = {};
 				if (parent == undefined) {
 					var defer = $q.defer();
 					function testElement() {
@@ -271,15 +273,28 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							parent = p[0];
 							$scope.ghostContainerElements[uuid] = parent;
 							defer.resolve(parent);
-						} else {
-							$timeout(testElement, 400);
-						}
+							delete $scope.testElementTimeouts[uuid];
+						} else if (isGhostContainer(uuid)) {
+								$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
+							}
 					}
-					$timeout(testElement, 400);
+					if ($scope.testElementTimeouts[uuid] == undefined) {
+						$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
+					}
 					$scope.ghostContainerElements[uuid] = defer.promise;
 					return defer.promise;
 				}
 				return parent;
+			}
+			
+			function isGhostContainer(uuid) {
+				if ($scope.ghosts.ghostContainers) {
+						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+							if 	($scope.ghosts.ghostContainers[i].uuid === uuid)
+							 return true;						
+						}
+					}
+				return false;
 			}
 
 			var realContainerPromise = {};
@@ -436,7 +451,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getBeanModel = function(node) {
-				if (node) {
+				if (node && editorContentRootScope.getDesignFormControllerScope) {
 					var name = node.getAttribute("svy-id");
 					if (name) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
 				}
@@ -444,7 +459,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getBeanModelOrGhost = function(node) {
-				if (node) {
+				if (node && editorContentRootScope.getDesignFormControllerScope) {
 					var name = node.getAttribute("name");
 					if (name)
 						return editorContentRootScope.getDesignFormControllerScope().model(node.getAttribute("svy-id"), true);
@@ -719,6 +734,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return hideDefault == "true";
 			}
 			
+			$scope.isFormComponent = function() {
+				return formComponent === "true";
+			}
+			
 			$scope.refreshEditorContent = function() {
 				if (editorContentRootScope) {
 					// TODO this digest makes it slow when moving, do we really need this?
@@ -892,8 +911,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.setGhosts = function(ghosts) {
 				if (!equalGhosts($scope.ghosts, ghosts)) {
+					flushGhostContainers();
 					$scope.ghosts = ghosts;
-					$scope.ghostContainerElements = {}
 	
 					if ($scope.ghosts.ghostContainers) {
 						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
@@ -1173,7 +1192,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			});
 
 			$element.on('flushGhostContainerElements.content', function(event) {
-				$scope.ghostContainerElements = {};
+				flushGhostContainers();
 			});
 
 			$element.on('renderDecorators.content', function(event) {
@@ -1246,11 +1265,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
 				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&clientnr=" + $webSocket.getURLParameter(
 						"c_clientnr") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
-					 "&" + $websocketConstants.CLEAR_SESSION_PARAM + "=true" + replacews + containerID;
+					 replacews + containerID;
 			})
 			
 			function areAllGhostContainersVisible() {
-				if ($scope.ghosts.ghostContainers) {
+				if ($scope.ghosts && $scope.ghosts.ghostContainers) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 						if (!$scope.ghosts.ghostContainers[i].style || $scope.ghosts.ghostContainers[i].style.display !== "block") {
 							return false;
@@ -1269,7 +1288,20 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					windowWidth =  $($window).width();
 					$element.trigger('renderDecorators.content');
 				}
-			});			
+			});		
+			
+			function flushGhostContainers() {
+				$scope.ghostContainerElements = {};
+				if ($scope.testElementTimeouts) {
+					var timeouts = $scope.testElementTimeouts;
+					$scope.testElementTimeouts = {};
+					for (var uuid in timeouts) {
+						if (timeouts.hasOwnProperty(uuid) && timeouts[uuid] !== undefined){
+						 clearTimeout(timeouts[uuid]);
+						}
+					}
+				}
+			}	
 			
 		},
 		templateUrl: 'templates/editor.html',
@@ -1395,6 +1427,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				ctrl: event.ctrlKey,
 				shift: event.shiftKey,
 				alt: event.altKey,
+				meta: event.metaKey,
 				keyCode: event.keyCode
 			}, true)
 		},
@@ -1573,6 +1606,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				if (changed) editorScope.setSelection(selection);
 			}
 			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
+		},
+		
+		setDirty: function(isDirty){
+			editorScope.isDirty = isDirty;
 		},
 		
 		refreshPalette: function()

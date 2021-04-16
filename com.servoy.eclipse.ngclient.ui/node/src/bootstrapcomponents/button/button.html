@@ -1,0 +1,22 @@
+<button
+    #element 
+    class="bts-button" 
+    *ngIf="showAs !== 'html' && showAs !== 'trusted_html'"
+    [sabloTabseq]="tabSeq"
+    [id]="servoyApi.getMarkupId()"
+    [svyTooltip]="toolTipText">
+    <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    {{text}}
+</button> 
+
+<button 
+	#element
+    class="bts-button" 
+    *ngIf="(showAs === 'html' || showAs === 'trusted_html')"
+    [sabloTabseq]="tabSeq"
+    [id]="servoyApi.getMarkupId()"
+    [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
+    [svyTooltip]="toolTipText">
+    <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    {{text}}
+</button>

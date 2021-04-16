@@ -1,0 +1,313 @@
+.svy-main-window-container > svy-form > .svy-respform
+{
+	height: 100%;
+}
+.svy-wrapper > * > div > div > div > svy-form > .svy-respform
+{
+	height: 100%;
+}
+.svy-wrapper > * > div > div > div > div > svy-form > .svy-respform
+{
+	height: 100%;
+}  
+@media (min-width: 992px){
+	.collapsible-container {
+	 display: block !important;
+	 visibility:visible;
+	 height: auto !important;
+	 padding-bottom: 0;
+	 overflow: visible !important;
+	}
+}
+
+.collapsible-toggle {
+	  padding: 5px 7px;
+	  margin-top: 15px;
+}
+
+@media (min-width: 992px){
+	.collapsible-toggle {
+	  display: none;
+	}
+}
+
+.collapse.width {
+    height: auto;
+}
+
+.no-transition {
+    -webkit-transition: none;
+    transition: none;
+}
+
+.absolutetopright {
+	position: absolute;
+	right: 15px;
+	z-index: 10;
+}
+
+/* Simple Collapsible */
+.simple-collapsible-toggle {
+	margin-top: 15px;
+}
+
+.simple-collapsible-icon {
+	padding: 5px 7px;
+}
+
+/* Simple Collapsible Icon */
+.simple-collapsible-toggle:hover {
+	cursor: pointer;
+}
+
+.simple-collapsible-toggle > .simple-collapsible-icon {
+	font-family: "Glyphicons Halflings";
+	display: inline-block;
+}
+
+.simple-collapsible-toggle > .simple-collapsible-icon:before {
+	content: "\e113"; /* GlyphIcon chevron down */
+}
+
+.simple-collapsible-toggle.collapsed > .simple-collapsible-icon:before {
+	content: "\e114"; /* GlyphIcon chevron up */
+}
+
+/* FIXME it breaks vertically if width exceeds available width !!! */
+/* This parent can be any width and height */
+.center-container {
+  height: 100%;
+  text-align: center;
+  display: inline-block; /* prevent the ghost to go to the next line when width doesn't fit */
+  min-width: 100%;
+}
+ 
+/* The ghost, nudged to maintain perfect centering */
+.center-container:after {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-left: -0.25em; /* Adjusts for spacing */
+}
+
+/* The element to be centered, can be of any width and height */ 
+.center-container > .center-container-content {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: initial; /* Reset text align to initial */
+}
+
+/* Inline Group Container */
+.inline-group-left {
+	float: left;
+	margin-right: 15px;
+}
+ 
+.inline-group-right {
+	float: right;
+	margin-left: 15px;
+}
+ 
+.inline-group-content {
+	overflow-x: hidden;
+}
+ 
+ /* Inling Group Sizes */
+.inline-group[data-leftsize="xs"] > .inline-group-left,
+.inline-group[data-rightsize="xs"] > .inline-group-right {
+ 	width: 40px;
+}
+ 
+.inline-group[data-leftsize="sm"] > .inline-group-left,
+.inline-group[data-rightsize="sm"] > .inline-group-right {
+ 	width: 80px;
+}
+ 
+.inline-group[data-leftsize="md"] > .inline-group-left,
+.inline-group[data-rightsize="md"] > .inline-group-right {
+ 	width: 120px;
+}
+ 
+.inline-group[data-leftsize="lg"] > .inline-group-left,
+.inline-group[data-rightsize="lg"] > .inline-group-right {
+ 	width: 160px;
+}
+
+@media (max-width: 768px) {
+	.inline-group[data-responsive="col-sm"] > .inline-group-left {
+		float: none;
+		width: auto;
+	}
+}
+
+@media (max-width: 992px) {
+	.inline-group[data-responsive="col-md"] > .inline-group-left {
+		float: none;
+		width: auto;
+	}
+}
+
+@media (max-width: 1200px) {
+	.inline-group[data-responsive="col-lg"] > .inline-group-left {
+		float: none;
+		width: auto;
+	}
+}
+
+
+.csspositioncontainer
+{
+ 	position: relative;
+ 	overflow: auto;
+}
+ 
+
+/* Flex Layout */
+.flexlayout {
+	display: flex;
+	flex-flow: column;
+	height: 100%;
+}
+
+.flex-header {}
+
+.flex-content {
+	flex: 2;
+	overflow: auto;
+}
+
+.flex-footer {}
+
+/* reset container margin */
+.container > .flexlayout {
+	margin-right: -15px;
+	margin-left: -15px;
+}
+
+
+/***********************************************************************************************************************
+*
+* Flex CSS Layout
+*
+***********************************************************************************************************************/
+
+/* Flex Layout System */
+.flex {
+	display: flex;
+}
+
+.flex[data-direction="column"] {
+	flex-direction: column;
+}
+
+.flex[data-direction="row"] {
+	flex-direction: row;
+}
+
+/* Flex Justify Items */
+.flex[data-justify-content="center"] {
+	justify-content: center;
+}
+
+.flex[data-justify-content="space-evenly"] {
+	justify-content: space-evenly;
+}
+
+.flex[data-justify-content="space-around"] {
+	justify-content: space-around;
+}
+
+.flex[data-justify-content="space-between"] {
+	justify-content: space-between;
+}
+
+.flex[data-justify-content="flex-start"] {
+	justify-content: flex-start;
+}
+
+.flex[data-justify-content="flex-end"] {
+	justify-content: flex-end;
+}
+
+/* Flex Align Items (applied to the container)*/
+.flex[data-align-items="center"] {
+	align-items: center;
+}
+
+.flex[data-align-items="stretch"] {
+	align-items: stretch;
+}
+
+.flex[data-align-items="baseline"] {
+	align-items: baseline;
+}
+
+.flex[data-align-items="flex-start"] {
+	align-items: flex-start;
+}
+
+.flex[data-align-items="flex-end"] {
+	align-items: flex-end;
+}
+
+/* Flex Align Self Items (applied to the items) */
+.flex > [data-align-self="center"] {
+	align-self: center;
+}
+
+.flex > [data-align-self="stretch"] {
+	align-self: stretch;
+}
+
+.flex > [data-align-self="baseline"] {
+	align-self: baseline;
+}
+
+.flex > [data-align-self="flex-start"] {
+	align-self: flex-start;
+}
+
+.flex > [data-align-self="flex-end"] {
+	align-self: flex-end;
+}
+
+.flex > [data-grow="1"]  {
+	flex-grow: 1;
+}
+
+.flex > [data-shrink="1"]  {
+	flex-shrink: 1;
+}
+
+.flex > [data-grow="2"]  {
+	flex-grow: 2;
+}
+
+.flex > [data-shrink="2"]  {
+	flex-shrink: 2;
+}
+
+.flex > [data-grow="3"]  {
+	flex-grow: 3;
+}
+
+.flex > [data-shrink="3"]  {
+	flex-shrink: 3;
+}
+
+.flex > [data-grow="4"]  {
+	flex-grow: 4;
+}
+
+.flex > [data-shrink="4"]  {
+	flex-shrink: 4;
+}
+
+.flex > [data-grow="5"]  {
+	flex-grow: 5;
+}
+
+.flex > [data-shrink="5"]  {
+	flex-shrink: 5;
+}

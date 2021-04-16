@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="nodejs" name="nodejs" schema="schema/nodejs.exsd"/>
+   <extension
+         point="com.servoy.eclipse.core.activesolutionlistener">
+      <listener
+            class="com.servoy.eclipse.ngclient.ui.ActiveProjectListener"
+            id="com.servoy.eclipse.ngclient.ui.listener">
+      </listener>
+   </extension>
+   <extension
+         point="org.apache.tomcat.serviceprovider">
+      <serviceprovider
+            class="com.servoy.eclipse.ngclient.ui.ServicesProvider"
+            id="com.servoy.eclipse.ngclient.ui.serviceprovider">
+      </serviceprovider>
+   </extension>
+
+</plugin>

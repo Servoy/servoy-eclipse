@@ -1,0 +1,334 @@
+<nav #element
+    [id]="servoyApi.getMarkupId()" 
+    class="navbar navbar-expand-lg bts-extra-navbar {{inverse ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}} {{fixed ? 'fixed-' + fixed : ''}} {{styleClass}}">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+         <a [tabindex]="brandLogoTabindex" *ngIf="brandLogo != null" (click)="clickBrand($event)" class="navbar-brand {{onBrandClicked ? 'clickable' : ''}}" style="padding-top: 0px;padding-bottom:0px;padding-right:5px">
+            <img [ngClass]="brandLogoStyleClass" alt="Logo" [src]="brandLogo">
+         </a>
+         <a [tabindex]="brandTextTabindex" *ngIf="brandText" (click)="clickBrand($event)" [innerHTML]="brandText | htmlFilter | trustAsHtml:isTrustedHTML()" class="navbar-brand" ></a>
+         <button *ngIf="collapsing" (click)="toggleCollapse()" class="navbar-toggler" type="button" data-toggle="collapse" [attr.data-target]="'#'+ servoyApi.getMarkupId() + '-navbar-collapse'" [attr.aria-controls]="servoyApi.getMarkupId()+'-navbar-collapse'" aria-expanded="false">
+             <span class="navbar-toggler-icon"></span>
+         </button>
+  
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="{{servoyApi.getMarkupId()}}-navbar-collapse" (click)="navBarClicked($event)">
+            <ul class="nav navbar-nav">
+                <ng-container *ngFor="let menuItem of menuItems;let $index = index" >
+                <li  *ngIf="menuItem.position == 'LEFT'" class="nav-item {{menuItem.subMenuItems ? 'dropdown' : ''}} {{menuItem.isActive ? 'active' : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}">
+                    
+                    <div *ngIf="menuItem.displayType == 'BUTTON'" class="svy-navbar-button">
+                        <a [tabindex]="menuItem.tabindex" [svyAttributes]="menuItem.attributes" [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.text}}
+                        </a>
+                    </div><!-- /.svy-navbar-button -->
+
+                    <div *ngIf="menuItem.displayType == 'TEXT'" class="svy-navbar-text">
+                        <p class="nav navbar-text" [svyTooltip]="menuItem.tooltip">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span>
+                            <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                        </p>
+                    </div><!-- /.svy-navbar-text -->
+
+                    <a *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems == null" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-img" [svyTooltip]="menuItem.tooltip">
+                        <img class="svy-navbar-item-img {{menuItem.styleClass ? menuItem.styleClass : ''}}" [src]="menuItem.dataProvider.url ? menuItem.dataProvider.url : null"/>
+                    </a><!-- /.svy-navbar-img -->
+
+                    <a *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" (click)="openMenu($event)" [svyAttributes]='menuItem.attributes' class="svy-navbar-img svy-navbar-dropdown dropdown-toggle {{menuItem.enabled == false ? 'disabled' : ''}}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" [svyTooltip]="menuItem.tooltip">
+                        <img class="svy-navbar-item-img {{menuItem.styleClass ? menuItem.styleClass : ''}}" [src]="menuItem.dataProvider.url ? menuItem.dataProvider.url : null"/>
+                        <span class="caret" ></span>
+                    </a>
+                    <div *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" class="dropdown-menu">
+                        <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                                <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
+                            </a>
+                            <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
+                        </ng-container>   
+                    </div><!-- /.svy-navbar-dropdown -->
+                    
+                    <div *ngIf="menuItem.displayType == 'INPUT' && !menuItem.valuelist" class="svy-navbar-input form-inline">
+                        <div class="form-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider" 
+                                (blur)="onInputChange(menuItem,$index)" 
+                                (keyup)="applyClickOnEnter($event)" 
+                                [svyTooltip]="menuItem.tooltip" 
+                                [svyAttributes]='menuItem.attributes'
+                                [attr.data-menu-item-id]="menuItem.itemId" 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false" 
+                                />
+                        </div>
+                        <button [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName || menuItem.inputButtonText" [svyAttributes]='menuItem.attributes' class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [attr.data-menu-item-id]="menuItem.itemId">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                        </button>
+                    </div><!-- /.svy-navbar-input -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT_GROUP' && !menuItem.valuelist" class="svy-navbar-inputgroup form-inline">
+                        <div class="input-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider" 
+                                 (blur)="onInputChange(menuItem, $index)" 
+                                (keyup)="applyClickOnEnter($event)" 
+                                [svyTooltip]="menuItem.tooltip"  
+                                [attr.data-menu-item-id]="menuItem.itemId"
+                                [svyAttributes]='menuItem.attributes' 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                                />
+                            <span *ngIf="menuItem.iconName || menuItem.inputButtonText" class="input-group-btn" [attr.data-menu-item-id]="menuItem.itemId">
+                                <button class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" type="button">
+                                    <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                                </button>
+                            </span>
+                        </div>
+                    </div><!-- /.svy-navbar-inputgroup -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT' && menuItem.valuelist" class="svy-navbar-typeahead form-inline">
+                        <div class="form-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control bts-typeahead {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider"
+                                [ngbTypeahead]="getFilterValues($index)"
+                                [container]="'body'"
+                                [resultFormatter]="resultFormatter"
+                                [inputFormatter]="inputFormatter"
+                                (change)="doSvyApply($event, $index)"
+                                (selectItem)="valueChanged($event.item, $index)" 
+                                (keyup)="applyBlurOnEnter($event)"
+                                (focus)="onFocus($index)"
+                                [svyTooltip]="menuItem.tooltip" 
+                                [attr.data-menu-item-id]="menuItem.itemId" 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                                [svyAttributes]='menuItem.attributes'
+                                #instance="ngbTypeahead" 
+                                />
+                        </div>
+                        <button tabindex="{{menuItem.tabindex}}" svy-attributes='menuItem.attributes' *ngIf="menuItem.iconName || menuItem.inputButtonText" ng-click="doBlur($event)" class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [attr.data-menu-item-id]="menuItem.itemId">
+                            <span tabindex="{{menuItem.tabindex}}" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                        </button>
+                    </div><!-- /.svy-navbar-typeahead -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT_GROUP' && menuItem.valuelist" class="svy-navbar-typeahead-inputgroup form-inline">
+                        <div class="input-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control bts-typeahead {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider"
+                                [ngbTypeahead]="getFilterValues($index)"
+                                [container]="'body'"
+                                [resultFormatter]="resultFormatter"
+                                [inputFormatter]="inputFormatter"
+                                (change)="doSvyApply($event, $index)"
+                                (selectItem)="valueChanged($event.item, $index)" 
+                                (keyup)="applyBlurOnEnter($event)"
+                                (focus)="onFocus($index)"
+                                [svyTooltip]="menuItem.tooltip" 
+                                [attr.data-menu-item-id]="menuItem.itemId" 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                                [svyAttributes]='menuItem.attributes'
+                                #instance="ngbTypeahead"
+                                />
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName || menuItem.inputButtonText" class="input-group-btn" [attr.data-menu-item-id]="menuItem.itemId">
+                                <button [tabindex]="menuItem.tabindex" class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" type="button" (click)="doBlur($event)" [attr.data-menu-item-id]="menuItem.itemId">
+                                    <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                                </button>
+                            </span>
+                        </div>
+                    </div><!-- /.svy-navbar-typeahead-inputgroup -->
+
+                    <a tabindex="{{menuItem.tabindex}}" *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems == null" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-item nav-link {{menuItem.styleClass}}" [svyTooltip]="menuItem.tooltip">
+                        <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span>
+                        <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                    </a><!-- /.svy-navbar-item -->
+
+                    <a *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" (click)="openMenu($event)" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-dropdown dropdown-toggle nav-link {{menuItem.styleClass ? menuItem.styleClass : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" [svyTooltip]="menuItem.tooltip">
+                        <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" class="{{menuItem.iconName}}"></span> 
+                        <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                        <span class="caret" ></span>
+                    </a>
+                    <div *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" class="dropdown-menu">
+                         <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                                <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
+                            </a>
+                            <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
+                         </ng-container>   
+                    </div><!-- /.svy-navbar-dropdown -->
+
+                </li>
+                </ng-container>
+            </ul><!-- /.navbar-nav -->
+            <ul class="nav navbar-nav ml-auto">
+                 <ng-container *ngFor="let menuItem of menuItems;let $index = index" >
+                <li *ngIf="menuItem.position == 'RIGHT'" class="svy-navbar-button nav-item {{menuItem.subMenuItems ? 'dropdown' : ''}} {{menuItem.isActive ? 'active' : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}">
+                    
+                   <div *ngIf="menuItem.displayType == 'BUTTON'" class="svy-navbar-button">
+                        <a [tabindex]="menuItem.tabindex" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="btn navbar-btn {{menuItem.styleClass ? menuItem.styleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [svyTooltip]="menuItem.tooltip">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.text}}
+                        </a>
+                    </div><!-- /.svy-navbar-button -->
+
+                    <div *ngIf="menuItem.displayType == 'TEXT'" class="svy-navbar-text">
+                        <p class="nav navbar-text" [svyTooltip]="menuItem.tooltip">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span>
+                            <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                        </p>
+                    </div><!-- /.svy-navbar-text -->
+
+                    <a *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems == null" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-img" [svyTooltip]="menuItem.tooltip">
+                        <img class="svy-navbar-item-img {{menuItem.styleClass ? menuItem.styleClass : ''}}" [src]="menuItem.dataProvider.url ? menuItem.dataProvider.url : null"/>
+                    </a><!-- /.svy-navbar-img -->
+
+                    <a *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" (click)="openMenu($event)" [svyAttributes]='menuItem.attributes' class="svy-navbar-img svy-navbar-dropdown dropdown-toggle {{menuItem.enabled == false ? 'disabled' : ''}}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" [svyTooltip]="menuItem.tooltip">
+                        <img class="svy-navbar-item-img {{menuItem.styleClass ? menuItem.styleClass : ''}}" [src]="menuItem.dataProvider.url ? menuItem.dataProvider.url : null"/>
+                        <span class="caret" ></span>
+                    </a>
+                   <div *ngIf="menuItem.displayType == 'IMAGE' && menuItem.subMenuItems != null" class="dropdown-menu">
+                        <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                                <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
+                            </a>
+                            <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
+                        </ng-container>   
+                    </div><!-- /.svy-navbar-dropdown -->
+                    
+                    <div *ngIf="menuItem.displayType == 'INPUT' && !menuItem.valuelist" class="svy-navbar-input form-inline">
+                        <div class="form-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider" 
+                                (blur)="onInputChange(menuItem, $index)" 
+                                (keyup)="applyClickOnEnter($event)"  
+                                [svyTooltip]="menuItem.tooltip" 
+                                [svyAttributes]='menuItem.attributes'
+                                [attr.data-menu-item-id]="menuItem.itemId" 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                            />
+                        </div>
+                        <button [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName || menuItem.inputButtonText" [svyAttributes]='menuItem.attributes' class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [attr.data-menu-item-id]="menuItem.itemId">
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                        </button>
+                    </div><!-- /.svy-navbar-input -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT_GROUP' && !menuItem.valuelist" class="svy-navbar-inputgroup form-inline">
+                        <div class="input-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider" 
+                                 (blur)="onInputChange(menuItem,$index)" 
+                                (keyup)="applyClickOnEnter($event)" 
+                                [svyTooltip]="menuItem.tooltip"  
+                                [attr.data-menu-item-id]="menuItem.itemId"
+                                [svyAttributes]='menuItem.attributes' 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                             />
+                            <span *ngIf="menuItem.iconName || menuItem.inputButtonText" class="input-group-btn" [attr.data-menu-item-id]="menuItem.itemId">
+                                <button class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" type="button">
+                                    <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                                </button>
+                            </span>
+                        </div>
+                    </div><!-- /.svy-navbar-inputgroup -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT' && menuItem.valuelist" class="svy-navbar-typeahead form-inline">
+                        <div class="form-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control bts-typeahead {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider"
+                                [ngbTypeahead]="getFilterValues($index)"
+                                [container]="'body'"
+                                [resultFormatter]="resultFormatter"
+                                [inputFormatter]="inputFormatter"
+                                (change)="doSvyApply($event, $index)"
+                                (selectItem)="valueChanged($event.item, $index)" 
+                                (keyup)="applyBlurOnEnter($event)" 
+                                (focus)="onFocus($index)"
+                                [svyTooltip]="menuItem.tooltip" 
+                                [attr.data-menu-item-id]="menuItem.itemId" 
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                                [svyAttributes]='menuItem.attributes'
+                                #instance="ngbTypeahead"
+                            />
+                        </div>
+                        <button tabindex="{{menuItem.tabindex}}" svy-attributes='menuItem.attributes' *ngIf="menuItem.iconName || menuItem.inputButtonText" ng-click="doBlur($event)" class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" [attr.data-menu-item-id]="menuItem.itemId">
+                            <span tabindex="{{menuItem.tabindex}}" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                        </button>
+                    </div><!-- /.svy-navbar-typeahead -->
+
+                    <div *ngIf="menuItem.displayType == 'INPUT_GROUP' && menuItem.valuelist" class="svy-navbar-typeahead-inputgroup form-inline">
+                        <div class="input-group">
+                            <input 
+                                [tabindex]="menuItem.tabindex"
+                                type="text" 
+                                class="form-control bts-typeahead {{menuItem.styleClass ? menuItem.styleClass : ''}}" 
+                                [(ngModel)]="menuItem.dataProvider"
+                                [ngbTypeahead]="getFilterValues($index)"
+                                [container]="'body'"
+                                [resultFormatter]="resultFormatter"
+                                [inputFormatter]="inputFormatter"
+                                (change)="doSvyApply($event, $index)"
+                                (selectItem)="valueChanged($event.item, $index)" 
+                                (keyup)="applyBlurOnEnter($event)"
+                                (focus)="onFocus($index)"
+                                [svyTooltip]="menuItem.tooltip" 
+                                [attr.data-menu-item-id]="menuItem.itemId"
+                                [placeholder]="menuItem.text" 
+                                [disabled]="menuItem.enabled == false ? true : false"
+                                [svyAttributes]='menuItem.attributes'
+                                #instance="ngbTypeahead"
+                                />
+                            <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName || menuItem.inputButtonText" class="input-group-btn" [attr.data-menu-item-id]="menuItem.itemId">
+                                <button [tabindex]="menuItem.tabindex" class="btn {{menuItem.inputButtonStyleClass ? menuItem.inputButtonStyleClass : 'btn-default'}} {{menuItem.enabled == false ? 'disabled' : ''}}" type="button" (click)="doBlur($event)" [attr.data-menu-item-id]="menuItem.itemId">
+                                    <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span> {{menuItem.inputButtonText}}
+                                </button>
+                            </span>
+                        </div>
+                    </div><!-- /.svy-navbar-typeahead-inputgroup -->
+
+                    <a tabindex="{{menuItem.tabindex}}" *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems == null" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-item nav-link {{menuItem.styleClass}}" [svyTooltip]="menuItem.tooltip">
+                        <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" [attr.data-menu-item-id]="menuItem.itemId" class="{{menuItem.iconName}}"></span>
+                        <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                    </a><!-- /.svy-navbar-item -->
+
+                    <a *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" (click)="openMenu($event)" [svyAttributes]='menuItem.attributes' [attr.data-menu-item-id]="menuItem.itemId" class="svy-navbar-dropdown dropdown-toggle nav-link {{menuItem.styleClass ? menuItem.styleClass : ''}} {{menuItem.enabled == false ? 'disabled' : ''}}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" [svyTooltip]="menuItem.tooltip">
+                        <span [tabindex]="menuItem.tabindex" *ngIf="menuItem.iconName" class="{{menuItem.iconName}}"></span> 
+                        <span class="svy-navbar-item-text">{{menuItem.text}}</span>
+                        <span class="caret"></span>
+                    </a>
+                    <div *ngIf="menuItem.displayType == 'MENU_ITEM' && menuItem.subMenuItems != null" class="dropdown-menu">
+                        <ng-container *ngFor="let subMenuItem of menuItem.subMenuItems" >
+                            <a *ngIf="subMenuItem.isDivider != true" (mousedown)="navBarClicked($event)" class="dropdown-item {{subMenuItem.styleClass ? subMenuItem.styleClass : ''}} {{subMenuItem.enabled == false ? 'disabled' : ''}}" tabindex="{{menuItem.tabindex}}" [attr.data-menu-item-id]="subMenuItem.itemId">
+                                <span [tabindex]="menuItem.tabindex" *ngIf="subMenuItem.iconName"[attr.data-menu-item-id]="subMenuItem.itemId" class="{{subMenuItem.iconName}}"></span> {{subMenuItem.text}}
+                            </a>
+                            <div *ngIf="subMenuItem.isDivider == true" class="dropdown-divider"></div>
+                        </ng-container>   
+                    </div><!-- /.svy-navbar-dropdown -->
+
+                </li>
+                </ng-container>
+            </ul><!-- /.navbar-nav navbar-right -->
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>

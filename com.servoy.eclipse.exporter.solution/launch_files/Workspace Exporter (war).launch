@@ -353,6 +353,7 @@
         <setEntry value="org.w3c.dom.smil@default:default"/>
         <setEntry value="org.w3c.dom.svg@default:default"/>
         <setEntry value="org.yaml.snakeyaml@default:default"/>
+        <setEntry value="com.google.common@default:default"/>
         <setEntry value="sj.jsonschemavalidation@default:default"/>
         <setEntry value="slf4j.api@default:true"/>
     </setAttribute>

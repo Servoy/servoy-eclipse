@@ -37,9 +37,11 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IContentSpecConstants;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportAttributes;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -168,6 +170,24 @@ public class PDPropertySource extends PersistPropertySource
 														result = null;
 													}
 													return result;
+												}
+
+												@Override
+												public Object resetComplexPropertyValue(Object id)
+												{
+													if (p instanceof WebFormComponentChildType)
+													{
+														IFormElement el = ((WebFormComponentChildType)p).getElement();
+														if (el instanceof BaseComponent)
+														{
+															Map<String, String> attributes = ((BaseComponent)el).getAttributes();
+															if (attributes != null && attributes.containsKey(id))
+															{
+																return attributes.get(id);
+															}
+														}
+													}
+													return super.resetComplexPropertyValue(id);
 												}
 											};
 										}

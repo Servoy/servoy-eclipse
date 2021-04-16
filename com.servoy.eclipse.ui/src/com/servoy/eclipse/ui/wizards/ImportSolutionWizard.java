@@ -25,11 +25,13 @@ import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.wicket.util.string.Strings;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -250,7 +252,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	 */
 	public void doImport(final File file, final String resourcesProjectName, final ServoyResourcesProject existingProject, final boolean isCleanImport,
 		final boolean doDisplayDataModelChanges, final boolean doActivateSolution, String projectLocation, IRunnableContext context, IProgressMonitor mon,
-		final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen)
+		final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen, final Set<IProject> projectsToDeleteAfterImport)
 	{
 		IRunnableWithProgress runnable = new IRunnableWithProgress()
 		{
@@ -381,7 +383,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							DatabaseUtils.getPostgresServerUrl(sc, name),
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass());
+							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
+							sc.getQuoteList());
 						if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
 						{
 							// something is wrong
@@ -432,7 +435,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
 						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
 						doActivateSolution,
-						isCleanImport, projectLocation, reportImportFail, forceActivateResourcesProject, keepResourcesProjectOpen);
+						isCleanImport, projectLocation, reportImportFail, forceActivateResourcesProject, keepResourcesProjectOpen, projectsToDeleteAfterImport);
 					if (rootObjects != null)
 					{
 						title = "Solution imported";
@@ -914,7 +917,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 		final boolean doActivateSolution = page.getActivateSolution();
 		doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
-			page.projectLocationComposite.getProjectLocation(), getContainer(), null, false, false);
+			page.projectLocationComposite.getProjectLocation(), getContainer(), null, false, false, null);
 
 		return true;
 	}

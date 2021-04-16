@@ -1,0 +1,58 @@
+@import "navbar/svy-navbar.css";
+@import "switch/bootstrap-switch.css";
+
+.breadcrumb > li > a:hover {
+    cursor: pointer;
+}
+
+.svy-wrapper > * > .bts-extra-breadcrumbs {
+    width: 100%;
+    
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.bts-extra-navbar .dropdown-item{
+    cursor: pointer;
+}
+
+.bts-extra-badge { 
+    display: inline-block;
+}
+
+.bts-extra-badge > * >  .badge-pill {
+    font-size: 86%;
+    padding: 3px 7px;
+    margin-left: 5px;
+}
+
+.svy-wrapper > * > .bts-extra-badge {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    white-space: nowrap;
+    display: block;
+    
+}
+
+.svy-wrapper > * > .bts-extra-badge .btn {
+    float: initial;
+    display: inline-block;
+    height: 100%;
+    line-height: normal;
+    padding-top: initial;
+    padding-bottom: initial;
+}
+
+.svy-wrapper > * > .bts-extra-progressbar {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.bts-extra-progressbar {
+    height: 20px;
+}
+
+.bts-extra-progressbar > .progress-bar {
+    line-height: 20px;
+}

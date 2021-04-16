@@ -527,6 +527,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					}
 				}
 
+				result.sort(NameComparator.INSTANCE);
 				return result.toArray();
 			}
 			return new Object[0];

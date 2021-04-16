@@ -179,6 +179,7 @@ import com.servoy.j2db.persistence.ITableListener.TableListener;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -190,8 +191,10 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -808,10 +811,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			@Override
 			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 			{
+				List<String> datasources = new ArrayList<String>();
 				for (ITable table : tables)
 				{
 					table.removeIColumnListener(columnListener);
 					flushDataProvidersForTable(table);
+					datasources.add(table.getDataSource());
 				}
 				String[] tableNames = new String[tables.length];
 				for (int i = 0; i < tables.length; i++)
@@ -819,11 +824,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					tableNames[i] = tables[i].getName();
 				}
 				clearCachedTables();
+				flushRelations(datasources);
 			}
 
 			@Override
 			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
+				List<String> datasources = new ArrayList<String>();
 				clearCachedTables();
 				try
 				{
@@ -833,12 +840,14 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							(server.getTable(tableName)).addIColumnListener(columnListener);
 						}
+						datasources.add(DataSourceUtils.createDBTableDataSource(server.getName(), tableName));
 					}
 				}
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError(e);
 				}
+				flushRelations(datasources);
 			}
 
 			@Override
@@ -856,6 +865,35 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 				{
 					project.getEditingFlattenedSolution().flushFlattenedFormCache();
+				}
+			}
+
+			private void flushRelations(List<String> changedDataSources)
+			{
+				try
+				{
+					Iterator<Relation> it = getFlattenedSolution().getRelations(false);
+					while (it.hasNext())
+					{
+						Relation relation = it.next();
+						if (changedDataSources.contains(relation.getPrimaryDataSource()) || changedDataSources.contains(relation.getForeignDataSource()))
+						{
+							relation.flushCashedItems();
+							ServoyProject servoyProject = getServoyProject(relation.getRootObject().getName());
+							if (servoyProject != null)
+							{
+								IPersist editingNode = servoyProject.getEditingPersist(relation.getUUID());
+								if (editingNode instanceof Relation)
+								{
+									((Relation)editingNode).flushCashedItems();
+								}
+							}
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Debug.error(ex);
 				}
 			}
 		};
@@ -1142,7 +1180,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 						try
 						{
-							updateFlattenedSolution();
+							updateFlattenedSolution(false);
 						}
 						finally
 						{
@@ -1201,7 +1239,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// should be there because of the above fireActiveProjectChanged(); that forces load of the packages.
 						PersistIndexCache.flush();
 						resetActiveEditingFlattenedSolutions();
-						updateFlattenedSolution();
+						updateFlattenedSolution(false);
 
 						progressMonitor.worked(1);
 
@@ -1832,7 +1870,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			return;
 		}
 		resetActiveEditingFlattenedSolutions();
-		updateFlattenedSolution();
+		updateFlattenedSolution(true);
 		getUserManager().reloadAllSecurityInformation();
 		fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED); // this will also eventually refresh JS build paths and working set
 	}
@@ -1994,19 +2032,29 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			throw new RepositoryException("Object to revert out of sync");
 		}
 
+		// we do not know what is changed, just assume everything
 		final List<IPersist> changed = new ArrayList<IPersist>();
 		persist.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist o)
 			{
-				if (o.isChanged())
-				{
-					changed.add(o);
-				}
+				changed.add(o);
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 		});
-		sp.updateEditingPersist(persist, true);
+		IPersist updatedPersist = sp.updateEditingPersist(persist, true);
+		if (updatedPersist != null)
+		{
+			changed.add(updatedPersist);
+			updatedPersist.acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (!changed.contains(o)) changed.add(o);
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				}
+			});
+		}
 		firePersistsChanged(false, changed);
 	}
 
@@ -2086,6 +2134,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		flushFlattenedFormCache(realSolution);
 		if (realSolution)
 		{
+			// we must clean the cache before editing solution listeners are called
+			PersistIndexCache.reload();
+			FormElementHelper.INSTANCE.reload();
 			synchronized (fireRealPersistchangesJob)
 			{
 				realOutstandingChanges.addAll(changes);
@@ -2801,6 +2852,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
 		final Set<IPersist> changedScriptElements = new HashSet<IPersist>();
+
+		// store the deleted persists, else we loose them when updating editing solution
+		for (IPersist child : strayCats)
+		{
+			IPersist editingPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), child);
+			if (editingPersist != null)
+			{
+				changedEditing.put(child.getUUID(), editingPersist);
+			}
+		}
+
 		solution.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist persist)

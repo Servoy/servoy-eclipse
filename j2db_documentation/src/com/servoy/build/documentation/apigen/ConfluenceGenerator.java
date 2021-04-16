@@ -301,7 +301,8 @@ public class ConfluenceGenerator
 		if (args.length < 2)
 		{
 			System.err.println(
-				"usage: ConfluenceGenerator uri_to_doc_xml common+root+wiki (will use d:/temp/generated and d:/temp/generated_old to generate in and compare to)");
+				"usage: ConfluenceGenerator uri_to_doc_xml common+root+wiki (will use " + System.getProperty("user.dir") + " generated and " +
+					System.getProperty("user.dir") + " generated_old to generate in and compare to)");
 			return;
 		}
 		String parentName = args[1];
@@ -334,6 +335,7 @@ public class ConfluenceGenerator
 				}
 			}
 		}
+		File userDir = new File(System.getProperty("user.dir"));
 		createClient(parentName);
 		for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
 		{
@@ -381,14 +383,14 @@ public class ConfluenceGenerator
 			String output = cg.asString();
 
 
-			File file = new File("D:/temp/doc/generated/" + value.getPublicName() + ".html");
+			File file = new File(userDir, "generated/" + value.getPublicName() + ".html");
 			file.getParentFile().mkdirs();
 			try (FileWriter writer = new FileWriter(file))
 			{
 				writer.write(output);
 			}
 
-			file = new File("D:/temp/doc/generated_old/" + value.getPublicName() + ".html");
+			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
 			if (file.exists())
 			{
 				if (file.length() == output.length())

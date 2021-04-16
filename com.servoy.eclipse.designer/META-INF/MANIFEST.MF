@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Designer Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer; singleton:=true
-Bundle-Version: 2020.12.0.3620_rc
+Bundle-Version: 2021.6.0.3680_rc
 Bundle-ClassPath: .
 Bundle-Activator: com.servoy.eclipse.designer.Activator
 Bundle-Vendor: Servoy
@@ -34,8 +34,8 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
  slf4j.api,
- org.eclipse.swt.chromium,
- com.servoy.eclipse.notification
+ com.servoy.eclipse.notification,
+ org.eclipse.swt.chromium
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

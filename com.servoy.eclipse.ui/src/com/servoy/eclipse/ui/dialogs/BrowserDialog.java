@@ -22,13 +22,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -49,6 +50,7 @@ import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IMainConceptsPageAction;
@@ -57,8 +59,11 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.browser.BrowserFactory;
+import com.servoy.eclipse.ui.browser.IBrowser;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -77,8 +82,8 @@ public class BrowserDialog extends Dialog
 {
 
 	private String url;
-	private Browser browser;
-	private org.eclipse.swt.chromium.Browser chromiumBrowser;
+	private IBrowser browser;
+	private org.eclipse.swt.browser.Browser swtBrowser;
 	private Shell shell;
 	private boolean showSkipNextTime;
 	private static final int MIN_WIDTH = 900;
@@ -135,15 +140,8 @@ public class BrowserDialog extends Dialog
 			shell.setLayout(new FillLayout());
 		}
 		final Button[] showNextTime = new Button[1];
-		//load html file in textReader
-		if (useChromiumHint && new DesignerPreferences().useChromiumBrowser())
-		{
-			chromiumBrowser = new org.eclipse.swt.chromium.Browser(shell, SWT.NONE);
-		}
-		else
-		{
-			browser = new Browser(shell, SWT.NONE);
-		}
+
+		browser = BrowserFactory.createBrowser(shell);
 		LocationListener locationListener = new LocationListener()
 		{
 			@Override
@@ -189,127 +187,145 @@ public class BrowserDialog extends Dialog
 						try (InputStream is = new URL(importSample.startsWith("https://") ? importSample
 							: "https://" + importSample).openStream())
 						{
-							String[] urlParts = importSample.split("/");
-							if (urlParts.length >= 1)
+							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+							if (importSample.endsWith(".json"))
 							{
-								final String solutionName = urlParts[urlParts.length - 1].substring(0, urlParts[urlParts.length - 1].indexOf("."));
-								ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-								boolean[] overwrite = new boolean[] { false };
-								if (sp != null)
+								String content = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+								if (content != null && content.startsWith("{"))
 								{
-									Display.getDefault().syncExec(() -> {
-
-										overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(), "Sample already exists in the workspace",
-											"Do you want to fully overwrite the installed sample again?");
-									});
-								}
-								if (sp == null || overwrite[0])
-								{
-									if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
-										.filter(
-											s -> s.isEnabled() &&
-												ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
-												((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
-													.isValid())
-										.count() == 0)
+									JSONObject obj = new JSONObject(content);
+									String solutionName = obj.optString("name", "");
+									if (!"".equals(solutionName))
 									{
-										// no valid servers
-										UIUtils.reportError("No valid server",
-											"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
-										return;
-									}
-
-									if (!shell.isDisposed()) shell.close();
-
-									final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
-										solutionName + ".servoy");
-									if (importSolutionFile.exists())
-									{
-										importSolutionFile.delete();
-									}
-									try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
-									{
-										Utils.streamCopy(is, fos);
-									}
-
-									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-									progressService.run(true, false, (IProgressMonitor monitor) -> {
-										ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-										importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-										importSolutionWizard.setAllowSolutionFilePathSelection(false);
-										importSolutionWizard.init(PlatformUI.getWorkbench(), null);
-										importSolutionWizard.setReportImportFail(true);
-										importSolutionWizard.setSkipModulesImport(false);
-										importSolutionWizard.setAllowDataModelChanges(true);
-										importSolutionWizard.setImportSampleData(true);
-										importSolutionWizard.shouldAllowSQLKeywords(true);
-										importSolutionWizard.shouldCreateMissingServer(true);
-										importSolutionWizard.setOverwriteModule(overwrite[0]);
-
-										ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
-											.getActiveResourcesProject();
-										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
-
-										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
-											monitor, false, false);
-										if (importSolutionWizard.isMissingServer() != null)
+										boolean install = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName) == null;
+										boolean shouldOverwrite = !install ? askOverwriteSolution() : false;
+										if (install || shouldOverwrite)
 										{
-											showTutorial[0] = introURL.getParameter("createDBConn");
+											if (!isValidServerPresent()) return;
+											if (!shell.isDisposed()) shell.close();
+											progressService.run(true, false, (IProgressMonitor monitor) -> {
+												monitor.beginTask("Installing solution " + solutionName, 1);
+												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils
+													.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
+												if (defaultImports != null && defaultImports.size() > 0)
+												{
+													defaultImports.get(0).importPackage(obj, null);
+												}
+												monitor.worked(1);
+												monitor.done();
+											});
 										}
+									}
+									else
+									{
+										UIUtils.reportError("Cannot install sample",
+											"An error occured when trying to install the sample. Please try again later");
+									}
+								}
+							}
+							else
+							{
+								String[] urlParts = importSample.split("/");
+								if (urlParts.length >= 1)
+								{
+									final String solutionName = urlParts[urlParts.length - 1].substring(0, urlParts[urlParts.length - 1].indexOf("."));
+									boolean install = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName) == null;
+									boolean shouldOverwrite = !install ? askOverwriteSolution() : false;
+									if (install || shouldOverwrite)
+									{
+										if (!isValidServerPresent()) return;
 
-										try
+										if (!shell.isDisposed()) shell.close();
+
+										final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
+											solutionName + ".servoy");
+										if (importSolutionFile.exists())
 										{
 											importSolutionFile.delete();
 										}
-										catch (RuntimeException e)
+										try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 										{
-											Debug.error(e);
+											Utils.streamCopy(is, fos);
 										}
-									});
-								}
-								else
-								{
-									if (!shell.isDisposed()) shell.close();
-									progressService.run(true, false, (IProgressMonitor monitor) -> {
-										ServoyModelManager.getServoyModelManager()
-											.getServoyModel()
-											.setActiveProject(ServoyModelManager.getServoyModelManager()
-												.getServoyModel()
-												.getServoyProject(solutionName), true);
-									});
-								}
-								ServoyModelManager.getServoyModelManager()
-									.getServoyModel()
-									.addActiveProjectListener(new IActiveProjectListener()
+
+										//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+										progressService.run(true, false, (IProgressMonitor monitor) -> {
+											ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+											importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+											importSolutionWizard.setAllowSolutionFilePathSelection(false);
+											importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+											importSolutionWizard.setReportImportFail(true);
+											importSolutionWizard.setSkipModulesImport(false);
+											importSolutionWizard.setAllowDataModelChanges(true);
+											importSolutionWizard.setImportSampleData(true);
+											importSolutionWizard.shouldAllowSQLKeywords(true);
+											importSolutionWizard.shouldCreateMissingServer(true);
+											importSolutionWizard.setOverwriteModule(shouldOverwrite);
+
+											ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
+												.getActiveResourcesProject();
+											String resourceProjectName = project == null ? getNewResourceProjectName() : null;
+
+											importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
+												monitor, false, false, null);
+											if (importSolutionWizard.isMissingServer() != null)
+											{
+												showTutorial[0] = introURL.getParameter("createDBConn");
+											}
+
+											try
+											{
+												importSolutionFile.delete();
+											}
+											catch (RuntimeException e)
+											{
+												Debug.error(e);
+											}
+										});
+									}
+									else
 									{
-
-										@Override
-										public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-										{
-											return true;
-										}
-
-										@Override
-										public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-										{
-										}
-
-										@Override
-										public void activeProjectChanged(ServoyProject activeProject)
-										{
-											Display.getDefault().asyncExec(() -> {
-												if (introURL.getParameter("showTinyTutorial") != null)
-												{
-													showTinyTutorial(introURL);
-													if (!shell.isDisposed()) shell.close();
-												}
-											});
+										if (!shell.isDisposed()) shell.close();
+										progressService.run(true, false, (IProgressMonitor monitor) -> {
 											ServoyModelManager.getServoyModelManager()
 												.getServoyModel()
-												.removeActiveProjectListener(this);
-										}
-									});
+												.setActiveProject(ServoyModelManager.getServoyModelManager()
+													.getServoyModel()
+													.getServoyProject(solutionName), true);
+										});
+									}
+									ServoyModelManager.getServoyModelManager()
+										.getServoyModel()
+										.addActiveProjectListener(new IActiveProjectListener()
+										{
+
+											@Override
+											public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+											{
+												return true;
+											}
+
+											@Override
+											public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+											{
+											}
+
+											@Override
+											public void activeProjectChanged(ServoyProject activeProject)
+											{
+												Display.getDefault().asyncExec(() -> {
+													if (introURL.getParameter("showTinyTutorial") != null)
+													{
+														showTinyTutorial(introURL);
+														if (!shell.isDisposed()) shell.close();
+													}
+												});
+												ServoyModelManager.getServoyModelManager()
+													.getServoyModel()
+													.removeActiveProjectListener(this);
+											}
+										});
+								}
 							}
 						}
 						catch (Exception e)
@@ -335,14 +351,7 @@ public class BrowserDialog extends Dialog
 							showNextTime[0].setVisible(false);
 						}
 						Rectangle bounds = parent.getBounds();
-						if (browser != null)
-						{
-							browser.setSize(bounds.width, bounds.height);
-						}
-						else
-						{
-							chromiumBrowser.setSize(bounds.width, bounds.height);
-						}
+						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -354,14 +363,7 @@ public class BrowserDialog extends Dialog
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
 							(size.height - (int)(size.height / 1.4)) / 2 + size.y, (int)(size.width / 1.5),
 							(int)(size.height / 1.4));
-						if (browser != null)
-						{
-							browser.setSize(bounds.width, bounds.height);
-						}
-						else
-						{
-							chromiumBrowser.setSize(bounds.width, bounds.height);
-						}
+						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -377,6 +379,36 @@ public class BrowserDialog extends Dialog
 					}
 
 				}
+			}
+
+			protected boolean isValidServerPresent()
+			{
+				if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+					.filter(
+						s -> s.isEnabled() &&
+							ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+							((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
+								.isValid())
+					.count() == 0)
+				{
+					// no valid servers
+					UIUtils.reportError("No valid server",
+						"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
+					return false;
+				}
+				return true;
+			}
+
+			protected boolean askOverwriteSolution()
+			{
+				boolean[] overwrite = new boolean[] { false };
+				Display.getDefault().syncExec(() -> {
+
+					overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(),
+						"Sample already exists in the workspace",
+						"Do you want to fully overwrite the installed sample again?");
+				});
+				return overwrite[0];
 			}
 
 			private String getNewResourceProjectName()
@@ -398,7 +430,7 @@ public class BrowserDialog extends Dialog
 						.getActiveWorkbenchWindow()
 						.getActivePage()
 						.showView(TutorialView.PART_ID);
-					view.open(tutorialUrl.startsWith("https://") ? tutorialUrl : "https://" + tutorialUrl);
+					view.openTutorial(tutorialUrl.startsWith("https://") ? tutorialUrl : "https://" + tutorialUrl);
 				}
 				catch (PartInitException e)
 				{
@@ -414,7 +446,7 @@ public class BrowserDialog extends Dialog
 						.getActiveWorkbenchWindow()
 						.getActivePage()
 						.showView(TutorialView.PART_ID);
-					view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
+					view.openTutorial(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
 						: "https://" + introURL.getParameter("showTinyTutorial"));
 				}
 				catch (PartInitException e)
@@ -428,28 +460,12 @@ public class BrowserDialog extends Dialog
 			{
 			}
 		};
-		if (browser != null)
-		{
-			browser.addLocationListener(locationListener);
-			browser.setUrl(url);
-			browser.setSize(size.width, size.height);
-		}
-		else
-		{
-			chromiumBrowser.addLocationListener(locationListener);
-			chromiumBrowser.setUrl(url);
-			chromiumBrowser.setSize(size.width, size.height);
-		}
+		browser.addLocationListener(locationListener);
+		browser.setUrl(url);
+		browser.setSize(size.width, size.height);
 		if (showSkipNextTime)
 		{
-			if (browser != null)
-			{
-				browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			}
-			else
-			{
-				chromiumBrowser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			}
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			showNextTime[0] = new Button(shell, SWT.CHECK);
 			showNextTime[0].setText("Do not show this dialog anymore");
 			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
@@ -466,7 +482,7 @@ public class BrowserDialog extends Dialog
 		}
 		shell.setLocation(location);
 		// in chromium i have to set size, else it shows very small
-		if (Util.isMac() || Util.isLinux() || chromiumBrowser != null)
+		if (Util.isMac() || Util.isLinux() || browser.isChromium())
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);
@@ -499,26 +515,12 @@ public class BrowserDialog extends Dialog
 	public void setUrl(String url)
 	{
 		this.url = url;
-		if (browser != null)
-		{
-			browser.setUrl(url);
-		}
-		else
-		{
-			chromiumBrowser.setUrl(url);
-		}
+		browser.setUrl(url);
 	}
 
 	public void setLocationAndSize(Point location, Dimension size)
 	{
-		if (browser != null)
-		{
-			browser.setSize(size.width, size.height);
-		}
-		else
-		{
-			chromiumBrowser.setSize(size.width, size.height);
-		}
+		browser.setSize(size.width, size.height);
 		shell.setLocation(location);
 		shell.setSize(size.width, size.height);
 	}

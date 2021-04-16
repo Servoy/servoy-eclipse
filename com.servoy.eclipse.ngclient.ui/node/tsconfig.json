@@ -1,0 +1,38 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "module": "es2020",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "typeRoots": [
+      "node_modules/@types",
+      "typings"
+    ],
+    "lib": [
+      "es2017",
+      "dom",
+      "es2018.promise"
+    ],
+    "paths": {
+      "@servoy/public": [
+        "../dist/servoy/public/servoy-public",
+        "../dist/servoy/public",
+        "dist/servoy/public/servoy-public",
+        "dist/servoy/public"
+      ]
+    },
+	"outDir": "./out-tsc/app"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

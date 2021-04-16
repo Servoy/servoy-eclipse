@@ -1,0 +1,27 @@
+{
+    "type": "chrome",
+    "request": "launch",
+    "name": "Debug karma tests",
+    "url": "http://localhost:9876/",
+    "webRoot": "${workspaceFolder}",
+    "runtimeArgs": [
+      "--headless"
+    ],
+    "sourceMaps": true,
+    "sourceMapPathOverrides": {
+      "webpack:/*": "${webRoot}/*",
+      "/./*": "${webRoot}/*",
+      "/src/*": "${webRoot}/*",
+      "/*": "*",
+      "/./~/*": "${webRoot}/node_modules/*"
+    },
+    "port": 9223,
+    "configurations": [
+        {
+            "type": "pwa-chrome",
+            "name": "http://localhost:9876/?id=50842561",
+            "request": "launch",
+            "url": "http://localhost:9876/?id=50842561"
+        }
+    ]
+  }

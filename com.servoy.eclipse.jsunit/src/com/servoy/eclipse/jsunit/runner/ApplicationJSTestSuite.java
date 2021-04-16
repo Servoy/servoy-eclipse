@@ -97,6 +97,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		{
 			try
 			{
+				application.getRuntimeProperties().put("JSUnit", Boolean.TRUE);
 				SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
 				suiteBuilder.initializeWithSolution(application.getSolution(), application.getFlattenedSolution(), target,
 					spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy);

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -322,6 +323,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 			selection = newSelection;
 			internalRefresh(null);
 			fireSelectionChanged(new SelectionChangedEvent(TreeSelectViewer.this, getSelection()));
+			setValid(getValue() != null && getSelectionFilter().select(getValue()));
 		}
 	}
 
@@ -437,13 +439,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		if (contentProposal != null)
 		{
 			String contents = text.getText();
-			Object value = determineValue(contents);
-			setValid(value != null && getSelectionFilter().select(value));
-			if (value != null)
-			{
-				setSelection(new StructuredSelection(value));
-			}
-			else if (contents.trim().length() == 0)
+			if (contents.trim().length() == 0)
 			{
 				// user made field empty, show proposals
 				contentProposal.openProposalPopup();
@@ -573,6 +569,24 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 				};
 				text.addModifyListener(textModifyListener);
 				createContentProposalAdapter();
+
+				text.addFocusListener(new FocusAdapter()
+				{
+					@Override
+					public void focusLost(FocusEvent e)
+					{
+						String contents = text.getText();
+						if (!Strings.isEmpty(contents))
+						{
+							Object value = determineValue(contents);
+							setValid(value != null && getSelectionFilter().select(value));
+							if (value != null)
+							{
+								setSelection(new StructuredSelection(value));
+							}
+						}
+					}
+				});
 			}
 		}
 	}
@@ -772,7 +786,15 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 		private TreeSelectContentProposalAdapter(Control control)
 		{
-			super(control, new TextContentAdapter(), null, null, null);
+			super(control, new TextContentAdapter()
+			{
+				@Override
+				public void setControlContents(Control cntrl, String text, int cursorPosition)
+				{
+					super.setControlContents(cntrl, text, cursorPosition);
+					setValid(true);
+				}
+			}, null, null, null);
 			setPropagateKeys(true);
 			setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 			addContentProposalListener(this);

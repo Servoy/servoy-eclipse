@@ -95,6 +95,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -142,8 +143,8 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
+		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() +
+			".jar", "org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 
@@ -170,7 +171,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 39);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 40);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -220,7 +221,7 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 10 : 4);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
 			monitor.subTask("Copying NGClient components/services...");
@@ -232,6 +233,12 @@ public class WarExporter
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
+			monitor.worked(1);
+			if (exportModel.isExportNG2())
+			{
+				monitor.subTask("Copy NGClient2 resources");
+				copyNGClient2(tmpWarDir);
+			}
 			monitor.worked(1);
 		}
 		try
@@ -255,6 +262,15 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws IOException
+	 */
+	private void copyNGClient2(File tmpWarDir) throws ExportException
+	{
+		Activator.getDefault().exportNG2ToWar(tmpWarDir);
 	}
 
 	/**
@@ -652,8 +668,10 @@ public class WarExporter
 					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()) && exportedPackages.contains(name))
 					{
 						PackageSpecification<WebLayoutSpecification> spec = componentsSpecProviderState.getLayoutSpecifications().get(name);
-						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||
-							spec.getJsClientLibrary() != null && !spec.getJsClientLibrary().isEmpty());
+						copy = spec != null; /*
+												 * && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() || spec.getJsClientLibrary()
+												 * != null && !spec.getJsClientLibrary().isEmpty());
+												 */
 						if (copy) componentLocations.append("/" + name + "/;");
 					}
 					if (copy)
@@ -956,29 +974,55 @@ public class WarExporter
 		}
 	}
 
-	protected void createTomcatContextXML(File tmpWarDir)
+	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
 	{
-		if (!exportModel.isCreateTomcatContextXML()) return;
-		try
+		String fileName = exportModel.getTomcatContextXMLFileName();
+		if (fileName != null)
 		{
-			File metaDir = new File(tmpWarDir, "META-INF");
-			metaDir.mkdir();
-			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
-			contextFile.createNewFile();
-			try (FileWriter writer = new FileWriter(contextFile))
+			File source = new File(fileName);
+			if (source.exists())
 			{
-				String fileContent = "<Context ";
-				if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
-				if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
-				if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
-				if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
-				fileContent += "></Context>";
-				writer.write(fileContent);
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				try
+				{
+					FileUtils.copyFile(source, contextFile);
+				}
+				catch (IOException e)
+				{
+					throw new ExportException("Can't copy tomcat context file: " + fileName, e);
+				}
+			}
+			else
+			{
+				throw new ExportException("Given tomcat context file does not exists: " + fileName);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			ServoyLog.logError(e);
+			if (!exportModel.isCreateTomcatContextXML()) return;
+			try
+			{
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				contextFile.createNewFile();
+				try (FileWriter writer = new FileWriter(contextFile))
+				{
+					String fileContent = "<Context ";
+					if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
+					if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
+					if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
+					if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
+					fileContent += "></Context>";
+					writer.write(fileContent);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 

@@ -360,7 +360,7 @@ public class ContentProposalAdapter {
 					// Backspace should back out of any stored filter text
 					if (filterStyle != FILTER_NONE) {
 						// We have no filter to back out of, so do nothing
-						if (filterText.length() == 0) {
+						if (filterText.isEmpty()) {
 							return;
 						}
 						// There is filter to back out of
@@ -616,7 +616,7 @@ public class ContentProposalAdapter {
 		protected final Control createDialogArea(final Composite parent) {
 			proposalTable = new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.VIRTUAL);
 
-			Listener listener = event -> handleSetData(event);
+			Listener listener = this::handleSetData;
 			proposalTable.addListener(SWT.SetData, listener);
 			// set the proposals to force population of the table.
 			setProposals(filterProposals(proposals, filterText));
@@ -987,7 +987,7 @@ public class ContentProposalAdapter {
 		 */
 		private IContentProposal[] filterProposals(
 				IContentProposal[] proposals, String filterString) {
-			if (filterString.length() == 0) {
+			if (filterString.isEmpty()) {
 				return proposals;
 			}
 
@@ -1866,25 +1866,27 @@ public class ContentProposalAdapter {
 	}
 
 	/**
-	 * Open the proposal popup and display the proposals provided by the
-	 * proposal provider. This method returns immediately. That is, it does not
-	 * wait for a proposal to be selected. This method is used by subclasses to
-	 * explicitly invoke the opening of the popup. If there are no proposals to
-	 * show, the popup will not open and a beep will be sounded.
+	 * Open the proposal popup and display the proposals provided by the proposal
+	 * provider. This method returns immediately. That is, it does not wait for a
+	 * proposal to be selected. This method is used to explicitly invoke the opening
+	 * of the popup. If there are no proposals to show, the popup will not open and
+	 * a beep will be sounded.
+	 *
+	 * @since 3.22
 	 */
-	protected void openProposalPopup() {
+	public void openProposalPopup() {
 		openProposalPopup(false);
 	}
 
 	/**
-	 * Close the proposal popup without accepting a proposal. This method
-	 * returns immediately, and has no effect if the proposal popup was not
-	 * open. This method is used by subclasses to explicitly close the popup
-	 * based on additional logic.
+	 * Close the proposal popup without accepting a proposal. This method returns
+	 * immediately, and has no effect if the proposal popup was not open. This
+	 * method is used by subclasses to explicitly close the popup based on
+	 * additional logic.
 	 *
-	 * @since 3.3
+	 * @since 3.22
 	 */
-	protected void closeProposalPopup() {
+	public void closeProposalPopup() {
 		if (popup != null) {
 			popup.close();
 		}
@@ -2086,8 +2088,7 @@ public class ContentProposalAdapter {
 	 * Return whether the control content is empty
 	 */
 	private boolean isControlContentEmpty() {
-		return getControlContentAdapter().getControlContents(getControl())
-				.length() == 0;
+		return getControlContentAdapter().getControlContents(getControl()).isEmpty();
 	}
 
 	/*
@@ -2111,7 +2112,7 @@ public class ContentProposalAdapter {
 	 */
 	private boolean shouldPopupRemainOpen() {
 		// If we always autoactivate or never autoactivate, it should remain open
-		if (autoActivateString == null || autoActivateString.length() == 0)
+		if (autoActivateString == null || autoActivateString.isEmpty())
 			return true;
 		String content = getControlContentAdapter().getControlContents(getControl());
 		for (int i=0; i<autoActivateString.length(); i++) {

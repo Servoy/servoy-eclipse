@@ -45,6 +45,7 @@ import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -52,6 +53,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard.SolutionPackageInstallInfo;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
@@ -170,14 +172,35 @@ public class InstallWebPackageHandler implements IDeveloperService
 		String urlString = null;
 		String dependency = null;
 		String pckVersion = null;
-		for (int i = 0; i < jsonArray.length(); i++)
+		String currentServoyVersion = ClientVersion.getPureVersion();
+		for (int i = jsonArray.length() - 1; i >= 0; i--)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
-			if (selectedVersion == null || selectedVersion.equals(release.optString("version", "")))
+			if (selectedVersion == null && release.has("servoy-version"))
 			{
+				//if version is not specified, then we search for the latest compatible version
+				String servoyVersion = release.getString("servoy-version");
+				String[] minAndMax = servoyVersion.split(" - ");
+				if (SemVerComparator.compare(minAndMax[0], currentServoyVersion) <= 0 && (pckVersion == null ||
+					SemVerComparator.compare(pckVersion, release.optString("version", "")) <= 0))
+				{
+					urlString = release.optString("url");
+					dependency = release.optString("dependency", null);
+					pckVersion = release.optString("version", "");
+				}
+			}
+			else if (pckVersion == null || release.optString("version", "").equals(selectedVersion) ||
+				SemVerComparator.compare(pckVersion, release.optString("version", "")) <= 0)
+			{
+				//the selectedVersion or the latest version we found so far
 				urlString = release.optString("url");
 				dependency = release.optString("dependency", null);
 				pckVersion = release.optString("version", "");
+			}
+
+			if (release.optString("version", "").equals(selectedVersion))
+			{
+				//we have found the specific version we were looking for
 				break;
 			}
 		}
@@ -231,7 +254,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 					if (allInstalledPackages == null)
 					{
-						allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages(isMainSolutionInstall);
+						allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages(isMainSolutionInstall, true);
 					}
 
 					for (Object pckObj : allInstalledPackages)
