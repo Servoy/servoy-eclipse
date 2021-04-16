@@ -31,6 +31,7 @@
           },
           "configurations": {
             "production": {
+              "outputPath": "dist/app_prod",
               "budgets": [
                 {
                   "type": "anyComponentStyle",

@@ -36,8 +36,6 @@ public class Activator extends Plugin
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
 
-	private boolean statelocationDone = false;
-
 	public static Activator getInstance()
 	{
 		return plugin;
@@ -208,46 +206,26 @@ public class Activator extends Plugin
 	 */
 	public void exportNG2ToWar(File location)
 	{
-		waitForStateLocation();
+		waitForNodeExtraction();
 
-		File distFolder = new File(projectFolder, "dist");
 		try
 		{
+			// TODO get exactly the exported components and services and adjust the sources
+			// check what happens if there was a debug watch command on the sources..
+
+			// create the production build
+			createNPMCommand("run build").runCommands();
+			// copy the production build
+			File distFolder = new File(projectFolder, "dist/app_prod");
 			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
 
 			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+
+			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			getLog().error("exceptions when exporting NG2 to WAR", e);
 		}
 	}
-
-	void stateLocationDone()
-	{
-		synchronized (plugin)
-		{
-			statelocationDone = true;
-			plugin.notifyAll();
-		}
-	}
-
-	private void waitForStateLocation()
-	{
-		synchronized (plugin)
-		{
-			while (!statelocationDone)
-			{
-				try
-				{
-					plugin.wait();
-				}
-				catch (InterruptedException e)
-				{
-				}
-			}
-		}
-	}
-
-
 }
