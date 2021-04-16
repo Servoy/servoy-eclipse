@@ -75,6 +75,9 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElemen
                         if (change.currentValue) this.renderer.setAttribute(this.getFocusElement(), 'placeholder', change.currentValue);
                         else this.renderer.removeAttribute(this.getFocusElement(), 'placeholder');
                         break;
+                    case 'inputType':
+                        this.renderer.setAttribute(this.getFocusElement(), 'type', this.inputType);
+                        break;
                 }
             }
         }
