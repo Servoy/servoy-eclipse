@@ -18,7 +18,8 @@ import { LoggerFactory, LoggerService } from '../logger.service';
     }]
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
-    private static DATEFORMAT: Format = {display:'yyyy-MM-ddTHH:mm', type:'DATETIME'} as Format;
+    private static DATETIMEFORMAT: Format = {display:'yyyy-MM-ddTHH:mm:ss', type:'DATETIME'} as Format;
+    private static DATEFORMAT: Format = {display:'yyyy-MM-dd', type:'DATETIME'} as Format;
 
     @Input('svyFormat') format: Format;
     @Input() findmode: boolean;
@@ -54,7 +55,9 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('change', ['$event.target.value']) input(value: any) {
         let data = value;
         const inputType = this.getType();
-        if (value && (inputType === 'datetime' || inputType === 'datetime-local')) {
+        if (inputType === 'datetime-local') {
+             data = this.formatService.unformat(value, FormatDirective.DATETIMEFORMAT.display, FormatDirective.DATETIMEFORMAT.type, this.realValue);
+        } else if (inputType === 'date') {
              data = this.formatService.unformat(value, FormatDirective.DATEFORMAT.display, FormatDirective.DATEFORMAT.type, this.realValue);
         } else if (!this.findmode && this.format) {
             const type = this.format.type;
@@ -115,14 +118,17 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 
     writeValue(value: any): void {
         this.realValue = value;
-        const type = this.getType();
-        if (value && (type === 'datetime' || type === 'datetime-local')) {
-             const data = this.formatService.format(value, FormatDirective.DATEFORMAT, false);
+        const inputType = this.getType();
+        if (inputType === 'datetime-local') {
+             const data = this.formatService.format(value, FormatDirective.DATETIMEFORMAT, false);
+             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'date') {
+            const data = this.formatService.format(value, FormatDirective.DATEFORMAT, false);
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (value && this.format) {
             let data = value;
             if (!this.findmode) {
-                data = type  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
+                data = inputType  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
                 let useEdit = !this.format.display;
                 if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
                 try {
