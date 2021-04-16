@@ -24,6 +24,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     @Input() toolTipText: string;
 	@Input() dataProviderID: any;
 	@Input() enabled: boolean;
+	@Input() editable: boolean;
 
     @ViewChild(Select2) select2: Select2;
 
@@ -74,6 +75,13 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         this.select2.toggleOpenAndClose();
     }
 
+    isEnabled() {
+        return this.enabled === true && this.isEditable();
+    }
+
+    isEditable() {
+        return this.readOnly == false && this.editable == true;
+    }
 
     setData() {
         if (this.valuelistID) {
