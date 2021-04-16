@@ -18,8 +18,9 @@ import { LoggerFactory, LoggerService } from '../logger.service';
     }]
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
+    private static DATEFORMAT: Format = {display:'yyyy-MM-ddTHH:mm', type:'DATETIME'} as Format;
+
     @Input('svyFormat') format: Format;
-    @Input() type: string;
     @Input() findmode: boolean;
 
     private hasFocus = false;
@@ -52,7 +53,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 
     @HostListener('change', ['$event.target.value']) input(value: any) {
         let data = value;
-        if (!this.findmode && this.format) {
+        const inputType = this.getType();
+        if (value && (inputType === 'datetime' || inputType === 'datetime-local')) {
+             data = this.formatService.unformat(value, FormatDirective.DATEFORMAT.display, FormatDirective.DATEFORMAT.type, this.realValue);
+        } else if (!this.findmode && this.format) {
             const type = this.format.type;
             let format = this.format.display ? this.format.display : this.format.edit;
             if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
@@ -111,10 +115,14 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 
     writeValue(value: any): void {
         this.realValue = value;
-        if (value && this.format) {
+        const type = this.getType();
+        if (value && (type === 'datetime' || type === 'datetime-local')) {
+             const data = this.formatService.format(value, FormatDirective.DATEFORMAT, false);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (value && this.format) {
             let data = value;
             if (!this.findmode) {
-                data = this.type === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
+                data = type  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
                 let useEdit = !this.format.display;
                 if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
                 try {
@@ -133,6 +141,9 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         }
     }
 
+    private getType(): string {
+        return this._elementRef.nativeElement.type;
+    }
 
     private setFormat() {
         this.listeners.forEach(lFn => lFn());

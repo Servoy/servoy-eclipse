@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, Input, ElementRef, ChangeDetectionStrategy, Inject, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, Input, ElementRef, ChangeDetectionStrategy, Inject, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { Format } from '@servoy/public';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -21,12 +21,20 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield<HTMLInputEl
         super(renderer, cdRef, doc);
     }
 
+    svyOnChanges(changes: SimpleChanges) {
+        super.svyOnChanges(changes);
+        if (changes.inputType) {
+            this.renderer.setAttribute(this.elementRef.nativeElement, 'type', this.inputType);
+        }
+    }
+
     setInputType(inputType: string) {
-        const types = ["text", "tel", "date", "time", "datetime-local", "month", "week", "number", "color"];
+        const types = ['text', 'tel', 'date', 'time', 'datetime-local', 'month', 'week', 'number', 'color'];
 
         if (types.indexOf(inputType) > -1) {
             this.dataProviderID = null;
             this.inputType = inputType;
+            this.renderer.setAttribute(this.elementRef.nativeElement, 'type', this.inputType);
             this.pushUpdate();
             this.inputTypeChange.emit(this.inputType);
             return true;
