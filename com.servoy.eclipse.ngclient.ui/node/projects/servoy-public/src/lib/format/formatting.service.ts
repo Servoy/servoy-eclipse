@@ -82,7 +82,7 @@ export class FormattingService {
 			} else if (vSvyFormat.type === 'NUMBER' || ((vSvyFormat.type === 'TEXT') && vSvyFormat.isNumberValidator)) {
 				const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar === undefined) {
+				if(keyChar === undefined || keyChar === null) {
 					return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
 				} else {
