@@ -20,7 +20,6 @@ import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
-import { NGDesktopUIService } from '@servoy/ngdesktopui';
 // generated imports start
 // generated imports end
 
@@ -46,7 +45,6 @@ export class AllServiceService implements ServiceProvider {
         private ngDataGrid: DatagridService,
         private ngPowerGrid: PowergridService,
         private dialogs: DialogService,
-        private ngdesktopui: NGDesktopUIService,
         // generated services start
         // generated services end
         private clientFunctionService: ClientFunctionService,
@@ -70,7 +68,6 @@ export class AllServiceService implements ServiceProvider {
                 KeyListener,
                 DatagridService,
                 PowergridService,
-                NGDesktopUIService,
                 // generated providers start
                 // generated providers end
                 ClientFunctionService

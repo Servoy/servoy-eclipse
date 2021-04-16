@@ -42,7 +42,6 @@
     "@danielmoncada/angular-datetime-picker": "^11.0.0",
     "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
     "@ng-bootstrap/ng-bootstrap": "^9.1.0",
-    "@servoy/ngdesktopui": "^2.0.0",
     "@tinymce/tinymce-angular": "^4.2.2",
     "angular-resizable-element": "3.3.5",
     "angular-tree-grid": "^3.0.0",
