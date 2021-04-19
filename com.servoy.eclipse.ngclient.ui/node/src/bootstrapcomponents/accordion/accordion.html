@@ -1,0 +1,14 @@
+<ngb-accordion [activeIds]="getSelectedTabId()" (panelChange)="onTabChange($event)"  class="bts-accordion"  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reservedGap: 50}">
+    <ngb-panel *ngFor="let tab of tabs;let i = index" [disabled]="tab.disabled || !tab.containedForm" [id]="tab._id">
+      <ng-template ngbPanelTitle>
+      	<div (click)="tabClicked(tab, i , $event)">
+        	<span [innerHTML]='tab?.text'></span>
+        </div>
+      </ng-template>
+      <ng-template ngbPanelContent>
+      	<div #element style="position: relative;overflow: auto;top: 0px;bottom: 0px;left: 0px;right: 0px;" [style.height.px]="panelHeight">
+      		<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
+      	</div>
+      </ng-template>
+    </ngb-panel>
+</ngb-accordion>

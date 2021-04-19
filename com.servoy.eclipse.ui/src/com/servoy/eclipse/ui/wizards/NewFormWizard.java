@@ -98,6 +98,7 @@ import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
@@ -148,6 +149,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 	private ServoyProject servoyProject;
 
 	private IDefaultSettings defaultSettings;
+	private Form form;
+	private boolean openDesigner = true;
 
 	public NewFormWizard()
 	{
@@ -178,6 +181,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		Form selectedForm = null;
+		SimpleUserNode selectedWorkingSetNode = null;
 		IDataSourceWrapper selectedDataSource = null;
 		// find the Servoy project to which the new form will be added
 		if (selection != null && selection.size() == 1)
@@ -198,6 +202,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				else if (node.getRealObject() instanceof IDataSourceWrapper)
 				{
 					selectedDataSource = (IDataSourceWrapper)node.getRealObject();
+				}
+				else if (node.getType() == UserNodeType.WORKING_SET)
+				{
+					selectedWorkingSetNode = node;
 				}
 				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
 				if (projectNode != null)
@@ -239,6 +247,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (selectedDataSource != null)
 			{
 				newFormWizardPage = new NewFormWizardPage("New form", selectedDataSource);
+			}
+			else if (selectedWorkingSetNode != null)
+			{
+				newFormWizardPage = new NewFormWizardPage("New form", selectedWorkingSetNode);
 			}
 			else
 			{
@@ -289,6 +301,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 	}
 
 	@Override
+	public boolean performCancel()
+	{
+		IDialogSettings settings = getDialogSettings();
+		refreshDialogSettingsWorkingSet(settings);
+		return true;
+	}
+
+	@Override
 	public boolean performFinish()
 	{
 		IDialogSettings settings = getDialogSettings();
@@ -307,6 +327,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		settings.put("style", style == null ? null : style.getName());
 		Template template = newFormWizardPage.getTemplate();
 		settings.put("templatename", template == null ? null : template.getName());
+
+		refreshDialogSettingsWorkingSet(settings);
 
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
@@ -327,7 +349,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			// create empty form
 			String dataSource = newFormWizardPage.getDataSource();
-			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
+			form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
 				true, null);
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
@@ -447,8 +469,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// open newly created form in the form editor (as new editor) except abstract form
 			// which will be opened in script editor
-			boolean returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
-				? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
+			boolean returnValue = true;
+			if (openDesigner)
+			{
+				returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
+					? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
+			}
 
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
@@ -479,6 +505,19 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			ServoyLog.logError(e);
 			return false;
+		}
+	}
+
+	/**
+	 * @param settings
+	 */
+	private void refreshDialogSettingsWorkingSet(IDialogSettings settings)
+	{
+		//refresh the working set object from settings
+		String workingSet = settings.get("workingset");
+		if (!Utils.stringIsEmpty(workingSet))
+		{
+			settings.put("workingset", "");
 		}
 	}
 
@@ -547,6 +586,19 @@ public class NewFormWizard extends Wizard implements INewWizard
 			this(pageName);
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
 			settings.put("datasource", tableWrapper == null ? null : tableWrapper.getDataSource());
+		}
+
+		/**
+		 * Creates a new form creation wizard page.
+		 *
+		 * @param pageName the name of the page
+		 * @param node the selected user node. This will contain the working set node
+		 */
+		public NewFormWizardPage(String pageName, SimpleUserNode node)
+		{
+			this(pageName);
+			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
+			settings.put("workingset", node == null ? null : node.getName());
 		}
 
 		@Override
@@ -705,7 +757,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			dataSourceViewer.setContentProvider(new TableContentProvider());
 			dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
+			dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
 			dataSourceViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
@@ -734,8 +786,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 				protected Object determineValue(String contents)
 				{
 					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
-					Form form = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
-					return form != null ? new Integer(form.getID()) : null;
+					Form frm = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
+					if (frm != null)
+					{
+						return new Integer(frm.getID());
+					}
+					return null;
 				}
 			};
 			extendsFormViewer.setTitleText("Select super form");
@@ -1020,7 +1076,15 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
-				fillWorkingSets();
+				String workingSet = settings.get("workingset");
+				if (!Utils.stringIsEmpty(workingSet))
+				{
+					fillWorkingSets(workingSet);
+				}
+				else
+				{
+					fillWorkingSets("");
+				}
 				if (superForm != null)
 				{
 					handleExtendsFormChanged();
@@ -1119,7 +1183,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			templateNameCombo.setSelection(new StructuredSelection(selected));
 		}
 
-		public void fillWorkingSets()
+		public void fillWorkingSets(String selectedWorkingSet)
 		{
 			List<Object> workingSets = new ArrayList<Object>();
 			workingSets.add(SELECTION_NONE);
@@ -1133,7 +1197,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			}
 			workingSetNameCombo.setInput(workingSets.toArray());
-			workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+			if (!Utils.stringIsEmpty(selectedWorkingSet))
+			{
+				workingSetNameCombo.setSelection(new StructuredSelection(selectedWorkingSet));
+			}
+			else
+			{
+				workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+			}
 		}
 
 		private void handleDataSourceSelected()
@@ -1358,7 +1429,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					updateExtendsFormViewer(flattenedSolution);
 					extendsFormViewer.setSelection(sel);
 
-					fillWorkingSets();//refresh working sets
+					fillWorkingSets("");//refresh working sets
 				}
 			}
 			setPageComplete(validatePage());
@@ -1552,5 +1623,18 @@ public class NewFormWizard extends Wizard implements INewWizard
 	interface IDefaultSettings
 	{
 		boolean isReferenceForm();
+	}
+
+	/**
+	 * @return the form
+	 */
+	public Form getForm()
+	{
+		return form;
+	}
+
+	public void setOpenDesigner(boolean openDesigner)
+	{
+		this.openDesigner = openDesigner;
 	}
 }

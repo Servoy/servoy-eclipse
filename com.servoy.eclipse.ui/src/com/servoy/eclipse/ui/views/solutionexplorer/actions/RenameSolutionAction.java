@@ -19,15 +19,17 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
@@ -38,16 +40,23 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -108,14 +117,21 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			int res = nameDialog.open();
 			if (res == Window.OK)
 			{
+
+				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution();
+				// avoid NPE by closing all editors before deactivating the solution
+				if (flattenedSolution.getName() == editingSolution.getName())
+				{
+					EditorUtil.getActivePage().closeAllEditors(false);
+				}
 				final String name = nameDialog.getValue();
 				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
 				if (project == null)
 				{
-					WorkspaceJob saveJob = new WorkspaceJob("Renaming solution...")
+					RunInWorkspaceJob saveJob = new RunInWorkspaceJob("Renaming solution...", new IWorkspaceRunnable()
 					{
 						@Override
-						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+						public void run(IProgressMonitor monitor) throws CoreException
 						{
 							try
 							{
@@ -163,6 +179,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								if (isActive)
 								{
 									servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+									IWorkingSet[] allWorkingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
 									IJobManager jobManager = Job.getJobManager();
 									try
 									{
@@ -172,28 +189,54 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 										servoyModel = (ServoyModel)servoyModel.refreshServoyProjects();
 										ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name)
 											? servoyModel.getServoyProject(name) : servoyModel.getServoyProject(activeProject.getProject().getName());
+										if (allWorkingSets != null)
+										{
+											for (IWorkingSet ws : allWorkingSets)
+											{
+												if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
+												{
+													List<String> paths = new ArrayList<String>();
+													IAdaptable[] resources = ws.getElements();
+													if (resources != null && resources.length > 0)
+													{
+														for (IAdaptable resource : resources)
+														{
+															IPath fullPath = ((IResource)resource).getFullPath();
+															IFile file = ServoyModel.getWorkspace().getRoot()
+																.getFile(new Path(name + "/" + fullPath.removeFirstSegments(1).toString()));
+															fullPath = file.getFullPath();
+															paths.add(fullPath.toString());
+														}
+														svyProject.getResourcesProject().addWorkingSet(
+															new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
+															ws.getName(), paths);
+													}
+												}
+											}
+										}
 										servoyModel.setActiveProject(svyProject, true);
 									}
 									catch (Exception e)
 									{
 										ServoyLog.logError(e);
-										MessageDialog.openError(viewer.getViewSite().getShell(), "Could not set active solution ", e.getMessage());
+										Display.getDefault().asyncExec(
+											() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Could not set active solution ", e.getMessage()));
 									}
 								}
 							}
 							catch (RepositoryException e)
 							{
 								ServoyLog.logError(e);
-								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage());
+								Display.getDefault().asyncExec(() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage()));
 							}
 							catch (CoreException e)
 							{
 								ServoyLog.logError(e);
-								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", "Could not move the project to new directory");
+								Display.getDefault().asyncExec(() -> MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed",
+									"Could not move the project to new directory"));
 							}
-							return Status.OK_STATUS;
 						}
-					};
+					});
 					saveJob.setUser(false);
 					saveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
 					saveJob.schedule();

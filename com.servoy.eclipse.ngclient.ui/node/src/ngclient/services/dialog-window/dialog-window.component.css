@@ -1,0 +1,45 @@
+.window-body {
+    background-color: white;
+}
+
+.window .window-body,
+.window .window-header,
+.window .window-footer {
+	overflow: auto;
+	padding:5px;
+	border:none;
+	margin:0px;
+}
+.window .window-header {
+	cursor:inherit;
+}
+.window .window-body{
+	min-width:0px;
+    min-height:0px;
+}
+.window .window-header .window-title {
+    cursor: move;
+}
+.window {
+	-webkit-transform: translate3d(0,0,0); /*TRICK* new layer is created not needing repaints on the layer below it */
+	transform: translate3d(0,0,0);
+	min-width:0px;
+	min-height:0px;
+	max-width :5000px;
+	max-height:5000px;
+}
+.svy-dialog-close {
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;	
+    float: right;
+    font-size: 21px;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+}

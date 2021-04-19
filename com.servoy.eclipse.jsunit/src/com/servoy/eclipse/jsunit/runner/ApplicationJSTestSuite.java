@@ -57,11 +57,12 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	 * @param app the application that will be used to create a JSUnit test suite. The application must have a loaded solution in order for the tests to be
 	 *            performed.
 	 */
-	public ApplicationJSTestSuite(IApplication application, TestTarget target)
+	public ApplicationJSTestSuite(IApplication application, TestTarget target,
+		boolean spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
 	{
 		this();
 		setUseFileForJavaQualifiedNameInStack(true);
-		init(application, target);
+		init(application, target, spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy);
 	}
 
 	/**
@@ -86,7 +87,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		super.init(new StringReader(suiteBuilder.getCode()), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, null, false, isDebugModeOn());
 	}
 
-	protected void init(IApplication application, TestTarget target)
+	protected void init(IApplication application, TestTarget target, boolean spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
 	{
 		if (application == null)
 		{
@@ -96,8 +97,10 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		{
 			try
 			{
+				application.getRuntimeProperties().put("JSUnit", Boolean.TRUE);
 				SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
-				suiteBuilder.initializeWithSolution(application.getSolution(), application.getFlattenedSolution(), target);
+				suiteBuilder.initializeWithSolution(application.getSolution(), application.getFlattenedSolution(), target,
+					spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy);
 				Scriptable scope = initScope(application);
 				jsTestCode = suiteBuilder.getCode();
 				super.init(new StringReader(jsTestCode), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, scope, scope != null, isDebugModeOn());
@@ -153,7 +156,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
 		try
 		{
-			return new ApplicationJSTestSuite(staticSuiteApplication, staticTarget);
+			return new ApplicationJSTestSuite(staticSuiteApplication, staticTarget, false);
 		}
 		finally
 		{

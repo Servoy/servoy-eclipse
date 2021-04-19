@@ -341,7 +341,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				input = (Form)inputElement;
 				if (fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE))
 				{
-					Form form = showAllAction.isChecked() ? getActiveSolution().getFlattenedForm(input, false) : input;
+					Form form = showAllAction.isChecked() ? getActiveSolution().getFlattenedForm(input, true) : input;
 					List<Pair<String, Image>> availableCategories = new ArrayList<>();
 					if (!hideElementsAction.isChecked() && form.getFormElementsSortedByFormIndex().hasNext()) availableCategories.add(ELEMENTS);
 					if (!hidePartsAction.isChecked() && form.getParts().hasNext()) availableCategories.add(PARTS);
@@ -527,6 +527,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					}
 				}
 
+				result.sort(NameComparator.INSTANCE);
 				return result.toArray();
 			}
 			return new Object[0];

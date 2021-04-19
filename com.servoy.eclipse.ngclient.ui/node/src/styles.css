@@ -1,0 +1,27 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.min.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fontawesome.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-regular.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
+@import "~@danielmoncada/angular-datetime-picker/assets/style/picker.min.css";
+@import "assets/bootstrap-window/bootstrap-window.css";
+@import "assets/styles/servoy.css";
+@import "bootstrapcomponents/svy_bootstrapcomponents.css";
+@import "bootstrapextracomponents/svy_bootstrapextracomponents.css";
+@import "~ngx-lightbox/lightbox.css";
+@import "servoydefault/defaultcomponents.css";
+@import "servoyextra/servoyextra.css";
+
+@import "12grid/lib/12grid.css";
+
+@import "~@ag-grid-community/core/dist/styles/ag-grid.css";
+@import "~@ag-grid-community/core/dist/styles/agGridClassicFont.css";
+@import "~@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
+@import "nggrids/ag-grid-custom.css";
+@import "nggrids/datagrid/datagrid.css";
+@import "nggrids/powergrid/powergrid.css";
+@import "@uppy/core/dist/style.css";
+@import "@uppy/dashboard/dist/style.css";
+@import "window_service/servoy-menu.css";
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";

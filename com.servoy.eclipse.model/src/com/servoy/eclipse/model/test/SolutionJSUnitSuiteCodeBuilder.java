@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJSON;
@@ -86,7 +88,8 @@ public class SolutionJSUnitSuiteCodeBuilder
 		return rootTestClassName;
 	}
 
-	public void initializeWithSolution(Solution solution, FlattenedSolution flattenedSolution, TestTarget target)
+	public void initializeWithSolution(Solution solution, FlattenedSolution flattenedSolution, TestTarget target,
+		boolean spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
 	{
 		if (solution == null || flattenedSolution == null)
 		{
@@ -107,10 +110,18 @@ public class SolutionJSUnitSuiteCodeBuilder
 		//       ... same as Solution suite structure
 		StringBuffer testCode = new StringBuffer(1024);
 		HashSet<Solution> inspectedModules = new HashSet<Solution>();
+		Stack<String> longTestNamesPrefix = null;
+		if (spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
+		{
+			longTestNamesPrefix = new Stack<>();
+			longTestNamesPrefix.push("test_SOLUTION_");
+		}
+
 		TestIdentifier testIdentifier = appendSolutionTestCode(solution, target, testCode, inspectedModules, flattenedSolution,
 			//* If Test target is null that means the whole active solution.
 			//* If Test target's module to test is the same as active solution that means the whole active solution again.
-			target == null || target.getActiveSolution().getName().equals(target.getModuleToTest() == null ? "" : target.getModuleToTest().getName()));
+			target == null || target.getActiveSolution().getName().equals(target.getModuleToTest() == null ? "" : target.getModuleToTest().getName()),
+			longTestNamesPrefix);
 
 		if (testIdentifier == null)
 		{
@@ -126,15 +137,17 @@ public class SolutionJSUnitSuiteCodeBuilder
 	}
 
 	private TestIdentifier appendSolutionTestCode(Solution solution, TestTarget target, StringBuffer testCode, HashSet<Solution> inspectedModules,
-		FlattenedSolution flattenedSolution, boolean partOfTargetModuleSubtree)
+		FlattenedSolution flattenedSolution, boolean partOfTargetModuleSubtree, Stack<String> longTestNamesPrefix)
 	{
 		TestIdentifier resultingSuiteId = null;
+
 		if (solution != null && !inspectedModules.contains(solution))
 		{
 			String moduleToTestName = target == null ? "" : (target.getModuleToTest() == null ? "" : target.getModuleToTest().getName());
 			boolean thisSolutionShouldBeTested = (partOfTargetModuleSubtree || target.getModuleToTest() == null || moduleToTestName.equals(solution.getName()));
 			boolean addedTestCode = false;
 			inspectedModules.add(solution);
+			if (longTestNamesPrefix != null) longTestNamesPrefix.push(solution.getName());
 
 			TestIdentifier modulesTestSuiteId = null;
 			// inspect direct child modules and generate test code for them
@@ -142,13 +155,14 @@ public class SolutionJSUnitSuiteCodeBuilder
 			{
 				List<RootObjectReference> modules = solution.getReferencedModules(null);
 				List<TestIdentifier> modulesThatAddedTests = new ArrayList<TestIdentifier>();
+				if (longTestNamesPrefix != null) longTestNamesPrefix.push("_MODULE_");
 				for (RootObjectReference ref : modules)
 				{
 					if (ref.getMetaData() instanceof SolutionMetaData && !SolutionMetaData.isImportHook((SolutionMetaData)ref.getMetaData()))
 					{
 						Solution module = (Solution)solution.getRepository().getActiveRootObject(ref.getMetaData().getRootObjectId());
 						TestIdentifier tmp = appendSolutionTestCode(module, target, testCode, inspectedModules, flattenedSolution,
-							(partOfTargetModuleSubtree || module.getName().equals(moduleToTestName)));
+							(partOfTargetModuleSubtree || module.getName().equals(moduleToTestName)), longTestNamesPrefix);
 						if (tmp != null)
 						{
 							modulesThatAddedTests.add(tmp);
@@ -170,6 +184,10 @@ public class SolutionJSUnitSuiteCodeBuilder
 			{
 				Debug.log(e);
 			}
+			finally
+			{
+				if (longTestNamesPrefix != null) longTestNamesPrefix.pop(); // pop for 'modules' string
+			}
 
 			TestIdentifier globalSuiteId = null;
 			List<TestIdentifier> formTestIds = new ArrayList<TestIdentifier>();
@@ -177,8 +195,9 @@ public class SolutionJSUnitSuiteCodeBuilder
 			{
 				// really create the solution test code now that module test code has been created
 				// first globals/form testcases
-				if (target == null || target.getFormToTest() == null) globalSuiteId = addGlobalTests(solution, target, testCode);
-				if (target == null || target.getGlobalScopeToTest() == null) formTestIds.addAll(addAllFormTests(solution, target, flattenedSolution, testCode));
+				if (target == null || target.getFormToTest() == null) globalSuiteId = addGlobalTests(solution, target, testCode, longTestNamesPrefix);
+				if (target == null || target.getGlobalScopeToTest() == null)
+					formTestIds.addAll(addAllFormTests(solution, target, flattenedSolution, testCode, longTestNamesPrefix));
 				addedTestCode = addedTestCode || (formTestIds.size() > 0) || globalSuiteId != null;
 			}
 
@@ -187,25 +206,33 @@ public class SolutionJSUnitSuiteCodeBuilder
 			{
 				resultingSuiteId = addSolutionSuite(solution, globalSuiteId, formTestIds, modulesTestSuiteId, testCode);
 			}
+
+			if (longTestNamesPrefix != null) longTestNamesPrefix.pop(); // pop for solution name
 		} // else this module was already inspected before - either loop in module hierarchy or the module is a child module of 2 different parent modules
 		return resultingSuiteId;
 	}
 
-	private TestIdentifier addGlobalTests(Solution solution, TestTarget target, StringBuffer testCode)
+	private TestIdentifier addGlobalTests(Solution solution, TestTarget target, StringBuffer testCode, Stack<String> longTestNamesPrefix)
 	{
 		// create scope test suites
+		if (longTestNamesPrefix != null) longTestNamesPrefix.push("_SCOPE_");
+
 		List<TestIdentifier> allGlobalIdentifiers = new ArrayList<TestIdentifier>();
 		for (String scopeName : solution.getScopeNames())
 		{
 			if (target == null || target.getGlobalScopeToTest() == null ||
 				(target.getGlobalScopeToTest().getRight().equals(scopeName) && solution.getName().equals(target.getGlobalScopeToTest().getLeft().getName())))
 			{
+				if (longTestNamesPrefix != null) longTestNamesPrefix.push(scopeName);
+
 				Iterator<ScriptMethod> it = solution.getScriptMethods(scopeName, true);
 				// prefix the name so that we have no name conflicts with other form/module/global tests
 				List<ScriptMethod> list = Utils.asList(it);
 				Collections.reverse(list);
-				TestIdentifier tmp = addTestCaseIfNecessary(list.iterator(), target, scopeName, "scopes", testCode);
+				TestIdentifier tmp = addTestCaseIfNecessary(list.iterator(), target, scopeName, "scopes", testCode, longTestNamesPrefix);
 				if (tmp != null) allGlobalIdentifiers.add(tmp);
+
+				if (longTestNamesPrefix != null) longTestNamesPrefix.pop(); // pop for scopeName
 			}
 		}
 
@@ -236,38 +263,49 @@ public class SolutionJSUnitSuiteCodeBuilder
 			testCode.append("(); }\n\n");
 		}
 
+		if (longTestNamesPrefix != null) longTestNamesPrefix.pop(); // for "_scope_" string
 		return suiteId;
 	}
 
-	private List<TestIdentifier> addAllFormTests(Solution solution, TestTarget target, FlattenedSolution flattenedSolution, StringBuffer testCode)
+	private List<TestIdentifier> addAllFormTests(Solution solution, TestTarget target, FlattenedSolution flattenedSolution, StringBuffer testCode,
+		Stack<String> longTestNamesPrefix)
 	{
 		List<TestIdentifier> allFormTestNames = new ArrayList<TestIdentifier>();
 		Iterator<Form> it = solution.getForms(null, true);
+		if (longTestNamesPrefix != null) longTestNamesPrefix.push("_FORM_");
+
 		while (it.hasNext())
 		{
 			Form form = it.next();
 			if (target == null || target.getFormToTest() == null || target.getFormToTest().getName().equals(form.getName()))
 			{
-				TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), target, testCode);
+				if (longTestNamesPrefix != null) longTestNamesPrefix.push(form.getName());
+
+				TestIdentifier formTestIdentifier = addFormTests(flattenedSolution.getFlattenedForm(form), target, testCode, longTestNamesPrefix);
 				if (formTestIdentifier != null)
 				{
 					allFormTestNames.add(formTestIdentifier);
 				}
+				if (longTestNamesPrefix != null) longTestNamesPrefix.pop();
 			}
 		}
+
+		if (longTestNamesPrefix != null) longTestNamesPrefix.pop();
+
 		return allFormTestNames;
 	}
 
-	private TestIdentifier addFormTests(Form form, TestTarget target, StringBuffer testCode)
+	private TestIdentifier addFormTests(Form form, TestTarget target, StringBuffer testCode, Stack<String> longTestNamesPrefix)
 	{
 		Iterator<ScriptMethod> it = form.getScriptMethods(true);
 		// prefix the name so that we have no name conflicts with other form/module/global tests
 		List<ScriptMethod> list = Utils.asList(it);
 		Collections.reverse(list);
-		return addTestCaseIfNecessary(list.iterator(), target, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode);
+		return addTestCaseIfNecessary(list.iterator(), target, "Form '" + form.getName() + "' tests", "forms." + form.getName(), testCode, longTestNamesPrefix);
 	}
 
-	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, TestTarget target, String nameOfTest, String callPrefix, StringBuffer testCode)
+	private TestIdentifier addTestCaseIfNecessary(Iterator<ScriptMethod> it, TestTarget target, String nameOfTest, String callPrefix, StringBuffer testCode,
+		Stack<String> longTestNamesPrefix)
 	{
 		TestIdentifier testIdentifier = null;
 		boolean testMethodsFound = false;
@@ -297,7 +335,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 				tmp.append("function ");
 				tmp.append(testIdentifier.getTestClassName());
 				tmp.append("_");
-				tmp.append(method.getName());
+				tmp.append(getTestMethodGeneratedName(method.getName(), longTestNamesPrefix));
 
 				// if something bad happened even before tests got to execute, error out (for example if during solution open or first form load, an unhandled (so not handled by solution onError) global error was detected)
 				tmp.append("() { if (typeof ");
@@ -334,7 +372,8 @@ public class SolutionJSUnitSuiteCodeBuilder
 				// if someone wants this test to fail after it finished running do so here (for example if during current test, an unhandled (so not handled by solution onError) global error was detected)
 				tmp.append(" = null; if (this.").append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(") { var te = this.").append(
 					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append("; this.").append(
-						SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(" = null; throw te; } }\n");
+						SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY)
+					.append(" = null; throw te; } }\n");
 			}
 		}
 		if (testMethodsFound && testIdentifier != null)
@@ -345,6 +384,20 @@ public class SolutionJSUnitSuiteCodeBuilder
 			testCode.append(".glue(this);\n\n");
 		}
 		return testMethodsFound ? testIdentifier : null;
+	}
+
+	/**
+	 * If 'long' test method names are needed (a way to work around limitations of current systems running junit that
+	 * simply discard test suite start/end to create a tree-like report), we add the prefix of the current context
+	 * (solution/module/form or scope name) + method name. This helps find the failing test faster in such systems. (unpatched ant or maven)
+	 *
+	 * @param realMethodNameInSolution the test method name in the solution.
+	 * @param longTestNamesPrefix the context strings
+	 */
+	private Object getTestMethodGeneratedName(String realMethodNameInSolution, Stack<String> longTestNamesPrefix)
+	{
+		if (longTestNamesPrefix == null || !realMethodNameInSolution.startsWith(TEST_METHOD_PREFIX)) return realMethodNameInSolution;
+		return longTestNamesPrefix.stream().collect(Collectors.joining()) + "_METHOD_" + realMethodNameInSolution;
 	}
 
 	private TestIdentifier addModuleSuite(List<TestIdentifier> modulesThatAddedTests, StringBuffer testCode)

@@ -18,6 +18,7 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,7 +42,6 @@ public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 	{
 		super(exportModel, pageName, title, description, "component");
 		this.componentsSpecProviderState = componentsSpecProviderState;
-		joinWithLastUsed();
 	}
 
 	@Override
@@ -53,10 +53,11 @@ public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getComponentsToExportWithoutUnderTheHoodOnes() == null ||
-			webObjectsUsedExplicitlyBySolution.containsAll(exportModel.getComponentsToExportWithoutUnderTheHoodOnes())) return;
+		Set<String> componentsToExportWithoutUnderTheHoodOnes = exportModel.getComponentsToExportWithoutUnderTheHoodOnes();
+		if (componentsToExportWithoutUnderTheHoodOnes == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(componentsToExportWithoutUnderTheHoodOnes)) return;
 
-		for (String component : exportModel.getComponentsToExportWithoutUnderTheHoodOnes())
+		for (String component : componentsToExportWithoutUnderTheHoodOnes)
 		{
 			// make sure that the component exported the last time was not removed
 			if (componentsSpecProviderState.getWebObjectSpecification(component) != null) selectedWebObjectsForListCreation.add(component);
@@ -67,10 +68,12 @@ public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
 		Set<String> availableComponents = new TreeSet<String>();
+		List<String> preferencesExcludedDefaultComponentPackages = exportModel.getPreferencesExcludedDefaultComponentPackages();
+		Set<String> componentsNeededUnderTheHood = exportModel.getComponentsNeededUnderTheHood();
 		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
 		{
-			if (!exportModel.getPreferencesExcludedDefaultComponentPackages().contains(spec.getPackageName()) &&
-				!exportModel.getComponentsNeededUnderTheHood().contains(spec.getName()) &&
+			if (!preferencesExcludedDefaultComponentPackages.contains(spec.getPackageName()) &&
+				!componentsNeededUnderTheHood.contains(spec.getName()) &&
 				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
 			{
 				availableComponents.add(spec.getName());
@@ -90,4 +93,5 @@ public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 	{
 		exportModel.setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(selectedWebObjectsList.getItems())));
 	}
+
 }

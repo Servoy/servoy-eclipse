@@ -95,7 +95,8 @@ public class Activator extends AbstractUIPlugin
 	 *
 	 */
 	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
-		? "https://tutorials.servoy.com/solutions/content/index.html?loginToken=" : System.getProperty("servoy.tutorial.url");
+		? "https://tutorials.servoy.com/solutions/content/index.html?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken="
+		: System.getProperty("servoy.tutorial.url");
 
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
@@ -274,6 +275,15 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public void showLoginAndStart()
 	{
+		try
+		{
+			//wait some more time for the progress information dialog from solution model to close
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError(e);
+		}
 		Runnable runnable = new Runnable()
 		{
 			@Override

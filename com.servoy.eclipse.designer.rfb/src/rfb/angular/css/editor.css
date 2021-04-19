@@ -420,3 +420,7 @@ html, body
 .dropdownMenu > ul > li > a:hover {
 	text-decoration: none;
 }
+
+.panel div {
+	box-shadow: 0px 0px;
+}

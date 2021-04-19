@@ -271,7 +271,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 		{
 			try
 			{
-				len = Integer.valueOf(maxLength.getText());
+				len = maxLength.getText().trim().isEmpty() ? null : Integer.valueOf(maxLength.getText());
 			}
 			catch (NumberFormatException e)
 			{

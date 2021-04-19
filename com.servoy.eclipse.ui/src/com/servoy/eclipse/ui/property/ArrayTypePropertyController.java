@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.property;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -426,7 +427,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	 * @author acostescu
 	 */
 	protected static class ArrayItemPropertyDescriptorWrapper
-		implements IPropertyController<Object, Object>, IPropertySetter<Object, ISetterAwarePropertySource>, IProvidesTooltip
+		implements IPropertyController<Object, Object>, IPropertySetter<Object, ISetterAwarePropertySource>, IProvidesTooltip, IAdaptable
 	{
 
 		protected final static Object DELETE_CURRENT_COMMAND_VALUE = new Object();
@@ -650,6 +651,15 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			if (basePD instanceof IProvidesTooltip) return ((IProvidesTooltip)basePD).getTooltipText();
 			else return null;
+		}
+
+		public Object getAdapter(Class adapter)
+		{
+			if (Comparable.class == adapter)
+			{
+				return Integer.valueOf(index);
+			}
+			return null;
 		}
 
 	}

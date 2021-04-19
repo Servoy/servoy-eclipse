@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.sql.Types;
+
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -24,7 +27,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 
 import com.servoy.base.persistence.IBaseColumn;
-import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
@@ -104,6 +108,11 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				}
 				return UUID_TEXT_36;
 			}
+			if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
+				!Strings.isEmpty(info.getNativeTypename()))
+			{
+				return info.getNativeTypename() + " (native type)";
+			}
 			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
@@ -128,12 +137,15 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public Color getBackground(Object element, int columnIndex)
 	{
 		boolean isMobile = false;
-		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		FlattenedSolution fs = servoyModel.getFlattenedSolution();
 		if (fs != null && fs.getSolution() != null)
 		{
 			isMobile = fs.getSolution().getSolutionType() == SolutionMetaData.MOBILE;
 		}
-		if (element instanceof Column && ((Column)element).hasBadNaming(isMobile))
+
+		if (element instanceof Column && ((Column)element).hasBadNaming(servoyModel.getNameValidator(), isMobile))
 		{
 			return color;
 		}

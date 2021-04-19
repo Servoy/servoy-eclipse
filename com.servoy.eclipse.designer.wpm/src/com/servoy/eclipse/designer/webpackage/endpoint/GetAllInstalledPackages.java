@@ -54,10 +54,12 @@ import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -96,12 +98,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
-		return getAllInstalledPackages(msg, this, false);
+		return getAllInstalledPackages(msg, this, false, false);
 	}
 
-	public static JSONArray getAllInstalledPackages(boolean ignoreActiveSolution)
+	public static JSONArray getAllInstalledPackages(boolean ignoreActiveSolution, boolean includeAllRepositories)
 	{
-		return getAllInstalledPackages(null, null, ignoreActiveSolution);
+		return getAllInstalledPackages(null, null, ignoreActiveSolution, includeAllRepositories);
 	}
 
 	private static List<JSONObject> sortPackages(List<JSONObject> remotePackages)
@@ -114,7 +116,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return remotePackages;
 	}
 
-	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService, boolean ignoreActiveSolution)
+	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService,
+		boolean ignoreActiveSolution, boolean includeAllRepositories)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
@@ -123,8 +126,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
-			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
-				: getRemotePackages();
+			List<JSONObject> remotePackages = getAllInstalledPackagesService != null
+				? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges(includeAllRepositories)
+				: getRemotePackages(includeAllRepositories);
 
 			for (JSONObject pack : remotePackages)
 			{
@@ -271,12 +275,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	public List<JSONObject> setSelectedWebPackageIndex(String index)
+	public JSONArray setSelectedWebPackageIndex(String index)
 	{
 		selectedWebPackageIndex = index;
 		try
 		{
-			return getRemotePackagesAndCheckForChanges();
+			return getAllInstalledPackages(null, this, false, false);
 		}
 		catch (Exception e)
 		{
@@ -286,19 +290,49 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	}
 
 
+	public List<JSONObject> getRemotePackagesAndCheckForChanges(boolean includeAllRepositories) throws Exception
+	{
+		return getRemotePackages(endpoint, includeAllRepositories);
+	}
+
 	public List<JSONObject> getRemotePackagesAndCheckForChanges() throws Exception
 	{
-		return getRemotePackages(endpoint);
+		return getRemotePackagesAndCheckForChanges(false);
+	}
+
+	public static List<JSONObject> getRemotePackages(boolean includeAllRepositories) throws Exception
+	{
+		return getRemotePackages(null, includeAllRepositories);
 	}
 
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
-		return getRemotePackages(null);
+		return getRemotePackages(false);
 	}
 
-	private static List<JSONObject> getRemotePackages(WebPackageManagerEndpoint endpoint) throws Exception
+	private static List<JSONObject> getRemotePackages(WebPackageManagerEndpoint endpoint, boolean includeAllRepositories) throws Exception
 	{
-		final List<JSONObject> remotePackages = getRemotePackages(selectedWebPackageIndex, true);
+		List<JSONObject> remotePackages;
+		if (includeAllRepositories)
+		{
+			remotePackages = new ArrayList<JSONObject>();
+			String indexes = Activator.getEclipsePreferences().node("wpm").get("indexes", null);
+			if (indexes != null)
+			{
+				JSONArray stored = new JSONArray(indexes);
+				for (int i = 0; i < stored.length(); i++)
+				{
+					JSONObject jsonObject = stored.getJSONObject(i);
+					remotePackages.addAll(getRemotePackagesFromRepository(jsonObject.getString("url"), true));
+				}
+			}
+			remotePackages.addAll(getRemotePackagesFromRepository(MAIN_WEBPACKAGEINDEX, true));
+		}
+		else
+		{
+			remotePackages = getRemotePackagesFromRepository(selectedWebPackageIndex, true);
+		}
+
 		if (endpoint != null)
 		{
 			// check for new in a new thread
@@ -315,7 +349,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							Pair<Long, List<JSONObject>> currentPackages = remotePackagesCache.get(wpIndex);
 							if (currentPackages != null)
 							{
-								List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
+								List<JSONObject> newRemotePackages = getRemotePackagesFromRepository(wpIndex, false);
 								if (newRemotePackages.isEmpty())
 								{
 									JSONObject jsonResult = new JSONObject();
@@ -346,7 +380,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return remotePackages;
 	}
 
-	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
+	private static synchronized List<JSONObject> getRemotePackagesFromRepository(String webPackageIndex, boolean useCache) throws Exception
 	{
 		if (!useCache || !remotePackagesCache.containsKey(webPackageIndex))
 		{
@@ -384,7 +418,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 								{
 									String servoyVersion = jsonObject.getString("servoy-version");
 									String[] minAndMax = servoyVersion.split(" - ");
-									if (versionCompare(minAndMax[0], currentVersion) <= 0)
+									if (SemVerComparator.compare(minAndMax[0], currentVersion) <= 0)
 									{
 										toSort.add(jsonObject);
 									}
@@ -398,7 +432,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									@Override
 									public int compare(JSONObject o1, JSONObject o2)
 									{
-										return versionCompare(o2.optString("version", ""), o1.optString("version", ""));
+										return SemVerComparator.compare(o2.optString("version", ""), o1.optString("version", ""));
 									}
 								});
 
@@ -409,7 +443,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									{
 										String servoyVersion = jsonObject.getString("servoy-version");
 										String[] minAndMax = servoyVersion.split(" - ");
-										if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+										if (minAndMax.length > 1 && SemVerComparator.compare(minAndMax[1], currentVersion) <= 0)
 										{
 											break;
 										}
@@ -457,45 +491,6 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		checksum.update(listAsBytes, 0, listAsBytes.length);
 
 		return checksum.getValue();
-	}
-
-	private static int versionCompare(String v1, String v2)
-	{
-		String[] v1Split = v1.split("\\.");
-		String[] v2Split = v2.split("\\.");
-
-		// make the splits to be the same size, filling missing part with "0"
-		int v1SplitLength = v1Split.length, v2SplitLength = v2Split.length;
-		int maxVersionTags = Math.max(v1SplitLength, v2SplitLength);
-		if (v1SplitLength < maxVersionTags)
-		{
-			v1Split = Arrays.copyOf(v1Split, maxVersionTags);
-			Arrays.fill(v1Split, v1SplitLength, maxVersionTags, "0");
-		}
-		else if (v2SplitLength < maxVersionTags)
-		{
-			v2Split = Arrays.copyOf(v2Split, maxVersionTags);
-			Arrays.fill(v2Split, v2SplitLength, maxVersionTags, "0");
-		}
-
-		for (int i = 0; i < v1Split.length; i++)
-		{
-			int cv = 0;
-			try
-			{
-				int v1Nr = Integer.parseInt(v1Split[i]);
-				int v2Nr = Integer.parseInt(v2Split[i]);
-				cv = v1Nr - v2Nr;
-			}
-			catch (NumberFormatException ex)
-			{
-				cv = v1Split[i].compareTo(v2Split[i]);
-			}
-			if (cv == 0) continue;
-			return cv;
-		}
-
-		return v1.compareTo(v2);
 	}
 
 	private static String getUrlContents(String urlToRead)

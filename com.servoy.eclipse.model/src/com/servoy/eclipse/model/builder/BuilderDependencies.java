@@ -37,7 +37,6 @@ public class BuilderDependencies
 {
 	// the cache contains real persists, not editing ones
 	private final static BuilderDependencies me = new BuilderDependencies();
-	private Map<String, List<Form>> namedFoundsets;
 	private Map<Media, List<Form>> mediaToForms;
 	private Map<ValueList, List<Form>> valuelistToForms;
 	private Map<Relation, List<IPersist>> relationToPersists;
@@ -69,7 +68,6 @@ public class BuilderDependencies
 
 	public void clear()
 	{
-		namedFoundsets = null;
 		mediaToForms = null;
 		formDependencies = null;
 		valuelistToForms = null;
@@ -79,59 +77,14 @@ public class BuilderDependencies
 		datasourceToPersists = null;
 	}
 
-	public void addNamedFoundsetDependency(String namedFoundset, Form form)
-	{
-		if (namedFoundsets == null)
-		{
-			namedFoundsets = new HashMap<String, List<Form>>();
-		}
-		List<Form> forms = namedFoundsets.get(namedFoundset);
-		if (forms == null)
-		{
-			forms = new ArrayList<Form>();
-			namedFoundsets.put(namedFoundset, forms);
-		}
-		if (!forms.contains(form)) forms.add(form);
-	}
-
-	public void removeNamedFoundsetDependency(Form form)
-	{
-		if (namedFoundsets != null)
-		{
-			Iterator<String> it = namedFoundsets.keySet().iterator();
-			while (it.hasNext())
-			{
-				String namedFoundset = it.next();
-				List<Form> forms = namedFoundsets.get(namedFoundset);
-				if (forms != null && forms.contains(form))
-				{
-					forms.remove(form);
-				}
-				if (forms == null || forms.size() == 0)
-				{
-					it.remove();
-				}
-			}
-		}
-	}
-
-	public List<Form> getNamedFoundsetDependency(String namedFoundset)
-	{
-		if (namedFoundsets != null)
-		{
-			return namedFoundsets.get(namedFoundset);
-		}
-		return null;
-	}
-
 	public boolean isInitialized()
 	{
-		return namedFoundsets != null;
+		return mediaToForms != null;
 	}
 
 	public void initialize()
 	{
-		namedFoundsets = new HashMap<String, List<Form>>();
+		mediaToForms = new HashMap<Media, List<Form>>();
 	}
 
 	public void removeForm(Form form)

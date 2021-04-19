@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.war.exporter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.crypto.Cipher;
@@ -43,6 +45,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.json.JSONObject;
@@ -68,6 +71,9 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SecuritySupport;
+import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -239,22 +245,29 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 					{
 
 						@Override
+						public ASTNode visitPropertyExpression(PropertyExpression node)
+						{
+							String expr = source.substring(node.sourceStart(), node.sourceEnd());
+							if (expr.startsWith("plugins."))
+							{
+								String[] parts = expr.split("\\.");
+								if (parts.length > 1)
+								{
+									WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
+									if (serviceSpec != null) servicesUsedExplicitlyBySolution.add(serviceSpec.getName());
+								}
+							}
+							return super.visitPropertyExpression(node);
+						}
+
+						@Override
 						public ASTNode visitCallExpression(CallExpression node)
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
 								ASTNode astNode = node.getExpression().getChilds().get(0);
 								String expr = source.substring(astNode.sourceStart(), astNode.sourceEnd());
-								if (expr.startsWith("plugins."))
-								{
-									String[] parts = expr.split("\\.");
-									if (parts.length > 1)
-									{
-										WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
-										if (serviceSpec != null) servicesUsedExplicitlyBySolution.add(serviceSpec.getName());
-									}
-								}
-								else if (expr.contains("newWebComponent"))
+								if (expr.contains("newWebComponent"))
 								{
 									if (node.getArguments().size() > 1)
 									{
@@ -306,7 +319,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	}
 
 	@Override
-	public Set<String> getServicesNeededUnderTheHood()
+	public Set<String> getServicesNeededUnderTheHoodWithoutSabloServices()
 	{
 		return servicesNeededUnderTheHood;
 	}
@@ -659,4 +672,150 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	{
 		skipDatabaseViewsUpdate = skip;
 	}
+
+	public void generatePropertiesFileContent(File targetFile) throws FileNotFoundException, IOException
+	{
+		// create the (sorted) properties file.
+		Properties properties = new SortedProperties();
+		properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
+		properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
+		properties.setProperty("SocketFactory.compress", "true");
+		properties.setProperty("java.rmi.server.hostname", "127.0.0.1");
+
+		// TODO ask for a keystore?
+		properties.setProperty("SocketFactory.useSSL", "true");
+		properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
+		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, //
+		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
+
+//		properties.setProperty("servoy.use.client.timezone", "true");
+
+		// TODO ask for all kinds of other stuff like branding?
+		properties.setProperty("servoy.server.start.rmi", Boolean.toString(getStartRMI()));
+		properties.setProperty("servoy.rmiStartPort", getStartRMIPort());
+
+
+		if (getUserHome() != null && getUserHome().trim().length() > 0)
+		{
+			properties.setProperty(Settings.USER_HOME, getUserHome());
+		}
+
+		if (!getLicenses().isEmpty())
+		{
+			writeLicenses(properties, getLicenses());
+		}
+
+		String maxSeqLength = Settings.getInstance().getProperty("ServerManager.databasesequence.maxlength");
+		if (maxSeqLength != null)
+		{
+			properties.setProperty("ServerManager.databasesequence.maxlength", maxSeqLength);
+		}
+		// store the servers
+		SortedSet<String> selectedServerNames = getSelectedServerNames();
+		properties.setProperty("ServerManager.numberOfServers", Integer.toString(selectedServerNames.size()));
+		int i = 0;
+		for (String serverName : selectedServerNames)
+		{
+			ServerConfiguration sc = getServerConfiguration(serverName);
+
+			properties.put("server." + i + ".serverName", sc.getName());
+			properties.put("server." + i + ".userName", sc.getUserName());
+			String password = sc.getPassword();
+			try
+			{
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Could not encrypt password for sever " + sc.getName(), e);
+			}
+			properties.put("server." + i + ".password", password);
+			properties.put("server." + i + ".URL", sc.getServerUrl());
+//			Map<String, String> connectionProperties = sc.getConnectionProperties();
+//			if (connectionProperties == null)
+//			{
+//				Settings.removePrefixedProperties(properties, "server." + i + ".property.");
+//			}
+//			else
+//			{
+//				for (Entry<String, String> entry : connectionProperties.entrySet())
+//				{
+//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue());
+//				}
+//			}
+			properties.put("server." + i + ".driver", sc.getDriver());
+			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
+			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
+			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
+			String catalog = sc.getCatalog();
+			if (catalog == null)
+			{
+				catalog = "<none>";
+			}
+			else if (catalog.trim().length() == 0)
+			{
+				catalog = "<empty>";
+			}
+			properties.put("server." + i + ".catalog", catalog);
+			String schema = sc.getSchema();
+			if (schema == null)
+			{
+				schema = "<none>";
+			}
+			else if (schema.trim().length() == 0)
+			{
+				schema = "<empty>";
+			}
+			properties.put("server." + i + ".schema", schema);
+			properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive()));
+			properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle()));
+			properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle()));
+			properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType()));
+			if (sc.getValidationQuery() != null)
+			{
+				properties.put("server." + i + ".validationQuery", sc.getValidationQuery());
+			}
+			if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom()))
+			{
+				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom());
+			}
+			properties.put("server." + i + ".enabled", Boolean.toString(true));
+//			if (sc.getDialectClass() != null)
+//			{
+//				properties.put("server." + i + ".dialect", sc.getDialectClass());
+//			}
+//			else
+//			{
+//				properties.remove("server." + i + ".dialect");
+//			}
+			i++;
+		}
+
+		FileOutputStream fos = new FileOutputStream(targetFile);
+		properties.store(fos, "");
+	}
+
+	public static void writeLicenses(Properties properties, Collection<License> licenses)
+	{
+		int i = 0;
+		//THE FOLLOWING PROPERTY NAMES MUST BE THE SAME AS IN LicenseManager
+		properties.setProperty("licenseManager.numberOfLicenses", Integer.toString(licenses.size()));
+		for (License license : licenses)
+		{
+			properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
+			properties.setProperty("license." + i + ".licenses", license.getNumberOfLicenses());
+			properties.setProperty("license." + i + ".product", "0");//client
+			try
+			{
+				properties.setProperty("license." + i + ".code",
+					IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Could not encrypt license key.", e);
+			}
+			i++;
+		}
+	}
+
 }

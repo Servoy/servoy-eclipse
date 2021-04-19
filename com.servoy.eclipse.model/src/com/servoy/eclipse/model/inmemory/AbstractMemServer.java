@@ -824,7 +824,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		{
 			throw new RepositoryException("A table with name " + tableName + " already exists");
 		}
-		if (SQLKeywords.checkIfKeyword(tableName))
+		if (SQLKeywords.checkIfKeyword(tableName, getDatabaseType()))
 		{
 			throw new RepositoryException("The name " + tableName + " is an reserved sql word");
 		}
@@ -931,7 +931,8 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#getSQLQuerySet(com.servoy.j2db.query.ISQLQuery, java.util.ArrayList, int, int, boolean)
 	 */
 	@Override
-	public QuerySet getSQLQuerySet(ISQLQuery sqlQuery, ArrayList<TableFilter> filters, int startRow, int rowsToRetrieve, boolean forceQualifyColumns)
+	public QuerySet getSQLQuerySet(ISQLQuery sqlQuery, ArrayList<TableFilter> filters, int startRow, int rowsToRetrieve, boolean forceQualifyColumns,
+		boolean disableUseArrayForIn)
 		throws RepositoryException
 	{
 		// TODO Auto-generated method stub
@@ -1041,7 +1042,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#setTableMarkedAsHiddenInDeveloper(java.lang.String, boolean)
 	 */
 	@Override
-	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper)
+	public void setTableMarkedAsHiddenInDeveloper(ITable table, boolean hiddenInDeveloper)
 	{
 		// TODO Auto-generated method stub
 	}
@@ -1052,7 +1053,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#setTableMarkedAsHiddenInDeveloper(java.lang.String, boolean, boolean)
 	 */
 	@Override
-	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper, boolean fireTableHidden)
+	public void setTableMarkedAsHiddenInDeveloper(ITable table, boolean hiddenInDeveloper, boolean fireTableHidden)
 	{
 		// TODO Auto-generated method stub
 
@@ -1065,6 +1066,18 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 */
 	@Override
 	public boolean isTableMarkedAsHiddenInDeveloper(String tableName)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#isTableInvalidInDeveloperBecauseNoPk(java.lang.String)
+	 */
+	@Override
+	public boolean isTableInvalidInDeveloperBecauseNoPk(String tableName)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -1250,5 +1263,11 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			return !memoryVersion.equals(driveColumns);
 		}
 		else return true;
+	}
+
+	@Override
+	public String getDatabaseType()
+	{
+		return "inmem";
 	}
 }

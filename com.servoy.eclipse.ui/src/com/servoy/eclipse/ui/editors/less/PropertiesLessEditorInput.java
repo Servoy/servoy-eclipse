@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -49,13 +50,15 @@ import com.servoy.j2db.util.Utils;
  */
 public class PropertiesLessEditorInput extends FileEditorInput
 {
+	public static final String CUSTOM_PROPERTIES_LESS = "custom_servoy_theme_properties";
+
 	public static PropertiesLessEditorInput createFromFileEditorInput(FileEditorInput input)
 	{
 		String content = null;
 		if (input != null)
 		{
 			String fileName = input.getName();
-			if (fileName.equals(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS))
+			if (fileName.startsWith(CUSTOM_PROPERTIES_LESS) && fileName.endsWith(".less"))
 			{
 				content = getFileContent(input);
 				if (content != null)
@@ -125,6 +128,11 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> current)
 	{
 		String[] categories = text.trim().split("/\\* START");
+		if (categories.length == 1 && categories[0].contains("@import") && !current.isEmpty())
+		{
+			handleOldPropertiesFiles(current, categories);
+			return;
+		}
 		for (String category : categories)
 		{
 			if (category.indexOf("VERSION") > 0 || category.indexOf("*/") == -1) continue;
@@ -163,6 +171,41 @@ public class PropertiesLessEditorInput extends FileEditorInput
 				}
 			}
 		}
+	}
+
+	protected void handleOldPropertiesFiles(LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> current, String[] categories)
+	{
+		//we have an old properties file which does not have categories
+		//but it might contain overwritten values
+
+		String content = categories[0].replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
+		Matcher m = lessVariablePattern.matcher(content);
+		while (m.find())
+		{
+			String name = m.group(1);
+			Optional<String> category = getPropertyCategory(name, current);
+			if (category.isPresent())
+			{
+				LessPropertyEntry lessProp = current.get(category.get()).get(name);
+				lessProp.setValue(m.group(2));
+			}
+			else
+			{
+				ServoyLog.logInfo("Less property " + name + "(with value '" + m.group(2) + "') was not found in any less properties category.");
+			}
+		}
+	}
+
+	/**
+	 * @param name of the property
+	 * @param current map of category names to properties
+	 * @return the category name which contains the property
+	 */
+	private Optional<String> getPropertyCategory(String name, LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> current)
+	{
+		return current.keySet().stream()//
+			.filter(k -> current.get(k).containsKey(name))//
+			.findAny();
 	}
 
 	private static LessPropertyType inferType(String name, String value)
@@ -296,7 +339,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		for (String category : properties.keySet())
 		{
 			LinkedHashMap<String, LessPropertyEntry> props = properties.get(category);
-			content.append("/* START ");
+			content.append("\n/* START ");
 			content.append(category);
 			content.append(" */");
 			for (LessPropertyEntry prop : props.values())

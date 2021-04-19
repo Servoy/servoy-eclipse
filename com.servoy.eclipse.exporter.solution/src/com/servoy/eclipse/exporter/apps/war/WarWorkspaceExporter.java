@@ -281,14 +281,15 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public Set<String> getAllExportedServices()
+		public Set<String> getAllExportedServicesWithoutSabloServices()
 		{
 			if (cmdLineArguments.getExcludedServicePackages() != null)
 			{
-				Set<String> internallyNeededServices = getServicesNeededUnderTheHood();
+				Set<String> internallyNeededServices = getServicesNeededUnderTheHoodWithoutSabloServices();
 				List<String> excludedPackages = Arrays.asList(cmdLineArguments.getExcludedServicePackages().split(" "));
 				return Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()) //
-					.filter(spec -> (internallyNeededServices.contains(spec.getName()) || !excludedPackages.contains(spec.getPackageName())))
+					.filter(spec -> (internallyNeededServices.contains(spec.getName()) ||
+						(!excludedPackages.contains(spec.getPackageName()) && !"sablo".equals(spec.getPackageName()))))
 					.map(spec -> spec.getName()).collect(Collectors.toSet());
 			}
 			else
@@ -297,14 +298,15 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				{
 					// auto-export services explicitly used by solution and under-the-hood-services
 					Set<String> defaultExportedServices = new HashSet<>(getServicesUsedExplicitlyBySolution());
-					defaultExportedServices.addAll(getServicesNeededUnderTheHood());
+					defaultExportedServices.addAll(getServicesNeededUnderTheHoodWithoutSabloServices());
 					return defaultExportedServices;
 				}
 
 				Set<String> set = new HashSet<String>();
 				if (cmdLineArguments.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()).map(spec -> spec.getName()).forEach(set::add);
+					Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()).filter(spec -> !"sablo".equals(spec.getPackageName()))
+						.map(spec -> spec.getName()).forEach(set::add);
 				}
 				else
 				{
@@ -319,7 +321,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						}
 					}
 					set.addAll(getServicesUsedExplicitlyBySolution());
-					set.addAll(getServicesNeededUnderTheHood());
+					set.addAll(getServicesNeededUnderTheHoodWithoutSabloServices());
 				}
 				return set;
 			}
@@ -329,6 +331,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public String getFileName()
 		{
 			return null;
+		}
+
+		@Override
+		public boolean isExportNG2()
+		{
+			return cmdLineArguments.isNG2Export();
 		}
 
 		@Override
@@ -444,6 +452,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public String getTomcatContextXMLFileName()
+		{
+			return cmdLineArguments.getTomcatContextXMLFileName();
+		}
+
+		@Override
 		public boolean isCreateTomcatContextXML()
 		{
 			return cmdLineArguments.isCreateTomcatContextXML();
@@ -522,14 +536,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public Set<String> getExportedPackages()
+		public Set<String> getExportedPackagesExceptSablo()
 		{
 			if (exportedPackages == null)
 			{
 				exportedPackages = Stream.of(getAllExportedComponents().stream() //
 					.map(comp -> componentsSpecProviderState.getWebObjectSpecification(comp).getPackageName()) //
 					.collect(Collectors.toSet()), //
-					getAllExportedServices().stream() //
+					getAllExportedServicesWithoutSabloServices().stream() //
 						.map(comp -> servicesSpecProviderState.getWebObjectSpecification(comp).getPackageName()) //
 						.collect(Collectors.toSet())) //
 					.flatMap(Set::stream) //

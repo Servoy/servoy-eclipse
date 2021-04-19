@@ -67,7 +67,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
-	private WebCustomType getNewElementValue(int index)
+	private WebCustomType getNewElementValue(int index, boolean insert)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
 		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
@@ -79,7 +79,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			ISupportsIndexedChildren parent = (ISupportsIndexedChildren)persistContext.getPersist();
 			WebCustomType customType = WebCustomType.createNewInstance((IBasicWebObject)parent, arrayElementPD, propertyDescription.getName(), index, true);
 			customType.setTypeName(typeName);
-			parent.insertChild(customType);
+			if (insert)
+			{
+				parent.insertChild(customType);
+			}
+			else
+			{
+				parent.setChild(customType);
+			}
 			return customType;
 		}
 		return null;
@@ -88,7 +95,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected WebCustomType getNewElementInitialValue()
 	{
-		return getNewElementValue(0);
+		return getNewElementValue(0, true);
 	}
 
 	@Override
@@ -171,7 +178,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
-			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
+			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1, true), getEditableValue());
 		}
 
 		@Override
@@ -189,7 +196,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		protected void defaultSetElement(Object value, int idx)
 		{
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
-			((Object[])getEditableValue())[idx] = value;
+			if (value == null && getEditableValue() instanceof IChildWebObject[])
+			{
+				((Object[])getEditableValue())[idx] = getNewElementValue(idx, false);
+			}
+			else
+			{
+				((Object[])getEditableValue())[idx] = value;
+			}
 		}
 
 		@Override

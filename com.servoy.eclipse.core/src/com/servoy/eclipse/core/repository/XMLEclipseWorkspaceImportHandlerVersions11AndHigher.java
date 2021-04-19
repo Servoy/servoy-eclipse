@@ -131,18 +131,19 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final boolean forceActivateResourceProject, final boolean keepResourceProjectOpen)
+		final boolean forceActivateResourceProject, final boolean keepResourceProjectOpen, final Set<IProject> projectsToDeleteAfterImport)
 		throws RepositoryException
 	{
 		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
-			null, false, forceActivateResourceProject, keepResourceProjectOpen);
+			null, false, forceActivateResourceProject, keepResourceProjectOpen, projectsToDeleteAfterImport);
 	}
 
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final String projectLocation, final boolean reportImportFail, final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen)
+		final String projectLocation, final boolean reportImportFail, final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen,
+		final Set<IProject> projectsToDeleteAfterImport)
 		throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
@@ -204,9 +205,26 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						try
 						{
-							if (dummySolProject[0] != null && !keepResourcesProjectOpen)
+							if (dummySolProject[0] != null)
 							{
-								dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
+								if (projectsToDeleteAfterImport != null)
+								{
+									projectsToDeleteAfterImport.add(dummySolProject[0]);
+								}
+								else if (!keepResourcesProjectOpen)
+								{
+									// dummy did it's job - to activate correct resources project, now we must remove it
+									dummySolProject[0].delete(true, true, null);
+								}
+							}
+
+							if (projectsToDeleteAfterImport != null && !keepResourcesProjectOpen)
+							{
+								// dummy did it's job - to activate correct resources project, now we must remove it
+								for (IProject projectToDelete : projectsToDeleteAfterImport)
+								{
+									projectToDelete.delete(true, true, null);
+								}
 							}
 						}
 						finally
@@ -248,13 +266,23 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							if (root instanceof Solution)
 							{
 								IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(root.getName());
-								if (newProject.exists()) newProject.delete(true, true, null);
+								IPath oldPath = null;
+								if (newProject.exists())
+								{
+									oldPath = newProject.getLocation();
+									newProject.delete(true, true, null);
+								}
 								IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(root.getName());
 								if (projectLocation != null)
 								{
 									IPath path = new Path(projectLocation);
 									path = path.append(root.getName());
 									description.setLocation(path);
+								}
+								else if (oldPath != null)
+								{
+									// create the project in the same place where it was
+									description.setLocation(oldPath);
 								}
 								newProject.create(description, null);
 								newProject.open(null);
@@ -962,7 +990,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 						IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
-							table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+							table.getServerName(), null, query, null, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 						if (ds.getRowCount() == 0)
 						{
 							MetaDataUtils.loadMetadataInTable(table, def.tableMetaData);

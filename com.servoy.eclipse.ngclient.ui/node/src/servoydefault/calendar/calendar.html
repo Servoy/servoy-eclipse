@@ -1,0 +1,23 @@
+<div class='input-group date svy-calendar-container input-sm'
+	style="position:relative"
+	[svyTooltip]="toolTipText"
+    style="width:100%;height:100%;overflow:hidden"
+    #element>
+	<input type="text"
+      class='svy-calendar form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'
+      style="height:100%"
+      [id]="servoyApi.getMarkupId()"
+      [(ngModel)]="dataProviderID"
+      [svyFormat]="format"
+      (change)="pushUpdate()"
+      [svyStartEdit]="'dataProviderID'"
+      [hostComponent]="this"
+      [sabloTabseq]="tabSeq"
+      [disabled]="!enabled"
+      [readonly]="readOnly"
+      [findmode]="findmode"
+      #inputElement/>
+		<span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;" [hidden]="readOnly || !enabled || findmode"><span class="far fa-calendar-alt"></span></span>
+		<input (dateTimeChange)="dateChanged($event)" [owlDateTime]="datetime"  [value]="dataProviderID"  style="position:absolute;bottom:0px;width:0px;height:0px;border:0px;padding:0px">
+		<owl-date-time #datetime [disabled]="readOnly" [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
+</div>

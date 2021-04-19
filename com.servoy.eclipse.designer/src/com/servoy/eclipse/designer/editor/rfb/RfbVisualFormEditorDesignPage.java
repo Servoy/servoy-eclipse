@@ -127,6 +127,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	// for updating selection in editor when selection changes in IDE
 	private RfbSelectionListener selectionListener;
 
+	private RfbDirtyListener dirtyListener;
+
 	private EditorWebsocketSession editorWebsocketSession;
 	private DesignerWebsocketSession designerWebsocketSession;
 
@@ -181,6 +183,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		refreshBrowserUrl(false);
 		openViewers();
+
+		dirtyListener = new RfbDirtyListener(editorPart, editorWebsocketSession);
+		editorPart.addPropertyListener(dirtyListener);
+
 	}
 
 	protected abstract void createBrowser(Composite parent);
@@ -248,7 +254,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault +
-				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
+				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()
@@ -362,7 +368,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	}
 
 	@Override
-	public void refreshPersists(final List<IPersist> persists)
+	public void refreshPersists(final List<IPersist> persists, boolean fullRefresh)
 	{
 		if (persists != null)
 		{
@@ -399,6 +405,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
 							new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
 								: null, form.getSize().width, form.getSize().height });
+					}
+					if (fullRefresh)
+					{
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh",
+							new Object[] { });
 					}
 					if (newStylesheetsFinal != null)
 					{

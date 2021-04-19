@@ -1,0 +1,13 @@
+<div class="view">
+<input id="rangeinput" type="range" orient="vertical" [(ngModel)]="sliderValue" (change)="setIndex(-sliderValue)"
+    min="{{ -navigatorComponentCache.model.maxIndex }}" max="{{ -navigatorComponentCache.model.minIndex }}" class="column"/>
+<div class="column">
+    <span>{{ navigatorComponentCache.model.minIndex }}</span>
+    <span>|</span>
+    <span>
+        {{ navigatorComponentCache.model.hasMore ? navigatorComponentCache.model.maxIndex + '+' : navigatorComponentCache.model.maxIndex }}
+    </span>
+    <div><input type="text" [(ngModel)]="navigatorComponentCache.model.currentIndex"
+        (change)="setIndex(navigatorComponentCache.model.currentIndex)"/></div>
+    </div>
+</div>

@@ -449,7 +449,7 @@ public class ElementResolver implements IElementResolver
 						{
 							boolean memberTypeVisible = true;
 							JSType memberType = m.getType();
-							if (memberType instanceof SimpleType)
+							if (memberType instanceof SimpleType && ((SimpleType)memberType).getTarget() != null)
 							{
 								memberTypeVisible = ((SimpleType)memberType).getTarget().isVisible();
 							}

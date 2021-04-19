@@ -34,7 +34,7 @@
        <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.TutorialView"
-            icon="icons/tutorial/tinytutorial.png"
+            icon="icons/servoy-tutorials.png"
             id="com.servoy.eclipse.ui.views.TutorialView"
             name="Tutorial step by step">
       </view>
@@ -388,7 +388,7 @@
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              default="true"
-             filenames="custom_servoy_theme_properties.less"
+             filenames="custom_servoy_theme_properties.less, custom_servoy_theme_properties_ng2.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
@@ -446,6 +446,12 @@
             class="com.servoy.eclipse.ui.preferences.AutomaticNamingStrategies"
             id="com.servoy.eclipse.ui.autoNameStrategies"
             name="Automatic Naming Strategies">
+      </page>
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.NGDesktopConfiguration"
+            id="com.servoy.eclipse.ui.ngdesktop"
+            name="NG Desktop">
       </page>
       <page
             category="org.eclipse.dltk.javascript.ui.EditorPreferences"
@@ -548,21 +554,36 @@
          </action>
       </actionSet>
       <actionSet
+            id="com.servoy.eclipse.ui.ServoyAdmin"
+            label="Servoy Admin Page"
+            visible="true">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenAdminPage"
+               icon="icons/servoy-admin-page.png"
+               id="com.servoy.eclipse.ui.openAdminPage"
+               label="Servoy Admin Page"
+               menubarPath="help/intro"
+               style="push"
+               tooltip="Open Servoy Admin Page">
+         </action>
+      </actionSet>
+      <actionSet
             id="com.servoy.eclipse.ui.openURL"
             label="Open Url"
             visible="true">
          <action
                class="com.servoy.eclipse.ui.actions.OpenUrlAction"
                definitionId="com.servoy.eclipse.ui.OpenWikiAction"
+               icon="icons/servoy-wiki.png"
                id="com.servoy.eclipse.ui.openWiki"
                label="Servoy Wiki"
                menubarPath="help/intro"
-               style="push"
                tooltip="Open Servoy Wiki">
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.OpenUrlAction"
                definitionId="com.servoy.eclipse.ui.OpenForumAction"
+               icon="icons/forum.png"
                id="com.servoy.eclipse.ui.openForum"
                label="Servoy Forum"
                menubarPath="help/intro"
@@ -628,11 +649,20 @@
             label="StartPage"
             visible="true">
          <action
+               class="com.servoy.eclipse.ui.actions.OpenTutorialsView"
+               icon="icons/servoy-tutorials.png"
+               id="com.servoy.eclipse.ui.openStartPage"
+               label="Servoy Step By Step Tutorial"
+               menubarPath="help/updates"
+               style="push"
+               tooltip="Servoy Step By Step Tutorial">
+         </action>
+         <action
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
                label="Servoy First Start Guide"
-               menubarPath="help/intro"
-               icon="icons/tutorial/tinytutorial.png"
+               menubarPath="help/updates"
+               icon="icons/tips-and-tricks.png"
                style="push"
                tooltip="Open First Start Guide">
          </action>
@@ -653,19 +683,6 @@
          </action>
       </actionSet>
       -->
-      <actionSet
-            id="com.servoy.eclipse.ui.ServoyAdmin"
-            label="Servoy Admin Page"
-            visible="true">
-         <action
-               class="com.servoy.eclipse.ui.actions.OpenAdminPage"
-               id="com.servoy.eclipse.ui.openAdminPage"
-               label="Servoy Admin Page"
-               menubarPath="help/intro"
-               style="push"
-               tooltip="Open Servoy Admin Page">
-         </action>
-      </actionSet>
    </extension>
      <extension
            point="org.eclipse.ui.ide.markerResolution">
@@ -1003,78 +1020,6 @@
       </wizard>-->
    </extension>
    <extension
-         point="org.eclipse.ui.cheatsheets.cheatSheetContent">
-      <category
-            id="com.servoy.eclipse.ui.CheatSheetCategory"
-            name="Servoy">
-      </category>
-      <!-- cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/CreateSolution.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.createsolution"
-            name="Create a Servoy Solution">
-         <description>
-			Shows you how to create a Servoy solution and how to run it with the Smart Client and the Web Client.
-         </description>
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/CreateDataModel.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.createdatamodel"
-            name="Create Data Model">
-         <description>
-			Shows you how to create tables for your data model.
-         </description>
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/CreateForms.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.createui"
-            name="Create Graphical User Interface">
-         <description>
-			Shows you how to create forms for your graphical user interface.
-         </description>
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="true"
-            contentFile="cheatsheets/FirstContact.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.firstcontact"
-            name="Getting Started with Servoy"
-     		listener="com.servoy.eclipse.cheatsheets.FirstContactCheatSheetListener">
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/InstallSVN.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.installsvn"
-            name="Install the SVN Plugin">
-         <description>
-            Shows you how to install the SVN plugin.
-         </description>
-      </cheatsheet>
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="false"
-            contentFile="cheatsheets/InstallSQLExplorer.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.installsql"
-            name="Install the SQL Explorer Plugin">
-         <description>
-            Shows you how to install the SQL Explorer plugin.
-         </description>
-      </cheatsheet -->
-      <cheatsheet
-            category="com.servoy.eclipse.ui.CheatSheetCategory"
-            composite="true"
-            contentFile="cheatsheets/helloworld/HelloWorld.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.firstcontact"
-            name="Building a Hello World Solution">
-      </cheatsheet>      
-   </extension>
-   <extension
          point="org.eclipse.ui.activities">
       <activityPatternBinding
             activityId="com.servoy.eclipse.activities.dltk"
@@ -1370,13 +1315,6 @@
             updaterClass="org.eclipse.ui.internal.ide.ResourceWorkingSetUpdater">
       </workingSet>
    </extension>
-	<extension
-		point="org.eclipse.ui.cheatsheets.cheatSheetItemExtension">
-		<itemExtension
-			class="com.servoy.eclipse.cheatsheets.HyperlinkCheatSheetExtension"
-			itemAttribute="cheatsheetHyperlink">
-		</itemExtension>
-	</extension>
  <extension
        point="org.eclipse.help.contexts">
     <contexts
@@ -1401,4 +1339,13 @@
         </toolbar>
      </menuContribution>
   </extension>
+ <extension
+       point="org.eclipse.ui.propertiesView">
+    <excludeSources
+          id="com.servoy.eclipse.ui.views.FavoritesView">
+    </excludeSources>
+    <excludeSources
+          id="com.servoy.eclipse.ui.views.TutorialView">
+    </excludeSources>
+ </extension>
 </plugin>

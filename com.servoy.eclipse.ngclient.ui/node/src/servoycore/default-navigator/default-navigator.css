@@ -1,0 +1,35 @@
+#rangeinput {
+    width: 30px;
+    height: 100px;
+    -webkit-appearance: slider-vertical;
+    writing-mode: bt-lr;
+}
+
+#rangeinput::-ms-tooltip {
+    display: none;
+}
+
+#rangeinput:focus {
+    outline: none;
+}
+
+input[type="text"] {
+    width: 40px;
+    padding: 0px;
+}
+
+span {
+    display: block;
+    text-align: center;
+}
+
+.view {
+    position: absolute;
+    width: 70px;
+}
+
+.column {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 15px;
+}

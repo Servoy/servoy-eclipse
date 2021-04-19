@@ -1,0 +1,144 @@
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
+import { WindowRefService } from '../../sablo/util/windowref.service';
+
+@Injectable()
+export class TooltipService {
+    isTooltipActive: Subject<boolean>;
+    tipInitialTimeout: any;
+    tipTimeout: any;
+    private tooltipDiv: HTMLDivElement;
+    private tipmousemouveEventX: any;
+    private tipmousemouveEventY: any;
+    private tipmousemouveEventIsPage: boolean;
+    constructor(@Inject(DOCUMENT) private doc: Document, private windowRefService: WindowRefService) {
+        this.isTooltipActive = new Subject<boolean>();
+    }
+
+
+    public showTooltip(event, message, initialDelay, dismissDelay) {
+        let e = event;
+        if (!e) e = this.windowRefService.nativeWindow.event;
+
+        let targ;
+        if (e.target) targ = e.target;
+        else if (e.srcElement) targ = e.srcElement;
+        if (targ.nodeType == 3) // defeat Safari bug
+            targ = targ.parentNode;
+
+        if (targ.tagName && targ.tagName.toLowerCase() == 'option') // stop tooltip if over option element
+        {
+            this.hideTooltip();
+            return;
+        }
+
+        const tDiv = this.getTooltipDiv();
+        tDiv.innerHTML = message;
+        tDiv.style.zIndex = '1600';
+        tDiv.style.width = '';
+        tDiv.style.overflow = 'hidden';
+
+        this.tipmousemove(e);
+        if (this.doc.addEventListener) {
+            this.doc.addEventListener('mousemove', this.tipmousemove, false);
+        }
+        this.tipInitialTimeout = setTimeout(() => this.adjustAndShowTooltip(dismissDelay), initialDelay);
+    }
+
+    public hideTooltip() {
+        this.internalHideTooltip();
+    }
+
+    private getTooltipDiv(): HTMLDivElement {
+        if (!this.tooltipDiv) {
+            this.tooltipDiv = this.doc.createElement('div');
+            this.tooltipDiv.id = 'mktipmsg';
+            this.tooltipDiv.className = 'mktipmsg tooltip-inner'; // tooltip-inner class is also used by ui-bootstrap-tpls-0.10.0
+            this.doc.getElementsByTagName('body')[0].appendChild(this.tooltipDiv);
+        }
+        return this.tooltipDiv;
+    }
+
+    private tipmousemove = (e) => {
+        if (e.pageX || e.pageY) {
+            this.tipmousemouveEventIsPage = true;
+            this.tipmousemouveEventX = e.pageX;
+            this.tipmousemouveEventY = e.pageY;
+        } else if (e.clientX || e.clientY) {
+            this.tipmousemouveEventIsPage = false;
+            this.tipmousemouveEventX = e.clientX;
+            this.tipmousemouveEventY = e.clientY;
+        }
+    }
+
+    private adjustAndShowTooltip(dismissDelay) {
+        let x = 0;
+        let y = 0;
+
+        if (this.tipmousemouveEventX || this.tipmousemouveEventY) {
+            if (this.tipmousemouveEventIsPage) {
+                x = this.tipmousemouveEventX;
+                y = this.tipmousemouveEventY;
+            } else {
+                x = this.tipmousemouveEventX + this.doc.body.scrollLeft + this.doc.documentElement.scrollLeft;
+                y = this.tipmousemouveEventY + this.doc.body.scrollTop + this.doc.documentElement.scrollTop;
+            }
+        }
+
+        let wWidth = 0; let wHeight = 0;
+        if (typeof ( this.windowRefService.nativeWindow.innerWidth) == 'number') {
+            //Non-IE
+            wWidth =  this.windowRefService.nativeWindow.innerWidth;
+            wHeight =  this.windowRefService.nativeWindow.innerHeight;
+        } else if (this.doc.documentElement && (this.doc.documentElement.clientWidth || this.doc.documentElement.clientHeight)) {
+            //IE 6+ in 'standards compliant mode'
+            wWidth = this.doc.documentElement.clientWidth;
+            wHeight = this.doc.documentElement.clientHeight;
+        }
+
+
+        const tDiv = this.getTooltipDiv();
+        tDiv.style.left = x + 10 + 'px';
+        tDiv.style.top = y + 10 + 'px';
+        tDiv.style.display = 'block';
+        const tooltipOffsetWidth = x + 10 + tDiv.offsetWidth;
+
+        if (wWidth < tooltipOffsetWidth) {
+            let newLeft = x - 10 - tDiv.offsetWidth;
+            if (newLeft < 0) {
+                newLeft = 0;
+                tDiv.style.width = x - 10 + 'px';
+            }
+            if (newLeft == 0)
+                newLeft = tDiv.offsetWidth;
+            tDiv.style.left = newLeft + 'px';
+        }
+
+        const tooltipOffsetHeight = y + 10 + tDiv.offsetHeight;
+        if (wHeight < tooltipOffsetHeight) {
+            const newTop = y - 10 - tDiv.offsetHeight;
+            tDiv.style.top = newTop + 'px';
+        }
+        this.isTooltipActive.next(true);
+        this.tipTimeout = setTimeout(() => this.hideTooltip(), dismissDelay);
+
+
+    }
+
+    private internalHideTooltip() {
+        if (this.doc.removeEventListener)
+           this.doc.removeEventListener('mousemove', this.tipmousemove, false);
+        clearTimeout(this.tipInitialTimeout);
+        clearTimeout(this.tipTimeout);
+
+        const tDiv = this.getTooltipDiv();
+        tDiv.style.display = 'none';
+        this.isTooltipActive.next(false);
+    }
+}
+
+
+
+
+

@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
+import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 
@@ -87,7 +88,7 @@ public class OpenWizardAction extends Action
 				selection = (IStructuredSelection)windowSelection;
 			}
 			wizard.init(PlatformUI.getWorkbench(), selection);
-
+			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
 			{
@@ -98,6 +99,19 @@ public class OpenWizardAction extends Action
 				protected IDialogSettings getDialogBoundsSettings()
 				{
 					return EditorUtil.getDialogSettings(wizardClass.getSimpleName());
+				}
+
+				@Override
+				public void setShellStyle(int newShellStyle)
+				{
+					if (TutorialView.isTutorialViewOpen())
+					{
+						super.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+					}
+					else
+					{
+						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+					}
 				}
 
 				@Override
@@ -172,10 +186,11 @@ public class OpenWizardAction extends Action
 							@Override
 							public void widgetSelected(SelectionEvent e)
 							{
-								((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
+								String extraInfoForClient = ((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
 								MessageBox box = new MessageBox(parent.getShell(), SWT.OK);
 								box.setText("War Export - cmd. line args");
-								box.setMessage("Command line war export equivalent (to this wizard war export) was copied to clipboard.");
+								box.setMessage("Command for command line war exporter (equivalent to this wizard war export) was copied to clipboard." +
+									(extraInfoForClient != null ? "\n\n" + extraInfoForClient : ""));
 								box.open();
 							}
 
@@ -235,6 +250,7 @@ public class OpenWizardAction extends Action
 			}
 			dialog.create();
 			dialog.open();
+			handleWizardReturnValue(wizard);
 			wizard.dispose();
 
 		}
@@ -246,5 +262,15 @@ public class OpenWizardAction extends Action
 		{
 			ServoyLog.logError(e);
 		}
+	}
+
+	public void handleWizardReturnValue(IWorkbenchWizard wizard)
+	{
+
+	}
+
+	public void initWizard(IWorkbenchWizard wizard)
+	{
+
 	}
 }

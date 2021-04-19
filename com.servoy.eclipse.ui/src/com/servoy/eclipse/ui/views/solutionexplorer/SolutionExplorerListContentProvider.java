@@ -1170,18 +1170,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				List<String> metadataTables = null;
 				for (String tableName : tableNames)
 				{
-					final ITable tabel = server.getTable(tableName);
-					if (server.isTableMarkedAsHiddenInDeveloper(tableName))
+					int nodeFlags = determineFlags(server, tableName);
+
+					if ((nodeFlags & SimpleUserNode.FLAG_HIDDEN) != 0)
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 						hiddenTables.add(tableName);
 					}
-					else if (server.isTableMarkedAsMetaData(tableName))
+					else if ((nodeFlags & SimpleUserNode.FLAG_METADATA) != 0)
 					{
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
 					}
-					else if (isTableInvalidInDeveloperBecauseNoPk(tabel) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
+					else if ((nodeFlags & SimpleUserNode.FLAG_NO_PK) != 0)
 					{
 						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
 						invalidBecauseNoPK.add(tableName);
@@ -1216,6 +1217,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						}
 						UserNode node = new UserNode(name, type, new DataSourceFeedback(dataSource, true), DataSourceWrapperFactory.getWrapper(dataSource),
 							image);
+						node.setFlags(SimpleUserNode.FLAG_METADATA);
 						dlm.add(node);
 					}
 				}
@@ -1224,9 +1226,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 					for (String name : hiddenTables)
 					{
-						String dataSource = server.getTable(name).getDataSource();
+						String dataSource = server.getTableDatasource(name);
 						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("portal.png", true));
+						node.setFlags(SimpleUserNode.FLAG_HIDDEN);
 						node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 						dlm.add(node);
@@ -1238,11 +1241,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// the icon will be rendered with an error icon on the bottom left
 					for (String name : invalidBecauseNoPK)
 					{
-						String dataSource = server.getTable(name).getDataSource();
-						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
-						//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
-						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
-						dlm.add(node);
+						String dataSource = server.getTableDatasource(name);
+						if (dataSource != null)
+						{
+							UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
+							//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+							node.setFlags(SimpleUserNode.FLAG_NO_PK);
+							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
+							dlm.add(node);
+						}
 					}
 				}
 
@@ -1255,18 +1262,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
-
-	/**
-	 * @param tabel
-	 * @return
-	 */
-	private static boolean isTableInvalidInDeveloperBecauseNoPk(final ITable tabel)
+	public static int determineFlags(IServerInternal server, String tableName)
 	{
-		if (tabel != null)
+		if (server.isTableMarkedAsHiddenInDeveloper(tableName))
 		{
-			return tabel.isTableInvalidInDeveloperBecauseNoPk();
+			return SimpleUserNode.FLAG_HIDDEN;
 		}
-		return false;
+		if (server.isTableMarkedAsMetaData(tableName))
+		{
+			return SimpleUserNode.FLAG_METADATA;
+		}
+		if (server.isTableInvalidInDeveloperBecauseNoPk(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
+		{
+			return SimpleUserNode.FLAG_NO_PK;
+		}
+		return 0;
 	}
 
 	private static Image loadImageForTableNode()
@@ -1777,7 +1787,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (spec.getApiFunctions().size() > 0)
 		{
 			extractDocsFromJsFile(spec, spec.getDefinitionURL());
-			extractDocsFromJsFile(spec, spec.getServerScript());
+			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
 		}
 	}
 

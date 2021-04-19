@@ -190,6 +190,7 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
@@ -2241,7 +2242,13 @@ public class SolutionExplorerView extends ViewPart
 				}
 
 				@Override
-				public void hiddenTableChanged(IServerInternal server, Table table)
+				public void tableInitialized(Table t)
+				{
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshTable(t);
+				}
+
+				@Override
+				public void hiddenTableChanged(IServerInternal server, ITable table)
 				{
 					if (table.getTableType() == ITable.VIEW)
 					{
@@ -2797,6 +2804,8 @@ public class SolutionExplorerView extends ViewPart
 			menuManager.add(openCreateRelationTutorialAction);
 			manager.add(menuManager);
 		}
+
+		manager.add(new CopySourceFolderAction());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -3133,6 +3142,7 @@ public class SolutionExplorerView extends ViewPart
 		NewInMemoryDataSourceAction newViewFS = new NewInMemoryDataSourceAction(this, "Create view foundset", UserNodeType.VIEW_FOUNDSETS);
 		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
+		newActionInTreePrimary.registerAction(UserNodeType.WORKING_SET, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);

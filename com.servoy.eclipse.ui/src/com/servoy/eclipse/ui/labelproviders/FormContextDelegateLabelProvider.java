@@ -17,15 +17,16 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 
 /**
  * Delegate label provider that adds the form context to the label.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class FormContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
 {
@@ -43,7 +44,7 @@ public class FormContextDelegateLabelProvider extends AbstractPersistContextDele
 	public String getText(Object value)
 	{
 		String baseText = super.getText(value);
-		if (getContext() != null && value != null)
+		if (!baseText.equalsIgnoreCase(Messages.LabelUnresolved) && getContext() != null && value != null)
 		{
 			IPersist persist = getPersist(value);
 			if (persist != null && persist.getParent() instanceof Form)

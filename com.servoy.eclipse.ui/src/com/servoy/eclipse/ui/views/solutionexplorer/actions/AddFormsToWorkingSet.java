@@ -19,7 +19,9 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
@@ -82,35 +84,59 @@ public class AddFormsToWorkingSet extends Action implements ISelectionChangedLis
 				if (option >= 0)
 				{
 					String workingSet = existingWorkingSets.get(option);
-
+					Map<String, List<Form>> toRemove = new HashMap<>();
 					List<IFile> formsFile = new ArrayList<IFile>();
 					for (SimpleUserNode node : viewer.getSelectedTreeNodes())
 					{
 						if (!(node.getRealObject() instanceof Form)) continue;
-						Pair<String, String> formFilePath = SolutionSerializer.getFilePath((Form)node.getRealObject(), false);
+						Form form = (Form)node.getRealObject();
+						Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
 						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
 						formsFile.add(file);
-						String oldWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
-							((Form)node.getRealObject()).getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
-						if (oldWorkingSet != null)
+						String oldWorkingSetName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
+							.getContainingWorkingSet(form.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+						if (oldWorkingSetName != null)
 						{
-							IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(oldWorkingSet);
-							if (ws != null)
+							IWorkingSet oldWorkingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(oldWorkingSetName);
+							if (oldWorkingSet != null)
 							{
-								List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-								if (files.remove(file))
+								List<Form> list = toRemove.get(oldWorkingSetName);
+								if (list == null)
 								{
-									ws.setElements(files.toArray(new IAdaptable[0]));
+									list = new ArrayList<Form>();
+									toRemove.put(oldWorkingSetName, list);
 								}
+								list.add(form);
 							}
 						}
+					}
+					if (toRemove.size() > 0)
+					{
+						toRemove.entrySet().forEach(entry -> {
+							IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(entry.getKey());
+							entry.getValue().forEach(form -> {
+								Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+								IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+								IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
+
+								List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+								boolean modified = files.remove(scriptFile);
+								if (files.remove(file) || modified)
+								{
+									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName).getResourcesProject()
+										.saveWorkingSet(files, solutionName, ws.getName());
+								}
+							});
+
+						});
 					}
 					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSet);
 					if (ws != null)
 					{
 						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
 						files.addAll(formsFile);
-						ws.setElements(files.toArray(new IAdaptable[0]));
+						ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName).getResourcesProject()
+							.saveWorkingSet(files, solutionName, ws.getName());
 					}
 				}
 			}

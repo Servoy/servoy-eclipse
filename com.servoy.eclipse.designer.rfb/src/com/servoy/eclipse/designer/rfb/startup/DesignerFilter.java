@@ -62,6 +62,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -121,6 +122,12 @@ public class DesignerFilter implements Filter
 				{
 					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
 					Form form = fl.getForm(formName);
+					if (form == null)
+					{
+						ServoyLog.logInfo(
+							"form " + formName + " not found for the editor in solutuion: " + fl + " maybe a switch of the solution for an old editor?");
+						return;
+					}
 
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
 
@@ -239,6 +246,10 @@ public class DesignerFilter implements Filter
 								IRepository.TEMPLATES);
 							if (templates.size() > 0)
 							{
+								if (form == null || form.getUseCssPosition() == null)
+								{
+									System.err.println("null");
+								}
 								String layout = form.getUseCssPosition().booleanValue() ? Template.LAYOUT_TYPE_CSS_POSITION : layoutType;
 
 								jsonWriter.object();
@@ -274,7 +285,7 @@ public class DesignerFilter implements Filter
 										}
 										catch (Exception e)
 										{
-											Debug.error("error parsing " + content, e);
+											Debug.error("error parsing template '" + stringResource + "' with content " + content, e);
 										}
 									}
 								}

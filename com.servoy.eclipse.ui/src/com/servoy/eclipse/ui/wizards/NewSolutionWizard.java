@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -282,6 +283,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				monitor.beginTask(jobName, 1);
+				servoyModel.refreshServoyProjects();
 				// set this solution as the new active solution or add it as a module
 				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
 				if (newProject == null)
@@ -326,6 +328,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						servoyModel.setActiveProject(newProject, true);
 					}
+				}
+				else
+				{
+					ServoyLog.logError("cannot activate solution", null);
 				}
 				monitor.worked(1);
 				monitor.done();
@@ -410,7 +416,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 //		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
 //		dialog.setBlockOnOpen(true);
 //		dialog.open();
-//		dialog.close();
+//		dialog.close();\
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.PropertySheet");
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		});
 		return true;
 	}
 
@@ -427,6 +447,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				{
 					createMissingDbServers(missingServerNames, monitor);
 
+					HashSet<IProject> projectsToDeleteAfterImport = new HashSet<IProject>();
 					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 					for (String name : solutions.keySet())
 					{
@@ -434,7 +455,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution, overwriteModules);
+								shouldAskOverwrite, activateSolution, overwriteModules, projectsToDeleteAfterImport);
 							monitor.worked(1);
 						}
 					}
@@ -563,7 +584,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				DatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
 				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
 				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
-				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass());
+				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
+				origConfig.getQuoteList());
 			try
 			{
 				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
@@ -599,7 +621,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	}
 
 	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules)
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Set<IProject> projectsToDeleteAfterImport)
 		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
@@ -640,7 +662,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		}
 		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
-			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen);
+			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen, projectsToDeleteAfterImport);
 		// write the wpm version into the new solution project
 		String solutionVersion = packageInfo.version;
 		if (solutionVersion.length() > 0)
@@ -778,7 +800,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass());
+						origConfig.getDialectClass(), origConfig.getQuoteList());
 
 					EditorUtil.openServerEditor(config, true);
 				}

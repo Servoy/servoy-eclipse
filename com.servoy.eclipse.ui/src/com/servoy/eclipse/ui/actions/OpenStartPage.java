@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.actions;
 
-import org.eclipse.equinox.security.storage.ISecurePreferences;
-import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -40,24 +38,11 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 
 	public void run(IAction action)
 	{
-//		new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-
-		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
-		ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
-		String loginToken = null;
-
-		try
-		{
-			loginToken = node.get(ServoyLoginDialog.SERVOY_LOGIN_TOKEN, null);
-		}
-		catch (Exception e)
-		{
-		}
+		String loginToken = ServoyLoginDialog.getLoginToken();
 		if (loginToken == null)
 		{
 			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
 		}
-
 		if (loginToken != null)
 		{
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),

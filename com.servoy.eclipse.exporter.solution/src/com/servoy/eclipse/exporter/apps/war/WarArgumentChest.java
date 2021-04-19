@@ -43,6 +43,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String lafs;
 	private String drivers;
 	private boolean isExportActiveSolution;
+	private boolean isNG2Export;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -77,6 +78,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String updateSequences = "updateSequences";// updates Sequences \n";
 	private static final String upgradeRepository = "upgradeRepository";
 
+	private static final String contextFileName = "contextFileName";
 	private static final String createTomcatContextXML = "createTomcatContextXML";
 	private static final String antiResourceLocking = "antiResourceLocking";
 	private static final String clearReferencesStatic = "clearReferencesStatic";
@@ -233,17 +235,18 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + addUsersToAdminGroup + " ... adds Users To Admin Group\n"
 			+ "        -" + updateSequences + " ... updates Sequences\n"
 			+ "        -" + upgradeRepository + " ... automatically upgrade repository if needed\n"
-			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml   file;   please   see\n"
-			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implement\n"
-			+ "             ation for more information.\n"
-			+ "        -" + antiResourceLocking + " ... add antiResourceLocking=\"true\" to Context element; may only\n"
-			+ "             be used with createTomcatContextXML.\n"
-			+ "        -" + clearReferencesStatic + " ... add clearReferencesStatic=\"true\" to  Context element; may\n"
-			+ "             only be used with createTomcatContextXML.\n"
-			+ "        -" + clearReferencesStopThreads + " ... add   clearReferencesStopThreads=\"true\"   to Context\n"
-			+ "             element; may only be used with createTomcatContextXML.\n"
-			+ "        -" + clearReferencesStopTimerThreads + " ... add  clearReferencesStopTimerThreads=\"true\"  to\n"
-			+ "             Context element; may only be used with createTomcatContextXML.\n"
+			+ "        -" + contextFileName + " ...  a path to a tomcat context.xml  that should be included into the WAR/META-INF/context.xml\n"
+//			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml   file;   please   see\n"
+//			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implement\n"
+//			+ "             ation for more information.\n"
+//			+ "        -" + antiResourceLocking + " ... add antiResourceLocking=\"true\" to Context element; may only\n"
+//			+ "             be used with createTomcatContextXML.\n"
+//			+ "        -" + clearReferencesStatic + " ... add clearReferencesStatic=\"true\" to  Context element; may\n"
+//			+ "             only be used with createTomcatContextXML.\n"
+//			+ "        -" + clearReferencesStopThreads + " ... add   clearReferencesStopThreads=\"true\"   to Context\n"
+//			+ "             element; may only be used with createTomcatContextXML.\n"
+//			+ "        -" + clearReferencesStopTimerThreads + " ... add  clearReferencesStopTimerThreads=\"true\"  to\n"
+//			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + useAsRealAdminUser + " ... the  default admin user login  given via   -" + defaultAdminUser + "\n"
 			+ "             above will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + license+license_name_suffix +" OR "+license+".<i>"+license_name_suffix+",\n"
@@ -272,6 +275,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
+			+  "        -ng2 export ng2 binaries\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
@@ -291,6 +295,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		excludedDrivers = parseArg(excludeDrivers, null, argsMap, false);
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
+		isNG2Export = false;
+		if (argsMap.containsKey("ng2") && !Utils.getAsBoolean(argsMap.get("active"))) isNG2Export = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -496,6 +502,12 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return isExportActiveSolution;
 	}
 
+	public boolean isNG2Export()
+	{
+		return isNG2Export;
+	}
+
+
 	public String getPluginLocations()
 	{
 		return pluginLocations;
@@ -616,6 +628,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean automaticallyUpdateRepository()
 	{
 		return argumentsMap.containsKey(upgradeRepository);
+	}
+
+	public String getTomcatContextXMLFileName()
+	{
+		return argumentsMap.get(contextFileName);
 	}
 
 	public boolean isCreateTomcatContextXML()

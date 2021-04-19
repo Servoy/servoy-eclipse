@@ -66,9 +66,6 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		setDescription(description);
 		this.exportModel = exportModel;
 		this.type = type;
-
-		webObjectsUsedExplicitlyBySolution = getWebObjectsExplicitlyUsedBySolution();
-		selectedWebObjectsForListCreation = new TreeSet<String>(webObjectsUsedExplicitlyBySolution);
 	}
 
 	@Override
@@ -84,7 +81,6 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		availableLabel.setText("Exported " + type + "s");
 
 		selectedWebObjectsList = new List(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-		selectedWebObjectsList.setItems(selectedWebObjectsForListCreation.toArray(new String[selectedWebObjectsForListCreation.size()]));
 
 		btnSelect = new Button(container, SWT.NONE);
 		btnSelect.setToolTipText("Export " + type);
@@ -99,8 +95,6 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		btnSelectAll.setText(">>");
 
 		availableWebObjectsList = new List(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-		availableWebObjectsForListCreation = getAvailableItems(false);
-		availableWebObjectsList.setItems(availableWebObjectsForListCreation.toArray(new String[availableWebObjectsForListCreation.size()]));
 
 		selectedWebObjectsList.addSelectionListener(new SelectionListener()
 		{
@@ -165,7 +159,7 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 
 		btnSelect.setEnabled(false);
 		btnRemove.setEnabled(false);
-		btnSelectAll.setEnabled(!availableWebObjectsForListCreation.isEmpty());
+		btnSelectAll.setEnabled(false);
 
 		btnSelect.addSelectionListener(new SelectionAdapter()
 		{
@@ -173,6 +167,7 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 			public void widgetSelected(SelectionEvent e)
 			{
 				addSelectedWebObjects();
+				btnSelectAll.setEnabled(availableWebObjectsList.getItemCount() > 0);
 			}
 		});
 
@@ -182,6 +177,7 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 			public void widgetSelected(SelectionEvent e)
 			{
 				removeSelectedWebObjects();
+				btnSelectAll.setEnabled(true);
 			}
 		});
 
@@ -231,6 +227,8 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		selectedWebObjectsList.setItems(selectedWebObjectsForListCreation.toArray(new String[selectedWebObjectsForListCreation.size()]));
 		availableWebObjectsForListCreation = getAvailableItems(false);
 		availableWebObjectsList.setItems(availableWebObjectsForListCreation.toArray(new String[availableWebObjectsForListCreation.size()]));
+
+		btnSelectAll.setEnabled(availableWebObjectsList.getItemCount() > 0);
 	}
 
 	protected abstract Set<String> getWebObjectsExplicitlyUsedBySolution();
@@ -284,7 +282,7 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		return super.getNextPage();
 	}
 
-	public void setWebObjectsExplicitlyUsedBySolution(Set<String> webObjectsExplicitlyUsedBySolution)
+	public void initialize(Set<String> webObjectsExplicitlyUsedBySolution)
 	{
 		this.webObjectsUsedExplicitlyBySolution = webObjectsExplicitlyUsedBySolution;
 		selectedWebObjectsForListCreation = new TreeSet<String>(webObjectsExplicitlyUsedBySolution);
@@ -292,6 +290,8 @@ public abstract class AbstractWebObjectSelectionPage extends WizardPage implemen
 		selectedWebObjectsList.setItems(selectedWebObjectsForListCreation.toArray(new String[selectedWebObjectsForListCreation.size()]));
 		availableWebObjectsForListCreation = getAvailableItems(false);
 		availableWebObjectsList.setItems(availableWebObjectsForListCreation.toArray(new String[availableWebObjectsForListCreation.size()]));
+
+		btnSelectAll.setEnabled(availableWebObjectsList.getItemCount() > 0);
 	}
 
 }

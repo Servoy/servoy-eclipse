@@ -1,0 +1,30 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "module": "es2020",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom",
+      "es2018.promise"
+    ],
+    "paths": {
+     "core-js/es7/reflect": ["../node_modules/core-js/proposals/reflect-metadata"]
+    },
+	"outDir": "./out-tsc/app"
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true
+  },
+	"buildOnSave": true
+}

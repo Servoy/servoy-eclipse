@@ -18,6 +18,7 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -40,7 +41,6 @@ public class ServicesSelectionPage extends AbstractWebObjectSelectionPage
 	{
 		super(exportModel, pageName, title, description, "service");
 		this.servicesSpecProviderState = servicesSpecProviderState;
-		joinWithLastUsed();
 	}
 
 	@Override
@@ -52,9 +52,10 @@ public class ServicesSelectionPage extends AbstractWebObjectSelectionPage
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getServicesToExportWithoutUnderTheHoodOnes() == null ||
-			webObjectsUsedExplicitlyBySolution.containsAll(exportModel.getServicesToExportWithoutUnderTheHoodOnes())) return;
-		for (String service : exportModel.getServicesToExportWithoutUnderTheHoodOnes())
+		Set<String> servicesToExportWithoutUnderTheHoodOnes = exportModel.getServicesToExportWithoutUnderTheHoodOnes();
+		if (servicesToExportWithoutUnderTheHoodOnes == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(servicesToExportWithoutUnderTheHoodOnes)) return;
+		for (String service : servicesToExportWithoutUnderTheHoodOnes)
 		{
 			if (servicesSpecProviderState.getWebObjectSpecification(service) != null) selectedWebObjectsForListCreation.add(service);
 		}
@@ -64,10 +65,12 @@ public class ServicesSelectionPage extends AbstractWebObjectSelectionPage
 	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
 		Set<String> availableServices = new TreeSet<String>();
+		List<String> preferencesExcludedDefaultServicePackages = exportModel.getPreferencesExcludedDefaultServicePackages();
+		Set<String> servicesNeededUnderTheHood = exportModel.getServicesNeededUnderTheHoodWithoutSabloServices();
 		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 		{
-			if (!exportModel.getPreferencesExcludedDefaultServicePackages().contains(spec.getPackageName()) &&
-				!exportModel.getServicesNeededUnderTheHood().contains(spec.getName()) && // normally under the hood services would not be returned anyway by NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport
+			if (!preferencesExcludedDefaultServicePackages.contains(spec.getPackageName()) &&
+				!servicesNeededUnderTheHood.contains(spec.getName()) && // normally under the hood services would not be returned anyway by NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport
 				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
 			{
 				availableServices.add(spec.getName());

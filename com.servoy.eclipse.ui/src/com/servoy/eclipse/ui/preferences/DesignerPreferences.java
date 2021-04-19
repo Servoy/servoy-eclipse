@@ -110,6 +110,7 @@ public class DesignerPreferences
 	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
+	public static final String LAUNCH_NG2 = "launchNG2";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -166,11 +167,13 @@ public class DesignerPreferences
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
 
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
+	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true; // Utils.isWindowsOS();
 
 	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
-	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_BYTE_ARRAY;
+	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
+
+	public static final boolean LAUNCH_NG2_DEFAULT = false;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -885,4 +888,15 @@ public class DesignerPreferences
 
 		return ARRAY_UTF8_TYPE_DEFAULT;
 	}
+
+	public boolean launchNG2()
+	{
+		return getProperty(LAUNCH_NG2, LAUNCH_NG2_DEFAULT);
+	}
+
+	public void setLaunchNG2(boolean launchNG2)
+	{
+		setProperty(LAUNCH_NG2, launchNG2);
+	}
+
 }

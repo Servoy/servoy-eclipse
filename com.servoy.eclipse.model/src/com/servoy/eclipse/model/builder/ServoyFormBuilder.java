@@ -51,7 +51,6 @@ import org.sablo.specification.property.ICustomType;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
@@ -64,9 +63,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IForm;
-import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -87,7 +84,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -110,6 +106,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -136,7 +133,6 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScopesUtils;
-import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -303,7 +299,7 @@ public class ServoyFormBuilder
 					throw new RuntimeException(e);
 				}
 
-				addWebComponentMissingHandlers(markerResource, fs, o, form);
+				addWebComponentMissingHandlers(markerResource, fs, o, form, form.getDataSource());
 
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
@@ -340,6 +336,11 @@ public class ServoyFormBuilder
 											foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 										}
 									}
+									else
+									{
+										//default is form foundset
+										foundsetValue = "";
+									}
 									if (foundsetValue != null)
 									{
 										if (DataSourceUtils.isDatasourceUri(foundsetValue))
@@ -359,19 +360,10 @@ public class ServoyFormBuilder
 											}
 											else
 											{
-												IFoundSet foundset;
-												try
+												List<Form> forms = fs.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
+												if (forms.size() > 0)
 												{
-													foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
-														foundsetValue);
-													if (foundset != null)
-													{
-														datasource = foundset.getDataSource();
-													}
-												}
-												catch (ServoyException e)
-												{
-													ServoyLog.logError(e);
+													datasource = forms.get(0).getDataSource();
 												}
 											}
 										}
@@ -404,6 +396,7 @@ public class ServoyFormBuilder
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
 										fs);
+									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
 								}
 							}
 						}
@@ -603,41 +596,30 @@ public class ServoyFormBuilder
 					}
 					if (namedFoundset != null && namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
 					{
-						BuilderDependencies.getInstance().addNamedFoundsetDependency(namedFoundset, form);
-						List<Form> forms = BuilderDependencies.getInstance().getNamedFoundsetDependency(namedFoundset);
-						if (forms != null)
-						{
-							for (Form defineForm : forms)
-							{
-								if (Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
-									!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
-								{
-									ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
-										defineForm.getName());
-									ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH,
-										IMarker.PRIORITY_NORMAL, null,
-										form);
-									IResource defineFormFile = ServoyBuilderUtils.getPersistResource(defineForm);
-									ServoyBuilder.deleteMarkers(defineFormFile, ServoyBuilder.NAMED_FOUNDSET_DATASOURCE);
+						fs.getFormsForNamedFoundset(namedFoundset).stream()
+							.filter(defineForm -> Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
+								!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
+							.forEach(defineForm -> {
+								ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+									namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
+									defineForm.getName());
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH,
+									IMarker.PRIORITY_NORMAL, null,
+									form);
+								IResource defineFormFile = ServoyBuilderUtils.getPersistResource(defineForm);
+								ServoyBuilder.deleteMarkers(defineFormFile, ServoyBuilder.NAMED_FOUNDSET_DATASOURCE);
 
-									mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
-										form.getName());
-									ServoyBuilder.addMarker(defineFormFile, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
-										defineForm);
+								mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+									namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
+									form.getName());
+								ServoyBuilder.addMarker(defineFormFile, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
+									defineForm);
 
-									BuilderDependencies.getInstance().addDependency(form, defineForm);
-									BuilderDependencies.getInstance().addDependency(defineForm, form);
-								}
-							}
-						}
-					}
-					else
-					{
-						BuilderDependencies.getInstance().removeNamedFoundsetDependency(form);
+								BuilderDependencies.getInstance().addDependency(form, defineForm);
+								BuilderDependencies.getInstance().addDependency(defineForm, form);
+							});
 					}
 
 					addFormVariablesHideTableColumn(markerResource, form, table);
@@ -836,7 +818,9 @@ public class ServoyFormBuilder
 							Debug.error(e);
 						}
 
+
 					}
+					ServoyBuilderUtils.addScriptMethodErrorMarkers(markerResource, scriptMethod);
 				}
 
 				if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
@@ -1554,7 +1538,7 @@ public class ServoyFormBuilder
 		});
 	}
 
-	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form)
+	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1588,6 +1572,50 @@ public class ServoyFormBuilder
 						}
 						else
 						{
+							if (scriptMethod.getParent() instanceof Form)
+							{
+								List<Form> hierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
+								if (!hierarchy.contains(scriptMethod.getParent()))
+								{
+									ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+										form);
+									IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+										ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+										IMarker.PRIORITY_LOW, null, o);
+									if (marker != null)
+									{
+										try
+										{
+											marker.setAttribute("EventName", handler);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
+									}
+								}
+							}
+							else if (scriptMethod.getParent() instanceof TableNode &&
+								!Utils.equalObjects(datasource, ((TableNode)scriptMethod.getParent()).getDataSource()))
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+									form);
+								IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, o);
+								if (marker != null)
+								{
+									try
+									{
+										marker.setAttribute("EventName", handler);
+									}
+									catch (Exception ex)
+									{
+										ServoyLog.logError(ex);
+									}
+								}
+							}
+
 							BuilderDependencies.getInstance().addDependency(scriptMethod.getScopeName(), form);
 						}
 					}
@@ -1727,18 +1755,9 @@ public class ServoyFormBuilder
 										invalid = relationSequence == null;
 										if (invalid)
 										{
-											IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
-											try
+											if (flattenedSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + fs).size() > 0)
 											{
-												if (serviceProvider != null &&
-													serviceProvider.getFoundSetManager().getNamedFoundSet(fs) != null)
-												{
-													invalid = false;
-												}
-											}
-											catch (ServoyException e)
-											{
-												ServoyLog.logError(e);
+												invalid = false;
 											}
 										}
 										else
@@ -2204,6 +2223,14 @@ public class ServoyFormBuilder
 				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 			}
 		}
+		else if (pd.getType() instanceof FoundsetPropertyType)
+		{
+			Object forFoundsetValue = webObject.getProperty(pd.getName());
+			if (forFoundsetValue instanceof JSONObject)
+			{
+				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+			}
+		}
 		return "";
 	}
 
@@ -2241,9 +2268,7 @@ public class ServoyFormBuilder
 						if (relations != null)
 						{
 							Relation r = relations[relations.length - 1];
-							dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
-							if (dataProvider == null)
-								dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
+							dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignDataSource());
 							if (r != null) BuilderDependencies.getInstance().addDependency(component.getAncestor(IRepository.FORMS),
 								ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 						}
@@ -2255,16 +2280,12 @@ public class ServoyFormBuilder
 		return dataProvider;
 	}
 
-	private static IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
+	private static IDataProvider getDataProvider(FlattenedSolution fs, String id, String dataSource) throws RepositoryException
 	{
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
-		if (server != null)
+		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
+		if (table != null)
 		{
-			ITable table = server.getTable(tableName);
-			if (table != null)
-			{
-				return fs.getDataProviderForTable(table, id);
-			}
+			return fs.getDataProviderForTable(table, id);
 		}
 		return null;
 	}
@@ -2374,6 +2395,7 @@ public class ServoyFormBuilder
 			{
 				markerResource.deleteMarkers(ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.SCRIPT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			}
 		}
 		catch (CoreException e)

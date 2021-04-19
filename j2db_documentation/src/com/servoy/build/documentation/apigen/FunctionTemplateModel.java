@@ -53,7 +53,7 @@ public class FunctionTemplateModel
 		{
 			return "";
 		}
-		return description;
+		return description.replace("<br>", "").replace("<br/>", "");
 	}
 
 	public String getReturnType()

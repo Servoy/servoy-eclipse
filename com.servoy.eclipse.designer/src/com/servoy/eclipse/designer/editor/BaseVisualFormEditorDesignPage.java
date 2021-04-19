@@ -383,7 +383,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 
 	public abstract boolean showPersist(IPersist persist);
 
-	public abstract void refreshPersists(List<IPersist> persists);
+	public abstract void refreshPersists(List<IPersist> persists, boolean fullRefresh);
 
 	@Override
 	public void selectionChanged(final IWorkbenchPart part, ISelection newSelection)

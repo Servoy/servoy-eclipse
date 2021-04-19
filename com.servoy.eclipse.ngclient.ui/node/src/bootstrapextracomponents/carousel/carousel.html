@@ -1,0 +1,38 @@
+<div #element
+    [id]="servoyApi.getMarkupId()"
+    class="bts-extra-carousel"  >
+	<ngb-carousel #ngCarousel 
+        [ngClass]="styleClass"
+        [ngStyle]="getStyle()"
+	    [showNavigationArrows]="true" 
+	    [interval] = "cycleInterval"
+        [showNavigationIndicators]="true"
+        [keyboard]="true"
+        [pauseOnHover]="!noPause"
+        [animation]="!noTransition"
+        [wrap]="true">
+		<ng-template ngbSlide *ngFor="let slide of innerSlides;index as i;">
+            <div class="picsum-img-wrapper">
+				<img class="bts-extra-carousel-img"
+				    alt="i" 
+				    [ngStyle]="imageCssInternal"
+					(click)="onSlideClicked($event,slide)"
+					*ngIf="lazyLoading"
+					loading="lazy"
+					[src]="slide.imageUrl != null ? slide.imageUrl : missingImage"
+				>
+				<img
+					class="bts-extra-carousel-img" 
+					alt="i"
+					[ngStyle]="imageCssInternal"
+					(click)="onSlideClicked($event,slide)" 
+                    *ngIf="!lazyLoading"
+					[src]="slide.imageUrl != null ? slide.imageUrl : missingImage"
+			    >
+			</div>
+			<div *ngIf="slide.caption" class="carousel-caption">
+                <h3>{{slide.caption}}</h3>
+            </div>
+		</ng-template>
+	</ngb-carousel>
+</div>

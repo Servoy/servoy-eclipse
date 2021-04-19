@@ -27,8 +27,10 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
+import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Solution;
@@ -39,7 +41,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  *
  */
-public class StartNGClientHandler extends StartWebClientHandler
+public class StartNGClientHandler extends StartWebClientHandler implements NGClientStarter
 {
 	/*
 	 * (non-Javadoc)
@@ -59,6 +61,15 @@ public class StartNGClientHandler extends StartWebClientHandler
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+	{
+		runProgressBarAndNGClient(monitor);
+	}
+
+	/**
+	 * @param monitor
+	 */
+	@Override
+	public void startNGClient(IProgressMonitor monitor)
 	{
 		StartClientHandler.setLastCommand(StartClientHandler.START_NG_CLIENT);
 		monitor.beginTask(getStartTitle(), 5);
@@ -86,6 +97,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
+					final String solution_path = (new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
 					if (debugNGClient != null && debugNGClient.getFlattenedSolution().getDebugListener() == null)
 					{
@@ -97,7 +109,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 					}
 					try
 					{
-						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() +
+						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + solution_path + solution.getName() +
 							"/index.html";
 						EditorUtil.openURL(getWebBrowser(), url);
 					}

@@ -1,5 +1,8 @@
 package com.servoy.eclipse.model.war.exporter;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +60,12 @@ public interface IWarExportModel extends IExportSolutionModel
 	public Set<String> getServicesUsedExplicitlyBySolution();
 
 	/**
-	 * NOTE: this currently won't include any sablo content as all needed sablo js files are referenced staticly from the page when serving ng clients.
+	 * NOTE: this currently won't include any sablo content (which is also under-the-hood) as all needed sablo js files are referenced statically from the page (pointing to jar file inside war) when serving ng clients.<br/>
+	 * And here we want only the contents that will be wro grouped/optimized to be included.<br/><br/>
+	 *
+	 * {@link #getComponentsNeededUnderTheHood()} would be the same if sablo would have components, but it does not have any so sablo does not matter there...
 	 */
-	public Set<String> getServicesNeededUnderTheHood();
+	public Set<String> getServicesNeededUnderTheHoodWithoutSabloServices();
 
 	public boolean isOverwriteGroups();
 
@@ -80,6 +86,8 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isUpdateSequences();
 
 	boolean isAutomaticallyUpgradeRepository();
+
+	String getTomcatContextXMLFileName();
 
 	boolean isCreateTomcatContextXML();
 
@@ -136,7 +144,7 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public void setSkipDatabaseViewsUpdate(boolean skip);
 
-	public Set<String> getExportedPackages();
+	public Set<String> getExportedPackagesExceptSablo();
 
 	/**
 	 * Gets all components that are to be exported. This includes under-the-hood components, components that are explicitly used by solution and any
@@ -145,9 +153,25 @@ public interface IWarExportModel extends IExportSolutionModel
 	Set<String> getAllExportedComponents();
 
 	/**
-	 * Gets all services that are to be exported. This includes under-the-hood services, services that are explicitly used by solution and any
-	 * optional services that the user picked during export.
+	 * Gets almost all services that are to be exported. This includes under-the-hood services, services that are explicitly used by solution and any
+	 * optional services that the user picked during export.<br/><br/>
+	 *
+	 * This currently won't include any sablo content as all needed sablo js files are referenced statically from the page (pointing to jar file inside war) when serving ng clients.<br/>
+	 * And here we want only the contents that will be wro grouped/optimized to be included.<br/><br/>
+	 *
+	 * {@link #getComponentsNeededUnderTheHood()} would be the same if sablo would have components, but it does not have any so sablo does not matter there...
 	 */
-	Set<String> getAllExportedServices();
+	Set<String> getAllExportedServicesWithoutSabloServices();
+
+	public boolean isExportNG2();
+
+	/**
+	 * If a property file {@link #getServoyPropertiesFileName()} was not specified then a properties file will be generated using this method and other
+	 * information provided by this export model. {for example @link #getStartRMI() or db settings which will be used to generate this content}
+	 * @throws FileNotFoundsIOException
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	public void generatePropertiesFileContent(File tmpWarDir) throws FileNotFoundException, IOException;
 
 }

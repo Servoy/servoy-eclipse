@@ -465,4 +465,11 @@
               id="com.servoy.eclipse.debug.spec_schema">
         </schemaprovider>
      </extension>
+     <extension
+           point="com.servoy.eclipse.model.typeInferencer">
+        <provider
+              class="com.servoy.eclipse.debug.script.CalculationTypeInferencerProvider"
+              id="com.servoy.eclipse.debug.calc_type_provider">
+        </provider>
+     </extension>
 </plugin>

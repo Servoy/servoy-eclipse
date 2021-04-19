@@ -23,5 +23,10 @@ package com.servoy.eclipse.ui.wizards;
  */
 public interface ICopyWarToCommandLineWizard
 {
-	void copyWarToCommandLine();
+
+	/**
+	 * @return returns extra-information that should be presented to the user.
+	 */
+	String copyWarToCommandLine();
+
 }

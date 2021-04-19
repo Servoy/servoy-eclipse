@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.servoy.j2db.ISolutionModelPersistIndex;
@@ -32,6 +33,7 @@ import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.Media;
@@ -51,6 +53,7 @@ import com.servoy.j2db.util.Utils;
 public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
 	private final Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
+	private final ConcurrentMap<String, List<Form>> formCacheByNamedFoundset = new ConcurrentHashMap<>();
 	private final Map<UUID, List<IPersist>> duplicatesUUIDs = new HashMap<UUID, List<IPersist>>();
 	private final Map<String, Map<String, List<IPersist>>> duplicateNames = new HashMap<String, Map<String, List<IPersist>>>();
 	private final Map<Form, String> formToDataSource = new HashMap<>();
@@ -86,6 +89,18 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 					formCacheByDataSource.put(ds, set);
 				}
 				set.add(f);
+
+				String namedFoundset = f.getNamedFoundSet();
+				if (namedFoundset != null)
+				{
+					List<Form> list = formCacheByNamedFoundset.get(namedFoundset);
+					if (list == null)
+					{
+						list = new ArrayList<Form>();
+						formCacheByNamedFoundset.put(namedFoundset, list);
+					}
+					list.add(f);
+				}
 			}
 			return IPersistVisitor.CONTINUE_TRAVERSAL;
 		});
@@ -99,6 +114,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	{
 		super.destroy();
 		formCacheByDataSource.clear();
+		formCacheByNamedFoundset.clear();
 		formToDataSource.clear();
 		duplicatesUUIDs.clear();
 		duplicateNames.clear();
@@ -129,6 +145,17 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
 			}
 		}
+		for (String namedFoundset : formCacheByNamedFoundset.keySet())
+		{
+			if (formCacheByNamedFoundset.get(namedFoundset).remove(form))
+			{
+				break;
+			}
+		}
+		if (form.getNamedFoundSet() != null)
+		{
+			getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
+		}
 	}
 
 	Set<Form> getFormsByDatasource(String datasource, boolean includeNone)
@@ -156,6 +183,27 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		return datasourceSet;
 	}
 
+	public List<Form> getFormsByNamedFoundset(String namedFoundset)
+	{
+		List<Form> list = getFormsByNamedFoundsetImpl(namedFoundset, false);
+		if (list == null) return Collections.emptyList();
+		return Collections.unmodifiableList(list);
+	}
+
+	private List<Form> getFormsByNamedFoundsetImpl(String namedFoundset, boolean create)
+	{
+		if (namedFoundset != null)
+		{
+			List<Form> namedFoundsetSet = formCacheByNamedFoundset.get(namedFoundset);
+			if (namedFoundsetSet == null && create)
+			{
+				namedFoundsetSet = new ArrayList<Form>(6);
+				formCacheByNamedFoundset.put(namedFoundset, namedFoundsetSet);
+			}
+			return namedFoundsetSet;
+		}
+		return null;
+	}
 
 	/**
 	 * @param datasource
@@ -187,6 +235,10 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 			formToDataSource.put(form, ds);
 			getFormsByDatasource(ds, false).add(form);
+			if (form.getNamedFoundSet() != null)
+			{
+				getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
+			}
 		}
 	}
 
@@ -200,7 +252,11 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			getFormsByDatasource(null, false).remove(form);
 			formToDataSource.remove(form);
 			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
-
+			if (form.getNamedFoundSet() != null)
+			{
+				List<Form> lst = getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), false);
+				if (lst != null) lst.remove(form);
+			}
 			if (form.isFormComponent().booleanValue())
 			{
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
@@ -284,26 +340,39 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void addInNameCache(ConcurrentMap<String, IPersist> cache, IPersist persist)
 	{
-		String name = ((ISupportName)persist).getName();
-		if (cache.containsKey(name))
-		{
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(persist.getClass().getName());
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(persist.getClass().getName(), duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
-			IPersist duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, persist.getClass().getName());
 		super.addInNameCache(cache, persist);
+	}
+
+	/**
+	 * @param cache
+	 * @param persist
+	 * @param cacheName
+	 */
+	protected void testDuplicateCache(Map<String, ? extends IPersist> cache, IPersist persist, String cacheName)
+	{
+		String name = ((ISupportName)persist).getName();
+		if (name != null)
+		{
+			IPersist duplicatePersist = cache.get(name);
+			if (duplicatePersist != null && !duplicatePersist.equals(persist))
+			{
+				Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+				if (duplicates == null)
+				{
+					duplicates = new HashMap<String, List<IPersist>>();
+					duplicateNames.put(name, duplicates);
+				}
+				List<IPersist> duplicatePersists = duplicates.get(cacheName);
+				if (duplicatePersists == null)
+				{
+					duplicatePersists = new ArrayList<>();
+					duplicates.put(cacheName, duplicatePersists);
+				}
+				if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
+				if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+			}
+		}
 	}
 
 	@Override
@@ -436,51 +505,14 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void addInDatasourceCache(ConcurrentMap<String, IPersist> cache, IPersist persist, String datasource)
 	{
-		String name = ((ISupportName)persist).getName();
-		if (name != null && cache.containsKey(name))
-		{
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(datasource + "_" + persist.getClass().getName());
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(datasource + "_" + persist.getClass().getName(), duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
-			IPersist duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, datasource + '_' + persist.getClass().getName());
 		super.addInDatasourceCache(cache, persist, datasource);
 	}
 
 	@Override
-	protected void addInScopeCache(Map<String, ISupportScope> cache, ISupportScope persist)
+	protected void addInScopeCache(Map<String, IScriptElement> cache, IScriptElement persist)
 	{
-		String name = persist.getName();
-		if (cache.containsKey(name))
-		{
-			String scope = persist.getScopeName();
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(ISupportScope.class.getName() + "_" + scope);
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(ISupportScope.class.getName() + "_" + scope, duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add((IPersist)persist);
-			ISupportScope duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add((IPersist)duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, ISupportScope.class.getName() + "_" + persist.getScopeName());
 		super.addInScopeCache(cache, persist);
 	}
 

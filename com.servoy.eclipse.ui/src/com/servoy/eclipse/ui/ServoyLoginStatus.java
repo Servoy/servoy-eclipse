@@ -63,13 +63,20 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			@Override
 			public void mouseUp(MouseEvent e)
 			{
-				if (ServoyLoginDialog.getLoginToken() == null)
+				try
 				{
-					new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+					if (ServoyLoginDialog.getLoginToken() == null)
+					{
+						new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+					}
+					else
+					{
+						showPopUp();
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					showPopUp();
+					ServoyLog.logError(ex);
 				}
 			}
 		});

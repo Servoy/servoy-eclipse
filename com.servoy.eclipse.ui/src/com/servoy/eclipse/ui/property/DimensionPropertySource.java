@@ -96,11 +96,11 @@ public class DimensionPropertySource extends ComplexPropertySourceWithStandardRe
 		java.awt.Dimension dim = (getEditableValue() == null) ? defaultDimension : getEditableValue();
 		if (WIDTH.equals(id))
 		{
-			dim.setSize(((Integer)v).intValue(), dim.getHeight());
+			dim.setSize(v != null ? ((Integer)v).intValue() : defaultDimension.getWidth(), dim.getHeight());
 		}
 		if (HEIGHT.equals(id))
 		{
-			dim.setSize(dim.getWidth(), ((Integer)v).intValue());
+			dim.setSize(dim.getWidth(), v != null ? ((Integer)v).intValue() : defaultDimension.getHeight());
 		}
 		return dim;
 	}

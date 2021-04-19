@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,22 +29,19 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.dialogs.ModuleListValueListSelectionDialog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new valuelist depending on the selection of a solution view.
@@ -107,44 +103,14 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 
 	public static Pair<String, String> askValueListName(Shell shell, String solutionName)
 	{
-		ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-		String[] names = new String[projects.length];
-		for (int i = 0; i < projects.length; i++)
-		{
-			names[i] = projects[i].getProject().getName();
-		}
-		InputAndListDialog nameDialog = new InputAndListDialog(shell, "Create value list", "Supply value list name", "", new IInputValidator()
-		{
-			public String isValid(String newText)
-			{
-				String message = null;
-				if (newText.length() == 0)
-				{
-					message = "";
-				}
-				else if (!IdentDocumentValidator.isJavaIdentifier(newText))
-				{
-					message = "Invalid value list name";
-				}
-				else
-				{
-					try
-					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
-							new ValidatorSearchContext(this, IRepository.VALUELISTS), false);
-					}
-					catch (RepositoryException e)
-					{
-						message = e.getMessage();
-					}
-				}
-				return message;
-			}
-		}, names, solutionName, "Solution");
+
+		ModuleListValueListSelectionDialog nameDialog = new ModuleListValueListSelectionDialog(shell,
+			"Select a module for the valuelist and also supply value list name", "Supply value list name:");
+		nameDialog.setInitialSelections(solutionName);
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
-			return new Pair<String, String>(nameDialog.getValue(), nameDialog.getExtendedValue());
+			return new Pair<String, String>(nameDialog.getValueListName(), nameDialog.getFirstResult().toString());
 		}
 		return null;
 	}

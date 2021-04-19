@@ -1,0 +1,11 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb bts-extra-breadcrumbs {{styleClass}}"
+        [id]="servoyApi.getMarkupId()" >
+        <li *ngIf="!breadcrumbs || breadcrumbs.length == 0" class='breadcrumb-item active'>&nbsp;</li>
+        <li *ngFor="let crumb of breadcrumbs;let $index = index;let $last = last;" 
+            [ngClass]="$last ? ('breadcrumb-item active ' + lastCrumbStyleClass) : ('breadcrumb-item '+crumbStyleClass) ">
+            <a *ngIf="!$last" (click)="crumbClicked($event, crumb, $index)" class="svy-breadcrumb-item">{{crumb.displayName}}&nbsp;</a>
+            <span [hidden]="!$last">{{crumb.displayName}}</span>
+        </li>
+    </ol>
+</nav>

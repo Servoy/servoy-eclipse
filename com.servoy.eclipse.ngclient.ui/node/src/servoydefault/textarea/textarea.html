@@ -1,0 +1,11 @@
+<textarea style="width:100%;height:100%;resize:none"
+	   class='svy-textarea form-control form-control-sm input-sm svy-padding-xs'
+	   [id]="servoyApi.getMarkupId()"
+	   [(ngModel)]="dataProviderID"
+	   (change)="pushUpdate()"
+       [svyStartEdit]="'dataProviderID'"
+       [hostComponent]="this"
+	   [svyTooltip]="toolTipText"
+	   [sabloTabseq]="tabSeq"
+	   #element>
+</textarea>

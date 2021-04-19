@@ -1,0 +1,27 @@
+<input
+        [id]="servoyApi.getMarkupId()"
+		type="text"
+		class='bts-typeahead'
+		[svyStartEdit]="'dataProviderID'"
+		[hostComponent]="this"
+		[(ngModel)]="dataProviderID"
+		(change)="pushUpdate()"
+		(selectItem)="valueChanged($event.item)"
+		[sabloTabseq]="tabSeq"
+		[editable]="isEditable()"
+		[svyTooltip]="toolTipText"
+		[ngbTypeahead]="filterValues"
+        [container]="appendToBody?'body':null"
+		[resultFormatter]="resultFormatter"
+		[inputFormatter]="inputFormatter"
+		(focus)="focus$.next('')"
+		(click)="click$.next('')"
+        [resultTemplate]="rt"
+        (keyup.arrowDown)="scroll()" (keyup.arrowUp)="scroll()"
+		#instance="ngbTypeahead"
+		#element
+/>
+
+<ng-template #rt let-r="result" let-t="term" let-formatter="formatter">
+  <ngb-highlight [result]="formatter(r)" [term]="t"></ngb-highlight>
+</ng-template>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Core Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.core;singleton:=true
-Bundle-Version: 2020.9.0.3600_rc
+Bundle-Version: 2021.6.0.3680_rc
 Bundle-Activator: com.servoy.eclipse.core.Activator
 Bundle-Vendor: Servoy
 Bundle-Localization: plugin
@@ -47,7 +47,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.commons.io,
  sj.jsonschemavalidation,
  slf4j.api,
- com.servoy.eclipse.ngclient
+ com.servoy.eclipse.ngclient,
+ org.apache.tomcat,
+ javax.servlet
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.builder,

@@ -150,7 +150,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 			ServerConfig newServerConfig = new ServerConfig(serverName, sc.getUserName(), sc.getPassword(), url, sc.getConnectionProperties(), sc.getDriver(),
 				sc.getCatalog(), sc.getSchema(), sc.getMaxActive(), sc.getMaxIdle(), sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(),
 				sc.getValidationQuery(), sc.getDataModelCloneFrom(), true, sc.getSkipSysTables(), sc.getPrefixTables(), false, sc.getIdleTimeout(),
-				sc.getSelectINValueCountLimit(), sc.getDialectClass());
+				sc.getSelectINValueCountLimit(), sc.getDialectClass(), sc.getQuoteList());
 			try
 			{
 				serverManager.saveServerConfig(null, newServerConfig);

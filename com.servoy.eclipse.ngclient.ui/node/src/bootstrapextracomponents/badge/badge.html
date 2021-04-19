@@ -1,0 +1,35 @@
+<div class="bts-extra-badge" #element>
+    <a
+        *ngIf="displayType == 'LABEL'"
+        [ngClass] = 'styleClass'
+        class="badge"    
+        [svyTooltip]="toolTipText"
+        [class.disabled] = '!enabled'
+        [id]="servoyApi.getMarkupId()">
+            <span class="badge-icon" aria-hidden="true">
+                <i [ngClass]="imageStyleClass" aria-hidden="true"></i>
+            </span>
+            <span class="badge-text" [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
+            </span>
+            <span *ngIf="badgeText != null" class="badge badge-pill badge-dark">
+                {{badgeText}}
+            </span>
+    </a>
+    <button
+        type='button'
+        [svyTooltip]="toolTipText"
+        class = 'btn {{styleClass ? styleClass : buttonClass}}'
+        *ngIf="!displayType || displayType == 'BUTTON'"    
+        [disabled] = '!enabled'
+        [id]="servoyApi.getMarkupId()">
+	        <span class="badge-icon" aria-hidden="true">
+                <i  [ngClass]="imageStyleClass" aria-hidden="true"></i>
+	        </span>
+	        <span class="badge-text" [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()">
+            </span> 
+	        <span *ngIf="badgeText != null" 
+	            class="badge badge-pill badge-dark">
+	            {{badgeText}}
+	        </span>
+    </button>
+</div>

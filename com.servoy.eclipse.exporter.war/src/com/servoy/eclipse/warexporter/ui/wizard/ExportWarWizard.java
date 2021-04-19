@@ -21,6 +21,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -81,6 +83,9 @@ import com.servoy.j2db.util.Utils;
 public class ExportWarWizard extends DirtySaveExportWizard implements IExportWizard, IRestoreDefaultWizard, ICopyWarToCommandLineWizard
 {
 
+	private static final String DEFAULT_VALIDATORS_JAR = "default_validators.jar";
+	private static final String CONVERTERS_JAR = "converters.jar";
+
 	private FileSelectionPage fileSelectionPage;
 
 	private DirectorySelectionPage pluginSelectionPage;
@@ -119,6 +124,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	private DatabaseImportPropertiesPage databaseImportProperties;
 
 	private ExportConfirmationPage exportConfirmationPage;
+
+	private boolean componentAndServicePagesWereInitialized = false;
 
 	public ExportWarWizard()
 	{
@@ -198,6 +205,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
+		exportModel.waitForSearchJobToFinish();
+		storeInputForComponentAndServicePages();
+
 		if (exportModel.getServoyPropertiesFileName() != null)
 		{
 			String checkFile = exportModel.checkServoyPropertiesFileExists();
@@ -241,6 +251,27 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
 				return false;
 			}
+		}
+
+		boolean alreadyAsked = getDialogSettings().getBoolean("export.no_validators_or_converters.question");
+		if (!alreadyAsked)
+		{
+			boolean noConvertorsOrValidators = !exportModel.getPlugins().contains(CONVERTERS_JAR) ||
+				!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR);
+			final boolean[] exportWithoutConvOrVal = new boolean[] { true };
+			if (noConvertorsOrValidators)
+			{
+				Display.getDefault().syncExec(() -> {
+					exportWithoutConvOrVal[0] = MessageDialog.openQuestion(getShell(), "No Column Convertors or Validators are exported",
+						"Are you sure you want to export without 'converters.jar' or 'default_validators.jar' from the plugins? Press 'No' to add them automatically to the current export.");
+				});
+			}
+			if (!exportWithoutConvOrVal[0])
+			{
+				if (!exportModel.getPlugins().contains(CONVERTERS_JAR)) exportModel.getPlugins().add(CONVERTERS_JAR);
+				if (!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR)) exportModel.getPlugins().add(DEFAULT_VALIDATORS_JAR);
+			}
+			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
 		exportModel.saveSettings(getDialogSettings());
@@ -298,9 +329,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			getContainer().run(true, false, job);
 		}
-		catch (
-
-		Exception e)
+		catch (Exception e)
 		{
 			Debug.error(e);
 			return false;
@@ -308,6 +337,15 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		return !errorFlag;
 	}
 
+	private void storeInputForComponentAndServicePages()
+	{
+		if (isNGExport)
+		{
+			ensureComponentAndServicePagesAreInitialized();
+			componentsSelectionPage.storeInput();
+			servicesSelectionPage.storeInput();
+		}
+	}
 
 	private String checkAndAutoUpgradeLicenses()
 	{
@@ -452,8 +490,19 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			return super.getNextPage(nonActiveSolutionPage);
 		}
 		IWizardPage supersNextPage = super.getNextPage(page);
-		if (componentsSelectionPage.equals(supersNextPage))
+		if (componentsSelectionPage == supersNextPage)
 		{
+			ensureComponentAndServicePagesAreInitialized();
+		}
+		return supersNextPage;
+	}
+
+	private void ensureComponentAndServicePagesAreInitialized()
+	{
+		if (!componentAndServicePagesWereInitialized)
+		{
+			componentAndServicePagesWereInitialized = true;
+
 			// make sure solution explicitly used components/services are added to these pages
 			if (!exportModel.isReady())
 			{
@@ -473,12 +522,13 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 							{
 								public void run()
 								{
-									setupComponentsPages();
+									setupComponentAndServicePages();
 								}
 							});
 							monitor.done();
 						}
 					});
+					exportModel.waitForSearchJobToFinish(); // just to make sure - as getContainer().run javadoc do not guarantee that the call above is blocking
 				}
 				catch (InvocationTargetException e)
 				{
@@ -491,22 +541,20 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			}
 			else
 			{
-				setupComponentsPages();
+				setupComponentAndServicePages();
 			}
-
 		}
-		return supersNextPage;
 	}
 
-	private void setupComponentsPages()
+	private void setupComponentAndServicePages()
 	{
 		if (exportModel.hasSearchError())
 		{
 			componentsSelectionPage.setMessage("There was a problem finding used components, please select them manually.", IMessageProvider.WARNING);
 			servicesSelectionPage.setMessage("There was a problem finding used services, please select them manually.", IMessageProvider.WARNING);
 		}
-		componentsSelectionPage.setWebObjectsExplicitlyUsedBySolution(exportModel.getComponentsUsedExplicitlyBySolution());
-		servicesSelectionPage.setWebObjectsExplicitlyUsedBySolution(exportModel.getServicesUsedExplicitlyBySolution());
+		componentsSelectionPage.initialize(exportModel.getComponentsUsedExplicitlyBySolution());
+		servicesSelectionPage.initialize(exportModel.getServicesUsedExplicitlyBySolution());
 	}
 
 	@Override
@@ -519,26 +567,27 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	}
 
 	@Override
-	public void copyWarToCommandLine()
+	public String copyWarToCommandLine()
 	{
+		String extraInfoForTheUser = null;
+
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
 		beanSelectionPage.storeInput();
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
-		if (isNGExport)
-		{
-			componentsSelectionPage.storeInput();
-			servicesSelectionPage.storeInput();
-		}
 
-		StringBuilder sb = new StringBuilder("./war_export.");
+		storeInputForComponentAndServicePages();
+
+		StringBuilder sb = new StringBuilder(".\\war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
-		else if (System.getProperty("os.name", "generic").toLowerCase().indexOf("darwin") > 0) sb.append("macosx.sh");
-		else sb.append("linux.sh");
+		else sb.append("sh");
 
-		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
+		sb.append(" -data \"").append(ServoyModel.getWorkspace().getRoot().getLocation()); // quote it in case of spaces in workspace location
+
+		// the rest of the arguments starting with -s are quoted completely due to SVY-15773: command line export failed due to -b <none> -l <none> if the quotes were not there
+		sb.append("\" \"-s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 
 		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
 		File warFile = new File(warFilePath);
@@ -550,11 +599,55 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			appendToBuilder(sb, " -warFileName ", warFile.getName());
 		}
 
-		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
+		if (exportModel.getServoyPropertiesFileName() != null)
+		{
+			appendToBuilder(sb, " -pfw ", exportModel.getServoyPropertiesFileName());
+		}
+		else
+		{
+			// as command line doesn't support all options that are available in UI if a properties file is not set, for command line
+			// we should generate a properties file and offer to save it together with the copied-to-clipboard command line
+			FileDialog fileSaveDialog = new FileDialog(getShell(), SWT.SAVE);
+			fileSaveDialog.setFileName("servoy.properties");
+			fileSaveDialog.setOverwrite(true);
+			fileSaveDialog.setFilterExtensions(new String[] { "*.properties" });
+			fileSaveDialog.setFilterIndex(0);
+			fileSaveDialog.setFilterNames(new String[] { "Servoy properties file (*.properties)" });
+
+			String pathOfFileToSave = exportModel.getGenerateExportCommandLinePropertiesFileSavePath();
+			if (pathOfFileToSave != null)
+			{
+				File previouslyUsedSaveLocation = new File(pathOfFileToSave);
+				if (previouslyUsedSaveLocation.exists()) fileSaveDialog.setFilterPath(previouslyUsedSaveLocation.getAbsolutePath());
+			}
+
+			extraInfoForTheUser = "Please point (using the -pfw arg) to the location of the previously saved servoy.properties file when executing this command.";
+
+			fileSaveDialog.setText(
+				"Please choose a location where the generated servoy.properties file will be saved");
+			pathOfFileToSave = fileSaveDialog.open();
+			if (pathOfFileToSave != null)
+			{
+				try
+				{
+					exportModel.generatePropertiesFileContent(new File(pathOfFileToSave));
+				}
+				catch (IOException e)
+				{
+					ServoyLog.logError("Cannot save to disk the servoy.properties file that is to be used together with the command line copied to clipboard.",
+						e);
+				}
+			}
+			else pathOfFileToSave = "servoy.properties";
+
+			appendToBuilder(sb, " -pfw ", pathOfFileToSave);
+		}
+
+		appendToBuilder(sb, " -as ", exportModel.getServoyApplicationServerDir());
+
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
 		appendToBuilder(sb, " -defaultAdminPassword ", exportModel.getDefaultAdminPassword());
-		appendToBuilder(sb, " -p ", exportModel.getServoyPropertiesFileName());
-		appendToBuilder(sb, " -as ", exportModel.getServoyApplicationServerDir());
+
 		appendToBuilder(sb, " -dbi", exportModel.isExportUsingDbiFileInfoOnly());
 
 		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
@@ -570,11 +663,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			appendToBuilder(sb, " -pluginLocations", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber());
 
 		// see how components are to be exported
-		int underTheHoodPlusExplicitlyUsedInSolution = exportModel.getComponentsNeededUnderTheHood().size() +
-			exportModel.getComponentsUsedExplicitlyBySolution().size();
-		int allToBeExported = exportModel.getAllExportedComponents().size();
-
-		if (underTheHoodPlusExplicitlyUsedInSolution == allToBeExported) sb.append(" -crefs"); // so nothing extra selected by user; and the user cannot select anything less then this
+		if (exportModel.getComponentsNeededUnderTheHood().size() + exportModel.getComponentsUsedExplicitlyBySolution().size() == exportModel
+			.getAllExportedComponents().size()) sb.append(" -crefs"); // so nothing extra selected by user; and the user cannot select anything less then this
 		else if (componentsSelectionPage.checkThatAllPickableArePresentIn(exportModel.getAllExportedComponents()))
 		{
 			// all is exported
@@ -589,12 +679,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 
 		// see how services are to be exported
-		underTheHoodPlusExplicitlyUsedInSolution = exportModel.getServicesNeededUnderTheHood().size() +
-			exportModel.getServicesUsedExplicitlyBySolution().size();
-		allToBeExported = exportModel.getAllExportedServices().size();
-
-		if (underTheHoodPlusExplicitlyUsedInSolution == allToBeExported) sb.append(" -srefs"); // so nothing extra selected by user; and the user cannot select anything less then this
-		else if (servicesSelectionPage.checkThatAllPickableArePresentIn(exportModel.getAllExportedServices()))
+		if (exportModel.getServicesNeededUnderTheHoodWithoutSabloServices().size() + exportModel.getServicesUsedExplicitlyBySolution().size() == exportModel
+			.getAllExportedServicesWithoutSabloServices().size()) sb.append(" -srefs"); // so nothing extra selected by user; and the user cannot select anything less then this
+		else if (servicesSelectionPage.checkThatAllPickableArePresentIn(exportModel.getAllExportedServicesWithoutSabloServices()))
 		{
 			// all is exported
 			sb.append(" -srefs all");
@@ -630,7 +717,11 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -updateSequence", exportModel.isUpdateSequences());
 		appendToBuilder(sb, " -upgradeRepository", exportModel.isAutomaticallyUpgradeRepository());
 
-		if (exportModel.isCreateTomcatContextXML())
+		if (exportModel.getTomcatContextXMLFileName() != null)
+		{
+			appendToBuilder(sb, " -contextFileName ", exportModel.getTomcatContextXMLFileName());
+		}
+		else if (exportModel.isCreateTomcatContextXML())
 		{
 			appendToBuilder(sb, " -antiResourceLocking", exportModel.isAntiResourceLocking());
 			appendToBuilder(sb, " -clearReferencesStatic", exportModel.isClearReferencesStatic());
@@ -659,10 +750,13 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -overwriteAllProperties", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
+		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(selection, selection);
+
+		return extraInfoForTheUser;
 	}
 
 	public void appendToBuilder(StringBuilder sb, String argument, String property)

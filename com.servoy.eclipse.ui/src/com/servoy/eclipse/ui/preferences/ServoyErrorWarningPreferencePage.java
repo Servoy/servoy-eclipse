@@ -368,6 +368,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				new ErrorWarningPreferenceItem(ServoyBuilder.INVALID_TABLE_REFERENCE, Messages.ErrorWarningPreferencePage_invalidTableReference, false));
 			associatedProblemMarkers.add(
 				new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_EVENT_PARAMETERS, Messages.ErrorWarningPreferencePage_methodEventParameters, true));
+			associatedProblemMarkers.add(
+				new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_NO_RETURN, Messages.ErrorWarningPreferencePage_methodNoReturn, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MEDIA_TIFF, Messages.ErrorWarningPreferencePage_mediaTiff, true));
 			associatedProblemMarkers.add(
 				new ErrorWarningPreferenceItem(ServoyBuilder.CALCULATION_FORM_ACCESS, Messages.ErrorWarningPreferencePage_calculationFormAccess, true));

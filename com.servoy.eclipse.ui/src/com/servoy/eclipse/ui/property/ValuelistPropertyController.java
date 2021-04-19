@@ -20,18 +20,25 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider;
-import com.servoy.eclipse.ui.editors.AddValueListButtonComposite;
+import com.servoy.eclipse.ui.editors.AddPersistButtonComposite;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor.ListSelectControlFactory;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -75,7 +82,21 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 
 				public Control createControl(Composite composite)
 				{
-					AddValueListButtonComposite buttons = new AddValueListButtonComposite(composite, SWT.NONE);
+					AddPersistButtonComposite buttons = new AddPersistButtonComposite(composite, SWT.NONE, "Create Value List")
+					{
+						@Override
+						protected IPersist createPersist(Solution editingSolution)
+						{
+							ValueList val = null;
+							Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), null);
+							if (name != null)
+							{
+								val = NewValueListAction.createValueList(name.getLeft(),
+									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight()).getEditingSolution());
+							}
+							return val;
+						}
+					};
 					buttons.setDialog(dialog);
 					buttons.setPersist(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
 						: persistContext.getPersist());

@@ -1863,41 +1863,44 @@ public class SolutionExplorerTreeContentProvider
 			Solution servoySolution = (Solution)realObject;
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
 
-			IProject eclipseProject = servoyProject.getProject();
-
-			List<IProject> allReferencedProjects;
-			if (includeModules)
+			if (servoyProject != null)
 			{
-				try
+				IProject eclipseProject = servoyProject.getProject();
+
+				List<IProject> allReferencedProjects;
+				if (includeModules)
 				{
-					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					try
+					{
+						allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					}
+					catch (CoreException e)
+					{
+						Debug.log(e);
+						allReferencedProjects = new ArrayList<IProject>(1);
+						allReferencedProjects.add(eclipseProject);
+					}
 				}
-				catch (CoreException e)
+				else
 				{
-					Debug.log(e);
 					allReferencedProjects = new ArrayList<IProject>(1);
 					allReferencedProjects.add(eclipseProject);
 				}
-			}
-			else
-			{
-				allReferencedProjects = new ArrayList<IProject>(1);
-				allReferencedProjects.add(eclipseProject);
-			}
-			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			if (activeResourcesProject != null)
-			{
-				allReferencedProjects.remove(activeResourcesProject.getProject());
-			}
-			ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
-			packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
-
-			for (IPackageReader entry : packages)
-			{
-				IResource resource = getResource(entry);
-				if (resource instanceof IFile && allReferencedProjects.contains(resource.getProject()))
+				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (activeResourcesProject != null)
 				{
-					return true;
+					allReferencedProjects.remove(activeResourcesProject.getProject());
+				}
+				ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
+				packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
+
+				for (IPackageReader entry : packages)
+				{
+					IResource resource = getResource(entry);
+					if (resource instanceof IFile && allReferencedProjects.contains(resource.getProject()))
+					{
+						return true;
+					}
 				}
 			}
 		}
@@ -2245,7 +2248,8 @@ public class SolutionExplorerTreeContentProvider
 					if (icon == null)
 					{
 						URI u = reader.getResource().toURI();
-						try (ZipFile zip = new ZipFile(u.toURL().getFile()))
+
+						try (ZipFile zip = new ZipFile(new File(u)))
 						{
 							ZipEntry entry = zip.getEntry(iconPath);
 							try (InputStream is = zip.getInputStream(entry))
@@ -3586,6 +3590,21 @@ public class SolutionExplorerTreeContentProvider
 		{
 			handleServerNode(server, node);
 			view.refreshTreeNodeFromModel(node);
+		}
+	}
+
+	public void refreshTable(ITable table)
+	{
+		PlatformSimpleUserNode serverNode = (PlatformSimpleUserNode)findChildNode(servers, table.getServerName());
+		if (serverNode != null)
+		{
+			SimpleUserNode tableNode = findChildNode(serverNode, table.getName());
+			// only refresh the tree if something on the table has changed
+			if (tableNode != null &&
+				tableNode.getFlags() != SolutionExplorerListContentProvider.determineFlags((IServerInternal)serverNode.getRealObject(), table.getName()))
+			{
+				refreshServerViewsNode((IServerInternal)serverNode.getRealObject());
+			}
 		}
 	}
 

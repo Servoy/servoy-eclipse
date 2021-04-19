@@ -31,12 +31,12 @@ export class PackagesComponent {
     if(!p.selected) {
       p.selected = p.releases[0].version;
     }
-    return p.selected == p.releases[0].version ? "Latest" : "";
+    return this.versionCompare(p.selected, p.releases[0].version) == 0 ? "Latest" : "";
   }
 
   installAvailable(p: Package): boolean {
     const installedVersion = p.installed == 'unknown' ? '' : p.installed;
-    return !p.installed || (p.installedIsWPA && p.selected != installedVersion) || (!p.installedIsWPA && p.selected > installedVersion);
+    return !p.installed || (p.installedIsWPA && (this.versionCompare(p.selected, installedVersion) != 0)) || (!p.installedIsWPA && (this.versionCompare(p.selected, installedVersion) > 0));
   }
 
   canBeRemoved(p: Package): boolean {
@@ -99,8 +99,8 @@ export class PackagesComponent {
     if (p.installed) { 
       const installedVersion = p.installed == 'unknown' ? '' : p.installed;
       return p.installing ?
-        (p.selected > installedVersion ? "Upgrading the " + packageType + "..." : "Downgrading the " + packageType + "...") :
-        (p.selected > installedVersion ? "Upgrade the " + packageType + " to the selected release version." : "Downgrade the " + packageType + " to the selected release version.");
+        (this.versionCompare(p.selected, installedVersion) > 0 ? "Upgrading the " + packageType + "..." : "Downgrading the " + packageType + "...") :
+        (this.versionCompare(p.selected, installedVersion) > 0 ? "Upgrade the " + packageType + " to the selected release version." : "Downgrade the " + packageType + " to the selected release version.");
     } else if(p.installing) {
       return "Adding the " + packageType + "...";		      
     } else {
@@ -132,5 +132,30 @@ export class PackagesComponent {
 
   needsActiveSolution(p: Package): boolean {
     return p.packageType != PACKAGE_TYPE_SOLUTION;
+  }
+
+  versionCompare(v1: string, v2: string): number {
+    const av1 = v1.split('.');
+    const av2 = v2.split('.');
+
+    const sizeDiff = av2.length - av1.length;
+    if(sizeDiff) {
+      for(let i = 0; i < Math.abs(sizeDiff); i++) {
+        if(sizeDiff > 0) av1.push('0')
+        else av2.push('0');
+      }
+    }
+
+    for(let i = 0; i < av1.length; i++) {
+      const ival1 = parseInt(av1[i]);
+      const ival2 = parseInt(av2[i]);
+      if(ival1 != NaN && ival2 !=NaN) {
+        if(ival1 != ival2) return ival1 - ival2;
+      }
+      else if(av1[i] < av2[i]) return -1;
+      else if(av1[i] > av2[i]) return 1;
+    }
+
+    return 0;
   }
 }

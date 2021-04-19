@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -73,6 +74,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String startRMIPort = "1099";
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
+	private boolean exportNG2;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -85,7 +87,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean allRows;
 	private String warFileName;
 	private String allowDataModelChanges = "true";
-	private boolean allowSQLKeywords;
+	private boolean allowSQLKeywords = true;
 	private boolean updateSequences;
 	private boolean overrideSequenceTypes;
 	private boolean overrideDefaultValues;
@@ -112,15 +114,16 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String webXMLFileName;
 	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
-	private Set<String> exportedComponentPackages = new HashSet<>();
-	private Set<String> exportedServicePackages = new HashSet<>();
+	private String contextFileName;
+	private WorkspaceJob searchForUsedAndUnderTheHoodWebObjectsJob;
+	private String generateExportCommandLinePropertiesFileSavePath;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
 		super(isNGExport);
 		if (isNGExport)
 		{
-			WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
+			searchForUsedAndUnderTheHoodWebObjectsJob = new WorkspaceJob("Searching used components and services data")
 			{
 
 				@Override
@@ -133,17 +136,13 @@ public class ExportWarModel extends AbstractWarExportModel
 						// at one point we were showing under-the-hood components that are always needed to the user in the pick services/components dialog;
 						// that is no longer the case, but old exports might have saved those in settings; update the model to not include setComponentsToExportWithoutUnderTheHoodOnes
 						// they were initially set in code below, outside of this runInWorkspace
-						if (getComponentsToExportWithoutUnderTheHoodOnes() != null)
+						if (componentsToExportWithoutUnderTheHoodOnes != null)
 						{
-							Set<String> previouslySelectedComponents = getComponentsToExportWithoutUnderTheHoodOnes();
-							previouslySelectedComponents.removeAll(getComponentsNeededUnderTheHood());
-							setComponentsToExportWithoutUnderTheHoodOnes(previouslySelectedComponents);
+							componentsToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getComponentsNeededUnderTheHood());
 						}
-						if (getServicesToExportWithoutUnderTheHoodOnes() != null)
+						if (servicesToExportWithoutUnderTheHoodOnes != null)
 						{
-							Set<String> previouslySelectedServices = getServicesToExportWithoutUnderTheHoodOnes();
-							previouslySelectedServices.removeAll(getServicesNeededUnderTheHood());
-							setServicesToExportWithoutUnderTheHoodOnes(previouslySelectedServices);
+							servicesToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getServicesNeededUnderTheHoodWithoutSabloServices());
 						}
 					}
 					catch (final Exception e)
@@ -158,9 +157,9 @@ public class ExportWarModel extends AbstractWarExportModel
 					return Status.OK_STATUS;
 				}
 			};
-			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			job.setUser(false);
-			job.schedule();
+			searchForUsedAndUnderTheHoodWebObjectsJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			searchForUsedAndUnderTheHoodWebObjectsJob.setUser(false);
+			searchForUsedAndUnderTheHoodWebObjectsJob.schedule();
 		}
 
 		Cipher desCipher = null;
@@ -181,6 +180,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
+		exportNG2 = Utils.getAsBoolean(settings.get("export.ng2"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -203,11 +203,14 @@ public class ExportWarModel extends AbstractWarExportModel
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
 		upgradeRepository = Utils.getAsBoolean(settings.get("export.upgradeRepository"));
 
+		contextFileName = settings.get("export.tomcat.contextFileName");
 		createTomcatContextXML = Utils.getAsBoolean(settings.get("export.tomcat.createTomcatContextXML"));
 		antiResourceLocking = Utils.getAsBoolean(settings.get("export.tomcat.antiResourceLocking"));
 		clearReferencesStatic = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStatic"));
 		clearReferencesStopThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopThreads"));
 		clearReferencesStopTimerThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopTimerThreads"));
+
+		generateExportCommandLinePropertiesFileSavePath = settings.get("ui.cmdgenerator.propertiesSavePath");
 
 		if (settings.get("export.overwriteDBServerProperties") != null)
 		{
@@ -353,6 +356,22 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 	}
 
+	/**
+	 * ExportWarModel constructor starts a workspace job the searches in the active solution for used services/components.<br/>
+	 * Call this method to make sure that job finished before trying to use services/components used by solution & under the hood components/services.
+	 */
+	public void waitForSearchJobToFinish()
+	{
+		try
+		{
+			if (searchForUsedAndUnderTheHoodWebObjectsJob != null) searchForUsedAndUnderTheHoodWebObjectsJob.join();
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError("Error waiting for job that searches solution for used components/services & under the hood webobjects...", e);
+		}
+	}
+
 	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
 	{
 		return decryptPassword(desCipher, settings.get(propertyName));
@@ -360,7 +379,6 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	public void saveSettings(IDialogSettings settings)
 	{
-
 		Cipher desCipher = null;
 		try
 		{
@@ -374,6 +392,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		settings.put("export.warfilename", warFileName);
+		settings.put("export.ng2", isExportNG2());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -401,12 +420,16 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
 		settings.put("export.upgradeRepository", upgradeRepository);
+		settings.put("export.tomcat.contextFileName", contextFileName);
 		settings.put("export.tomcat.createTomcatContextXML", createTomcatContextXML);
 		settings.put("export.tomcat.antiResourceLocking", antiResourceLocking);
 		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
 		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
 		settings.put("export.defaultAdminUser", defaultAdminUser);
+
+		settings.put("ui.cmdgenerator.propertiesSavePath", generateExportCommandLinePropertiesFileSavePath);
+
 		if (defaultAdminPassword != null)
 			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
 		settings.put("export.useAsRealAdminUser", useAsRealAdminUser);
@@ -414,7 +437,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteDBServerProperties", isOverwriteDeployedDBServerProperties());
 		settings.put("export.overwriteAllProperties", isOverwriteDeployedServoyProperties());
 
-
+		waitForSearchJobToFinish();
 		if (componentsToExportWithoutUnderTheHoodOnes != null)
 			settings.put("export.components", componentsToExportWithoutUnderTheHoodOnes.toArray(new String[componentsToExportWithoutUnderTheHoodOnes.size()]));
 		if (servicesToExportWithoutUnderTheHoodOnes != null)
@@ -592,6 +615,17 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void setExportActiveSolution(boolean exportActiveSolution)
 	{
 		this.exportActiveSolution = exportActiveSolution;
+	}
+
+	@Override
+	public boolean isExportNG2()
+	{
+		return exportNG2;
+	}
+
+	public void setExportNG2(boolean exportNG2)
+	{
+		this.exportNG2 = exportNG2;
 	}
 
 	public List<String> getPlugins()
@@ -857,28 +891,36 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void setComponentsToExportWithoutUnderTheHoodOnes(Set<String> selectedComponents)
 	{
 		this.componentsToExportWithoutUnderTheHoodOnes = selectedComponents;
-		exportedComponentPackages = componentsToExportWithoutUnderTheHoodOnes.stream() //
-			.filter(component -> componentsSpecProviderState.getWebObjectSpecification(component) != null) //
-			.map(component -> componentsSpecProviderState.getWebObjectSpecification(component).getPackageName()) //
-			.collect(Collectors.toSet());
 	}
 
 	public void setServicesToExportWithoutUnderTheHoodOnes(Set<String> selectedServices)
 	{
 		this.servicesToExportWithoutUnderTheHoodOnes = selectedServices;
-		exportedServicePackages = servicesToExportWithoutUnderTheHoodOnes.stream() //
-			.filter(service -> servicesSpecProviderState.getWebObjectSpecification(service) != null) //
-			.map(service -> servicesSpecProviderState.getWebObjectSpecification(service).getPackageName()) //
-			.collect(Collectors.toSet());
+	}
+
+	@Override
+	public Set<String> getComponentsNeededUnderTheHood()
+	{
+		waitForSearchJobToFinish();
+		return super.getComponentsNeededUnderTheHood();
+	}
+
+	@Override
+	public Set<String> getServicesNeededUnderTheHoodWithoutSabloServices()
+	{
+		waitForSearchJobToFinish();
+		return super.getServicesNeededUnderTheHoodWithoutSabloServices();
 	}
 
 	public Set<String> getComponentsToExportWithoutUnderTheHoodOnes()
 	{
+		waitForSearchJobToFinish();
 		return componentsToExportWithoutUnderTheHoodOnes != null ? componentsToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
 	}
 
 	public Set<String> getServicesToExportWithoutUnderTheHoodOnes()
 	{
+		waitForSearchJobToFinish();
 		return servicesToExportWithoutUnderTheHoodOnes != null ? servicesToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
 	}
 
@@ -891,6 +933,21 @@ public class ExportWarModel extends AbstractWarExportModel
 	public boolean isAutomaticallyUpgradeRepository()
 	{
 		return upgradeRepository;
+	}
+
+	@Override
+	public String getTomcatContextXMLFileName()
+	{
+		return contextFileName;
+	}
+
+	/**
+	 * @param contextFileName the contextFileName to set
+	 */
+	public void setTomcatContextXMLFileName(String contextFileName)
+	{
+		this.contextFileName = contextFileName;
+		if (this.createTomcatContextXML) this.createTomcatContextXML = contextFileName != null;
 	}
 
 	public boolean isCreateTomcatContextXML()
@@ -1038,10 +1095,21 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	@Override
-	public Set<String> getExportedPackages()
+	public Set<String> getExportedPackagesExceptSablo()
 	{
-		return Stream.of(exportedComponentPackages, exportedServicePackages, exportedLayoutPackages) //
-			.flatMap(Set::stream) //
+		Set<String> allExportedServicePackages = getAllExportedServicesWithoutSabloServices().stream()
+			.filter(service -> servicesSpecProviderState.getWebObjectSpecification(service) != null)
+			.map(service -> servicesSpecProviderState.getWebObjectSpecification(service).getPackageName())
+			.collect(Collectors.toSet());
+
+		Set<String> allExportedComponentPackages = getAllExportedComponents().stream()
+			.filter(component -> componentsSpecProviderState.getWebObjectSpecification(component) != null)
+			.map(component -> componentsSpecProviderState.getWebObjectSpecification(component).getPackageName())
+			.collect(Collectors.toSet());
+
+		return Stream
+			.of(allExportedComponentPackages, allExportedServicePackages, exportedLayoutPackages)
+			.flatMap(Set::stream)
 			.collect(Collectors.toSet());
 	}
 
@@ -1054,11 +1122,21 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	@Override
-	public Set<String> getAllExportedServices()
+	public Set<String> getAllExportedServicesWithoutSabloServices()
 	{
-		Set<String> allServicesThatShouldBeExported = new HashSet<>(getServicesNeededUnderTheHood());
-		allServicesThatShouldBeExported.addAll(getServicesToExportWithoutUnderTheHoodOnes());
-		return allServicesThatShouldBeExported;
+		Set<String> allServicesThatShouldBeExportedExceptSabloServices = new HashSet<>(getServicesNeededUnderTheHoodWithoutSabloServices());
+		allServicesThatShouldBeExportedExceptSabloServices.addAll(getServicesToExportWithoutUnderTheHoodOnes());
+		return allServicesThatShouldBeExportedExceptSabloServices;
+	}
+
+	public String getGenerateExportCommandLinePropertiesFileSavePath()
+	{
+		return generateExportCommandLinePropertiesFileSavePath;
+	}
+
+	public void setGenerateExportCommandLinePropertiesFileSavePath(String path)
+	{
+		generateExportCommandLinePropertiesFileSavePath = path;
 	}
 
 }

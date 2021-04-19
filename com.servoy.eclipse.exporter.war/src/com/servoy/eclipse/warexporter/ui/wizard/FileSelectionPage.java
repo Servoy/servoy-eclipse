@@ -62,6 +62,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
+	private Button exportNG2;
 	private Button exportActiveSolution;
 	private Button exportSomeNonActiveSolutions;
 	private Button allRowsRadioButton;
@@ -116,6 +117,19 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		browseButton = new Button(fileBrowsePanel, SWT.PUSH);
 		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
+
+		exportNG2 = new Button(composite, SWT.CHECK);
+		exportNG2.setText("Export NG2 resources");
+		exportNG2.setEnabled(exportModel.isNGExport());
+		exportNG2.setSelection(exportModel.isExportNG2());
+		exportNG2.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setExportNG2(exportNG2.getSelection());
+			}
+		});
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
 		exportActiveSolution.setText("Include active solution and modules");
@@ -423,8 +437,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		enableSolutionExportData();
 
 		setControl(composite);
-
-		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()
@@ -630,6 +642,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportSomeNonActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
 		exportActiveSolution.setSelection(false);
+		exportNG2.setSelection(false);
 		exportModel.setExportActiveSolution(false);
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
@@ -664,5 +677,15 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_main");
+	}
+
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (visible)
+		{
+			this.getWizard().getContainer().getShell().pack();
+		}
 	}
 }

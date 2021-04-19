@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -42,7 +43,7 @@ import com.servoy.j2db.persistence.ValueList;
 
 /**
  * Action that is displayed in the context menu of the supported {@link IPersist} instances, currently {@link Relation} and {@link ValueList}
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -60,7 +61,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -99,6 +100,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			query = new TableSearch((TableWrapper)selectedObject);
 		}
+		else if (selectedObject instanceof InMemServerWrapper)
+		{
+			query = new InMemDatasourceSearch((InMemServerWrapper)selectedObject);
+		}
 		else if (selectedObject instanceof BaseComponent)
 		{
 			query = new ElementSearch((BaseComponent)selectedObject);
@@ -120,7 +125,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
@@ -140,7 +145,8 @@ public class SearchAction extends Action implements ISelectionChangedListener
 				if (node.getType() == UserNodeType.VALUELIST_ITEM || node.getType() == UserNodeType.RELATION || node.getType() == UserNodeType.FORM ||
 					node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
 					node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
-					node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
+					node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.INMEMORY_DATASOURCE ||
+					node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
 					node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
 					node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM ||
 					node.getType() == UserNodeType.MEDIA_IMAGE)

@@ -694,10 +694,8 @@ public class DataModelManager implements IColumnInfoManager
 		if (tableInfo.columnInfoDefSet.size() > 0)
 		{
 			changedColumns = new ArrayList<IColumn>(tableInfo.columnInfoDefSet.size());
-			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
+			for (ColumnInfoDef cid : tableInfo.columnInfoDefSet)
 			{
-				ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
-
 				String cname = cid.name;
 				Column c = t.getColumn(cname);
 
@@ -765,7 +763,7 @@ public class DataModelManager implements IColumnInfoManager
 			t.setTableInvalidInDeveloperBecauseNoPk(true);
 			//s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
 		}
-		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+		else s.setTableMarkedAsHiddenInDeveloper(t, tableInfo.hiddenInDeveloper);
 
 		t.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
 

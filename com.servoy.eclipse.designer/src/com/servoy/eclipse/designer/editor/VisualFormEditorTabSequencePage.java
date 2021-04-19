@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.TabSeqComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
@@ -406,7 +405,8 @@ public class VisualFormEditorTabSequencePage extends Composite
 		{
 			public int compare(TabSeqProperty o1, TabSeqProperty o2)
 			{
-				return TabSeqComparator.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element);
+				return FormElementHelper.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element,
+					ModelUtils.getEditingFlattenedSolution(editor.getForm()));
 			}
 		});
 		List<IFormElement> elements = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getFlattenedObjects(null);

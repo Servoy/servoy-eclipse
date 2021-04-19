@@ -25,9 +25,9 @@ import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * Delegate label provider that adds a marker to the text when the value should not be accessible from the context..
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class AccesCheckingContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
 {
@@ -45,7 +45,7 @@ public class AccesCheckingContextDelegateLabelProvider extends AbstractPersistCo
 	public String getText(Object value)
 	{
 		String baseText = super.getText(value);
-		if (value != null && getContext() != null)
+		if (!baseText.equalsIgnoreCase(Messages.LabelUnresolved) && value != null && getContext() != null)
 		{
 			IPersist persist = getPersist(value);
 			if (persist instanceof ScriptMethod && persist.getParent() != getContext() && ((ScriptMethod)persist).isPrivate())

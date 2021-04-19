@@ -40,6 +40,7 @@ public class ResourcesUtils
 
 	public static String BUILDPATH_FILE = IScriptProjectFilenames.BUILDPATH_FILENAME;
 	public static String STP_DIR = ".stp";
+	public static String NODE_DIR = ".node";
 
 	/**
 	 * Creates the given file, and it's parent containers (if they do not already exist).

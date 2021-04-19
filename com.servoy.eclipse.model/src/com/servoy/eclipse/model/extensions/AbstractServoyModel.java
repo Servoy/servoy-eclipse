@@ -78,7 +78,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	protected DataModelManager dataModelManager;
 	private volatile Map<String, ServoyProject> servoyProjectCache;
 
-	private FlattenedSolution flattenedSolution;
+	private volatile FlattenedSolution flattenedSolution;
 	private IActiveSolutionHandler activeSolutionHandler;
 
 	private final EclipseMessages messagesManager;
@@ -429,21 +429,30 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return flattenedSolution;
 	}
 
-	protected void updateFlattenedSolution()
+	protected void updateFlattenedSolution(boolean forceUpdate)
 	{
 		if (flattenedSolution != null)
 		{
-			try
+			synchronized (flattenedSolution)
 			{
-				flattenedSolution.close(null);
-				if (activeProject != null && activeProject.getSolution() != null)
+				if (!forceUpdate && activeProject != null && flattenedSolution.getSolution() != null &&
+					flattenedSolution.getSolution().equals(activeProject.getSolution()))
 				{
-					flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
+					flattenedSolution.reload();
+					return;
 				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
+				try
+				{
+					flattenedSolution.close(null);
+					if (activeProject != null && activeProject.getSolution() != null)
+					{
+						flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}

@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -108,6 +107,7 @@ import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
+import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -141,8 +141,8 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
+		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() +
+			".jar", "org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 
@@ -169,7 +169,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 39);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 40);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -219,7 +219,7 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 10 : 4);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
 			monitor.subTask("Copying NGClient components/services...");
@@ -232,12 +232,18 @@ public class WarExporter
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
 			monitor.worked(1);
+			if (exportModel.isExportNG2())
+			{
+				monitor.subTask("Copy NGClient2 resources");
+				copyNGClient2(tmpWarDir);
+			}
+			monitor.worked(1);
 		}
 		try
 		{
 			// just always copy the nglibs to it even if it is just puur smart client
 			// the log4j libs are always needed.
-			copyNGLibs(targetLibDir);
+			copyNGLibs(targetLibDir, exportModel.isNGExport());
 		}
 		catch (IOException e)
 		{
@@ -254,6 +260,22 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @throws IOException
+	 */
+	private void copyNGClient2(File tmpWarDir) throws ExportException
+	{
+		try
+		{
+			Activator.getInstance().exportNG2ToWar(tmpWarDir);
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Can't copy the NG2 resources to " + tmpWarDir, e);
+		}
 	}
 
 	/**
@@ -331,7 +353,8 @@ public class WarExporter
 
 			//generate servoy-components.js
 			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
-			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getAllExportedServices(), exportModel.getAllExportedComponents());
+			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getAllExportedServicesWithoutSabloServices(),
+				exportModel.getAllExportedComponents());
 			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
 
 			//generate wro.xml
@@ -442,13 +465,14 @@ public class WarExporter
 		rootElement.setAttributeNode(attr);
 
 		Set<String> exportedWebObjects = null;
-		if (exportModel.getAllExportedComponents() != null || exportModel.getAllExportedServices() != null)
+		if (exportModel.getAllExportedComponents() != null || exportModel.getAllExportedServicesWithoutSabloServices() != null)
 		{
 			exportedWebObjects = new HashSet<>();
 			if (exportModel.getAllExportedComponents() != null) exportedWebObjects.addAll(exportModel.getAllExportedComponents());
-			if (exportModel.getAllExportedServices() != null) exportedWebObjects.addAll(exportModel.getAllExportedServices());
+			if (exportModel.getAllExportedServicesWithoutSabloServices() != null)
+				exportedWebObjects.addAll(exportModel.getAllExportedServicesWithoutSabloServices());
 		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackages(), Boolean.TRUE,
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackagesExceptSablo(), Boolean.TRUE,
 			NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
@@ -563,15 +587,28 @@ public class WarExporter
 	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir, IProgressMonitor m) throws ExportException
 	{
 		Set<String> exportedComponents = exportModel.getAllExportedComponents();
-		Set<String> exportedServices = exportModel.getAllExportedServices();
+		Set<String> exportedServicesWithoutSabloServices = exportModel.getAllExportedServicesWithoutSabloServices();
+
 		if (exportedComponents != null)
 		{
-			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
+			Set<String> componentsExceptUnderTheHoodOnes = new TreeSet<>(exportedComponents);
+			componentsExceptUnderTheHoodOnes.removeAll(exportModel.getComponentsNeededUnderTheHood());
+			m.subTask("Exporting components: " + Arrays.toString(componentsExceptUnderTheHoodOnes.toArray(new String[0])));
 		}
 
-		if ((exportedComponents == null && exportedServices == null) ||
-			(exportedComponents.size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportedServices.size() == servicesSpecProviderState.getWebObjectSpecifications().size()))
+		if (exportedServicesWithoutSabloServices != null)
+		{
+			Set<String> servicesExceptUnderTheHoodOnes = new TreeSet<>(exportedServicesWithoutSabloServices);
+			servicesExceptUnderTheHoodOnes.removeAll(exportModel.getServicesNeededUnderTheHoodWithoutSabloServices());
+			m.subTask("Exporting services: " + Arrays.toString(servicesExceptUnderTheHoodOnes.toArray(new String[0])));
+		}
+
+		// sablo services are automatically loaded fully from the sablo jar that is included in the war file; they are a bit special
+		// and not included in exportedServicesWithoutSabloServices map; we do not need to list these in this properties file as jar loaded webobjects are not affected by this
+		if ((exportedComponents == null && exportedServicesWithoutSabloServices == null) ||
+			(exportedComponents.size() == componentsSpecProviderState.getAllWebObjectSpecifications().length &&
+				exportedServicesWithoutSabloServices.size() + WebServiceSpecProvider.getSpecProviderState().getWebObjectSpecifications().get("sablo")
+					.getSpecifications().keySet().size() == servicesSpecProviderState.getAllWebObjectSpecifications().length))
 			return; // all of them will be loaded in app; if we do not generate a properties file at all then that will be the case
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
@@ -582,17 +619,12 @@ public class WarExporter
 			webObjects.append(component + ",");
 		}
 
-		if (exportedServices != null)
-		{
-			m.subTask("Exporting services: " + Arrays.toString(exportedServices.toArray(new String[0])));
-		}
-
 		TreeSet<String> allServices = new TreeSet<String>();
-		// append internal servoy services
+		// append internal servoy services; TODO these should already be included due to exportModel.getServicesNeededUnderTheHood() which get included in exportModel.getAllExportedServices()
 		PackageSpecification<WebObjectSpecification> servoyservices = servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
-		if (exportedServices != null) allServices.addAll(exportedServices);
+		if (exportedServicesWithoutSabloServices != null) allServices.addAll(exportedServicesWithoutSabloServices);
 		for (String service : allServices)
 		{
 			webObjects.append(service + ",");
@@ -619,7 +651,7 @@ public class WarExporter
 			StringBuilder servicesLocations = new StringBuilder();
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
-			Set<String> exportedPackages = exportModel.getExportedPackages();
+			Set<String> exportedPackages = exportModel.getExportedPackagesExceptSablo();
 			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
 
 			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
@@ -652,8 +684,10 @@ public class WarExporter
 					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()) && exportedPackages.contains(name))
 					{
 						PackageSpecification<WebLayoutSpecification> spec = componentsSpecProviderState.getLayoutSpecifications().get(name);
-						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||
-							spec.getJsClientLibrary() != null && !spec.getJsClientLibrary().isEmpty());
+						copy = spec != null; /*
+												 * && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() || spec.getJsClientLibrary()
+												 * != null && !spec.getJsClientLibrary().isEmpty());
+												 */
 						if (copy) componentLocations.append("/" + name + "/;");
 					}
 					if (copy)
@@ -713,10 +747,11 @@ public class WarExporter
 	/**
 	 * Add all NG_LIBS to the war.
 	 * @param targetLibDir
+	 * @param includeNGClientLib
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
+	private void copyNGLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -725,6 +760,7 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
+			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -954,29 +990,55 @@ public class WarExporter
 		}
 	}
 
-	protected void createTomcatContextXML(File tmpWarDir)
+	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
 	{
-		if (!exportModel.isCreateTomcatContextXML()) return;
-		try
+		String fileName = exportModel.getTomcatContextXMLFileName();
+		if (fileName != null)
 		{
-			File metaDir = new File(tmpWarDir, "META-INF");
-			metaDir.mkdir();
-			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
-			contextFile.createNewFile();
-			try (FileWriter writer = new FileWriter(contextFile))
+			File source = new File(fileName);
+			if (source.exists())
 			{
-				String fileContent = "<Context ";
-				if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
-				if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
-				if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
-				if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
-				fileContent += "></Context>";
-				writer.write(fileContent);
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				try
+				{
+					FileUtils.copyFile(source, contextFile);
+				}
+				catch (IOException e)
+				{
+					throw new ExportException("Can't copy tomcat context file: " + fileName, e);
+				}
+			}
+			else
+			{
+				throw new ExportException("Given tomcat context file does not exists: " + fileName);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			ServoyLog.logError(e);
+			if (!exportModel.isCreateTomcatContextXML()) return;
+			try
+			{
+				File metaDir = new File(tmpWarDir, "META-INF");
+				metaDir.mkdir();
+				File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+				contextFile.createNewFile();
+				try (FileWriter writer = new FileWriter(contextFile))
+				{
+					String fileContent = "<Context ";
+					if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
+					if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
+					if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
+					if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
+					fileContent += "></Context>";
+					writer.write(fileContent);
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 
@@ -1017,20 +1079,23 @@ public class WarExporter
 	{
 		if (exportModel.getServoyPropertiesFileName() == null)
 		{
-			generatePropertiesFile(tmpWarDir);
+			try
+			{
+				exportModel.generatePropertiesFileContent(new File(tmpWarDir, "WEB-INF/servoy.properties"));
+			}
+			catch (FileNotFoundException fileNotFoundException)
+			{
+				throw new ExportException("Couldn't find file " + tmpWarDir.getAbsolutePath() + "/WEB-INF/servoy.properties", fileNotFoundException);
+			}
+			catch (IOException e)
+			{
+				throw new ExportException("Couldn't generate the properties file", e);
+			}
 		}
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() || !exportModel.getUpgradedLicenses().isEmpty() ||
-				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
-			{
-				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
-			}
-			else
-			{
-				copyPropertiesFileToWar(tmpWarDir, sourceFile);
-			}
+			changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 		}
 	}
 
@@ -1222,6 +1287,12 @@ public class WarExporter
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
+		boolean noConvertorsOrValidators = !plugins.contains("converters.jar") || !plugins.contains("default_validators.jar");
+		if (noConvertorsOrValidators)
+		{
+			// print to system out for the command line exporter.
+			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
+		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
@@ -1342,6 +1413,26 @@ public class WarExporter
 			Properties properties = new SortedProperties();
 			properties.load(fis);
 
+			for (Object k : properties.keySet())
+			{
+				if (k instanceof String)
+				{
+					String key = (String)k;
+					if (shouldEncrypt(key) && !properties.getProperty(key, "").startsWith(IWarExportModel.enc_prefix))
+					{
+						try
+						{
+							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), properties.getProperty(key, ""));
+							properties.put(k, password);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Could not encrypt property " + key, e);
+						}
+					}
+				}
+			}
+
 			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
 			{
 				properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
@@ -1349,6 +1440,8 @@ public class WarExporter
 
 			if (exportModel.allowOverwriteSocketFactoryProperties())
 			{
+				// TODO currently command line always returns false for allowOverwriteSocketFactoryProperties(); it does not provide that as command line args;
+				// that means that UI wizard will not be able to give an accurate command line equivalent if that one is set and the properties fie is also set
 				properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
 				properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
 				if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
@@ -1411,7 +1504,7 @@ public class WarExporter
 					}
 				}
 
-				writeLicenses(properties, licenses);
+				AbstractWarExportModel.writeLicenses(properties, licenses);
 
 			}
 
@@ -1423,181 +1516,10 @@ public class WarExporter
 		}
 	}
 
-	private void copyPropertiesFileToWar(File tmpWarDir, File sourceFile) throws ExportException
+	private boolean shouldEncrypt(String key)
 	{
-		File destFile = new File(tmpWarDir, "WEB-INF/servoy.properties");
-		try
-		{
-			if (destFile.createNewFile())
-			{
-				try (FileInputStream fis = new FileInputStream(sourceFile);
-					FileOutputStream fos = new FileOutputStream(destFile);
-					FileChannel sourceChannel = fis.getChannel();
-					FileChannel destinationChannel = fos.getChannel())
-				{
-					// Copy source file to destination file
-					destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Couldn't copy the servoy properties file", e);
-		}
-	}
-
-	private void generatePropertiesFile(File tmpWarDir) throws ExportException
-	{
-		// create the (sorted) properties file.
-		Properties properties = new SortedProperties();
-		properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
-		properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
-		properties.setProperty("SocketFactory.compress", "true");
-		properties.setProperty("java.rmi.server.hostname", "127.0.0.1");
-
-		// TODO ask for a keystore?
-		properties.setProperty("SocketFactory.useSSL", "true");
-		properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
-		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, //
-		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
-
-//		properties.setProperty("servoy.use.client.timezone", "true");
-
-		// TODO ask for all kinds of other stuff like branding?
-		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
-		properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
-
-
-		if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
-		{
-			properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
-		}
-
-		if (!exportModel.getLicenses().isEmpty())
-		{
-			writeLicenses(properties, exportModel.getLicenses());
-		}
-		String maxSeqLength = Settings.getInstance().getProperty("ServerManager.databasesequence.maxlength");
-		if (maxSeqLength != null)
-		{
-			properties.setProperty("ServerManager.databasesequence.maxlength", maxSeqLength);
-		}
-		// store the servers
-		SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
-		properties.setProperty("ServerManager.numberOfServers", Integer.toString(selectedServerNames.size()));
-		int i = 0;
-		for (String serverName : selectedServerNames)
-		{
-			ServerConfiguration sc = exportModel.getServerConfiguration(serverName);
-
-			properties.put("server." + i + ".serverName", sc.getName());
-			properties.put("server." + i + ".userName", sc.getUserName());
-			String password = sc.getPassword();
-			try
-			{
-				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password);
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Could not encrypt password for sever " + sc.getName(), e);
-			}
-			properties.put("server." + i + ".password", password);
-			properties.put("server." + i + ".URL", sc.getServerUrl());
-//			Map<String, String> connectionProperties = sc.getConnectionProperties();
-//			if (connectionProperties == null)
-//			{
-//				Settings.removePrefixedProperties(properties, "server." + i + ".property.");
-//			}
-//			else
-//			{
-//				for (Entry<String, String> entry : connectionProperties.entrySet())
-//				{
-//					properties.put("server." + i + ".property." + entry.getKey(), entry.getValue());
-//				}
-//			}
-			properties.put("server." + i + ".driver", sc.getDriver());
-			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
-			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
-			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
-			String catalog = sc.getCatalog();
-			if (catalog == null)
-			{
-				catalog = "<none>";
-			}
-			else if (catalog.trim().length() == 0)
-			{
-				catalog = "<empty>";
-			}
-			properties.put("server." + i + ".catalog", catalog);
-			String schema = sc.getSchema();
-			if (schema == null)
-			{
-				schema = "<none>";
-			}
-			else if (schema.trim().length() == 0)
-			{
-				schema = "<empty>";
-			}
-			properties.put("server." + i + ".schema", schema);
-			properties.put("server." + i + ".maxConnectionsActive", String.valueOf(sc.getMaxActive()));
-			properties.put("server." + i + ".maxConnectionsIdle", String.valueOf(sc.getMaxIdle()));
-			properties.put("server." + i + ".maxPreparedStatementsIdle", String.valueOf(sc.getMaxPreparedStatementsIdle()));
-			properties.put("server." + i + ".connectionValidationType", String.valueOf(sc.getConnectionValidationType()));
-			if (sc.getValidationQuery() != null)
-			{
-				properties.put("server." + i + ".validationQuery", sc.getValidationQuery());
-			}
-			if (sc.getDataModelCloneFrom() != null && !"".equals(sc.getDataModelCloneFrom()))
-			{
-				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom());
-			}
-			properties.put("server." + i + ".enabled", Boolean.toString(true));
-//			if (sc.getDialectClass() != null)
-//			{
-//				properties.put("server." + i + ".dialect", sc.getDialectClass());
-//			}
-//			else
-//			{
-//				properties.remove("server." + i + ".dialect");
-//			}
-			i++;
-		}
-
-		try (FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
-		{
-			properties.store(fos, "");
-		}
-		catch (FileNotFoundException fileNotFoundException)
-		{
-			throw new ExportException("Couldn't find file " + tmpWarDir.getAbsolutePath() + "/WEB-INF/servoy.properties", fileNotFoundException);
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Couldn't generate the properties file", e);
-		}
-	}
-
-	private void writeLicenses(Properties properties, Collection<License> licenses)
-	{
-		int i = 0;
-		//THE FOLLOWING PROPERTY NAMES MUST BE THE SAME AS IN LicenseManager
-		properties.setProperty("licenseManager.numberOfLicenses", Integer.toString(exportModel.getLicenses().size()));
-		for (License license : licenses)
-		{
-			properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
-			properties.setProperty("license." + i + ".licenses", license.getNumberOfLicenses());
-			properties.setProperty("license." + i + ".product", "0");//client
-			try
-			{
-				properties.setProperty("license." + i + ".code",
-					IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Could not encrypt license key.", e);
-			}
-			i++;
-		}
+		String lcKey = key.toLowerCase();
+		return lcKey.indexOf("password") != -1 || lcKey.indexOf("passphrase") != -1;
 	}
 
 	private static void writeFileEntry(Writer fw, File file, String name, Set<File> writtenFiles) throws IOException

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
@@ -29,6 +30,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.debug.Debugger;
 
+import com.servoy.j2db.scripting.ServoyContextFactory;
 import com.servoy.j2db.util.Debug;
 
 import de.berlios.jsunit.JsUnitException;
@@ -280,6 +282,8 @@ public class JSUnitToJavaRunner
 
 	protected <T, X extends Exception> T runInRhino(RhinoContextRunnable<T, X> rhinoContextRunnable, String exceptionMessage) throws X
 	{
+		ContextFactory global = ContextFactory.getGlobal();
+		if (global instanceof ServoyContextFactory) ((ServoyContextFactory)global).setFeature(Context.FEATURE_ENHANCED_JAVA_ACCESS, true);
 		Context context = Context.enter();
 		try
 		{

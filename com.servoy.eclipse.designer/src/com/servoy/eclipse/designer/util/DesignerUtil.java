@@ -56,6 +56,7 @@ import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -70,6 +71,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -131,9 +133,9 @@ public class DesignerUtil
 		{
 			if (selectedEditParts.get(0) instanceof EditPart)
 			{
-				for (int i = 0; i < selectedEditParts.size(); i++)
+				for (Object selectedEditPart : selectedEditParts)
 				{
-					EditPart object = (EditPart)selectedEditParts.get(i);
+					EditPart object = (EditPart)selectedEditPart;
 					EditPart parent = object.getParent();
 					if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel()))
 						return true;
@@ -141,21 +143,21 @@ public class DesignerUtil
 			}
 			else
 			{
-				for (int i = 0; i < selectedEditParts.size(); i++)
+				for (Object selectedEditPart : selectedEditParts)
 				{
 					Object formElement = null;
 					IPersist context = null;
-					if (selectedEditParts.get(i) instanceof PersistContext)
+					if (selectedEditPart instanceof PersistContext)
 					{
-						PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
+						PersistContext persistContext = (PersistContext)selectedEditPart;
 						context = persistContext.getContext();
 						formElement = persistContext.getPersist();
 
 					}
-					else if (selectedEditParts.get(i) instanceof FormElementGroup)
+					else if (selectedEditPart instanceof FormElementGroup)
 					{
-						context = ((FormElementGroup)selectedEditParts.get(i)).getParent();
-						formElement = selectedEditParts.get(i);
+						context = ((FormElementGroup)selectedEditPart).getParent();
+						formElement = selectedEditPart;
 					}
 					if (Utils.isInheritedFormElement(formElement, context)) return true;
 				}
@@ -407,8 +409,9 @@ public class DesignerUtil
 	{
 		Set<String> topContainers = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values().stream().flatMap(
 			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer).map(
-				layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName())).collect(
-					Collectors.toCollection(() -> !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>()));
+				layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName()))
+			.collect(
+				Collectors.toCollection(() -> !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>()));
 		if (!skipTemplate && hasResponsiveLayoutTemplates(null, null))
 		{
 			topContainers.add("template");
@@ -550,9 +553,9 @@ public class DesignerUtil
 		Set<String> allowedChildren = findAllowedChildren(packName, specName, true);
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		List<TemplateElementHolder> elements = new ArrayList<>();
-		for (int i = 0; i < templates.size(); i++)
+		for (IRootObject template2 : templates)
 		{
-			Template template = (Template)templates.get(i);
+			Template template = (Template)template2;
 			if (addTemplate(allowedChildren, template))
 			{
 				elements.add(new TemplateElementHolder(template));
@@ -581,39 +584,68 @@ public class DesignerUtil
 
 	public static boolean addTemplate(Set<String> allowedChildren, Template template)
 	{
-		JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
-		if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(Template.LAYOUT_TYPE_RESPONSIVE))
+		try
 		{
-			JSONArray elements = (JSONArray)templateJSON.opt(Template.PROP_ELEMENTS);
-			if (elements.length() >= 1)
+			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
+			if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(Template.LAYOUT_TYPE_RESPONSIVE))
 			{
-				JSONObject element = elements.getJSONObject(0);
-				String spec = element.optString("typeName");
-				String packAndSpec = "";
-				if (!element.has("typeName"))
+				JSONArray elements = (JSONArray)templateJSON.opt(Template.PROP_ELEMENTS);
+				if (elements.length() >= 1)
 				{
-					if (element.has("customProperties") && element.get("customProperties") instanceof String)
+					JSONObject element = elements.getJSONObject(0);
+					String spec = element.optString("typeName");
+					String packAndSpec = "";
+					if (!element.has("typeName"))
 					{
-						String customProperties = element.getString("customProperties");
-						element = new ServoyJSONObject(customProperties, true, true, false);
-						if (element.has("properties"))
+						if (element.has("customProperties") && element.get("customProperties") instanceof String)
 						{
-							JSONObject properties = element.getJSONObject("properties");
-							spec = properties.optString("specname");
-							packAndSpec = properties.optString("packagename") + "." + properties.optString("specname");
+							String customProperties = element.getString("customProperties");
+							element = new ServoyJSONObject(customProperties, true, true, false);
+							if (element.has("properties"))
+							{
+								JSONObject properties = element.getJSONObject("properties");
+								spec = properties.optString("specname");
+								packAndSpec = properties.optString("packagename") + "." + properties.optString("specname");
+							}
 						}
 					}
-				}
-				if (spec != null)
-				{
-					if (allowedChildren.contains(spec) || allowedChildren.contains(packAndSpec) ||
-						allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(spec) != null)
+					if (spec != null)
 					{
-						return true;
+						if (allowedChildren.contains(spec) || allowedChildren.contains(packAndSpec) ||
+							allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(spec) != null)
+						{
+							return true;
+						}
 					}
 				}
 			}
 		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Wrong template, parsing problem: " + template, e);
+			return false;
+		}
 		return false;
 	}
+
+	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj)
+	{
+		if (parent instanceof LayoutContainer)
+		{
+			Set<String> allowed = getAllowedChildren().get(
+				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
+			if (webObj instanceof LayoutContainer)
+				return allowed.contains(((LayoutContainer)webObj).getPackageName() + "." + ((LayoutContainer)webObj).getSpecName());
+			if (webObj instanceof WebComponent) return allowed.contains("component");
+			return true;
+		}
+		if (parent instanceof Form)
+		{
+			Set<String> topContainers = findTopContainers(true);
+			if (webObj instanceof LayoutContainer)
+				return topContainers.contains(((LayoutContainer)webObj).getPackageName() + "." + ((LayoutContainer)webObj).getSpecName());
+		}
+		return false;
+	}
+
 }

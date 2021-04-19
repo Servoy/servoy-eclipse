@@ -42,9 +42,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
@@ -80,6 +85,8 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.extensions.ICalculationTypeInferencer;
+import com.servoy.eclipse.model.extensions.ICalculationTypeInferencerProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -145,6 +152,8 @@ public class SolutionDeserializer
 	private static final Map<UUID, UUID> childToContainerUUID = new HashMap<UUID, UUID>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
+	private ICalculationTypeInferencerProvider calculationTypeInferencerProvider;
+	private ICalculationTypeInferencer calculationTypeInferencer;
 
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, String> errorKeeper)
 	{
@@ -1423,7 +1432,42 @@ public class SolutionDeserializer
 			for (FunctionStatement function : functions)
 			{
 				String comment = null;
-				if (function.getDocumentation() != null) comment = function.getDocumentation().getText();
+				boolean hasDocs = false;
+				int servoyType = -1;
+				if (function.getDocumentation() != null)
+				{
+					comment = function.getDocumentation().getText();
+					hasDocs = true;
+				}
+
+				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && resource.getParent() != null &&
+					resource.getParent().getParent() != null &&
+					resource.getParent().getParent().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && !hasDocs)
+				{
+
+					if (calculationTypeInferencer == null)
+					{
+						calculationTypeInferencer = getCalculationTypeInferencer(script, resource);
+					}
+					if (calculationTypeInferencer != null)
+					{
+
+						List<String> types = calculationTypeInferencer.getReturnedType(function.getName().getName());
+						if (types != null)
+						{
+							servoyType = IColumnTypes.MEDIA;//default
+							for (String type : types)
+							{
+								servoyType = getServoyType(type);
+								if (servoyType != IColumnTypes.MEDIA) break;
+							}
+						}
+					}
+					else
+					{
+						ServoyLog.logWarning("Could not get calculation type inferencer to set the returned type for " + function.getName().getName(), null);
+					}
+				}
 				JSONObject json = null;
 				if (comment != null)
 				{
@@ -1460,6 +1504,10 @@ public class SolutionDeserializer
 				}
 
 				json.put(SolutionSerializer.PROP_NAME, function.getName().getName());
+				if (servoyType != -1)
+				{
+					json.put("type", servoyType);
+				}
 
 				String source = fileContent.substring(function.sourceStart(), function.sourceEnd());
 				if ("".equals(comment) && (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1))
@@ -1501,6 +1549,7 @@ public class SolutionDeserializer
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
 			}
+			calculationTypeInferencer = null;//clear
 			if (jsonObjects.size() > 0)
 			{
 				JSONArray array = new JSONArray();
@@ -1532,7 +1581,7 @@ public class SolutionDeserializer
 	 */
 	private int getServoyType(String name)
 	{
-		if ("String".equals(name))
+		if ("String".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.TEXT;
 		}
@@ -1540,7 +1589,7 @@ public class SolutionDeserializer
 		{
 			return IColumnTypes.DATETIME;
 		}
-		else if ("Number".equals(name))
+		else if ("Number".equalsIgnoreCase(name))
 		{
 			return IColumnTypes.NUMBER;
 		}
@@ -1611,7 +1660,7 @@ public class SolutionDeserializer
 				ServoyLog.logError("Could not parse UUID -- generating new uuid", e);
 				uuid = UUID.randomUUID();
 			}
-			existingNode = AbstractRepository.searchPersist(parent, uuid);
+			existingNode = AbstractRepository.searchPersist(parent, uuid, parent);
 
 			if (existingNode == null)
 			{
@@ -2363,4 +2412,61 @@ public class SolutionDeserializer
 			this.start = start;
 		}
 	}
+
+	private ICalculationTypeInferencer getCalculationTypeInferencer(Script script, IFile resource)
+	{
+		if (calculationTypeInferencerProvider == null)
+		{
+			IExtensionRegistry reg = Platform.getExtensionRegistry();
+			IExtensionPoint ep = reg.getExtensionPoint(ICalculationTypeInferencerProvider.EXTENSION_ID);
+			IExtension[] extensions = ep.getExtensions();
+
+			if (extensions == null || extensions.length == 0)
+			{
+				ServoyLog.logWarning(
+					"Could not find calculation type inferencer plugin (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID + ")", null);
+				return null;
+			}
+			if (extensions.length > 1)
+			{
+				ServoyLog.logWarning(
+					"Multiple calculation type inferencer plugins found (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID + ")",
+					null);
+			}
+			IConfigurationElement[] ce = extensions[0].getConfigurationElements();
+			if (ce == null || ce.length == 0)
+			{
+				ServoyLog.logWarning(
+					"Could not read calculation type inferencer plugin (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID + ")",
+					null);
+				return null;
+			}
+			if (ce.length > 1)
+			{
+				ServoyLog.logWarning(
+					"Multiple extensions for calculation type inferencer plugins found (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID +
+						")",
+					null);
+			}
+			try
+			{
+				calculationTypeInferencerProvider = (ICalculationTypeInferencerProvider)ce[0].createExecutableExtension("class");
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logWarning(
+					"Could not create calculation type inferencer plugin (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID + ")",
+					e);
+				return null;
+			}
+			if (calculationTypeInferencerProvider == null)
+			{
+				ServoyLog.logWarning(
+					"Could not load calculation type inferencer plugin (extension point " + ICalculationTypeInferencerProvider.EXTENSION_ID + ")",
+					null);
+			}
+		}
+		return calculationTypeInferencerProvider.parse(script, resource);
+	}
+
 }

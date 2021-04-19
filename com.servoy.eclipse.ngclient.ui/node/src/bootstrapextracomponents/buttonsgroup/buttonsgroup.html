@@ -1,0 +1,14 @@
+<div class="bts-extra-btn-radio btn-group"
+    [id]="servoyApi.getMarkupId()"
+    [svyTooltip]="toolTipText"
+    #element>
+  <button type="button" 
+        class= "btn {{styleClass}}"
+        [sabloTabseq]="tabSeq"
+        *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;"
+        [ngClass]="selectedValues[item.realValue] ? 'active' : ''" 
+        (click)="onClick(item)">
+        <span [textContent]='item.displayValue' *ngIf='showAs != "html" && showAs != "trusted_html"'></span>
+        <span [innerHtml]="item.displayValue | htmlFilter | trustAsHtml: servoyApi.trustAsHtml()" *ngIf='showAs == "html" || showAs == "trusted_html"'></span>
+    </button>
+</div>

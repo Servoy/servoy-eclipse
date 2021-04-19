@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -99,7 +100,7 @@ public class ChangeParentCommand extends Command
 				}
 
 				// adding an element into its own child is not allowed
-				if (child instanceof LayoutContainer && isChildOf(possibleNewParent, initialParent))
+				if (child instanceof LayoutContainer && isChildOf(possibleNewParent, (LayoutContainer)child))
 				{
 					return false;
 				}
@@ -116,7 +117,24 @@ public class ChangeParentCommand extends Command
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(child.getParent());
 
 		ISupportChilds initialParent = child instanceof ISupportExtendsID ? ((ISupportExtendsID)child).getRealParent() : child.getParent();
-		if (newParent == null) newParent = initialParent;
+		boolean sameParent = false;
+		if (newParent == null)
+		{
+			newParent = initialParent;
+			sameParent = true;
+		}
+		if (!form.equals(newParent.getAncestor(IRepository.FORMS)))
+		{
+			try
+			{
+				newParent = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(newParent, form));
+				changes.add(newParent);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error("Cannot move " + child.getUUID() + " to " + newParent.getUUID() + ". Cause: " + e);
+			}
+		}
 
 		if (childPositionClass != null)
 		{
@@ -126,7 +144,7 @@ public class ChangeParentCommand extends Command
 			oldIndex = sortedChildren.indexOf(child);
 		}
 		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, newParent);
-		if (newParent == initialParent)
+		if (newParent == initialParent || sameParent)
 		{
 			oldParent = null;
 			//same parent
@@ -255,7 +273,7 @@ public class ChangeParentCommand extends Command
 					{
 						((IChildWebObject)persist).setIndex(i);
 					}
-					changes.add(persist);
+					if (!changes.contains(newParent)) changes.add(persist);
 				}
 				if (flattenedNewParent instanceof IBasicWebObject && child instanceof WebCustomType)
 				{

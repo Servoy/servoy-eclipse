@@ -26,8 +26,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -79,7 +79,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 	public void run(TableDifference difference)
 	{
 		ColumnType columnType = difference.getDbiFileDefinition().columnType;
-		IColumn c;
+		Column c;
 		try
 		{
 			IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -116,6 +116,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & IBaseColumn.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
+					c.setFlags(difference.getDbiFileDefinition().flags);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
 					{
 						// Set the sequence type (new table, or override).

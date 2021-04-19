@@ -55,7 +55,7 @@ import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Base editor for GEF-based form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -231,7 +231,7 @@ public abstract class BaseVisualFormEditorGEFDesignPage extends BaseVisualFormEd
 				});
 				viewer.getEditDomain().loadDefaultTool();
 
-				// native drag-and-drop from 
+				// native drag-and-drop from
 				viewer.addDragSourceListener(new TemplateTransferDragSourceListener(viewer));
 
 				// refresh templates when templates are added or removed
@@ -266,11 +266,11 @@ public abstract class BaseVisualFormEditorGEFDesignPage extends BaseVisualFormEd
 
 	/**
 	 * Refresh the visual form editor that holds the IPersist.
-	 * 
+	 *
 	 * @param persist
 	 */
 	@Override
-	public void refreshPersists(List<IPersist> persists)
+	public void refreshPersists(List<IPersist> persists, boolean fullRefresh)
 	{
 		RootEditPart rootEditPart = getGraphicalViewer().getRootEditPart();
 

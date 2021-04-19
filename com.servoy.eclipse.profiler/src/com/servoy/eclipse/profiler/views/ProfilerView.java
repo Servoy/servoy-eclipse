@@ -685,11 +685,11 @@ public class ProfilerView extends ViewPart
 		{
 			if (aggregateView)
 			{
-				arguments.setText("Arguments");
+				arguments.getColumn().setText("Arguments");
 			}
 			else
 			{
-				arguments.setText("Count");
+				arguments.getColumn().setText("Count");
 
 			}
 			aggregateView = !aggregateView;
@@ -972,7 +972,7 @@ public class ProfilerView extends ViewPart
 	private TableColumn name;
 	private TableColumn time;
 	private TableViewerColumn query;
-	private TableColumn arguments;
+	private TableViewerColumn arguments;
 	private TableColumn datasource;
 	private TableColumn transaction;
 	private Tree tree;
@@ -1001,7 +1001,6 @@ public class ProfilerView extends ViewPart
 		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(methodCallViewer);
 		makeActions();
-		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
 
@@ -1145,10 +1144,10 @@ public class ProfilerView extends ViewPart
 		query.getColumn().setWidth(queryTableColumnWidth);
 		query.getColumn().setResizable(true);
 
-		arguments = new TableColumn(table, SWT.NONE);
-		arguments.setText("Arguments");
-		arguments.setWidth(argumentsTableColumnWidth);
-		arguments.setResizable(true);
+		arguments = new TableViewerColumn(sqlDataViewer, SWT.NONE);
+		arguments.getColumn().setText("Arguments");
+		arguments.getColumn().setWidth(argumentsTableColumnWidth);
+		arguments.getColumn().setResizable(true);
 
 		datasource = new TableColumn(table, SWT.NONE);
 		datasource.setText("Datasource");
@@ -1172,6 +1171,25 @@ public class ProfilerView extends ViewPart
 			public String getToolTipText(Object element)
 			{
 				String text = getText(element);
+				if (!text.contains("\n"))
+				{
+					String lower = text.toLowerCase();
+					int fromIndex = lower.indexOf(" from ");
+					if (fromIndex > 0)
+					{
+						text = text.substring(0, fromIndex) + '\n' + text.substring(fromIndex + 1); // one more to replace the space with new line so text is still the same number of chars
+					}
+					int whereIndex = lower.indexOf(" where ");
+					if (whereIndex > 0)
+					{
+						text = text.substring(0, whereIndex) + '\n' + text.substring(whereIndex + 1);
+					}
+					int orderIndex = lower.indexOf(" order by ");
+					if (orderIndex > 0)
+					{
+						text = text.substring(0, orderIndex) + '\n' + text.substring(orderIndex + 1);
+					}
+				}
 				return text;
 			}
 
@@ -1190,6 +1208,31 @@ public class ProfilerView extends ViewPart
 			}
 		});
 		ColumnViewerToolTipSupport.enableFor(query.getViewer());
+
+		arguments.setLabelProvider(new ColumnLabelProvider()
+		{
+			@Override
+			public String getToolTipText(Object element)
+			{
+				String text = getText(element);
+				return text;
+			}
+
+			@Override
+			public String getText(Object element)
+			{
+				if (element instanceof DataCallProfileDataAggregate)
+				{
+					return ((DataCallProfileDataAggregate)element).getArgumentString();
+				}
+				else if (element instanceof DataCallProfileData)
+				{
+					return ((DataCallProfileData)element).getArgumentString();
+				}
+				return null;
+			}
+		});
+		ColumnViewerToolTipSupport.enableFor(arguments.getViewer());
 
 		methodCallViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
@@ -1296,6 +1339,8 @@ public class ProfilerView extends ViewPart
 				return true;
 			}
 		});
+		hookContextMenu();
+
 	}
 
 	/**
@@ -1339,6 +1384,37 @@ public class ProfilerView extends ViewPart
 		Menu menu = menuMgr.createContextMenu(methodCallViewer.getControl());
 		methodCallViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, methodCallViewer);
+
+
+		menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				ISelection selection = sqlDataViewer.getSelection();
+				if (!selection.isEmpty() && selection instanceof IStructuredSelection &&
+					((IStructuredSelection)selection).getFirstElement() instanceof DataCallProfileData)
+				{
+					final DataCallProfileData data = (DataCallProfileData)((IStructuredSelection)selection).getFirstElement();
+					Action copyAction = new Action("Copy SQL")
+					{
+						@Override
+						public void run()
+						{
+							Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+							TextTransfer textTransfer = TextTransfer.getInstance();
+							clipboard.setContents(new Object[] { data.getQuery() }, new Transfer[] { textTransfer });
+							clipboard.dispose();
+						}
+					};
+					manager.add(copyAction);
+				}
+			}
+		});
+		menu = menuMgr.createContextMenu(sqlDataViewer.getControl());
+		sqlDataViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, sqlDataViewer);
 	}
 
 	private void contributeToActionBars()
@@ -1795,7 +1871,7 @@ public class ProfilerView extends ViewPart
 		mem.putInteger(NAME_TABLE_COLUMN_WIDTH_SETTING, name.getWidth());
 		mem.putInteger(TIME_TABLE_COLUMN_WIDTH_SETTING, time.getWidth());
 		mem.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, query.getColumn().getWidth());
-		mem.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, arguments.getWidth());
+		mem.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, arguments.getColumn().getWidth());
 		mem.putInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, datasource.getWidth());
 		mem.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transaction.getWidth());
 		mem.putInteger(TREE_WIDTH_SETTING, sashForm.getWeights()[0]);

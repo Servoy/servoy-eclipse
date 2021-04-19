@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -177,6 +178,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
@@ -195,7 +197,6 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
@@ -389,6 +390,7 @@ public class TypeCreator extends TypeCache
 	protected static final List<String> objectMethods = Arrays.asList(
 		new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
+	private boolean jfxInitialized = false;
 
 	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
 	{
@@ -546,6 +548,28 @@ public class TypeCreator extends TypeCache
 				Class< ? > clz = null;
 				try
 				{
+					if (!jfxInitialized && name.startsWith("javafx."))
+					{
+						jfxInitialized = true;
+						try
+						{
+							// special supprt for jfx because classes can't be loaded before jfx is initialzied correctly.
+							DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+							IServoyBeanFactory factory = (IServoyBeanFactory)application.getBeanManager()
+								.createInstance("com.servoy.extensions.beans.jfxpanel.JFXPanel");
+							if (factory != null)
+							{
+								SwingUtilities.invokeAndWait(() -> {
+									factory.getBeanInstance(IClientPluginAccess.CLIENT, (IClientPluginAccess)application.getPluginAccess(), null);
+								});
+							}
+						}
+						catch (Throwable e)
+						{
+							// ignores
+						}
+
+					}
 					clz = Class.forName(name);
 				}
 				catch (Exception e)
@@ -652,20 +676,21 @@ public class TypeCreator extends TypeCache
 				m.setDeprecated(true);
 			}
 			EList<Parameter> parameters = m.getParameters();
-			Class< ? >[] parameterTypes = method.getParameterTypes();
-			for (int i = 0; i < parameterTypes.length; i++)
+			java.lang.reflect.Parameter[] methodParams = method.getParameters();
+			for (int i = 0; i < methodParams.length; i++)
 			{
+				Class< ? > paramType = methodParams[i].getType();
 				Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
-				parameter.setName("arg" + i);
+				parameter.setName(methodParams[i].getName());
 				JSType jsType;
-				if (i == (parameterTypes.length - 1) && method.isVarArgs() && parameterTypes[i].isArray())
+				if (i == (methodParams.length - 1) && method.isVarArgs() && paramType.isArray())
 				{
-					jsType = getJSType(context, parameterTypes[i].getComponentType());
+					jsType = getJSType(context, paramType.getComponentType());
 					parameter.setKind(ParameterKind.VARARGS);
 				}
 				else
 				{
-					jsType = getJSType(context, parameterTypes[i]);
+					jsType = getJSType(context, paramType);
 				}
 				// don't set any type of it is just Object, so that everything is excepted
 				if (!jsType.getName().equals("java.lang.Object")) parameter.setType(jsType);
@@ -805,33 +830,44 @@ public class TypeCreator extends TypeCache
 				}
 			}
 		}
-		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
-		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
-		for (Class< ? > beanClass : allBeanClasses)
-		{
-			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
-			{
-				try
-				{
-					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-					Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
-						new Object[] { "developer", "developer", null });
-					addType(beanClass.getSimpleName(), beanInstance.getClass());
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("error creating bean for in the js type provider", e);
-				}
-				catch (NoClassDefFoundError e)
-				{
-					ServoyLog.logError("error creating bean for in the js type provider", e);
-				}
-			}
-			else
-			{
-				addType(beanClass.getSimpleName(), beanClass);
-			}
-		}
+		// removed this for now, beans should be done on demand when they are really used on the forms
+//		IBeanClassProvider beanManager = (IBeanClassProvider)application.getBeanManager();
+//		Class< ? >[] allBeanClasses = beanManager.getAllBeanClasses();
+//		for (Class< ? > beanClass : allBeanClasses)
+//		{
+//			if (IServoyBeanFactory.class.isAssignableFrom(beanClass))
+//			{
+//				try
+//				{
+//					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
+//					Class< ? > realBeanClass = null;
+//					if (IServoyBeanFactory2.class.isAssignableFrom(beanClass))
+//					{
+//						realBeanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
+//					}
+//					else
+//					{
+//						ServoyLog.logWarning("Found bean class: " + beanClass + ", that implements IServoyBeanFactory and not IServoyBeanFactory2", null);
+//						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+//							new Object[] { "developer", "developer", null });
+//						realBeanClass = beanInstance.getClass();
+//					}
+//					addType(beanClass.getSimpleName(), realBeanClass);
+//				}
+//				catch (Exception e)
+//				{
+//					ServoyLog.logError("error creating bean for in the js type provider", e);
+//				}
+//				catch (NoClassDefFoundError e)
+//				{
+//					ServoyLog.logError("error creating bean for in the js type provider", e);
+//				}
+//			}
+//			else
+//			{
+//				addType(beanClass.getSimpleName(), beanClass);
+//			}
+//		}
 
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		synchronized (this)
@@ -907,7 +943,7 @@ public class TypeCreator extends TypeCache
 					}
 
 					@Override
-					public void hiddenTableChanged(IServerInternal server, Table table)
+					public void hiddenTableChanged(IServerInternal server, ITable table)
 					{
 						runClearCacheJob();
 					}
@@ -924,6 +960,21 @@ public class TypeCreator extends TypeCache
 				{
 					((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
 				}
+				serverManager.addServerListener(new IServerListener()
+				{
+
+					@Override
+					public void serverRemoved(IServerInternal s)
+					{
+						s.removeTableListener(tableListener);
+					}
+
+					@Override
+					public void serverAdded(IServerInternal s)
+					{
+						s.addTableListener(tableListener);
+					}
+				});
 			}
 		}
 
@@ -1239,10 +1290,10 @@ public class TypeCreator extends TypeCache
 				if (paramType == null)
 				{
 					paramType = getTypeRef(null, paramDesc.getType().getName());
-					if (PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
-					{
-						paramType = TypeUtil.arrayOf(paramType);
-					}
+				}
+				if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
+				{
+					paramType = TypeUtil.arrayOf(paramType);
 				}
 				param.setType(paramType);
 				parameters.add(param);
@@ -4638,6 +4689,7 @@ public class TypeCreator extends TypeCache
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
 						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
+						if (spec == null) continue;
 						String typeName = null;
 						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 						if (properties.size() > 0)
@@ -4683,6 +4735,7 @@ public class TypeCreator extends TypeCache
 								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
 								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types
 								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
+								addType(beanClassName.substring(beanClassName.lastIndexOf('.') + 1), persistClass);
 							}
 						}
 						elementType = getElementType(context, persistClass);
@@ -4747,6 +4800,7 @@ public class TypeCreator extends TypeCache
 			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
+			if (typeNames.length < 2) return null;
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(typeNames[0]);
 			if (spec == null)
@@ -5112,6 +5166,7 @@ public class TypeCreator extends TypeCache
 				if (Relation.isValid(relation, fs))
 				{
 					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					if (table == null) return null;
 					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
 					table = null;
 				}

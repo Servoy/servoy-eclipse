@@ -41,6 +41,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -110,7 +112,6 @@ import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -123,7 +124,6 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
-import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
@@ -142,7 +142,6 @@ import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.BodyPortal;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -383,11 +382,27 @@ public class Activator extends Plugin
 			}
 		});
 
-		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
-		for (String packageName : defaultPackageNames)
+		// turn of auto building, don't touch servoy model before IServerStarter because that needs to be first initialized.
+		IWorkspaceDescription description = ResourcesPlugin.getWorkspace().getDescription();
+		boolean autoBuilding = description.isAutoBuilding();
+		if (autoBuilding)
 		{
-			PlatformUI.getPreferenceStore().setDefault("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, true);
+			description.setAutoBuilding(false);
+			ResourcesPlugin.getWorkspace().setDescription(description);
+			ServoyModelManager.getServoyModelManager().addDoneListener(() -> {
+				IWorkspaceDescription des = ResourcesPlugin.getWorkspace().getDescription();
+				des.setAutoBuilding(true);
+				try
+				{
+					ResourcesPlugin.getWorkspace().setDescription(des);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			});
 		}
+
 	}
 
 	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
@@ -874,8 +889,6 @@ public class Activator extends Plugin
 											}
 										}
 									}
-									PersistIndexCache.reload();
-									FormElementHelper.INSTANCE.reload();
 								}
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
