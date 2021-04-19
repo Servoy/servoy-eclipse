@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { ServoyDefaultListBox } from './listbox';
-import {  FormattingService, TooltipService, ServoyApi} from '../../ngclient/servoy_public';
+import {  FormattingService, TooltipService, ServoyApi} from '@servoy/public';
 
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -37,7 +37,7 @@ describe('ServoyDefaultListBox', () => {
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultListBox],
-      imports: [SabloModule, FormsModule, ServoyPublicModule],
+      imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();

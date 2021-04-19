@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Component, Input } from '@angular/core';
 import { AngularTreeGridComponent } from 'angular-tree-grid';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { ServoyExtraTreeviewCellRenderer } from './cellrenderer';
 
 @Component({

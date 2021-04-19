@@ -1,6 +1,6 @@
 import { Input, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
 
-import { Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
+import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
 
 
 @Directive()

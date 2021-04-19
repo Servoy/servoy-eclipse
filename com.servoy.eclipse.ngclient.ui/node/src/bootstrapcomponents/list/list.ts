@@ -8,9 +8,10 @@ import { DOCUMENT } from '@angular/common';
   selector: 'bootstrapcomponents-list',
   templateUrl: './list.html',
   styleUrls: ['./list.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ShowDisplayValuePipe]
 })
-export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLDivElement> {
+export class ServoyBootstrapList extends ServoyBootstrapBasefield<HTMLInputElement> {
 
   @Input() valuelistID: IValuelist;
 

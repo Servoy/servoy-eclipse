@@ -1,4 +1,4 @@
-import { LoggerFactory, LoggerService, LogLevel } from '../logger.service';
+import { LoggerFactory, LoggerService, LogLevel } from '@servoy/public';
 import { CustomEventEmitter, CustomEvent } from '../util/eventemitter';
 
 

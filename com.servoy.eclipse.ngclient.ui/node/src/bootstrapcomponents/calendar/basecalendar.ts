@@ -2,9 +2,9 @@ import { Renderer2, ChangeDetectorRef, Inject } from '@angular/core';
 import { Moment } from 'moment';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import * as moment from 'moment';
-import { LocaleService } from '../../ngclient/servoy_public';
 import { DateTimeAdapter } from '@danielmoncada/angular-datetime-picker';
 import { DOCUMENT } from '@angular/common';
+import { ServoyPublicService } from '@servoy/public';
 
 export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDivElement> {
 
@@ -19,10 +19,10 @@ export class ServoyBootstrapBaseCalendar extends ServoyBootstrapBasefield<HTMLDi
     public hour12Timer = false;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-            localeService: LocaleService,
+            servoyService: ServoyPublicService,
             dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, doc);
-        dateTimeAdapter.setLocale(localeService.getLocale());
+        dateTimeAdapter.setLocale(servoyService.getLocale());
         const ld = moment.localeData();
         this.firstDayOfWeek = ld.firstDayOfWeek();
         const lts = ld.longDateFormat('LTS');

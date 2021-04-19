@@ -1,14 +1,13 @@
 import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild, ViewChildren, QueryList, ElementRef, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
-import { Format, FormattingService } from '../../ngclient/servoy_public';
+import { Format, FormattingService } from '@servoy/public';
 import { NgbDropdownItem, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'bootstrapcomponents-combobox',
     templateUrl: './combobox.html',
-    styleUrls: ['./combobox.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield<HTMLDivElement> {

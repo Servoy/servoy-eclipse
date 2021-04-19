@@ -1,6 +1,6 @@
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { Directive, Input, Output, EventEmitter, SimpleChanges, Renderer2, ChangeDetectorRef, Inject } from '@angular/core';
-import { PropertyUtils } from '../ngclient/servoy_public';
+import { PropertyUtils } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
 
 @Directive()

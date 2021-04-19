@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FormattingService, I18NProvider, LocaleService, TooltipService } from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { SabloModule } from '../../sablo/sablo.module';
+import { FormattingService, TooltipService } from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { LocaleService } from '../../ngclient/locale.service';
+import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 
 import { ServoyBootstrapExtraBreadcrumbs } from './breadcrumbs';
 
@@ -13,7 +15,7 @@ describe('BreadcrumbsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapExtraBreadcrumbs ],
-      imports: [SabloModule, ServoyPublicModule, FormsModule],
+      imports: [ServoyTestingModule, ServoyPublicModule, FormsModule],
       providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
     })
     .compileComponents();

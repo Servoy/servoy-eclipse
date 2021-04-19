@@ -3360,7 +3360,7 @@ public class TypeCreator extends TypeCache
 			}
 
 			EList<Member> members = type.getMembers();
-			for (String name : ContainersScope.getAllLayoutNames(ff))
+			for (String name : ContainersScope.getAllLayoutNames(ff, fs))
 			{
 				members.add(createProperty(name, true, getTypeRef(context, "RuntimeContainer"), "runtime container", CONTAINERS));
 			}

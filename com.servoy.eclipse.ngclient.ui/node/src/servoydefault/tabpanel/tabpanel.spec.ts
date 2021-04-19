@@ -1,16 +1,16 @@
-import { Directive, Input, SimpleChanges, SimpleChange } from '@angular/core';
+import { SimpleChanges, SimpleChange } from '@angular/core';
 import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@angular/core/testing';
 import { ServoyDefaultTabpanel } from './tabpanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi } from '../../ngclient/servoy_public';
+import { ServoyApi, ServoyPublicModule } from '@servoy/public';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
-import { WindowRefService } from '../../sablo/util/windowref.service';
-import { LoggerFactory } from '../../sablo/logger.service';
-import { SabloModule } from '../../sablo/sablo.module';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
@@ -23,7 +23,7 @@ describe( 'ServoyDefaultTabpanel', () => {
             declarations: [
                 ServoyDefaultTabpanel
             ],
-            imports: [NgbModule, SabloModule],
+            imports: [NgbModule, ServoyTestingModule, ServoyPublicModule],
             providers: [WindowRefService, LoggerFactory]
         } ).compileComponents();
     } ) );

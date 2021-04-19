@@ -1,6 +1,6 @@
 import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject } from '@angular/core';
 
-import { PropertyUtils, FormattingService } from '../ngclient/servoy_public';
+import { PropertyUtils, FormattingService } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 

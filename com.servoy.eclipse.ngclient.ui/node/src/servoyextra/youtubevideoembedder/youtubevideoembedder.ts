@@ -1,5 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({

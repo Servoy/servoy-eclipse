@@ -1,8 +1,8 @@
 import { Component, SimpleChanges, Input, Output, Renderer2, ChangeDetectorRef, ContentChild, TemplateRef, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 
 @Component({
     selector: 'servoyextra-sidenav',

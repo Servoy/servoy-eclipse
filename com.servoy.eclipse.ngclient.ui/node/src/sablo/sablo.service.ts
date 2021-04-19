@@ -1,10 +1,10 @@
 import { Injectable, } from '@angular/core';
 import { SessionStorageService } from './webstorage/sessionstorage.service';
-import { WindowRefService } from './util/windowref.service';
+import { WindowRefService } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
-import { LoggerService, LoggerFactory } from './logger.service';
-import { Deferred } from './util/deferred';
+import { LoggerService, LoggerFactory } from '@servoy/public';
+import { Deferred } from '@servoy/public';
 
 @Injectable()
 export class SabloService {
@@ -19,7 +19,7 @@ export class SabloService {
 
 
     constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService,
-        private windowRefService: WindowRefService, private logFactory: LoggerFactory) {
+        private windowRefService: WindowRefService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SabloService');
         this.windowRefService.nativeWindow.window.addEventListener('unload', () => {
             sessionStorage.remove('svy_session_lock');
@@ -28,7 +28,7 @@ export class SabloService {
 
         if (sessionStorage.has('svy_session_lock')) {
             this.clearSabloInfo()
-            console.warn('Found a lock in session storage. The storage was cleared.');
+            this.log.warn('Found a lock in session storage. The storage was cleared.');
         }
 
         sessionStorage.set('svy_session_lock', '1');

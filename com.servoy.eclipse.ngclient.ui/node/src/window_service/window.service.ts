@@ -2,12 +2,10 @@ import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 import { ShortcutService } from './shortcut.service';
-import { SvyUtilsService } from '../ngclient/servoy_public';
-import { ServoyService } from '../ngclient/servoy.service';
 import { PopupMenuService, Popup } from './popupmenu.service';
 import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 import { PopupFormService, PopupForm, Callback } from '../ngclient/services/popupform.service';
-import { LoggerFactory, LoggerService } from '../sablo/logger.service';
+import { LoggerFactory, LoggerService, ServoyPublicService } from '@servoy/public';
 
 @Injectable()
 export class WindowService {
@@ -19,8 +17,7 @@ export class WindowService {
 
     constructor(private shortcutService: ShortcutService,
         private popupMenuService: PopupMenuService,
-        private utils: SvyUtilsService,
-        private servoyService: ServoyService,
+        private servoyService: ServoyPublicService,
         @Inject(DOCUMENT) private doc: Document,
         private changeHandler: ServiceChangeHandler,
         private popupFormService: PopupFormService,
@@ -62,7 +59,7 @@ export class WindowService {
                             }
                         }
 
-                        const jsEvent = this.utils.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
+                        const jsEvent = this.servoyService.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
 
                         if (!jsEvent) return retValue;
 

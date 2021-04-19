@@ -1,0 +1,16 @@
+<div class="bts-extra-switch" [ngClass]="styleClass" [sabloTabseq]="tabSeq" [id]="servoyApi.getMarkupId()" #element>
+    <bSwitch
+        [switch-disabled]="!enabled"
+        [switch-size]="componentSize"
+        [switch-animate]="animate"
+        [switch-label-text]="label"
+        [switch-on-text]="onText"
+        [switch-off-text]="offText"
+        [switch-on-color]="onColor"
+        [switch-off-color]="offColor"
+        [switch-label-width]="labelWidth"
+        [switch-handle-width]="handleWidth"
+        [(ngModel)]="state"
+        (changeState)="onChange($event)">
+    </bSwitch>
+</div>

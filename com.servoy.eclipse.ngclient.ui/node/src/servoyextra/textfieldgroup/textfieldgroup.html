@@ -5,7 +5,6 @@
 		</span>
 	</div>
 	<input class='form-control' 
-	    [type]="inputType"
 		[ngClass]="styleClass" 
 		(ngModelChange)="pushUpdate($event)"
 		[id]="servoyApi.getMarkupId()"
@@ -14,7 +13,6 @@
 		[svyStartEdit]="'dataProviderID'" 
 		[hostComponent]="this"
 		[sabloTabseq]="tabSeq" 
-		[placeholder]="placeholderText" 
 		#input />
 </div>
 <div *ngIf="showError" class="textfieldgroup-msg-error">{{invalidEmailMessage}}</div>

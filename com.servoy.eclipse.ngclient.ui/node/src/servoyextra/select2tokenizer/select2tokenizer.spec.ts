@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Select2Module } from 'ng-select2-component';
 import { ServoyExtraSelect2Tokenizer } from './select2tokenizer';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('ServoyExtraSelect2Tokenizer', () => {
   let component: ServoyExtraSelect2Tokenizer;

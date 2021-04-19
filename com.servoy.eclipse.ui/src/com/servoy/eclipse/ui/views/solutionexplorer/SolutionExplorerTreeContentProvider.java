@@ -2698,8 +2698,9 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormContainersChildren(PlatformSimpleUserNode elementsNode)
 	{
 		Form form = (Form)elementsNode.getRealObject();
+		FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		Set<String> allLayoutNames = ContainersScope.getAllLayoutNames(
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getFlattenedForm(form));
+			flattenedSolution.getFlattenedForm(form), flattenedSolution);
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
 		for (String name : allLayoutNames)
 		{

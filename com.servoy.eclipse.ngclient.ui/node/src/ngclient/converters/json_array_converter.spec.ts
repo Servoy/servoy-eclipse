@@ -2,8 +2,8 @@ import { TestBed, inject } from '@angular/core/testing';
 import { IterableDiffers } from '@angular/core';
 
 import { ConverterService } from '../../sablo/converter.service';
-import { LoggerFactory } from '../../sablo/logger.service';
-import {WindowRefService} from '../../sablo/util/windowref.service';
+import { LoggerFactory } from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
 
 import { SpecTypesService, BaseCustomObject, ICustomArray } from '../../sablo/spectypes.service';
 

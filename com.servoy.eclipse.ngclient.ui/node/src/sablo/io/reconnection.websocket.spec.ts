@@ -3,8 +3,8 @@ import { TestBed,fakeAsync,tick } from '@angular/core/testing';
 import {ReconnectingWebSocket} from './reconnecting.websocket';
 
 import {CustomEvent} from '../util/eventemitter';
-import { LoggerFactory } from '../logger.service';
-import { WindowRefService } from '../util/windowref.service';
+import { LoggerFactory } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 
 describe('ReconnectionWebsocket', () => {
   let normalWebSocket = null;

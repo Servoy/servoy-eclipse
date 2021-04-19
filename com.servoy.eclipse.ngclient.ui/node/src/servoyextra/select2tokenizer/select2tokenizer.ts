@@ -1,6 +1,6 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { DOCUMENT } from '@angular/common';
 
@@ -24,6 +24,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     @Input() toolTipText: string;
 	@Input() dataProviderID: any;
 	@Input() enabled: boolean;
+	@Input() editable: boolean;
 
     @ViewChild(Select2) select2: Select2;
 
@@ -74,6 +75,13 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         this.select2.toggleOpenAndClose();
     }
 
+    isEnabled() {
+        return this.enabled === true && this.isEditable();
+    }
+
+    isEditable() {
+        return this.readOnly == false && this.editable == true;
+    }
 
     setData() {
         if (this.valuelistID) {

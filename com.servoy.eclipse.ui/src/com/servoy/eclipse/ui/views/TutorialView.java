@@ -31,6 +31,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
+import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -83,11 +84,13 @@ public class TutorialView extends ViewPart
 
 	private Composite rootComposite;
 	private boolean showTutorialsList;
+	private Color backgroundColor;
 
 	@Override
 	public void createPartControl(Composite parent)
 	{
 		loadDataModel(true, null);
+		setupBackgroundColor(parent);
 		createTutorialView(parent, true);
 		parent.addControlListener(new ControlAdapter()
 		{
@@ -119,6 +122,30 @@ public class TutorialView extends ViewPart
 		});
 	}
 
+	private void setupBackgroundColor(Composite parent)
+	{
+		backgroundColor = parent.getBackground();
+		if (isLightColor(backgroundColor))
+		{
+			backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		}
+		else
+		{
+			backgroundColor = new Color(47, 47, 47, 255); //TODO get it from the theme/color registry
+			parent.addDisposeListener(event -> {
+				backgroundColor.dispose();
+			});
+		}
+	}
+
+	private boolean isLightColor(Color c)
+	{
+		double hsp = Math.sqrt(0.299 * (c.getRed() * c.getRed()) +
+			0.587 * (c.getGreen() * c.getGreen()) +
+			0.114 * (c.getBlue() * c.getBlue()));
+		return hsp > 127.5;
+	}
+
 	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
 		this.showTutorialsList = createDefaultTutorialsList;
@@ -128,7 +155,7 @@ public class TutorialView extends ViewPart
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
 		rootComposite.setLayout(layout);
-		rootComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		rootComposite.setBackground(backgroundColor);
 		ScrolledComposite sc = new ScrolledComposite(rootComposite, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Composite mainContainer = new Composite(sc, SWT.NONE);
@@ -137,7 +164,7 @@ public class TutorialView extends ViewPart
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
 		mainContainer.setLayout(layout);
-		mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		mainContainer.setBackground(backgroundColor);
 
 		if (createDefaultTutorialsList)
 		{
@@ -145,11 +172,7 @@ public class TutorialView extends ViewPart
 		}
 		else
 		{
-			StyledText openLink = new StyledText(mainContainer, SWT.NONE);
-			openLink.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			openLink.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-			openLink.setEditable(false);
-			openLink.setText("Go back to tutorials");
+			StyledText openLink = createDefaultColorsStyledText(mainContainer, "Go back to tutorials");
 			openLink.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
 			FontDescriptor descriptor = FontDescriptor.createFrom(openLink.getFont());
 			openLink.setFont(descriptor.createFont(parent.getDisplay()));
@@ -166,7 +189,7 @@ public class TutorialView extends ViewPart
 				}
 			});
 			Label nameLabel = new Label(mainContainer, SWT.NONE);
-			nameLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			nameLabel.setBackground(backgroundColor);
 			nameLabel.setText(dataModel.optString("name"));
 			descriptor = FontDescriptor.createFrom(nameLabel.getFont());
 			descriptor = descriptor.setStyle(SWT.BOLD);
@@ -190,6 +213,26 @@ public class TutorialView extends ViewPart
 		sc.requestLayout();
 	}
 
+	private StyledText createDefaultColorsStyledText(Composite parent, String text)
+	{
+		StyledText styledText = new StyledText(parent, SWT.NONE);
+		styledText.setEditable(false);
+		styledText.setText(text);
+		styledText.setBackground(backgroundColor);
+		styledText.setStyleRange(getDefaultColorStyleRange(0, text.length(), true));
+		return styledText;
+	}
+
+	private StyleRange getDefaultColorStyleRange(int start, int length, boolean defaultFont)
+	{
+		StyleRange style = new StyleRange();
+		style.background = backgroundColor;
+		if (defaultFont) style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
+		style.start = start;
+		style.length = length;
+		return style;
+	}
+
 	/**
 	 * This class is representing the default tutorials list.
 	 */
@@ -204,7 +247,7 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			setBackground(backgroundColor);
 
 			if (dataTutorialsList != null)
 			{
@@ -212,7 +255,7 @@ public class TutorialView extends ViewPart
 				{
 					Composite row = new Composite(this, SWT.FILL);
 					row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					row.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					row.setBackground(backgroundColor);
 
 					GridLayout rowLayout = new GridLayout();
 					rowLayout.numColumns = 1;
@@ -224,7 +267,7 @@ public class TutorialView extends ViewPart
 					String dividerText = dataTutorialsList.getJSONObject(i).optString("divider");
 					boolean hasDivider = dividerText != null && !dividerText.isEmpty();
 					Label name = new Label(row, SWT.WRAP);
-					name.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					name.setBackground(backgroundColor);
 					name.setText(dataTutorialsList.getJSONObject(i).optString(hasDivider ? "divider" : "title"));
 					name.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
 					FontDescriptor descriptor = FontDescriptor.createFrom(name.getFont());
@@ -233,7 +276,7 @@ public class TutorialView extends ViewPart
 					name.setFont(descriptor.createFont(mainContainer.getDisplay()));
 
 					Label description = new Label(row, SWT.WRAP);
-					description.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					description.setBackground(backgroundColor);
 					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 					gd.widthHint = widthHint - 70;
@@ -247,17 +290,13 @@ public class TutorialView extends ViewPart
 						final String tutorialID = dataTutorialsList.getJSONObject(i).optString("id");
 						Composite buttonsComposite = new Composite(row, SWT.FILL);
 						buttonsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						buttonsComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+						buttonsComposite.setBackground(backgroundColor);
 						GridLayout buttonsLayout = new GridLayout();
 						buttonsLayout.numColumns = 3;
 						buttonsLayout.marginTop = -2;
 						buttonsComposite.setLayout(buttonsLayout);
 
-						StyledText openLink = new StyledText(buttonsComposite, SWT.NONE);
-						openLink.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-						openLink.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-						openLink.setEditable(false);
-						openLink.setText("open tutorial");
+						StyledText openLink = createDefaultColorsStyledText(buttonsComposite, "open tutorial");
 						openLink.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
 						descriptor = FontDescriptor.createFrom(openLink.getFont());
 						openLink.setFont(descriptor.createFont(mainContainer.getDisplay()));
@@ -277,17 +316,9 @@ public class TutorialView extends ViewPart
 							}
 						});
 
-						StyledText slash = new StyledText(buttonsComposite, SWT.NONE);
-						slash.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-						slash.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-						slash.setEditable(false);
-						slash.setText(" / ");
+						createDefaultColorsStyledText(buttonsComposite, " / ");
 
-						StyledText watchVideo = new StyledText(buttonsComposite, SWT.NONE);
-						watchVideo.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-						watchVideo.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-						watchVideo.setEditable(false);
-						watchVideo.setText("watch video");
+						StyledText watchVideo = createDefaultColorsStyledText(buttonsComposite, "watch video");
 						watchVideo.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
 						descriptor = FontDescriptor.createFrom(watchVideo.getFont());
 						watchVideo.setFont(descriptor.createFont(mainContainer.getDisplay()));
@@ -330,11 +361,11 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			setBackground(backgroundColor);
 
 			Composite row = new Composite(this, SWT.FILL);
 			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			row.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			row.setBackground(backgroundColor);
 
 			GridLayout rowLayout = new GridLayout();
 			rowLayout.numColumns = 2;
@@ -344,7 +375,7 @@ public class TutorialView extends ViewPart
 			row.setLayout(rowLayout);
 
 			Button currentTutorial = new Button(row, SWT.BUTTON1);
-			currentTutorial.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			currentTutorial.setBackground(backgroundColor);
 			currentTutorial.setText("Watch video");
 			currentTutorial.setToolTipText("Play the video for this tutorial.");
 			currentTutorial.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
@@ -369,7 +400,7 @@ public class TutorialView extends ViewPart
 			{
 				Integer id = (Integer)nextTutorialID;
 				Button nextTutorial = new Button(row, SWT.BUTTON1);
-				nextTutorial.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+				nextTutorial.setBackground(backgroundColor);
 				nextTutorial.setText("Next tutorial");
 				nextTutorial.setToolTipText("Open the next tutorial.");
 				GridData gridData = new GridData();
@@ -402,11 +433,11 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			setBackground(backgroundColor);
 
 			Composite row = new Composite(this, SWT.FILL);
 			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			row.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			row.setBackground(backgroundColor);
 
 			GridLayout rowLayout = new GridLayout();
 			rowLayout.numColumns = 1;
@@ -416,7 +447,7 @@ public class TutorialView extends ViewPart
 			row.setLayout(rowLayout);
 
 			Label stepName = new Label(row, SWT.NONE);
-			stepName.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			stepName.setBackground(backgroundColor);
 			stepName.setText(index + ". " + rowData.optString("name"));
 			FontDescriptor descriptor = FontDescriptor.createFrom(stepName.getFont());
 			descriptor = descriptor.setStyle(SWT.BOLD);
@@ -456,14 +487,10 @@ public class TutorialView extends ViewPart
 			}
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
-			gifURL.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			gifURL.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
 			gifURL.setEditable(false);
 			gifURL.setText("< show");
-			StyleRange styleRange = new StyleRange();
+			StyleRange styleRange = getDefaultColorStyleRange(0, 6, true);
 			styleRange.underline = true;
-			styleRange.start = 0;
-			styleRange.length = 6;
 			gifURL.setStyleRange(styleRange);
 			gifURL.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
 			descriptor = FontDescriptor.createFrom(gifURL.getFont());
@@ -612,21 +639,21 @@ public class TutorialView extends ViewPart
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = widthHint - 70;
 			styledText.setLayoutData(gd);
+			styledText.setStyleRange(getDefaultColorStyleRange(0, styledText.getText().length(), false));
+			styledText.addLineBackgroundListener((LineBackgroundEvent event) -> {
+				event.lineBackground = backgroundColor;
+			});
 
 			for (int i = 0; i < boldStartIndex.size(); i++)
 			{
-				StyleRange styleRange = new StyleRange();
-				styleRange.start = boldStartIndex.get(i).intValue();
-				styleRange.length = boldEndIndex.get(i).intValue();
+				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);
 				styleRange.fontStyle = SWT.BOLD;
 				styledText.setStyleRange(styleRange);
 			}
 
 			for (int i = 0; i < italicStartIndex.size(); i++)
 			{
-				StyleRange styleRange = new StyleRange();
-				styleRange.start = italicStartIndex.get(i).intValue();
-				styleRange.length = italicEndIndex.get(i).intValue();
+				StyleRange styleRange = getDefaultColorStyleRange(italicStartIndex.get(i).intValue(), italicEndIndex.get(i).intValue(), false);
 				styleRange.fontStyle = SWT.ITALIC;
 				styledText.setStyleRange(styleRange);
 			}
@@ -635,7 +662,7 @@ public class TutorialView extends ViewPart
 			{
 				StyleRange bulletStyle = new StyleRange();
 				bulletStyle.metrics = new GlyphMetrics(0, 0, 40);
-				bulletStyle.foreground = getDisplay().getSystemColor(SWT.COLOR_BLACK);
+				bulletStyle.foreground = getDisplay().getSystemColor(SWT.COLOR_BLACK); //TODO or white..
 				Bullet bullet = new Bullet(bulletStyle);
 				styledText.setLineBullet(listStartIndex.get(i).intValue(), listEndIndex.get(i).intValue(), bullet);
 			}
@@ -644,9 +671,7 @@ public class TutorialView extends ViewPart
 			boolean mouseDownListenerAdded = false;
 			for (Map.Entry<Integer, String> entry : linkStartIndex.entrySet())
 			{
-				StyleRange styleRange = new StyleRange();
-				styleRange.start = entry.getKey().intValue();
-				styleRange.length = linkEndIndex.get(indexForLinkLength++).intValue();
+				StyleRange styleRange = getDefaultColorStyleRange(entry.getKey().intValue(), linkEndIndex.get(indexForLinkLength++).intValue(), false);
 				styleRange.underline = true;
 				styleRange.underlineStyle = SWT.UNDERLINE_LINK;
 				styleRange.data = entry.getValue();

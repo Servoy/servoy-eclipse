@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from '../../sablo/logger.service';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { LoggerFactory } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 import { SpecTypesService } from '../../sablo/spectypes.service';
 import { ServicesService } from '../../sablo/services.service';
 import { FoundsetConverter } from './foundset_converter';
@@ -29,7 +29,7 @@ describe('FoundsetLinked Converter', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ServoyTestingModule],
-            providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService,TestabilityService, SpecTypesService, LoggerFactory,
+            providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, TestabilityService, SpecTypesService, LoggerFactory,
                 WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
         });
 

@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, Format } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, Format } from '@servoy/public';
 
 @Component( {
     selector: 'servoyextra-textfieldgroup',
@@ -70,6 +70,13 @@ export class ServoyExtraTextfieldGroup extends ServoyBaseComponent<HTMLDivElemen
                         break;
                     case 'dataProviderID':
                         this.dataProviderValidation();
+                        break;
+                    case 'placeholderText':
+                        if (change.currentValue) this.renderer.setAttribute(this.getFocusElement(), 'placeholder', change.currentValue);
+                        else this.renderer.removeAttribute(this.getFocusElement(), 'placeholder');
+                        break;
+                    case 'inputType':
+                        this.renderer.setAttribute(this.getFocusElement(), 'type', this.inputType);
                         break;
                 }
             }

@@ -6,16 +6,16 @@ import { ChangeType, ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ComponentConverter, ComponentModel } from '../../ngclient/converters/component_converter';
-import { ServoyBaseComponent } from '../../ngclient/basecomponent';
+import { ServoyBaseComponent } from '@servoy/public';
 import { Foundset, FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { FormComponentState } from '../../ngclient/converters/formcomponent_converter';
-import { ServoyApi } from '../../ngclient/servoy_public';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
+import { ServoyApi } from '../../ngclient/servoy_api';
 
 @Component({
     selector: 'servoycore-listformcomponent',

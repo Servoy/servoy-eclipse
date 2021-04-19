@@ -1,4 +1,4 @@
-import { ServoyBaseComponent } from '../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { Directive, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
 @Directive()

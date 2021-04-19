@@ -94,6 +94,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -107,7 +108,6 @@ import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
-import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -145,6 +145,13 @@ public class WarExporter
 			".jar", "org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
+	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
+
+	static
+	{
+		EXCLUDED_RESOURCES_BY_NAME = new HashSet<>();
+		EXCLUDED_RESOURCES_BY_NAME.add(".git");
+	}
 
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
@@ -268,14 +275,7 @@ public class WarExporter
 	 */
 	private void copyNGClient2(File tmpWarDir) throws ExportException
 	{
-		try
-		{
-			Activator.getInstance().exportNG2ToWar(tmpWarDir);
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Can't copy the NG2 resources to " + tmpWarDir, e);
-		}
+		Activator.getDefault().exportNG2ToWar(tmpWarDir);
 	}
 
 	/**
@@ -694,7 +694,7 @@ public class WarExporter
 					{
 						if (resource.isDirectory())
 						{
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, EXCLUDED_RESOURCES_BY_NAME);
 						}
 						else
 						{
@@ -1691,28 +1691,32 @@ public class WarExporter
 		path.delete();
 	}
 
-	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates) throws ExportException
+	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
+		throws ExportException
 	{
 		Set<File> writtenFiles = new HashSet<File>();
-		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates);
+		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates, excludedResourcesByName);
 		return writtenFiles;
 	}
 
 	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive) throws ExportException
 	{
-		return copyDir(sourceDir, destDir, recusive, null);
+		return copyDir(sourceDir, destDir, recusive, null, null);
 	}
 
-	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles, Map<String, File> allTemplates) throws ExportException
+	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles, Map<String, File> allTemplates,
+		Set<String> excludedResourcesByName) throws ExportException
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
 		if (listFiles == null) return;
 		for (File file : listFiles)
 		{
+			if (excludedResourcesByName != null && excludedResourcesByName.contains(file.getName())) continue; // skip it; for example it could be a .git dir that should not get inside .war contents as it is useless there and can have a large size
+
 			if (file.isDirectory())
 			{
-				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates);
+				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates, excludedResourcesByName);
 			}
 			else
 			{

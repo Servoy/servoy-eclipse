@@ -96,7 +96,6 @@ public class DistFolderCreatorJob extends Job
 		}
 		System.err.println("copied " + (System.currentTimeMillis() - time));
 		NodeFolderCreatorJob.createFileWatcher(nodeFolder, "/dist");
-		Activator.getInstance().stateLocationDone();
 		return Status.OK_STATUS;
 	}
 

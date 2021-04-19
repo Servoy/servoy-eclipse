@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '../sablo/util/deferred';
+import { Deferred } from '@servoy/public';
 import { ConverterService } from '../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '../sablo/logger.service';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 import { ServoyService } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { get } from 'lodash-es';
@@ -272,7 +272,17 @@ export class FormService {
         const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
         const formData = msg.forms[formname];
+        var newFormProperties = formData['']; // form properties
+        if (newFormProperties) {
+            if (formConversion)
+                newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion, formComponent,
+                  (propertyName: string) => formComponent ? formComponent[propertyName] : formComponent);
+            for (var p in newFormProperties) {
+                formComponent[p] = newFormProperties[p];
+            }
+        }
         for (const beanname of Object.keys(formData)) {
+            if (beanname === '') continue; // skip form properties
             let comp: IComponentCache = formCache.getComponent(beanname);
             if (!comp) { // is it a form component?
                 comp = formCache.getFormComponent(beanname);

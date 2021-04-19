@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service';
 
-import {WindowRefService} from '../../sablo/util/windowref.service';
+import {LoggerFactory, LoggerService, WindowRefService} from '@servoy/public';
 
 import {SabloService} from '../../sablo/sablo.service';
 
@@ -13,11 +13,11 @@ import { FileUploadWindowComponent } from './file-upload-window/file-upload-wind
 import { LocalStorageService } from '../../sablo/webstorage/localstorage.service';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
-import { SvyUtilsService } from './utils.service';
 
 @Injectable()
 export class ApplicationService {
     private userProperties: {[property: string]: any};
+    private log: LoggerService;
 
     constructor(private servoyService: ServoyService,
                             private localStorageService: LocalStorageService,
@@ -27,7 +27,8 @@ export class ApplicationService {
                             @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
                             private serverData: ServerDataService,
-                             private utilsService: SvyUtilsService) {
+                            private logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('ApplicationService');
     }
 
     public setLocale(language: string, country: string ) {
@@ -130,6 +131,13 @@ export class ApplicationService {
     public getClientBrowserInformation() {
         const locale = this.sabloService.getLocale();
         const userAgent = this.getUserAgentAndPlatform();
+        let timeZone: string;
+        try {
+            timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+        } catch(e) {
+            this.log.warn('Cant get client timeZone ' + e);
+        }
+
         return {
             serverURL: this.getServerURL(),
             userAgent : userAgent.userAgent,
@@ -137,6 +145,7 @@ export class ApplicationService {
             locale : locale.full,
             remote_ipaddress : this.serverData.getIPAdress(),
             remote_host : this.serverData.getHostAdress(),
+            timeZone,
             utcOffset : (new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0).getTimezoneOffset() / -60), utcDstOffset: (new Date(new Date().getFullYear(), 6, 1, 0, 0, 0, 0).getTimezoneOffset() / -60)
         };
     }
@@ -181,7 +190,7 @@ export class ApplicationService {
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string ) {
         if (!url) {
-           url = this.utilsService.generateUploadUrl(null, null, null);
+           url = this.generateUploadUrl(null, null, null);
         }
         const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
         modalRef.componentInstance.url = url;
@@ -200,6 +209,18 @@ export class ApplicationService {
             return beanModel.clientProperty.trustDataAsHtml;
         }
         return this.servoyService.getUIProperties().getUIProperty('trustDataAsHtml');
+    }
+
+    public generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
+        return 'resources/upload/' + this.sabloService.getClientnr() +
+            (formname ? '/' + formname : '') +
+            (componentName ? '/' + componentName : '') +
+            (propertyName ? '/' + propertyName : '');
+    }
+
+    public generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string{
+            // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
+            return 'resources/upload/' +  this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
     }
 
     private  showDefaultLoginWindow() {

@@ -1,10 +1,8 @@
 <input #element
     [id]="servoyApi.getMarkupId()"
     class="bts-textbox"
-    [type]="inputType"
     (change)="pushUpdate()"
     [ngClass]="styleClass"
-    [placeholder]="placeholderText"
     [(ngModel)]="dataProviderID"
     [svyFormat]="format"
     [svyDecimalKeyConverter]="format"

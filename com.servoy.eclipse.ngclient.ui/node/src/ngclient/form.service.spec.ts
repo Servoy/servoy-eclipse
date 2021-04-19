@@ -1,12 +1,10 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import {EventEmitter } from '@angular/core';
-
 import {WebsocketService} from '../sablo/websocket.service';
 import {SabloService} from '../sablo/sablo.service';
 import {ConverterService} from '../sablo/converter.service';
-import {LoggerFactory} from '../sablo/logger.service';
-import {WindowRefService} from '../sablo/util/windowref.service';
+import {LoggerFactory} from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
 
 import { FormService } from './form.service';
 import {ServoyService} from './servoy.service';

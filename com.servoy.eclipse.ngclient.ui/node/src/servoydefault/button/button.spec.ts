@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultButton } from './button';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { TooltipService, ComponentContributor, ServoyApi} from '../../ngclient/servoy_public';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { TooltipService, ComponentContributor, ServoyApi} from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { runOnPushChangeDetection } from '../../testing';
 
@@ -19,7 +19,7 @@ describe('SvyButton', () => {
       declarations: [ ServoyDefaultButton],
       providers: [ TooltipService, ComponentContributor],
       imports: [
-               SabloModule, ServoyPublicModule],
+               ServoyTestingModule, ServoyPublicModule],
     })
     .compileComponents();
   }));
@@ -41,7 +41,7 @@ describe('SvyButton', () => {
     expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
   });
 
-  it( 'should render html', () => {
+  it( 'should render html', async () => {
     servoyApi.trustAsHtml.and.returnValue( true );
     component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
     runOnPushChangeDetection(fixture);

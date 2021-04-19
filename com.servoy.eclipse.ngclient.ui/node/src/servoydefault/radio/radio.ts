@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { FormattingService } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { FormattingService } from '@servoy/public';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {

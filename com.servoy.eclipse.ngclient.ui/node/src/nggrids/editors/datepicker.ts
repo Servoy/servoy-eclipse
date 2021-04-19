@@ -1,11 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
-import { LocaleService } from '../../ngclient/servoy_public';
 import { EditorDirective } from './editor';
 import { ICellEditorParams } from '@ag-grid-community/core';
 import * as moment from 'moment';
 import { DOCUMENT } from '@angular/common';
 import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
+import { ServoyPublicService } from '@servoy/public';
 
 @Component({
   selector: 'aggrid-datepicker',
@@ -28,9 +28,9 @@ export class DatePicker extends EditorDirective {
 
   selectedValue: any;
 
-  constructor(localeService: LocaleService, dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) private doc: Document) {
+  constructor(servoyService: ServoyPublicService, dateTimeAdapter: DateTimeAdapter<any>, @Inject(DOCUMENT) private doc: Document) {
     super();
-    dateTimeAdapter.setLocale(localeService.getLocale());
+    dateTimeAdapter.setLocale(servoyService.getLocale());
 
     const ld = moment.localeData();
     this.firstDayOfWeek = ld.firstDayOfWeek();

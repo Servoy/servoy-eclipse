@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { Deferred } from '../../sablo/util/deferred';
+import { Deferred } from '@servoy/public';
 
 @Injectable()
 export class I18NProvider {

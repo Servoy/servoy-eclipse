@@ -1,13 +1,14 @@
 import { async, ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule, } from '../../ngclient/servoy_public.module';
+import { ServoyPublicModule, } from '@servoy/public';
 
 import { ServoyDefaultTextField } from './textfield';
-import { FormattingService, TooltipService, LocaleService, I18NProvider, Format} from '../../ngclient/servoy_public';
+import { FormattingService, TooltipService, Format} from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-
+import { LocaleService } from '../../ngclient/locale.service';
+import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { runOnPushChangeDetection } from '../../testing';
 
 describe('ServoyDefaultTextField', () => {
@@ -18,7 +19,7 @@ describe('ServoyDefaultTextField', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTextField],
-      imports: [SabloModule, ServoyPublicModule, FormsModule],
+      imports: [ServoyTestingModule, ServoyPublicModule, FormsModule],
       providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
     })
     .compileComponents();

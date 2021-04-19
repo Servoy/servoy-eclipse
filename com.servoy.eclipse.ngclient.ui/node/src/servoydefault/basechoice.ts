@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, Input, OnInit, Inject } from '@angular/core';
-import { FormattingService } from '../ngclient/servoy_public';
+import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from './basefield';
 
 @Directive()

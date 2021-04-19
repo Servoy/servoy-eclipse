@@ -1,8 +1,8 @@
 import { TestBed, inject, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from '../../sablo/logger.service';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { LoggerFactory } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 import { SpecTypesService, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
 import { ServicesService } from '../../sablo/services.service';
 import { ValuelistConverter } from './valuelist_converter';
@@ -10,7 +10,7 @@ import { SabloDeferHelper} from '../../sablo/defer.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
-import { TestWebsocketService } from '../../testing/servoytesting.module';
+import { TestSabloService, TestWebsocketService } from '../../testing/servoytesting.module';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { TestabilityService } from '../../sablo/testability.service';
 
@@ -26,9 +26,9 @@ describe('ValuelistConverter', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ValuelistConverter, ConverterService, SabloService, SpecTypesService,
+      providers: [ValuelistConverter, ConverterService, SpecTypesService,
         LoggerFactory, WindowRefService, SabloDeferHelper, TestabilityService, ServicesService, SessionStorageService, LoadingIndicatorService,
-        { provide: WebsocketService, useClass: TestWebsocketService }]
+        { provide: WebsocketService, useClass: TestWebsocketService }, { provide: SabloService, useClass: TestSabloService }]
     });
 
     const sabloService: SabloService = TestBed.get( SabloService );

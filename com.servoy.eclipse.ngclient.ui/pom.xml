@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.servoy</groupId>
@@ -12,7 +13,7 @@
 	<version>2021.6.0.3680_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
-	   <test.script>test_headless</test.script>
+		<test.script>test_headless</test.script>
 	</properties>
 	<build>
 		<plugins>
@@ -47,7 +48,33 @@
 						</configuration>
 					</execution>
 
-					<!-- 3. npm run build -->
+					<!-- 3. npm run build_lib -->
+					<execution>
+						<id>npm run build_lib</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<arguments>run build_lib</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 4. npm run fix_lib -->
+					<execution>
+						<id>npm run fix_lib</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>node</workingDirectory>
+							<arguments>run fix_lib</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 5. npm run build -->
 					<execution>
 						<id>npm run build</id>
 						<phase>compile</phase>
@@ -60,17 +87,17 @@
 						</configuration>
 					</execution>
 
-					<!-- 4. Run karma tests -->
+					<!-- 6. Run karma tests -->
 					<execution>
 						<id>angular karma test</id>
-						<phase>test</phase>	
+						<phase>test</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
-							<failOnError>true</failOnError>	
+							<failOnError>true</failOnError>
 							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>

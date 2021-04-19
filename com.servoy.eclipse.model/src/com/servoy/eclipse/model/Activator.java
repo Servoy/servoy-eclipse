@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.model;
 
+import java.io.File;
+import java.util.function.Consumer;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Plugin;
@@ -42,6 +45,8 @@ public class Activator extends Plugin
 
 	// The shared instance
 	private static Activator plugin;
+
+	private Consumer<File> exporter;
 
 	/**
 	 * The constructor
@@ -122,6 +127,19 @@ public class Activator extends Plugin
 			};
 		}
 		return mobileExportClient;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 */
+	public void exportNG2ToWar(File location)
+	{
+		if (exporter != null) exporter.accept(location);
+	}
+
+	public void setNG2WarExporter(Consumer<File> exporter)
+	{
+		this.exporter = exporter;
 	}
 
 }

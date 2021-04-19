@@ -1,5 +1,5 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy, Input, TemplateRef, Inject, ContentChild, Output, EventEmitter } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from './../../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
 import { BaseCustomObject } from '../../sablo/spectypes.service';

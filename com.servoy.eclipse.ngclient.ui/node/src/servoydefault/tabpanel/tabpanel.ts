@@ -2,8 +2,8 @@ import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy} from
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { WindowRefService } from '../../sablo/util/windowref.service';
-import { LoggerFactory } from '../../sablo/logger.service';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 

@@ -9,7 +9,7 @@ import { ComponentCache } from '../../ngclient/types';
 })
 export class DefaultNavigator {
 
-  @Input() readonly name: string;
+  @Input() name: string;
   navigatorComponentCache: ComponentCache;
   sliderValue: number;
 

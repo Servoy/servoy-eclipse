@@ -4,8 +4,8 @@ import { ConverterService } from './converter.service';
 
 import {SpecTypesService} from '../sablo/spectypes.service';
 
-import {LoggerService, LoggerFactory} from './logger.service';
-import {WindowRefService} from './util/windowref.service';
+import {LoggerService, LoggerFactory} from '@servoy/public';
+import {WindowRefService} from '@servoy/public';
 
 
 describe('ConverterService', () => {

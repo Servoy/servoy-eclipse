@@ -1,9 +1,9 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultSpinner } from './spinner';
-import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicModule } from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { IValuelist } from '../../sablo/spectypes.service';
@@ -35,7 +35,7 @@ describe('ServoyDefaultCheckGroup', () => {
 
     TestBed.configureTestingModule({
       declarations: [ServoyDefaultSpinner],
-      imports: [SabloModule, FormsModule, ServoyPublicModule],
+      imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     }).compileComponents();
   }));

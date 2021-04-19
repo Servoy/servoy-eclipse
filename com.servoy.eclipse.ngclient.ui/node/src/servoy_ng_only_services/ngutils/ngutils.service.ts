@@ -1,7 +1,7 @@
 import { Injectable, Renderer2, Inject, RendererFactory2 } from '@angular/core';
 
 import { DOCUMENT, PlatformLocation } from '@angular/common';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { WindowRefService } from '@servoy/public';
 import { ServiceChangeHandler } from '../../sablo/util/servicechangehandler';
 import { ServoyService } from '../../ngclient/servoy.service';
 

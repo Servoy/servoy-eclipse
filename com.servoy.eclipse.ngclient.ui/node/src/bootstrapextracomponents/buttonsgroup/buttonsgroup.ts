@@ -1,7 +1,7 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent } from '@servoy/public';
 import { IValuelist } from '../../sablo/spectypes.service';
-import { Format } from '../../ngclient/servoy_public';
+import { Format } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-buttons-group',

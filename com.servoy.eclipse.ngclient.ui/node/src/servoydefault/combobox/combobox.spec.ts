@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { Format, FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
-import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '@servoy/public';
+import { Format, FormattingService, ServoyApi, TooltipService } from '@servoy/public';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConverterService } from '../../sablo/converter.service';
@@ -14,8 +14,8 @@ import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/load
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { WindowRefService } from '../../sablo/util/windowref.service';
-import { LoggerFactory } from '../../sablo/logger.service';
+import { WindowRefService } from '@servoy/public';
+import { LoggerFactory } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -55,9 +55,8 @@ describe('ComboboxComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultCombobox],
-      providers: [ FormattingService, TooltipService, ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService,
-        LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService],
-      imports: [ServoyPublicModule, SabloModule, NgbModule, FormsModule]
+      providers: [ ValuelistConverter,  ServicesService ],
+      imports: [ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule]
     })
     .compileComponents();
   }));

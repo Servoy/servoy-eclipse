@@ -1,5 +1,5 @@
 import { Renderer2, Input, Output, EventEmitter, SimpleChanges, ContentChild, TemplateRef, Directive, ChangeDetectorRef } from '@angular/core';
-import { WindowRefService } from '../sablo/util/windowref.service';
+import { WindowRefService } from '@servoy/public';
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { BaseCustomObject } from '../sablo/spectypes.service';
 

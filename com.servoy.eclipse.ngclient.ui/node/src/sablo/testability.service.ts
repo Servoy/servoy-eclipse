@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { LoggerFactory, LoggerService } from './logger.service';
-import { Deferred } from './util/deferred';
-import { WindowRefService } from './util/windowref.service';
+import { LoggerFactory, LoggerService } from '@servoy/public';
+import { Deferred } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 
 @Injectable()
 export class TestabilityService {

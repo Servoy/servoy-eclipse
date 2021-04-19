@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { OwlDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ServoyPublicModule } from '../ngclient/servoy_public.module';
+import { ServoyPublicModule } from '@servoy/public';
 import { DataGrid } from './datagrid/datagrid';
 import { DatePicker } from './editors/datepicker';
 import { FormEditor } from './editors/formeditor';

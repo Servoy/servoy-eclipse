@@ -5,10 +5,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyService } from '../../ngclient/servoy.service';
-import { FormattingService } from '../../ngclient/servoy_public';
-import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
+import { FormattingService } from '@servoy/public';
+import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ChangeType, IFoundset } from '../../sablo/spectypes.service';
-import { Deferred } from '../../sablo/util/deferred';
+import { Deferred } from '@servoy/public';
 import { DatagridService } from './datagrid.service';
 import { DatePicker } from '../editors/datepicker';
 import { FormEditor } from '../editors/formeditor';
@@ -675,31 +675,33 @@ export class DataGrid extends NGGridDirective {
                         });
                         break;
                     case 'columns':
-                        // need a better way to detect if columns array are changed
-                        if(change.currentValue !== change.previousValue) {
-                            this.updateColumnDefs();
-                        } else {
-                            for(let i = 0; i < this.columns.length; i++) {
-                                for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
-                                    const oldPropertyValue = change.previousValue[i][prop];
-                                    const newPropertyValue = change.currentValue[i][prop];
-                                    if(newPropertyValue !== oldPropertyValue) {
-                                        this.log.debug('column property changed');
-                                        if(this.isGridReady) {
-                                            if(prop !== 'footerText') {
-                                                this.updateColumnDefs();
+                        if(!change.firstChange) {
+                            // need a better way to detect if columns array are changed
+                            if(change.currentValue !== change.previousValue) {
+                                this.updateColumnDefs();
+                            } else {
+                                for(let i = 0; i < this.columns.length; i++) {
+                                    for(const prop of COLUMN_KEYS_TO_CHECK_FOR_CHANGES) {
+                                        const oldPropertyValue = change.previousValue[i][prop];
+                                        const newPropertyValue = change.currentValue[i][prop];
+                                        if(newPropertyValue !== oldPropertyValue) {
+                                            this.log.debug('column property changed');
+                                            if(this.isGridReady) {
+                                                if(prop !== 'footerText') {
+                                                    this.updateColumnDefs();
+                                                }
+                                                if(prop !== 'visible' && prop !== 'width') {
+                                                    this.restoreColumnsState();
+                                                }
+                                            } else {
+                                                this.isColumnModelChangedBeforeGridReady = true;
                                             }
-                                            if(prop !== 'visible' && prop !== 'width') {
-                                                this.restoreColumnsState();
-                                            }
-                                        } else {
-                                            this.isColumnModelChangedBeforeGridReady = true;
-                                        }
 
-                                        if(prop === 'headerTitle') {
-                                            this.handleColumnHeaderTitle(i, newPropertyValue);
-                                        } else if (prop === 'footerText') {
-                                            this.handleColumnFooterText();
+                                            if(prop === 'headerTitle') {
+                                                this.handleColumnHeaderTitle(i, newPropertyValue);
+                                            } else if (prop === 'footerText') {
+                                                this.handleColumnFooterText();
+                                            }
                                         }
                                     }
                                 }
@@ -892,6 +894,7 @@ export class DataGrid extends NGGridDirective {
         //create the column definitions from the specified columns in designer
         const colDefs = [];
         let colDef: any = { };
+        const colGroups = { };
         let column: any;
         for (let i = 0; this.columns && i < this.columns.length; i++) {
             column = this.columns[i];
@@ -1006,7 +1009,27 @@ export class DataGrid extends NGGridDirective {
                 }
             }
 
-            colDefs.push(colDef);
+            if(column.headerGroup) {
+                if(!colGroups[column.headerGroup]) {
+                    colGroups[column.headerGroup] = {};
+                    colGroups[column.headerGroup]['headerClass'] = column.headerGroupStyleClass;
+                    colGroups[column.headerGroup]['children'] = [];
+
+                }
+                colGroups[column.headerGroup]['children'].push(colDef);
+            } else {
+                colDefs.push(colDef);
+            }
+        }
+
+        for(const groupName in colGroups) {
+            if(colGroups.hasOwnProperty(groupName)) {
+                const group: any = {};
+                group.headerName = groupName;
+                group.headerClass = colGroups[groupName]['headerClass'];
+                group.children = colGroups[groupName]['children'];
+                colDefs.push(group);
+            }
         }
 
         // TODO svyRowId should not be visible. I need the id for the selection
@@ -1575,7 +1598,8 @@ export class DataGrid extends NGGridDirective {
                         _this.getColumnIndex(params.column.colId),
                         oldValue,
                         newValue,
-                        _this.createJSEvent()
+                        _this.createJSEvent(),
+                        _this.getRecord(params)
                     );
                     _this.onColumnDataChangePromise.then((r: any) => {
                         if(r === false) {
@@ -3105,6 +3129,7 @@ export class DataGrid extends NGGridDirective {
         if (changeEvent.selectedRowIndexesChanged && !this.requestSelectionPromises.length) {
             this.log.debug(idRandom + ' - 3. Request selection changed');
             this.selectedRowIndexesChanged();
+            this.scrollToSelection();
         }
 
     }

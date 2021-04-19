@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public';
+import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 import { UppyConfig, UppyAngularComponent } from 'uppy-angular';
 
 @Component({
@@ -38,7 +38,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
     filesToBeAdded: Array<string> = [];
 
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private utilsService: SvyUtilsService) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService) {
         super(renderer, cdRef);
     }
 
@@ -185,7 +185,7 @@ export class ServoyExtraMultiFileUpload extends ServoyBaseComponent<HTMLDivEleme
         }
         this.settings = {
             uploadAPI: {
-                endpoint: this.utilsService.generateUploadUrl(this.servoyApi.getFormName(), this.name, 'onFileUploaded')
+                endpoint: this.servoyService.generateUploadUrl(this.servoyApi.getFormName(), this.name, 'onFileUploaded')
             },
             plugins: uppyPlugins,
             restrictions: this.restrictions,

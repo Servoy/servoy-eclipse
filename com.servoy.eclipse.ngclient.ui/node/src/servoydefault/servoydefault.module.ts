@@ -32,19 +32,17 @@ import {ServoyDefaultSpinner} from './spinner/spinner';
 import {ChoiceElementDirective} from './basechoice';
 
 import { SabloModule } from '../sablo/sablo.module';
-import { ServoyPublicModule } from '../ngclient/servoy_public.module';
-
-import { FormattingService, I18NProvider} from '../ngclient/servoy_public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { UploadDirective } from '../ngclient/utils/upload.directive';
 import { Select2Module } from 'ng-select2-component';
 import { SpecTypesService } from '../sablo/spectypes.service';
 import { Tab } from './tabpanel/basetabpanel';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
+import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 
 @NgModule({
   declarations: [
@@ -71,8 +69,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     ServoyDefaultImageMedia,
     ChoiceElementDirective,
     BGSplitter,
-    BGPane,
-    UploadDirective
+    BGPane
   ],
   imports: [
     FormsModule,
@@ -111,7 +108,6 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 
   ],
   providers: [
-              FormattingService,
               I18NProvider,
               { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
              ],
@@ -119,7 +115,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     CUSTOM_ELEMENTS_SCHEMA
   ]
 })
-export class ServoyDefaultComponentsModule { 
+export class ServoyDefaultComponentsModule {
     constructor( specTypesService: SpecTypesService ) {
         specTypesService.registerType('servoydefault-tabpanel.tab', Tab);
         specTypesService.registerType('servoydefault-splitpane.tab', Tab);

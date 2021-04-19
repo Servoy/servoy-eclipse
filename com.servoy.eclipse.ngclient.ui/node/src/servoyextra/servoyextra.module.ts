@@ -12,7 +12,7 @@ import { ServoyExtraMultiFileUpload } from './multifileupload/multifileupload';
 import { ServoyExtraSelect2Tokenizer } from './select2tokenizer/select2tokenizer';
 import { ServoyExtraYoutubeVideoEmbedder } from './youtubevideoembedder/youtubevideoembedder';
 import { ServoyExtraSidenav } from './sidenav/sidenav';
-import { ServoyPublicModule } from '../ngclient/servoy_public.module';
+import { ServoyPublicModule } from '@servoy/public';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ResizableModule } from 'angular-resizable-element';
@@ -27,7 +27,7 @@ import { Select2Module } from 'ng-select2-component';
 import { UppyAngularModule } from 'uppy-angular';
 import { LightboxModule } from 'ngx-lightbox';
 import { ServoyExtraCollapse } from './collapse/collapse';
-import { ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
+import { Binding, Callback, Datasource, FoundsetInfo, LevelVisibilityType, RelationInfo, ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
 import { TreeModule } from '@circlon/angular-tree-component';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ServoyExtraTreeview } from './treeview/treeview';
@@ -74,7 +74,7 @@ import { SpecTypesService } from '../sablo/spectypes.service';
         TreeModule,
         EditorModule,
         AngularTreeGridModule
-    ], 
+    ],
     providers: [AsyncPipe,
             { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
     ],
@@ -104,5 +104,11 @@ export class ServoyExtraComponentsModule {
     constructor( specTypesService: SpecTypesService ) {
         specTypesService.registerType('servoyextra-table.column', Column);
         specTypesService.registerType('servoyextra-table.settings', KeycodeSettings);
+        specTypesService.registerType('servoyextra-dbtreeview.foundsetInfo', FoundsetInfo);
+        specTypesService.registerType('servoyextra-dbtreeview.datasource', Datasource);
+        specTypesService.registerType('servoyextra-dbtreeview.binding', Binding);
+        specTypesService.registerType('servoyextra-dbtreeview.callback', Callback);
+        specTypesService.registerType('servoyextra-dbtreeview.relationInfo', RelationInfo);
+        specTypesService.registerType('servoyextra-dbtreeview.levelVisibilityType', LevelVisibilityType);
    }
 }

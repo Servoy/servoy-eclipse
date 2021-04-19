@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FileUploadWindowComponent } from './file-upload-window.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { I18NProvider } from '../../../ngclient/servoy_public';
+import { I18NProvider } from '../i18n_provider.service';
 
 describe('FileUploadWindowComponent', () => {
   let component: FileUploadWindowComponent;

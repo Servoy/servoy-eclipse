@@ -47,7 +47,7 @@ public class ModuleListSelectionDialog extends FilteredItemsSelectionDialog
 	/**
 	 * @param shell
 	 */
-	public ModuleListSelectionDialog(Shell shell, final String title)
+	public ModuleListSelectionDialog(Shell shell, final String title, final String dialogMessage)
 	{
 		super(shell);
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -60,7 +60,7 @@ public class ModuleListSelectionDialog extends FilteredItemsSelectionDialog
 			}
 		}
 		setTitle(title);
-		setMessage("Select a module by typing a name or by selecting from the list:");
+		setMessage(dialogMessage);
 		setSelectionHistory(new ResourceSelectionHistory());
 		setInitialElementSelections(moduleNames);
 	}

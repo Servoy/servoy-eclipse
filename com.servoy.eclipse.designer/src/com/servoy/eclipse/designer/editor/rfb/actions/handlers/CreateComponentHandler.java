@@ -611,34 +611,40 @@ public class CreateComponentHandler implements IServerService
 						}
 						List<IPersist> changes = new ArrayList<>();
 						boolean addSiblingsToChanges = true;
-						if (editorPart.getForm().isResponsiveLayout() && initialDropTarget != null &&
-							!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
+						if (editorPart.getForm().isResponsiveLayout())
 						{
-							ISupportChilds parent = webComponent.getParent();
-							changes.add(webComponent.getParent());
-							addSiblingsToChanges = false;//no need to mark the siblings as changed because the whole parent was overridden
-
-							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-							parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
-							Iterator<IPersist> it = parent.getAllObjects();
-							while (it.hasNext())
+							if (initialDropTarget != null &&
+								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
 							{
-								IPersist child = it.next();
-								IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, editorPart.getForm()));
-								if (!overridePersist.getUUID().equals(child.getUUID()))
+								ISupportChilds parent = webComponent.getParent();
+								changes.add(webComponent.getParent());
+								addSiblingsToChanges = false;//no need to mark the siblings as changed because the whole parent was overridden
+
+								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+								parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
+								Iterator<IPersist> it = parent.getAllObjects();
+								while (it.hasNext())
 								{
-									parent.removeChild(child);
-									parent.addChild(overridePersist);
+									IPersist child = it.next();
+									IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, editorPart.getForm()));
+									if (!overridePersist.getUUID().equals(child.getUUID()))
+									{
+										parent.removeChild(child);
+										parent.addChild(overridePersist);
+									}
 								}
 							}
+							else
+							{
+								changes.add(webComponent);
+							}
+							webComponent.setLocation(getLocationAndShiftSiblings(webComponent.getParent(), args, extraChangedPersists));
+							if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
 						}
 						else
 						{
 							changes.add(webComponent);
 						}
-						webComponent.setLocation(getLocationAndShiftSiblings(webComponent.getParent(), args, extraChangedPersists));
-						if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
-
 						return changes.toArray(new IPersist[changes.size()]);
 					}
 					else

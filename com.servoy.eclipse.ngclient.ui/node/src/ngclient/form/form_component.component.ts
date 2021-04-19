@@ -1,16 +1,17 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
-        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
+        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
-import { ServoyBaseComponent } from '../basecomponent';
+import { DOCUMENT } from '@angular/common';
+import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
     // eslint-disable-next-line
@@ -77,6 +78,7 @@ import { ServoyBaseComponent } from '../basecomponent';
 <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
 <ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [location]="state.model.location" [size]="state.model.size" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
 <ng-template #servoycoreFormcomponent let-callback="callback" let-state="state"><servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [size]="state.model.size" [styleClass]="state.model.styleClass" *ngIf="state.model.visible" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent></ng-template>
+<ng-template #servoycoreFormcontainer let-callback="callback" let-state="state"><servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [relationName]="state.model.relationName" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" *ngIf="state.model.visible" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoycore-formcontainer></ng-template>
 <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [location]="state.model.location" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" *ngIf="state.model.visible" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
 <ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [location]="state.model.location" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [size]="state.model.size" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
 <ng-template #servoycorePortal let-callback="callback" let-state="state"><servoycore-portal  [servoyAttributes]="state.model.servoyAttributes" [background]="state.model.background" [borderType]="state.model.borderType" [childElements]="state.model.childElements" (childElementsChange)="callback.datachange(state,'childElements',$event)" [cssPosition]="state.model.cssPosition" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [foreground]="state.model.foreground" [headerHeight]="state.model.headerHeight" [headers]="state.model.headers" (headersChange)="callback.datachange(state,'headers',$event)" [initialSort]="state.model.initialSort" [intercellSpacing]="state.model.intercellSpacing" [location]="state.model.location" [multiLine]="state.model.multiLine" [readOnly]="state.model.readOnly" [readOnlyMode]="state.model.readOnlyMode" [relatedFoundset]="state.model.relatedFoundset" [reorderable]="state.model.reorderable" [resizable]="state.model.resizable" [resizeble]="state.model.resizeble" [rowBGColorCalculation]="state.model.rowBGColorCalculation" [rowHeight]="state.model.rowHeight" [scrollbars]="state.model.scrollbars" [showHorizontalLines]="state.model.showHorizontalLines" [showVerticalLines]="state.model.showVerticalLines" [size]="state.model.size" [sortable]="state.model.sortable" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [transparent]="state.model.transparent" *ngIf="state.model.visible" [onDragEndMethodID]="callback.getHandler(state,'onDragEndMethodID')" [onDragMethodID]="callback.getHandler(state,'onDragMethodID')" [onDragOverMethodID]="callback.getHandler(state,'onDragOverMethodID')" [onDropMethodID]="callback.getHandler(state,'onDropMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-portal></ng-template>
@@ -158,6 +160,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
     @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
+    @ViewChild('servoycoreFormcontainer', { static: true }) readonly servoycoreFormcontainer: TemplateRef<any>;
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
     @ViewChild('servoyextraHtmlarea', { static: true }) readonly servoyextraHtmlarea: TemplateRef<any>;
@@ -198,16 +201,19 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('bootstrapextracomponentsButtonsGroup', { static: true }) readonly bootstrapextracomponentsButtonsGroup: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsNavbar', { static: true }) readonly bootstrapextracomponentsNavbar: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsCarousel', { static: true }) readonly bootstrapextracomponentsCarousel: TemplateRef<any>;
+    @ViewChild('bootstrapextracomponentsInputGroup', { static: true }) readonly bootstrapextracomponentsInputGroup: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsBadge', { static: true }) readonly bootstrapextracomponentsBadge: TemplateRef<any>;
     @ViewChild('bootstrapextracomponentsRating', { static: true }) readonly bootstrapextracomponentsRating: TemplateRef<any>;
-     @ViewChild('bootstrapextracomponentsProgressbar', { static: true }) readonly bootstrapextracomponentsProgressbar: TemplateRef<any>;
-    
+    @ViewChild('bootstrapextracomponentsProgressbar', { static: true }) readonly bootstrapextracomponentsProgressbar: TemplateRef<any>;
+    @ViewChild('bootstrapextracomponentsDropdown', { static: true }) readonly bootstrapextracomponentsDropdown: TemplateRef<any>;
+    @ViewChild('bootstrapextracomponentsSwitch', { static: true }) readonly bootstrapextracomponentsSwitch: TemplateRef<any>;
+
     @ViewChild('svychartjsChart', { static: true }) readonly svychartjsChart: TemplateRef<any>;
     // component template generate end
 
 
 
-    @Input() readonly name: string;
+    @Input() name: string;
 
     formClasses: string[];
 
@@ -217,11 +223,14 @@ export class FormComponent implements OnDestroy, OnChanges {
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
+    private _containers: { added: any; removed: any; };
+    private _cssstyles: { [x: string]: any; };
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, private renderer: Renderer2) {
+                private el: ElementRef, private renderer: Renderer2,
+                @Inject(DOCUMENT) private document: Document) {
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -249,6 +258,47 @@ export class FormComponent implements OnDestroy, OnChanges {
         }
     }
 
+    @Input('containers')
+    set containers(containers: {added: any, removed: any}) {
+        if (!containers) return;
+        this._containers = containers;
+        for (let containername in containers.added) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
+            }
+        }
+        for (let containername in containers.removed) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
+            }
+        }
+    }
+
+    get containers() {
+        return this._containers;
+    }
+
+    @Input('cssStyles')
+    set cssstyles(cssStyles: { [x: string]: any; }) {
+        if (!cssStyles) return;
+        this._cssstyles = cssStyles;
+        for (let containername in cssStyles) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                const stylesMap = cssStyles[containername];
+                for (let key in stylesMap) {
+                    this.renderer.setStyle(container, key, stylesMap[key]);
+                }
+            }
+        }
+    }
+
+    get cssstyles() {
+        return this._cssstyles;
+    }
+
     ngOnChanges(changes: SimpleChanges) {
         if (changes.name) {
             // really make sure all form state is reverted to default
@@ -256,10 +306,11 @@ export class FormComponent implements OnDestroy, OnChanges {
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
             if (styleClasses)
-                this.formClasses =styleClasses.split(' ');
+                this.formClasses = styleClasses.split(' ');
             else
-                this.formClasses = null;;
-
+                this.formClasses = null;
+            this._containers = this.formCache.getComponent('').model.containers;
+            this._cssstyles = this.formCache.getComponent('').model.cssstyles;
             this.handlerCache = {};
             this.servoyApiCache = {};
             this.componentCache = {};
@@ -401,6 +452,10 @@ export class FormComponent implements OnDestroy, OnChanges {
             }
         }
     }
+
+    private getContainerByName(containername: string) : Element {
+       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
+    }
 }
 
 class FormComponentServoyApi extends ServoyApi {
@@ -426,7 +481,7 @@ class FormComponentServoyApi extends ServoyApi {
 export class AddAttributeDirective implements OnInit {
     @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
 
-    constructor(private el: ElementRef, private renderer: Renderer2) { }
+    constructor(private el: ElementRef, private renderer: Renderer2, @Inject(FormComponent) private parent: FormComponent) { }
 
     ngOnInit() {
         if ('classes' in this.svyContainerStyle) {
@@ -441,6 +496,27 @@ export class AddAttributeDirective implements OnInit {
         if ('attributes' in this.svyContainerStyle) {
               for (const key of Object.keys(this.svyContainerStyle.attributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
+                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
+            }
+        }
+    }
+
+    private restoreCss() {
+        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
+            const name = this.svyContainerStyle.attributes.name.split('.')[1];
+            if (this.parent.cssstyles && this.parent.cssstyles[name]) {
+                const stylesMap = this.parent.cssstyles[name];
+                for (let k in stylesMap) {
+                    this.renderer.setStyle(this.el.nativeElement, k, stylesMap[k]);
+                }
+            }
+            if (this.parent.containers) {
+                if (this.parent.containers.added && this.parent.containers.added[name]) {
+                    this.parent.containers.added[name].forEach((cls: string) => this.renderer.addClass(this.el.nativeElement, cls));
+                }
+                if (this.parent.containers.removed && this.parent.containers.removed[name]) {
+                    this.parent.containers.removed[name].forEach((cls: string) => this.renderer.removeClass(this.el.nativeElement, cls));
+                }
             }
         }
     }

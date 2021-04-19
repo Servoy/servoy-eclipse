@@ -1,5 +1,5 @@
 import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { WindowRefService } from '../../sablo/util/windowref.service';
+import { WindowRefService } from '@servoy/public';
 
 import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
 import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap';
@@ -51,7 +51,7 @@ export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel<HTMLDi
     }
 
     selectTabAt( selectionIndex: number ) {
-        if ( selectionIndex >= 0 && selectionIndex <= this.tabs.length ) {
+        if ( selectionIndex >= 0 && selectionIndex < this.tabs.length ) {
             let tabToSelect = this.tabs[selectionIndex];
             if ( tabToSelect.disabled == true ) {
                 return;
