@@ -60,7 +60,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			protected org.eclipse.core.runtime.IStatus run(IProgressMonitor monitor)
 			{
 				Map<WebObjectSpecification, String> ng2Services = new HashMap<>();
-				WebObjectSpecification[] allServices = WebServiceSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+				WebObjectSpecification[] allServices = WebServiceSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
 					if (!webObjectSpecification.getNG2Config().isNull("packageName"))
