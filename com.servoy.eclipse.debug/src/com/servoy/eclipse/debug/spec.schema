@@ -144,9 +144,13 @@
 			"description": "Array of keywords used for component search",
 			"type": "array"
 		},
-		"dependencies": 
-		{
-			"description": "Dependencies for NG2",
+		"ng2Config": {
+			"dependencies": 
+			{
+				"description": "Dependencies for NG2",
+				"type": "object"
+			},
+			"description": "Configuration property for NG2",
 			"type": "object"
 		},
 		"icon": 
