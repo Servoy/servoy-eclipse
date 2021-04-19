@@ -7,6 +7,26 @@ import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '../logger.service';
 
 
+class NumberParser {
+  private _group: RegExp;
+    private _decimal: RegExp;
+    private _numeral: RegExp;
+    private _index: (d: any) => string;
+  constructor() {
+    const locale = new Intl.NumberFormat().resolvedOptions().locale;
+    const parts = (new Intl.NumberFormat(locale) as any).formatToParts(12345.6);
+    const numerals = [...new Intl.NumberFormat(locale, {useGrouping: false}).format(9876543210)].reverse();
+    const index = new Map(numerals.map((d, i) => [d, i]));
+    this._group = new RegExp(`[${parts.find(d => d.type === 'group').value}]`, 'g');
+    this._decimal = new RegExp(`[${parts.find(d => d.type === 'decimal').value}]`);
+    this._numeral = new RegExp(`[${numerals.join('')}]`, 'g');
+    this._index = d => index.get(d).toString();
+  }
+  parse(str: string) {
+    return (str.trim().replace(this._group, '').replace(this._decimal, '.').replace(this._numeral, this._index)) ? +str : NaN;
+  }
+}
+
 @Directive({
 
     // eslint-disable-next-line @angular-eslint/directive-selector
@@ -20,6 +40,10 @@ import { LoggerFactory, LoggerService } from '../logger.service';
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
     private static DATETIMEFORMAT: Format = {display:'yyyy-MM-ddTHH:mm:ss', type:'DATETIME'} as Format;
     private static DATEFORMAT: Format = {display:'yyyy-MM-dd', type:'DATETIME'} as Format;
+    private static MONTHFORMAT: Format = {display:'yyyy-MM', type:'DATETIME'} as Format;
+    private static WEEKFORMAT: Format = {display:'YYYY-[W]WW', type:'DATETIME'} as Format;
+    private static TIMEFORMAT: Format = {display:'HH:mm', type:'DATETIME'} as Format;
+    private static BROWSERNUMBERFORMAT = new NumberParser();
 
     @Input('svyFormat') format: Format;
     @Input() findmode: boolean;
@@ -59,6 +83,16 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
              data = this.formatService.unformat(value, FormatDirective.DATETIMEFORMAT.display, FormatDirective.DATETIMEFORMAT.type, this.realValue);
         } else if (inputType === 'date') {
              data = this.formatService.unformat(value, FormatDirective.DATEFORMAT.display, FormatDirective.DATEFORMAT.type, this.realValue);
+        } else if (inputType === 'time') {
+             data = this.formatService.unformat(value, FormatDirective.TIMEFORMAT.display, FormatDirective.TIMEFORMAT.type, this.realValue);
+        } else if (inputType === 'month') {
+             data = this.formatService.unformat(value, FormatDirective.MONTHFORMAT.display, FormatDirective.MONTHFORMAT.type, this.realValue);
+        } else if (inputType === 'week') {
+             data = this.formatService.unformat(value, FormatDirective.WEEKFORMAT.display, FormatDirective.WEEKFORMAT.type, this.realValue);
+        } else if (inputType === 'number') {
+             data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
+        } else if (inputType === 'email') {
+             data = value;
         } else if (!this.findmode && this.format) {
             const type = this.format.type;
             let format = this.format.display ? this.format.display : this.format.edit;
@@ -125,6 +159,20 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         } else if (inputType === 'date') {
             const data = this.formatService.format(value, FormatDirective.DATEFORMAT, false);
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'time') {
+            const data = this.formatService.format(value, FormatDirective.TIMEFORMAT, false);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'month') {
+            const data = this.formatService.format(value, FormatDirective.MONTHFORMAT, false);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'week') {
+            const data = this.formatService.format(value, FormatDirective.WEEKFORMAT, false);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'number') {
+            const data = value?new Intl.NumberFormat().format(value):'';
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+        } else if (inputType === 'email') {
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if (value && this.format) {
             let data = value;
             if (!this.findmode) {
@@ -148,7 +196,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     }
 
     private getType(): string {
-        return this._elementRef.nativeElement.type;
+        const type = this._elementRef.nativeElement.type as string;
+        return type?type.toLocaleLowerCase():'text';
     }
 
     private setFormat() {
@@ -261,3 +310,5 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         return stripped;
     }
 }
+
+
