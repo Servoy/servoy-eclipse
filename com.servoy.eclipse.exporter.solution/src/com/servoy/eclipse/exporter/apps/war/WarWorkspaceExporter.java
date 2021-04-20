@@ -241,9 +241,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				Set<String> internallyNeededComponents = getComponentsNeededUnderTheHood();
 				List<String> excludedPackages = Arrays.asList(cmdLineArguments.getExcludedComponentPackages().split(" "));
-				return Arrays.stream(componentsSpecProviderState.getAllWebObjectSpecifications()) //
+				return Arrays.stream(componentsSpecProviderState.getAllWebObjectSpecifications())
 					.filter(spec -> (internallyNeededComponents.contains(spec.getName()) || !excludedPackages.contains(spec.getPackageName())))
-					.map(spec -> spec.getName()) //
+					.map(spec -> spec.getName())
 					.collect(Collectors.toSet());
 			}
 			else
