@@ -30,7 +30,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> i
     @Input() enabled: boolean;
     @Input() levelVisibility: LevelVisibilityType;
     @Input() responsiveHeight: number;
-    @Input() selection: Array<Object>
+    @Input() selection: Array<Object>;
     @Input() visible: boolean;
     @Input() onReady: (e: Event, data?: any) => void;
 
@@ -39,7 +39,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> i
     fileImgPath = "../../assets/images/file.png"
     useCheckboxes = false;
     expandedNodes: any = [];
-    displayNodes = [];
+    displayNodes: any = [];
     removeListenerFunctionArray: Array<FoundsetListener> = [];
 
     @ViewChild('element', { static: true }) elementRef: ElementRef;
@@ -114,7 +114,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> i
                     }
                     break;
                 case 'foundsets': {
-                  if (change.currentValue && change.previousValue) {
+                  if (change.currentValue) {
                     this.initTree();
                   }
                   this.addOrRemoveFoundsetListeners(change);
