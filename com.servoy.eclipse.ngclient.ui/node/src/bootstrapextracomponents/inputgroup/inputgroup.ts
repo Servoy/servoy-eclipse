@@ -7,7 +7,6 @@ import { BaseCustomObject } from '../../sablo/spectypes.service';
 @Component( {
     selector: 'bootstrapextracomponents-input-group',
     templateUrl: './inputgroup.html',
-    styleUrls: ['./inputgroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivElement> {
