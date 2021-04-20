@@ -43,7 +43,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 {
 	public WebPackagesListener()
 	{
-		checkPackages();
+		if (WebServiceSpecProvider.isLoaded())
+			checkPackages();
 	}
 
 	@Override
