@@ -11,8 +11,8 @@ describe('RatingComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapExtraRating , ServoyTestingModule, ServoyPublicModule],
-      imports: [ NgbModule ]
+      declarations: [ ServoyBootstrapExtraRating],
+      imports: [ NgbModule, ServoyTestingModule, ServoyPublicModule ]
     })
     .compileComponents();
   }));
