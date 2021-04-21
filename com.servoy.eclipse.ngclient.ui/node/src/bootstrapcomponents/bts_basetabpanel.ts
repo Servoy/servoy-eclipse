@@ -177,4 +177,5 @@ export class Tab extends BaseCustomObject {
 	imageMediaID: string;
 	hideCloseIcon: boolean;
 	iconStyleClass: string;
+    styleClass: string;
 }
