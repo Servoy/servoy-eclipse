@@ -72,7 +72,7 @@
 						</configuration>
 					</execution>
  -->
-					<!-- 4. npm run fix_lib -->
+					<!-- 4. npm run fix_lib 
 					<execution>
 						<id>npm run fix_lib</id>
 						<phase>compile</phase>
@@ -84,7 +84,7 @@
 							<arguments>run fix_lib</arguments>
 						</configuration>
 					</execution>
-
+-->
 					<!-- 5. npm run build -->
 					<execution>
 						<id>npm run build</id>
@@ -94,7 +94,8 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<arguments>run build</arguments>
+							<!--  Developer just uses the debug output for now, this stepp will be removed fully because we will build in the developer -->
+							<arguments>run build_debug_nowatch</arguments> 
 						</configuration>
 					</execution>
 
