@@ -18,6 +18,17 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>nod/dist/</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
 				<version>1.11.0</version>
@@ -48,7 +59,7 @@
 						</configuration>
 					</execution>
 
-					<!-- 3. npm run build_lib -->
+					<!-- 3. npm run build_lib
 					<execution>
 						<id>npm run build_lib</id>
 						<phase>compile</phase>
@@ -60,7 +71,7 @@
 							<arguments>run build_lib</arguments>
 						</configuration>
 					</execution>
-
+ -->
 					<!-- 4. npm run fix_lib -->
 					<execution>
 						<id>npm run fix_lib</id>
