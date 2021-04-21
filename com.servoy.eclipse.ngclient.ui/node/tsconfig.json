@@ -21,10 +21,8 @@
     ],
     "paths": {
       "@servoy/public": [
-        "../dist/servoy/public/servoy-public",
-        "../dist/servoy/public",
-        "dist/servoy/public/servoy-public",
-        "dist/servoy/public"
+        "../projects/servoy-public/src/public-api",
+        "./projects/servoy-public/src/public-api"
       ]
     },
 	"outDir": "./out-tsc/app"
