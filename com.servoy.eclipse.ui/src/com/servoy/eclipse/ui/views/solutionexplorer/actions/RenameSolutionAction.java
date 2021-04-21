@@ -202,10 +202,17 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 														for (IAdaptable resource : resources)
 														{
 															IPath fullPath = ((IResource)resource).getFullPath();
-															IFile file = ServoyModel.getWorkspace().getRoot()
-																.getFile(new Path(name + "/" + fullPath.removeFirstSegments(1).toString()));
-															fullPath = file.getFullPath();
-															paths.add(fullPath.toString());
+															if (oldName.equals(fullPath.segment(0)))
+															{
+																IFile file = ServoyModel.getWorkspace().getRoot()
+																	.getFile(new Path(name + "/" + fullPath.removeFirstSegments(1).toString()));
+																fullPath = file.getFullPath();
+																paths.add(fullPath.toString());
+															}
+															else
+															{
+																paths.add(fullPath.toString());
+															}
 														}
 														svyProject.getResourcesProject().addWorkingSet(
 															new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
