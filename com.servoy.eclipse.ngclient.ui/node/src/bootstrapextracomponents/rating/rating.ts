@@ -12,16 +12,15 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
 
     @Input() enabled: boolean;
     @Input() dataProviderID: number;
+    @Output() dataProviderIDChange = new EventEmitter();
     @Input() max: number;
     @Input() showPercentageOnHover: boolean;
     @Input() stateOn: string;
     @Input() stateOff: string;
 
-    overStar: boolean = false;
+    overStar = false;
     percent: number;
 
-    @Output() dataProviderIDChange = new EventEmitter();
- 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService ) {
         super( renderer, cdRef );
     }
@@ -35,18 +34,18 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
     onLeaveEvent() {
         this.overStar = false;
         if (this.onLeave) {
-            var jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()} as EventLike, 'onLeave' );
+            const jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()} as EventLike, 'onLeave' );
 
             this.onLeave(jsEvent, this.dataProviderID);
         }
     }
 
-    onHoverEvent(value : number) {
+    onHoverEvent(value: number) {
         if (this.enabled !== false) {
             this.percent = value / this.max * 100;
             this.overStar = true;
             if (this.onHover) {
-                let jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()}  as EventLike, 'onHover' );
+                const jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()}  as EventLike, 'onHover' );
 
                 this.onHover(jsEvent, this.dataProviderID);
             }
@@ -55,6 +54,6 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
     }
 
     onChange(){
-        this.dataProviderIDChange.emit(this.dataProviderID);   
+        this.dataProviderIDChange.emit(this.dataProviderID);
     }
 }
