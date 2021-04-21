@@ -1,5 +1,5 @@
-import { Component, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
+import { Component, Output, EventEmitter, Input, ChangeDetectionStrategy, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { ServoyBaseComponent, JSEvent, EventLike, ServoyPublicService } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-rating',
@@ -22,6 +22,11 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
 
     @Output() dataProviderIDChange = new EventEmitter();
  
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService ) {
+        super( renderer, cdRef );
+    }
+
+
     svyOnInit() {
         super.svyOnInit();
         this.percent = this.dataProviderID * 100 / this.max ;
@@ -30,7 +35,7 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
     onLeaveEvent() {
         this.overStar = false;
         if (this.onLeave) {
-            var jsEvent = this.createJSEvent('onLeave');
+            var jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()} as EventLike, 'onLeave' );
 
             this.onLeave(jsEvent, this.dataProviderID);
         }
@@ -41,7 +46,7 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
             this.percent = value / this.max * 100;
             this.overStar = true;
             if (this.onHover) {
-                let jsEvent = this.createJSEvent('onHover');
+                let jsEvent = this.servoyService.createJSEvent( {target : this.getNativeElement()}  as EventLike, 'onHover' );
 
                 this.onHover(jsEvent, this.dataProviderID);
             }
@@ -52,27 +57,4 @@ export class ServoyBootstrapExtraRating extends ServoyBaseComponent<HTMLDivEleme
     onChange(){
         this.dataProviderIDChange.emit(this.dataProviderID);   
     }
-    
-    createJSEvent(eventType: string): JSEvent {
-        //create JSEvent
-        let jsEvent : JSEvent = { svyType: 'JSEvent' };
-
-        jsEvent.elementName = this.getNativeElement().getAttribute('name');
-
-        //get event type
-        jsEvent.eventType = eventType;
-
-        jsEvent.data = null;
-        return jsEvent;
-    }
-
-}
-
-class JSEvent {
-    svyType: string;
-    elementName?: string;
-    eventType?: string;
-    x?: number;
-    y?: number;
-    data?: any;
 }
