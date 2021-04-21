@@ -68,3 +68,8 @@
 .bts-extra-progressbar > .progress-bar {
     line-height: 20px;
 }
+
+.svy-wrapper > * > .bts-extra-switch {
+    width: 100%;
+    overflow: hidden;
+}
