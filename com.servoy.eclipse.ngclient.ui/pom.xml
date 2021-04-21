@@ -23,7 +23,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>nod/dist/</directory>
+							<directory>node/dist/</directory>
 						</fileset>
 					</filesets>
 				</configuration>
