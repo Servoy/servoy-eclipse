@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.gef.ui.actions.SelectAllAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -69,6 +71,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
@@ -144,6 +147,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 	private final PartListener partListener = new PartListener();
 
+	private final DesignerPreferences designerPreferences = new DesignerPreferences();
+
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
@@ -179,6 +184,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
+		designerPreferences.addPreferenceChangeListener(partListener);
 		createBrowser(parent);
 
 		refreshBrowserUrl(false);
@@ -249,11 +255,12 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			formName = flattenedForm.getName();
 			extendsId = flattenedForm.getExtendsID();
 			boolean hideDefault = EditorUtil.hideDefaultComponents(form);
+			boolean marqueeSelectOuter = designerPreferences.getMarqueeSelectOuter();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
-				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault +
+				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault + "&mso=" + marqueeSelectOuter +
 				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
 			final Runnable runnable = new Runnable()
 			{
@@ -315,6 +322,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getSessionKey());
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().removeFormComponentListener(partListener);
+		designerPreferences.removePreferenceChangeListener(partListener);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -597,7 +605,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	 */
 	protected abstract void showUrl(final String url);
 
-	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener
+	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener
 	{
 		private boolean hidden = false;
 		private boolean refresh = false;
@@ -699,6 +707,19 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef)
 		{
+		}
+
+		@Override
+		public void preferenceChange(PreferenceChangeEvent event)
+		{
+			if ((DesignerPreferences.DESIGNER_SETTINGS_PREFIX + DesignerPreferences.MARQUEE_SELECT_OUTER_SETTING).equals(event.getKey()))
+			{
+				if (!hidden)
+				{
+					refreshEntireForm();
+				}
+				else refresh = true;
+			}
 		}
 	}
 
