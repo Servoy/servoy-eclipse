@@ -108,6 +108,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					StringBuilder command = new StringBuilder();
 					command.append("install ");
 					packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
+					command.append("--force");
 					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
 					try
 					{
@@ -159,16 +160,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						content = replace(content, "// generated modules start", "// generated modules end", modules);
 
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
-						// run the 2 build command "build_lib_debug_nowatch" and "build_debug_nowatch"
-						npmCommand = Activator.getInstance().createNPMCommand("run build_lib_debug_nowatch");
-						try
-						{
-							npmCommand.runCommands();
-						}
-						catch (Exception e)
-						{
-							e.printStackTrace();
-						}
+//						// run the 2 build command "build_lib_debug_nowatch" and "build_debug_nowatch"
+//						npmCommand = Activator.getInstance().createNPMCommand("run build_lib_debug_nowatch");
+//						try
+//						{
+//							npmCommand.runCommands();
+//						}
+//						catch (Exception e)
+//						{
+//							e.printStackTrace();
+//						}
 						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
 						try
 						{
