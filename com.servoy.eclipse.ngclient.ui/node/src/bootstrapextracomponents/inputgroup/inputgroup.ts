@@ -18,8 +18,8 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     @Input() onFocusGainedMethodID: ( e: Event ) => void;
     @Input() onFocusLostMethodID: ( e: Event ) => void;
 
-    @Output() dataProviderIDChange = new EventEmitter();
-    @Input() dataProviderID: any;
+    @Output() dataProviderChange = new EventEmitter();
+    @Input() dataProvider: any;
     @Input() enabled: boolean;
     @Input() editable: boolean;
     @Input() format: Format;
@@ -49,6 +49,9 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     svyOnInit() {
         super.svyOnInit();
         this.attachFocusListeners( this.getFocusElement() );
+        if (this.dataProvider === undefined) {
+            this.dataProvider = null;
+        }
         if ( this.onAction ) {
             this.renderer.listen( this.getFocusElement(), 'click', e => this.onAction( e ) );
         }
@@ -74,6 +77,10 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
         }
     }
 
+    pushUpdate() {
+        this.dataProviderChange.emit(this.dataProvider);
+    }
+    
     requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
         this.getFocusElement().focus();
