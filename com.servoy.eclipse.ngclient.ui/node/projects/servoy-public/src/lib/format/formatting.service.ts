@@ -71,7 +71,7 @@ export class FormattingService {
 			} else if (vSvyFormat.type === 'INTEGER') {
 				const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar === undefined) {
+				if(keyChar === undefined || keyChar === null) {
 					return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
 							.symbol,
 							vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
