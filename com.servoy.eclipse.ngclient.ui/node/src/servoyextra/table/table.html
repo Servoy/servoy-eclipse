@@ -8,7 +8,7 @@
 					[resizeEdges]="{ bottom: false, right: enableColumnResize && i < columns.length-1, top: false, left: enableColumnResize && i > 0 }"
 					(resizing)="onResizeEnd($event,i)">
 					<div [innerHtml]='column.headerText' class="table-servoyextra-header-label"></div>
-					<span [ngClass]="getSortClass(i)" style="display: table-cell;"></span>
+					<span [ngClass]="getSortClass(i)" style="display: table-cell;vertical-align:middle;"></span>
 				</th>
 			</tr>
 		</thead>
