@@ -21,6 +21,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ServoyExtraComponentsModule } from '../servoyextra.module';
 import { ResizableModule } from 'angular-resizable-element';
 import { SabloModule } from '../../sablo/sablo.module';
+import { LocaleService } from '../../ngclient/locale.service';
+
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -58,9 +60,10 @@ describe('ServoyExtraTable', () => {
   let loggerFactory: LoggerFactory;
   let sabloService: SabloService;
   let sabloDeferHelper: SabloDeferHelper;
+  let localeService: LocaleService;
   let componentModelGetter: PropertyContext;
 
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner', 'registerComponent', 'unRegisterComponent', 'isInAbsoluteLayout']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner', 'registerComponent', 'unRegisterComponent', 'isInAbsoluteLayout', 'trustAsHtml']);
   const onCellClick = jasmine.createSpy('onCellClick');
   const onCellRightClick = jasmine.createSpy('onCellRightClick');
   const onCellDoubleClick = jasmine.createSpy('onCellDoubleClick');
@@ -144,7 +147,7 @@ const finishInit = () => {
       declarations: [TestWrapperComponent, ServoyExtraTable, TableRow],
       imports: [ServoyTestingModule, ScrollingModule, NgbModule, ResizableModule, ServoyPublicModule],
       providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, TestabilityService, SpecTypesService, LoggerFactory,
-        WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
+        WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService, LocaleService]
     });
 
     sabloService = TestBed.inject(SabloService);
@@ -155,6 +158,8 @@ const finishInit = () => {
     converterService = TestBed.inject(ConverterService);
     converterService.registerCustomPropertyHandler('foundset', new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, loggerFactory));
     converterService.registerCustomPropertyHandler('fsLinked', new FoundsetLinkedConverter(converterService, sabloService, viewportService, loggerFactory));
+    localeService = TestBed.inject(LocaleService);
+    localeService.setLocale('en', 'US');
     servoyApi.isInAbsoluteLayout.and.callFake(() => false);
 
     fixture = TestBed.createComponent(TestWrapperComponent);
@@ -195,7 +200,7 @@ const finishInit = () => {
           w: false,
           vEr: 5
         },
-        format: { allowedCharacters: null, isMask: false, isRaw: false, edit: null, display: null, type: 'TEXT', placeHolder: null, isNumberValidator: false },
+        format: { allowedCharacters: null, isMask: false, isRaw: false, edit: null, display: null, type: 'TEXT', placeHolder: null, isNumberValidator: false, uppercase: true },
         width: 'auto',
         autoResize: false,
         headerText: 'Country',
@@ -265,8 +270,8 @@ const finishInit = () => {
     expect(rows.length).toBeGreaterThan(0, 'should have rows');
     const firstRow = rows[1].getElementsByTagName('td');
     expect(firstRow.length).toEqual(3, 'should have 3 columns');
-    expect(firstRow[0].innerText).toEqual('10248');
-    expect(firstRow[1].innerText).toEqual('France');
+    expect(firstRow[0].innerText).toEqual('10.248');
+    expect(firstRow[1].innerText).toEqual('FRANCE');
     expect(firstRow[2].innerText).toEqual('Reims');
   }));
 
