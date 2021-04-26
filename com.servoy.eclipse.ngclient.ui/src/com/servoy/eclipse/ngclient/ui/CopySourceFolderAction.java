@@ -17,11 +17,13 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 
 /**
  * @author jcompagner
- * @since 8.5
+ * @since 2021.03
  */
 public class CopySourceFolderAction extends Action
 {
@@ -34,6 +36,16 @@ public class CopySourceFolderAction extends Action
 	@Override
 	public void run()
 	{
-		new DistFolderCreatorJob(Activator.getInstance().getProjectFolder(), true).schedule();
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
+		copySources.addJobChangeListener(new JobChangeAdapter()
+		{
+			@Override
+			public void done(IJobChangeEvent event)
+			{
+				WebPackagesListener.checkPackages();
+			}
+		});
+		copySources.schedule();
+
 	}
 }

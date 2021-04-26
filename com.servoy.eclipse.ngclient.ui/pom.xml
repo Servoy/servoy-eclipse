@@ -85,7 +85,7 @@
 						</configuration>
 					</execution>
 -->
-					<!-- 5. npm run build -->
+					<!-- 5. npm run build 
 					<execution>
 						<id>npm run build</id>
 						<phase>compile</phase>
@@ -94,11 +94,10 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<!--  Developer just uses the debug output for now, this stepp will be removed fully because we will build in the developer -->
 							<arguments>run build_debug_nowatch</arguments> 
 						</configuration>
 					</execution>
-
+-->
 					<!-- 6. Run karma tests -->
 					<execution>
 						<id>angular karma test</id>

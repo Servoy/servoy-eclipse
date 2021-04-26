@@ -49,14 +49,18 @@ public class NodeFolderCreatorJob extends Job
 {
 
 	private final File nodeFolder;
+	private final boolean createWatcher;
+	private final boolean force;
 
 	/**
 	 * @param nodeFolder
 	 */
-	public NodeFolderCreatorJob(File nodeFolder)
+	public NodeFolderCreatorJob(File nodeFolder, boolean createWatcher, boolean force)
 	{
 		super("Copy node folder to plugin location");
 		this.nodeFolder = nodeFolder;
+		this.createWatcher = createWatcher;
+		this.force = force;
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public class NodeFolderCreatorJob extends Job
 		File packageJsonFile = new File(nodeFolder, "package_original.json");
 		URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
 		String bundleContent = Utils.getURLContent(packageJsonUrl);
-		if (packageJsonFile.exists())
+		if (packageJsonFile.exists() && !force)
 		{
 			try
 			{
@@ -132,7 +136,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 //		if (packageJsonChanged) Activator.getInstance().executeNPMInstall();
 //		else Activator.getInstance().executeNPMBuild();
-		createFileWatcher(nodeFolder, null);
+		if (createWatcher) createFileWatcher(nodeFolder, null);
 		System.err.println("done " + (System.currentTimeMillis() - time));
 		Activator.getInstance().countDown();
 		return Status.OK_STATUS;
@@ -140,8 +144,8 @@ public class NodeFolderCreatorJob extends Job
 
 	private static boolean ignoredResource(String filename)
 	{
-		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/node_modules/") || filename.startsWith("/node/") ||
-			filename.endsWith(".spec.ts");
+		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.startsWith("/node_modules/") ||
+			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts");
 	}
 
 
