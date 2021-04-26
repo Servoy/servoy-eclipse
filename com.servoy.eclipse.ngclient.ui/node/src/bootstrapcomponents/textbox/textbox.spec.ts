@@ -78,8 +78,7 @@ describe('TextboxComponent', () => {
         ret = component.setInputType('wrong_value');
         expect(ret).toBeFalse();
         fixture.detectChanges();
-        // not working now
-        expect(textField.type).toBe('tel');
+        expect(textField.nativeElement.type).toBe('tel');
     });
 
     it('should apply dataprovider to UI', async () => {
