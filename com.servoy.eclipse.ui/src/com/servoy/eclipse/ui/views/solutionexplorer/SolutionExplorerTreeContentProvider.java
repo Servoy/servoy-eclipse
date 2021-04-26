@@ -1634,7 +1634,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
 						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(un.getName(),
-							new String[] { un.getSolution().getName() }))
+							new String[] { un.getSolution().getName() }, un.parent.getType() == UserNodeType.COMPONENT_FORMS))
 						return true;
 					return false;
 				}
@@ -2542,8 +2542,9 @@ public class SolutionExplorerTreeContentProvider
 				List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
 				for (String formName : forms)
 				{
+					boolean isFormComponentWSParent = workingSetNode.parent.getType() == UserNodeType.COMPONENT_FORMS;
 					Form form = workingSetNode.getSolution().getForm(formName);
-					if (form != null && !form.isFormComponent().booleanValue())
+					if (form != null && (form.isFormComponent().booleanValue() == isFormComponentWSParent))
 					{
 						addFormNode(form, nodes, workingSetNode);
 					}
@@ -2566,7 +2567,7 @@ public class SolutionExplorerTreeContentProvider
 	{
 		Solution solution = (Solution)formsNode.getRealObject();
 		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
-		if (!referenceForms && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			List<String> workingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
 				new String[] { solution.getName() });
@@ -2587,8 +2588,7 @@ public class SolutionExplorerTreeContentProvider
 		while (it.hasNext())
 		{
 			Form f = it.next();
-			//if this is the "Reference Forms" node, then all forms here, even if they belong to a working set
-			if (referenceForms || ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null ||
+			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null ||
 				!ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().isContainedInWorkingSets(f.getName(),
 					new String[] { solution.getName() }))
 			{

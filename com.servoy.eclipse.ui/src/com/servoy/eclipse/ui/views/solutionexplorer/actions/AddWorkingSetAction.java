@@ -48,6 +48,8 @@ import com.servoy.j2db.persistence.Solution;
  */
 public class AddWorkingSetAction extends Action implements ISelectionChangedListener
 {
+	public static final AddWorkingSetAction INSTANCE = new AddWorkingSetAction();
+
 	private SimpleUserNode selection = null;
 
 	public AddWorkingSetAction()
@@ -65,7 +67,7 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = type == UserNodeType.FORMS;
+			state = type == UserNodeType.FORMS || type == UserNodeType.COMPONENT_FORMS;
 			selection = (SimpleUserNode)sel.getFirstElement();
 		}
 		setEnabled(state);
