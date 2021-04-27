@@ -44,6 +44,18 @@
     padding-bottom: initial;
 }
 
+.svy-wrapper > * > .bts-extra-input-group {
+    width: 100%;
+}
+
+.bts-extra-input-group > .addon-left {
+    border-right: 0;
+}
+
+.bts-extra-input-group > .addon-right {
+    border-left: 0;
+}
+
 .svy-wrapper > * > .bts-extra-progressbar {
     width: 100%;
     white-space: nowrap;
@@ -55,4 +67,8 @@
 
 .bts-extra-progressbar > .progress-bar {
     line-height: 20px;
+}
+
+.svy-wrapper > * > .bts-extra-switch {
+    overflow: hidden;
 }

@@ -345,7 +345,7 @@ public class ExportPage extends WizardPage
 		appNameText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.APP_NAME_LENGTH + " chars");
 		appNameText.setEditable(true);
 		appNameText.setVisible(true);
-		appNameText.setEnabled(isUpdateSupported());
+		appNameText.setEnabled(true);
 		appNameText.setText(getAppName());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -391,7 +391,6 @@ public class ExportPage extends WizardPage
 	{
 		includeUpdateBtn.setEnabled(isUpdateAvailable());
 		updateUrlText.setEnabled(isUpdateSupported());
-		appNameText.setEnabled(isUpdateSupported());
 	}
 
 	private List<String> getAvailableVersions()

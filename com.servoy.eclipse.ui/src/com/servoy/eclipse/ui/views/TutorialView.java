@@ -31,7 +31,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
-import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -77,6 +76,8 @@ public class TutorialView extends ViewPart
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 	private static boolean isTutorialViewOpen = false;
 	private static final String URL_DEFAULT_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
+	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
+	private static final String SVY_BACKGROUND = "svybackground";
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -84,13 +85,11 @@ public class TutorialView extends ViewPart
 
 	private Composite rootComposite;
 	private boolean showTutorialsList;
-	private Color backgroundColor;
 
 	@Override
 	public void createPartControl(Composite parent)
 	{
 		loadDataModel(true, null);
-		setupBackgroundColor(parent);
 		createTutorialView(parent, true);
 		parent.addControlListener(new ControlAdapter()
 		{
@@ -122,22 +121,6 @@ public class TutorialView extends ViewPart
 		});
 	}
 
-	private void setupBackgroundColor(Composite parent)
-	{
-		backgroundColor = parent.getBackground();
-		if (isLightColor(backgroundColor))
-		{
-			backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		}
-		else
-		{
-			backgroundColor = new Color(47, 47, 47, 255); //TODO get it from the theme/color registry
-			parent.addDisposeListener(event -> {
-				backgroundColor.dispose();
-			});
-		}
-	}
-
 	private boolean isLightColor(Color c)
 	{
 		double hsp = Math.sqrt(0.299 * (c.getRed() * c.getRed()) +
@@ -148,6 +131,7 @@ public class TutorialView extends ViewPart
 
 	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
+		parent.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		this.showTutorialsList = createDefaultTutorialsList;
 		if (this.rootComposite != null) rootComposite.dispose();
 		rootComposite = new Composite(parent, SWT.NONE);
@@ -155,16 +139,23 @@ public class TutorialView extends ViewPart
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
 		rootComposite.setLayout(layout);
-		rootComposite.setBackground(backgroundColor);
+		rootComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		ScrolledComposite sc = new ScrolledComposite(rootComposite, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Composite mainContainer = new Composite(sc, SWT.NONE);
 		sc.setContent(mainContainer);
+		sc.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
 		mainContainer.setLayout(layout);
-		mainContainer.setBackground(backgroundColor);
+
+		//this is a workaround, the background of the main container is not really set with setData until the view is focused out
+		//TODO remove this when the background is set on the main container using setData
+		if (isLightColor(parent.getBackground())) mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		//end workaround
+
+		mainContainer.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 		if (createDefaultTutorialsList)
 		{
@@ -189,7 +180,7 @@ public class TutorialView extends ViewPart
 				}
 			});
 			Label nameLabel = new Label(mainContainer, SWT.NONE);
-			nameLabel.setBackground(backgroundColor);
+			nameLabel.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			nameLabel.setText(dataModel.optString("name"));
 			descriptor = FontDescriptor.createFrom(nameLabel.getFont());
 			descriptor = descriptor.setStyle(SWT.BOLD);
@@ -218,15 +209,13 @@ public class TutorialView extends ViewPart
 		StyledText styledText = new StyledText(parent, SWT.NONE);
 		styledText.setEditable(false);
 		styledText.setText(text);
-		styledText.setBackground(backgroundColor);
-		styledText.setStyleRange(getDefaultColorStyleRange(0, text.length(), true));
+		styledText.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		return styledText;
 	}
 
 	private StyleRange getDefaultColorStyleRange(int start, int length, boolean defaultFont)
 	{
 		StyleRange style = new StyleRange();
-		style.background = backgroundColor;
 		if (defaultFont) style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
 		style.start = start;
 		style.length = length;
@@ -247,7 +236,7 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(backgroundColor);
+			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			if (dataTutorialsList != null)
 			{
@@ -255,7 +244,7 @@ public class TutorialView extends ViewPart
 				{
 					Composite row = new Composite(this, SWT.FILL);
 					row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					row.setBackground(backgroundColor);
+					row.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 					GridLayout rowLayout = new GridLayout();
 					rowLayout.numColumns = 1;
@@ -267,7 +256,7 @@ public class TutorialView extends ViewPart
 					String dividerText = dataTutorialsList.getJSONObject(i).optString("divider");
 					boolean hasDivider = dividerText != null && !dividerText.isEmpty();
 					Label name = new Label(row, SWT.WRAP);
-					name.setBackground(backgroundColor);
+					name.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 					name.setText(dataTutorialsList.getJSONObject(i).optString(hasDivider ? "divider" : "title"));
 					name.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
 					FontDescriptor descriptor = FontDescriptor.createFrom(name.getFont());
@@ -276,7 +265,7 @@ public class TutorialView extends ViewPart
 					name.setFont(descriptor.createFont(mainContainer.getDisplay()));
 
 					Label description = new Label(row, SWT.WRAP);
-					description.setBackground(backgroundColor);
+					description.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 					gd.widthHint = widthHint - 70;
@@ -290,7 +279,7 @@ public class TutorialView extends ViewPart
 						final String tutorialID = dataTutorialsList.getJSONObject(i).optString("id");
 						Composite buttonsComposite = new Composite(row, SWT.FILL);
 						buttonsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						buttonsComposite.setBackground(backgroundColor);
+						buttonsComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 						GridLayout buttonsLayout = new GridLayout();
 						buttonsLayout.numColumns = 3;
 						buttonsLayout.marginTop = -2;
@@ -361,11 +350,11 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(backgroundColor);
+			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			Composite row = new Composite(this, SWT.FILL);
 			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			row.setBackground(backgroundColor);
+			row.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			GridLayout rowLayout = new GridLayout();
 			rowLayout.numColumns = 2;
@@ -375,7 +364,7 @@ public class TutorialView extends ViewPart
 			row.setLayout(rowLayout);
 
 			Button currentTutorial = new Button(row, SWT.BUTTON1);
-			currentTutorial.setBackground(backgroundColor);
+			currentTutorial.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			currentTutorial.setText("Watch video");
 			currentTutorial.setToolTipText("Play the video for this tutorial.");
 			currentTutorial.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
@@ -400,7 +389,7 @@ public class TutorialView extends ViewPart
 			{
 				Integer id = (Integer)nextTutorialID;
 				Button nextTutorial = new Button(row, SWT.BUTTON1);
-				nextTutorial.setBackground(backgroundColor);
+				nextTutorial.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 				nextTutorial.setText("Next tutorial");
 				nextTutorial.setToolTipText("Open the next tutorial.");
 				GridData gridData = new GridData();
@@ -433,11 +422,11 @@ public class TutorialView extends ViewPart
 			layout.marginHeight = 1;
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
-			setBackground(backgroundColor);
+			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			Composite row = new Composite(this, SWT.FILL);
 			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			row.setBackground(backgroundColor);
+			row.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			GridLayout rowLayout = new GridLayout();
 			rowLayout.numColumns = 1;
@@ -447,7 +436,7 @@ public class TutorialView extends ViewPart
 			row.setLayout(rowLayout);
 
 			Label stepName = new Label(row, SWT.NONE);
-			stepName.setBackground(backgroundColor);
+			stepName.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			stepName.setText(index + ". " + rowData.optString("name"));
 			FontDescriptor descriptor = FontDescriptor.createFrom(stepName.getFont());
 			descriptor = descriptor.setStyle(SWT.BOLD);
@@ -487,11 +476,12 @@ public class TutorialView extends ViewPart
 			}
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
+			gifURL.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			gifURL.setEditable(false);
 			gifURL.setText("< show");
 			StyleRange styleRange = getDefaultColorStyleRange(0, 6, true);
 			styleRange.underline = true;
-			gifURL.setStyleRange(styleRange);
+			//gifURL.setStyleRange(styleRange);
 			gifURL.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
 			descriptor = FontDescriptor.createFrom(gifURL.getFont());
 			descriptor = descriptor.setHeight(10);
@@ -633,21 +623,17 @@ public class TutorialView extends ViewPart
 
 			StyledText styledText = new StyledText(row, SWT.WRAP | SWT.READ_ONLY);
 			styledText.setText(removeHTMLTags(text));
+			styledText.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			FontDescriptor descriptor = FontDescriptor.createFrom(styledText.getFont());
 			descriptor = descriptor.increaseHeight(2);
 			styledText.setFont(descriptor.createFont(parent.getDisplay()));
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = widthHint - 70;
 			styledText.setLayoutData(gd);
-			styledText.setStyleRange(getDefaultColorStyleRange(0, styledText.getText().length(), false));
-			styledText.addLineBackgroundListener((LineBackgroundEvent event) -> {
-				event.lineBackground = backgroundColor;
-			});
 
 			for (int i = 0; i < boldStartIndex.size(); i++)
 			{
-				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);
-				styleRange.fontStyle = SWT.BOLD;
+				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);				styleRange.fontStyle = SWT.BOLD;
 				styledText.setStyleRange(styleRange);
 			}
 

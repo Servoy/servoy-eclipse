@@ -1,5 +1,5 @@
 import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
+import { Format, ServoyBaseComponent } from '@servoy/public';
 import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ResizeEvent } from 'angular-resizable-element';
@@ -749,6 +749,25 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         }
     }
 
+    isTrustedHTML(column: Column): boolean {
+        if (this.servoyApi.trustAsHtml() || column.showAs === 'trusted_html') {
+            return true;
+        }
+        return false;
+    }
+
+    getDisplayValue(column: Column, row: number) {
+        const val = column.dataprovider[row];
+        if (column.valuelist) {
+            for (let i = 0; i < column.valuelist.length; i++) {
+                if (val === column.valuelist[i].realValue) {
+                    return column.valuelist[i].displayValue;
+                }
+            }
+        }
+        return val;
+    }
+
     private foundsetChanged(event: FoundsetChangeEvent) {
         if (event.sortColumnsChanged) {
             this.sortColumnsChanged(event);
@@ -931,6 +950,7 @@ export class Column extends BaseCustomObject {
     valuelist: IValuelist;
     width: string; 
     initialWidth: string; 
+    format: Format;
 }
 
 export class KeycodeSettings extends BaseCustomObject {

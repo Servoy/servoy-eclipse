@@ -61,7 +61,7 @@ class BaseMenuItem extends BaseCustomObject {
     public userData: any;
 }
 
-class MenuItem extends BaseMenuItem {
+export class MenuItem extends BaseMenuItem {
     public isDivider: boolean;
     public enabled: boolean;
     public iconName: string;

@@ -18,9 +18,20 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>node/dist/</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.11.0</version>
+				<version>1.11.3</version>
 				<executions>
 
 					<!-- 1. Install node and npm locally -->
@@ -32,7 +43,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<nodeVersion>v14.15.4</nodeVersion>
+							<nodeVersion>v16.0.0</nodeVersion>
 						</configuration>
 					</execution>
 
@@ -48,7 +59,7 @@
 						</configuration>
 					</execution>
 
-					<!-- 3. npm run build_lib -->
+					<!-- 3. npm run build_lib
 					<execution>
 						<id>npm run build_lib</id>
 						<phase>compile</phase>
@@ -60,8 +71,8 @@
 							<arguments>run build_lib</arguments>
 						</configuration>
 					</execution>
-
-					<!-- 4. npm run fix_lib -->
+ -->
+					<!-- 4. npm run fix_lib 
 					<execution>
 						<id>npm run fix_lib</id>
 						<phase>compile</phase>
@@ -73,7 +84,7 @@
 							<arguments>run fix_lib</arguments>
 						</configuration>
 					</execution>
-
+-->
 					<!-- 5. npm run build -->
 					<execution>
 						<id>npm run build</id>
@@ -83,7 +94,8 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<arguments>run build</arguments>
+							<!--  Developer just uses the debug output for now, this stepp will be removed fully because we will build in the developer -->
+							<arguments>run build_debug_nowatch</arguments> 
 						</configuration>
 					</execution>
 

@@ -274,9 +274,10 @@ export class FormService {
         const formData = msg.forms[formname];
         var newFormProperties = formData['']; // form properties
         if (newFormProperties) {
-            if (formConversion)
-                newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion, formComponent,
+            if (formConversion && formConversion['']) {
+                newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion[''], formComponent,
                   (propertyName: string) => formComponent ? formComponent[propertyName] : formComponent);
+            }
             for (var p in newFormProperties) {
                 formComponent[p] = newFormProperties[p];
             }

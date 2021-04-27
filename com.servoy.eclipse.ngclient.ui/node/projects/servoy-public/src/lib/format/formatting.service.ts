@@ -71,7 +71,7 @@ export class FormattingService {
 			} else if (vSvyFormat.type === 'INTEGER') {
 				const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar === undefined) {
+				if(keyChar === undefined || keyChar === null) {
 					return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
 							.symbol,
 							vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
@@ -98,28 +98,30 @@ export class FormattingService {
 
     public unformat(data: any, servoyFormat: string, type: string, currentValue: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
-        if ((type == 'NUMBER') || (type == 'INTEGER')) {
+        if ((type === 'NUMBER') || (type === 'INTEGER')) {
             return this.unformatNumbers(data, servoyFormat);
-        } else if (type == 'TEXT') {
+        } else if (type === 'TEXT') {
             return data;
-        } else if (type == 'DATETIME') {
+        } else if (type === 'DATETIME') {
             if ('' === data ) return null;
             // some compatibility issues, see http://momentjs.com/docs/ and http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
             servoyFormat = servoyFormat.replace(new RegExp('d', 'g'), 'D');
             servoyFormat = servoyFormat.replace(new RegExp('y', 'g'), 'Y');
             // use moment.js from calendar component
-            const d = moment(data, servoyFormat,true).toDate();
+            const d = moment(data, servoyFormat, true).toDate();
             // if format has not year/month/day use the one from the current model value
             // because moment will just use current date
             if(currentValue && !isNaN(currentValue.getTime())) {
-                if(servoyFormat.indexOf('Y') == -1) {
+                if(servoyFormat.indexOf('Y') === -1) {
                     d.setFullYear(currentValue.getFullYear());
                 }
-                if(servoyFormat.indexOf('M') == -1) {
-                    d.setMonth(currentValue.getMonth());
-                }
-                if(servoyFormat.indexOf('D') == -1) {
-                    d.setDate(currentValue.getDate());
+                if (servoyFormat.indexOf('W') === -1) {
+                    if(servoyFormat.indexOf('M') === -1) {
+                        d.setMonth(currentValue.getMonth());
+                    }
+                    if(servoyFormat.indexOf('D') === -1) {
+                        d.setDate(currentValue.getDate());
+                    }
                 }
             }
             return d;

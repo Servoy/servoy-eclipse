@@ -37,8 +37,9 @@
         class='form-control bts-textbox'
         [disabled]="!enabled"
         [readonly]="readOnly || !editable" 
-        [(ngModel)]="dataProviderID"
-        [svyStartEdit]="'dataProviderID'"
+        (change)="pushUpdate()"
+        [(ngModel)]="dataProvider"
+        [svyStartEdit]="'dataProvider'"
         [hostComponent]="this"
         [sabloTabseq]="tabSeq"
         [svyDecimalKeyConverter]="format"

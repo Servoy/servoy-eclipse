@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.jabsorb.JSONSerializer;
@@ -71,7 +72,7 @@ public class DesignerPreferences
 		}
 	}
 
-	private static final String DESIGNER_SETTINGS_PREFIX = "designer.";
+	public static final String DESIGNER_SETTINGS_PREFIX = "designer.";
 
 	public static final String METRICS_SETTING = "preferdMetrics";
 	public static final String STEP_SIZE_SETTING = "stepSize";
@@ -181,6 +182,16 @@ public class DesignerPreferences
 	public DesignerPreferences()
 	{
 		eclipsePreferences = Activator.getDefault().getEclipsePreferences();
+	}
+
+	public void addPreferenceChangeListener(IPreferenceChangeListener preferenceChangeListener)
+	{
+		eclipsePreferences.addPreferenceChangeListener(preferenceChangeListener);
+	}
+
+	public void removePreferenceChangeListener(IPreferenceChangeListener preferenceChangeListener)
+	{
+		eclipsePreferences.removePreferenceChangeListener(preferenceChangeListener);
 	}
 
 	public void save()

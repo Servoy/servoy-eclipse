@@ -32,11 +32,16 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield<HTMLInputEl
         const types = ['text', 'tel', 'date', 'time', 'datetime-local', 'month', 'week', 'number', 'color'];
 
         if (types.indexOf(inputType) > -1) {
-            this.dataProviderID = null;
             this.inputType = inputType;
             this.renderer.setAttribute(this.elementRef.nativeElement, 'type', this.inputType);
-            this.pushUpdate();
             this.inputTypeChange.emit(this.inputType);
+            const dp = this.dataProviderID;
+            if (dp) {
+                this.dataProviderID = null;
+                this.cdRef.detectChanges();
+                this.dataProviderID = dp;
+                this.cdRef.detectChanges();
+            }
             return true;
         } else {
             return false;

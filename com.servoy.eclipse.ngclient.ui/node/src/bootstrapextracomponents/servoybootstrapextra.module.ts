@@ -6,7 +6,7 @@ import { ServoyBootstrapExtraBadge } from './badge/badge';
 import { ServoyBootstrapExtraInputGroup, SvyAttributesInputGroup, AddOn, AddOnButton } from './inputgroup/inputgroup';
 import { ServoyBootstrapExtraRating } from './rating/rating';
 import { ServoyBootstrapExtraProgressBar } from './progressbar/progressbar';
-import {ServoyBootstrapExtraDropdown} from './dropdown/dropdown';
+import {ServoyBootstrapExtraDropdown, MenuItem as dropdown_MenuItem} from './dropdown/dropdown';
 import { ServoyBootstrapExtraCarousel, Slide } from './carousel/carousel';
 import { MenuItem, ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
@@ -60,6 +60,7 @@ import { JwBootstrapSwitchNg2Module } from 'jw-bootstrap-switch-ng2';
 export class ServoyBootstrapExtraComponentsModule {
       constructor( specTypesService: SpecTypesService ) {
          specTypesService.registerType('bootstrapextracomponents-navbar.menuItem', MenuItem);
+         specTypesService.registerType('bootstrapextracomponents-dropdown.MenuItem', dropdown_MenuItem);
          specTypesService.registerType('bootstrapextracomponents-carousel.slide', Slide);
          specTypesService.registerType('bootstrapextracomponents-input-group.addOn', AddOn);
          specTypesService.registerType('bootstrapextracomponents-input-group.addOnButton', AddOnButton);

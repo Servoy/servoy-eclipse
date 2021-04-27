@@ -648,6 +648,12 @@
             id="com.servoy.eclipse.core.servoytheme"
             label="Servoy Default Theme">
       </theme>
+      <stylesheet
+            uri="servoydarktheme/servoydark.css">
+         <themeid
+               refid="org.eclipse.e4.ui.css.theme.e4_dark">
+         </themeid>
+      </stylesheet>
    </extension>
    <extension
          point="org.apache.tomcat.serviceprovider">

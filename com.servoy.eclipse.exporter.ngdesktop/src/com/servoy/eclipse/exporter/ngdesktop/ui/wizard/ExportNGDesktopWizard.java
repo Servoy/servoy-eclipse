@@ -177,20 +177,17 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				monitor.done();
 				retCode = PROCESS_CANCELLED;
 			}
-			else
+			else switch (status)
 			{
-				switch (status)
-				{
-					case NgDesktopClientConnection.READY :
-						serviceConn.download(tokenId, saveDir, monitor);
-						break;
-					case NgDesktopClientConnection.DOWNLOAD_ARCHIVE :
-						final String archiveUrl = getDownloadUrl(serviceConn, tokenId, errorMsg);
-						downloadArchive(saveDir, archiveUrl, monitor, errorMsg);
-						break;
-				}
-				serviceConn.delete(tokenId);
+				case NgDesktopClientConnection.READY :
+					serviceConn.download(tokenId, saveDir, monitor);
+					break;
+				case NgDesktopClientConnection.DOWNLOAD_ARCHIVE :
+					final String archiveUrl = getDownloadUrl(serviceConn, tokenId, errorMsg);
+					downloadArchive(saveDir, archiveUrl, monitor, errorMsg);
+					break;
 			}
+			serviceConn.delete(tokenId);
 		}
 		catch (IOException | InterruptedException e)
 		{

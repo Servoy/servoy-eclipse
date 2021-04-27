@@ -96,6 +96,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
 			var hideDefault = $webSocket.getURLParameter("hd");
+			var marqueeSelectOuter = $webSocket.getURLParameter("mso");
 			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
@@ -747,6 +748,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return formComponent === "true";
 			}
 			
+			$scope.isMarqueeSelectOuter = function() {
+				return marqueeSelectOuter === "true";
+			}
+
 			$scope.refreshEditorContent = function() {
 				if (editorContentRootScope) {
 					// TODO this digest makes it slow when moving, do we really need this?
