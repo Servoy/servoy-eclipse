@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 
 public class NgDesktopClientConnection implements Closeable
 {
@@ -139,6 +140,7 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("loginToken", settings.get("login_token"));
 		if (settings.get("application_name") != null)
 			jsonObj.put("applicationName", settings.get("application_name"));
+		jsonObj.put("devVersion", ClientVersion.getVersion());
 
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
