@@ -19,6 +19,7 @@ import { RadioFilter } from './filters/radiofilter';
 import { ValuelistFilter } from './filters/valuelistfilter';
 import { NGGridDirective } from '../nggrid';
 import { DOCUMENT } from '@angular/common';
+import { BlankLoadingCellRendrer } from './renderers/blankloadingcellrenderer';
 
 const TABLE_PROPERTIES_DEFAULTS = {
     rowHeight: { gridOptionsProperty: 'rowHeight', default: 25 },
@@ -103,6 +104,7 @@ export class DataGrid extends NGGridDirective {
     @Input() mainMenuItemsConfig: any;
     @Input() gridOptions: any;
     @Input() showColumnsMenuTab: any;
+    @Input() showLoadingIndicator: boolean;
 
     @Input() columnState: any;
     @Output() columnStateChange = new EventEmitter();
@@ -520,6 +522,10 @@ export class DataGrid extends NGGridDirective {
         // rowStyleClassDataprovider
         if (this.rowStyleClassDataprovider) {
             this.agGridOptions.getRowClass = this.getRowClass;
+        }
+
+        if (!this.showLoadingIndicator) {
+            this.agGridOptions.loadingCellRendererFramework = BlankLoadingCellRendrer;
         }
 
         // set all custom icons

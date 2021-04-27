@@ -16,6 +16,7 @@ import { ClientSideRowModelModule,
 import { ValuelistFilter } from './datagrid/filters/valuelistfilter';
 import { RadioFilter } from './datagrid/filters/radiofilter';
 import { PowerGrid } from './powergrid/powergrid';
+import { BlankLoadingCellRendrer } from './datagrid/renderers/blankloadingcellrenderer';
 
 @NgModule({
     declarations: [
@@ -27,6 +28,7 @@ import { PowerGrid } from './powergrid/powergrid';
         TypeaheadEditor,
         ValuelistFilter,
         RadioFilter,
+        BlankLoadingCellRendrer,
         PowerGrid
     ],
     imports: [
