@@ -1793,13 +1793,11 @@ public class SolutionExplorerView extends ViewPart
 								{
 									cp.refreshFormsNode(formsNode, false);
 								}
-								else
+								PlatformSimpleUserNode formComponentsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode,
+									Messages.TreeStrings_FormComponents);
+								if (formComponentsNode != null)
 								{
-									formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_FormComponents);
-									if (formsNode != null)
-									{
-										cp.refreshFormsNode(formsNode, true);
-									}
+									cp.refreshFormsNode(formComponentsNode, true);
 								}
 							}
 						}
@@ -3083,6 +3081,9 @@ public class SolutionExplorerView extends ViewPart
 				return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 			}
 		};
+		IAction newFormComponent = new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("new_form_component.png"),
+			"Create new form component");
+
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("export.png"), "File Export");
 		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("import.png"), "Import solution");
 		i18nExternalizeAction = new I18NExternalizeAction();
@@ -3143,6 +3144,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.WORKING_SET, newForm);
+		newActionInTreeSecondary.registerAction(UserNodeType.WORKING_SET, newFormComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
@@ -3156,8 +3158,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
-		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
-			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("new_form_component.png"), "Create new form component"));
+		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS, newFormComponent);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
@@ -3186,7 +3187,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
-		newActionInTreeSecondary.registerAction(UserNodeType.FORMS, new AddWorkingSetAction());
+		newActionInTreeSecondary.registerAction(UserNodeType.FORMS, AddWorkingSetAction.INSTANCE);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENT_FORMS, AddWorkingSetAction.INSTANCE);
 
 		newActionInListPrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");

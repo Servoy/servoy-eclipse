@@ -156,12 +156,13 @@ public class ServoyResourcesProject implements IProjectNature
 	}
 
 	/**
-	 * Returns true if the working set contains forms that are not form components
+	 * Returns true if the working set contains forms (checkFormComponents is false) or formComponents (checkFormComponents is true)
 	 * @param workingSetName
 	 * @param solutionNames
+	 * @param checkFormComponents
 	 * @return
 	 */
-	public boolean hasPersistsInServoyWorkingSets(String workingSetName, String[] solutionNames)
+	public boolean hasPersistsInServoyWorkingSets(String workingSetName, String[] solutionNames, boolean checkFormComponents)
 	{
 		if (workingSetPersists != null)
 		{
@@ -177,7 +178,7 @@ public class ServoyResourcesProject implements IProjectNature
 					if (solution != null)
 					{
 						Form form = solution.getForm(formName);
-						if (form != null && form.isFormComponent().booleanValue())
+						if (form != null && (form.isFormComponent().booleanValue() != checkFormComponents))
 						{
 							iterator.remove();
 							continue formNamesWhile; // removed it already, no point in continuing the for

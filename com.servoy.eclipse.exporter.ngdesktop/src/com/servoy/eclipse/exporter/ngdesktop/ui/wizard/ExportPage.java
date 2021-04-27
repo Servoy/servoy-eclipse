@@ -533,6 +533,7 @@ public class ExportPage extends WizardPage
 
 	private boolean isUpdateSupported()
 	{
+		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result >= 0)
 			return true;

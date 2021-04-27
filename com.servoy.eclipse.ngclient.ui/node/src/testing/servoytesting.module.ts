@@ -54,6 +54,8 @@ export class TestWebsocketService extends WebsocketService {
       return new WebsocketSession({} as ReconnectingWebSocket, this, this._services,
         this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._testability, this._logFactory );
   }
+  disconnect() {
+  }
 }
 
 @Injectable()
