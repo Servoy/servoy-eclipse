@@ -172,7 +172,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					try
 					{
 						StringBuilder imports = new StringBuilder("// generated imports start\n");
-						StringBuilder services = new StringBuilder(" // generated services start\n");
+						StringBuilder services = new StringBuilder("// generated services start\n");
 						StringBuilder providers = new StringBuilder("// generated providers start\n");
 						StringBuilder modules = new StringBuilder("// generated modules start\n");
 						ng2Services.keySet().forEach(service -> {
@@ -197,7 +197,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 						imports.append("// generated imports end");
-						services.append(" // generated services end");
+						services.append("// generated services end");
 						providers.append("// generated providers end");
 						modules.append("// generated modules end");
 
