@@ -18,11 +18,14 @@
 package com.servoy.eclipse.ui.views;
 
 import java.awt.Dimension;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,6 +34,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
+import org.eclipse.swt.custom.PaintObjectEvent;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -42,7 +46,9 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.GlyphMetrics;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -237,6 +243,7 @@ public class TutorialView extends ViewPart
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			setLayout(layout);
 			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+
 
 			if (dataTutorialsList != null)
 			{
@@ -555,6 +562,8 @@ public class TutorialView extends ViewPart
 			ArrayList<Integer> listStartIndex = new ArrayList<>();
 			ArrayList<Integer> listEndIndex = new ArrayList<>();
 			Map<Integer, String> linkStartIndex = new LinkedHashMap<Integer, String>();
+			ArrayList<Integer> imgStartIndex = new ArrayList<>();
+			ArrayList<Image> images = new ArrayList<>();
 			ArrayList<Integer> linkEndIndex = new ArrayList<>();
 
 
@@ -577,13 +586,25 @@ public class TutorialView extends ViewPart
 							}
 							break;
 						}
-						// italic
+						// italic or image
 						case 'i' :
 						{
 							if (isOpeningTag)
 							{
-								italicStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
-								italicEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</i>", i + 3)).length()));
+								if (text.indexOf("img", i + 1) == i + 1 && text.indexOf("data:", i + 2) > 0 && text.indexOf("base64,", i + 3) > 0)
+								{
+									//inline image
+									imgStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length();
+									int imgStart = text.indexOf("base64,", i + 3) + 7;
+									String imgBase64 = text.substring(imgStart, text.indexOf("\"", imgStart)).trim();
+									images.add(getImageFromEncodedString(imgBase64));
+								}
+								else
+								{
+									italicStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+									italicEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</i>", i + 3)).length()));
+								}
 							}
 							break;
 						}
@@ -633,7 +654,8 @@ public class TutorialView extends ViewPart
 
 			for (int i = 0; i < boldStartIndex.size(); i++)
 			{
-				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);				styleRange.fontStyle = SWT.BOLD;
+				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);
+				styleRange.fontStyle = SWT.BOLD;
 				styledText.setStyleRange(styleRange);
 			}
 
@@ -692,6 +714,24 @@ public class TutorialView extends ViewPart
 				});
 				mouseDownListenerAdded = true;
 			}
+
+			for (int i = 0; i < imgStartIndex.size(); i++)
+			{
+				StyleRange style = new StyleRange();
+				style.start = imgStartIndex.get(i).intValue();
+				style.length = 1;
+				Rectangle rect = images.get(i).getBounds();
+				style.metrics = new GlyphMetrics(rect.height, 0, rect.width);
+				styledText.setStyleRange(style);
+			}
+			styledText.addPaintObjectListener((PaintObjectEvent event) -> {
+				GC gc = event.gc;
+				StyleRange style = event.style;
+				int x = event.x;
+				int y = event.y + event.ascent - style.metrics.ascent;
+				gc.drawImage(images.get(imgStartIndex.indexOf(Integer.valueOf(style.start))), x, y);
+			});
+
 		}
 
 		/**
@@ -799,7 +839,7 @@ public class TutorialView extends ViewPart
 				break;
 			}
 		}
-		return copyText.trim().replaceAll(" +", " ");
+		return copyText;//.trim().replaceAll(" +", " ");
 	}
 
 	private String getLoginToken()
@@ -811,5 +851,20 @@ public class TutorialView extends ViewPart
 		}
 
 		return loginToken;
+	}
+
+	private Image getImageFromEncodedString(String imgBase64)
+	{
+		byte[] decodedBytes = Base64.getDecoder().decode(imgBase64);
+		try (InputStream is = new ByteArrayInputStream(decodedBytes))
+		{
+			ImageData imgData = new ImageData(is);
+			return new Image(PlatformUI.getWorkbench().getDisplay(), imgData);
+		}
+		catch (IOException e)
+		{
+			Debug.error(e);
+		}
+		return null;
 	}
 }
