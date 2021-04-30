@@ -384,7 +384,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
-							sc.getQuoteList());
+							sc.getQuoteList(), sc.isClientOnlyConnections());
 						if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
 						{
 							// something is wrong

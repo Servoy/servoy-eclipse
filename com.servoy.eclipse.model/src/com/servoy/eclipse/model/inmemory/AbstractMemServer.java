@@ -53,6 +53,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.TableFilter;
+import com.servoy.j2db.dataprocessing.datasource.JSConnectionDefinition;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
@@ -1224,6 +1225,17 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean createClientDatasource(JSConnectionDefinition definition)
+	{
+		return false;
+	}
+
+	@Override
+	public void dropClientDatasource(String clientId)
+	{
 	}
 
 	/*

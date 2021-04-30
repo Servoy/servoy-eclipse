@@ -119,6 +119,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button enabledButton;
 	private Button logServerButton;
 	private Button proceduresButton;
+	private Button clientOnlyConnectionsButton;
 	private Button createLogTableButton;
 	private Button createClientstatsTableButton;
 	private Button skipSysTablesButton;
@@ -574,6 +575,22 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		proceduresButton = new Button(advancedSettingsComposite, SWT.CHECK);
 		proceduresButton.setToolTipText(toolTip);
 		proceduresButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				flagModified();
+			}
+		});
+
+		toolTip = "Enabling this will set this server to only have client defined connections (datasources.db.server.defineDatasource()). This tries to postpone also the loading of the tables (only do that with a client connection)";
+		Label clientOnlyConnectionsLabel;
+		clientOnlyConnectionsLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		clientOnlyConnectionsLabel.setText("Client Only Connections");
+		clientOnlyConnectionsLabel.setToolTipText(toolTip);
+
+		clientOnlyConnectionsButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		clientOnlyConnectionsButton.setToolTipText(toolTip);
+		clientOnlyConnectionsButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
@@ -1100,13 +1117,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class, List.class //
+			String.class, List.class, boolean.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList" });
+			"dialectClass", "quoteList", "clientOnlyConnections" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew())
@@ -1445,9 +1462,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		IObservableValue getEnabledObserveValue = serverConfigObservable.observePropertyValue("enabled");
 		IObservableValue enabledSelectionObserveWidget = SWTObservables.observeSelection(enabledButton);
 		IObservableValue getSkipSysTablesObserveValue = serverConfigObservable.observePropertyValue("skipSysTables");
-		IObservableValue proceduresButtonObserveValue = serverConfigObservable.observePropertyValue("queryProcedures");
 		IObservableValue skipSysTablesSelectionObserveWidget = SWTObservables.observeSelection(skipSysTablesButton);
+		IObservableValue proceduresButtonObserveValue = serverConfigObservable.observePropertyValue("queryProcedures");
 		IObservableValue proceduresButtonSelectionObserveWidget = SWTObservables.observeSelection(proceduresButton);
+		IObservableValue clientOnlyConnectionsButtonObserveValue = serverConfigObservable.observePropertyValue("clientOnlyConnections");
+		IObservableValue clientOnlyConnectionsSelectionObserveWidget = SWTObservables.observeSelection(clientOnlyConnectionsButton);
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);
@@ -1467,6 +1486,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		m_bindingContext.bindValue(enabledSelectionObserveWidget, getEnabledObserveValue, null, null);
 		m_bindingContext.bindValue(skipSysTablesSelectionObserveWidget, getSkipSysTablesObserveValue, null, null);
 		m_bindingContext.bindValue(proceduresButtonSelectionObserveWidget, proceduresButtonObserveValue, null, null);
+		m_bindingContext.bindValue(clientOnlyConnectionsSelectionObserveWidget, clientOnlyConnectionsButtonObserveValue, null, null);
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{

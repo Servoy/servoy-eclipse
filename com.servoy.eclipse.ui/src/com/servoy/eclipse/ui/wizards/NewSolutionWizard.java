@@ -585,7 +585,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
 				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
 				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-				origConfig.getQuoteList());
+				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 			try
 			{
 				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
@@ -800,7 +800,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass(), origConfig.getQuoteList());
+						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 
 					EditorUtil.openServerEditor(config, true);
 				}

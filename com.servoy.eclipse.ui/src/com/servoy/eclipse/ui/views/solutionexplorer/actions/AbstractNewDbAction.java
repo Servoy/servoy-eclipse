@@ -252,7 +252,7 @@ public abstract class AbstractNewDbAction extends Action
 			origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 			origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-			origConfig.getQuoteList());
+			origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
