@@ -14,6 +14,17 @@
 	<bundle id="org.apache.aries.spifly.dynamic.bundle">
 		<category name="bundles" />
 	</bundle>
+	<!-- RAGTEST waarom zijn deze 3 nodig -->
+	<bundle id="org.objectweb.asm.commons">
+		<category name="bundles" />
+	</bundle>
+	<bundle id="org.objectweb.asm.tree.analysis">
+		<category name="bundles" />
+	</bundle>
+	<bundle id="org.objectweb.asm.util">
+		<category name="bundles" />
+	</bundle>
+	
 	<bundle id="slf4j.api" version="1.8.0.beta3-SNAPSHOT">
 		<category name="bundles" />
 	</bundle>
