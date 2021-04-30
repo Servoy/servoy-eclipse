@@ -8,6 +8,7 @@ import { ServoyPublicModule } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { runOnPushChangeDetection } from '../../testing';
+import { FormsModule } from '@angular/forms';
 
 const mockData = [
     {
@@ -32,7 +33,7 @@ describe('ServoyBootstrapSelect', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [ServoyBootstrapSelect, ShowDisplayValuePipe],
-            imports: [ServoyTestingModule, ServoyPublicModule]
+            imports: [ServoyTestingModule, ServoyPublicModule, FormsModule]
         })
             .compileComponents();
     }));
@@ -63,7 +64,7 @@ describe('ServoyBootstrapSelect', () => {
         expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(0);
         selectField.triggerEventHandler('blur', null);
         expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(1);
-        selectField.triggerEventHandler('change', null);
+        selectField.triggerEventHandler('change', {target:selectField.nativeElement});
         expect(component.onActionMethodID).toHaveBeenCalled();
     });
 
@@ -76,9 +77,9 @@ describe('ServoyBootstrapSelect', () => {
 
     it('should apply dataprovider from UI', async () => {
         component.dataProviderID = 'Amsterdam';
-        selectField.value = 3;
-        selectField.nativeElement.dispatchEvent(new Event('change'));
+        selectField.nativeElement.value = 3;
         await runOnPushChangeDetection(fixture);
+        selectField.nativeElement.dispatchEvent(new Event('change'));
         expect(component.dataProviderID).toBe(3);
     });
     

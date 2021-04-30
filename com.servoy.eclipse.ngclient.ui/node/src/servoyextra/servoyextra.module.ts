@@ -27,7 +27,7 @@ import { Select2Module } from 'ng-select2-component';
 import { UppyAngularModule } from 'uppy-angular';
 import { LightboxModule } from 'ngx-lightbox';
 import { ServoyExtraCollapse } from './collapse/collapse';
-import { Binding, Callback, Datasource, FoundsetInfo, LevelVisibilityType, RelationInfo, ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
+import { Binding, Callback, FoundsetInfo, LevelVisibilityType, RelationInfo, ServoyExtraDbtreeview } from './dbtreeview/dbtreeview';
 import { TreeModule } from '@circlon/angular-tree-component';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ServoyExtraTreeview } from './treeview/treeview';
@@ -105,7 +105,6 @@ export class ServoyExtraComponentsModule {
         specTypesService.registerType('servoyextra-table.column', Column);
         specTypesService.registerType('servoyextra-table.settings', KeycodeSettings);
         specTypesService.registerType('servoyextra-dbtreeview.foundsetInfo', FoundsetInfo);
-        specTypesService.registerType('servoyextra-dbtreeview.datasource', Datasource);
         specTypesService.registerType('servoyextra-dbtreeview.binding', Binding);
         specTypesService.registerType('servoyextra-dbtreeview.callback', Callback);
         specTypesService.registerType('servoyextra-dbtreeview.relationInfo', RelationInfo);

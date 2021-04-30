@@ -42,6 +42,23 @@
     line-height: normal;
     padding-top: initial;
     padding-bottom: initial;
+    position: absolute;
+}
+.svy-wrapper > * > .bts-extra-badge .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+    background-color: #e6e6e6;
+}
+
+.svy-wrapper > * > .bts-extra-input-group {
+    width: 100%;
+}
+
+.bts-extra-input-group > .addon-left {
+    border-right: 0;
+}
+
+.bts-extra-input-group > .addon-right {
+    border-left: 0;
 }
 
 .svy-wrapper > * > .bts-extra-progressbar {
@@ -55,4 +72,8 @@
 
 .bts-extra-progressbar > .progress-bar {
     line-height: 20px;
+}
+
+.svy-wrapper > * > .bts-extra-switch {
+    overflow: hidden;
 }

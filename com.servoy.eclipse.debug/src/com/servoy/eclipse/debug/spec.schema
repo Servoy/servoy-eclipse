@@ -144,10 +144,29 @@
 			"description": "Array of keywords used for component search",
 			"type": "array"
 		},
-		"dependencies": 
-		{
-			"description": "Dependencies for NG2",
-			"type": "object"
+		"ng2Config": {
+			"description": "Configuration property for NG2",
+			"type": "object",
+			"properties": {
+    			"dependencies": 
+    			{
+    				"description": "Dependencies for NG2",
+    				"type": "object"
+    			},
+    			"packageName": {
+    			     "description": "The npm package name",
+    			     "type": "string"
+    			},
+                "serviceName":  {
+                     "description": "The exported service name",
+                     "type": "string"
+                },
+                "entryPoint":  {
+                     "description": "The entry point of the distribution",
+                     "type": "string"
+                }
+        	},
+        	"additionalProperties": false
 		},
 		"icon": 
 		{

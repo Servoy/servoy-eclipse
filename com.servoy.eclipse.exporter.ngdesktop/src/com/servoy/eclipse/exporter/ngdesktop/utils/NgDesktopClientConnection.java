@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 
 public class NgDesktopClientConnection implements Closeable
 {
@@ -54,15 +55,16 @@ public class NgDesktopClientConnection implements Closeable
 	public final static int BUILDS_FULL = 3;
 	public final static int PROCESSING = 4; // installer is currently created
 	public final static int ERROR = 5; // creating installer process has run into an error
-	public final static int WARNING = 12;
 	public final static int READY = 6; // installer is ready for download
 	public final static int WAITING = 7; // waiting in the requests queue
 	public final static int CANCELED = 8; // the build has been cancelled
 	public final static int NOT_FOUND = 9;
 	public final static int ALREADY_STARTED = 10;
 	public final static int OK = 11; // no error
+	public final static int WARNING = 12;
 	public final static int ACCESS_DENIED = 13; //authorization failed
 	public final static int DOWNLOAD_ARCHIVE = 14; //Build not supported. Download binary instead.
+	public final static int SWITCH_SERVICE = 15; //Switch to MacOS service
 	// END sync
 
 	public NgDesktopClientConnection() throws MalformedURLException
@@ -138,14 +140,25 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("loginToken", settings.get("login_token"));
 		if (settings.get("application_name") != null)
 			jsonObj.put("applicationName", settings.get("application_name"));
+		jsonObj.put("devVersion", ClientVersion.getVersion());
 
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
 
-		final HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+		HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
 		postRequest.setEntity(input);
 		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 		jsonObj = processRequest(postRequest);
+
+		final int status = jsonObj.getInt("statusCode");
+		if (status == SWITCH_SERVICE)
+		{
+			service_url = jsonObj.getString("macServiceAddress");
+			postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+			postRequest.setEntity(input);
+			ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
+			jsonObj = processRequest(postRequest);
+		}
 
 		buildRefSize = jsonObj.optInt("buildRefSize", 0);
 		buildRefDuration = jsonObj.optInt("buildRefDuration", 0);

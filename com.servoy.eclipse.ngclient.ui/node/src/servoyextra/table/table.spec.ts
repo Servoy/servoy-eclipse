@@ -7,7 +7,7 @@ import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloDeferHelper } from '../../sablo/defer.service';
-import { LoggerFactory, ServoyPublicModule } from '@servoy/public';
+import { Format, FormattingService, LoggerFactory, ServoyPublicModule } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ServicesService } from '../../sablo/services.service';
 import { SpecTypesService, ViewPortRow } from '../../sablo/spectypes.service';
@@ -18,9 +18,9 @@ import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.ser
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { ServoyExtraTable, TableRow } from './table';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ServoyExtraComponentsModule } from '../servoyextra.module';
 import { ResizableModule } from 'angular-resizable-element';
-import { SabloModule } from '../../sablo/sablo.module';
+import { LocaleService } from '../../ngclient/locale.service';
+
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -58,9 +58,10 @@ describe('ServoyExtraTable', () => {
   let loggerFactory: LoggerFactory;
   let sabloService: SabloService;
   let sabloDeferHelper: SabloDeferHelper;
+  let formattingService: FormattingService;
   let componentModelGetter: PropertyContext;
 
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner', 'registerComponent', 'unRegisterComponent', 'isInAbsoluteLayout']);
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner', 'registerComponent', 'unRegisterComponent', 'isInAbsoluteLayout', 'trustAsHtml']);
   const onCellClick = jasmine.createSpy('onCellClick');
   const onCellRightClick = jasmine.createSpy('onCellRightClick');
   const onCellDoubleClick = jasmine.createSpy('onCellDoubleClick');
@@ -155,6 +156,7 @@ const finishInit = () => {
     converterService = TestBed.inject(ConverterService);
     converterService.registerCustomPropertyHandler('foundset', new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, loggerFactory));
     converterService.registerCustomPropertyHandler('fsLinked', new FoundsetLinkedConverter(converterService, sabloService, viewportService, loggerFactory));
+    formattingService = TestBed.inject(FormattingService);
     servoyApi.isInAbsoluteLayout.and.callFake(() => false);
 
     fixture = TestBed.createComponent(TestWrapperComponent);
@@ -195,7 +197,7 @@ const finishInit = () => {
           w: false,
           vEr: 5
         },
-        format: { allowedCharacters: null, isMask: false, isRaw: false, edit: null, display: null, type: 'TEXT', placeHolder: null, isNumberValidator: false },
+        format: { allowedCharacters: null, isMask: false, isRaw: false, edit: null, display: null, type: 'TEXT', placeHolder: null, isNumberValidator: false, uppercase: true },
         width: 'auto',
         autoResize: false,
         headerText: 'Country',
@@ -265,8 +267,9 @@ const finishInit = () => {
     expect(rows.length).toBeGreaterThan(0, 'should have rows');
     const firstRow = rows[1].getElementsByTagName('td');
     expect(firstRow.length).toEqual(3, 'should have 3 columns');
-    expect(firstRow[0].innerText).toEqual('10248');
-    expect(firstRow[1].innerText).toEqual('France');
+    const formattedNumber = formattingService.format(10248, {type: 'INTEGER', display:'#,###'} as Format, false);
+    expect(firstRow[0].innerText).toEqual(formattedNumber);
+    expect(firstRow[1].innerText).toEqual('FRANCE');
     expect(firstRow[2].innerText).toEqual('Reims');
   }));
 

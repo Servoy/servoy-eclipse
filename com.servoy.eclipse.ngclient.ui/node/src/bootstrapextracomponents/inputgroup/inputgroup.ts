@@ -1,13 +1,11 @@
 import { Component, ChangeDetectorRef, SimpleChanges, ViewChild, Directive, ElementRef, OnInit, EventEmitter, Output, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 import { Format } from '@servoy/public';
-import { ServoyService } from '../../ngclient/servoy.service';
 import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component( {
     selector: 'bootstrapextracomponents-input-group',
     templateUrl: './inputgroup.html',
-    styleUrls: ['./inputgroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivElement> {
@@ -20,8 +18,8 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     @Input() onFocusGainedMethodID: ( e: Event ) => void;
     @Input() onFocusLostMethodID: ( e: Event ) => void;
 
-    @Output() dataProviderIDChange = new EventEmitter();
-    @Input() dataProviderID: any;
+    @Output() dataProviderChange = new EventEmitter();
+    @Input() dataProvider: any;
     @Input() enabled: boolean;
     @Input() editable: boolean;
     @Input() format: Format;
@@ -51,6 +49,9 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
     svyOnInit() {
         super.svyOnInit();
         this.attachFocusListeners( this.getFocusElement() );
+        if (this.dataProvider === undefined) {
+            this.dataProvider = null;
+        }
         if ( this.onAction ) {
             this.renderer.listen( this.getFocusElement(), 'click', e => this.onAction( e ) );
         }
@@ -76,6 +77,10 @@ export class ServoyBootstrapExtraInputGroup extends ServoyBaseComponent<HTMLDivE
         }
     }
 
+    pushUpdate() {
+        this.dataProviderChange.emit(this.dataProvider);
+    }
+    
     requestFocus( mustExecuteOnFocusGainedMethod: boolean ) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
         this.getFocusElement().focus();

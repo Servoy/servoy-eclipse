@@ -64,7 +64,7 @@ public class Activator extends Plugin
 
 	private void copyNodeFolder()
 	{
-		new NodeFolderCreatorJob(this.projectFolder).schedule();
+		new NodeFolderCreatorJob(this.projectFolder, true, false).schedule();
 	}
 
 	private void extractNode()

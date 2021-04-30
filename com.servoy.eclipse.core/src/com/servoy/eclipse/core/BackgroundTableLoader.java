@@ -114,7 +114,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 				for (String serverName : serverNames)
 				{
 					IServer s = serverManager.getServer(serverName, true, false);
-					if (s != null)
+					if (s != null && !((IServerInternal)s).getConfig().isClientOnlyConnections())
 					{
 						try
 						{
