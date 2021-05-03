@@ -285,6 +285,10 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			{
 				Debug.error(e);
 			}
+			catch (StackOverflowError e)
+			{
+				Debug.error("Error parsing file for export: " + scriptFile.getRawLocation(), e);
+			}
 		}
 	}
 
