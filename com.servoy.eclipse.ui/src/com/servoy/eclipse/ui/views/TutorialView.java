@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -84,6 +86,7 @@ public class TutorialView extends ViewPart
 	private static final String URL_DEFAULT_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
 	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 	private static final String SVY_BACKGROUND = "svybackground";
+	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) alt=(.+?)/>");
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -273,7 +276,7 @@ public class TutorialView extends ViewPart
 
 					Label description = new Label(row, SWT.WRAP);
 					description.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
+					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description"), null));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 					gd.widthHint = widthHint - 70;
 					description.setLayoutData(gd);
@@ -595,7 +598,7 @@ public class TutorialView extends ViewPart
 								{
 									//inline image
 									imgStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
-									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length();
+									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length() - 2;
 									int imgStart = text.indexOf("base64,", i + 3) + 7;
 									String imgBase64 = text.substring(imgStart, text.indexOf("\"", imgStart)).trim();
 									images.add(getImageFromEncodedString(imgBase64));
@@ -643,7 +646,7 @@ public class TutorialView extends ViewPart
 			}
 
 			StyledText styledText = new StyledText(row, SWT.WRAP | SWT.READ_ONLY);
-			styledText.setText(removeHTMLTags(text));
+			styledText.setText(removeHTMLTags(text, images));
 			styledText.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			FontDescriptor descriptor = FontDescriptor.createFrom(styledText.getFont());
 			descriptor = descriptor.increaseHeight(2);
@@ -717,6 +720,7 @@ public class TutorialView extends ViewPart
 
 			for (int i = 0; i < imgStartIndex.size(); i++)
 			{
+				if (images.get(i) == null) continue;
 				StyleRange style = new StyleRange();
 				style.start = imgStartIndex.get(i).intValue();
 				style.length = 1;
@@ -825,9 +829,24 @@ public class TutorialView extends ViewPart
 	 * @param text the text to be checked.
 	 * @return the text without HTML tags.
 	 */
-	private String removeHTMLTags(final String text)
+	private String removeHTMLTags(final String text, ArrayList<Image> images)
 	{
 		String copyText = text;
+		Matcher matcher = imgPattern.matcher(copyText);
+		int count = 0;
+		while (matcher.find())
+		{
+			if (images.get(count) == null)
+			{
+				copyText = copyText.replaceFirst(matcher.group(0), matcher.groupCount() == 3 ? matcher.group(2).replaceAll("\"", "") : "");
+			}
+			else
+			{
+				copyText = copyText.replaceFirst(matcher.group(0), "_");
+			}
+			count++;
+		}
+
 		while (true)
 		{
 			if (copyText.indexOf('<') != -1 && copyText.indexOf('>') != -1)
@@ -839,7 +858,7 @@ public class TutorialView extends ViewPart
 				break;
 			}
 		}
-		return copyText;//.trim().replaceAll(" +", " ");
+		return copyText.trim().replaceAll(" +", " ");
 	}
 
 	private String getLoginToken()
@@ -855,13 +874,20 @@ public class TutorialView extends ViewPart
 
 	private Image getImageFromEncodedString(String imgBase64)
 	{
-		byte[] decodedBytes = Base64.getDecoder().decode(imgBase64);
-		try (InputStream is = new ByteArrayInputStream(decodedBytes))
+		try
 		{
-			ImageData imgData = new ImageData(is);
-			return new Image(PlatformUI.getWorkbench().getDisplay(), imgData);
+			byte[] decodedBytes = Base64.getDecoder().decode(imgBase64);
+			try (InputStream is = new ByteArrayInputStream(decodedBytes))
+			{
+				ImageData imgData = new ImageData(is);
+				return new Image(PlatformUI.getWorkbench().getDisplay(), imgData);
+			}
+			catch (IOException e)
+			{
+				Debug.error(e);
+			}
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			Debug.error(e);
 		}
