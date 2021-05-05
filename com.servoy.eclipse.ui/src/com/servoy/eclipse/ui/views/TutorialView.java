@@ -838,7 +838,7 @@ public class TutorialView extends ViewPart
 		{
 			if (images.get(count) == null)
 			{
-				copyText = copyText.replaceFirst(matcher.group(0), matcher.groupCount() == 3 ? matcher.group(2).replaceAll("\"", "") : "");
+				copyText = copyText.replaceFirst(matcher.group(0), matcher.groupCount() == 2 ? matcher.group(2).replaceAll("\"", "") : "");
 			}
 			else
 			{
