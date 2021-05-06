@@ -94,6 +94,17 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         }
     }
 
+    onDataChangeCallback( event, returnval ) {
+        const stringValue = ( typeof returnval === 'string' || returnval instanceof String );
+        if ( returnval === false || stringValue ) {
+            //this.renderer.removeClass( this.select2, 'ng-valid' );
+            this.renderer.addClass( this.elementRef.nativeElement, 'ng-invalid' );
+        } else {
+            this.renderer.removeClass( this.elementRef.nativeElement, 'ng-invalid' );
+            //this.renderer.addClass( this.select2, 'ng-valid' );
+        }
+    }    
+    
     updateValue( event: Select2UpdateEvent<any> ) {
         if ( this.filteredDataProviderId !== event.value ) {
             this.filteredDataProviderId = event.value;
