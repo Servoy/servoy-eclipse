@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
@@ -91,6 +93,9 @@ import com.servoy.j2db.util.Utils;
 public class Activator extends AbstractUIPlugin
 {
 
+	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
+	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
+
 	/**
 	 *
 	 */
@@ -122,6 +127,8 @@ public class Activator extends AbstractUIPlugin
 	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
+
+	private IPreferenceChangeListener themeChangedListener;
 
 	private static BundleContext context;
 
@@ -268,6 +275,22 @@ public class Activator extends AbstractUIPlugin
 		});
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
+
+		listenForThemeChanges();
+	}
+
+	private void listenForThemeChanges()
+	{
+		themeChangedListener = (PreferenceChangeEvent event) -> {
+			if (event.getKey().equals("themeid"))
+			{
+				String themeid = (String)event.getNewValue();
+				IconPreferences iconPreferences = IconPreferences.getInstance();
+				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
+				iconPreferences.save();
+			}
+		};
+		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).addPreferenceChangeListener(themeChangedListener);
 	}
 
 	/**
@@ -379,6 +402,8 @@ public class Activator extends AbstractUIPlugin
 		{
 			provisioningAgent.stop();
 		}
+
+		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
 
 		plugin = null;
 		super.stop(context);

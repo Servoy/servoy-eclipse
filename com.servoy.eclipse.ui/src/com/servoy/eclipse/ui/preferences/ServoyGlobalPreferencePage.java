@@ -264,6 +264,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	@Override
+	public void setVisible(boolean visible)
+	{
+		if (visible)
+		{
+			useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
+		}
+		super.setVisible(visible);
+	}
+
+	@Override
 	public boolean performOk()
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
