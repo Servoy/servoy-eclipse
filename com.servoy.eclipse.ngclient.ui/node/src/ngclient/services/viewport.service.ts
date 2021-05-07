@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloUtils } from '../../sablo/websocket.service';
-import { ColumnRef, ChangeType, ChangeAwareState, isChanged } from '../../sablo/spectypes.service';
-import { Foundset } from '../converters/foundset_converter';
-
+import { ColumnRef, ChangeType, ChangeAwareState, isChanged, IFoundset } from '../../sablo/spectypes.service';
 
 @Injectable()
 export class ViewportService {
@@ -170,6 +168,6 @@ export class ViewportService {
 
 export class FoundsetViewportState extends ChangeAwareState {
   viewportConversions: Record<string, any>[] = [];
-  forFoundset: () => Foundset;
+  forFoundset: () => IFoundset;
   requests = [];
 }

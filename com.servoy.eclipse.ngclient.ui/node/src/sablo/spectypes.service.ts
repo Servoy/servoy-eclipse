@@ -140,7 +140,18 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
-export interface IFoundset {
+export interface IFoundsetFieldsOnly {
+
+    /**
+     * An identifier that allows you to use this foundset via the 'foundsetRef' type;
+     * when a 'foundsetRef' type sends a foundset from server to client (for example
+     * as a return value of callServerSideApi) it will translate to this identifier
+     * on client (so you can use it to find the actual foundset property in the model if
+     * server side script put it in the model as well); internally when sending a
+     * 'foundset' typed property to server through a 'foundsetRef' typed argument or prop,
+     * it will use this foundsetId as well to find it on server and give a real Foundset
+     */
+    foundsetId: number;
 
     /**
      * the size of the foundset on server (so not necessarily the total record count
@@ -190,6 +201,9 @@ export interface IFoundset {
      * the format contents
      */
     columnFormats: Record<string, any>;
+}
+
+export interface IFoundset extends IFoundsetFieldsOnly {
 
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
@@ -221,7 +235,7 @@ export interface IFoundset {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
+    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
 
     /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
@@ -239,7 +253,7 @@ export interface IFoundset {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
+    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
 
     /**
      * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
@@ -306,7 +320,7 @@ export interface IFoundset {
      *                                           selected row (here the page size is assumed to be
      *                                           preferredSize).
      */
-    setPreferredViewportSize(preferredSize: number, sendViewportWithSelection: boolean, centerViewportOnSelected: boolean): void;
+    setPreferredViewportSize(preferredSize: number, sendViewportWithSelection?: boolean, centerViewportOnSelected?: boolean): void;
 
     /**
      * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
@@ -337,8 +351,8 @@ export interface IFoundset {
                  get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
      * @param changeListener the listener to register.
      */
-    addChangeListener(changeListener: ChangeListener): () => void;
-    removeChangeListener(changeListener: ChangeListener): void;
+    addChangeListener(changeListener: FoundsetChangeListener): () => void;
+    removeChangeListener(changeListener: FoundsetChangeListener): void;
 
     /**
      * Mark the foundset data as changed on the client.
@@ -349,7 +363,8 @@ export interface IFoundset {
      * @param newValue the new value
      * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
      */
-    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any);
+    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any): void;
+
 }
 
 export interface ViewportChangeEvent {
@@ -368,7 +383,30 @@ export interface ViewportChangeEvent {
     viewportRowsUpdated?: ViewportRowUpdates;
 }
 
+export interface FoundsetChangeEvent extends ViewportChangeEvent {
+    /**
+     * If the previous value was non-null, had listeners and a full value update was
+     * received from server, this key is set on the change event; if newValue is non-null, it will keep the same reference as before;
+     * it will just update it's contents; oldValue will be a dummy shallow copy of old value contents
+     */
+    fullValueChanged?: { oldValue: IFoundsetFieldsOnly; newValue: IFoundset };
+
+    // the following keys appear if each of these got updated from server; the names of those
+    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
+    // (e.g. new server size and old server size) so not the whole foundset property new/old value
+    serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
+    hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
+    multiSelectChanged?: { oldValue: boolean; newValue: boolean };
+    columnFormatsChanged?: { oldValue: Record<string, object>; newValue: Record<string, object> };
+    sortColumnsChanged?: { oldValue: string; newValue: string };
+    selectedRowIndexesChanged?: { oldValue: number[]; newValue: number[] };
+    viewPortStartIndexChanged?: { oldValue: number; newValue: number };
+    viewPortSizeChanged?: { oldValue: number; newValue: number };
+    userSetSelection?: boolean;
+}
+
 export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
+export type FoundsetChangeListener = (changeEvent: FoundsetChangeEvent) => void;
 
 export interface ViewportRowUpdate { type: ChangeType; startIndex: number; endIndex: number }
 export type ViewportRowUpdates = ViewportRowUpdate[];
