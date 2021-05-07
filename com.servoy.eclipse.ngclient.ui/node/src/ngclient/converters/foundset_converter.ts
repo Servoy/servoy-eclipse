@@ -203,9 +203,6 @@ export class FoundsetConverter implements IConverter {
                 } else {
                     oldValue = new FoundsetFieldsOnly(newValue);
                     internalState = newValue.state;
-                    Object.keys(newValue).forEach((prop) => {
-                        newValue[prop] = serverJSONValue[prop];
-                    });
                 }
 
                 Object.keys(serverJSONValue).forEach((prop) => {
@@ -518,7 +515,7 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
 }
 
 class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
-    
+
     foundsetId: number;
     serverSize: number;
     viewPort: ViewPort;
@@ -529,6 +526,7 @@ class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
     columnFormats: Record<string, any>;
 
     constructor(foundsetToShallowCopy: Foundset) {
+        this.foundsetId = foundsetToShallowCopy.foundsetId;
         this.serverSize = foundsetToShallowCopy.serverSize;
         this.viewPort = foundsetToShallowCopy.viewPort;
         this.selectedRowIndexes = foundsetToShallowCopy.selectedRowIndexes;
