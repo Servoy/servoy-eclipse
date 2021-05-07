@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
-import { IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
-    IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '../../sablo/spectypes.service';
+import { Deferred, LoggerService, LoggerFactory, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
+    IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { Deferred } from '@servoy/public';
 import { SabloUtils } from '../../sablo/websocket.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
 

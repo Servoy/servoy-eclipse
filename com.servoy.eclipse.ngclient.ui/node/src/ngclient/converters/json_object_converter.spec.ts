@@ -3,9 +3,7 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { ConverterService } from '../../sablo/converter.service';
 import { LoggerFactory } from '@servoy/public';
-import { WindowRefService } from '@servoy/public';
-
-import { SpecTypesService, BaseCustomObject } from '../../sablo/spectypes.service';
+import { SpecTypesService, BaseCustomObject, WindowRefService } from '@servoy/public';
 
 import { JSONObjectConverter } from './json_object_converter';
 

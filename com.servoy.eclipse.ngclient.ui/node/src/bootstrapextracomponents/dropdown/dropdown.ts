@@ -1,6 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef } from '@angular/core';
-import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
+import { BaseCustomObject, ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-dropdown',

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
-import { ServoyBootstrapComponentsModule } from '../bootstrapcomponents/servoybootstrap.module';
+import { ServoyBootstrapComponentsModule } from '@servoy/bootstrapcomponents';
 import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';
 import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 import { SvyChartJSModule } from '../svychartjs/svychartjs.module';

@@ -1,8 +1,7 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy, Input, TemplateRef, Inject, ContentChild, Output, EventEmitter } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
+import { BaseCustomObject, ServoyBaseComponent } from '@servoy/public';
 import { FormService } from './../../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component({
     selector: 'servoyextra-collapse',

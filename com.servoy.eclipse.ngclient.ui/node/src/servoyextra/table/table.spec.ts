@@ -10,16 +10,14 @@ import { SabloDeferHelper } from '../../sablo/defer.service';
 import { Format, FormattingService, LoggerFactory, ServoyPublicModule } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ServicesService } from '../../sablo/services.service';
-import { SpecTypesService, ViewPortRow } from '../../sablo/spectypes.service';
 import { TestabilityService } from '../../sablo/testability.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
-import { WindowRefService } from '@servoy/public';
+import { SpecTypesService, ViewPortRow, WindowRefService } from '@servoy/public';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { ServoyExtraTable, TableRow } from './table';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ResizableModule } from 'angular-resizable-element';
-import { LocaleService } from '../../ngclient/locale.service';
 
 
 @Component({

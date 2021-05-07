@@ -1,6 +1,5 @@
 import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
-import { IFoundset } from '../../sablo/spectypes.service';
+import { IFoundset, ServoyBaseComponent } from '@servoy/public';
 import { ChartType, ChartOptions, ChartDataSets } from 'chart.js';
 import { BaseChartDirective, Label } from 'ng2-charts';
 

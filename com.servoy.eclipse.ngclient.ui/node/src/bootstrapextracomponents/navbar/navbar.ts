@@ -2,9 +2,7 @@ import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Directiv
 import { DOCUMENT } from '@angular/common';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { ServoyBaseComponent, FormattingService, ServoyPublicService } from '@servoy/public';
-import { IValuelist } from '../../sablo/spectypes.service';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
+import { ServoyBaseComponent, FormattingService, ServoyPublicService, BaseCustomObject, IValuelist } from '@servoy/public';
 
 @Component({
     selector: 'bootstrapextracomponents-navbar',

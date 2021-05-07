@@ -1,8 +1,6 @@
 import { Component, ChangeDetectorRef, ViewChild, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
-import { IFoundset } from '../../sablo/spectypes.service';
+import { BaseCustomObject, IFoundset, ServoyBaseComponent } from '@servoy/public';
 import { NgbCarouselConfig, NgbCarousel } from '@ng-bootstrap/ng-bootstrap';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component( {
     selector: 'bootstrapextracomponents-carousel',
