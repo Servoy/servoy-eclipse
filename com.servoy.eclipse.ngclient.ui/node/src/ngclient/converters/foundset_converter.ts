@@ -481,7 +481,7 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
 
     deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
     timeoutRejectLogPrefix: string;
-    changeListeners: FoundsetChangeListener[];
+    changeListeners: FoundsetChangeListener[] = [];
     rowPrototype: FoundsetRow;
     selectionUpdateDefer: Deferred<any>;
     push_to_server: any = undefined;
