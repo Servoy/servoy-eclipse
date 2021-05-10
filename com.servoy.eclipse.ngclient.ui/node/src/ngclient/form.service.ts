@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '@servoy/public';
+import { Deferred, IChangeAwareValue, IComponentCache, instanceOfChangeAwareValue } from '@servoy/public';
 import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { ServoyService } from './servoy.service';
-import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { get } from 'lodash-es';
-import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IComponentCache, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
+import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
 import { ClientFunctionService } from './services/clientfunction.service';
 
 @Injectable()
@@ -272,7 +271,7 @@ export class FormService {
         const formComponent = this.formComponentCache.get(formname) as IFormComponent;
         const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
         const formData = msg.forms[formname];
-        var newFormProperties = formData['']; // form properties
+        let newFormProperties = formData['']; // form properties
         if (newFormProperties) {
             if (formConversion && formConversion['']) {
                 newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion[''], formComponent,

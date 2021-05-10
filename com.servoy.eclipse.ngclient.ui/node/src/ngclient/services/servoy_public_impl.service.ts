@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EventLike, JSEvent, ServoyPublicService } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
+import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
@@ -14,7 +15,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         private utils: SvyUtilsService,
         private localeService: LocaleService,
         private applicationService: ApplicationService,
-        private servoyService: ServoyService) {
+        private servoyService: ServoyService,
+        private formService: FormService,) {
         super();
     }
 
@@ -44,6 +46,9 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
     generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
         return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
+    }
+    getFormCacheByName(containedForm: string): IFormCache {
+        return this.formService.getFormCacheByName(containedForm);
     }
 
 }

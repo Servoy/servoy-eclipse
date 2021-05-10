@@ -1,0 +1,31 @@
+.fill-area {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+.contentframe-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index:2;
+    background-color: transparent;
+    outline:none;
+    user-select:none;
+}
+
+.content-area {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    overflow: auto;
+    background-image: url('assets/light-raster-background.png');
+    vertical-align: top;
+    padding-top: 20px;
+    padding-left: 20px
+}
+

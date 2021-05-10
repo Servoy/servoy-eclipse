@@ -1,6 +1,5 @@
 import { Component, ChangeDetectorRef, SimpleChanges, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
-import { IFoundset } from '../../sablo/spectypes.service';
+import { ServoyBaseComponent, IFoundset } from '@servoy/public';
 import { Lightbox, LightboxConfig } from 'ngx-lightbox';
 
 @Component({

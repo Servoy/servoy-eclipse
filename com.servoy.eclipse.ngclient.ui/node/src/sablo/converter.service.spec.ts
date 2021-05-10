@@ -2,9 +2,7 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { ConverterService } from './converter.service';
 
-import {SpecTypesService} from '../sablo/spectypes.service';
-
-import {LoggerService, LoggerFactory} from '@servoy/public';
+import {SpecTypesService, LoggerFactory} from '@servoy/public';
 import {WindowRefService} from '@servoy/public';
 
 

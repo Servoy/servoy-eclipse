@@ -2,7 +2,7 @@ import { IConverter, ConverterService, PropertyContext } from '../../sablo/conve
 
 import { IterableDiffers } from '@angular/core';
 
-import { SpecTypesService, ArrayState, ICustomArray, instanceOfChangeAwareValue, instanceOfCustomArray } from '../../sablo/spectypes.service';
+import { SpecTypesService, ArrayState, ICustomArray, instanceOfChangeAwareValue, instanceOfCustomArray } from '@servoy/public';
 
 export class JSONArrayConverter implements IConverter {
     /* eslint-disable */

@@ -538,8 +538,10 @@ angular.module('editorContent',['servoyApp'])
     }
     
     if (shouldGetTemplate) {
-      var promise = $sabloApplication.callService("$editor", "getTemplate", getTemplateParam, false);
-      promise.then(handleTemplate)
+        if (updateData.childParentMap[updateData.childParentMap[elementId].uuid] ===  undefined) {//we don't want get the template if we also get the template of the parent
+            var promise = $sabloApplication.callService("$editor", "getTemplate", getTemplateParam, false);
+            promise.then(handleTemplate)
+        }
       return null;
     }
     else {

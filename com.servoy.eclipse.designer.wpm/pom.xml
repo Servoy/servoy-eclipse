@@ -31,7 +31,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v16.0.0</nodeVersion>
+							<nodeVersion>v16.1.0</nodeVersion>
 						</configuration>
 					</execution>
 

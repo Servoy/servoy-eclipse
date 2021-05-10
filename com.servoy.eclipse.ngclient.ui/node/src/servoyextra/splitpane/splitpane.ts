@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, SimpleChanges, Renderer2, ChangeDetectionStrategy} from '@angular/core';
 
-import { ServoyBaseComponent } from '@servoy/public';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
+import { BaseCustomObject, ServoyBaseComponent } from '@servoy/public';
 
 @Component( {
     selector: 'servoyextra-splitpane',

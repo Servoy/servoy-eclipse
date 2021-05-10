@@ -1,10 +1,9 @@
 import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject } from '@angular/core';
 
-import { PropertyUtils, FormattingService } from '@servoy/public';
+import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 
-import { IValuelist } from '../sablo/spectypes.service';
 import { DOCUMENT } from '@angular/common';
 
 @Directive()

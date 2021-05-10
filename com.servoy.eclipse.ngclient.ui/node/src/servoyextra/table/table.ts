@@ -1,16 +1,12 @@
 import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject } from '@angular/core';
-import { Format, ServoyBaseComponent } from '@servoy/public';
-import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
+import { BaseCustomObject, Format, IFoundset, IValuelist, ServoyBaseComponent, ViewPortRow, FoundsetChangeEvent } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ResizeEvent } from 'angular-resizable-element';
-import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/scrolling';
 import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap, first } from 'rxjs/operators';
 import { CustomVirtualScrollStrategy } from './scroll-strategy';
 import { DOCUMENT } from '@angular/common';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
-import { IValuelist } from '../../sablo/spectypes.service';
 
 @Directive({
     selector: '[svyTableRow]'

@@ -11,12 +11,16 @@ export abstract class ServoyPublicService {
     public abstract executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T>;
     public abstract generateUploadUrl(formname: string, componentName: string, propertyName: string): string;
     public abstract generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string;
+    public abstract getFormCacheByName(containedForm: string): IFormCache;
 }
 
 export interface IFormCache {
+    absolute: boolean;
+    size: {width: number; height: number};
     getComponent(name: string): IComponentCache;
 }
 
 export interface IComponentCache {
-
+    name: string;
+    model: { [property: string]: any };
 }

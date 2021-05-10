@@ -2,10 +2,9 @@ import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angul
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicModule, IValuelist } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { FormattingService, TooltipService } from '@servoy/public';
-import { IValuelist } from '../../sablo/spectypes.service';
 import { By } from '@angular/platform-browser';
 import { NotNullOrEmptyPipe } from '@servoy/public';
 import { DebugElement } from '@angular/core';

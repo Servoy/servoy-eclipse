@@ -1,16 +1,8 @@
 import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
-import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '@servoy/public';
-
-import { WindowRefService } from '@servoy/public';
-
-import { BaseCustomObject } from '../../sablo/spectypes.service';
+import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
 import { LoggerService, LoggerFactory } from '@servoy/public';
-
-import { ServoyDefaultBaseComponent } from '../basecomponent';
-
-
 
 @Directive()
 export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {

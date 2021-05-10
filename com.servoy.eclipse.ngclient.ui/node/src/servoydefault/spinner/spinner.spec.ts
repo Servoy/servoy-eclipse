@@ -2,11 +2,10 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 
 import { ServoyDefaultSpinner } from './spinner';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicModule, IValuelist } from '@servoy/public';
 import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { IValuelist } from '../../sablo/spectypes.service';
 
 
 const mockData = [

@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
-import { IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, ViewportChangeEvent, ColumnRef, ChangeAwareState, IChangeAwareValue } from '../../sablo/spectypes.service';
+import { Deferred, LoggerService, LoggerFactory, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
+    IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { Deferred } from '@servoy/public';
 import { SabloUtils } from '../../sablo/websocket.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
 
@@ -182,35 +181,39 @@ export class FoundsetConverter implements IConverter {
             if (!updates && !serverJSONValue[FoundsetConverter.NO_OP]) {
                 // not updates - so whole thing receive
                 // conversion to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
-                newValue = new Foundset(this.sabloService, this.sabloDeferHelper, this.logFactory, this.converterService, this.viewportService,
-                    currentClientValue && currentClientValue.state ? currentClientValue.state : new FoundsetState());
+                let oldValue: IFoundsetFieldsOnly;
+                let internalState: FoundsetState;
+                if (!newValue /* newValue is now already currentValue, see code above, so we are checking current value here */) {
+                    newValue = new Foundset(this.sabloService, this.sabloDeferHelper,
+                        this.logFactory, this.converterService, this.viewportService, new FoundsetState());
+
+                    internalState = newValue.state;
+                    this.sabloDeferHelper.initInternalStateForDeferring(internalState, 'svy foundset * ');
+                    internalState.rowPrototype = {};
+                    // conversion of rows to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
+                    internalState.rowPrototype[SabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC] = () => {
+                        if (internalState.rowPrototype._svyRowId) {
+                            const r: FoundsetRow = { _svyRowId: internalState.rowPrototype._svyRowId, foundsetId: newValue.foundsetId };
+                            return r;
+                        }
+                        return null;
+                    };
+                } else {
+                    oldValue = new FoundsetFieldsOnly(newValue);
+                    internalState = newValue.state;
+                }
+
                 Object.keys(serverJSONValue).forEach((prop) => {
                     newValue[prop] = serverJSONValue[prop];
                 });
-                if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue: currentClientValue, newValue };
-                const internalState = newValue.state;
+                if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue, newValue };
 
-                internalState.rowPrototype = {};
-                // conversion of rows to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
-                internalState.rowPrototype[SabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC] = () => {
-                    if (internalState.rowPrototype._svyRowId) {
-                        const r: FoundsetRow = { _svyRowId: internalState.rowPrototype._svyRowId, foundsetId: newValue.foundsetId };
-                        return r;
-                    }
-                    return null;
-                };
                 const rows = newValue.viewPort.rows;
                 if (typeof newValue[FoundsetConverter.PUSH_TO_SERVER] !== 'undefined') {
                     internalState.push_to_server = newValue[FoundsetConverter.PUSH_TO_SERVER];
                     delete newValue[FoundsetConverter.PUSH_TO_SERVER];
                 }
 
-                internalState.requests = [];
-                if (currentClientValue && currentClientValue.state) {
-                    this.sabloDeferHelper.initInternalStateForDeferringFromOldInternalState(internalState, currentClientValue.state);
-                } else {
-                    this.sabloDeferHelper.initInternalStateForDeferring(internalState, 'svy foundset * ');
-                }
                 // convert data if needed - specially done for Date send/receive as the rest are primitives anyway in case of foundset
                 this.viewportService.updateAllConversionInfo(rows, internalState, newValue.viewPort[ConverterService.TYPES_KEY] ?
                     newValue.viewPort[ConverterService.TYPES_KEY][FoundsetConverter.ROWS] : undefined);
@@ -223,11 +226,6 @@ export class FoundsetConverter implements IConverter {
                 for (let i = rows.length - 1; i >= 0; i--) {
                     rows[i] = SabloUtils.cloneWithDifferentPrototype(rows[i], internalState.rowPrototype);
                 }
-
-                // initialize the property value; make it 'smart'
-                // even if it's a completely new value, keep listeners from old one if there is an old value
-                internalState.setChangeListeners(currentClientValue);
-
             }
 
             this.log.spam(this.log.buildMessage(() => ('svy foundset * updates or value received from server; new viewport and server size (' +
@@ -256,7 +254,8 @@ export class FoundsetConverter implements IConverter {
     }
 }
 
-export class Foundset implements IChangeAwareValue, IFoundset {
+class Foundset implements IChangeAwareValue, IFoundset {
+
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' type;
      * when a 'foundsetRef' type sends a foundset from server to client (for example
@@ -319,11 +318,13 @@ export class Foundset implements IChangeAwareValue, IFoundset {
 
     private log: LoggerService;
 
-    constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private logFactory: LoggerFactory,
+    constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, logFactory: LoggerFactory,
         private converterService: ConverterService, private viewportService: ViewportService, public state: FoundsetState) {
+
         this.log = logFactory.getLogger('Foundset');
         this.viewPort = { startIndex: undefined, size: undefined, rows: [] };
     }
+
     getStateHolder(): ChangeAwareState {
         return this.state;
     }
@@ -447,10 +448,10 @@ export class Foundset implements IChangeAwareValue, IFoundset {
      * @param listener the listener to register.
      * @returns the deregister function.
      */
-    public addChangeListener(listener: ChangeListener): () => void {
+    public addChangeListener(listener: FoundsetChangeListener): () => void {
         return this.state.addChangeListener(listener);
     }
-    public removeChangeListener(listener: ChangeListener) {
+    public removeChangeListener(listener: FoundsetChangeListener) {
         this.state.removeChangeListener(listener);
     }
 
@@ -478,7 +479,7 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
 
     deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
     timeoutRejectLogPrefix: string;
-    changeListeners: ChangeListener[];
+    changeListeners: FoundsetChangeListener[] = [];
     rowPrototype: FoundsetRow;
     selectionUpdateDefer: Deferred<any>;
     push_to_server: any = undefined;
@@ -500,10 +501,6 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
         }
     }
 
-    public setChangeListeners(currentClientValue: Foundset) {
-        this.changeListeners = currentClientValue && currentClientValue.state ? currentClientValue.state.changeListeners : [];
-    }
-
     public fireChanges(foundsetChanges: FoundsetChangeEvent) {
         for (const cl of this.changeListeners) {
             cl(foundsetChanges);
@@ -515,24 +512,26 @@ class FoundsetState extends FoundsetViewportState implements IDeferedState {
     }
 }
 
-export interface FoundsetChangeEvent extends ViewportChangeEvent {
-    // if value was non-null and had a listener attached before, and a full value update was
-    // received from server, this key is set; if newValue is non-null, it will automatically get the old
-    // value's listeners registered to itself
-    // NOTE: it might be easier to rely just on a shallow $watch of the foundset value (to catch even the
-    // null to non-null scenario that you still need) and not use NOTIFY_FULL_VALUE_CHANGED at all
-    fullValueChanged?: { oldValue: Foundset; newValue: Foundset };
+class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
 
-    // the following keys appear if each of these got updated from server; the names of those
-    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
-    // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
-    hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
-    multiSelectChanged?: { oldValue: boolean; newValue: boolean };
-    columnFormatsChanged?: { oldValue: Record<string, object>; newValue: Record<string, object> };
-    sortColumnsChanged?: { oldValue: string; newValue: string };
-    selectedRowIndexesChanged?: { oldValue: number[]; newValue: number[] };
-    viewPortStartIndexChanged?: { oldValue: number; newValue: number };
-    viewPortSizeChanged?: { oldValue: number; newValue: number };
-    userSetSelection?: boolean;
+    foundsetId: number;
+    serverSize: number;
+    viewPort: ViewPort;
+    selectedRowIndexes: number[];
+    sortColumns: string;
+    multiSelect: boolean;
+    hasMoreRows: boolean;
+    columnFormats: Record<string, any>;
+
+    constructor(foundsetToShallowCopy: Foundset) {
+        this.foundsetId = foundsetToShallowCopy.foundsetId;
+        this.serverSize = foundsetToShallowCopy.serverSize;
+        this.viewPort = foundsetToShallowCopy.viewPort;
+        this.selectedRowIndexes = foundsetToShallowCopy.selectedRowIndexes;
+        this.sortColumns = foundsetToShallowCopy.sortColumns;
+        this.multiSelect = foundsetToShallowCopy.multiSelect;
+        this.hasMoreRows = foundsetToShallowCopy.hasMoreRows;
+        this.columnFormats = foundsetToShallowCopy.columnFormats;
+    }
+
 }

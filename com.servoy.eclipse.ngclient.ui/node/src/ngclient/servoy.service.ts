@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { WindowRefService } from '@servoy/public';
+import { SpecTypesService, WindowRefService } from '@servoy/public';
 import { LoggerFactory } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
@@ -18,7 +18,6 @@ import { ViewportService } from './services/viewport.service';
 
 import { IterableDiffers } from '@angular/core';
 
-import { SpecTypesService } from '../sablo/spectypes.service';
 
 import { FormcomponentConverter } from './converters/formcomponent_converter';
 import { ComponentConverter } from './converters/component_converter';

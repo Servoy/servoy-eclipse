@@ -1,6 +1,5 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
-import { IValuelist } from '../../sablo/spectypes.service';
+import { IValuelist, ServoyBaseComponent } from '@servoy/public';
 import { Format } from '@servoy/public';
 
 @Component({

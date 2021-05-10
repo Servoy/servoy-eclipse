@@ -18,19 +18,25 @@
 package com.servoy.eclipse.ui.views;
 
 import java.awt.Dimension;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
+import org.eclipse.swt.custom.PaintObjectEvent;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -42,7 +48,9 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.GlyphMetrics;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -78,6 +86,7 @@ public class TutorialView extends ViewPart
 	private static final String URL_DEFAULT_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
 	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 	private static final String SVY_BACKGROUND = "svybackground";
+	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) alt=(.+?)/>");
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -238,6 +247,7 @@ public class TutorialView extends ViewPart
 			setLayout(layout);
 			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
+
 			if (dataTutorialsList != null)
 			{
 				for (int i = 0; i < dataTutorialsList.length(); i++)
@@ -266,7 +276,7 @@ public class TutorialView extends ViewPart
 
 					Label description = new Label(row, SWT.WRAP);
 					description.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
+					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description"), null));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 					gd.widthHint = widthHint - 70;
 					description.setLayoutData(gd);
@@ -555,6 +565,8 @@ public class TutorialView extends ViewPart
 			ArrayList<Integer> listStartIndex = new ArrayList<>();
 			ArrayList<Integer> listEndIndex = new ArrayList<>();
 			Map<Integer, String> linkStartIndex = new LinkedHashMap<Integer, String>();
+			ArrayList<Integer> imgStartIndex = new ArrayList<>();
+			ArrayList<Image> images = new ArrayList<>();
 			ArrayList<Integer> linkEndIndex = new ArrayList<>();
 
 
@@ -577,13 +589,25 @@ public class TutorialView extends ViewPart
 							}
 							break;
 						}
-						// italic
+						// italic or image
 						case 'i' :
 						{
 							if (isOpeningTag)
 							{
-								italicStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
-								italicEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</i>", i + 3)).length()));
+								if (text.indexOf("img", i + 1) == i + 1 && text.indexOf("data:", i + 2) > 0 && text.indexOf("base64,", i + 3) > 0)
+								{
+									//inline image
+									imgStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length() - 2;
+									int imgStart = text.indexOf("base64,", i + 3) + 7;
+									String imgBase64 = text.substring(imgStart, text.indexOf("\"", imgStart)).trim();
+									images.add(getImageFromEncodedString(imgBase64));
+								}
+								else
+								{
+									italicStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
+									italicEndIndex.add(Integer.valueOf(text.substring(i + 3, text.indexOf("</i>", i + 3)).length()));
+								}
 							}
 							break;
 						}
@@ -622,7 +646,7 @@ public class TutorialView extends ViewPart
 			}
 
 			StyledText styledText = new StyledText(row, SWT.WRAP | SWT.READ_ONLY);
-			styledText.setText(removeHTMLTags(text));
+			styledText.setText(removeHTMLTags(text, images));
 			styledText.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			FontDescriptor descriptor = FontDescriptor.createFrom(styledText.getFont());
 			descriptor = descriptor.increaseHeight(2);
@@ -633,7 +657,8 @@ public class TutorialView extends ViewPart
 
 			for (int i = 0; i < boldStartIndex.size(); i++)
 			{
-				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);				styleRange.fontStyle = SWT.BOLD;
+				StyleRange styleRange = getDefaultColorStyleRange(boldStartIndex.get(i).intValue(), boldEndIndex.get(i).intValue(), false);
+				styleRange.fontStyle = SWT.BOLD;
 				styledText.setStyleRange(styleRange);
 			}
 
@@ -692,6 +717,25 @@ public class TutorialView extends ViewPart
 				});
 				mouseDownListenerAdded = true;
 			}
+
+			for (int i = 0; i < imgStartIndex.size(); i++)
+			{
+				if (images.get(i) == null) continue;
+				StyleRange style = new StyleRange();
+				style.start = imgStartIndex.get(i).intValue();
+				style.length = 1;
+				Rectangle rect = images.get(i).getBounds();
+				style.metrics = new GlyphMetrics(rect.height, 0, rect.width);
+				styledText.setStyleRange(style);
+			}
+			styledText.addPaintObjectListener((PaintObjectEvent event) -> {
+				GC gc = event.gc;
+				StyleRange style = event.style;
+				int x = event.x;
+				int y = event.y + event.ascent - style.metrics.ascent;
+				gc.drawImage(images.get(imgStartIndex.indexOf(Integer.valueOf(style.start))), x, y);
+			});
+
 		}
 
 		/**
@@ -785,9 +829,24 @@ public class TutorialView extends ViewPart
 	 * @param text the text to be checked.
 	 * @return the text without HTML tags.
 	 */
-	private String removeHTMLTags(final String text)
+	private String removeHTMLTags(final String text, ArrayList<Image> images)
 	{
 		String copyText = text;
+		Matcher matcher = imgPattern.matcher(copyText);
+		int count = 0;
+		while (matcher.find())
+		{
+			if (images.get(count) == null)
+			{
+				copyText = copyText.replaceFirst(matcher.group(0), matcher.groupCount() == 2 ? matcher.group(2).replaceAll("\"", "") : "");
+			}
+			else
+			{
+				copyText = copyText.replaceFirst(matcher.group(0), "_");
+			}
+			count++;
+		}
+
 		while (true)
 		{
 			if (copyText.indexOf('<') != -1 && copyText.indexOf('>') != -1)
@@ -811,5 +870,27 @@ public class TutorialView extends ViewPart
 		}
 
 		return loginToken;
+	}
+
+	private Image getImageFromEncodedString(String imgBase64)
+	{
+		try
+		{
+			byte[] decodedBytes = Base64.getDecoder().decode(imgBase64);
+			try (InputStream is = new ByteArrayInputStream(decodedBytes))
+			{
+				ImageData imgData = new ImageData(is);
+				return new Image(PlatformUI.getWorkbench().getDisplay(), imgData);
+			}
+			catch (IOException e)
+			{
+				Debug.error(e);
+			}
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+		}
+		return null;
 	}
 }

@@ -39,7 +39,7 @@ import org.sablo.websocket.WebsocketEndpoint;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/websocket/{clientnr}")
+@ServerEndpoint(value = "/rfb/{angularversion}/websocket/{clientnr}")
 public class EditorEndpoint extends WebsocketEndpoint
 {
 	public static final String EDITOR_ENDPOINT = "editor";
