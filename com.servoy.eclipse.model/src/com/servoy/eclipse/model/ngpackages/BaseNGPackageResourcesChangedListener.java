@@ -245,6 +245,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				handleFileChanged(resourceDelta, resource);
 				return false;
 			}
+			else if (resource instanceof IFolder && resource.getName().equals("node_modules")) return false;
 			else if (resource instanceof IProject && ((resourceDelta.getKind() & IResourceDelta.CHANGED) == 0 ||
 				(resourceDelta.getFlags() != 0 && resourceDelta.getFlags() != IResourceDelta.MARKERS))) // the project itself hasn't actually changed if it has no change flags; also we are not interested in marker changes only either
 			{
