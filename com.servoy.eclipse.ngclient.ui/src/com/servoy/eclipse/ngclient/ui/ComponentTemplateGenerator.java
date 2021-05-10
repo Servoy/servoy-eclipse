@@ -30,6 +30,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecification.PushToServerEnum;
 import org.sablo.specification.property.CustomJSONPropertyType;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.impl.ClientService;
 
@@ -59,7 +60,7 @@ public class ComponentTemplateGenerator
 
 		template.append("<!-- component template generate start -->\n");
 		viewChild.append("// component viewchild template generate start\n");
-		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		Arrays.sort(specs, new Comparator<WebObjectSpecification>()
 		{
 			@Override
@@ -175,7 +176,7 @@ public class ComponentTemplateGenerator
 		Collection<PropertyDescription> properties = spec.getProperties(FormPropertyType.INSTANCE);
 		if (properties.size() == 0)
 		{
-			Map<String, IPropertyType< ? >> declaredCustomObjectTypes = spec.getDeclaredCustomObjectTypes();
+			Map<String, ICustomType< ? >> declaredCustomObjectTypes = spec.getDeclaredCustomObjectTypes();
 			for (IPropertyType< ? > pt : declaredCustomObjectTypes.values())
 			{
 				if (pt instanceof CustomJSONPropertyType< ? >)
