@@ -143,7 +143,10 @@ describe('FoundsetConverter', () => {
         copy.selectedRowIndexes = [0];
         copy.multiSelect = false;
         copy.viewPort = { startIndex: 0, size: 0, rows: [] };
-        expect(fs).toEqual(copy);
+        expect(fs.serverSize).toEqual(copy.serverSize);
+        expect(fs.selectedRowIndexes).toEqual(copy.selectedRowIndexes);
+        expect(fs.multiSelect).toEqual(copy.multiSelect);
+        expect(fs.viewPort).toEqual(copy.viewPort);
 
         // *** request and receive new viewport (all records in this case)
         fs.loadRecordsAsync(0, 6);
@@ -187,8 +190,11 @@ describe('FoundsetConverter', () => {
         expectedfs.viewPort.rows.push({ d: null, i: 1234, _svyRowId: '5.10835;_3' });
         expectedfs.viewPort.rows.push({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' });
         expectedfs.viewPort.rows.push({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' });
-        expect(fs).toEqual(expectedfs);
-
+        expect(fs.serverSize).toEqual(expectedfs.serverSize);
+        expect(fs.selectedRowIndexes).toEqual(expectedfs.selectedRowIndexes);
+        expect(fs.multiSelect).toEqual(expectedfs.multiSelect);
+        expect(fs.viewPort).toEqual(expectedfs.viewPort);
+        
         // *** Selection change from Client
         fs.requestSelectionUpdate([1]); // WAS fs.selectedRowIndexes[0] = 1;
         expect(fs.state.isChanged()).toEqual(true);

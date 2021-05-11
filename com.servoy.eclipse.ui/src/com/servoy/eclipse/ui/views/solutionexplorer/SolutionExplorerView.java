@@ -3070,9 +3070,9 @@ public class SolutionExplorerView extends ViewPart
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadDefaultImageDescriptorFromBundle("solution.png"),
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"),
 			"Create new solution");
-		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadDefaultImageDescriptorFromBundle("module.png"), "Create new module");
+		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
 			@Override
@@ -3201,7 +3201,7 @@ public class SolutionExplorerView extends ViewPart
 		newRelation = new NewRelationAction(this);
 		newForm = new OpenNewFormWizardAction();
 		newScope = new NewScopeAction(this);
-		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
+		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"), "Create new module");
 		newActionInListPrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBAL_VARIABLES, newVariable);

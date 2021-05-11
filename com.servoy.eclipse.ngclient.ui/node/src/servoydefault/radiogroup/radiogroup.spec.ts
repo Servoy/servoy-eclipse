@@ -11,7 +11,7 @@ import { DebugElement } from '@angular/core';
 
 import {ChoiceElementDirective} from '../basechoice';
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 const mockData = [
                   {

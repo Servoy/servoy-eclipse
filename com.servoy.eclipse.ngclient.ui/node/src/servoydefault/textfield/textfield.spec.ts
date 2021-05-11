@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe('ServoyDefaultTextField', () => {
   let component: ServoyDefaultTextField;
