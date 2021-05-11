@@ -8,7 +8,7 @@ import { ServoyDefaultHTMLView } from './htmlview';
 import { FormattingService, TooltipService, ServoyApi } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe('ServoyDefaultHTMLView', () => {
   let component: ServoyDefaultHTMLView;

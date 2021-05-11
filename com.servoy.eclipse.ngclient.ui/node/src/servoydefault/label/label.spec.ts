@@ -6,7 +6,7 @@ import { ServoyDefaultLabel } from './label';
 import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from '@servoy/public';
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;

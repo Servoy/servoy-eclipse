@@ -254,7 +254,7 @@ export class FoundsetConverter implements IConverter {
     }
 }
 
-class Foundset implements IChangeAwareValue, IFoundset {
+export class Foundset implements IChangeAwareValue, IFoundset {
 
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' type;

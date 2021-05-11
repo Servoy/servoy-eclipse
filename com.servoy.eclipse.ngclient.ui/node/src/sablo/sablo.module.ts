@@ -5,7 +5,6 @@ import { ConverterService } from './converter.service';
 import { ServicesService } from './services.service';
 import { SabloService } from './sablo.service';
 import { ServiceChangeHandler } from './util/servicechangehandler';
-import { LoggerFactory } from '@servoy/public';
 import { SabloDeferHelper} from './defer.service';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 import { TestabilityService } from './testability.service';
@@ -21,7 +20,6 @@ import { TestabilityService } from './testability.service';
         WebsocketService,
         TestabilityService,
         LoadingIndicatorService,
-        LoggerFactory,
         SabloDeferHelper,
         ServiceChangeHandler],
     exports: []
