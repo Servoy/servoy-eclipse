@@ -204,7 +204,7 @@ export class PowerGrid extends NGGridDirective {
             excelStyles: [
                 {
                     id: 'stringType',
-                    dataType: 'string'
+                    dataType: 'String'
                 }
             ],
             columnDefs,
