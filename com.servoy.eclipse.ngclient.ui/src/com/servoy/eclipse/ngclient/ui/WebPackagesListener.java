@@ -252,6 +252,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					try
 					{
+
+
 						// generate the all components.module.ts
 						StringBuilder allComponentsModule = new StringBuilder(256);
 						allComponentsModule.append("import { NgModule } from '@angular/core';\n");
@@ -263,16 +265,37 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							allComponentsModule.append("';\n");
 						});
 
+						// static list for now
+						allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
+						allComponentsModule
+							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
+						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
+						allComponentsModule.append("import { SvyChartJSModule } from '../svychartjs/svychartjs.module';\n");
+						// end
+
 						allComponentsModule.append("@NgModule({\n imports: [\n");
 						componentSpecToReader.keySet().forEach(spec -> {
 							allComponentsModule.append(spec.getNg2Module());
 							allComponentsModule.append(",\n");
 						});
+
+						// static list for now
+						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
+						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
+						allComponentsModule.append("SvyChartJSModule,\n");
+						allComponentsModule.append("ServoyExtraComponentsModule\n");
+						// end
 						allComponentsModule.append(" ],\n exports: [\n");
 						componentSpecToReader.keySet().forEach(spec -> {
 							allComponentsModule.append(spec.getNg2Module());
 							allComponentsModule.append(",\n");
 						});
+						// static list for now
+						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
+						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
+						allComponentsModule.append("SvyChartJSModule,\n");
+						allComponentsModule.append("ServoyExtraComponentsModule\n");
+						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 						String current = allComponentsModule.toString();
 						String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");

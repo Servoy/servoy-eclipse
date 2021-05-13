@@ -72,6 +72,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -83,7 +84,9 @@ public class TutorialView extends ViewPart
 {
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 	private static boolean isTutorialViewOpen = false;
-	private static final String URL_DEFAULT_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
+	private static final String REST_TUTORIALS_URL = System.getProperty("servoy.rest.tutorial.url") == null
+		? "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI" : System.getProperty("servoy.rest.tutorial.url");
+	private static final String URL_DEFAULT_TUTORIALS_LIST = REST_TUTORIALS_URL + "/listtutorials?servoyVersion=" + ClientVersion.getPureVersion();
 	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 	private static final String SVY_BACKGROUND = "svybackground";
 	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) alt=(.+?)/>");
@@ -308,7 +311,7 @@ public class TutorialView extends ViewPart
 
 								if (event.getSource() instanceof StyledText)
 								{
-									String url = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/tutorial/" + tutorialID;
+									String url = REST_TUTORIALS_URL + "/tutorial/" + tutorialID + "?servoyVersion=" + ClientVersion.getPureVersion();
 									loadDataModel(false, url);
 									createTutorialView(firstParent, false);
 								}
@@ -838,11 +841,11 @@ public class TutorialView extends ViewPart
 		{
 			if (images.get(count) == null)
 			{
-				copyText = copyText.replaceFirst(matcher.group(0), matcher.groupCount() == 2 ? matcher.group(2).replaceAll("\"", "") : "");
+				copyText = copyText.replace(matcher.group(0), matcher.groupCount() == 2 ? matcher.group(2).replaceAll("\"", "") : "");
 			}
 			else
 			{
-				copyText = copyText.replaceFirst(matcher.group(0), "_");
+				copyText = copyText.replace(matcher.group(0), "_");
 			}
 			count++;
 		}
