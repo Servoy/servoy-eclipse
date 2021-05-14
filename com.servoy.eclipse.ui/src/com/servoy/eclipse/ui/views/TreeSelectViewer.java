@@ -24,6 +24,8 @@ import java.util.List;
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalListener2;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -63,6 +65,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
@@ -87,6 +90,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 {
 	public static final String DEFAULT_TITLE = "Select";
 	public static final String DEFAULT_BUTTON_TEXT = "...";
+	public static final String CONTENT_LOADING_JOB_FAMILY = "svyContentLoadingJobFamily";
 
 	private IStructuredSelection selection;
 
@@ -720,6 +724,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 					path.add(parent);
 					parent = contentProvider.getParent(parent);
 				}
+				waitForJobsToFinish();
 				Object[] elements = contentProvider.getElements(getInput());
 				for (int i = path.size(); --i >= 0;)
 				{
@@ -743,6 +748,20 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 			}
 		}
 		setValid(isValid);
+	}
+
+	private void waitForJobsToFinish()
+	{
+		IJobManager jobManager = Job.getJobManager();
+		try
+		{
+			//wait for content jobs to finish if it's the case
+			jobManager.join(CONTENT_LOADING_JOB_FAMILY, null);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	@Override
