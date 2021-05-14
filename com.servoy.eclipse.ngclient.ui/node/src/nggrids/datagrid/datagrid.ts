@@ -198,6 +198,9 @@ export class DataGrid extends NGGridDirective {
     // root foundset change listener remover
     removeChangeListenerFunction: any = null;
 
+    // id of the root foundset needed when the foundset is changed as there is no way to get the previous foundset id then to check for change
+    myFoundsetId: any;
+
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory,
         private servoyService: ServoyService, public formattingService: FormattingService,
         private datagridService: DatagridService, private sanitizer: DomSanitizer, @Inject(DOCUMENT) private doc: Document) {
@@ -661,6 +664,10 @@ export class DataGrid extends NGGridDirective {
 						if(this.isTableGrouped()) {
 							this.purge();
 						}
+                        if(change.currentValue && this.myFoundsetId && change.currentValue.foundsetId !== this.myFoundsetId) {
+                            this.filterModel = null;
+                        }
+                        this.myFoundsetId = change.currentValue.foundsetId;
 						const isChangedToEmpty = change.currentValue && change.previousValue && change.previousValue.serverSize === 0 && change.previousValue.serverSize > 0;
 						if(this.myFoundset.viewPort.size > 0 || isChangedToEmpty) {
 							// browser refresh
@@ -2096,7 +2103,7 @@ export class DataGrid extends NGGridDirective {
                     this.agGrid.columnApi.setRowGroupColumns(columnStateJSON.rowGroupColumnsState);
                 }
 
-                if(this.restoreStates && this.restoreStates.filter && this.isPlainObject(columnStateJSON.filterModel)) {
+                if(restoreColumns && this.isPlainObject(columnStateJSON.filterModel)) {
                     this.agGrid.api.setFilterModel(columnStateJSON.filterModel);
                 }
 
