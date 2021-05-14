@@ -1,12 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
+import { LoggerService, LoggerFactory, ServoyBaseComponent, BaseCustomObject, ViewPortRow, FoundsetChangeEvent, IFoundset } from '@servoy/public';
 import { IActionMapping, ITreeOptions, TreeComponent, TreeNode } from '@circlon/angular-tree-component';
-import { LoggerService, LoggerFactory } from '@servoy/public';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { ITreeNode } from '@circlon/angular-tree-component/lib/defs/api';
-import { Foundset, FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
-import { BaseCustomObject, ViewPortRow } from '../../sablo/spectypes.service';
 import { isEqual } from 'lodash-es';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 
@@ -643,7 +640,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> i
         }
     }
 
-    private addFoundsetListener(foundset: Foundset) {
+    private addFoundsetListener(foundset: IFoundset) {
         if (this.autoRefresh) {
             if (!this.removeListenerFunctionArray.find(listener => listener.foundsetId === foundset.foundsetId)) {
                 this.removeListenerFunctionArray.push({
@@ -675,7 +672,7 @@ export class ServoyExtraDbtreeview extends ServoyBaseComponent<HTMLDivElement> i
         }
     }
 
-    private removeFoundsetListener(foundset: Foundset) {
+    private removeFoundsetListener(foundset: IFoundset) {
         const fsListener = this.removeListenerFunctionArray.find(el => el.foundsetId === foundset.foundsetId);
         if (fsListener) fsListener.listener();
         this.removeListenerFunctionArray = this.removeListenerFunctionArray.filter(el => !(el.foundsetId === foundset.foundsetId));
@@ -758,7 +755,7 @@ export class FoundsetInfo extends BaseCustomObject {
     public foundsetInfoID: number;
     public foundsetInfoParentID: number;
     public indexOfTheParentRecord: number;
-    public foundset: Foundset;
+    public foundset: IFoundset;
     public foundsetpk: string;
 }
 

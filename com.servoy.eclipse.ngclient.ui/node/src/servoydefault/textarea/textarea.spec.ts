@@ -10,7 +10,7 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe('ServoyDefaultTextArea', () => {
   let component: ServoyDefaultTextArea;

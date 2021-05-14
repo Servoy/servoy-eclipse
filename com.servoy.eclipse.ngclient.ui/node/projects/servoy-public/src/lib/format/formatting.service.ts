@@ -1,5 +1,4 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as moment from 'moment';
 import numbro from 'numbro';
 
@@ -23,10 +22,10 @@ export class Format {
 
 @Injectable()
 export class FormattingService {
-    private doc: Document
-    constructor(@Inject(DOCUMENT) _doc: any) {
-        this.doc = _doc;
+
+    constructor() {
     }
+
     // formatting stufff
     public format(data: any, format: Format, useEditFormat: boolean): string {
         const formatString = useEditFormat ? format.edit : format.display;
@@ -62,48 +61,48 @@ export class FormattingService {
         return code === keyCode;
     }
 
-	// test numbers only
-	public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
-		if (!vFindMode && vCheckNumbers) {
-			if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
-				//do not looses focus, just apply the format and push value
-				vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
-			} else if (vSvyFormat.type === 'INTEGER') {
-				const currentLanguageNumeralSymbols = numbro.languageData();
+    // test numbers only
+    public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
+        if (!vFindMode && vCheckNumbers) {
+            if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
+                //do not looses focus, just apply the format and push value
+                vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
+            } else if (vSvyFormat.type === 'INTEGER') {
+                const currentLanguageNumeralSymbols = numbro.languageData();
 
-				if(keyChar === undefined || keyChar === null) {
-					return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
-							.symbol,
-							vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
-				} else {
-					return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
-                    currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
-				}
-			} else if (vSvyFormat.type === 'NUMBER' || ((vSvyFormat.type === 'TEXT') && vSvyFormat.isNumberValidator)) {
-				const currentLanguageNumeralSymbols = numbro.languageData();
-
-				if(keyChar === undefined || keyChar === null) {
-					return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                if (keyChar === undefined || keyChar === null) {
+                    return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
+                        .symbol,
+                        vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                } else {
+                    return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
-				} else {
-					return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                }
+            } else if (vSvyFormat.type === 'NUMBER' || ((vSvyFormat.type === 'TEXT') && vSvyFormat.isNumberValidator)) {
+                const currentLanguageNumeralSymbols = numbro.languageData();
+
+                if (keyChar === undefined || keyChar === null) {
+                    return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
-				}
-			}
-		}
-		return true;
-	}
+                } else {
+                    return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
+                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                }
+            }
+        }
+        return true;
+    }
 
-	// unformatting stuff
+    // unformatting stuff
 
-    public unformat(data: any, servoyFormat: string, type: string, currentValue: any) {
+    public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
             return this.unformatNumbers(data, servoyFormat);
         } else if (type === 'TEXT') {
             return data;
         } else if (type === 'DATETIME') {
-            if ('' === data ) return null;
+            if ('' === data) return null;
             // some compatibility issues, see http://momentjs.com/docs/ and http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
             servoyFormat = servoyFormat.replace(new RegExp('d', 'g'), 'D');
             servoyFormat = servoyFormat.replace(new RegExp('y', 'g'), 'Y');
@@ -111,15 +110,15 @@ export class FormattingService {
             const d = moment(data, servoyFormat, true).toDate();
             // if format has not year/month/day use the one from the current model value
             // because moment will just use current date
-            if(currentValue && !isNaN(currentValue.getTime())) {
-                if(servoyFormat.indexOf('Y') === -1) {
+            if (currentValue && !isNaN(currentValue.getTime())) {
+                if (servoyFormat.indexOf('Y') === -1) {
                     d.setFullYear(currentValue.getFullYear());
                 }
                 if (servoyFormat.indexOf('W') === -1) {
-                    if(servoyFormat.indexOf('M') === -1) {
+                    if (servoyFormat.indexOf('M') === -1) {
                         d.setMonth(currentValue.getMonth());
                     }
-                    if(servoyFormat.indexOf('D') === -1) {
+                    if (servoyFormat.indexOf('D') === -1) {
                         d.setDate(currentValue.getDate());
                     }
                 }
@@ -130,101 +129,94 @@ export class FormattingService {
     }
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
-		if (data === '') return data;
-		//treat scientiffic numbers
-		if (data.toString().toLowerCase().indexOf('e') > -1 && !isNaN(data)) {
-			return new Number(data).valueOf();
-		}
+        if (data === '') return data;
+        //treat scientiffic numbers
+        if (data.toString().toLowerCase().indexOf('e') > -1 && !isNaN(data)) {
+            return new Number(data).valueOf();
+        }
 
-		let multFactor = 1;
-		const MILLSIGN = '\u2030';
-		if (format.indexOf(MILLSIGN) > -1 && format.indexOf('\''+MILLSIGN+'\'') == -1) {
-			multFactor *= 0.001;
-		}
-		if (format.indexOf('\'') > -1) {
-			// replace the literals
-			const parts = format.split('\'');
-			for (let i=0;i<parts.length;i++) {
-				if (i % 2 === 1) {
-					data = data.replace(new RegExp(parts[i], 'g'), '');
-				}
-			}
-		}
-		let ret = numbro(data).value();
-		ret *= multFactor;
-		return ret;
-	}
+        let multFactor = 1;
+        const MILLSIGN = '\u2030';
+        if (format.indexOf(MILLSIGN) > -1 && format.indexOf('\'' + MILLSIGN + '\'') == -1) {
+            multFactor *= 0.001;
+        }
+        if (format.indexOf('\'') > -1) {
+            // replace the literals
+            const parts = format.split('\'');
+            for (let i = 0; i < parts.length; i++) {
+                if (i % 2 === 1) {
+                    data = data.replace(new RegExp(parts[i], 'g'), '');
+                }
+            }
+        }
+        let ret = numbro(data).value();
+        ret *= multFactor;
+        return ret;
+    }
 
-	private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
-		let key;
+    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+        let key;
 
-		if (window.event) {
-			key = window.event['keyCode'];
-		} else if (e) {
-			key = e.which;
-		} else {
-			return true;
-		}
+        if (window.event) {
+            key = window.event['keyCode'];
+        } else if (e) {
+            key = e.which;
+        } else {
+            return true;
+        }
 
-		if ((key == null) || (key === 0) || (key === 8) || (key === 9) || (key === 13) || (key === 27) || (e.ctrlKey && key === 97) || (e.ctrlKey && key === 99) ||
+        if ((key == null) || (key === 0) || (key === 8) || (key === 9) || (key === 13) || (key === 27) || (e.ctrlKey && key === 97) || (e.ctrlKey && key === 99) ||
             (e.ctrlKey && key === 118) || (e.ctrlKey && key === 120)) { //added CTRL-A, X, C and V
-			return true;
-		}
+            return true;
+        }
 
-		const keychar = String.fromCharCode(key);
-		return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
+        const keychar = String.fromCharCode(key);
+        return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
 
-	}
+    }
 
-	private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
-		const value = vElement.value;
-		if (mlength > 0 && value) {
-			let counter = 0;
-			if (('0123456789').indexOf(keychar) !== -1) counter++;
-			const stringLength = value.length;
-			for (let i = 0; i < stringLength; i++) {
-				if (('0123456789').indexOf(value.charAt(i)) !== -1) counter++;
-			}
-			const selectedTxt = this.getSelectedText(vElement);
-			if (selectedTxt) {
-				// selection will get deleted/replaced by typed key
-				for (let i = 0; i < selectedTxt.length; i++) {
-					if (('0123456789').indexOf(selectedTxt.charAt(i)) !== -1) counter--;
-				}
-			}
-			if (counter > mlength) return false;
-		}
+    private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+        const value = vElement.value;
+        if (mlength > 0 && value) {
+            let counter = 0;
+            if (('0123456789').indexOf(keychar) !== -1) counter++;
+            const stringLength = value.length;
+            for (let i = 0; i < stringLength; i++) {
+                if (('0123456789').indexOf(value.charAt(i)) !== -1) counter++;
+            }
+            const selectedTxt = this.getSelectedText(vElement);
+            if (selectedTxt) {
+                // selection will get deleted/replaced by typed key
+                for (let i = 0; i < selectedTxt.length; i++) {
+                    if (('0123456789').indexOf(selectedTxt.charAt(i)) !== -1) counter--;
+                }
+            }
+            if (counter > mlength) return false;
+        }
 
-		if ((('-0123456789').indexOf(keychar) > -1)) {
-			return true;
-		} else if (decimal && (keychar === decimalChar)) {
-			return true;
-		} else if (keychar === groupingChar) {
-			return true;
-		} else if (keychar === currencyChar) {
-			return true;
-		} else if (keychar === percentChar) {
-			return true;
-		}
-		return false;
-	}
+        if ((('-0123456789').indexOf(keychar) > -1)) {
+            return true;
+        } else if (decimal && (keychar === decimalChar)) {
+            return true;
+        } else if (keychar === groupingChar) {
+            return true;
+        } else if (keychar === currencyChar) {
+            return true;
+        } else if (keychar === percentChar) {
+            return true;
+        }
+        return false;
+    }
 
     private getSelectedText(textarea) {
-		let sel = null;
-		if(textarea) {
-			// code for IE
-			if (this.doc['selection']) {
-				textarea.focus();
-				sel = this.doc['selection'].createRange().text;
-			} else {
-				// code for Mozilla
-				const start = textarea['selectionStart'];
-				const end = textarea['selectionEnd'];
-				sel = textarea['value'].substring(start, end);
-			}
-		}
-		return sel;
-	}
+        let sel = null;
+        if (textarea) {
+            const start = textarea['selectionStart'];
+            const end = textarea['selectionEnd'];
+            sel = textarea['value'].substring(start, end);
+        }
+        return sel;
+    }
 
     private formatNumbers(data, servoyFormat: string): string {
         if (!servoyFormat)
@@ -441,13 +433,19 @@ export class FormattingService {
     }
 
     private formatDate(data, dateFormat: string): string {
-        if ( !(data instanceof Date)) return data;
+        if (!(data instanceof Date)) return data;
         if (!dateFormat) dateFormat = 'L'; // long date format of moment
         // adjust to moment js formatting (from java simple date format)
+        dateFormat = dateFormat.replace(new RegExp('D'), 'DDD');
         dateFormat = dateFormat.replace(new RegExp('d', 'g'), 'D');
         dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'Y');
         dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
         dateFormat = dateFormat.replace(new RegExp('AA', 'g'), 'A');
+        dateFormat = dateFormat.replace(new RegExp('G', 'g'), 'NN');
+        dateFormat = dateFormat.replace(new RegExp('S'), 'SSS');
+        // no equivalent for K, just put h for now
+        dateFormat = dateFormat.replace(new RegExp('K','g'), 'h');
+        
         const formatted = moment(data).format(dateFormat);
         return formatted.trim ? formatted.trim() : formatted;
     }

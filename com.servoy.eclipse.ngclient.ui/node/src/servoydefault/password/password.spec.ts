@@ -9,7 +9,7 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { TooltipDirective } from '@servoy/public';
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe('PasswordComponent', () => {
   let component: ServoyDefaultPassword;

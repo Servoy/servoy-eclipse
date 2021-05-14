@@ -1,16 +1,12 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject } from '@angular/core';
-import { Format, ServoyBaseComponent } from '@servoy/public';
-import { IFoundset, ViewPortRow } from '../../sablo/spectypes.service';
+import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, QueryList, ViewChildren, Directive, Inject, HostListener } from '@angular/core';
+import { BaseCustomObject, Format, IFoundset, IValuelist, ServoyBaseComponent, ViewPortRow, FoundsetChangeEvent } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ResizeEvent } from 'angular-resizable-element';
-import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { CdkVirtualScrollViewport, VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/scrolling';
 import { BehaviorSubject } from 'rxjs';
 import { auditTime, tap, first } from 'rxjs/operators';
 import { CustomVirtualScrollStrategy } from './scroll-strategy';
 import { DOCUMENT } from '@angular/common';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
-import { IValuelist } from '../../sablo/spectypes.service';
 
 @Directive({
     selector: '[svyTableRow]'
@@ -767,6 +763,25 @@ export class ServoyExtraTable extends ServoyBaseComponent<HTMLDivElement> implem
         }
         return val;
     }
+
+    @HostListener('window:resize') onResize() {
+        const tbody = this.elementRef !== undefined ? this.getNativeElement().getElementsByTagName('tbody') : undefined;
+        if(tbody && tbody[0]) {
+            const oldWidth = this.componentWidth;
+            this.componentWidth = undefined;
+            const deltaWidth = this.getComponentWidth() - oldWidth;
+            this.updateTBodyStyle(tbody[0]);
+            if (this.columns && deltaWidth !== 0) {
+                if (this.columns && this.columns.length > 0) {
+                    this.updateAutoColumnsWidth(deltaWidth);
+                    for (let i = 0; i < this.columns.length; i++) {
+                        this.columnStyleCache[i] = undefined;
+                        this.updateTableColumnStyleClass(i, this.getColumnStyle(i));
+                    }
+                }
+            }
+        }
+     }
 
     private foundsetChanged(event: FoundsetChangeEvent) {
         if (event.sortColumnsChanged) {

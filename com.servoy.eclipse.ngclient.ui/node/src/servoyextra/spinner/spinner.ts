@@ -1,6 +1,5 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { Format, FormattingService, ServoyBaseComponent } from '@servoy/public';
-import { IValuelist } from '../../sablo/spectypes.service';
+import { Format, FormattingService, ServoyBaseComponent, IValuelist } from '@servoy/public';
 
 @Component({
     selector: 'servoyextra-spinner',

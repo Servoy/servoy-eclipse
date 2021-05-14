@@ -6,7 +6,7 @@ import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { TooltipService, ComponentContributor, ServoyApi} from '@servoy/public';
 import { ServoyPublicModule } from '@servoy/public';
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 
 describe('SvyButton', () => {
   let component: ServoyDefaultButton;

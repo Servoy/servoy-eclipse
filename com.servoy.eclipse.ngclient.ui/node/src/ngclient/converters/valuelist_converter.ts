@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { IValuelist, IChangeAwareValue, ChangeAwareState } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { Deferred, IDeferred } from '@servoy/public';
+import { Deferred, IValuelist, IChangeAwareValue, ChangeAwareState } from '@servoy/public';
 import { Observable, of, from } from 'rxjs';
 
 @Injectable()

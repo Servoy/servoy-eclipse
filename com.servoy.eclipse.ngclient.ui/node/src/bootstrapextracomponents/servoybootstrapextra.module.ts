@@ -10,11 +10,10 @@ import {ServoyBootstrapExtraDropdown, MenuItem as dropdown_MenuItem} from './dro
 import { ServoyBootstrapExtraCarousel, Slide } from './carousel/carousel';
 import { MenuItem, ServoyBootstrapExtraNavbar, SvyAttributes } from './navbar/navbar';
 import { CommonModule } from '@angular/common';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 import { SabloModule } from '../sablo/sablo.module';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
-import { SpecTypesService } from '../sablo/spectypes.service';
 import { ServoyBootstrapExtraSwitch } from './switch/switch';
 import { JwBootstrapSwitchNg2Module } from 'jw-bootstrap-switch-ng2';
 

@@ -13,7 +13,7 @@ import { Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 const moment = require('moment');
 
-import { runOnPushChangeDetection } from '../../testing';
+import { runOnPushChangeDetection } from '../testingutils';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('ServoyDefaultCalendar', () => {

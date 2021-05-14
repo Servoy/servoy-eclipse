@@ -1,10 +1,11 @@
+import { IComponentCache, IFormCache } from '@servoy/public';
 
 export class FormSettings {
   public name: string;
   public size: { width: number; height: number };
 }
 
-export class FormCache {
+export class FormCache implements IFormCache{
     public navigatorForm: FormSettings;
     public size: Dimension;
     private componentCache: Map<string, ComponentCache>;
@@ -97,11 +98,6 @@ export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
 
 export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
     obj != null && (obj).detectChanges instanceof Function;
-
-export interface IComponentCache {
-    name: string;
-    model: { [property: string]: any };
-}
 
 export class ComponentCache implements IComponentCache {
     constructor(public readonly name: string,

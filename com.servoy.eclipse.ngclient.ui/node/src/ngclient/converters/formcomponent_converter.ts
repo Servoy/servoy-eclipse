@@ -1,5 +1,5 @@
 import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { ChangeAwareState, IChangeAwareValue, instanceOfChangeAwareValue,  } from '../../sablo/spectypes.service';
+import { ChangeAwareState, IChangeAwareValue, instanceOfChangeAwareValue,  } from '@servoy/public';
 import { ComponentModel } from './component_converter';
 
 export class FormcomponentConverter implements IConverter {

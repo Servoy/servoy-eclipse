@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
-import { ChangeAwareState, ChangeListener, IChangeAwareValue, instanceOfChangeAwareValue, ViewportChangeEvent } from '../../sablo/spectypes.service';
+import { FoundsetChangeEvent, LoggerService, LoggerFactory, ChangeAwareState, ChangeListener, IChangeAwareValue, instanceOfChangeAwareValue, ViewportChangeEvent, IFoundset } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
-import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter';
-
 
 @Injectable()
 export class FoundsetLinkedConverter implements IConverter {
@@ -76,7 +73,7 @@ export class FoundsetLinkedConverter implements IConverter {
                     conversionInfos = internalState.singleValueState.conversionInfos;
                     if (internalState.viewportSizeChangedListener === undefined) {
                         this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                            const fs: Foundset = internalState.forFoundset();
+                            const fs: IFoundset = internalState.forFoundset();
                             internalState.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
                                 if (event.viewPortSizeChanged || event.fullValueChanged) {
                                     const newSize = this.converterService.getInDepthProperty(internalState.forFoundset(), 'viewPort', 'size');

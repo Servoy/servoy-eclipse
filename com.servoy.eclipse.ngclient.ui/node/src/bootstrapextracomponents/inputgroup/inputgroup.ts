@@ -1,7 +1,6 @@
 import { Component, ChangeDetectorRef, SimpleChanges, ViewChild, Directive, ElementRef, OnInit, EventEmitter, Output, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
+import { BaseCustomObject, ServoyBaseComponent, ServoyPublicService } from '@servoy/public';
 import { Format } from '@servoy/public';
-import { BaseCustomObject } from '../../sablo/spectypes.service';
 
 @Component( {
     selector: 'bootstrapextracomponents-input-group',

@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone } from '@angular/core';
+import { Injectable, EventEmitter, NgZone, Inject } from '@angular/core';
 
 import { Subscription, interval, Subject } from 'rxjs';
 
@@ -34,7 +34,7 @@ export class WebsocketService {
         this.log = logFactory.getLogger('WebsocketService');
     }
 
-    public connect(context, args, queryArgs, websocketUri): WebsocketSession {
+    public connect(context, args, queryArgs?, websocketUri?): WebsocketSession {
 
         this.connectionArguments = {
             context,
@@ -126,7 +126,7 @@ export class WebsocketService {
         this.wsSession.disconnect();
     }
     
-    private generateURL(context, args, queryArgs, websocketUri) {
+    private generateURL(context, args, queryArgs?, websocketUri?) {
         let new_uri: string;
         if (this.windowRef.nativeWindow.location.protocol === 'https:') {
             new_uri = 'wss:';
@@ -153,12 +153,16 @@ export class WebsocketService {
         }
 
         new_uri += '?connectNr=' + Math.floor((Math.random() * 10000000000000)) + '&';
-
-        for (const a of Object.keys(queryArgs)) {
+        
+        if (queryArgs)
+        {
+             for (const a of Object.keys(queryArgs)) {
             if (queryArgs.hasOwnProperty(a)) {
                 new_uri += a + '=' + queryArgs[a] + '&';
             }
         }
+        }
+       
 
         if (this.lastServerMessageNumber != null) {
             new_uri += 'lastServerMessageNumber=' + this.lastServerMessageNumber + '&';
@@ -270,7 +274,7 @@ export class WebsocketSession {
     }
 
     // api
-    public callService(serviceName: string, methodName: string, argsObject, async: boolean): Promise<any> {
+    public callService(serviceName: string, methodName: string, argsObject?, async?: boolean): Promise<any> {
         const cmd = {
             service: serviceName,
             methodname: methodName,

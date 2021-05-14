@@ -1,8 +1,6 @@
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
 
-import { BaseCustomObject } from '../../sablo/spectypes.service';
-
-import { SpecTypesService, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
+import { BaseCustomObject, SpecTypesService, instanceOfChangeAwareValue } from '@servoy/public';
 
 export class JSONObjectConverter implements IConverter {
     /* eslint-disable */

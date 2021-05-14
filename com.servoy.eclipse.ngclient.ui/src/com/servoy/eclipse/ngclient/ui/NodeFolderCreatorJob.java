@@ -52,9 +52,6 @@ public class NodeFolderCreatorJob extends Job
 	private final boolean createWatcher;
 	private final boolean force;
 
-	/**
-	 * @param nodeFolder
-	 */
 	public NodeFolderCreatorJob(File nodeFolder, boolean createWatcher, boolean force)
 	{
 		super("Copy node folder to plugin location");
@@ -102,22 +99,45 @@ public class NodeFolderCreatorJob extends Job
 			{
 				e.printStackTrace();
 			}
+
 			System.err.println("tested " + (System.currentTimeMillis() - time));
+
 			// copy over the latest resources
-			Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries("/node", "*", true);
-			while (entries.hasMoreElements())
+			Enumeration<URL> rootSubEntries = Activator.getInstance().getBundle().findEntries("/node", "*", false);
+			// first level do findEntries(.. false) to avoid a long running operation in case a node_modules or dist is present in sources (when running from sources)
+			// then after first level contents were ignored, look deep in remaining subdirs with findEntries(.. true)
+			copyAllEntries("/node", false);
+
+			System.err.println("copied " + (System.currentTimeMillis() - time));
+		}
+//		if (packageJsonChanged) Activator.getInstance().executeNPMInstall();
+//		else Activator.getInstance().executeNPMBuild();
+		if (createWatcher) createFileWatcher(nodeFolder, null);
+		System.err.println("done " + (System.currentTimeMillis() - time));
+		Activator.getInstance().countDown();
+		return Status.OK_STATUS;
+	}
+
+	private void copyAllEntries(String entryPath, boolean deepFindEntries)
+	{
+		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries(entryPath, "*", deepFindEntries);
+		while (entries.hasMoreElements())
+		{
+			URL entry = entries.nextElement();
+			String filename = entry.getFile();
+			if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
+			else filename = filename.substring("node".length());
+			if (!ignoredResource(filename))
 			{
-				URL entry = entries.nextElement();
-				String filename = entry.getFile();
-				if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
-				else filename = filename.substring("node".length());
-				if (ignoredResource(filename)) continue;
 				try
 				{
 					if (filename.endsWith("/"))
 					{
 						File folder = new File(nodeFolder, filename);
 						createFolder(folder);
+
+						// if it was not a deep findEntries then sub-entries must be deep-copied
+						if (!deepFindEntries) copyAllEntries(entry.getFile(), true);
 					}
 					else
 					{
@@ -132,20 +152,14 @@ public class NodeFolderCreatorJob extends Job
 					Activator.getInstance().getLog().error("Error copy file " + filename + "to node folder " + nodeFolder, e);
 				}
 			}
-			System.err.println("copied " + (System.currentTimeMillis() - time));
 		}
-//		if (packageJsonChanged) Activator.getInstance().executeNPMInstall();
-//		else Activator.getInstance().executeNPMBuild();
-		if (createWatcher) createFileWatcher(nodeFolder, null);
-		System.err.println("done " + (System.currentTimeMillis() - time));
-		Activator.getInstance().countDown();
-		return Status.OK_STATUS;
 	}
 
 	private static boolean ignoredResource(String filename)
 	{
 		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.startsWith("/node_modules/") ||
-			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts");
+			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts") ||
+			filename.startsWith("/.gitignore");
 	}
 
 

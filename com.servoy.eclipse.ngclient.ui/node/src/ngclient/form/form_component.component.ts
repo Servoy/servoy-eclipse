@@ -131,7 +131,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
     @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
 
-    // component template generate start
+    // component viewchild template generate start
     @ViewChild('aggridGroupingtable', { static: true }) readonly aggridGroupingtable: TemplateRef<any>;
     @ViewChild('aggridDatasettable', { static: true }) readonly aggridDatasettable: TemplateRef<any>;
 
@@ -209,7 +209,7 @@ export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('bootstrapextracomponentsSwitch', { static: true }) readonly bootstrapextracomponentsSwitch: TemplateRef<any>;
 
     @ViewChild('svychartjsChart', { static: true }) readonly svychartjsChart: TemplateRef<any>;
-    // component template generate end
+    // component viewchild template generate end
 
 
 

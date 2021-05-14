@@ -12,7 +12,7 @@ import { ServoyExtraMultiFileUpload } from './multifileupload/multifileupload';
 import { ServoyExtraSelect2Tokenizer } from './select2tokenizer/select2tokenizer';
 import { ServoyExtraYoutubeVideoEmbedder } from './youtubevideoembedder/youtubevideoembedder';
 import { ServoyExtraSidenav } from './sidenav/sidenav';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ResizableModule } from 'angular-resizable-element';
@@ -33,7 +33,6 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ServoyExtraTreeview } from './treeview/treeview';
 import { AngularTreeGridModule } from 'angular-tree-grid';
 import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
-import { SpecTypesService } from '../sablo/spectypes.service';
 
 @NgModule({
     declarations: [
