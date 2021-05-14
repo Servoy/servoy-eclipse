@@ -24,11 +24,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -109,6 +111,11 @@ public class RunNPMCommand extends WorkspaceJob
 	public void runCommands() throws IOException, InterruptedException
 	{
 		ProcessBuilder builder = new ProcessBuilder();
+		Map<String, String> environment = builder.environment();
+		String pathkey = Platform.getOS().equals(Platform.OS_WIN32) ? "Path" : "PATH";
+		String path = environment.get(pathkey);
+		path = nodePath.getParent() + System.getProperty("path.separator") + path;
+		environment.put(pathkey, path);
 		builder.directory(projectFolder);
 		builder.redirectErrorStream(true);
 		for (String command : commands)
