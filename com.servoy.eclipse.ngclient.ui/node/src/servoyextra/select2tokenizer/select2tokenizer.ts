@@ -30,6 +30,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     data: Select2Option[] = [];
     filteredDataProviderId: any;
     listPosition: 'above' | 'below' = "below";
+    mustExecuteOnFocus = true;
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject( DOCUMENT ) private doc: Document ) {
         super( renderer, cdRef );
@@ -46,7 +47,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     svyOnInit() {
         super.svyOnInit();
         this.setData();
-        this.attachFocusListeners();
+        this.attachFocusListeners(this.getNativeElement());
         const position = this.getNativeElement().getBoundingClientRect();
         let availableHeight = this.doc.defaultView.innerHeight - position.top - position.height;
         let dropDownheight = this.valuelistID.length * 30;
@@ -55,22 +56,31 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
         }
     }
 
-    attachFocusListeners() {
-        if ( this.onFocusGainedMethodID ) {
-            this.select2.focus.subscribe(() => {
-                this.onFocusGainedMethodID( new CustomEvent( 'focus' ) );
+    attachFocusListeners( nativeElement: HTMLDivElement ) {
+        if ( this.onFocusGainedMethodID && !this.isEditable() ) {
+            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+                if (this.mustExecuteOnFocus === true) {
+                    this.onFocusGainedMethodID(e);
+                }
+                this.mustExecuteOnFocus = true;
             } );
         }
 
-        if ( this.onFocusLostMethodID ) {
-            this.select2.blur.subscribe(() => {
-                this.onFocusLostMethodID( new CustomEvent( 'blur' ) );
+        if ( this.onFocusLostMethodID && !this.isEditable() ) {
+            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+                this.onFocusLostMethodID( e );
             } );
         }
     }
 
-    requestFocus() {
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
+        this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
+        this.getNativeElement().focus();
         this.select2.toggleOpenAndClose();
+    }
+    
+    isEnabled() {
+        return this.enabled === true && this.isEditable();
     }
 
     isEditable() {
