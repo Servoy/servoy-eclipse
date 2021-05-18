@@ -57,8 +57,8 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     }
 
     attachFocusListeners( nativeElement: HTMLDivElement ) {
-        if ( this.onFocusGainedMethodID && !this.isEditable() ) {
-            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+        if ( this.onFocusGainedMethodID ) {
+            this.renderer.listen(  this.getNativeElement(), 'focusin', ( e ) => {
                 if (this.mustExecuteOnFocus === true) {
                     this.onFocusGainedMethodID(e);
                 }
@@ -66,8 +66,8 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
             } );
         }
 
-        if ( this.onFocusLostMethodID && !this.isEditable() ) {
-            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+        if ( this.onFocusLostMethodID) {
+            this.renderer.listen(  this.getNativeElement(), 'focusout', ( e ) => {
                 this.onFocusLostMethodID( e );
             } );
         }
