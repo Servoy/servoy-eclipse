@@ -7,6 +7,7 @@ export class JSEvent {
     public x?: number;
     public y?: number;
     public timestamp: number;
+    public data? : any;
 }
 
 export interface EventLike {
@@ -15,4 +16,6 @@ export interface EventLike {
     shiftKey?: boolean;
     ctrlKey?: boolean;
     metaKey?: boolean;
+    pageX? : number;
+    pageY? : number;
 }
