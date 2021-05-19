@@ -386,7 +386,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								IFolder file = containers[0].getProject().getFolder(entryPoint);
 								if (file.exists())
 								{
-									String location = file.getRawLocation().toString();
+									String location = file.getProjectRelativePath().toPortableString();
 									String installedVersion = dependencies.optString(packageName);
 									if (!installedVersion.endsWith(location))
 									{
