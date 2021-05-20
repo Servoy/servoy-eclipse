@@ -4,8 +4,8 @@
   "lib": {
     "entryFile": "src/public-api.ts",
     "umdModuleIds": {
-      "moment": "moment",
-      "numbro": "numbro"
+      "numbro": "numbro",
+      "luxon": "luxon"
     },
     "umdId": "servoy.public"
   }
