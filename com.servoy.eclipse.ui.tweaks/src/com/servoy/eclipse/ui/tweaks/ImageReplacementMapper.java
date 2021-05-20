@@ -119,11 +119,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/last_edit_pos.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit-disabled.png"));
-			//TODO add icons
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/next_edit_pos.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_edit_pos.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_edit_pos.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_edit_pos-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/next_edit_pos.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_edit_pos.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_edit_pos.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_edit_pos-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.externaltools/$nl$/icons/full/obj16/external_tools.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/launch_last_tool.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/skip_brkp.png"),
@@ -644,9 +643,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/dlcl16/reduce_font.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font-disabled.png"));
-			//TODO add icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.wst.validation.ui/icons/ok_tbl.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/validate.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.wst.validation.ui/icons/ok_tbl.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/validate.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/tricks.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/tips-and-tricks.png"));
 
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
@@ -675,6 +675,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.jsunit/{0}/jsunit.png"));
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/form.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.designer/{0}/form.png"));
+			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.ui/icons/tips-and-tricks.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/tips-and-tricks.png"));
+			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.ui/icons/servoy-tutorials.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/servoy-tutorials.png"));
 		}
 		catch (Exception e)
 		{
