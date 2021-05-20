@@ -3,7 +3,7 @@ import { FormattingService } from '@servoy/public';
 
 import { ServoyExtraSlider } from './slider';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicTestingModule } from '@servoy/public';
 
 describe('ServoyExtraSlider', () => {
   let component: ServoyExtraSlider;
@@ -12,7 +12,7 @@ describe('ServoyExtraSlider', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyExtraSlider ],
- 	  imports: [ NgxSliderModule, ServoyPublicModule],
+ 	  imports: [ NgxSliderModule, ServoyPublicTestingModule],
  	  providers: [FormattingService]
     })
     .compileComponents();

@@ -2,7 +2,7 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 
 import { ServoyExtraSpinner } from './spinner';
 import { SabloModule } from '../../sablo/sablo.module';
-import { ServoyPublicModule, IValuelist } from '@servoy/public';
+import { ServoyPublicTestingModule, IValuelist } from '@servoy/public';
 import { FormattingService, ServoyApi, TooltipService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -34,7 +34,7 @@ describe('ServoyExtraCheckGroup', () => {
 
     TestBed.configureTestingModule({
       declarations: [ServoyExtraSpinner],
-      imports: [SabloModule, FormsModule, ServoyPublicModule],
+      imports: [SabloModule, FormsModule, ServoyPublicTestingModule],
       providers: [FormattingService, TooltipService]
     }).compileComponents();
   }));
