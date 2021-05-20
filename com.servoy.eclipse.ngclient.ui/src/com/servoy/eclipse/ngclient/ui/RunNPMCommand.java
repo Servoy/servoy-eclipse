@@ -120,6 +120,7 @@ public class RunNPMCommand extends WorkspaceJob
 		builder.redirectErrorStream(true);
 		for (String command : commands)
 		{
+			long time = System.currentTimeMillis();
 			if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
 			{
 				ngBuildRunning = true;
@@ -149,6 +150,7 @@ public class RunNPMCommand extends WorkspaceJob
 				}
 			}
 			process.waitFor();
+			System.err.println("Done running " + command + " time: " + (System.currentTimeMillis() - time));
 		}
 	}
 
