@@ -84,6 +84,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				try
 				{
+					long time = System.currentTimeMillis();
 					File projectFolder = Activator.getInstance().getProjectFolder();
 					Set<String> packageToInstall = new HashSet<>();
 
@@ -163,20 +164,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 					}
 
-					// first exeuted npm install with all the packages.
-					StringBuilder command = new StringBuilder();
-					command.append("install ");
-					packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
-					command.append("--force");
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
-					try
-					{
-						npmCommand.runCommands();
-					}
-					catch (Exception e)
-					{
-						Debug.error(e);
-					}
 					// adjust the allservices.sevice.ts
 					try
 					{
@@ -271,6 +258,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
 						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
 						allComponentsModule.append("import { SvyChartJSModule } from '../svychartjs/svychartjs.module';\n");
+						allComponentsModule.append("import { GoogleMapsModule } from '../googlemaps/googlemaps.module';\n");
 						// end
 
 						allComponentsModule.append("@NgModule({\n imports: [\n");
@@ -283,6 +271,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
 						allComponentsModule.append("SvyChartJSModule,\n");
+						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ],\n exports: [\n");
@@ -294,6 +283,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
 						allComponentsModule.append("SvyChartJSModule,\n");
+						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
@@ -337,9 +327,24 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						Debug.error(e);
 					}
-
 					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists())
 					{
+						// first exeuted npm install with all the packages.
+						// only execute this if a source is changed (should always happens the first time)
+						// or if there are really packages to install.
+						StringBuilder command = new StringBuilder();
+						command.append("install ");
+						packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
+						command.append("--force");
+						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
+						try
+						{
+							npmCommand.runCommands();
+						}
+						catch (Exception e)
+						{
+							Debug.error(e);
+						}
 
 						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
 						try
@@ -351,6 +356,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							Debug.error(e);
 						}
 					}
+					System.out.println("Total time to check/install NG2 target folder: " + projectFolder + " is " + (System.currentTimeMillis() - time));
 					return Status.OK_STATUS;
 				}
 				finally
@@ -383,11 +389,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								IFolder file = containers[0].getProject().getFolder(entryPoint);
 								if (file.exists())
 								{
-									String location = file.getRawLocation().toString();
+									String location = file.getProjectRelativePath().toPortableString();
 									String installedVersion = dependencies.optString(packageName);
 									if (!installedVersion.endsWith(location))
 									{
-										return location;
+										return file.getRawLocation().toString();
 									}
 									return null;
 								}

@@ -34,8 +34,7 @@ import {ChoiceElementDirective} from './basechoice';
 import { SabloModule } from '../sablo/sablo.module';
 import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 
-import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
-import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Select2Module } from 'ng-select2-component';
@@ -77,7 +76,7 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
     SabloModule,
     BrowserAnimationsModule,
     OwlDateTimeModule,
-    OwlMomentDateTimeModule,
+    OwlNativeDateTimeModule,
     ServoyPublicModule,
     Select2Module,
     EditorModule

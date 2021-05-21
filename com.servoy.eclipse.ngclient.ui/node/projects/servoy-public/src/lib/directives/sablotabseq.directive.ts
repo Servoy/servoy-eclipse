@@ -1,9 +1,9 @@
-import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
 
 @Directive({
     selector: '[sabloTabseq]'
 })
-export class SabloTabseq implements OnInit, OnDestroy {
+export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     @Input('sabloTabseq') designTabSeq: number;
     @Input('sabloTabseqConfig') config: any;
@@ -143,6 +143,28 @@ export class SabloTabseq implements OnInit, OnDestroy {
         } else {
             if (this.designTabSeq !== -2) {
                 this.trigger(this._elemRef.nativeElement.parentNode, 'registerCSTS', [this.designTabSeq, this.runtimeIndex]);
+            }
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        const change = changes['designTabSeq'];
+        if (change && !change.firstChange) {
+            if (!(this.config && this.config.root)) {
+                if (change.previousValue !== -2) this.trigger(this._elemRef.nativeElement.parentNode, 'unregisterCSTS', [change.previousValue, this.runtimeIndex]);
+                if (!this.designTabSeq) this.designTabSeq = 0;
+                this.runtimeIndex.startIndex = -1;
+                this.runtimeIndex.nextAvailableIndex = -1;
+                this.initializing = true;
+
+                if (this.designTabSeq !== -2) {
+                    this.trigger(this._elemRef.nativeElement.parentNode, 'registerCSTS', [this.designTabSeq, this.runtimeIndex]);
+                    // here we could send [0] instead of [designTabSeq] - it would potentially calculate more but start again from first parent available index,
+                    // not higher index (the end user behavior being the same)
+                    this.trigger(this._elemRef.nativeElement.parentNode, 'recalculatePSTS', [this.designTabSeq]);
+                } else {
+                    this.updateCurrentDomElTabIndex(); // -1 runtime
+                }
             }
         }
     }

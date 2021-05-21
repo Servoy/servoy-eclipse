@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment';
 import numbro from 'numbro';
+import { DateTime } from 'luxon';
+import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
 
@@ -23,7 +24,7 @@ export class Format {
 @Injectable()
 export class FormattingService {
 
-    constructor() {
+    constructor(private servoyService: ServoyPublicService) {
     }
 
     // formatting stufff
@@ -103,22 +104,19 @@ export class FormattingService {
             return data;
         } else if (type === 'DATETIME') {
             if ('' === data) return null;
-            // some compatibility issues, see http://momentjs.com/docs/ and http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
-            servoyFormat = servoyFormat.replace(new RegExp('d', 'g'), 'D');
-            servoyFormat = servoyFormat.replace(new RegExp('y', 'g'), 'Y');
-            // use moment.js from calendar component
-            const d = moment(data, servoyFormat, true).toDate();
+           servoyFormat = this.convertFormat(servoyFormat);
+            const d = DateTime.fromFormat(data, servoyFormat, {locale: this.servoyService.getLocale()}).toJSDate();
             // if format has not year/month/day use the one from the current model value
-            // because moment will just use current date
+            // because luxon will just use current date
             if (currentValue && !isNaN(currentValue.getTime())) {
-                if (servoyFormat.indexOf('Y') === -1) {
+                if (servoyFormat.indexOf('y') === -1) {
                     d.setFullYear(currentValue.getFullYear());
                 }
-                if (servoyFormat.indexOf('W') === -1) {
+                if (servoyFormat.indexOf('W') === -1 && servoyFormat.indexOf('o') === -1) {
                     if (servoyFormat.indexOf('M') === -1) {
                         d.setMonth(currentValue.getMonth());
                     }
-                    if (servoyFormat.indexOf('D') === -1) {
+                    if (servoyFormat.indexOf('d') === -1) {
                         d.setDate(currentValue.getDate());
                     }
                 }
@@ -434,19 +432,27 @@ export class FormattingService {
 
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
-        if (!dateFormat) dateFormat = 'L'; // long date format of moment
-        // adjust to moment js formatting (from java simple date format)
-        dateFormat = dateFormat.replace(new RegExp('D'), 'DDD');
-        dateFormat = dateFormat.replace(new RegExp('d', 'g'), 'D');
-        dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'Y');
+        dateFormat = this.convertFormat(dateFormat);
+        const formatted  = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
+        return formatted.trim ? formatted.trim() : formatted;
+    }
+
+    private convertFormat(dateFormat: string): string {
+        if (!dateFormat) dateFormat = 'F'; // long date format of luxon
+        // adjust to luxon js formatting (from java simple date format)
+        dateFormat = dateFormat.replace(new RegExp('Y', 'g'), 'y');
         dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
-        dateFormat = dateFormat.replace(new RegExp('AA', 'g'), 'A');
-        dateFormat = dateFormat.replace(new RegExp('G', 'g'), 'NN');
-        dateFormat = dateFormat.replace(new RegExp('S'), 'SSS');
+        dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
+        dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
+        dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
         // no equivalent for K, just put h for now
         dateFormat = dateFormat.replace(new RegExp('K','g'), 'h');
-        
-        const formatted = moment(data).format(dateFormat);
-        return formatted.trim ? formatted.trim() : formatted;
+        dateFormat = dateFormat.replace(new RegExp('k','g'), 'H');
+        dateFormat = dateFormat.replace(new RegExp('D','g'), 'o');
+        // if week is found then the year must be 'k' for luxon (iso week year)
+        if (dateFormat.indexOf('W') !== -1) {
+            dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'k');
+        }
+        return dateFormat;
     }
 }

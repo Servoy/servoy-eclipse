@@ -2,7 +2,6 @@ import { Injectable, Renderer2, Inject, RendererFactory2 } from '@angular/core';
 
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { WindowRefService } from '@servoy/public';
-import { ServiceChangeHandler } from '../../sablo/util/servicechangehandler';
 import { ServoyService } from '../../ngclient/servoy.service';
 
 @Injectable()
@@ -11,10 +10,9 @@ export class NGUtilsService {
     private _styleclasses: any;
     private _backActionCB: any;
     private confirmMessage: string;
-    renderer: Renderer2;
+    private renderer: Renderer2;
 
     constructor(private windowRef: WindowRefService,
-            private changeHandler: ServiceChangeHandler,
             private servoyService: ServoyService,
             private platformLocation: PlatformLocation,
             rendererFactory: RendererFactory2,
@@ -37,7 +35,7 @@ export class NGUtilsService {
                     this.renderer.setAttribute(elem, attr.name, attr.value);
                 });
             }
-            this.renderer.setAttribute(elem, "hhsManagedTag", "");
+            this.renderer.setAttribute(elem, 'hhsManagedTag', '');
             this.renderer.appendChild(this.document.head, elem);
         });
     }
@@ -56,9 +54,7 @@ export class NGUtilsService {
                 if (old && old[key]) {
                     let toRemove = old[key];
                     if (newCls.length > 0) {
-                        toRemove = old[key].split(' ').filter((cls: string) => {
-                            newCls.indexOf(cls) < 0
-                        });
+                        toRemove = old[key].split(' ').filter((cls: string) => newCls.indexOf(cls) < 0);
                     }
                     toRemove.forEach((cls: string) => {
                         this.renderer.removeClass(form, cls);
@@ -68,7 +64,7 @@ export class NGUtilsService {
                 newCls.forEach((cls: string) => {
                    if(!form.classList.contains(cls)) {
                     this.renderer.addClass(form, cls);
-                   } 
+                   }
                 });
             }
         });
@@ -204,7 +200,7 @@ export class NGUtilsService {
      *
      * @param viewportDefType one of the constants listed above.
      */
-    public setViewportMetaForMobileAwareSites(viewportDefType) {
+    public setViewportMetaForMobileAwareSites(_viewportDefType: number) {
         // implemented in ngclientutils_server.js
     }
 
@@ -229,7 +225,7 @@ export class NGUtilsService {
      * @param newTag the new tag that replaces the old one. If null/undefined it will just remove what it finds.
      * @return the tag that was removed if any.
      */
-    public replaceHeaderTag(tagName, attrNameToFind, attrValueToFind, newTag) {
+    public replaceHeaderTag(_tagName: string, _attrNameToFind: string, _attrValueToFind: string, _newTag: string) {
         // implemented in ngclientutils_server.js
     }
 
@@ -245,7 +241,7 @@ export class NGUtilsService {
      * @param formname the form name to add to.
      * @param styleclass the styleclass to be added to form tag.
      */
-    public addFormStyleClass(formname,styleclass) {
+    public addFormStyleClass(_formname: string,_styleclass: string) {
         // implemented in ngutils_server.js
     }
 
@@ -265,7 +261,7 @@ export class NGUtilsService {
      * @param formname the form name to get style classes.
      * @return the styleclass of that form.
      */
-    public getFormStyleClass(formname) {
+    public getFormStyleClass(_formname: string) {
         // implemented in ngutils_server.js
     }
 
@@ -285,7 +281,7 @@ export class NGUtilsService {
      * @param formname the form name to remove from.
      * @param styleclass the styleclass to be removed from form tag.
      */
-    public removeFormStyleClass(formname,styleclass) {
+    public removeFormStyleClass(_formname: string, _styleclass: string) {
         // implemented in ngutils_server.js
     }
 
@@ -316,7 +312,7 @@ export class NGUtilsService {
         });
     }
 
-    private beforeUnload(e) {
+    private beforeUnload(e: any) {
         (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
         return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
     };

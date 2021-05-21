@@ -13,6 +13,11 @@
           "options": {
             "preserveSymlinks": true,
             "aot": true,
+             "sourceMap": {
+              "scripts": true,
+              "styles": true,
+              "vendor": true
+            },
             "outputPath": "dist/app",
             "index": "src/index.html",
             "main": "src/main.ts",

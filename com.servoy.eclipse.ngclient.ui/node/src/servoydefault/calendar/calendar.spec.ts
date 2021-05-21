@@ -11,7 +11,6 @@ import { ServoyDefaultCalendar } from './calendar';
 import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-const moment = require('moment');
 
 import { runOnPushChangeDetection } from '../testingutils';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
@@ -27,8 +26,6 @@ describe('ServoyDefaultCalendar', () => {
         i18nProvider = jasmine.createSpyObj('I18NProvider', ['getI18NMessages']);
         const promise = Promise.resolve({});
         i18nProvider.getI18NMessages.and.returnValue(promise);
-
-        (<any>window).moment = moment;
 
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],

@@ -116,12 +116,18 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
                         this.animateSlideMenu(this.open);
                         break;
                     case 'expandedIndex':
-                        if (typeof this.expandedIndex == 'string') {
+                        if(!change.currentValue) {
+                            this.expandedIndex = {};
+                        }
+                        else if (typeof this.expandedIndex == 'string') {
                             this.expandedIndex = JSON.parse(this.expandedIndex);
                         }
                         break;
                     case 'selectedIndex':
-                        if (typeof this.selectedIndex == 'string') {
+                        if(!change.currentValue) {
+                            this.selectedIndex = {}
+                        }
+                        else if (typeof this.selectedIndex == 'string') {
                             this.selectedIndex = JSON.parse(this.selectedIndex);
                         }
                         break;
@@ -399,6 +405,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             this.onMenuItemCollapsed(item.id, event).then(() => {
                 // if (result == true) {
                 this.clearExpandedIndex(level - 1);
+                this.expandedIndexChange.emit(JSON.stringify(this.expandedIndex));
                 // }
             }, (err) => { // Error: "Oops something went wrong"
                 // TODO use logging instead
@@ -406,6 +413,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             });
         } else {
             this.clearExpandedIndex(level - 1);
+            this.expandedIndexChange.emit(JSON.stringify(this.expandedIndex));
         }
 
         return true;
@@ -546,7 +554,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             newSelectedIndex[level] = item.id;
         }
         this.selectedIndex = newSelectedIndex;
-        this.selectedIndexChange.emit(this.selectedIndex);
+        this.selectedIndexChange.emit(JSON.stringify(this.selectedIndex));
     }
 
     clearSelectedIndex(level: number) {
@@ -581,7 +589,7 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
             newExpandedIndex[level] = item.id;
         }
         this.expandedIndex = newExpandedIndex;
-        this.expandedIndexChange.emit(this.expandedIndex);
+        this.expandedIndexChange.emit(JSON.stringify(this.expandedIndex));
     }
 
 
@@ -674,53 +682,6 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
     * API
     **************************************************************/
 
-    getSelectedMenuItem(level: number): MenuItem {
-        // TODO if level is greater then selected level, what should return ?
-        return this.getSelectedNode(level);
-    }
-
-    setSelectedMenuItem(id: string | number, mustExecuteOnMenuItemSelect?: boolean, mustExecuteOnMenuItemExpand?: boolean, level?: number): boolean {
-        let nodes: MenuItem[];
-        let levelPath = [];
-
-        // if level is provided search only in the selected node
-        if (level && level > 1) { // search in selected node only
-            levelPath = this.getSelectedIndexPath(level - 1);
-            const parentNode = this.getNodeByIndexPath(levelPath, this.menu); // retrieve the selected node at level
-            if (parentNode) nodes = parentNode.menuItems;
-        } else if (level === 1) { // search in root
-            // FIXME it searches in the whole tree
-            nodes = this.menu;
-        } else {
-            nodes = this.menu;
-        }
-
-        // search path to node
-        let path = levelPath;
-        const subPath = this.getPathToNode(id, nodes, 'id');
-        if (subPath) { // not found in the selected node
-            path = levelPath.concat(subPath);
-        } else {
-            return false;
-        }
-
-        // do nothing if the item is already selected
-        if (this.isNodeSelected(id, path.length) && !this.selectedIndex[path.length + 1]) {
-            return true;
-        } else {
-            // search the node
-            const node = this.getNodeByIndexPath(subPath, nodes);
-
-            // select the item
-            const preventSelectHandler = mustExecuteOnMenuItemSelect === true ? false : true;
-            const preventExpandHandler = mustExecuteOnMenuItemExpand === true ? false : true;
-            return this.selectItem(path.length, path[path.length - 1], node, null, preventSelectHandler, preventExpandHandler);
-        }
-    }
-
-    setSelectedMenuItemAsync(id: string | number) {
-        this.setSelectedMenuItem(id, false, false);
-    }
 
     setSelectedByIndexPath(path: Array<number>, mustExecuteOnSelectNode: boolean) {
 
@@ -729,25 +690,6 @@ export class ServoyExtraSidenav extends ServoyBaseComponent<HTMLDivElement> {
         const preventSelectHandler = mustExecuteOnSelectNode === true ? false : true;
         this.selectItem(path.length, path[path.length - 1], node, null, preventSelectHandler);
         return;
-    }
-
-    setMenuItemExpanded(menuItemId: string | number, expanded: boolean, mustExecuteOnMenuItemExpand?: boolean) {
-        const node = this.getNodeById(menuItemId, this.menu);
-
-        if (!node) {
-            return false;
-        }
-
-        // expandItem/collapsItem requires node level
-        const level = this.getNodeLevel(menuItemId);
-        const preventHandler = mustExecuteOnMenuItemExpand === true ? false : true;
-
-        if (expanded) {
-            return this.expandItem(level, null, node, null, preventHandler);
-        } else {
-            return this.collapseItem(level, null, node, null, preventHandler);
-        }
-
     }
 
     isMenuItemExpanded = (menuItemId: string | number) =>this.isNodeExpanded(menuItemId);

@@ -1,4 +1,4 @@
-<div #element [sabloTabseq]="tabSeq" (focus)="requestFocus()" class="svy-select2-autotokenizer"> 
+<div #element [sabloTabseq]="tabSeq" (focus)="requestFocus(mustExecuteOnFocus)" class="svy-select2-autotokenizer"> 
     <select2  
         [multiple]="true"
         [data]="data"
@@ -9,7 +9,7 @@
         [minCountForSearch]="0"
 		[placeholder]="placeholderText"
 		[listPosition]="listPosition"
-        [disabled]="!enabled"
+        [disabled]="!isEnabled()"
         [readonly]="!isEditable()"
         #select2>
     </select2>
