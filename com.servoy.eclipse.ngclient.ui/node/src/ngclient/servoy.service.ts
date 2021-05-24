@@ -69,7 +69,9 @@ class SolutionSettings {
     public sessionProblem: SessionProblem;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
     private uiProperties: UIProperties;

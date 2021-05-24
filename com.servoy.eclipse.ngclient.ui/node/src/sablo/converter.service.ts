@@ -22,7 +22,9 @@ class SwingModifiers {
 
 export type PropertyContext = (propertyName: string) => any;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ConverterService {
 
   constructor(private logFactory: LoggerFactory) {

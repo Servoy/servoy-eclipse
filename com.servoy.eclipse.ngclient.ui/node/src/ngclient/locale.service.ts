@@ -10,7 +10,9 @@ import { Settings } from 'luxon';
 import { I18NProvider } from './services/i18n_provider.service';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LocaleService {
     private locale = 'en';
     private loadedLocale: Deferred<any>;

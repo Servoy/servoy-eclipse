@@ -6,7 +6,9 @@ import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { Deferred } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SabloService {
 
     private locale: { language: string; country: string; full: string } = null;

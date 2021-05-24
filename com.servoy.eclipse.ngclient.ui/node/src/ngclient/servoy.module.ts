@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -17,7 +17,6 @@ import { DefaultLoginWindowComponent } from './services/default-login-window/def
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
 import { ServoyFormPopupComponent } from './services/popupform/popupform';
-import { HttpClientModule } from '@angular/common/http';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import { I18NProvider } from './services/i18n_provider.service';
@@ -37,9 +36,9 @@ import { NGGridsModule } from '../nggrids/nggrids.module';
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import { SvyUtilsService } from './utils.service';
+import {MainRoutingModule} from './main-routing.module';
 
 @NgModule( {
     declarations: [
@@ -59,16 +58,15 @@ import { SvyUtilsService } from './utils.service';
         ListFormComponent
     ],
     imports: [
-        BrowserModule,
+        CommonModule,
         NgbModule,
         FormsModule,
         SabloModule,
         AllComponentsModule,
         AllServicesModules,
-        HttpClientModule,
         ServoyPublicModule,
         NGGridsModule,
-        BrowserAnimationsModule
+        MainRoutingModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
 					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe, ViewportService, SvyUtilsService,

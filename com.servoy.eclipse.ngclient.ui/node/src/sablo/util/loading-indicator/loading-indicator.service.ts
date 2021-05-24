@@ -7,7 +7,9 @@ export interface ICustomLoadingIndicator {
     hideLoading(): void;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LoadingIndicatorService {
 
     showLoadingIndicator: Subject<boolean> = new Subject<boolean>();

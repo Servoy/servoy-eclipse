@@ -12,7 +12,9 @@ import { LoggerService, LogLevel, LoggerFactory } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 import { TestabilityService } from './testability.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WebsocketService {
     public reconnectingEmitter = new Subject<boolean>();
 

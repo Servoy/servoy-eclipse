@@ -3,7 +3,9 @@ import { ChangeAwareState, ChangeType, ColumnRef, isChanged, IFoundset } from '@
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloUtils } from '../../sablo/websocket.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ViewportService {
   public static readonly ROW_ID_COL_KEY = '_svyRowId';
 

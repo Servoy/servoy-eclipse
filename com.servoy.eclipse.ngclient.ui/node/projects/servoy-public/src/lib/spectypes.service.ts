@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 import { LoggerFactory, LoggerService } from './logger.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SpecTypesService {
 
     private registeredTypes = new Map<string, typeof BaseCustomObject>();
