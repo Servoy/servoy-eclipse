@@ -387,6 +387,15 @@ public class ServoyFormBuilder
 										o);
 								}
 
+								if (frm.isResponsiveLayout() && !form.isResponsiveLayout())
+								{
+									ServoyMarker mk = MarkerMessages.FormComponentIncompatibleLayout.fill(((WebComponent)o).getName(),
+										pd.getName(), frm.getName());
+									ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+										ServoyBuilder.FORM_COMPONENT_INVALID_LAYOUT_COMBINATION,
+										IMarker.PRIORITY_NORMAL, null, o);
+								}
+
 								BuilderDependencies.getInstance().addDatasourceDependency(datasource, form);
 								BuilderDependencies.getInstance().addDatasourceDependency(frm.getDataSource(), form);
 

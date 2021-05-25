@@ -480,6 +480,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_DATASOURCE = new Pair<String, ProblemSeverity>("formComponentInvalidDataSource",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_LAYOUT_COMBINATION = new Pair<String, ProblemSeverity>(
+		"formComponentInvalidLayoutCombination",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_NESTED_LIST = new Pair<String, ProblemSeverity>("formComponentNestedList",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
