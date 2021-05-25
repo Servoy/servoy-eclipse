@@ -41,7 +41,7 @@
     "@angular/router": "^11.2.13",
     "@circlon/angular-tree-component": "^11.0.4",
     "@danielmoncada/angular-datetime-picker": "^11.0.1",
-    "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
+    "@fortawesome/fontawesome-free": "^5.15.3",
     "@googlemaps/markerclustererplus": "^1.1.2",
     "@ng-bootstrap/ng-bootstrap": "^9.1.0",
     "@tinymce/tinymce-angular": "^4.2.3",
