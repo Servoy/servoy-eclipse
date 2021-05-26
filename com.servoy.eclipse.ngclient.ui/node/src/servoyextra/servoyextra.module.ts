@@ -33,6 +33,9 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 import { ServoyExtraTreeview } from './treeview/treeview';
 import { AngularTreeGridModule } from 'angular-tree-grid';
 import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
+import { ServoyExtraGauge } from './gauge/gauge';
+//import { GaugesModule } from '@biacsics/ng-canvas-gauges';
+
 
 @NgModule({
     declarations: [
@@ -54,6 +57,7 @@ import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
         ServoyExtraDbtreeview,
         ServoyExtraTreeview,
         ServoyExtraTreeviewCellRenderer,
+        ServoyExtraGauge,
 		BGSplitter,
     	BGPane
     ],
@@ -73,6 +77,7 @@ import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
         TreeModule,
         EditorModule,
         AngularTreeGridModule
+//        GaugesModule
     ],
     providers: [AsyncPipe,
             { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
@@ -93,7 +98,8 @@ import { ServoyExtraTreeviewCellRenderer } from './treeview/cellrenderer';
               ServoyExtraSidenav,
               ServoyExtraCollapse,
               ServoyExtraDbtreeview,
-              ServoyExtraTreeview
+              ServoyExtraTreeview,
+              ServoyExtraGauge
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA
