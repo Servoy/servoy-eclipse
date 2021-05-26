@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -35,6 +37,8 @@ public class Activator extends Plugin
 	private File npmPath;
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
+	private IOConsole console;
+
 
 	public static Activator getInstance()
 	{
@@ -51,6 +55,16 @@ public class Activator extends Plugin
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
 		extractNode();
 		copyNodeFolder();
+	}
+
+	public synchronized IOConsole getConsole()
+	{
+		if (console == null)
+		{
+			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
+			console = new IOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+		}
+		return console;
 	}
 
 	void countDown()

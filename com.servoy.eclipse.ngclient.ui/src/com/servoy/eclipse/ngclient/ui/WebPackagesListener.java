@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
@@ -82,8 +83,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
+				IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
 				try
 				{
+					writeConsole(console, "Starting ngclient source check");
 					long time = System.currentTimeMillis();
 					File projectFolder = Activator.getInstance().getProjectFolder();
 					Set<String> packageToInstall = new HashSet<>();
@@ -142,6 +145,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
 								if (pck != null)
 								{
+									writeConsole(console, "need to install package " + pck);
 									packageToInstall.add(pck);
 								}
 							});
@@ -206,6 +210,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!old.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "services ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
 						}
 					}
@@ -228,6 +233,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!old.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "components ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
 						}
 
@@ -293,6 +299,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!current.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "component modules  ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), current, "UTF-8");
 						}
 					}
@@ -319,6 +326,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								content = imports + content;
 								sourceChanged = true;
+								writeConsole(console, "Styles source changed");
 								FileUtils.writeStringToFile(new File(projectFolder, "src/styles.css"), content, "UTF-8");
 							}
 						}
@@ -356,12 +364,35 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							Debug.error(e);
 						}
 					}
-					System.out.println("Total time to check/install NG2 target folder: " + projectFolder + " is " + (System.currentTimeMillis() - time));
+					writeConsole(console, "Total time to check/install NG2 target folder: " + projectFolder + " is " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 					return Status.OK_STATUS;
 				}
 				finally
 				{
+					try
+					{
+						console.close();
+					}
+					catch (IOException e)
+					{
+					}
 					currentJob.set(null);
+				}
+			}
+
+			/**
+			 * @param console
+			 * @param pck
+			 */
+			private void writeConsole(IOConsoleOutputStream console, String message)
+			{
+				try
+				{
+					console.write(message + "\n");
+				}
+				catch (IOException e2)
+				{
 				}
 			}
 
