@@ -56,7 +56,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<arguments>install --force</arguments>
+							<arguments>ci --force</arguments>
 						</configuration>
 					</execution>
 
