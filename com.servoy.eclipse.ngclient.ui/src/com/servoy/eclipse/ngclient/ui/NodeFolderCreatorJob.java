@@ -38,12 +38,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
- * @since 8.5
+ * @since 2020.03
  */
 public class NodeFolderCreatorJob extends Job
 {
@@ -63,59 +64,84 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
-		long time = System.currentTimeMillis();
-		if (!nodeFolder.exists())
+		IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+		try
 		{
-			createFolder(nodeFolder);
+			long startTime = System.currentTimeMillis();
+			long time = startTime;
+			writeConsole(console, "Start to copy the NG2 sources");
+			if (!nodeFolder.exists())
+			{
+				createFolder(nodeFolder);
+			}
+			boolean packageJsonChanged = true;
+			File packageJsonFile = new File(nodeFolder, "package_original.json");
+			URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
+			String bundleContent = Utils.getURLContent(packageJsonUrl);
+			if (packageJsonFile.exists() && !force)
+			{
+				try
+				{
+					String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
+					packageJsonChanged = !fileContent.equals(bundleContent);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			if (packageJsonChanged)
+			{
+				try
+				{
+					// create the package_original.json
+					FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
+
+					// delete the source dirs so we start clean
+					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
+					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+
+				writeConsole(console, "Tested package.json which is changed, starting to copy " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+				time = System.currentTimeMillis();
+
+				// copy over the latest resources
+				// first level do findEntries(.. false) to avoid a long running operation in case a node_modules or dist is present in sources (when running from sources)
+				// then after first level contents were ignored, look deep in remaining subdirs with findEntries(.. true)
+				copyAllEntries("/node", false);
+
+				writeConsole(console, "Copied all the sources " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+			}
+			if (createWatcher) createFileWatcher(nodeFolder, null);
+			writeConsole(console, "Total time to copy done " + Math.round((System.currentTimeMillis() - startTime) / 1000) + "s\n");
+			Activator.getInstance().countDown();
 		}
-		boolean packageJsonChanged = true;
-		File packageJsonFile = new File(nodeFolder, "package_original.json");
-		URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
-		String bundleContent = Utils.getURLContent(packageJsonUrl);
-		if (packageJsonFile.exists() && !force)
+		finally
 		{
 			try
 			{
-				String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
-				packageJsonChanged = !fileContent.equals(bundleContent);
+				console.close();
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
 			}
 		}
-		if (packageJsonChanged)
-		{
-			try
-			{
-				// create the package_original.json
-				FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
-
-				// delete the source dirs so we start clean
-				FileUtils.deleteDirectory(new File(nodeFolder, "src"));
-				FileUtils.deleteDirectory(new File(nodeFolder, "projects"));
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-
-			System.err.println("tested " + (System.currentTimeMillis() - time));
-
-			// copy over the latest resources
-			Enumeration<URL> rootSubEntries = Activator.getInstance().getBundle().findEntries("/node", "*", false);
-			// first level do findEntries(.. false) to avoid a long running operation in case a node_modules or dist is present in sources (when running from sources)
-			// then after first level contents were ignored, look deep in remaining subdirs with findEntries(.. true)
-			copyAllEntries("/node", false);
-
-			System.err.println("copied " + (System.currentTimeMillis() - time));
-		}
-//		if (packageJsonChanged) Activator.getInstance().executeNPMInstall();
-//		else Activator.getInstance().executeNPMBuild();
-		if (createWatcher) createFileWatcher(nodeFolder, null);
-		System.err.println("done " + (System.currentTimeMillis() - time));
-		Activator.getInstance().countDown();
 		return Status.OK_STATUS;
+	}
+
+	private void writeConsole(IOConsoleOutputStream console, String message)
+	{
+		try
+		{
+			console.write(message + "\n");
+		}
+		catch (IOException e2)
+		{
+		}
 	}
 
 	private void copyAllEntries(String entryPath, boolean deepFindEntries)

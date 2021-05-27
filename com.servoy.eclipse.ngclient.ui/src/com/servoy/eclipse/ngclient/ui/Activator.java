@@ -69,10 +69,13 @@ public class Activator extends Plugin
 
 	void countDown()
 	{
-		nodeReady.countDown();
-		if (nodeReady.getCount() == -0)
+		if (nodeReady.getCount() > 0)
 		{
-			ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
+			nodeReady.countDown();
+			if (nodeReady.getCount() == -0)
+			{
+				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
+			}
 		}
 	}
 

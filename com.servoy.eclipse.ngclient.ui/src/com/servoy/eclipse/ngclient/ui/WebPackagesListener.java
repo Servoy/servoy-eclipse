@@ -18,7 +18,6 @@
 package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.jar.Manifest;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IContainer;
@@ -67,16 +65,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	public WebPackagesListener()
 	{
 		if (WebServiceSpecProvider.isLoaded())
-			checkPackages();
+			checkPackages(false);
 	}
 
 	@Override
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		checkPackages();
+		checkPackages(false);
 	}
 
-	public static void checkPackages()
+	public static void checkPackages(final boolean cleanInstall)
 	{
 		Job job = new Job("Checking/Installing NGClient2 Components and Services")
 		{
@@ -86,11 +84,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
 				try
 				{
-					writeConsole(console, "Starting ngclient source check");
 					long time = System.currentTimeMillis();
+					writeConsole(console, "Starting ngclient source check");
 					File projectFolder = Activator.getInstance().getProjectFolder();
 					Set<String> packageToInstall = new HashSet<>();
-
 					// service are based just on all service specifications
 					Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
 					SpecProviderState specProviderState = WebServiceSpecProvider.getSpecProviderState();
@@ -332,7 +329,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						Debug.error(e);
 					}
-					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists())
+					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall)
 					{
 						// first exeuted npm install with all the packages.
 						// only execute this if a source is changed (should always happens the first time)
@@ -350,7 +347,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							Debug.error(e);
 						}
-
+						if (cleanInstall)
+						{
+							npmCommand = Activator.getInstance().createNPMCommand("ci --force");
+							try
+							{
+								npmCommand.runCommands();
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+						}
 						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
 						try
 						{
@@ -362,7 +370,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 					}
 					writeConsole(console, "Total time to check/install NG2 target folder: " + projectFolder + " is " +
-						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 					return Status.OK_STATUS;
 				}
 				finally
@@ -441,22 +449,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						boolean exists = packageFolder.exists();
 						if (exists)
 						{
-							// check if the version is ok
-							File manifestFile = new File(packageFolder, "META-INF/MANIFEST.MF");
-							if (manifestFile.exists()) try (FileInputStream fis = new FileInputStream(manifestFile))
+							if (packageFolder.lastModified() < packageReader.getResource().lastModified())
 							{
-								Manifest manifest = new Manifest(fis);
-								if (!packageVersion.equals(manifest.getMainAttributes().getValue("Bundle-Version")))
+								try
 								{
 									FileUtils.deleteDirectory(packageFolder);
-									exists = false;
 								}
+								catch (IOException e)
+								{
+								}
+								exists = false;
 							}
-							catch (IOException e)
-							{
-								Debug.error(e);
-							}
-							else exists = false;
+
 						}
 
 						try

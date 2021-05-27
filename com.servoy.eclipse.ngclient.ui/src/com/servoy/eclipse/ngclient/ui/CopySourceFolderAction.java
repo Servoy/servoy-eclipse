@@ -20,6 +20,8 @@ package com.servoy.eclipse.ngclient.ui;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author jcompagner
@@ -36,13 +38,15 @@ public class CopySourceFolderAction extends Action
 	@Override
 	public void run()
 	{
+		final boolean cleanInstall = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Should we do a clean install (npm ci)?",
+			"This cleans out the node_modules. A full npm ci is done.\nDo this if there are problems when building (See NGConsole in the console view)");
 		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				WebPackagesListener.checkPackages();
+				WebPackagesListener.checkPackages(cleanInstall);
 			}
 		});
 		copySources.schedule();

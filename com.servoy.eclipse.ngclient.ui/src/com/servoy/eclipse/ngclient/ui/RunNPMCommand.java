@@ -156,7 +156,7 @@ public class RunNPMCommand extends WorkspaceJob
 					}
 				}
 				process.waitFor();
-				writeConsole(console, "Done running '" + command + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+				writeConsole(console, "Done running '" + command + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 			}
 		}
 		finally
