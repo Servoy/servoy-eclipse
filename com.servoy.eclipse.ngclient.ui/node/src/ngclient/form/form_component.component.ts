@@ -223,6 +223,8 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     formCache: FormCache;
 
+    absolutFormPosition = {};
+
     private handlerCache: { [property: string]: { [property: string]: () => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
@@ -357,35 +359,37 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent('');
-        const position = {
-            left: '0px',
-            top: '0px',
-            right: '0px',
-            bottom: '0px',
-            position: 'absolute',
-            minWidth: undefined,
-            minHeight: undefined,
-            backgroundColor: undefined
-        };
+
+        for (const key in this.absolutFormPosition){
+            if (this.absolutFormPosition.hasOwnProperty(key)){
+                delete this.absolutFormPosition[key];
+            }
+        }
+        this.absolutFormPosition['left'] = '0px';
+        this.absolutFormPosition['top'] = '0px';
+        this.absolutFormPosition['right'] = '0px';
+        this.absolutFormPosition['bottom'] = '0px';
+        this.absolutFormPosition['position'] = 'absolute';
+
         if (formData.model.borderType) {
             const borderStyle = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
-                position[key] = position[key];
+                this.absolutFormPosition[key] = borderStyle[key];
             }
         }
         if (formData.model.transparent) {
-            position.backgroundColor = 'transparent';
+            this.absolutFormPosition['backgroundColor'] = 'transparent';
         }
 
         if (formData.model.addMinSize) {
             if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null)
             {
                 // see svyFormstyle from ng1
-               position.minWidth = formData.model.size.width + 'px';
-               position.minHeight = formData.model.size.height + 'px';  
+                this.absolutFormPosition['minWidth'] = formData.model.size.width + 'px';
+                this.absolutFormPosition['minHeight'] = formData.model.size.height + 'px';
             }
         }
-        return position;
+        return this.absolutFormPosition;
     }
 
     public isFormAvailable(name: string): boolean {

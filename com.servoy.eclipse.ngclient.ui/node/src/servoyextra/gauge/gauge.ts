@@ -12,7 +12,8 @@ export class ServoyExtraGauge extends ServoyBaseComponent<HTMLDivElement> {
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
         this.myOptionsProperty = {
-            animation: false,
+            width: 150,
+            height: 400,
             minValue: 0,
             maxValue: 100
         };
