@@ -48,14 +48,12 @@
     "angular-resizable-element": "3.3.5",
     "angular-tree-grid": "^3.0.0",
     "bootstrap": "^5.0.0",
-    "chart.js": "^2.9.4",
     "core-js": "^3.12.1",
     "custom-event-polyfill": "^1.0.7",
     "jw-bootstrap-switch-ng2": "^2.0.5",
     "lodash-es": "^4.17.21",
     "luxon": "^1.27.0",
     "ng-select2-component": "^7.3.1",
-    "ng2-charts": "^2.4.2",
     "ng2-file-upload": "^1.4.0",
     "ngx-lightbox": "^2.3.0",
     "numbro": "^2.3.2",
@@ -104,6 +102,7 @@
     "ng-packagr": "^11.2.4",
     "protractor": "~7.0.0",
     "ts-node": "^9.1.1",
+    "moment": "^2.29.1",
     "typescript": "4.1.5"
   }
 }
