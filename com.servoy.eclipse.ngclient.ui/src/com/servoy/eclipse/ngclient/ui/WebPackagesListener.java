@@ -260,7 +260,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule
 							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
 						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
-						allComponentsModule.append("import { GoogleMapsModule } from '../googlemaps/googlemaps.module';\n");
 						// end
 
 						allComponentsModule.append("@NgModule({\n imports: [\n");
@@ -272,7 +271,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ],\n exports: [\n");
@@ -283,7 +281,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
