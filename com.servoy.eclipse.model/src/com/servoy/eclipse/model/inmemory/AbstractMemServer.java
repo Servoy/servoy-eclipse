@@ -1021,8 +1021,9 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * boolean)
 	 */
 	@Override
-	public void createIndex(ITable table, String indexName, Column[] indexColumns, boolean unique) throws RepositoryException
+	public String createIndex(ITable table, String indexName, Column[] indexColumns, boolean unique) throws RepositoryException
 	{
+		return null;
 	}
 
 	/*

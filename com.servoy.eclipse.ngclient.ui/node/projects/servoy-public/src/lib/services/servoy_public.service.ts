@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { getLocaleNumberSymbol, NumberSymbol } from '@angular/common';
 import { EventLike, JSEvent } from '../jsevent';
 
 @Injectable()
@@ -12,6 +13,9 @@ export abstract class ServoyPublicService {
     public abstract generateUploadUrl(formname: string, componentName: string, propertyName: string): string;
     public abstract generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string;
     public abstract getFormCacheByName(containedForm: string): IFormCache;
+    public getLocaleNumberSymbol(symbol: NumberSymbol): string {
+        return getLocaleNumberSymbol(this.getLocale(), symbol);
+    }
 }
 
 export interface IFormCache {

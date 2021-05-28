@@ -3,7 +3,9 @@ import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { Deferred, IDeferred } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ClientFunctionService {
 
     private renderer: Renderer2;

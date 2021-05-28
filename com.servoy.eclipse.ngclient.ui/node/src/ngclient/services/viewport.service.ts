@@ -3,7 +3,9 @@ import { ChangeAwareState, ChangeType, ColumnRef, isChanged, IFoundset } from '@
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloUtils } from '../../sablo/websocket.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ViewportService {
   public static readonly ROW_ID_COL_KEY = '_svyRowId';
 
@@ -53,7 +55,7 @@ export class ViewportService {
           // apply the conversions
           const rowConversionUpdate = (rowUpdateConversions && rowUpdateConversions[i] && rowUpdateConversions[i].rows) ? rowUpdateConversions[i].rows[relIdx] : undefined;
           // TODO that "null" should be a changehandler, where do we get that here?
-          if (rowConversionUpdate) rowUpdate.rows[relIdx] = this.converterService.convertFromServerToClient(rowUpdate.rows[relIdx], rowConversionUpdate, propertyContext, viewPort[j]);
+          if (rowConversionUpdate) rowUpdate.rows[relIdx] = this.converterService.convertFromServerToClient(rowUpdate.rows[relIdx], rowConversionUpdate, viewPort[j], propertyContext);
           // if the rowUpdate contains '_svyRowId' then we know it's the entire/complete row object
           if (simpleRowValue || rowUpdate.rows[relIdx]._svyRowId) {
             viewPort[j] = rowUpdate.rows[relIdx];

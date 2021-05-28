@@ -2,28 +2,22 @@ import { TestBed, ComponentFixture, fakeAsync, tick, waitForAsync, inject } from
 import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
-import * as  angularCommon from '@angular/common';
-import { ServoyPublicTestingModule } from '../testing/publictesting.module';
+import { ServoyPublicServiceTestingImpl, ServoyPublicTestingModule } from '../testing/publictesting.module';
+import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Component({
     template: '<input type="text" [svyDecimalKeyConverter]="format" #element>'
 })
-
 class TestDecimalKeyConverterComponent {
     @Input() format;
     @ViewChild('element', { static: true }) elementRef: ElementRef;
 }
 
-const fixedSpyOn = <T>(target: T, prop: keyof T): jasmine.Spy => {
-    const spy = jasmine.createSpy(`${prop}Spy`);
-    spyOnProperty(target, prop).and.returnValue(spy);
-    return spy;
-};
-
 describe('Directive: DecimalKeyConverter', () => {
     let component: TestDecimalKeyConverterComponent;
     let fixture: ComponentFixture<TestDecimalKeyConverterComponent>;
     let inputEl: DebugElement;
+    const service = new ServoyPublicServiceTestingImpl();
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -31,7 +25,9 @@ describe('Directive: DecimalKeyConverter', () => {
                 TestDecimalKeyConverterComponent,
             ],
             imports: [ServoyPublicTestingModule],
-            providers: []
+            providers: [
+                  { provide: ServoyPublicService, useValue: service }
+            ]
         });
         fixture = TestBed.createComponent(TestDecimalKeyConverterComponent);
         component = fixture.componentInstance;
@@ -44,7 +40,7 @@ describe('Directive: DecimalKeyConverter', () => {
     });
 
     it('should insert numpad decimal (nl == ,)', waitForAsync(() => {
-        fixedSpyOn(angularCommon, 'getLocaleNumberSymbol').and.returnValue(',');
+        service.setLocaleNumberSymbol(',');
         component.format = {
             uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
             display: null, type: 'NUMBER', placeHolder: null, isNumberValidator: false
@@ -58,11 +54,11 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
 
         expect(inputEl.nativeElement.value).toEqual('12,');
+        service.setLocaleNumberSymbol(null);
     }));
 
     it('should insert comma decimal (en == .)', fakeAsync(() => {
-        fixedSpyOn(angularCommon, 'getLocaleNumberSymbol').and.returnValue('.');
-
+        service.setLocaleNumberSymbol('.');
         component.format = {
             uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
             display: null, type: 'NUMBER', placeHolder: null, isNumberValidator: false
@@ -77,5 +73,6 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
         tick();
         expect(inputEl.nativeElement.value).toEqual('12.');
+        service.setLocaleNumberSymbol(null);
     }));
 });

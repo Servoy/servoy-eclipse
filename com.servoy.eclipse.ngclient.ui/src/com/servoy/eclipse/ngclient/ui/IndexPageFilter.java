@@ -66,7 +66,8 @@ public class IndexPageFilter implements Filter
 			String requestURI = request.getRequestURI();
 			String solutionName = getSolutionNameFromURI(requestURI);
 			if (solutionName != null &&
-				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) || requestURI.toLowerCase().endsWith("/index.html")))
+				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
+					requestURI.toLowerCase().endsWith("/index.html")))
 			{
 				File file = new File(distFolder, "index.html");
 				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
@@ -107,6 +108,10 @@ public class IndexPageFilter implements Filter
 
 	private String getSolutionNameFromURI(String uri)
 	{
+		if (uri.startsWith("/designer"))
+		{
+			uri = uri.substring(9);
+		}
 		if (uri.startsWith(SOLUTIONS_PATH))
 		{
 			int solutionEndIndex = uri.indexOf("/", SOLUTIONS_PATH.length() + 1);

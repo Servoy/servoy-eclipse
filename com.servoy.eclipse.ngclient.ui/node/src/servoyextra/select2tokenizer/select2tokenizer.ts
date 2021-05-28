@@ -31,6 +31,7 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
     filteredDataProviderId: any;
     listPosition: 'above' | 'below' = "below";
     mustExecuteOnFocus = true;
+    hashMap = {};
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, @Inject( DOCUMENT ) private doc: Document ) {
         super( renderer, cdRef );
@@ -127,8 +128,47 @@ export class ServoyExtraSelect2Tokenizer extends ServoyBaseComponent<HTMLDivElem
             this.setData();
         }
         if ( changes['dataProviderID'] ) {
+            this.setData();
+            this.select2.update;
             this.filteredDataProviderId = ( typeof this.dataProviderID === 'string' ) ? this.dataProviderID.split( '\n' ) : [this.dataProviderID];
+            this.hashMap = {};
+            if( this.filteredDataProviderId &&  this.filteredDataProviderId.length){
+                let realValue:any;
+                for (let  i = 0; this.filteredDataProviderId && i < this.filteredDataProviderId.length;  i++) {
+                    realValue = this.filteredDataProviderId[i];
+                    this.hashMap[realValue] = realValue;
+                }
+                // select each value
+                for (realValue in this.hashMap) {
+                    this.selectRealValue(realValue, this.filteredDataProviderId);
+                }
+            }
         }
         super.svyOnChanges( changes );
+    }
+    
+    selectRealValue( realValue: any, values: any ) {
+        let found = false;
+        for ( let i = 0; i < this.valuelistID.length; i++ ) {
+            if ( this.valuelistID[i].realValue === realValue ) {
+                // set value
+                found = true;
+                break;
+            }
+        }
+        if ( !found ) {
+            const options: Select2Option[] = [];
+            options.push( {
+                value: realValue,
+                label: realValue
+            } );
+            if ( !this.data.includes( options[0] ) ) {
+                this.data.push( {
+                    value: realValue,
+                    label: realValue
+                } );
+            }
+            this.select2.update;
+        }
     }
 }

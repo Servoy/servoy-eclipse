@@ -10,7 +10,9 @@ import { get } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
 import { ClientFunctionService } from './services/clientfunction.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class FormService {
 
     private formsCache: Map<string, FormCache>;

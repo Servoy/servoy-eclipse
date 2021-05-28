@@ -101,7 +101,9 @@ export class LoggerService {
     }
  }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LoggerFactory {
 
     private instances: any = {};

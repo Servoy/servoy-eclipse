@@ -18,7 +18,6 @@
 package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.jar.Manifest;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IContainer;
@@ -39,6 +37,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
@@ -66,28 +65,29 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	public WebPackagesListener()
 	{
 		if (WebServiceSpecProvider.isLoaded())
-			checkPackages();
+			checkPackages(false);
 	}
 
 	@Override
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		checkPackages();
+		checkPackages(false);
 	}
 
-	public static void checkPackages()
+	public static void checkPackages(final boolean cleanInstall)
 	{
 		Job job = new Job("Checking/Installing NGClient2 Components and Services")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
+				IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
 				try
 				{
 					long time = System.currentTimeMillis();
+					writeConsole(console, "Starting ngclient source check");
 					File projectFolder = Activator.getInstance().getProjectFolder();
 					Set<String> packageToInstall = new HashSet<>();
-
 					// service are based just on all service specifications
 					Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
 					SpecProviderState specProviderState = WebServiceSpecProvider.getSpecProviderState();
@@ -142,6 +142,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
 								if (pck != null)
 								{
+									writeConsole(console, "need to install package " + pck);
 									packageToInstall.add(pck);
 								}
 							});
@@ -206,6 +207,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!old.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "services ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
 						}
 					}
@@ -228,6 +230,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!old.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "components ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
 						}
 
@@ -257,7 +260,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule
 							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
 						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
-						allComponentsModule.append("import { SvyChartJSModule } from '../svychartjs/svychartjs.module';\n");
 						allComponentsModule.append("import { GoogleMapsModule } from '../googlemaps/googlemaps.module';\n");
 						// end
 
@@ -270,7 +272,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("SvyChartJSModule,\n");
 						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
@@ -282,7 +283,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("SvyChartJSModule,\n");
 						allComponentsModule.append("GoogleMapsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
@@ -293,6 +293,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!current.equals(content))
 						{
 							sourceChanged = true;
+							writeConsole(console, "component modules  ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), current, "UTF-8");
 						}
 					}
@@ -319,6 +320,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								content = imports + content;
 								sourceChanged = true;
+								writeConsole(console, "Styles source changed");
 								FileUtils.writeStringToFile(new File(projectFolder, "src/styles.css"), content, "UTF-8");
 							}
 						}
@@ -327,7 +329,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						Debug.error(e);
 					}
-					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists())
+					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall)
 					{
 						// first exeuted npm install with all the packages.
 						// only execute this if a source is changed (should always happens the first time)
@@ -345,7 +347,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							Debug.error(e);
 						}
-
+						if (cleanInstall)
+						{
+							npmCommand = Activator.getInstance().createNPMCommand("ci --force");
+							try
+							{
+								npmCommand.runCommands();
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+						}
 						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
 						try
 						{
@@ -356,12 +369,35 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							Debug.error(e);
 						}
 					}
-					System.out.println("Total time to check/install NG2 target folder: " + projectFolder + " is " + (System.currentTimeMillis() - time));
+					writeConsole(console, "Total time to check/install NG2 target folder: " + projectFolder + " is " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 					return Status.OK_STATUS;
 				}
 				finally
 				{
+					try
+					{
+						console.close();
+					}
+					catch (IOException e)
+					{
+					}
 					currentJob.set(null);
+				}
+			}
+
+			/**
+			 * @param console
+			 * @param pck
+			 */
+			private void writeConsole(IOConsoleOutputStream console, String message)
+			{
+				try
+				{
+					console.write(message + "\n");
+				}
+				catch (IOException e2)
+				{
 				}
 			}
 
@@ -413,22 +449,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						boolean exists = packageFolder.exists();
 						if (exists)
 						{
-							// check if the version is ok
-							File manifestFile = new File(packageFolder, "META-INF/MANIFEST.MF");
-							if (manifestFile.exists()) try (FileInputStream fis = new FileInputStream(manifestFile))
+							if (packageFolder.lastModified() < packageReader.getResource().lastModified())
 							{
-								Manifest manifest = new Manifest(fis);
-								if (!packageVersion.equals(manifest.getMainAttributes().getValue("Bundle-Version")))
+								try
 								{
 									FileUtils.deleteDirectory(packageFolder);
-									exists = false;
 								}
+								catch (IOException e)
+								{
+								}
+								exists = false;
 							}
-							catch (IOException e)
-							{
-								Debug.error(e);
-							}
-							else exists = false;
+
 						}
 
 						try

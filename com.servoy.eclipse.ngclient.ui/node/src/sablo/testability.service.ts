@@ -3,7 +3,9 @@ import { LoggerFactory, LoggerService } from '@servoy/public';
 import { Deferred } from '@servoy/public';
 import { WindowRefService } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TestabilityService {
     private log: LoggerService;
     private blockEventLoop = 0;

@@ -36,7 +36,6 @@ import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Select2Module } from 'ng-select2-component';
 import { Tab } from './tabpanel/basetabpanel';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
@@ -74,7 +73,6 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
     CommonModule,
     NgbModule,
     SabloModule,
-    BrowserAnimationsModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     ServoyPublicModule,

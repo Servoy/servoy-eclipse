@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 
@@ -110,47 +111,68 @@ public class RunNPMCommand extends WorkspaceJob
 	 */
 	public void runCommands() throws IOException, InterruptedException
 	{
-		ProcessBuilder builder = new ProcessBuilder();
-		Map<String, String> environment = builder.environment();
-		String pathkey = Platform.getOS().equals(Platform.OS_WIN32) ? "Path" : "PATH";
-		String path = environment.get(pathkey);
-		path = nodePath.getParent() + System.getProperty("path.separator") + path;
-		environment.put(pathkey, path);
-		builder.directory(projectFolder);
-		builder.redirectErrorStream(true);
-		for (String command : commands)
+		IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+		try
 		{
-			long time = System.currentTimeMillis();
-			if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
+			ProcessBuilder builder = new ProcessBuilder();
+			Map<String, String> environment = builder.environment();
+			String pathkey = Platform.getOS().equals(Platform.OS_WIN32) ? "Path" : "PATH";
+			String path = environment.get(pathkey);
+			path = nodePath.getParent() + System.getProperty("path.separator") + path;
+			environment.put(pathkey, path);
+			builder.directory(projectFolder);
+			builder.redirectErrorStream(true);
+			for (String command : commands)
 			{
-				ngBuildRunning = true;
-			}
-			List<String> lst = new ArrayList<>();
-			lst.add(nodePath.getCanonicalPath());
-			lst.add(npmPath.getCanonicalPath());
-			lst.addAll(Arrays.asList(command.split(" ")));
-			lst.add("--scripts-prepend-node-path");
-			System.out.println("Running npm command: " + lst);
-			builder.command(lst);
-			process = builder.start();
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
-			{
-				String str = null;
-				while ((str = br.readLine()) != null)
+				long time = System.currentTimeMillis();
+				if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
 				{
-					str = str.replaceAll(".*?m", "");
-					str = str.replaceAll("\b", "");
-					System.err.println(str.trim());
-					// The date, hash and time represents the last output line of the NG build process.
-					// The NG build is finished when this conditions is met.
-					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					ngBuildRunning = true;
+				}
+				List<String> lst = new ArrayList<>();
+				lst.add(nodePath.getCanonicalPath());
+				lst.add(npmPath.getCanonicalPath());
+				lst.addAll(Arrays.asList(command.split(" ")));
+				lst.add("--scripts-prepend-node-path");
+				StringBuilder sb = new StringBuilder();
+				lst.stream().forEach(item -> sb.append(item).append('\n'));
+				writeConsole(console, "Running npm command:\n" + sb);
+				builder.command(lst);
+				process = builder.start();
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
+				{
+					String str = null;
+					while ((str = br.readLine()) != null)
 					{
-						ngBuildRunning = false;
+//						str = str.replaceAll(".*?m", "");
+//						str = str.replaceAll("\b", "");
+						writeConsole(console, str.trim());
+						// The date, hash and time represents the last output line of the NG build process.
+						// The NG build is finished when this conditions is met.
+						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+						{
+							ngBuildRunning = false;
+						}
 					}
 				}
+				process.waitFor();
+				writeConsole(console, "Done running '" + command + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 			}
-			process.waitFor();
-			System.err.println("Done running " + command + " time: " + (System.currentTimeMillis() - time));
+		}
+		finally
+		{
+			console.close();
+		}
+	}
+
+	private void writeConsole(IOConsoleOutputStream console, String message)
+	{
+		try
+		{
+			console.write(message + "\n");
+		}
+		catch (IOException e2)
+		{
 		}
 	}
 

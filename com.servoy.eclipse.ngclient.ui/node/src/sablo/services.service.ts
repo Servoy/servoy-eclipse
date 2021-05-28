@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
     private log: LoggerService;

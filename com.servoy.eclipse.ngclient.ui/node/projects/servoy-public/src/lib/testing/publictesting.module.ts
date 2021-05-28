@@ -1,3 +1,4 @@
+import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { IComponentCache, IFormCache, ServoyPublicService } from '../services/servoy_public.service';
@@ -8,6 +9,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     private locale: string;
     private messages: { [key: string]: string } = {};
     private forms: { [key: string]: IFormCache } = {};
+    private localeNumberSymbol: string = null;
 
     public addForm(name: string, formCache: IFormCache) {
         this.forms[name] = formCache;
@@ -76,6 +78,14 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         throw new Error('Method not implemented.');
     }
 
+    public getLocaleNumberSymbol(symbol: NumberSymbol): string {
+        if (this.localeNumberSymbol) return this.localeNumberSymbol;
+        return super.getLocaleNumberSymbol(symbol);
+    }
+    
+    public setLocaleNumberSymbol(symbol: string): void {
+        this.localeNumberSymbol = symbol;
+    }
 }
 @NgModule({
     declarations: [

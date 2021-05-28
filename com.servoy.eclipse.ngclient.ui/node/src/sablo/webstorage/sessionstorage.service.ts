@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { WebStorage } from './webstorage.interface';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SessionStorageService implements WebStorage {
 
     hasSessionStorage: boolean;
