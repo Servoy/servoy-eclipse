@@ -20,16 +20,23 @@ package com.servoy.eclipse.ui;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -55,7 +62,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 
@@ -92,44 +101,71 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 
 		public boolean post()
 		{
-			try (CloseableHttpClient client = HttpClients.createDefault())
+			CookieStore httpCookieStore = new BasicCookieStore();
+			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).build())
 			{
 				String sid = getSID(client);
 				if (sid == null || !login(client, sid)) return false;
 
-				String form_token = getFormToken(client, sid);
+				String form_token = getFormToken(client, sid, httpCookieStore);
 
 				HttpPost httpPost = new HttpPost(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-				ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("subject", subjectText.getText()));
-				params.add(new BasicNameValuePair("message", description.getText()));
 
-				//hidden params
+				MultipartEntityBuilder requestEntity = MultipartEntityBuilder.create();
+				requestEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+				requestEntity.addTextBody("subject", subjectText.getText());
+				requestEntity.addTextBody("addbbcode20", "100");
+				requestEntity.addTextBody("message", description.getText());
 				String timestamp = String.valueOf(System.currentTimeMillis());
-				params.add(new BasicNameValuePair("lastclick", timestamp));
-				params.add(new BasicNameValuePair("post", "Submit"));
-				params.add(new BasicNameValuePair("attach_sig", "on"));
-				params.add(new BasicNameValuePair("creation_time", timestamp));
-				params.add(new BasicNameValuePair("form_token", form_token));//UUID.randomUUID().toString().replace("-", ""))); //TODO check if it does work with a generated form token
-				params.add(new BasicNameValuePair("addbbcode20", "100"));
-				params.add(new BasicNameValuePair("poll_length", "0"));
-				params.add(new BasicNameValuePair("poll_title", ""));
-				params.add(new BasicNameValuePair("poll_option_text", ""));
-				params.add(new BasicNameValuePair("poll_max_options", ""));
-				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
-				httpPost.setEntity(entity);
-				httpPost.addHeader("Connection", "keep-alive");
-				httpPost.addHeader("Host", "forum.servoy.com");
+				requestEntity.addTextBody("lastclick", timestamp);
+				requestEntity.addTextBody("post", "Submit");
+				requestEntity.addTextBody("attach_sig", "on");
+				requestEntity.addTextBody("creation_time", timestamp);
+				requestEntity.addTextBody("form_token", form_token);
+				requestEntity.addBinaryBody("fileupload", new byte[0], ContentType.APPLICATION_OCTET_STREAM, "");
+				requestEntity.addTextBody("filecomment", "");
+				requestEntity.addTextBody("poll_title", "");
+				requestEntity.addTextBody("poll_option_text", "");
+				requestEntity.addTextBody("poll_max_options", "1");
+				requestEntity.addTextBody("poll_length", "0");
+				HttpEntity httpEntity = requestEntity.build();
+				httpPost.setEntity(httpEntity);
+				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
+				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
+				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
+				//TODO sec-ch-ua header?
+				httpPost.addHeader("sec-ch-ua-mobile", "?0");
+				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
 				httpPost.addHeader("Origin", "https://forum.servoy.com");
-				httpPost.addHeader("referer", POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-				httpPost.addHeader("Content-Type", "multipart/form-data");
+				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
+				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
+				httpPost.addHeader(HttpHeaders.ACCEPT,
+					"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
+				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
+				httpPost.addHeader("Sec-Fetch-User", "?1");
+				httpPost.addHeader("Sec-Fetch-Dest", "document");
+				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
+				httpPost.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
+				String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+				httpPost.addHeader("Cookie", cookies);
 
 				CloseableHttpResponse response = client.execute(httpPost);
-				HttpEntity respEntity = response.getEntity();
-				if (respEntity != null)//TODO rem
+//				HttpEntity respEntity = response.getEntity();
+//				if (respEntity != null)//TODO rem
+//				{
+//					String content = EntityUtils.toString(respEntity);
+//					System.out.println(content); //TODO rem
+//					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
+//				}
+				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
 				{
-					String content = EntityUtils.toString(respEntity);
-					System.out.println(content); //TODO rem
+					//TODO button for showing the post on the forum
+					UIUtils.showInformation(getParentShell(), "Thank you for posting", "View your post on the Servoy forum here ...");
+				}
+				else
+				{
+					setErrorMessage("Connot post to the forum. Please try again later.");
 				}
 				return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
 			}
@@ -141,9 +177,12 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		}
 
 
-		private String getFormToken(CloseableHttpClient client, String sid) throws ClientProtocolException, IOException
+		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore) throws ClientProtocolException, IOException
 		{
 			HttpGet httpGet = new HttpGet(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
+			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+			httpGet.addHeader("Cookie", cookies);
+			httpGet.addHeader("Connection", "keep-alive");
 			HttpResponse httpresponse = client.execute(httpGet);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
@@ -174,9 +213,9 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			httpPost.addHeader("referer", "https://forum.servoy.com/index.php?sid=" + sid);
 			HttpResponse httpresponse = client.execute(httpPost);
 
-			//Printing the status and the contents of the response
-			System.out.println(EntityUtils.toString(httpresponse.getEntity()));
-			System.out.println(httpresponse.getStatusLine());
+			//TODO remove
+//			System.out.println(EntityUtils.toString(httpresponse.getEntity()));
+//			System.out.println(httpresponse.getStatusLine());
 
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
@@ -291,10 +330,12 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		@Override
 		protected void okPressed()
 		{
-			if (post())
-			{
-				super.okPressed();
-			}
+			Display.getDefault().asyncExec(() -> {
+				if (post())
+				{
+					super.okPressed();
+				}
+			});
 		}
 
 
@@ -308,6 +349,12 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 	@Override
 	public void run(IAction action)
 	{
+		String loginToken = ServoyLoginDialog.getLoginToken();
+		if (loginToken == null)
+		{
+			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+		}
+		if (loginToken == null) return;
 		ForumPostDialog dialog = new ForumPostDialog(window.getShell());
 		dialog.open();
 	}
