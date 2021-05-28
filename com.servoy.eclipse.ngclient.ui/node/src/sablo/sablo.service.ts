@@ -23,7 +23,7 @@ export class SabloService {
     constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService,
         private windowRefService: WindowRefService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SabloService');
-        this.windowRefService.nativeWindow.window.addEventListener('unload', () => {
+        this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
             sessionStorage.remove('svy_session_lock');
             websocketService.disconnect();
         });

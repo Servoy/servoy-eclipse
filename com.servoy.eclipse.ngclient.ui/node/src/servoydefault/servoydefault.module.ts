@@ -104,7 +104,6 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 
   ],
   providers: [
-              I18NProvider,
               { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
              ],
   schemas: [

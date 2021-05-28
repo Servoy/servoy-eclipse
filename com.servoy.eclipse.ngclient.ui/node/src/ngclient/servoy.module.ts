@@ -68,8 +68,8 @@ import {MainRoutingModule} from './main-routing.module';
         NGGridsModule,
         MainRoutingModule
     ],
-    providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
-					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe, ViewportService, SvyUtilsService,
+    providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
+					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe,
 					ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],

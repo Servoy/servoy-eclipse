@@ -2,7 +2,9 @@ import { Injectable, } from '@angular/core';
 
 import { SabloService } from '../../sablo/sablo.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServiceChangeHandler {
     constructor(private sabloService: SabloService) {
     }
