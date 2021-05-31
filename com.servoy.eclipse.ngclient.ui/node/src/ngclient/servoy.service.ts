@@ -3,11 +3,9 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { SpecTypesService, WindowRefService } from '@servoy/public';
-import { LoggerFactory } from '@servoy/public';
+import { SpecTypesService, WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
-import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
 import { DateConverter } from './converters/date_converter';
 import { JSONObjectConverter } from './converters/json_object_converter';
 import { JSONArrayConverter } from './converters/json_array_converter';

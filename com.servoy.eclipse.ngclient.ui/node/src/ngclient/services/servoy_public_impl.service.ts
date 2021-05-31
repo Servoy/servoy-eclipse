@@ -47,6 +47,12 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
         return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
     }
+    generateMediaDownloadUrl(media : string) : string{
+        return this.applicationService.generateMediaDownloadUrl(media);
+    }
+    getUIProperty(key : string) : any{
+        return this.applicationService.getUIProperty(key);
+    }
     getFormCacheByName(containedForm: string): IFormCache {
         return this.formService.getFormCacheByName(containedForm);
     }

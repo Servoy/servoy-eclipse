@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
-import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 /**
  * This module should be generated in the developer and when exporting a WAR
  * This will list all the component modules that can or will be used in a solution.
@@ -9,12 +8,9 @@ import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 @NgModule({
 
   imports: [
-    ServoyDefaultComponentsModule,
-    ServoyExtraComponentsModule
-  ],
+    ServoyDefaultComponentsModule  ],
   exports: [
-    ServoyDefaultComponentsModule,
-    ServoyExtraComponentsModule
+    ServoyDefaultComponentsModule
   ]
 })
 export class AllComponentsModule { }

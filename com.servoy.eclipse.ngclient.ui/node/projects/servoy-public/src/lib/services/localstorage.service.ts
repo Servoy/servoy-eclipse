@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { LoggerFactory, LoggerService } from '@servoy/public';
+import { LoggerFactory, LoggerService } from '../logger.service';
 import { WebStorage } from './webstorage.interface';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LocalStorageService implements WebStorage {
 
     hasLocalStorage: boolean;

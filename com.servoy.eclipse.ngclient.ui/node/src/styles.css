@@ -4,9 +4,7 @@
 @import "assets/bootstrap-window/bootstrap-window.css";
 @import "assets/styles/servoy.css";
 @import "~@fortawesome/fontawesome-free/css/all.css";
-@import "~ngx-lightbox/lightbox.css";
 @import "servoydefault/defaultcomponents.css";
-@import "servoyextra/servoyextra.css";
 
 @import "12grid/lib/12grid.css";
 
@@ -16,7 +14,5 @@
 @import "nggrids/ag-grid-custom.css";
 @import "nggrids/datagrid/datagrid.css";
 @import "nggrids/powergrid/powergrid.css";
-@import "@uppy/core/dist/style.css";
-@import "@uppy/dashboard/dist/style.css";
 @import "window_service/servoy-menu.css";
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";

@@ -257,7 +257,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
-						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
 						// end
 
 						allComponentsModule.append("@NgModule({\n imports: [\n");
@@ -268,7 +267,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ],\n exports: [\n");
 						componentSpecToReader.keySet().forEach(spec -> {
@@ -277,7 +275,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 						String current = allComponentsModule.toString();
