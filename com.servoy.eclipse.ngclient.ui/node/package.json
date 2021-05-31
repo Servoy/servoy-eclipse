@@ -49,7 +49,6 @@
     "bootstrap": "5.0.1",
     "core-js": "3.13.0",
     "custom-event-polyfill": "1.0.7",
-    "jw-bootstrap-switch-ng2": "2.0.5",
     "lodash-es": "4.17.21",
     "luxon": "1.27.0",
     "ng-select2-component": "7.3.1",

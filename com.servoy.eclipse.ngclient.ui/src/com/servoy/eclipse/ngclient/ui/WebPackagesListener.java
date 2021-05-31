@@ -257,8 +257,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
-						allComponentsModule
-							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
 						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
 						// end
 
@@ -270,7 +268,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ],\n exports: [\n");
@@ -280,7 +277,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
 						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
