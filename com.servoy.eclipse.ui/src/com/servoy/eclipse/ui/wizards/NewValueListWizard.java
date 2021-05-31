@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -23,12 +24,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
+import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValueList;
 
 public class NewValueListWizard extends Wizard implements INewWizard
 {
@@ -38,6 +44,8 @@ public class NewValueListWizard extends Wizard implements INewWizard
 	private WizardPage errorPage;
 	private final String activeSolutionName;
 	private final IDeveloperServoyModel servoyModel;
+
+	private ValueList valuelist;
 
 
 	public NewValueListWizard(String activeSolutionName)
@@ -104,9 +112,35 @@ public class NewValueListWizard extends Wizard implements INewWizard
 			{
 				ServoyProject servoyProject = servoyModel.getServoyProject(params[0]);
 				Solution editingSolution = servoyProject.getEditingSolution();
-				NewValueListAction.createValueList(params[1], editingSolution);
+				valuelist = createValueList(params[1], editingSolution);
+				if (valuelist == null)
+				{
+					return false;
+				}
 			}
 		}
 		return true;
+	}
+
+	public ValueList createValueList(String valueListName, Solution editingSolution)
+	{
+		try
+		{
+			IValidateName validator = servoyModel.getNameValidator();
+			ValueList vl = editingSolution.createNewValueList(validator, valueListName);
+			vl.setAddEmptyValue(IValueListConstants.EMPTY_VALUE_NEVER);
+			EditorUtil.openValueListEditor(vl);
+			return vl;
+		}
+		catch (RepositoryException e)
+		{
+			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error", e.getMessage());
+		}
+		return null;
+	}
+
+	public ValueList getCreatedValueList()
+	{
+		return valuelist;
 	}
 }

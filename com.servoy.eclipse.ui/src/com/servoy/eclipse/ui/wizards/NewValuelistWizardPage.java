@@ -51,6 +51,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -95,15 +96,16 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 
 	private void retrieveCurrentSolutionNames()
 	{
-		ServoyProject projects[] = servoyModel.getModulesOfActiveProject();
+		Solution[] modules = activeSolutionName != null ? servoyModel.getServoyProject(activeSolutionName).getModules()
+			: servoyModel.getActiveProject().getModules();
 
 		List<String> list = new ArrayList<String>();
 
-		for (ServoyProject project : projects)
+		for (Solution sol : modules)
 		{
-			if (list.contains(project.getSolution().getName()) == false)
+			if (list.contains(sol.getName()) == false)
 			{
-				list.add(project.getSolution().getName());
+				list.add(sol.getName());
 			}
 		}
 
@@ -265,7 +267,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 
 		try
 		{
-			validator.checkName(valueListName, 0, null, false);
+			validator.checkName(valueListName, 0, searchContext, false);
 		}
 		catch (RepositoryException e)
 		{
@@ -316,7 +318,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		public void setSearchText(String s)
 		{
 			// ensure that the value can be used for matching
-			this.searchString = s + ".*";
+			this.searchString = "(?i)" + s + ".*";
 		}
 
 		/*

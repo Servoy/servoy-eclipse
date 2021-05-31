@@ -18,30 +18,20 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.dialogs.ModuleListValueListSelectionDialog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.Pair;
 
 /**
  * Action to create a new valuelist depending on the selection of a solution view.
@@ -87,53 +77,14 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 		{
 			Solution realSolution = (Solution)((IPersist)node.getRealObject()).getRootObject();
 
-			Pair<String, String> name = askValueListName(viewer.getViewSite().getShell(), realSolution.getName());
-			if (name != null)
-			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight());
-				Solution editingSolution = servoyProject.getEditingSolution();
-				if (editingSolution == null)
-				{
-					return;
-				}
-				createValueList(name.getLeft(), editingSolution);
-			}
-		}
-	}
+			NewValueListWizard newValueListWizard = new NewValueListWizard(realSolution.getName());
 
-	public static Pair<String, String> askValueListName(Shell shell, String solutionName)
-	{
+			IStructuredSelection selection = StructuredSelection.EMPTY;
+			newValueListWizard.init(PlatformUI.getWorkbench(), selection);
 
-		ModuleListValueListSelectionDialog nameDialog = new ModuleListValueListSelectionDialog(shell,
-			"Select a module for the valuelist and also supply value list name", "Supply value list name:");
-		nameDialog.setInitialSelections(solutionName);
-		int res = nameDialog.open();
-		if (res == Window.OK)
-		{
-			return new Pair<String, String>(nameDialog.getValueListName(), nameDialog.getFirstResult().toString());
+			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), newValueListWizard);
+			dialog.create();
+			dialog.open();
 		}
-		return null;
-	}
-
-	public static ValueList createValueList(String valueListName, Solution editingSolution)
-	{
-		try
-		{
-			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ValueList vl = editingSolution.getValueList(valueListName);
-			if (vl == null)
-			{
-				IValidateName validator = servoyModel.getNameValidator();
-				vl = editingSolution.createNewValueList(validator, valueListName);
-				vl.setAddEmptyValue(IValueListConstants.EMPTY_VALUE_NEVER);
-			}
-			EditorUtil.openValueListEditor(vl);
-			return vl;
-		}
-		catch (RepositoryException e)
-		{
-			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error", e.getMessage());
-		}
-		return null;
 	}
 }

@@ -17,12 +17,14 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider;
@@ -33,12 +35,10 @@ import com.servoy.eclipse.ui.editors.ListSelectCellEditor.ListSelectControlFacto
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
+import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -87,14 +87,15 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 						@Override
 						protected IPersist createPersist(Solution editingSolution)
 						{
-							ValueList val = null;
-							Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), null);
-							if (name != null)
-							{
-								val = NewValueListAction.createValueList(name.getLeft(),
-									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight()).getEditingSolution());
-							}
-							return val;
+							NewValueListWizard newValueListWizard = new NewValueListWizard(flattenedEditingSolution.getName());
+
+							IStructuredSelection selection = StructuredSelection.EMPTY;
+							newValueListWizard.init(PlatformUI.getWorkbench(), selection);
+
+							WizardDialog valDialog = new WizardDialog(dialog.getShell(), newValueListWizard);
+							valDialog.create();
+							valDialog.open();
+							return newValueListWizard.getCreatedValueList();
 						}
 					};
 					buttons.setDialog(dialog);
