@@ -426,19 +426,19 @@
 									<target>
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 									</target>
 								</configuration>

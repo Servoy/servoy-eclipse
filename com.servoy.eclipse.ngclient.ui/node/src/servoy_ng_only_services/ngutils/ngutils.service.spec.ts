@@ -1,10 +1,8 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
-
 import { NGUtilsService } from './ngutils.service';
 
-import {WindowRefService} from '@servoy/public';
+import {SessionStorageService, WindowRefService} from '@servoy/public';
 
 import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler';
 
