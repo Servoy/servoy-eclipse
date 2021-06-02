@@ -32,7 +32,6 @@ import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loadi
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 
 import { LocaleService } from './locale.service';
-import { NGGridsModule } from '../nggrids/nggrids.module';
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
@@ -65,7 +64,6 @@ import {MainRoutingModule} from './main-routing.module';
         AllComponentsModule,
         AllServicesModules,
         ServoyPublicModule,
-        NGGridsModule,
         MainRoutingModule
     ],
     providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
