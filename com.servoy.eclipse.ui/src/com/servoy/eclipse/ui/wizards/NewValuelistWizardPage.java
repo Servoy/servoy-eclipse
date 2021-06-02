@@ -243,11 +243,11 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
-
 			@Override
 			public void selectionChanged(SelectionChangedEvent event)
 			{
 				selectedSolutionName = tableViewer.getSelection().toString();
+				setPageComplete(validatePage());
 			}
 		});
 
@@ -287,6 +287,10 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		else if (!IdentDocumentValidator.isJavaIdentifier(valuelistNameText.getText()))
 		{
 			error = "Invalid relation name";
+		}
+		else if (((IStructuredSelection)tableViewer.getSelection()).isEmpty())
+		{
+			error = "Select a solution";
 		}
 		else
 		{
