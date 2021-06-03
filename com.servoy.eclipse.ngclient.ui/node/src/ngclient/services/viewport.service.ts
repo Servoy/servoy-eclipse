@@ -8,8 +8,8 @@ import { SabloUtils } from '../../sablo/websocket.service';
 })
 export class ViewportService {
   public static readonly ROW_ID_COL_KEY = '_svyRowId';
-
-  private static readonly CHANGED_IN_LINKED_PROPERTY = 9;
+  private static readonly ROW_ID_COL_KEY_PARTIAL_UPDATE = "_svyRowId_p"; // same as $foundsetTypeConstants.ROW_ID_COL_KEY but sent when the foundset
+  // property is sending just a partial update, but some of the columns that did changed are also pks so they do affect the pk hash
 
   constructor(private converterService: ConverterService) { }
 
@@ -46,7 +46,7 @@ export class ViewportService {
 
     // apply them one by one
     for (let i = 0; i < rowUpdates.length; i++) {
-      const rowUpdate = rowUpdates[i];
+      let rowUpdate = rowUpdates[i];
       if (rowUpdate.type === ChangeType.ROWS_CHANGED) {
         for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
           let dpName: string;
@@ -57,7 +57,8 @@ export class ViewportService {
           // TODO that "null" should be a changehandler, where do we get that here?
           if (rowConversionUpdate) rowUpdate.rows[relIdx] = this.converterService.convertFromServerToClient(rowUpdate.rows[relIdx], rowConversionUpdate, viewPort[j], propertyContext);
           // if the rowUpdate contains '_svyRowId' then we know it's the entire/complete row object
-          if (simpleRowValue || rowUpdate.rows[relIdx]._svyRowId) {
+          if (simpleRowValue || rowUpdate.rows[relIdx]._svyRowId) { // because of this _svyRowId check we also have ViewportService.ROW_ID_COL_KEY_PARTIAL_UPDATE
+                                                                    // that actually updates the same thing but is not a full update
             viewPort[j] = rowUpdate.rows[relIdx];
             if (rowPrototype) viewPort[j] = SabloUtils.cloneWithDifferentPrototype(viewPort[j], rowPrototype);
 
@@ -75,7 +76,7 @@ export class ViewportService {
             // eslint-disable-next-line guard-for-in
             for (dpName in rowUpdate.rows[relIdx]) {
               // update value
-              viewPort[j][dpName] = rowUpdate.rows[relIdx][dpName];
+              viewPort[j][dpName === ViewportService.ROW_ID_COL_KEY_PARTIAL_UPDATE ? "_svyRowId" : dpName] = rowUpdate.rows[relIdx][dpName];
 
               if (rowConversionUpdate) {
                 // update conversion info
@@ -92,8 +93,9 @@ export class ViewportService {
           }
         }
       } else if (rowUpdate.type === ChangeType.ROWS_INSERTED) {
-        if (rowUpdateConversions && rowUpdateConversions[i])
-            this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], null,propertyContext);
+        // apply conversions
+        if (rowUpdateConversions && rowUpdateConversions[i]) rowUpdate = this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], undefined, propertyContext);
+
         if (internalState.viewportConversions === undefined) {
           internalState.viewportConversions = [];
         }
@@ -101,31 +103,27 @@ export class ViewportService {
         for (let j = rowUpdate.rows.length - 1; j >= 0; j--) {
           viewPort.splice(rowUpdate.startIndex, 0, rowUpdate.rows[j]);
           if (rowPrototype) rowUpdate.rows[j] = SabloUtils.cloneWithDifferentPrototype(rowUpdate.rows[j], rowPrototype);
-          if (rowUpdateConversions && rowUpdateConversions[i]) {
-            internalState.viewportConversions[rowUpdate.startIndex + j] = (rowUpdateConversions && rowUpdateConversions[i] && rowUpdateConversions[i].rows) ?
-             rowUpdateConversions[i].rows[j] : undefined;
+
+          if (internalState.viewportConversions.length > rowUpdate.startIndex) {
+            // insert conversion at the right location and shift old ones after insert index
+            internalState.viewportConversions.splice(rowUpdate.startIndex, 0,
+                    rowUpdateConversions && rowUpdateConversions[i] &&  rowUpdateConversions[i].rows ? rowUpdateConversions[i].rows[j] : undefined);
+          } else if (rowUpdateConversions && rowUpdateConversions[i] &&  rowUpdateConversions[i].rows && rowUpdateConversions[i].rows[j]) {
+            internalState.viewportConversions[rowUpdate.startIndex] = rowUpdateConversions[i].rows[j];
           }
         }
         rowUpdate.endIndex = rowUpdate.startIndex + rowUpdate.rows.length - 1; // prepare rowUpdate.endIndex for listener notifications
       } else if (rowUpdate.type === ChangeType.ROWS_DELETED) {
-        if (rowUpdateConversions && rowUpdateConversions[i])
-            this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], null, propertyContext);
-
-        const oldLength = viewPort.length;
+        const numberOfDeletedRows = rowUpdate.endIndex - rowUpdate.startIndex + 1;
         if (internalState.viewportConversions) {
           // delete conversion info for deleted rows
-          for (let j = rowUpdate.startIndex; j < oldLength; j++) {
-            if (j + (rowUpdate.endIndex - rowUpdate.startIndex) < oldLength) {
-              internalState.viewportConversions[j] = internalState.viewportConversions[j + (rowUpdate.endIndex - rowUpdate.startIndex)];
-            } else {
-              delete internalState.viewportConversions[j];
-            }
+          if (internalState.viewportConversions.length > rowUpdate.startIndex) {
+            // delete conversion info for deleted rows and shift left what is after deletion
+            internalState.viewportConversions.splice(rowUpdate.startIndex, Math.min(numberOfDeletedRows, internalState.viewportConversions.length - rowUpdate.startIndex));
           }
         }
-        viewPort.splice(rowUpdate.startIndex, rowUpdate.endIndex - rowUpdate.startIndex + 1);
-      } else if (rowUpdate.type === ViewportService.CHANGED_IN_LINKED_PROPERTY) {
-        // just prepare it for the foundset change listener; components will want to handle this type of change as well so we should notify them when it happens
-        rowUpdate.type = ChangeType.ROWS_CHANGED;
+
+        viewPort.splice(rowUpdate.startIndex, numberOfDeletedRows);
       }
       delete rowUpdate.rows; // prepare rowUpdate for listener notifications
     }
