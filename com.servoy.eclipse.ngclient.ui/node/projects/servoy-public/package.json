@@ -1,11 +1,12 @@
 {
   "name": "@servoy/public",
-  "version": "2021.6.0-rc5",
+  "version": "2021.6.0-rc6",
   "peerDependencies": {
     "@angular/common": ">=12",
     "@angular/core": ">=12"
   },
   "dependencies": {
+    "luxon": "^1.27.0",
     "tslib": "*"
   },
   "license": "MIT",

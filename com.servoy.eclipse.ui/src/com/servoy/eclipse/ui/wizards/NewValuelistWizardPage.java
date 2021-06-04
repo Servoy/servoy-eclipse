@@ -236,6 +236,10 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 			{
 				filter.setSearchText(solutionNamePattern.getText());
 				tableViewer.refresh();
+				if (tableViewer.getSelection().isEmpty() && tableViewer.getTable().getItemCount() != 0)
+				{
+					tableViewer.setSelection(new StructuredSelection(tableViewer.getTable().getItem(0)));
+				}
 			}
 		});
 
@@ -264,7 +268,6 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		{
 			searchContext = new ValidatorSearchContext(servoyProject.getEditingSolution(), IRepository.VALUELISTS);
 		}
-
 		try
 		{
 			validator.checkName(valueListName, 0, searchContext, false);
@@ -347,6 +350,4 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		}
 
 	}
-
-
 }
