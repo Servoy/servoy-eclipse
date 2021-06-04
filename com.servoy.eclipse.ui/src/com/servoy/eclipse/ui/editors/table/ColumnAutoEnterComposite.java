@@ -472,7 +472,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_DATETIME));
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_SERVER_DATETIME));
 		}
-		if (type == IColumnTypes.TEXT || column.isUUID())
+		if (type == IColumnTypes.TEXT && !column.isUUID())
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERNAME));
 		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER || column.isUUID())
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERUID));
@@ -481,7 +481,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_DATETIME));
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_SERVER_DATETIME));
 		}
-		if (type == IColumnTypes.TEXT || column.isUUID())
+		if (type == IColumnTypes.TEXT && !column.isUUID())
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERNAME));
 		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER || column.isUUID())
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERUID));
