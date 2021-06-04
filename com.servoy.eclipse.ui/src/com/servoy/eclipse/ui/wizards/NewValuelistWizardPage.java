@@ -41,6 +41,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -236,10 +237,13 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 			{
 				filter.setSearchText(solutionNamePattern.getText());
 				tableViewer.refresh();
-				if (tableViewer.getSelection().isEmpty() && tableViewer.getTable().getItemCount() != 0)
-				{
-					tableViewer.setSelection(new StructuredSelection(tableViewer.getTable().getItem(0)));
-				}
+				Display.getDefault().asyncExec(() -> {
+					Object elementAt = tableViewer.getElementAt(0);
+					if (elementAt != null)
+					{
+						tableViewer.setSelection(new StructuredSelection(elementAt));
+					}
+				});
 			}
 		});
 
@@ -298,7 +302,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		else
 		{
 			String valName = valuelistNameText.getText();
-			String solName = ((IStructuredSelection)tableViewer.getSelection()).toList().get(0).toString();
+			String solName = ((IStructuredSelection)tableViewer.getSelection()).getFirstElement().toString();
 			String searchResult = valueListNameOk(valName, solName);
 			if (!searchResult.equals(""))
 			{
