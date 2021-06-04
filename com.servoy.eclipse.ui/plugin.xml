@@ -590,7 +590,6 @@
                style="push"
                tooltip="Open Servoy Forum">
          </action> 
-         <!--
           <action
             class="com.servoy.eclipse.ui.PostOnTheForumAction"
             icon="icons/forum.png"
@@ -601,7 +600,6 @@
             style="push"
             tooltip="Post in the forum directly from the developer.">
       </action>        
-      -->
       </actionSet>
       <!--<actionSet id="com.servoy.eclipse.ui.marketplace"
             label="Marketplace"

@@ -20,10 +20,13 @@ package com.servoy.eclipse.ui;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -40,6 +43,8 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -99,10 +104,20 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			super(parentShell);
 		}
 
+		private class ContentLengthHeaderRemover implements HttpRequestInterceptor
+		{
+			@Override
+			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException
+			{
+				request.removeHeaders(HTTP.CONTENT_LEN);// fighting org.apache.http.protocol.RequestContent's ProtocolException("Content-Length header already present");
+			}
+		}
+
 		public boolean post()
 		{
 			CookieStore httpCookieStore = new BasicCookieStore();
-			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).build())
+			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).addInterceptorFirst(new ContentLengthHeaderRemover())
+				.build())
 			{
 				String sid = getSID(client);
 				if (sid == null || !login(client, sid)) return false;
@@ -130,34 +145,48 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 				requestEntity.addTextBody("poll_length", "0");
 				HttpEntity httpEntity = requestEntity.build();
 				httpPost.setEntity(httpEntity);
-				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
-				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
-				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
-				//TODO sec-ch-ua header?
-				httpPost.addHeader("sec-ch-ua-mobile", "?0");
-				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
-				httpPost.addHeader("Origin", "https://forum.servoy.com");
-				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
-				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
+
 				httpPost.addHeader(HttpHeaders.ACCEPT,
 					"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
-				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
-				httpPost.addHeader("Sec-Fetch-User", "?1");
-				httpPost.addHeader("Sec-Fetch-Dest", "document");
-				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
 				httpPost.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
-				String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-				httpPost.addHeader("Cookie", cookies);
+				httpPost.addHeader(HttpHeaders.ACCEPT_LANGUAGE, "ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7");
+				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
+				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
+				httpPost.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(httpEntity.getContentLength()));
+				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
+				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
+				//String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+				httpPost.addHeader("Cookie",
+					"_ga=GA1.2.755388126.1618211851; style_cookie=printonly; __utmc=134421478; __utmz=134421478.1621605136.2.2.utmcsr=support.servoy.com|utmccn=(referral)|utmcmd=referral|utmcct=/; ajs_user_id=\"1215447197c7034c75c99165ffd3ad77b65fe9fa\"; ajs_anonymous_id=\"54ca35ce-eea6-4066-9dfb-23b3ab040a08\"; phpbb3_5o7yg_k=; __utma=134421478.755388126.1618211851.1622716183.1622814302.20; __utmt=1; phpbb3_5o7yg_u=54779; phpbb3_5o7yg_sid=" +
+						sid + "; __utmb=134421478.3.10.1622814302");
+				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
+				httpPost.addHeader("Origin", "https://forum.servoy.com");
+				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
+				httpPost.addHeader("sec-ch-ua", "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Google Chrome\";v=\"90\"");
+				httpPost.addHeader("sec-ch-ua-mobile", "?0");
+				httpPost.addHeader("Sec-Fetch-Dest", "document");
+				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
+				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
+				httpPost.addHeader("Sec-Fetch-User", "?1");
+				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
+				httpPost.addHeader(HttpHeaders.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36");
+
+				//TODO remove printing the headers and content
+				for (Header h : httpPost.getAllHeaders())
+				{
+					System.out.println(h.getName() + ": " + h.getValue());
+				}
+				System.out.println(EntityUtils.toString(httpEntity));
 
 				CloseableHttpResponse response = client.execute(httpPost);
-//				HttpEntity respEntity = response.getEntity();
-//				if (respEntity != null)//TODO rem
-//				{
-//					String content = EntityUtils.toString(respEntity);
-//					System.out.println(content); //TODO rem
-//					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
-//				}
+				HttpEntity respEntity = response.getEntity();
+				if (respEntity != null)//TODO rem
+				{
+					String content = EntityUtils.toString(respEntity);
+					System.out.println(content); //TODO rem
+					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
+				}
 				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
 				{
 					//TODO button for showing the post on the forum
@@ -180,8 +209,11 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore) throws ClientProtocolException, IOException
 		{
 			HttpGet httpGet = new HttpGet(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-			httpGet.addHeader("Cookie", cookies);
+//			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+//			httpGet.addHeader("Cookie", cookies);
+			httpGet.addHeader("Cookie",
+				"_ga=GA1.2.755388126.1618211851; style_cookie=printonly; __utmc=134421478; __utmz=134421478.1621605136.2.2.utmcsr=support.servoy.com|utmccn=(referral)|utmcmd=referral|utmcct=/; ajs_user_id=\"1215447197c7034c75c99165ffd3ad77b65fe9fa\"; ajs_anonymous_id=\"54ca35ce-eea6-4066-9dfb-23b3ab040a08\"; phpbb3_5o7yg_k=; __utma=134421478.755388126.1618211851.1622716183.1622814302.20; __utmt=1; phpbb3_5o7yg_u=54779; phpbb3_5o7yg_sid=" +
+					sid + "; __utmb=134421478.3.10.1622814302");
 			httpGet.addHeader("Connection", "keep-alive");
 			HttpResponse httpresponse = client.execute(httpGet);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
@@ -212,10 +244,6 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			httpPost.addHeader("Connection", "keep-alive");
 			httpPost.addHeader("referer", "https://forum.servoy.com/index.php?sid=" + sid);
 			HttpResponse httpresponse = client.execute(httpPost);
-
-			//TODO remove
-//			System.out.println(EntityUtils.toString(httpresponse.getEntity()));
-//			System.out.println(httpresponse.getStatusLine());
 
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
@@ -330,12 +358,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		@Override
 		protected void okPressed()
 		{
-			Display.getDefault().asyncExec(() -> {
-				if (post())
-				{
-					super.okPressed();
-				}
-			});
+			if (post())
+			{
+				super.okPressed();
+			}
 		}
 
 
