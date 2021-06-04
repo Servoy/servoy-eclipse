@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -36,6 +37,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -119,10 +121,11 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).addInterceptorFirst(new ContentLengthHeaderRemover())
 				.build())
 			{
-				String sid = getSID(client);
-				if (sid == null || !login(client, sid)) return false;
+				HttpClientContext context = HttpClientContext.create();
+				String sid = getSID(client, context);
+				if (sid == null || !login(client, sid, context)) return false;
 
-				String form_token = getFormToken(client, sid, httpCookieStore);
+				String form_token = getFormToken(client, sid, httpCookieStore, context);
 
 				HttpPost httpPost = new HttpPost(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
 
@@ -155,10 +158,8 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 				httpPost.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(httpEntity.getContentLength()));
 				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
 				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
-				//String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-				httpPost.addHeader("Cookie",
-					"_ga=GA1.2.755388126.1618211851; style_cookie=printonly; __utmc=134421478; __utmz=134421478.1621605136.2.2.utmcsr=support.servoy.com|utmccn=(referral)|utmcmd=referral|utmcct=/; ajs_user_id=\"1215447197c7034c75c99165ffd3ad77b65fe9fa\"; ajs_anonymous_id=\"54ca35ce-eea6-4066-9dfb-23b3ab040a08\"; phpbb3_5o7yg_k=; __utma=134421478.755388126.1618211851.1622716183.1622814302.20; __utmt=1; phpbb3_5o7yg_u=54779; phpbb3_5o7yg_sid=" +
-						sid + "; __utmb=134421478.3.10.1622814302");
+				String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+				httpPost.addHeader("Cookie", cookies);
 				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
 				httpPost.addHeader("Origin", "https://forum.servoy.com");
 				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
@@ -179,7 +180,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 				}
 				System.out.println(EntityUtils.toString(httpEntity));
 
-				CloseableHttpResponse response = client.execute(httpPost);
+				CloseableHttpResponse response = client.execute(httpPost, context);
 				HttpEntity respEntity = response.getEntity();
 				if (respEntity != null)//TODO rem
 				{
@@ -206,16 +207,14 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		}
 
 
-		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore) throws ClientProtocolException, IOException
+		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore, HttpClientContext context)
+			throws ClientProtocolException, IOException
 		{
 			HttpGet httpGet = new HttpGet(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-//			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-//			httpGet.addHeader("Cookie", cookies);
-			httpGet.addHeader("Cookie",
-				"_ga=GA1.2.755388126.1618211851; style_cookie=printonly; __utmc=134421478; __utmz=134421478.1621605136.2.2.utmcsr=support.servoy.com|utmccn=(referral)|utmcmd=referral|utmcct=/; ajs_user_id=\"1215447197c7034c75c99165ffd3ad77b65fe9fa\"; ajs_anonymous_id=\"54ca35ce-eea6-4066-9dfb-23b3ab040a08\"; phpbb3_5o7yg_k=; __utma=134421478.755388126.1618211851.1622716183.1622814302.20; __utmt=1; phpbb3_5o7yg_u=54779; phpbb3_5o7yg_sid=" +
-					sid + "; __utmb=134421478.3.10.1622814302");
+			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
+			httpGet.addHeader("Cookie", cookies);
 			httpGet.addHeader("Connection", "keep-alive");
-			HttpResponse httpresponse = client.execute(httpGet);
+			HttpResponse httpresponse = client.execute(httpGet, context);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				setErrorMessage("Cannot connect to the forum. Please try again later.");
@@ -227,7 +226,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			return token;
 		}
 
-		private boolean login(CloseableHttpClient client, String sid) throws StorageException, IOException, ClientProtocolException
+		private boolean login(CloseableHttpClient client, String sid, HttpClientContext context) throws StorageException, IOException, ClientProtocolException
 		{
 			ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
 			ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
@@ -243,7 +242,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			httpPost.setEntity(entity);
 			httpPost.addHeader("Connection", "keep-alive");
 			httpPost.addHeader("referer", "https://forum.servoy.com/index.php?sid=" + sid);
-			HttpResponse httpresponse = client.execute(httpPost);
+			HttpResponse httpresponse = client.execute(httpPost, context);
 
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
@@ -254,10 +253,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		}
 
 
-		private String getSID(CloseableHttpClient client) throws IOException, ClientProtocolException
+		private String getSID(CloseableHttpClient client, HttpClientContext context) throws IOException, ClientProtocolException
 		{
 			HttpGet httpGet = new HttpGet("https://forum.servoy.com/");
-			HttpResponse httpresponse = client.execute(httpGet);
+			HttpResponse httpresponse = client.execute(httpGet, context);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				getShell().setText("Cannot connect to the forum. Please try again later.");
