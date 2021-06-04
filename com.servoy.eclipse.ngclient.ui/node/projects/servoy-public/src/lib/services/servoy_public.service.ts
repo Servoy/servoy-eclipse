@@ -15,6 +15,7 @@ export abstract class ServoyPublicService {
     public abstract generateMediaDownloadUrl(media : string) : string;
     public abstract getUIProperty(key : string) : any;
     public abstract getFormCacheByName(containedForm: string): IFormCache;
+    public abstract sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) : void;
     public getLocaleNumberSymbol(symbol: NumberSymbol): string {
         return getLocaleNumberSymbol(this.getLocale(), symbol);
     }

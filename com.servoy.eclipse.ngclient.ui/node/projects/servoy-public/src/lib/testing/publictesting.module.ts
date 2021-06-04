@@ -93,6 +93,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public setLocaleNumberSymbol(symbol: string): void {
         this.localeNumberSymbol = symbol;
     }
+    
+    public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+        
+    }
 }
 @NgModule({
     declarations: [
