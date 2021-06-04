@@ -170,11 +170,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						StringBuilder imports = new StringBuilder("// generated imports start\n");
 						StringBuilder services = new StringBuilder("// generated services start\n");
+						StringBuilder providers = new StringBuilder("// generated providers start\n");
 						StringBuilder modules = new StringBuilder("// generated modules start\n");
 						ng2Services.keySet().forEach(service -> {
 							if (service.getNG2Config().has("serviceName"))
 							{
-								// no providers, all services should be providedin:root
 								// import the service
 								imports.append("import { ");
 								String serviceName = service.getNG2Config().optString("serviceName");
@@ -188,6 +188,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								services.append(": ");
 								services.append(serviceName);
 								services.append(",\n");
+								// add it to the providers (if it is not a module)
+								if (!"aggridservice".equals(service.getPackageName()))
+								{
+									providers.append(serviceName);
+									providers.append(",\n");
+								}
 								// add it to the modules
 								if (service.getNG2Config().has("moduleName"))
 								{
@@ -198,12 +204,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						imports.append("// generated imports end");
 						services.append("// generated services end");
+						providers.append("// generated providers end");
 						modules.append("// generated modules end");
 
 						String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allservices.service.ts"), "UTF-8");
 						String old = content;
 						content = replace(content, "// generated imports start", "// generated imports end", imports);
 						content = replace(content, "// generated services start", "// generated services end", services);
+						content = replace(content, "// generated providers start", "// generated providers end", providers);
 						content = replace(content, "// generated modules start", "// generated modules end", modules);
 						if (!old.equals(content))
 						{

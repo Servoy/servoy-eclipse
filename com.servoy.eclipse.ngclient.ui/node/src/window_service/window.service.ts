@@ -3,7 +3,6 @@ import { DOCUMENT } from '@angular/common';
 
 import { ShortcutService } from './shortcut.service';
 import { PopupMenuService, Popup } from './popupmenu.service';
-import { ServiceChangeHandler } from '../sablo/util/servicechangehandler';
 import { PopupFormService, PopupForm, Callback } from '../ngclient/services/popupform.service';
 import { LoggerFactory, LoggerService, ServoyPublicService } from '@servoy/public';
 
@@ -19,7 +18,6 @@ export class WindowService {
         private popupMenuService: PopupMenuService,
         private servoyService: ServoyPublicService,
         @Inject(DOCUMENT) private doc: Document,
-        private changeHandler: ServiceChangeHandler,
         private popupFormService: PopupFormService,
         logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('WindowService');
@@ -117,7 +115,7 @@ export class WindowService {
 
                     this.popupMenuService.initClosePopupHandler(() => {
                         this._popupMenuShowCommand = null;
-                        this.changeHandler.changed('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
+                        this.servoyService.sendServiceChanges('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     });
                     if (this._popupMenuShowCommand.elementId) {
                         const element = this.doc.getElementById(this._popupMenuShowCommand.elementId);

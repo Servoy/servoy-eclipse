@@ -56,6 +56,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     getFormCacheByName(containedForm: string): IFormCache {
         return this.formService.getFormCacheByName(containedForm);
     }
-
+    sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+        this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
+    }
 }
 
