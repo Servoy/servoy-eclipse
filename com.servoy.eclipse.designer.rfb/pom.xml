@@ -8,7 +8,7 @@
 		<artifactId>servoy-eclipse</artifactId>
 		<version>2021.9.0.3700_rc</version>
 	</parent>
-	<artifactId>com.servoy.eclipse.designer.wpm</artifactId>
+	<artifactId>com.servoy.eclipse.designer.rfb</artifactId>
 	<version>2021.9.0.3700_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>

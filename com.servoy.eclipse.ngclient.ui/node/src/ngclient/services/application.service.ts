@@ -3,14 +3,13 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service';
 
-import {LoggerFactory, LoggerService, WindowRefService} from '@servoy/public';
+import {LoggerFactory, LoggerService, WindowRefService, LocalStorageService} from '@servoy/public';
 
 import {SabloService} from '../../sablo/sablo.service';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component';
-import { LocalStorageService } from '../../sablo/webstorage/localstorage.service';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
 
@@ -222,7 +221,14 @@ export class ApplicationService {
             // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
             return 'resources/upload/' +  this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
     }
-
+    
+    public generateMediaDownloadUrl(media : string) : string{
+        if (media && media.indexOf('media://') === 0) {
+            media = media.substring(8);
+        }
+        return 'resources/fs/' + this.getSolutionName() + media;    
+    }
+    
     private  showDefaultLoginWindow() {
         this.modalService.open(DefaultLoginWindowComponent, { backdrop: 'static' });
     }

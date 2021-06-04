@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LocalStorageService } from '../../../sablo/webstorage/localstorage.service';
+import { LocalStorageService} from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 

@@ -414,7 +414,7 @@ public class TutorialView extends ViewPart
 					@Override
 					public void handleEvent(Event event)
 					{
-						String url = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/tutorial/" + id;
+						String url = REST_TUTORIALS_URL + "/tutorial/" + id + "?servoyVersion=" + ClientVersion.getPureVersion();
 						loadDataModel(false, url);
 						createTutorialView(fistParent, false);
 					}

@@ -8,7 +8,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2021.6.0.3680_rc</version>
+	<version>2021.9.0.3700_rc</version>
 	<properties>
 		<tycho.version>2.3.0</tycho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -426,19 +426,19 @@
 									<target>
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.parent.version}" replace="${newVersion}"
+											match="${project.version}" replace="${newVersion}"
 											byline="true" />
 									</target>
 								</configuration>

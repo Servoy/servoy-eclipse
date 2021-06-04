@@ -13,10 +13,7 @@ import { WindowService as WindowPlugin} from '../window_service/window.service';
 // TODO move to generated
 import { WindowServiceModule} from '../window_service/windowservice.module';
 import { DialogModule } from '../dialogservice/dialog.module';
-import { KeyListener } from '../keylistener/keylistener.service';
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
-import { DatagridService } from '../nggrids/datagrid/datagrid.service';
-import { PowergridService } from '../nggrids/powergrid/powergrid.service';
 import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
@@ -40,10 +37,7 @@ export class AllServiceService implements ServiceProvider {
         private $sabloService: SabloService,
         // TODO move to generated
         private ngclientutils: NGUtilsService,
-        private keyListener: KeyListener,
         private window: WindowPlugin,
-        private ngDataGrid: DatagridService,
-        private ngPowerGrid: PowergridService,
         private dialogs: DialogService,
         // generated services start
         // generated services end
@@ -65,9 +59,6 @@ export class AllServiceService implements ServiceProvider {
     providers: [AllServiceService, ApplicationService, WindowService, SessionService,
                 // TODO move to generated
                 NGUtilsService,
-                KeyListener,
-                DatagridService,
-                PowergridService,
                 // generated providers start
                 // generated providers end
                 ClientFunctionService

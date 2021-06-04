@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '@servoy/public';
+import { Deferred, SessionStorageService, LoggerFactory, LoggerService } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
-import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
 
 import numbro from 'numbro';
 import { Settings } from 'luxon';
 
 import { I18NProvider } from './services/i18n_provider.service';
-import { LoggerFactory, LoggerService } from '@servoy/public';
 
 @Injectable({
   providedIn: 'root'

@@ -138,7 +138,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								JSONObject ng2Config = spec.getNG2Config();
 								String packageName = ng2Config.optString("packageName");
 								IPackageReader packageReader = entry.getValue();
-								String entryPoint = ng2Config.optString("entryPoint");
+								String entryPoint = ng2Config.optString("entryPoint", null);
 								String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
 								if (pck != null)
 								{
@@ -182,15 +182,24 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								imports.append(" } from '");
 								imports.append(service.getNG2Config().optString("packageName"));
 								imports.append("';\n");
-								// add it to the service declartions in the constructor
+								// add it to the service declarations in the constructor
 								services.append("private ");
 								services.append(service.getName());
 								services.append(": ");
 								services.append(serviceName);
 								services.append(",\n");
 								// add it to the providers (if it is not a module)
-								providers.append(serviceName);
-								providers.append(",\n");
+								if (!"aggridservice".equals(service.getPackageName()))
+								{
+									providers.append(serviceName);
+									providers.append(",\n");
+								}
+								// add it to the modules
+								if (service.getNG2Config().has("moduleName"))
+								{
+									modules.append(service.getNG2Config().getString("moduleName"));
+									modules.append(",\n");
+								}
 							}
 						});
 						imports.append("// generated imports end");
@@ -257,10 +266,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
-						allComponentsModule
-							.append("import { ServoyBootstrapExtraComponentsModule } from '../bootstrapextracomponents/servoybootstrapextra.module';\n");
-						allComponentsModule.append("import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';\n");
-						allComponentsModule.append("import { GoogleMapsModule } from '../googlemaps/googlemaps.module';\n");
 						// end
 
 						allComponentsModule.append("@NgModule({\n imports: [\n");
@@ -271,9 +276,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("GoogleMapsModule,\n");
-						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ],\n exports: [\n");
 						componentSpecToReader.keySet().forEach(spec -> {
@@ -282,9 +284,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						// static list for now
 						allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-						allComponentsModule.append("ServoyBootstrapExtraComponentsModule,\n");
-						allComponentsModule.append("GoogleMapsModule,\n");
-						allComponentsModule.append("ServoyExtraComponentsModule\n");
 						// end
 						allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 						String current = allComponentsModule.toString();
@@ -485,19 +484,20 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							Debug.error(e);
 						}
 					}
+
+					// check for prerelease (npm uses x.y.z-rc1 manifest: x.y.z.rc1)
+					String[] split = packageVersion.split("\\.");
+					if (split.length == 4)
+					{
+						packageVersion = split[0] + '.' + split[1] + '.' + split[2] + '-' + split[3];
+					}
+					String installedVersion = dependencies.optString(packageName);
+					if (!installedVersion.contains(packageVersion))
+					{
+						return packageName + '@' + packageVersion;
+					}
 				}
 
-				// check for prerelease (npm uses x.y.z-rc1 manifest: x.y.z.rc1)
-				String[] split = packageVersion.split("\\.");
-				if (split.length == 4)
-				{
-					packageVersion = split[0] + '.' + split[1] + '.' + split[2] + '-' + split[3];
-				}
-				String installedVersion = dependencies.optString(packageName);
-				if (!installedVersion.contains(packageVersion))
-				{
-					return packageName + '@' + packageVersion;
-				}
 				return null;
 			}
 

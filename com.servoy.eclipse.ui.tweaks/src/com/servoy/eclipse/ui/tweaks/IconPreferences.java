@@ -31,6 +31,7 @@ public class IconPreferences
 
 	private static IconPreferences instance;
 	protected final IEclipsePreferences eclipsePreferences;
+	private boolean changed = false;
 
 	private static final String USE_DARK_THEME_ICONS_SETTING = "useDarkThemeIcons";
 	public static final boolean USE_DARK_THEME_ICONS_DEFAULT = false;
@@ -53,7 +54,13 @@ public class IconPreferences
 
 	public void setUseDarkThemeIcons(boolean value)
 	{
+		changed = value != getUseDarkThemeIcons();
 		eclipsePreferences.putBoolean(USE_DARK_THEME_ICONS_SETTING, value);
+	}
+
+	public boolean isChanged()
+	{
+		return changed;
 	}
 
 	public void save()
@@ -71,5 +78,16 @@ public class IconPreferences
 	public boolean getUseDarkThemeIcons()
 	{
 		return eclipsePreferences.getBoolean(USE_DARK_THEME_ICONS_SETTING, USE_DARK_THEME_ICONS_DEFAULT);
+	}
+
+	public void save(boolean flushChanged)
+	{
+		save();
+		if (flushChanged) changed = false;
+	}
+
+	public void flushChanged()
+	{
+		changed = false;
 	}
 }
