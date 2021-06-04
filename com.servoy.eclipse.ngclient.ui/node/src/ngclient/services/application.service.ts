@@ -228,6 +228,14 @@ export class ApplicationService {
         }
         return 'resources/fs/' + this.getSolutionName() + media;    
     }
+
+    public setClipboardContent(content: string) : void {
+        this.windowRefService.nativeWindow.navigator.clipboard.writeText(content);
+    }
+
+    public getClipboardContent() : Promise<string> {
+        return this.windowRefService.nativeWindow.navigator.clipboard.readText();
+    }
     
     private  showDefaultLoginWindow() {
         this.modalService.open(DefaultLoginWindowComponent, { backdrop: 'static' });
