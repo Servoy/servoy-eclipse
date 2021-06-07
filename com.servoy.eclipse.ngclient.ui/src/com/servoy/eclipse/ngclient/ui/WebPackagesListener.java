@@ -60,6 +60,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class WebPackagesListener implements ILoadedNGPackagesListener
 {
+	private static boolean SOURCE_DEBUG = false;
+
 	private static final AtomicReference<Job> currentJob = new AtomicReference<>();
 
 	public WebPackagesListener()
@@ -337,18 +339,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						command.append("install ");
 						packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
 						command.append("--force");
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
-						try
+						if (SOURCE_DEBUG)
 						{
-							npmCommand.runCommands();
+							writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
+							writeConsole(console, "npm command not done: " + command);
 						}
-						catch (Exception e)
+						else
 						{
-							Debug.error(e);
-						}
-						if (cleanInstall)
-						{
-							npmCommand = Activator.getInstance().createNPMCommand("ci --force");
+							RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
 							try
 							{
 								npmCommand.runCommands();
@@ -357,15 +355,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								Debug.error(e);
 							}
-						}
-						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
-						try
-						{
-							npmCommand.runCommands();
-						}
-						catch (Exception e)
-						{
-							Debug.error(e);
+							if (cleanInstall)
+							{
+								npmCommand = Activator.getInstance().createNPMCommand("ci --force");
+								try
+								{
+									npmCommand.runCommands();
+								}
+								catch (Exception e)
+								{
+									Debug.error(e);
+								}
+							}
+							npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
+							try
+							{
+								npmCommand.runCommands();
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
 						}
 					}
 					writeConsole(console, "Total time to check/install NG2 target folder: " + projectFolder + " is " +
