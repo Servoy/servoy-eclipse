@@ -35,6 +35,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
          this.renderer.listen( this.getFocusElement(), 'focus', () => {
             setTimeout(this.onFocus);
         });
+        // add custom class to the popup, needed by ng-grids (ag-grid) so it can be used in form editors (popups)
+        this.instance.popupClass = 'ag-custom-component-popup';
     }
 
     onFocus = () => {
