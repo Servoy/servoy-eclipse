@@ -89,7 +89,7 @@ public class TutorialView extends ViewPart
 	private static final String URL_DEFAULT_TUTORIALS_LIST = REST_TUTORIALS_URL + "/listtutorials?servoyVersion=" + ClientVersion.getPureVersion();
 	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 	private static final String SVY_BACKGROUND = "svybackground";
-	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) alt=(.+?)/>");
+	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) (alt=(.+?))?\\s*/>");
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -601,7 +601,7 @@ public class TutorialView extends ViewPart
 								{
 									//inline image
 									imgStartIndex.add(Integer.valueOf(i - numberOfHtmlChars));
-									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length() - 2;
+									numberOfHtmlChars += text.substring(i, text.indexOf("/>", i + 3)).length() - 1;
 									int imgStart = text.indexOf("base64,", i + 3) + 7;
 									String imgBase64 = text.substring(imgStart, text.indexOf("\"", imgStart)).trim();
 									images.add(getImageFromEncodedString(imgBase64));
@@ -861,7 +861,7 @@ public class TutorialView extends ViewPart
 				break;
 			}
 		}
-		return copyText.trim().replaceAll(" +", " ");
+		return copyText;//.trim().replaceAll(" +", " ");
 	}
 
 	private String getLoginToken()
