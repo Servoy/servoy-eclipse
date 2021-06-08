@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class RunNPMCommand extends WorkspaceJob
 {
 
 	private final File projectFolder;
-	private final String[] commands;
+	private final List<String> commandArguments;
 	private final File nodePath;
 	private final File npmPath;
 	private Job nextJob;
@@ -62,11 +61,11 @@ public class RunNPMCommand extends WorkspaceJob
 	 * @param projectFolder
 	 * @param commands
 	 */
-	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, String... commands)
+	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
-		super("Execute NPM command: " + Arrays.toString(commands));
+		super("Executing NPM command: " + commandArgsToString(commands));
 		this.familyJob = familyJob;
-		this.commands = commands;
+		this.commandArguments = commands;
 		this.nodePath = nodePath;
 		this.npmPath = npmPath;
 		this.projectFolder = projectFolder;
@@ -80,10 +79,10 @@ public class RunNPMCommand extends WorkspaceJob
 	 * @param projectFolder
 	 * @param commands
 	 */
-	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, String... commands)
+	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
-		super("Execute NPM command: " + Arrays.toString(commands));
-		this.commands = commands;
+		super("Executing NPM command: " + commandArgsToString(commands));
+		this.commandArguments = commands;
 		this.nodePath = nodePath;
 		this.npmPath = npmPath;
 		this.projectFolder = projectFolder;
@@ -122,42 +121,40 @@ public class RunNPMCommand extends WorkspaceJob
 			environment.put(pathkey, path);
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
-			for (String command : commands)
+			if (commandArguments == NGClientConstants.NG_BUILD_COMMAND) // the command that runs the NG build
 			{
-				long time = System.currentTimeMillis();
-				if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
+				ngBuildRunning = true;
+			}
+
+			long time = System.currentTimeMillis();
+			List<String> allCmdLineArgs = new ArrayList<>();
+			allCmdLineArgs.add(nodePath.getCanonicalPath());
+			allCmdLineArgs.add(npmPath.getCanonicalPath());
+			allCmdLineArgs.addAll(commandArguments);
+			allCmdLineArgs.add("--scripts-prepend-node-path");
+			writeConsole(console, "In dir: " + projectFolder);
+			writeConsole(console, "Running npm command:\n" + commandArgsToString(allCmdLineArgs));
+			builder.command(allCmdLineArgs);
+			process = builder.start();
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
+			{
+				String str = null;
+				while ((str = br.readLine()) != null)
 				{
-					ngBuildRunning = true;
-				}
-				List<String> lst = new ArrayList<>();
-				lst.add(nodePath.getCanonicalPath());
-				lst.add(npmPath.getCanonicalPath());
-				lst.addAll(Arrays.asList(command.split(" ")));
-				lst.add("--scripts-prepend-node-path");
-				StringBuilder sb = new StringBuilder();
-				lst.stream().forEach(item -> sb.append(item).append('\n'));
-				writeConsole(console, "Running npm command:\n" + sb);
-				builder.command(lst);
-				process = builder.start();
-				try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
-				{
-					String str = null;
-					while ((str = br.readLine()) != null)
-					{
 //						str = str.replaceAll(".*?m", "");
 //						str = str.replaceAll("\b", "");
-						writeConsole(console, str.trim());
-						// The date, hash and time represents the last output line of the NG build process.
-						// The NG build is finished when this conditions is met.
-						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
-						{
-							ngBuildRunning = false;
-						}
+					writeConsole(console, str.trim());
+					// The date, hash and time represents the last output line of the NG build process.
+					// The NG build is finished when this conditions is met.
+					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					{
+						ngBuildRunning = false;
 					}
 				}
-				process.waitFor();
-				writeConsole(console, "Done running '" + command + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 			}
+			process.waitFor();
+			writeConsole(console,
+				"Done running '" + commandArgsToString(commandArguments) + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 		}
 		finally
 		{
@@ -207,4 +204,10 @@ public class RunNPMCommand extends WorkspaceJob
 	{
 		return ngBuildRunning;
 	}
+
+	public static String commandArgsToString(List<String> command)
+	{
+		return command.stream().reduce("", (a, b) -> a + (b.contains(" ") ? "\"" + b + "\"" : b) + (b.length() > 20 ? "\n" : " "));
+	}
+
 }

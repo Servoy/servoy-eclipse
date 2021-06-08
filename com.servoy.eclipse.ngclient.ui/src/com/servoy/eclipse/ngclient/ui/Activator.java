@@ -3,6 +3,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
@@ -161,10 +163,10 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public RunNPMCommand createNPMCommand(String... commands)
+	public RunNPMCommand createNPMCommand(List<String> commandArguments)
 	{
 		waitForNodeExtraction();
-		return new RunNPMCommand(nodePath, npmPath, projectFolder, commands);
+		return new RunNPMCommand(nodePath, npmPath, projectFolder, commandArguments);
 	}
 
 	public void executeNPMInstall()
@@ -231,7 +233,7 @@ public class Activator extends Plugin
 			// check what happens if there was a debug watch command on the sources..
 
 			// create the production build
-			createNPMCommand("run build").runCommands();
+			createNPMCommand(Arrays.asList("run", "build")).runCommands();
 			// copy the production build
 			File distFolder = new File(projectFolder, "dist/app_prod");
 			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));

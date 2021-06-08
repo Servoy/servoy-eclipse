@@ -20,6 +20,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -335,18 +337,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						// first exeuted npm install with all the packages.
 						// only execute this if a source is changed (should always happens the first time)
 						// or if there are really packages to install.
-						StringBuilder command = new StringBuilder();
-						command.append("install ");
-						packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
-						command.append("--force");
+						List<String> command = new ArrayList<>();
+						command.add("install");
+						packageToInstall.forEach(packageName -> command.add(packageName));
+						command.add("--force");
 						if (SOURCE_DEBUG)
 						{
 							writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
-							writeConsole(console, "npm command not done: " + command);
+							writeConsole(console,
+								"npm command not done: " + RunNPMCommand.commandArgsToString(command));
 						}
 						else
 						{
-							RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
+							RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
 							try
 							{
 								npmCommand.runCommands();
@@ -357,7 +360,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 							if (cleanInstall)
 							{
-								npmCommand = Activator.getInstance().createNPMCommand("ci --force");
+								npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--force"));
 								try
 								{
 									npmCommand.runCommands();
@@ -367,7 +370,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									Debug.error(e);
 								}
 							}
-							npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
+							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 							try
 							{
 								npmCommand.runCommands();
