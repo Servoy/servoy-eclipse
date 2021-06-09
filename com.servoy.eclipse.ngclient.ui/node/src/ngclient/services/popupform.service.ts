@@ -5,9 +5,7 @@ import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable()
 export class PopupFormService {
 
     formPopupComponent: ComponentRef<ServoyFormPopupComponent>;
