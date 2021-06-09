@@ -25,18 +25,15 @@ import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 import { SessionView } from '../servoycore/session-view/session-view';
 import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
-import { ViewportService } from './services/viewport.service';
 
 import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 
-import { LocaleService } from './locale.service';
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
-import { SvyUtilsService } from './utils.service';
 import {MainRoutingModule} from './main-routing.module';
 
 @NgModule( {
