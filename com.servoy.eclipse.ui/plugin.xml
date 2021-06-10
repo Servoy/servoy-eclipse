@@ -393,9 +393,6 @@
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
              name="Servoy Theme Properties">
-         <contentTypeBinding
-               contentTypeId="com.servoy.eclipse.core.resource.media">
-         </contentTypeBinding>
       </editor>
    </extension>
    <extension
