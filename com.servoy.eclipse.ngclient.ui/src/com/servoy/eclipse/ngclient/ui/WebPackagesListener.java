@@ -20,18 +20,20 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -41,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.IOConsoleOutputStream;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
@@ -438,24 +441,68 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						IContainer[] containers = root.findContainersForLocationURI(packageReader.getPackageURL().toURI());
 						if (containers != null && containers.length == 1)
 						{
-							IProject project = containers[0].getProject();
-							IFolder file = project.getFolder(entryPoint);
-							if (file.exists())
+							try
 							{
-								// check/copy the dist folder to the target packages location
-								if (!WebPackagesListener.watchCreated.contains(project.getName()))
+								IProject project = containers[0].getProject();
+								IFolder file = project.getFolder(entryPoint);
+								if (file.exists())
 								{
-									WebPackagesListener.watchCreated.add(project.getName());
 
-								}
+									File projectFolder = Activator.getInstance().getProjectFolder();
+									File packagesFolder = new File(projectFolder, "packages");
+									File packageFolder = new File(packagesFolder, packageName);
 
-								String location = file.getProjectRelativePath().toPortableString();
-								String installedVersion = dependencies.optString(packageName);
-								if (!installedVersion.endsWith(location))
-								{
-									return file.getRawLocation().toString();
+									IFile sourcePath = project.getFile(".sourcepath");
+									JSONObject sourcePathJson = null;
+									File apiFile = null;
+									if (sourcePath.exists())
+									{
+										String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
+										sourcePathJson = new JSONObject(sourcePathContents);
+										file = project.getFolder(sourcePathJson.getString("srcDir"));
+										apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
+
+									}
+
+									String location = packageFolder.getCanonicalPath();
+									// check/copy the dist folder to the target packages location
+									if (!WebPackagesListener.watchCreated.containsKey(project.getName()) || !packageFolder.exists() ||
+										(apiFile != null && !apiFile.exists()))
+									{
+										DirectorySync directorySync = WebPackagesListener.watchCreated.get(project.getName());
+										if (directorySync != null) directorySync.destroy();
+										FileUtils.deleteQuietly(packageFolder);
+										File srcDir = new File(file.getRawLocationURI());
+										FileUtils.copyDirectory(srcDir, packageFolder);
+										WebPackagesListener.watchCreated.put(project.getName(), new DirectorySync(srcDir, packageFolder, null));
+									}
+									// also add if this is a src thing to the ts config
+									if (sourcePathJson != null)
+									{
+										File tsConfig = new File(projectFolder, "tsconfig.json");
+										String tsConfigContents = FileUtils.readFileToString(tsConfig, "UTF8");
+										JSONObject json = new JSONObject(tsConfigContents);
+										JSONObject paths = json.getJSONObject("compilerOptions").getJSONObject("paths");
+										if (!paths.has(packageName))
+										{
+											JSONArray array = new JSONArray();
+											array.put(new File(packageFolder, sourcePathJson.getString("apiFile")).getCanonicalPath());
+											paths.put(packageName, array);
+											FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
+										}
+									}
+
+									String installedVersion = dependencies.optString(packageName);
+									if (!installedVersion.endsWith("packages/" + packageName))
+									{
+										return location;
+									}
 								}
 								return null;
+							}
+							catch (IOException e)
+							{
+								Debug.error(e);
 							}
 						}
 					}
@@ -473,15 +520,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					boolean exists = packageFolder.exists();
 					if (exists)
 					{
-						if (packageFolder.lastModified() < packageReader.getResource().lastModified())
+						File entry = new File(packageFolder, entryPoint);
+						if (packageFolder.lastModified() < packageReader.getResource().lastModified() || !entry.exists())
 						{
-							try
-							{
-								FileUtils.deleteDirectory(packageFolder);
-							}
-							catch (IOException e)
-							{
-							}
+							FileUtils.deleteQuietly(packageFolder);
 							exists = false;
 						}
 
@@ -541,7 +583,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final AtomicInteger scheduled = new AtomicInteger(0); // 0 == no jobs, 1 == job scheduled, 2  or 3 == job running, 3 == run again.
 	private static final AtomicBoolean cleanInstall = new AtomicBoolean(false);
 
-	private static final Set<String> watchCreated = Collections.synchronizedSet(new HashSet<>());
+	private static final ConcurrentMap<String, DirectorySync> watchCreated = new ConcurrentHashMap<>();
 
 	public WebPackagesListener()
 	{
