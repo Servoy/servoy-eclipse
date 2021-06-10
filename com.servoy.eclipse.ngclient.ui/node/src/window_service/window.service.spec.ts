@@ -11,6 +11,7 @@ import { ServoyService } from '../ngclient/servoy.service';
 import { ViewportService } from '../ngclient/services/viewport.service';
 import { ClientFunctionService } from '../ngclient/services/clientfunction.service';
 import { ServoyTestingModule } from '../testing/servoytesting.module';
+import { PopupFormService } from '../ngclient/services/popupform.service';
 
 describe('WindowService', () => {
   let service: WindowService;
@@ -18,7 +19,7 @@ describe('WindowService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
         imports: [ServoyTestingModule, SabloModule, ServoyPublicModule],
-        providers:[WindowService, ShortcutService, PopupMenuService,ViewportService, ClientFunctionService,
+        providers:[WindowService, ShortcutService, PopupMenuService, PopupFormService, ViewportService, ClientFunctionService,
                     FormService, ServoyService, { provide: LocaleService, useValue: {getLocale: () => 'en' }}]
     });
     service = TestBed.inject(WindowService);
