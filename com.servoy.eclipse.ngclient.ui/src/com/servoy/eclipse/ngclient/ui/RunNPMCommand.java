@@ -50,17 +50,10 @@ public class RunNPMCommand extends WorkspaceJob
 	private Job nextJob;
 	private final String familyJob;
 	private Process process;
+	private Thread workerThread;
+	private boolean stillReadingOutput;
 	private static boolean ngBuildRunning;
 
-	/**
-	 * RunNPMCommand constructor
-	 *
-	 * @param familyJob
-	 * @param nodePath
-	 * @param npmPath
-	 * @param projectFolder
-	 * @param commands
-	 */
 	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
 		super("Executing NPM command: " + commandArgsToString(commands));
@@ -71,17 +64,9 @@ public class RunNPMCommand extends WorkspaceJob
 		this.projectFolder = projectFolder;
 	}
 
-	/**
-	 * RunNPMCommand constructor
-	 *
-	 * @param nodePath
-	 * @param npmPath
-	 * @param projectFolder
-	 * @param commands
-	 */
 	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
-		super("Executing NPM command: " + commandArgsToString(commands));
+		super("Executing NPM command: " + commandArgsToString(commands) + ". (for more info open 'NG2 Build Console' in 'Console' view)");
 		this.commandArguments = commands;
 		this.nodePath = nodePath;
 		this.npmPath = npmPath;
@@ -94,7 +79,7 @@ public class RunNPMCommand extends WorkspaceJob
 	{
 		try
 		{
-			runCommands();
+			runCommand(monitor);
 			if (nextJob != null) nextJob.schedule();
 		}
 		catch (Exception e)
@@ -104,13 +89,40 @@ public class RunNPMCommand extends WorkspaceJob
 		return Status.OK_STATUS;
 	}
 
-	/**
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void runCommands() throws IOException, InterruptedException
+	public void runCommand(IProgressMonitor monitor) throws IOException, InterruptedException
 	{
 		IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+
+		if (monitor.isCanceled())
+		{
+			writeConsole(console, "Cancel was requested; skipping command\n'" + commandArgsToString(commandArguments) + "'\n");
+			return;
+		}
+
+		// cancel button of 'monitor' should be able to stop long-running npm commands (and the job reading in a blocking manner from it's console output
+		// can't handle it directly by checking cancellation if npm itself hangs);
+		// as runCommands is not always called from this class running as an actual job but just a direct call from a different job, monitor might be that
+		// of another job and we need to cancel on it as well so the overridden "canceling" method of this class is not enough
+		workerThread = Thread.currentThread();
+		final boolean[] cancelThreadDone = new boolean[] { false };
+		Thread cancelThread = new Thread(() -> {
+			while (!cancelThreadDone[0])
+			{
+				if (monitor.isCanceled()) // TODO add here also automatically canceling if console output of the running npm process didn't generate any output in a long time?! maybe followed by an automatic re-run? (it happened that npm just stalls)
+				{
+					cancelThreadDone[0] = true;
+					canceling();
+				}
+				else try
+				{
+					Thread.sleep(300);
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		});
+
 		try
 		{
 			ProcessBuilder builder = new ProcessBuilder();
@@ -136,28 +148,46 @@ public class RunNPMCommand extends WorkspaceJob
 			writeConsole(console, "Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			builder.command(allCmdLineArgs);
 			process = builder.start();
+			cancelThread.start();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
 			{
-				String str = null;
-				while ((str = br.readLine()) != null)
+				stillReadingOutput = true;
+				try
 				{
+					String str = null;
+					while ((str = br.readLine()) != null)
+					{
 //						str = str.replaceAll(".*?m", "");
 //						str = str.replaceAll("\b", "");
-					writeConsole(console, str.trim());
-					// The date, hash and time represents the last output line of the NG build process.
-					// The NG build is finished when this conditions is met.
-					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
-					{
-						ngBuildRunning = false;
+						writeConsole(console, str.trim());
+						// The date, hash and time represents the last output line of the NG build process.
+						// The NG build is finished when this conditions is met.
+						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+						{
+							ngBuildRunning = false;
+						}
 					}
 				}
+				finally
+				{
+					stillReadingOutput = false;
+				}
 			}
-			process.waitFor();
-			writeConsole(console,
-				"Done running '" + commandArgsToString(commandArguments) + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
+			try
+			{
+				if (process != null) process.waitFor(); // process can be set to null if canceling method was called meanwhile
+				writeConsole(console,
+					"Finished running '" + commandArgsToString(commandArguments) + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
+			}
+			catch (InterruptedException e)
+			{
+				if (monitor.isCanceled()) writeConsole(console, "Process interrupted!\n");
+				else throw e;
+			}
 		}
 		finally
 		{
+			cancelThreadDone[0] = true;
 			console.close();
 		}
 	}
@@ -173,23 +203,56 @@ public class RunNPMCommand extends WorkspaceJob
 		}
 	}
 
-	/**
-	 * @param buildCommand
-	 */
 	public void setNextJob(Job nextJob)
 	{
 		this.nextJob = nextJob;
 	}
 
 	@Override
-	protected void canceling()
+	protected synchronized void canceling()
 	{
-		if (process != null) process.destroy();
+		if (process != null)
+		{
+			IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+
+			writeConsole(console, "Cancel requested by user... Trying to stop process...");
+//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
+			process.destroy();
+
+			try
+			{
+				int t = 10;
+				while (t-- > 0 && isActuallyRunningProcess())
+				{
+					if (t == 8) writeConsole(console, "Waiting 10 sec for NPM to stop...");
+					Thread.sleep(1000);
+				}
+			}
+			catch (InterruptedException e)
+			{
+			}
+
+			if (isActuallyRunningProcess())
+			{
+				writeConsole(console, "NPM did not stop nicely in 10 seconds... Trying to stop it forcibly...");
+				process.destroyForcibly();
+			}
+
+			process = null;
+			workerThread = null;
+		}
 	}
 
-	/**
-	 * @param family the job family
-	 */
+	private boolean isActuallyRunningProcess()
+	{
+		// somehow npm can make it so that process.isAlive() is false, process.exitValue() is 1 after a
+		// call to process.destroy(); but the inputStream of the process is still blocking and not closing for a few minutes...
+		synchronized (process)
+		{
+			return process.isAlive() || stillReadingOutput;
+		}
+	}
+
 	@Override
 	public boolean belongsTo(Object family)
 	{

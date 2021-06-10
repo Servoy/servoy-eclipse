@@ -223,7 +223,7 @@ public class Activator extends Plugin
 	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
 	 * @throws IOException
 	 */
-	public void exportNG2ToWar(File location)
+	public void exportNG2ToWar(File location, IProgressMonitor monitor)
 	{
 		waitForNodeExtraction();
 
@@ -233,7 +233,7 @@ public class Activator extends Plugin
 			// check what happens if there was a debug watch command on the sources..
 
 			// create the production build
-			createNPMCommand(Arrays.asList("run", "build")).runCommands();
+			createNPMCommand(Arrays.asList("run", "build")).runCommand(monitor);
 			// copy the production build
 			File distFolder = new File(projectFolder, "dist/app_prod");
 			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));

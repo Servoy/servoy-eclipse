@@ -244,7 +244,7 @@ public class WarExporter
 			if (exportModel.isExportNG2())
 			{
 				monitor.subTask("Copy NGClient2 resources");
-				copyNGClient2(tmpWarDir);
+				copyNGClient2(tmpWarDir, monitor);
 			}
 			monitor.worked(1);
 		}
@@ -271,13 +271,9 @@ public class WarExporter
 		return;
 	}
 
-	/**
-	 * @param tmpWarDir
-	 * @throws IOException
-	 */
-	private void copyNGClient2(File tmpWarDir) throws ExportException
+	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
-		Activator.getDefault().exportNG2ToWar(tmpWarDir);
+		Activator.getDefault().exportNG2ToWar(tmpWarDir, monitor);
 	}
 
 	/**

@@ -18,10 +18,11 @@
 package com.servoy.eclipse.model;
 
 import java.io.File;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -46,7 +47,7 @@ public class Activator extends Plugin
 	// The shared instance
 	private static Activator plugin;
 
-	private Consumer<File> exporter;
+	private BiConsumer<File, IProgressMonitor> exporter;
 
 	/**
 	 * The constructor
@@ -129,15 +130,12 @@ public class Activator extends Plugin
 		return mobileExportClient;
 	}
 
-	/**
-	 * @param tmpWarDir
-	 */
-	public void exportNG2ToWar(File location)
+	public void exportNG2ToWar(File location, IProgressMonitor monitor)
 	{
-		if (exporter != null) exporter.accept(location);
+		if (exporter != null) exporter.accept(location, monitor);
 	}
 
-	public void setNG2WarExporter(Consumer<File> exporter)
+	public void setNG2WarExporter(BiConsumer<File, IProgressMonitor> exporter)
 	{
 		this.exporter = exporter;
 	}

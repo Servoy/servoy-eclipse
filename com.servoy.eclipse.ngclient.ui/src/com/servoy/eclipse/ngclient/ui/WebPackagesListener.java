@@ -51,8 +51,8 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -165,7 +165,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (IOException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 
@@ -226,7 +226,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 
 					ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
@@ -250,7 +250,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e1)
 					{
-						Debug.error(e1);
+						ServoyLog.logError(e1);
 					}
 
 					try
@@ -302,7 +302,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e1)
 					{
-						Debug.error(e1);
+						ServoyLog.logError(e1);
 					}
 
 					try
@@ -330,7 +330,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 					if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall)
 					{
@@ -352,32 +352,32 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
 							try
 							{
-								npmCommand.runCommands();
+								npmCommand.runCommand(monitor);
 							}
 							catch (Exception e)
 							{
-								Debug.error(e);
+								ServoyLog.logError(e);
 							}
 							if (cleanInstall)
 							{
 								npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--force"));
 								try
 								{
-									npmCommand.runCommands();
+									npmCommand.runCommand(monitor);
 								}
 								catch (Exception e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 							try
 							{
-								npmCommand.runCommands();
+								npmCommand.runCommand(monitor);
 							}
 							catch (Exception e)
 							{
-								Debug.error(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -398,10 +398,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 			}
 
-			/**
-			 * @param console
-			 * @param pck
-			 */
 			private void writeConsole(IOConsoleOutputStream console, String message)
 			{
 				try
@@ -413,13 +409,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 			}
 
-			/**
-			 * @param packageToInstall
-			 * @param dependencies
-			 * @param packageName
-			 * @param packageReader
-			 * @param entryPoint
-			 */
 			private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint)
 			{
 				String packageVersion = packageReader.getVersion();
@@ -449,7 +438,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (URISyntaxException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 					else if (packageReader instanceof ZipPackageReader)
@@ -494,7 +483,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (IOException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 
@@ -521,7 +510,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				return content.substring(0, startIndex) + toInsert + content.substring(endIndex);
 			}
 		};
-// only schedule 1 and a bit later to relax first the system
+
+		// only schedule 1 and a bit later to relax first the system
 		if (currentJob.compareAndSet(null, job)) job.schedule(500);
 	}
 
