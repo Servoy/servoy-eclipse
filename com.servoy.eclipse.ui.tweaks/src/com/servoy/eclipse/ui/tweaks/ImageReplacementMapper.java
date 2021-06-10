@@ -63,6 +63,8 @@ public class ImageReplacementMapper
 		{
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.pn"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_projects.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/save_edit.png"),
@@ -293,19 +295,27 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/clear_console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/clear_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/clear_console-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/clear_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/clear_console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
+			urlReplacements.put(new URL("(platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/wordwrap.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/etool16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/dtool16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/rem_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/rem_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/dlcl16/rem_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem-disabled.png"));
