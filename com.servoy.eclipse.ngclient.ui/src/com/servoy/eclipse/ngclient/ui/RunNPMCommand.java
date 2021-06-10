@@ -133,7 +133,7 @@ public class RunNPMCommand extends WorkspaceJob
 				lst.add(nodePath.getCanonicalPath());
 				lst.add(npmPath.getCanonicalPath());
 				lst.addAll(Arrays.asList(command.split(" ")));
-				lst.add("--scripts-prepend-node-path");
+//				lst.add("--scripts-prepend-node-path");
 				StringBuilder sb = new StringBuilder();
 				lst.stream().forEach(item -> sb.append(item).append('\n'));
 				writeConsole(console, "Running npm command:\n" + sb);

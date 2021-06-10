@@ -51,6 +51,7 @@ import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard.SolutionPackageInstallInfo;
 import com.servoy.j2db.ClientVersion;
@@ -85,79 +86,88 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 	public static void importPackage(JSONObject pck, String selectedVersion) throws IOException
 	{
-		final boolean isMainSolutionInstall = "Solution-Main".equals(pck.getString("packageType"));
-		final String selectedSolution = isMainSolutionInstall ? pck.getString("name") : pck.optString("activeSolution", null) != null
-			? pck.optString("activeSolution", null) : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		Map<String, SolutionPackageInstallInfo> solutionsWithDependencies = new LinkedHashMap<String, SolutionPackageInstallInfo>();
-		Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
-		Map<String, String> packagesInstalledResources = new HashMap<String, String>();
-		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources,
-			new ArrayList<String>(), isMainSolutionInstall);
-
-		final Boolean installingSolutions = new Boolean(solutionsWithDependencies.size() > 0);
-		if (installingSolutions.booleanValue())
+		WebPackagesListener.setIgnore(true);
+		try
 		{
-			if (isMainSolutionInstall)
+			final boolean isMainSolutionInstall = "Solution-Main".equals(pck.getString("packageType"));
+			final String selectedSolution = isMainSolutionInstall ? pck.getString("name") : pck.optString("activeSolution", null) != null
+				? pck.optString("activeSolution", null) : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+			Map<String, SolutionPackageInstallInfo> solutionsWithDependencies = new LinkedHashMap<String, SolutionPackageInstallInfo>();
+			Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
+			Map<String, String> packagesInstalledResources = new HashMap<String, String>();
+			getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies,
+				packagesInstalledResources,
+				new ArrayList<String>(), isMainSolutionInstall);
+
+			final Boolean installingSolutions = new Boolean(solutionsWithDependencies.size() > 0);
+			if (installingSolutions.booleanValue())
 			{
-				// last solution/module in list should not keep the import project's resources project open
-				Iterator<SolutionPackageInstallInfo> solutionsWithDependenciesIte = solutionsWithDependencies.values().iterator();
-				SolutionPackageInstallInfo lastSolutionPackageInstallInfo = null;
-				while (solutionsWithDependenciesIte.hasNext())
+				if (isMainSolutionInstall)
 				{
-					lastSolutionPackageInstallInfo = solutionsWithDependenciesIte.next();
+					// last solution/module in list should not keep the import project's resources project open
+					Iterator<SolutionPackageInstallInfo> solutionsWithDependenciesIte = solutionsWithDependencies.values().iterator();
+					SolutionPackageInstallInfo lastSolutionPackageInstallInfo = null;
+					while (solutionsWithDependenciesIte.hasNext())
+					{
+						lastSolutionPackageInstallInfo = solutionsWithDependenciesIte.next();
+					}
+					lastSolutionPackageInstallInfo.keepResourcesProjectOpen = false;
 				}
-				lastSolutionPackageInstallInfo.keepResourcesProjectOpen = false;
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
+								isMainSolutionInstall ? null : selectedSolution, false, true);
+
+							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+							progressService.run(true, false, importSolutionsRunnable);
+							if (!isMainSolutionInstall) NewSolutionWizard.addAsModule(pck.getString("name"), selectedSolution, null);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+						synchronized (installingSolutions)
+						{
+							installingSolutions.notify();
+						}
+					}
+				});
 			}
-			Display.getDefault().asyncExec(new Runnable()
+			// wait for the solutions to be installed
+			if (installingSolutions.booleanValue())
 			{
-				public void run()
+				synchronized (installingSolutions)
 				{
 					try
 					{
-						IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
-							isMainSolutionInstall ? null : selectedSolution, false, true);
-
-						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-						progressService.run(true, false, importSolutionsRunnable);
-						if (!isMainSolutionInstall) NewSolutionWizard.addAsModule(pck.getString("name"), selectedSolution, null);
+						installingSolutions.wait();
 					}
-					catch (Exception e)
+					catch (InterruptedException ex)
 					{
-						ServoyLog.logError(e);
+						ServoyLog.logError(ex);
 					}
-					synchronized (installingSolutions)
-					{
-						installingSolutions.notify();
-					}
-				}
-			});
-		}
-		// wait for the solutions to be installed
-		if (installingSolutions.booleanValue())
-		{
-			synchronized (installingSolutions)
-			{
-				try
-				{
-					installingSolutions.wait();
-				}
-				catch (InterruptedException ex)
-				{
-					ServoyLog.logError(ex);
 				}
 			}
-		}
-		IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-		for (String packageName : webpackagesWithDependencies.keySet())
-		{
-			String installedResource = packagesInstalledResources.get(packageName);
-			importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
-		}
+			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+			for (String packageName : webpackagesWithDependencies.keySet())
+			{
+				String installedResource = packagesInstalledResources.get(packageName);
+				importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
+			}
 
-		if (isMainSolutionInstall)
+			if (isMainSolutionInstall)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel()
+					.setActiveProject(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedSolution), true);
+			}
+		}
+		finally
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel()
-				.setActiveProject(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedSolution), true);
+			WebPackagesListener.setIgnore(false);
 		}
 	}
 
