@@ -362,7 +362,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (cleanInstall.get())
 						{
 							cleanInstall.set(false);
-							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci --legacy-peer-deps"));
+							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
 							try
 							{
 								npmCommand.runCommand(monitor);
@@ -372,7 +372,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								ServoyLog.logError(e);
 							}
 						}
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
