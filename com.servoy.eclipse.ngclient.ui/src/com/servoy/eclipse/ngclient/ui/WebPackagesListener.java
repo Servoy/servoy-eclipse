@@ -446,25 +446,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							try
 							{
 								IProject project = containers[0].getProject();
-								IFolder file = project.getFolder(entryPoint);
-								if (file.exists())
+								IFile sourcePath = project.getFile(".sourcepath");
+								if (sourcePath.exists())
 								{
-
 									File projectFolder = Activator.getInstance().getProjectFolder();
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
-									IFile sourcePath = project.getFile(".sourcepath");
 									JSONObject sourcePathJson = null;
-									File apiFile = null;
-									if (sourcePath.exists())
-									{
-										String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
-										sourcePathJson = new JSONObject(sourcePathContents);
-										file = project.getFolder(sourcePathJson.getString("srcDir"));
-										apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
-
-									}
+									String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
+									sourcePathJson = new JSONObject(sourcePathContents);
+									IFolder file = project.getFolder(sourcePathJson.getString("srcDir"));
+									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
 
 									String location = packageFolder.getCanonicalPath();
 									// check/copy the dist folder to the target packages location
