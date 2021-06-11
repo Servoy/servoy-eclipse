@@ -271,7 +271,7 @@ public class WarExporter
 		return;
 	}
 
-	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
 	{
 		Activator.getDefault().exportNG2ToWar(tmpWarDir, monitor);
 	}
