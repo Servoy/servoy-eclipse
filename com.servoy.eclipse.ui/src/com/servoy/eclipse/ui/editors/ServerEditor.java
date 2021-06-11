@@ -120,6 +120,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button logServerButton;
 	private Button proceduresButton;
 	private Button clientOnlyConnectionsButton;
+	private Button prefixTablesButton;
 	private Button createLogTableButton;
 	private Button createClientstatsTableButton;
 	private Button skipSysTablesButton;
@@ -598,8 +599,22 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		new Label(advancedSettingsComposite, SWT.LEFT);
-		new Label(advancedSettingsComposite, SWT.LEFT);
+
+		toolTip = "When tables are defined in multiple schemas, with this option set to true, Servoy will prefix the table in the sql when needed.";
+		Label prefixTablesLabel;
+		prefixTablesLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		prefixTablesLabel.setText("Prefix Tables");
+		prefixTablesLabel.setToolTipText(toolTip);
+
+		prefixTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		prefixTablesButton.setToolTipText(toolTip);
+		prefixTablesButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				flagModified();
+			}
+		});
 
 		toolTip = "Servoy has functionality that allows to automatically track all insert/updates/deletes on tables.\nThis functionality can be enabled through the Security layer inside the Solution.\nThis functionality relies on one of the enabled Database Servers configured on the Servoy Application Server being marked at 'Log server'.";
 		Label logServerLabel;
@@ -1467,6 +1482,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		IObservableValue proceduresButtonSelectionObserveWidget = SWTObservables.observeSelection(proceduresButton);
 		IObservableValue clientOnlyConnectionsButtonObserveValue = serverConfigObservable.observePropertyValue("clientOnlyConnections");
 		IObservableValue clientOnlyConnectionsSelectionObserveWidget = SWTObservables.observeSelection(clientOnlyConnectionsButton);
+		IObservableValue prefixTablesButtonObserveValue = serverConfigObservable.observePropertyValue("prefixTables");
+		IObservableValue prefixTablesButtonSelectionObserveWidget = SWTObservables.observeSelection(prefixTablesButton);
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);
@@ -1487,6 +1504,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		m_bindingContext.bindValue(skipSysTablesSelectionObserveWidget, getSkipSysTablesObserveValue, null, null);
 		m_bindingContext.bindValue(proceduresButtonSelectionObserveWidget, proceduresButtonObserveValue, null, null);
 		m_bindingContext.bindValue(clientOnlyConnectionsSelectionObserveWidget, clientOnlyConnectionsButtonObserveValue, null, null);
+		m_bindingContext.bindValue(prefixTablesButtonSelectionObserveWidget, prefixTablesButtonObserveValue, null, null);
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{
