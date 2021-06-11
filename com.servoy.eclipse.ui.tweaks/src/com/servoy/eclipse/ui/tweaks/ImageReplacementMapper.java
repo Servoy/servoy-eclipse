@@ -63,7 +63,7 @@ public class ImageReplacementMapper
 		{
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.pn"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_projects.png"));
@@ -301,7 +301,7 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
-			urlReplacements.put(new URL("(platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
@@ -657,6 +657,46 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/validate.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/tricks.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/tips-and-tricks.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/eview16/call_hierarchy.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/call_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/$nl$/icons/full/eview16/call_hierarchy.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/call_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/history_list.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/history_list.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/history_list.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/history_list-disabled.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_callers.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callers.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_callers.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callers-disabled.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_callees.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callees.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_callees.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callees-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_cancel.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/remove.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_cancel.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/remove.png")); //TODO disabled
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_automatic.gif"), //TODO add dark theme version of the following
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_automatic.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_automatic.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_automatic.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_vertical.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_vertical.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_vertical.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_vertical.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_horizontal.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_horizontal.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_horizontal.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_horizontal.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_single.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/th_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_single.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/th_hierarchy.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_ps.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/filter_ps.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter-disabled.png"));
 
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
