@@ -20,6 +20,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +58,8 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -143,7 +145,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String packageName = ng2Config.optString("packageName");
 							IPackageReader packageReader = entry.getValue();
 							String entryPoint = ng2Config.optString("entryPoint", null);
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
+							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
 								writeConsole(console, "need to install package " + pck);
@@ -156,7 +158,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String packageName = spec.getNpmPackageName();
 							IPackageReader packageReader = entry.getValue();
 							String entryPoint = spec.getEntryPoint();
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
+							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
 								packageToInstall.add(pck);
@@ -165,7 +167,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 				}
 
@@ -226,7 +228,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					Debug.error(e);
+					ServoyLog.logError(e);
 				}
 
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
@@ -250,7 +252,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					Debug.error(e1);
+					ServoyLog.logError(e1);
 				}
 
 				try
@@ -302,7 +304,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					Debug.error(e1);
+					ServoyLog.logError(e1);
 				}
 
 				try
@@ -330,54 +332,54 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					Debug.error(e);
+					ServoyLog.logError(e);
 				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
 					// first exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
 					// or if there are really packages to install.
-					StringBuilder command = new StringBuilder();
-					command.append("install ");
-					packageToInstall.forEach(packageName -> command.append(packageName).append(' '));
-					command.append("--legacy-peer-deps");
+					List<String> command = new ArrayList<>();
+					command.add("install");
+					packageToInstall.forEach(packageName -> command.add(packageName));
+					command.add("--legacy-peer-deps");
 					if (SOURCE_DEBUG)
 					{
 						writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
-						writeConsole(console, "npm command not done: " + command);
+						writeConsole(console, "npm command not done: " + RunNPMCommand.commandArgsToString(command));
 					}
 					else
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command.toString());
+						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
 						try
 						{
-							npmCommand.runCommands();
+							npmCommand.runCommand(monitor);
 						}
 						catch (Exception e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 						if (cleanInstall.get())
 						{
 							cleanInstall.set(false);
-							npmCommand = Activator.getInstance().createNPMCommand("ci --legacy-peer-deps");
+							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
 							try
 							{
-								npmCommand.runCommands();
+								npmCommand.runCommand(monitor);
 							}
 							catch (Exception e)
 							{
-								Debug.error(e);
+								ServoyLog.logError(e);
 							}
 						}
-						npmCommand = Activator.getInstance().createNPMCommand("run build_debug_nowatch");
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 						try
 						{
-							npmCommand.runCommands();
+							npmCommand.runCommand(monitor);
 						}
 						catch (Exception e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -427,7 +429,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param packageReader
 		 * @param entryPoint
 		 */
-		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint)
+		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, IOConsoleOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
@@ -444,25 +446,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							try
 							{
 								IProject project = containers[0].getProject();
-								IFolder file = project.getFolder(entryPoint);
-								if (file.exists())
+								IFile sourcePath = project.getFile(".sourcepath");
+								if (sourcePath.exists())
 								{
-
 									File projectFolder = Activator.getInstance().getProjectFolder();
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
-									IFile sourcePath = project.getFile(".sourcepath");
 									JSONObject sourcePathJson = null;
-									File apiFile = null;
-									if (sourcePath.exists())
-									{
-										String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
-										sourcePathJson = new JSONObject(sourcePathContents);
-										file = project.getFolder(sourcePathJson.getString("srcDir"));
-										apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
-
-									}
+									String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
+									sourcePathJson = new JSONObject(sourcePathContents);
+									IFolder file = project.getFolder(sourcePathJson.getString("srcDir"));
+									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
 
 									String location = packageFolder.getCanonicalPath();
 									// check/copy the dist folder to the target packages location
@@ -498,17 +493,22 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										return location;
 									}
 								}
+								else
+								{
+									writeConsole(console, "Source package " + packageName + " (project: " + project +
+										") should have a .sourcepath json file in the project root having 2 properties: srcDir (pointing to the root souce dir) and apiFile (pointing to the public api file without extension in that source dir\n");
+								}
 								return null;
 							}
 							catch (IOException e)
 							{
-								Debug.error(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
 					catch (URISyntaxException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 				}
 				else if (packageReader instanceof ZipPackageReader)
@@ -548,7 +548,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 				}
 

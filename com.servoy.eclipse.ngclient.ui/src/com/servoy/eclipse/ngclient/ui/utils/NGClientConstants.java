@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ngclient.ui.utils;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author fbandrei
  *
@@ -25,8 +28,8 @@ package com.servoy.eclipse.ngclient.ui.utils;
  */
 public class NGClientConstants
 {
-	public static final String NG_BUILD_COMMAND = "run-script build_debug";
+	public static final List<String> NG_BUILD_COMMAND = Arrays.asList("run-script", "build_debug");
 	public static final String NPM_BUILD_JOB = "npmBuild";
 	public static final String NPM_CONFIGURATION_TITLE_PROGRESS_BAR = "Running npm configurations ...";
-	public static final String NPM_INSTALL = "install";
+	public static final List<String> NPM_INSTALL = Arrays.asList("install");
 }
