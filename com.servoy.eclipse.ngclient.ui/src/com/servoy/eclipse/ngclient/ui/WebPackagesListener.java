@@ -340,7 +340,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// only execute this if a source is changed (should always happens the first time)
 					// or if there are really packages to install.
 					List<String> command = new ArrayList<>();
-					command.add("install ");
+					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("--legacy-peer-deps");
 					if (SOURCE_DEBUG)
