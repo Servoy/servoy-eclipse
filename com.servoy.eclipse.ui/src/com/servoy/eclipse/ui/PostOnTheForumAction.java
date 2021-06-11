@@ -22,8 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -33,6 +37,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -40,6 +45,8 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -99,15 +106,26 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			super(parentShell);
 		}
 
+		private class ContentLengthHeaderRemover implements HttpRequestInterceptor
+		{
+			@Override
+			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException
+			{
+				request.removeHeaders(HTTP.CONTENT_LEN);// fighting org.apache.http.protocol.RequestContent's ProtocolException("Content-Length header already present");
+			}
+		}
+
 		public boolean post()
 		{
 			CookieStore httpCookieStore = new BasicCookieStore();
-			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).build())
+			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).addInterceptorFirst(new ContentLengthHeaderRemover())
+				.build())
 			{
-				String sid = getSID(client);
-				if (sid == null || !login(client, sid)) return false;
+				HttpClientContext context = HttpClientContext.create();
+				String sid = getSID(client, context);
+				if (sid == null || !login(client, sid, context)) return false;
 
-				String form_token = getFormToken(client, sid, httpCookieStore);
+				String form_token = getFormToken(client, sid, httpCookieStore, context);
 
 				HttpPost httpPost = new HttpPost(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
 
@@ -130,34 +148,46 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 				requestEntity.addTextBody("poll_length", "0");
 				HttpEntity httpEntity = requestEntity.build();
 				httpPost.setEntity(httpEntity);
-				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
-				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
-				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
-				//TODO sec-ch-ua header?
-				httpPost.addHeader("sec-ch-ua-mobile", "?0");
-				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
-				httpPost.addHeader("Origin", "https://forum.servoy.com");
-				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
-				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
+
 				httpPost.addHeader(HttpHeaders.ACCEPT,
 					"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
-				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
-				httpPost.addHeader("Sec-Fetch-User", "?1");
-				httpPost.addHeader("Sec-Fetch-Dest", "document");
-				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
 				httpPost.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
+				httpPost.addHeader(HttpHeaders.ACCEPT_LANGUAGE, "ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7");
+				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
+				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
+				httpPost.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(httpEntity.getContentLength()));
+				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
+				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
 				String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
 				httpPost.addHeader("Cookie", cookies);
+				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
+				httpPost.addHeader("Origin", "https://forum.servoy.com");
+				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
+				httpPost.addHeader("sec-ch-ua", "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Google Chrome\";v=\"90\"");
+				httpPost.addHeader("sec-ch-ua-mobile", "?0");
+				httpPost.addHeader("Sec-Fetch-Dest", "document");
+				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
+				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
+				httpPost.addHeader("Sec-Fetch-User", "?1");
+				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
+				httpPost.addHeader(HttpHeaders.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36");
 
-				CloseableHttpResponse response = client.execute(httpPost);
-//				HttpEntity respEntity = response.getEntity();
-//				if (respEntity != null)//TODO rem
-//				{
-//					String content = EntityUtils.toString(respEntity);
-//					System.out.println(content); //TODO rem
-//					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
-//				}
+				//TODO remove printing the headers and content
+				for (Header h : httpPost.getAllHeaders())
+				{
+					System.out.println(h.getName() + ": " + h.getValue());
+				}
+				System.out.println(EntityUtils.toString(httpEntity));
+
+				CloseableHttpResponse response = client.execute(httpPost, context);
+				HttpEntity respEntity = response.getEntity();
+				if (respEntity != null)//TODO rem
+				{
+					String content = EntityUtils.toString(respEntity);
+					System.out.println(content); //TODO rem
+					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
+				}
 				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
 				{
 					//TODO button for showing the post on the forum
@@ -177,13 +207,14 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		}
 
 
-		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore) throws ClientProtocolException, IOException
+		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore, HttpClientContext context)
+			throws ClientProtocolException, IOException
 		{
 			HttpGet httpGet = new HttpGet(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
 			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
 			httpGet.addHeader("Cookie", cookies);
 			httpGet.addHeader("Connection", "keep-alive");
-			HttpResponse httpresponse = client.execute(httpGet);
+			HttpResponse httpresponse = client.execute(httpGet, context);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				setErrorMessage("Cannot connect to the forum. Please try again later.");
@@ -195,7 +226,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			return token;
 		}
 
-		private boolean login(CloseableHttpClient client, String sid) throws StorageException, IOException, ClientProtocolException
+		private boolean login(CloseableHttpClient client, String sid, HttpClientContext context) throws StorageException, IOException, ClientProtocolException
 		{
 			ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
 			ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
@@ -211,11 +242,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			httpPost.setEntity(entity);
 			httpPost.addHeader("Connection", "keep-alive");
 			httpPost.addHeader("referer", "https://forum.servoy.com/index.php?sid=" + sid);
-			HttpResponse httpresponse = client.execute(httpPost);
-
-			//TODO remove
-//			System.out.println(EntityUtils.toString(httpresponse.getEntity()));
-//			System.out.println(httpresponse.getStatusLine());
+			HttpResponse httpresponse = client.execute(httpPost, context);
 
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
@@ -226,10 +253,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		}
 
 
-		private String getSID(CloseableHttpClient client) throws IOException, ClientProtocolException
+		private String getSID(CloseableHttpClient client, HttpClientContext context) throws IOException, ClientProtocolException
 		{
 			HttpGet httpGet = new HttpGet("https://forum.servoy.com/");
-			HttpResponse httpresponse = client.execute(httpGet);
+			HttpResponse httpresponse = client.execute(httpGet, context);
 			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				getShell().setText("Cannot connect to the forum. Please try again later.");
@@ -330,12 +357,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		@Override
 		protected void okPressed()
 		{
-			Display.getDefault().asyncExec(() -> {
-				if (post())
-				{
-					super.okPressed();
-				}
-			});
+			if (post())
+			{
+				super.okPressed();
+			}
 		}
 
 

@@ -7,6 +7,7 @@ import { ServicesService, ServiceProvider } from '../sablo/services.service';
 import { ApplicationService } from './services/application.service';
 import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
+import {PopupFormService} from './services/popupform.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WindowService as WindowPlugin} from '../window_service/window.service';
 
@@ -56,7 +57,7 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SessionService,
+    providers: [AllServiceService, ApplicationService, WindowService, SessionService, PopupFormService,
                 // TODO move to generated
                 NGUtilsService,
                 // generated providers start

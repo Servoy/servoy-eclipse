@@ -1,6 +1,7 @@
 import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy } from '@angular/core';
 import { ServoyBaseComponent } from '../basecomponent';
 import { IViewStateListener } from '../basecomponent';
+import { WindowRefService } from '../services/windowref.service';
 
 @Directive({
     selector: '[svyImageMediaId]'
@@ -14,7 +15,8 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     private rollOverImgStyle: Map<string, any>;
     private clearStyle: Map<string, any>;
 
-    public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2) {
+    public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2, 
+        private windowRefService: WindowRefService) {
         this.clearStyle = new Map();
         this.clearStyle.set('width', '0px');
         this.clearStyle.set('height', '0px');
@@ -50,6 +52,9 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                     this.setCSSStyle(this.clearStyle);
                 }
             }
+        });
+        renderer.listen(this.windowRefService.nativeWindow, 'resize', () => {
+            this.setImageStyle();
         });
         this.setImageStyle();
     }

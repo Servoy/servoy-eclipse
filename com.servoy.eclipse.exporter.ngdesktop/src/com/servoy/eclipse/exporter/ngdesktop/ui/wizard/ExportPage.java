@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -40,7 +43,6 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -52,6 +54,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
@@ -66,8 +69,6 @@ public class ExportPage extends WizardPage
 	public static String LINUX_PLATFORM = "linux";
 
 	private Text applicationUrlText;
-	private Text saveDirPath;
-	private Button browseDirButton;
 	private Group platformGroup;
 
 	private Text iconPath;
@@ -83,6 +84,9 @@ public class ExportPage extends WizardPage
 	private Button includeUpdateBtn;
 	private Text appNameText;
 	private Text updateUrlText;
+	private Group storeGroup;
+	private Text emailAddress;
+	private Button storeBtn;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
@@ -170,31 +174,6 @@ public class ExportPage extends WizardPage
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
-
-		final Label outputDirLabel = new Label(composite, SWT.NONE);
-		outputDirLabel.setText("Save directory");
-
-		saveDirPath = new Text(composite, SWT.BORDER);
-		final String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
-		saveDirPath.setText(saveDir != null ? saveDir : "");
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
-		saveDirPath.setLayoutData(gd);
-
-
-		browseDirButton = new Button(composite, SWT.NONE);
-		browseDirButton.setText("Browse");
-		browseDirButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				final DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.NONE);
-				dlg.setFilterPath(getDlgInitPath(saveDirPath.getText()));
-				final String path = dlg.open();
-				if (path != null) saveDirPath.setText(path);
-			}
-		});
 
 		final Label iconLabel = new Label(composite, SWT.NONE);
 		iconLabel.setText("Icon path:");
@@ -365,6 +344,35 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		updateUrlText.setLayoutData(gd);
 
+		final Label emailLabel = new Label(composite, SWT.NONE);
+		emailLabel.setText("Email address:");
+		emailLabel.setToolTipText("Email address where to receive download links ...");
+
+		storeGroup = new Group(composite, SWT.NONE);
+		storeGroup.setLayout(new GridLayout());
+
+		emailAddress = new Text(storeGroup, SWT.BORDER);
+		emailAddress.setToolTipText("Email address where to receive download links...");
+		emailAddress.setEditable(true);
+		emailAddress.setVisible(true);
+		value = exportElectronWizard.getDialogSettings().get("email_address");
+		emailAddress.setText(value != null ? value : getLoginUsername());
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		emailAddress.setLayoutData(gd);
+
+		storeBtn = new Button(storeGroup, SWT.CHECK);
+		storeBtn.setText(String.format("Store data for %d days", ExportNGDesktopWizard.STORE_TIMEOUT));
+		storeBtn.setToolTipText("If not checked, installer(s) will be deleted after several hours ...");
+		storeBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("store_data"));
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		storeBtn.setLayoutData(gd);
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		gd.verticalSpan = 1;
+		storeGroup.setLayoutData(gd);
+
+
 		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
 		emptyLabel.setText("");
 		emptyLabel.setEnabled(false); //set to gray
@@ -385,6 +393,23 @@ public class ExportPage extends WizardPage
 
 		setControl(composite);
 		this.getWizard().getContainer().getShell().pack();
+	}
+
+	private String getLoginUsername()
+	{
+		final ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+
+		final ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+		try
+		{
+			return node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+		}
+		catch (final StorageException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		return null;
+
 	}
 
 	private void srcVersionListener(SelectionEvent event)
@@ -517,7 +542,7 @@ public class ExportPage extends WizardPage
 		// the return type is different depending on the execution leaf
 		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
-
+	
 	public List<String> getSelectedPlatforms()
 	{
 		return selectedPlatforms;
@@ -547,17 +572,26 @@ public class ExportPage extends WizardPage
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
-		settings.put("save_dir", saveDirPath.getText().trim());
 		settings.put("app_url", applicationUrlText.getText().trim());
-		settings.put("icon_path", iconPath.getText().trim());
-		settings.put("image_path", imgPath.getText().trim());
-		settings.put("copyright", copyrightText.getText());
-		settings.put("ngdesktop_width", widthText.getText().trim());
-		settings.put("ngdesktop_height", heightText.getText().trim());
+		if (iconPath.getText().trim().length() > 0)
+			settings.put("icon_path", iconPath.getText().trim());
+		if (imgPath.getText().trim().length() > 0)
+			settings.put("image_path", imgPath.getText().trim());
+		if (copyrightText.getText().trim().length() > 0)
+			settings.put("copyright", copyrightText.getText());
+		if (widthText.getText().trim().length() > 0)
+			settings.put("ngdesktop_height", heightText.getText().trim());
+		if (widthText.getText().trim().length() > 0)
+			settings.put("ngdesktop_height", heightText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
 		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
-		settings.put("application_name", appNameText.getText().trim());
-		settings.put("update_url", updateUrlText.getText().trim());
+		if (appNameText.getText().trim().length() > 0)
+			settings.put("application_name", appNameText.getText().trim());
+		if (updateUrlText.getText().trim().length() > 0)
+			settings.put("update_url", updateUrlText.getText().trim());
+		if (emailAddress.getText().trim().length() > 0)
+			settings.put("email_address", emailAddress.getText().trim());
+		settings.put("store_data", storeBtn.getSelection());
 	}
 
 	@Override

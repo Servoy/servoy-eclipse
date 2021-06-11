@@ -21,5 +21,6 @@ Require-Bundle: javax.servlet,
  org.eclipse.core.expressions,
  com.servoy.eclipse.ui,
  org.eclipse.ui.intro,
- com.servoy.eclipse.notification
+ com.servoy.eclipse.notification,
+ com.servoy.eclipse.ngclient.ui
 Automatic-Module-Name: com.servoy.eclipse.designer.wpm

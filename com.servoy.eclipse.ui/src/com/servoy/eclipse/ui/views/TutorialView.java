@@ -89,7 +89,8 @@ public class TutorialView extends ViewPart
 	private static final String URL_DEFAULT_TUTORIALS_LIST = REST_TUTORIALS_URL + "/listtutorials?servoyVersion=" + ClientVersion.getPureVersion();
 	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 	private static final String SVY_BACKGROUND = "svybackground";
-	private static final Pattern imgPattern = Pattern.compile("<img src=(.+?) alt=(.+?)/>");
+	private static final Pattern imgPattern = Pattern.compile("<img\\s+src=(.+?)(\\s+alt=(.+?))?/>");
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -162,6 +163,13 @@ public class TutorialView extends ViewPart
 		layout.verticalSpacing = 0;
 		mainContainer.setLayout(layout);
 
+		Composite actionsContainer = new Composite(rootComposite, SWT.NONE);
+		actionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		actionsContainer.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+		layout = new GridLayout();
+		layout.numColumns = 1;
+		actionsContainer.setLayout(layout);
+
 		//this is a workaround, the background of the main container is not really set with setData until the view is focused out
 		//TODO remove this when the background is set on the main container using setData
 		if (isLightColor(parent.getBackground())) mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -175,26 +183,10 @@ public class TutorialView extends ViewPart
 		}
 		else
 		{
-			StyledText openLink = createDefaultColorsStyledText(mainContainer, "Go back to tutorials");
-			openLink.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
-			FontDescriptor descriptor = FontDescriptor.createFrom(openLink.getFont());
-			openLink.setFont(descriptor.createFont(parent.getDisplay()));
-			openLink.addMouseListener(new MouseAdapter()
-			{
-				@Override
-				public void mouseUp(MouseEvent event)
-				{
-					super.mouseUp(event);
-					if (event.getSource() instanceof StyledText)
-					{
-						createTutorialView(parent, true);
-					}
-				}
-			});
 			Label nameLabel = new Label(mainContainer, SWT.NONE);
 			nameLabel.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			nameLabel.setText(dataModel.optString("name"));
-			descriptor = FontDescriptor.createFrom(nameLabel.getFont());
+			FontDescriptor descriptor = FontDescriptor.createFrom(nameLabel.getFont());
 			descriptor = descriptor.setStyle(SWT.BOLD);
 			descriptor = descriptor.increaseHeight(12);
 			nameLabel.setFont(descriptor.createFont(this.getViewSite().getShell().getDisplay()));
@@ -208,7 +200,7 @@ public class TutorialView extends ViewPart
 				}
 			}
 
-			new TutorialButtons(mainContainer, parent);
+			new TutorialButtons(actionsContainer, parent);
 		}
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
@@ -366,21 +358,43 @@ public class TutorialView extends ViewPart
 			setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			Composite row = new Composite(this, SWT.FILL);
-			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			row.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 			row.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 			GridLayout rowLayout = new GridLayout();
-			rowLayout.numColumns = 2;
-			rowLayout.horizontalSpacing = 10;
+			rowLayout.numColumns = 3;
 			rowLayout.marginHeight = 1;
+			rowLayout.horizontalSpacing = 50;
 			rowLayout.marginTop = 10;
 			row.setLayout(rowLayout);
 
+			Button listButton = new Button(row, SWT.BUTTON1);
+			Image image = uiActivator.loadImageFromBundle("list_orange_24px.png", false);
+			listButton.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+			listButton.setToolTipText("Go back to tutorials list");
+			listButton.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
+			listButton.setImage(image);
+			listButton.setSize(40, 40);
+			listButton.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseUp(MouseEvent event)
+				{
+					super.mouseUp(event);
+					if (event.getSource() instanceof Button)
+					{
+						createTutorialView(fistParent, true);
+					}
+				}
+			});
+
 			Button currentTutorial = new Button(row, SWT.BUTTON1);
+			image = uiActivator.loadImageFromBundle("play_orange_24px.png", false);
 			currentTutorial.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-			currentTutorial.setText("Watch video");
 			currentTutorial.setToolTipText("Play the video for this tutorial.");
 			currentTutorial.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
+			currentTutorial.setImage(image);
+			currentTutorial.setSize(40, 40);
 			currentTutorial.addListener(SWT.Selection, new Listener()
 			{
 				@Override
@@ -402,8 +416,10 @@ public class TutorialView extends ViewPart
 			{
 				Integer id = (Integer)nextTutorialID;
 				Button nextTutorial = new Button(row, SWT.BUTTON1);
+				image = uiActivator.loadImageFromBundle("arrow_orange_24px.png", false);
 				nextTutorial.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-				nextTutorial.setText("Next tutorial");
+				nextTutorial.setImage(image);
+				nextTutorial.setSize(40, 40);
 				nextTutorial.setToolTipText("Open the next tutorial.");
 				GridData gridData = new GridData();
 				gridData.horizontalAlignment = GridData.END;
@@ -841,7 +857,7 @@ public class TutorialView extends ViewPart
 		{
 			if (images.get(count) == null)
 			{
-				copyText = copyText.replace(matcher.group(0), matcher.groupCount() == 2 ? matcher.group(2).replaceAll("\"", "") : "");
+				copyText = copyText.replace(matcher.group(0), matcher.groupCount() == 3 ? matcher.group(3).replaceAll("\"", "") : "");
 			}
 			else
 			{
@@ -861,7 +877,7 @@ public class TutorialView extends ViewPart
 				break;
 			}
 		}
-		return copyText.trim().replaceAll(" +", " ");
+		return copyText;//.trim().replaceAll(" +", " ");
 	}
 
 	private String getLoginToken()
