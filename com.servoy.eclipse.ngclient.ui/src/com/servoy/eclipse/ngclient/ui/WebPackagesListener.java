@@ -145,7 +145,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String packageName = ng2Config.optString("packageName");
 							IPackageReader packageReader = entry.getValue();
 							String entryPoint = ng2Config.optString("entryPoint", null);
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
+							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
 								writeConsole(console, "need to install package " + pck);
@@ -158,7 +158,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String packageName = spec.getNpmPackageName();
 							IPackageReader packageReader = entry.getValue();
 							String entryPoint = spec.getEntryPoint();
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint);
+							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
 								packageToInstall.add(pck);
@@ -429,7 +429,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param packageReader
 		 * @param entryPoint
 		 */
-		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint)
+		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, IOConsoleOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
@@ -492,6 +492,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									{
 										return location;
 									}
+								}
+								else
+								{
+									writeConsole(console, "Source package " + packageName + " (project: " + project +
+										") should have a .sourcepath json file in the project root having 2 properties: srcDir (pointing to the root souce dir) and apiFile (pointing to the public api file without extension in that source dir\n");
 								}
 								return null;
 							}
