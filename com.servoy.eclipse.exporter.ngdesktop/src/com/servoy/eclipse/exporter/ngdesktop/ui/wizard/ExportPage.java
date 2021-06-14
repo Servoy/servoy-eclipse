@@ -84,7 +84,6 @@ public class ExportPage extends WizardPage
 	private Button includeUpdateBtn;
 	private Text appNameText;
 	private Text updateUrlText;
-	private Group storeGroup;
 	private Text emailAddress;
 	private Button storeBtn;
 
@@ -348,30 +347,28 @@ public class ExportPage extends WizardPage
 		emailLabel.setText("Email address:");
 		emailLabel.setToolTipText("Email address where to receive download links ...");
 
-		storeGroup = new Group(composite, SWT.NONE);
-		storeGroup.setLayout(new GridLayout());
 
-		emailAddress = new Text(storeGroup, SWT.BORDER);
+		emailAddress = new Text(composite, SWT.BORDER);
 		emailAddress.setToolTipText("Email address where to receive download links...");
 		emailAddress.setEditable(true);
 		emailAddress.setVisible(true);
 		value = exportElectronWizard.getDialogSettings().get("email_address");
 		emailAddress.setText(value != null ? value : getLoginUsername());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
 		emailAddress.setLayoutData(gd);
 
-		storeBtn = new Button(storeGroup, SWT.CHECK);
-		storeBtn.setText(String.format("Store data for %d days", ExportNGDesktopWizard.STORE_TIMEOUT));
-		storeBtn.setToolTipText("If not checked, installer(s) will be deleted after several hours ...");
+		final Label storeLabel = new Label(composite, SWT.NONE);
+		storeLabel.setText(String.format("Store artifacts for %d days", ExportNGDesktopWizard.STORE_TIMEOUT));
+
+		storeBtn = new Button(composite, SWT.CHECK);
+		storeBtn.setText("");
+		storeBtn.setToolTipText("If not checked, artifacts will be deleted after several hours ...");
 		storeBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("store_data"));
-		gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		storeBtn.setLayoutData(gd);
-
 		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.verticalSpan = 2;
 		gd.horizontalSpan = 2;
-		gd.verticalSpan = 1;
-		storeGroup.setLayoutData(gd);
-
+		storeBtn.setLayoutData(gd);
 
 		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
 		emptyLabel.setText("");
@@ -381,15 +378,6 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 3;
 		emptyLabel.setLayoutData(gd);
 		emptyLabel.setVisible(true);
-
-		final Label noteLabel = new Label(composite, SWT.NONE);
-		noteLabel.setText("*For now we only support generating Windows branded installers/updates");
-		noteLabel.setEnabled(false); //set to gray
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
-		gd.horizontalSpan = 3;
-		noteLabel.setLayoutData(gd);
-		noteLabel.setVisible(true);
 
 		setControl(composite);
 		this.getWizard().getContainer().getShell().pack();
@@ -542,7 +530,7 @@ public class ExportPage extends WizardPage
 		// the return type is different depending on the execution leaf
 		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
-	
+
 	public List<String> getSelectedPlatforms()
 	{
 		return selectedPlatforms;
