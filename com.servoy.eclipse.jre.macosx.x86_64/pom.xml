@@ -7,7 +7,7 @@
 <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2021.6.0.3680_rc</version>
+		<version>2021.6.0.3681_rc2</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.macosx.x86_64</artifactId>
