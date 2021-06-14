@@ -353,7 +353,7 @@ public class ExportPage extends WizardPage
 		emailAddress.setEditable(true);
 		emailAddress.setVisible(true);
 		value = exportElectronWizard.getDialogSettings().get("email_address");
-		emailAddress.setText(value != null ? value : getLoginUsername());
+		emailAddress.setText(value != null ? value : getLoginUsername() != null ? getLoginUsername() : "");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		emailAddress.setLayoutData(gd);
