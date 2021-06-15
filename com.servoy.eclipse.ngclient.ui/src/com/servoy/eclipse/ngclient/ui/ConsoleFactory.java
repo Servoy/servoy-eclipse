@@ -1,7 +1,6 @@
 package com.servoy.eclipse.ngclient.ui;
 
 import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleFactory;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
@@ -13,8 +12,6 @@ public class ConsoleFactory implements IConsoleFactory
 	{
 		IOConsole console = Activator.getInstance().getConsole();
 		IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-		consoleManager.addConsoles(new IConsole[] { console });
 		consoleManager.showConsoleView(console);
 	}
-
 }

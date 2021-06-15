@@ -69,7 +69,7 @@ public class NodeFolderCreatorJob extends Job
 		{
 			long startTime = System.currentTimeMillis();
 			long time = startTime;
-			writeConsole(console, "Start to copy the NG2 sources");
+			writeConsole(console, "---- Start to copy the NG2 sources");
 			if (!nodeFolder.exists())
 			{
 				createFolder(nodeFolder);

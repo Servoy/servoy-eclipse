@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
@@ -65,6 +68,9 @@ public class Activator extends Plugin
 		{
 			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
 			console = new IOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+			consoleManager.addConsoles(new IConsole[] { console });
+			consoleManager.showConsoleView(console);
 		}
 		return console;
 	}

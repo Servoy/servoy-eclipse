@@ -20,6 +20,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -91,7 +93,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				scheduled.incrementAndGet();
 				long time = System.currentTimeMillis();
-				writeConsole(console, "Starting ngclient source check");
+				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
 				Set<String> packageToInstall = new HashSet<>();
 				// service are based just on all service specifications

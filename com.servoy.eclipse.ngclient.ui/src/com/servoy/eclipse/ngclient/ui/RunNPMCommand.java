@@ -144,8 +144,8 @@ public class RunNPMCommand extends WorkspaceJob
 			allCmdLineArgs.add(npmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(commandArguments);
 //			allCmdLineArgs.add("--scripts-prepend-node-path");
+			writeConsole(console, "\n---- Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
-			writeConsole(console, "Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			builder.command(allCmdLineArgs);
 			process = builder.start();
 			cancelThread.start();
