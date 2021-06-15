@@ -15,6 +15,8 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     private rollOverImgStyle: Map<string, any>;
     private clearStyle: Map<string, any>;
 
+    private resizeObserver: ResizeObserver;
+
     public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2, 
         private windowRefService: WindowRefService) {
         this.clearStyle = new Map();
@@ -32,6 +34,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     ngOnDestroy(): void {
         if (this.hostComponent) {
             this.hostComponent.removeViewStateListener(this);
+            this.resizeObserver.unobserve(this.hostComponent.getNativeElement());
         }
     }
 
@@ -53,9 +56,10 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                 }
             }
         });
-        renderer.listen(this.windowRefService.nativeWindow, 'resize', () => {
+        this.resizeObserver = new ResizeObserver(() => {
             this.setImageStyle();
         });
+        this.resizeObserver.observe(nativeElement);
         this.setImageStyle();
     }
 
