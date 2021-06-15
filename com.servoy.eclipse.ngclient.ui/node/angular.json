@@ -15,7 +15,7 @@
              "sourceMap": {
               "scripts": true,
               "styles": true,
-              "vendor": true
+              "vendor": false
             },
             "outputPath": "dist/app",
             "index": "src/index.html",
