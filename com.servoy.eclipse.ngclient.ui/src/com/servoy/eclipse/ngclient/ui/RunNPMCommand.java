@@ -131,6 +131,7 @@ public class RunNPMCommand extends WorkspaceJob
 			String path = environment.get(pathkey);
 			path = nodePath.getParent() + System.getProperty("path.separator") + path;
 			environment.put(pathkey, path);
+			environment.put("NODE_OPTIONS", "--max-old-space-size=2048");
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
 			if (commandArguments == NGClientConstants.NG_BUILD_COMMAND) // the command that runs the NG build
