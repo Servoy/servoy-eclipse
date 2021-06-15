@@ -47,12 +47,13 @@ public class ImageReplacementMapper
 
 	private static Set<String> interceptableUrls = null;
 	private static Set<Pair<Class< ? >, String>> interceptableFiles = null;
+	private static boolean list_mappings = LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS;
 
 	// replacements loaded from extension points
 	private final static Map<URL, URL> urlReplacements = new HashMap<>();
 	private final static Map<Pair<String, String>, URL> classAndFileNameReplacements = new HashMap<>();
 
-	private static void fill()
+	private static void fill() throws Exception
 	{
 		if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
@@ -732,8 +733,8 @@ public class ImageReplacementMapper
 		}
 		catch (Exception e)
 		{
-			System.err.println("Url replacements parsing going wrong: " + e.getMessage());
 			e.printStackTrace();
+			throw new Exception("Url replacements parsing going wrong: " + e.getMessage());
 		}
 		try
 		{
@@ -765,8 +766,8 @@ public class ImageReplacementMapper
 		}
 		catch (Exception e)
 		{
-			System.err.println("ClassAndFileName Url replacements parsing going wrong: " + e.getMessage());
 			e.printStackTrace();
+			throw new Exception("ClassAndFileName Url replacements parsing going wrong: " + e.getMessage());
 		}
 	}
 
@@ -791,10 +792,21 @@ public class ImageReplacementMapper
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
-			if (urlReplacements.size() == 0) fill();
+			if (urlReplacements.size() == 0)
+			{
+				try
+				{
+					fill();
+				}
+				catch (Exception e)
+				{
+					list_mappings = false; // don't list mappings because you have to scroll a lot to see the exception
+					System.err.println(e.getMessage());
+				}
+			}
 			URL replacement = classAndFileNameReplacements.get(new Pair<>(location.getName(), filename));
 
-			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+			if (list_mappings)
 			{
 				if (interceptableFiles.add(new Pair<Class< ? >, String>(location, filename)))
 				{
@@ -804,7 +816,7 @@ public class ImageReplacementMapper
 
 			if (replacement != null) return replacement;
 		}
-		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+		else if (list_mappings)
 		{
 			System.out.println("skipped the url " + filename + " because workbench is not running yet");
 		}
@@ -828,7 +840,18 @@ public class ImageReplacementMapper
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
-			if (urlReplacements.size() == 0) fill();
+			if (urlReplacements.size() == 0)
+			{
+				try
+				{
+					fill();
+				}
+				catch (Exception e)
+				{
+					list_mappings = false; // don't list mappings because you have to scroll a lot to see the exception
+					System.err.println(e.getMessage());
+				}
+			}
 			URL stableUrl = url;
 			if (String.valueOf(url).startsWith("bundleentry://"))
 			{
@@ -848,7 +871,7 @@ public class ImageReplacementMapper
 
 			URL replacement = urlReplacements.get(stableUrl);
 
-			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+			if (list_mappings)
 			{
 				if (interceptableUrls.add(String.valueOf(stableUrl)))
 				{
@@ -858,7 +881,7 @@ public class ImageReplacementMapper
 
 			if (replacement != null) return replacement;
 		}
-		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+		else if (list_mappings)
 		{
 			System.out.println("skipped the url " + url + " because workbench is not running yet");
 		}
