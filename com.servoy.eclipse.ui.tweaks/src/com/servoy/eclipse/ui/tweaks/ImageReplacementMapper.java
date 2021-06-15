@@ -288,7 +288,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/dlcl16/defaults_ps.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/restore_default_value-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/display_selected_console.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/new_con.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/open_console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/clear_co.png"),
