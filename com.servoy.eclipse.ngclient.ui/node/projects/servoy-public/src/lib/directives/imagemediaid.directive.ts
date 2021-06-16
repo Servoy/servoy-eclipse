@@ -34,7 +34,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     ngOnDestroy(): void {
         if (this.hostComponent) {
             this.hostComponent.removeViewStateListener(this);
-            this.resizeObserver.unobserve(this.hostComponent.getNativeElement());
+            if (this.resizeObserver) this.resizeObserver.unobserve(this.hostComponent.getNativeElement());
         }
     }
 
