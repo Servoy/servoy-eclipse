@@ -35,6 +35,8 @@ import { ServoyBaseComponent } from '@servoy/public';
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
+      <!-- structure template generate start -->
+      <!-- structure template generate end -->
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
           <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
                <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
@@ -81,6 +83,8 @@ import { ServoyBaseComponent } from '@servoy/public';
 
 export class FormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
+    // structure viewchild template generate start
+    // structure viewchild template generate end
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
     @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
 
