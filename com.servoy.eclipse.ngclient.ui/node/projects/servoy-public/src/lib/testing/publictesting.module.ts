@@ -1,3 +1,4 @@
+import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { IComponentCache, IFormCache, ServoyPublicService } from '../services/servoy_public.service';
@@ -8,6 +9,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     private locale: string;
     private messages: { [key: string]: string } = {};
     private forms: { [key: string]: IFormCache } = {};
+    private localeNumberSymbol: string = null;
 
     public addForm(name: string, formCache: IFormCache) {
         this.forms[name] = formCache;
@@ -15,9 +17,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
 
     public getFormCacheByName(containedForm: string): IFormCache {
         if (this.forms[containedForm]) return this.forms[containedForm];
-        const form: IFormCache= {
+        const form: IFormCache = {
             absolute: true,
-            size:  {width: 100, height: 100},
+            size: { width: 100, height: 100 },
             getComponent: (name: string) => {
                 const comp: IComponentCache = {
                     name,
@@ -30,14 +32,21 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
 
     public generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string {
-         return 'resources/upload/1/svy_services/' + serviceName + '/' + apiFunctionName;
+        return 'resources/upload/1/svy_services/' + serviceName + '/' + apiFunctionName;
     }
 
     public generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
-         return 'resources/upload/1' +
+        return 'resources/upload/1' +
             (formname ? '/' + formname : '') +
             (componentName ? '/' + componentName : '') +
             (propertyName ? '/' + propertyName : '');
+    }
+
+    public generateMediaDownloadUrl(media: string): string {
+        return null;
+    }
+    public getUIProperty(key: string): any {
+        return null;
     }
 
     public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
@@ -49,9 +58,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
 
     public getI18NMessages(...keys: string[]): Promise<any> {
-        const resolvedMessages: {[key: string]: string } = {};
-        keys.forEach(key => resolvedMessages[key] = this.messages[key]?this.messages[key]:'');
-        return Promise.resolve(resolvedMessages); 
+        const resolvedMessages: { [key: string]: string } = {};
+        keys.forEach(key => resolvedMessages[key] = this.messages[key] ? this.messages[key] : '');
+        return Promise.resolve(resolvedMessages);
     }
 
     public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
@@ -76,6 +85,18 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         throw new Error('Method not implemented.');
     }
 
+    public getLocaleNumberSymbol(symbol: NumberSymbol): string {
+        if (this.localeNumberSymbol) return this.localeNumberSymbol;
+        return super.getLocaleNumberSymbol(symbol);
+    }
+
+    public setLocaleNumberSymbol(symbol: string): void {
+        this.localeNumberSymbol = symbol;
+    }
+    
+    public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+        
+    }
 }
 @NgModule({
     declarations: [

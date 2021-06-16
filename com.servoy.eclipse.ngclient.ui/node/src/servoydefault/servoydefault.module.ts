@@ -34,10 +34,8 @@ import {ChoiceElementDirective} from './basechoice';
 import { SabloModule } from '../sablo/sablo.module';
 import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 
-import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
-import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Select2Module } from 'ng-select2-component';
 import { Tab } from './tabpanel/basetabpanel';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
@@ -75,9 +73,8 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
     CommonModule,
     NgbModule,
     SabloModule,
-    BrowserAnimationsModule,
     OwlDateTimeModule,
-    OwlMomentDateTimeModule,
+    OwlNativeDateTimeModule,
     ServoyPublicModule,
     Select2Module,
     EditorModule
@@ -107,7 +104,6 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 
   ],
   providers: [
-              I18NProvider,
               { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
              ],
   schemas: [

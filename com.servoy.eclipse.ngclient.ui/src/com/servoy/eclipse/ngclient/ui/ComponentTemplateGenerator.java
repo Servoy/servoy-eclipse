@@ -71,7 +71,6 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectSpecification spec : specs)
 		{
-			if (spec.isDeprecated()) continue;
 			genereateSpec(template, viewChild, spec, spec.getName());
 			if (spec.getName().equals("servoydefault-tabpanel"))
 			{

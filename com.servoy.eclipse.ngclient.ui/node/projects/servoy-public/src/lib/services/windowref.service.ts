@@ -4,7 +4,9 @@ function getWindow(): Window {
     return window;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WindowRefService {
     get nativeWindow(): Window {
         return getWindow();

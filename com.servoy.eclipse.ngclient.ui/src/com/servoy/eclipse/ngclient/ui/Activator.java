@@ -3,6 +3,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
@@ -15,6 +17,11 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -35,6 +42,8 @@ public class Activator extends Plugin
 	private File npmPath;
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
+	private IOConsole console;
+
 
 	public static Activator getInstance()
 	{
@@ -53,12 +62,28 @@ public class Activator extends Plugin
 		copyNodeFolder();
 	}
 
+	public synchronized IOConsole getConsole()
+	{
+		if (console == null)
+		{
+			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
+			console = new IOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+			consoleManager.addConsoles(new IConsole[] { console });
+			consoleManager.showConsoleView(console);
+		}
+		return console;
+	}
+
 	void countDown()
 	{
-		nodeReady.countDown();
-		if (nodeReady.getCount() == -0)
+		if (nodeReady.getCount() > 0)
 		{
-			ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
+			nodeReady.countDown();
+			if (nodeReady.getCount() == -0)
+			{
+				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
+			}
 		}
 	}
 
@@ -144,10 +169,10 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public RunNPMCommand createNPMCommand(String... commands)
+	public RunNPMCommand createNPMCommand(List<String> commandArguments)
 	{
 		waitForNodeExtraction();
-		return new RunNPMCommand(nodePath, npmPath, projectFolder, commands);
+		return new RunNPMCommand(nodePath, npmPath, projectFolder, commandArguments);
 	}
 
 	public void executeNPMInstall()
@@ -204,7 +229,7 @@ public class Activator extends Plugin
 	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
 	 * @throws IOException
 	 */
-	public void exportNG2ToWar(File location)
+	public void exportNG2ToWar(File location, IProgressMonitor monitor)
 	{
 		waitForNodeExtraction();
 
@@ -214,7 +239,7 @@ public class Activator extends Plugin
 			// check what happens if there was a debug watch command on the sources..
 
 			// create the production build
-			createNPMCommand("run build").runCommands();
+			createNPMCommand(Arrays.asList("run", "build")).runCommand(monitor);
 			// copy the production build
 			File distFolder = new File(projectFolder, "dist/app_prod");
 			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));

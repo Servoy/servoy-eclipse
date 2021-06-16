@@ -16,5 +16,13 @@
             id="com.servoy.eclipse.ngclient.ui.serviceprovider">
       </serviceprovider>
    </extension>
+   <extension
+         point="org.eclipse.ui.console.consoleFactories">
+      <consoleFactory
+            class="com.servoy.eclipse.ngclient.ui.ConsoleFactory"
+            icon="images/npmconsole.png"
+            label="NG2 Build Console">
+      </consoleFactory>
+   </extension>
 
 </plugin>

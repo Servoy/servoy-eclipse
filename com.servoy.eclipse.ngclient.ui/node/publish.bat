@@ -1,0 +1,1 @@
+npm publish dist\servoy\public --access public --tag %1

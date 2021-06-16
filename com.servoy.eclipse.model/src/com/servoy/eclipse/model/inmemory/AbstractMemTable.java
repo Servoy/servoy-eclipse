@@ -18,8 +18,12 @@
 package com.servoy.eclipse.model.inmemory;
 
 
+import java.util.Collections;
+import java.util.List;
+
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.dataprocessing.IndexInfo;
 import com.servoy.j2db.persistence.AbstractTable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnChangeHandler;
@@ -367,6 +371,13 @@ public abstract class AbstractMemTable extends AbstractTable
 		}
 
 	}
+
+	@Override
+	public List<IndexInfo> getIndexes()
+	{
+		return Collections.emptyList();
+	}
+
 
 	/**
 	 * @return

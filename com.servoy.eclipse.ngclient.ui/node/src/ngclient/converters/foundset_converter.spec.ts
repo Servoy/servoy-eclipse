@@ -1,12 +1,10 @@
 import { TestBed, inject } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from '@servoy/public';
-import { WindowRefService, SpecTypesService } from '@servoy/public';
+import { LoggerFactory, SessionStorageService, WindowRefService, SpecTypesService } from '@servoy/public';
 import { ServicesService } from '../../sablo/services.service';
 import { FoundsetConverter, Foundset } from './foundset_converter';
 import { SabloDeferHelper } from '../../sablo/defer.service';
-import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ViewportService } from '../services/viewport.service';
 import { DateConverter } from './date_converter';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';

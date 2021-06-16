@@ -6,9 +6,14 @@ import { SpecTypesService, ArrayState, ICustomArray, instanceOfChangeAwareValue,
 
 export class JSONArrayConverter implements IConverter {
     /* eslint-disable */
+    private static readonly GRANULAR_UPDATES = "g";
+    private static readonly GRANULAR_UPDATE_DATA = "d";
+    private static readonly OP_ARRAY_START_END_TYPE = "op";
+    private static readonly CHANGED = 0;
+    private static readonly INSERT = 1;
+    private static readonly DELETE = 2;
+        
     private static readonly UPDATES = 'u';
-    private static readonly REMOVES = 'r';
-    private static readonly ADDITIONS = 'a';
     private static readonly INDEX = 'i';
     private static readonly INITIALIZE = 'in';
     private static readonly VALUE = 'v';
@@ -20,7 +25,7 @@ export class JSONArrayConverter implements IConverter {
     constructor(private converterService: ConverterService, private specTypesService: SpecTypesService, private iterableDiffers: IterableDiffers) {
     }
 
-    fromServerToClient(serverJSONValue, currentClientValue?: ICustomArray<any>, propertyContext?: PropertyContext) {
+    fromServerToClient(serverJSONValue: any, currentClientValue?: ICustomArray<any>, propertyContext?: PropertyContext) {
         let newValue = currentClientValue;
         let state: ArrayState = null;
 
@@ -55,7 +60,7 @@ export class JSONArrayConverter implements IConverter {
                         }
                     }
                 }
-            } else if (serverJSONValue && (serverJSONValue[JSONArrayConverter.UPDATES] || serverJSONValue[JSONArrayConverter.REMOVES] || serverJSONValue[JSONArrayConverter.ADDITIONS])) {
+            } else if (serverJSONValue && serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
                 // granular updates received;
 
                 state = currentClientValue.getStateHolder();
@@ -67,67 +72,94 @@ export class JSONArrayConverter implements IConverter {
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is
                 // leading/has priority because not all server side values might support being recreated from client values)
                 if (state[JSONArrayConverter.CONTENT_VERSION] === serverJSONValue[JSONArrayConverter.CONTENT_VERSION]) {
-                    if (serverJSONValue[JSONArrayConverter.REMOVES]) {
-                        const removes = serverJSONValue[JSONArrayConverter.REMOVES];
-                        // eslint-disable-next-line guard-for-in
-                        for (const idx in removes) {
-                            currentClientValue.splice(removes[idx], 1);
-                        }
-                    }
-                    if (serverJSONValue[JSONArrayConverter.ADDITIONS]) {
-                        const additions = serverJSONValue[JSONArrayConverter.ADDITIONS];
-                        const conversionInfos = serverJSONValue[ConverterService.TYPES_KEY];
-                        // eslint-disable-next-line guard-for-in
-                        for (const i in additions) {
-                            const element = additions[i];
-                            const idx = element[JSONArrayConverter.INDEX];
-                            let val = element[JSONArrayConverter.VALUE];
+                    let i;
+                    for (const granularOp of serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
+                        const startIndex_endIndex_opType = granularOp[JSONArrayConverter.OP_ARRAY_START_END_TYPE]; // it's an array of 3 elements in the order given in name
+                        const startIndex: number = startIndex_endIndex_opType[0];
+                        const endIndex: number = startIndex_endIndex_opType[1];
+                        const opType: number = startIndex_endIndex_opType[2];
 
-                            let conversionInfo = null;
-                            if (conversionInfos && conversionInfos[i] && conversionInfos[i][JSONArrayConverter.VALUE]) {
-                                conversionInfo = conversionInfos[i][JSONArrayConverter.VALUE];
+                        if (opType === JSONArrayConverter.CHANGED) {
+                            const granularOpConversionInfo = granularOp[ConverterService.TYPES_KEY];
+                            const changedData = granularOp[JSONArrayConverter.GRANULAR_UPDATE_DATA];
+                            for (i = startIndex; i <= endIndex; i++) {
+                                const relIdx = i - startIndex;
+
+                                // apply the conversions, update value and kept conversion info for changed indexes
+                                state.conversionInfo[i] = granularOpConversionInfo ? granularOpConversionInfo[relIdx] : undefined;
+                                if (state.conversionInfo[i]) {
+                                    currentClientValue[i] = this.converterService.convertFromServerToClient(changedData[relIdx], state.conversionInfo[i],
+                                                                                currentClientValue[i], propertyContext);
+                                } else currentClientValue[i] = changedData[relIdx];
+
+                                const val = currentClientValue[i];
+                                if (instanceOfChangeAwareValue(val)) {
+                                    // child is able to handle it's own change mechanism
+                                    val.getStateHolder().setChangeListener(() => {
+                                        state.getChangedKeys().add(i);
+                                        state.notifyChangeListener();
+                                    });
+                                }
+                            }
+                        } else if (opType === JSONArrayConverter.INSERT) {
+                            const granularOpConversionInfo = granularOp[ConverterService.TYPES_KEY];
+                            let changedData = granularOp[JSONArrayConverter.GRANULAR_UPDATE_DATA];
+                            const numberOfInsertedRows = changedData.length;
+                            const oldLength = currentClientValue.length;
+
+                            // apply conversions
+                            if (granularOpConversionInfo) changedData = this.converterService.convertFromServerToClient(changedData, granularOpConversionInfo, undefined, propertyContext);
+
+                            // shift conversion info after insert to the right
+                            if (state.conversionInfo) {
+                                for (i = oldLength - 1; i >= startIndex; i--) {
+                                    state.conversionInfo[i + numberOfInsertedRows] = state.conversionInfo[i];
+                                    delete state.conversionInfo[i];
+                                }
                             }
 
-                            if (conversionInfo) {
-                                state.conversionInfo[idx] = conversionInfo;
-                                val = this.converterService.convertFromServerToClient(val, conversionInfo, currentClientValue[idx], propertyContext);
-                            }
-                            currentClientValue.splice(idx, 0, val);
-
-                            if (instanceOfChangeAwareValue(val)) {
-                                // child is able to handle it's own change mechanism
-                                val.getStateHolder().setChangeListener(() => {
-                                    state.getChangedKeys().add(idx);
-                                    state.notifyChangeListener();
-                                });
-                            }
-                        }
-                    }
-                    if (serverJSONValue[JSONArrayConverter.UPDATES]) {
-                        const updates = serverJSONValue[JSONArrayConverter.UPDATES];
-                        const conversionInfos = serverJSONValue[ConverterService.TYPES_KEY];
-                        // eslint-disable-next-line guard-for-in
-                        for (const i in updates) {
-                            const update = updates[i];
-                            const idx = update[JSONArrayConverter.INDEX];
-                            let val = update[JSONArrayConverter.VALUE];
-
-                            let conversionInfo = null;
-                            if (conversionInfos && conversionInfos[i] && conversionInfos[i][JSONArrayConverter.VALUE]) {
-                                conversionInfo = conversionInfos[i][JSONArrayConverter.VALUE];
+                            // do insert the new data, remember conversion info
+                            currentClientValue.splice.apply(currentClientValue, [startIndex, 0].concat(changedData));
+                            if (granularOpConversionInfo) {
+                                for (i = 0; i < changedData.length ; i++) {
+                                    if (granularOpConversionInfo[i]) state.conversionInfo[startIndex + i] = granularOpConversionInfo[i];
+                                }
                             }
 
-                            if (conversionInfo) {
-                                state.conversionInfo[idx] = conversionInfo;
-                                currentClientValue[idx] = val = this.converterService.convertFromServerToClient(val, conversionInfo, currentClientValue[idx], propertyContext);
-                            } else currentClientValue[idx] = val;
+                            // update any affected change notifiers
+                            for (i = startIndex; i < currentClientValue.length; i++) {
+                                if (instanceOfChangeAwareValue(currentClientValue[i])) {
+                                    // child is able to handle it's own change mechanism
+                                    currentClientValue[i].getStateHolder().setChangeListener(() => {
+                                        state.getChangedKeys().add(i);
+                                        state.notifyChangeListener();
+                                    });
+                                }
+                            }
+                        } else if (opType === JSONArrayConverter.DELETE) {
+                            const oldLength = currentClientValue.length;
+                            const numberOfDeletedRows = endIndex - startIndex + 1;
 
-                            if (instanceOfChangeAwareValue(val)) {
-                                // child is able to handle it's own change mechanism
-                                val.getStateHolder().setChangeListener(() => {
-                                    state.getChangedKeys().add(idx);
-                                    state.notifyChangeListener();
-                                });
+                            if (state.conversionInfo) {
+                                // delete conversion info for deleted rows and shift left what is after deletion
+                                for (i = startIndex; i <= endIndex; i++)
+                                    delete state.conversionInfo[i];
+                                for (i = endIndex + 1; i < oldLength; i++) {
+                                    state.conversionInfo[i - numberOfDeletedRows] = state.conversionInfo[i];
+                                    delete state.conversionInfo[i];
+                                }
+                            }
+                            currentClientValue.splice(startIndex, numberOfDeletedRows);
+
+                            // update any affected change notifiers
+                            for (i = startIndex; i < currentClientValue.length; i++) {
+                                if (instanceOfChangeAwareValue(currentClientValue[i])) {
+                                    // child is able to handle it's own change mechanism
+                                    currentClientValue[i].getStateHolder().setChangeListener(() => {
+                                        state.getChangedKeys().add(i);
+                                        state.notifyChangeListener();
+                                    });
+                                }
                             }
                         }
                     }

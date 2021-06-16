@@ -1,12 +1,13 @@
 import { Component, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 
-import { FormattingService, ServoyPublicService } from '@servoy/public';
+import { FormattingService, ServoyPublicService , getFirstDayOfWeek } from '@servoy/public';
 
 import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeComponent } from '@danielmoncada/angular-datetime-picker';
 
 import { ServoyDefaultBaseField } from '../basefield';
 
-import * as moment from 'moment';
+import { DateTime } from 'luxon';
+
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { PickerType } from '@danielmoncada/angular-datetime-picker/lib/date-time/date-time.class';
@@ -44,10 +45,9 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             if (val['servoy.button.cancel']) owlDateTimeIntl.cancelBtnLabel = val['servoy.button.cancel'];
         });
         this.log = logFactory.getLogger('default-calendar');
-        const ld = moment.localeData();
-        this.firstDayOfWeek = ld.firstDayOfWeek();
-        const lts = ld.longDateFormat('LTS');
-        this.hour12Timer = lts.indexOf('a') >= 0 || lts.indexOf('A') >= 0;
+        this.firstDayOfWeek = getFirstDayOfWeek(servoyService.getLocale());
+        const lts = DateTime.now().setLocale(servoyService.getLocale()).toLocaleString(DateTime.DATETIME_FULL).toUpperCase();
+        this.hour12Timer = lts.indexOf('AM') >= 0 || lts.indexOf('PM') >= 0;
     }
 
     attachFocusListeners(nativeElement: any) {
@@ -96,7 +96,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     public dateChanged(event) {
         if (event && event.value) {
-            this.dataProviderID = event.value.toDate();
+            this.dataProviderID = event.value;
         } else this.dataProviderID = null;
         super.pushUpdate();
     }

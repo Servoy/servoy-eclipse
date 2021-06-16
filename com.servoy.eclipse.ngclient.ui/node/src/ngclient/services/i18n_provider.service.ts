@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { Deferred } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class I18NProvider {
     private cachedMessages = {};
 

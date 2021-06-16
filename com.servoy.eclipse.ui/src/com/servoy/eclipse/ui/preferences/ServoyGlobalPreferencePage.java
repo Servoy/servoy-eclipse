@@ -292,10 +292,10 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();
-		if (useDarkIconsButton.getSelection() != iconPreferences.getUseDarkThemeIcons())
+		if (useDarkIconsButton.getSelection() != iconPreferences.getUseDarkThemeIcons() && !iconPreferences.isChanged()) //we set it once more if it was not already set by the theme change
 		{
 			iconPreferences.setUseDarkThemeIcons(useDarkIconsButton.getSelection());
-			iconPreferences.save();
+			iconPreferences.save(true);
 			if (MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
 				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 			{

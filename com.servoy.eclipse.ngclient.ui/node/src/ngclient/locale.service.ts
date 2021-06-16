@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred } from '@servoy/public';
+import { Deferred, SessionStorageService, LoggerFactory, LoggerService } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
-import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
 
-import * as moment from 'moment';
 import numbro from 'numbro';
+import { Settings } from 'luxon';
 
 import { I18NProvider } from './services/i18n_provider.service';
-import { LoggerFactory, LoggerService } from '@servoy/public';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LocaleService {
     private locale = 'en';
     private loadedLocale: Deferred<any>;
@@ -44,10 +44,12 @@ export class LocaleService {
                 // in the session storage we always have the value set via applicationService.setLocale
                 this.sessionStorageService.set('locale', language + '-' + country);
             }
+            // luxon default locale
+            Settings.defaultLocale =  localeId;
             this.locale = localeId;
             const full = language + (country ? '-' + country.toUpperCase() : '');
             // numbro wants with upper case counter but moment is all lower case
-            Promise.all([this.setMomentLocale(full.toLowerCase(), true), this.setNumbroLocale(full, true)]).then(() =>
+            this.setNumbroLocale(full, true).then(() =>
                 this.loadedLocale.resolve(localeId)
             ).catch(() => this.loadedLocale.resolve(localeId));
         }, () => {
@@ -59,24 +61,6 @@ export class LocaleService {
         let locale = this.localeMap[localeId];
         if (!locale) locale = localeId + '-' + localeId.toUpperCase();
         return locale;
-    }
-
-    private setMomentLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
-        if (moment.locale() === localeId) return Promise.resolve();
-        return import(`moment/locale/${localeId}`).then(
-            module => {
-                if (moment.locale() !== localeId)
-                    moment.defineLocale(localeId, module.default._config);
-            }).catch(e => {
-                const index = localeId.indexOf('-');
-                if (index === -1) {
-                    return this.setMomentLocale(this.makeFullLocale(localeId), false);
-                } else if (tryOnlyLanguage) {
-                    return this.setMomentLocale(localeId.substring(0, index), false);
-                } else {
-                    this.log.warn('moment locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
-                }
-            });
     }
 
     private setNumbroLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {

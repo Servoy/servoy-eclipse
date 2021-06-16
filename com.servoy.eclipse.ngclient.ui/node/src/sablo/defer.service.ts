@@ -4,7 +4,9 @@ import { Deferred, IDeferred } from '@servoy/public';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { SabloService } from './sablo.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SabloDeferHelper {
 
     private log: LoggerService;

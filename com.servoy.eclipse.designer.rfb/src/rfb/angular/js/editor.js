@@ -285,8 +285,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							defer.resolve(parent);
 							delete $scope.testElementTimeouts[uuid];
 						} else if (isGhostContainer(uuid)) {
-								$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
-							}
+							$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);
+						}
+                        else{
+                            defer.reject();
+                        }
 					}
 					if ($scope.testElementTimeouts[uuid] == undefined) {
 						$scope.testElementTimeouts[uuid] = $timeout(testElement, 400);

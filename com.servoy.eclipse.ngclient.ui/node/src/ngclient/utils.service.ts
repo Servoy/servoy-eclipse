@@ -3,7 +3,9 @@ import { DOCUMENT } from '@angular/common';
 import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public';
 import { FormService } from './form.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SvyUtilsService {
     private log: LoggerService;
     private doc: Document;

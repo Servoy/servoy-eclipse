@@ -1,12 +1,10 @@
 import { TestBed, inject, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerFactory } from '@servoy/public';
-import { WindowRefService, IValuelist, SpecTypesService, instanceOfChangeAwareValue } from '@servoy/public';
+import { WindowRefService, IValuelist, SpecTypesService, instanceOfChangeAwareValue, SessionStorageService, LoggerFactory } from '@servoy/public';
 import { ServicesService } from '../../sablo/services.service';
 import { ValuelistConverter } from './valuelist_converter';
 import { SabloDeferHelper} from '../../sablo/defer.service';
-import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { TestSabloService, TestWebsocketService } from '../../testing/servoytesting.module';
 import { WebsocketService } from '../../sablo/websocket.service';

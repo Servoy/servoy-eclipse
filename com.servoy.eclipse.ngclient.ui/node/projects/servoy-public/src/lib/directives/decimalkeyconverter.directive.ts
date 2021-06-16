@@ -1,7 +1,7 @@
 import { Directive , Input , ElementRef, HostListener} from '@angular/core';
-import { getLocaleNumberSymbol, NumberSymbol } from '@angular/common';
 import { ServoyPublicService } from '../services/servoy_public.service';
 import { Format } from '../format/formatting.service';
+import { NumberSymbol } from '@angular/common';
 
 @Directive({
   selector: '[svyDecimalKeyConverter]'
@@ -20,7 +20,7 @@ export class DecimalkeyconverterDirective {
           const caretPos = this.element.selectionStart;
           const startString = this.element.value.slice(0, caretPos);
           const endString = this.element.value.slice(this.element.selectionEnd, this.element.value.length);
-          this.element.value = (startString + getLocaleNumberSymbol(this.servoyService.getLocale(), NumberSymbol.Decimal) + endString);
+          this.element.value = (startString + this.servoyService.getLocaleNumberSymbol(NumberSymbol.Decimal) + endString);
           this.element.focus();
           this.element.setSelectionRange(caretPos + 1, caretPos + 1);
           if (e.preventDefault) e.preventDefault();

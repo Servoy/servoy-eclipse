@@ -673,7 +673,8 @@ public class CreateComponentHandler implements IServerService
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
-								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+								Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
+								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p.x,
 									specifications, args.optString("packageName"));
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -712,8 +713,9 @@ public class CreateComponentHandler implements IServerService
 							{
 								if (template.getName().equals(name))
 								{
+									Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
 									Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
-										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
+										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(p.x, p.y), false);
 									if (applyTemplate.length > 0)
 									{
 										if (applyTemplate[0] instanceof FormElementGroup)
@@ -747,7 +749,8 @@ public class CreateComponentHandler implements IServerService
 					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 					ISupportChilds parent = dropTarget instanceof ISupportChilds ? (ISupportChilds)dropTarget : persist.getParent();
 					IPersist newPersist = ((AbstractBase)persist).cloneObj(parent, true, validator, true, true, true);
-					CSSPositionUtils.setLocation((ISupportBounds)newPersist, x, y);
+					Point p = getLocationAndShiftSiblings(parent, args, extraChangedPersists);
+					CSSPositionUtils.setLocation((ISupportBounds)newPersist, p.x, p.y);
 					if (w > 0 && h > 0) CSSPositionUtils.setSize((ISupportBounds)newPersist, w, h);
 
 					final ArrayList<IPersist> newPersists = new ArrayList<IPersist>();
@@ -848,7 +851,7 @@ public class CreateComponentHandler implements IServerService
 			}
 			return new Point(x, y);
 		}
-		return new Point(1, 1);
+		return new Point(args.optInt("x", 1), args.optInt("y", 1));
 	}
 
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWebComponent, PropertyDescription pd, String componentSpecName, String propertyName,
