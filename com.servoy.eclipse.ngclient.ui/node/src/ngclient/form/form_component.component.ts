@@ -232,7 +232,7 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return this.svyResponsiveDiv;
+            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
         } else if (item instanceof FormComponentCache ) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;

@@ -109,7 +109,7 @@ export class ComponentCache implements IComponentCache {
 }
 
 export class StructureCache {
-    constructor(public readonly classes: Array<string>,  public readonly attributes?: { [property: string]: string },
+    constructor(public readonly tagname: string, public readonly classes: Array<string>,  public readonly attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (!this.items) this.items = [];
     }

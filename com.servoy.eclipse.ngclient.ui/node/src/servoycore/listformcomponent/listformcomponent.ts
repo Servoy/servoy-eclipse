@@ -298,7 +298,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache ): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return this.svyResponsiveDiv;
+            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
         }
          if (item instanceof FormComponentCache) {
             return this.parent.getTemplate(item);
