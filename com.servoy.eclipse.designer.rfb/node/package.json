@@ -1,6 +1,6 @@
 {
   "name": "servoy-designer",
-  "version": "2021.9",
+  "version": "2021.9.0",
   "description": "Designer of Servoy",
   "license": "MIT",
   "scripts": {
