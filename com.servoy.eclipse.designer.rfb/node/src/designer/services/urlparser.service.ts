@@ -21,7 +21,7 @@ export class URLParserService {
     parseURL() {
         this.formName = this.websocketService.getURLParameter('f');
         this.solutionName = this.websocketService.getURLParameter('s');
-        this.layout = this.websocketService.getURLParameter('layout');
+        this.layout = this.websocketService.getURLParameter('l');
         this.hideDefault = this.websocketService.getURLParameter("hd");
         this.marqueeSelectOuter = this.websocketService.getURLParameter("mso");
         this.formWidth = parseInt(this.websocketService.getURLParameter("w"), 10);

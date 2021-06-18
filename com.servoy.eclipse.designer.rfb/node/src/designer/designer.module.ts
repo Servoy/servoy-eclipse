@@ -17,6 +17,9 @@ import { SabloModule } from '@servoy/sablo';
 import { WindowRefService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -35,7 +38,10 @@ import { CommonModule } from '@angular/common';
     BrowserModule,
     SabloModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    HttpClientModule,
+    NgbModule,
+    DragDropModule
   ],
   providers: [EditorSessionService, URLParserService, WindowRefService],
   bootstrap: [DesignerComponent]
