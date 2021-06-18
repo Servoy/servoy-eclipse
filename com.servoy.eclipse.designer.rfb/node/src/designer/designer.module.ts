@@ -12,8 +12,11 @@ import { HighlightComponent } from './highlight/highlight.component';
 import { GhostsContainerComponent } from './ghostscontainer/ghostscontainer.component';
 import { EditorContentComponent } from './editorcontent/editorcontent.component';
 import {EditorSessionService} from './services/editorsession.service';
+import {URLParserService} from './services/urlparser.service';
 import { SabloModule } from '@servoy/sablo';
 import { WindowRefService } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -30,9 +33,11 @@ import { WindowRefService } from '@servoy/public';
   ],
   imports: [
     BrowserModule,
-    SabloModule
+    SabloModule,
+    FormsModule,
+    CommonModule
   ],
-  providers: [EditorSessionService, WindowRefService],
+  providers: [EditorSessionService, URLParserService, WindowRefService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

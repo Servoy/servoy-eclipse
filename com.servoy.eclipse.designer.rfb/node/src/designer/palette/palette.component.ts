@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
   selector: 'designer-palette',
@@ -6,4 +7,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./palette.component.css']
 })
 export class PaletteComponent {
+    
+    public searchText : string;
+    
+     constructor(protected readonly editorSession: EditorSessionService) {
+    }
+
+
+    openPackageManager(){
+        this.editorSession.openPackageManager();
+    }
 }

@@ -47,12 +47,13 @@ public class ImageReplacementMapper
 
 	private static Set<String> interceptableUrls = null;
 	private static Set<Pair<Class< ? >, String>> interceptableFiles = null;
+	private static boolean list_mappings = LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS;
 
 	// replacements loaded from extension points
 	private final static Map<URL, URL> urlReplacements = new HashMap<>();
 	private final static Map<Pair<String, String>, URL> classAndFileNameReplacements = new HashMap<>();
 
-	private static void fill()
+	private static void fill() throws Exception
 	{
 		if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
@@ -63,7 +64,7 @@ public class ImageReplacementMapper
 		{
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.pn"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_projects.png"));
@@ -288,7 +289,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/dlcl16/defaults_ps.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/restore_default_value-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/display_selected_console.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/new_con.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/open_console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/clear_co.png"),
@@ -301,7 +302,7 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
-			urlReplacements.put(new URL("(platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/wordwrap.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
@@ -657,6 +658,46 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/validate.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/tricks.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/tips-and-tricks.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/eview16/call_hierarchy.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/call_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/$nl$/icons/full/eview16/call_hierarchy.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/call_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/history_list.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/history_list.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/history_list.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/history_list-disabled.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_callers.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callers.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_callers.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callers-disabled.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_callees.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callees.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_callees.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/callees-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/ch_cancel.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/remove.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/ch_cancel.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/remove.png")); //TODO disabled
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_automatic.gif"), //TODO add dark theme version of the following
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_automatic.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_automatic.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_automatic.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_vertical.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_vertical.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_vertical.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_vertical.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_horizontal.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_horizontal.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_horizontal.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_horizontal.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/th_single.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/th_hierarchy.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/th_single.gif"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/th_hierarchy.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_ps.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/filter_ps.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter-disabled.png"));
 
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
@@ -692,8 +733,8 @@ public class ImageReplacementMapper
 		}
 		catch (Exception e)
 		{
-			System.err.println("Url replacements parsing going wrong: " + e.getMessage());
 			e.printStackTrace();
+			throw new Exception("Url replacements parsing going wrong: " + e.getMessage());
 		}
 		try
 		{
@@ -725,8 +766,8 @@ public class ImageReplacementMapper
 		}
 		catch (Exception e)
 		{
-			System.err.println("ClassAndFileName Url replacements parsing going wrong: " + e.getMessage());
 			e.printStackTrace();
+			throw new Exception("ClassAndFileName Url replacements parsing going wrong: " + e.getMessage());
 		}
 	}
 
@@ -751,10 +792,21 @@ public class ImageReplacementMapper
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
-			if (urlReplacements.size() == 0) fill();
+			if (urlReplacements.size() == 0)
+			{
+				try
+				{
+					fill();
+				}
+				catch (Exception e)
+				{
+					list_mappings = false; // don't list mappings because you have to scroll a lot to see the exception
+					System.err.println(e.getMessage());
+				}
+			}
 			URL replacement = classAndFileNameReplacements.get(new Pair<>(location.getName(), filename));
 
-			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+			if (list_mappings)
 			{
 				if (interceptableFiles.add(new Pair<Class< ? >, String>(location, filename)))
 				{
@@ -764,7 +816,7 @@ public class ImageReplacementMapper
 
 			if (replacement != null) return replacement;
 		}
-		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+		else if (list_mappings)
 		{
 			System.out.println("skipped the url " + filename + " because workbench is not running yet");
 		}
@@ -788,7 +840,18 @@ public class ImageReplacementMapper
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
-			if (urlReplacements.size() == 0) fill();
+			if (urlReplacements.size() == 0)
+			{
+				try
+				{
+					fill();
+				}
+				catch (Exception e)
+				{
+					list_mappings = false; // don't list mappings because you have to scroll a lot to see the exception
+					System.err.println(e.getMessage());
+				}
+			}
 			URL stableUrl = url;
 			if (String.valueOf(url).startsWith("bundleentry://"))
 			{
@@ -808,7 +871,7 @@ public class ImageReplacementMapper
 
 			URL replacement = urlReplacements.get(stableUrl);
 
-			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+			if (list_mappings)
 			{
 				if (interceptableUrls.add(String.valueOf(stableUrl)))
 				{
@@ -818,7 +881,7 @@ public class ImageReplacementMapper
 
 			if (replacement != null) return replacement;
 		}
-		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
+		else if (list_mappings)
 		{
 			System.out.println("skipped the url " + url + " because workbench is not running yet");
 		}

@@ -131,6 +131,7 @@ public class RunNPMCommand extends WorkspaceJob
 			String path = environment.get(pathkey);
 			path = nodePath.getParent() + System.getProperty("path.separator") + path;
 			environment.put(pathkey, path);
+			environment.put("NODE_OPTIONS", "--max-old-space-size=2048");
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
 			if (commandArguments == NGClientConstants.NG_BUILD_COMMAND) // the command that runs the NG build
@@ -144,8 +145,8 @@ public class RunNPMCommand extends WorkspaceJob
 			allCmdLineArgs.add(npmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(commandArguments);
 //			allCmdLineArgs.add("--scripts-prepend-node-path");
+			writeConsole(console, "\n---- Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
-			writeConsole(console, "Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			builder.command(allCmdLineArgs);
 			process = builder.start();
 			cancelThread.start();

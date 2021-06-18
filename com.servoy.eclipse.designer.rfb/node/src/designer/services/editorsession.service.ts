@@ -139,10 +139,6 @@ export class EditorSessionService {
         this.wsSession.callService('formeditor', action, params, true)
     }
 
-    isShowingContainer() {
-        return this.websocketService.getURLParameter("cont");
-    }
-
     openContainedForm(ghost) {
         this.wsSession.callService('formeditor', 'openContainedForm', {
             "uuid": ghost.uuid

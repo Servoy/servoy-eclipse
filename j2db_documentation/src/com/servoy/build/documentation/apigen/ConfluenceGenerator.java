@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 
 import com.jamesmurty.utils.XMLBuilder2;
@@ -86,6 +87,7 @@ import com.servoy.j2db.querybuilder.IQueryBuilderCondition;
 import com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition;
 import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
+import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.solutionmodel.ISMPart;
@@ -846,7 +848,7 @@ public class ConfluenceGenerator
 			{// special tabs that in scripting just map on a String
 				return "String";
 			}
-			else if (type == Map.class || type == ServoyJSONObject.class || type == JSONObject.class)
+			else if (type == Map.class || type == ServoyJSONObject.class || type == JSONObject.class || type == JSMap.class || type == NativeObject.class)
 			{
 				return "Object";
 			}
