@@ -7,7 +7,17 @@
            {{package.packageDisplayname}}
         </ng-template>
          <ng-template ngbPanelContent>
-           
+            <ul>
+                <li *ngFor="let component of package.components"><img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    <ul>
+                    <li *ngFor="let ghost of component.types"><img [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
+                    </ul>
+                    <ul *ngFor="let propertyName of component.properties">
+                        <li *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
+                    </ul>
+                </li>
+                
+            </ul>
         </ng-template>
         </ngb-panel>
     </ngb-accordion>
