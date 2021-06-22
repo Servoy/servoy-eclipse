@@ -38,6 +38,7 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
@@ -81,6 +82,14 @@ public class MovePersistAction extends AbstractMovePersistAction
 		if (location == null)
 		{
 			return;
+		}
+
+		for (IPersist persist : persistList)
+		{
+			if (persist.getRootObject() instanceof Solution)
+			{
+				EditorUtil.closeEditor(persist);
+			}
 		}
 
 		final Location destination = location;
