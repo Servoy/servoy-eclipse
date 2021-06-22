@@ -359,11 +359,11 @@ public class InstallWebPackageHandler implements IDeveloperService
 		switch (prefix)
 		{
 			case "=" :
-				return version1.equals(version2);
+				return SemVerComparator.compare(version1, version2) == 0;
 			case ">=" :
-				return version1.compareTo(version2) >= 0;
+				return SemVerComparator.compare(version1, version2) >= 0;
 			case ">" :
-				return version1.compareTo(version2) > 0;
+				return SemVerComparator.compare(version1, version2) > 0;
 		}
 		return false;
 	}
