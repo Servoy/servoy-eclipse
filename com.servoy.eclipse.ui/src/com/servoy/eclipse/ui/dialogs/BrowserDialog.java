@@ -83,7 +83,6 @@ public class BrowserDialog extends Dialog
 
 	private String url;
 	private IBrowser browser;
-	private org.eclipse.swt.browser.Browser swtBrowser;
 	private Shell shell;
 	private boolean showSkipNextTime;
 	private static final int MIN_WIDTH = 900;
