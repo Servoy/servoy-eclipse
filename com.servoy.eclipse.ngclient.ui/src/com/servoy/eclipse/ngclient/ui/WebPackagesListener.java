@@ -384,14 +384,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("--legacy-peer-deps");
-					if (SOURCE_DEBUG)
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+					try
 					{
-						writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
-						writeConsole(console, "npm command not done: " + RunNPMCommand.commandArgsToString(command));
+						npmCommand.runCommand(monitor);
 					}
-					else
+					catch (Exception e)
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+						ServoyLog.logError(e);
+					}
+					if (cleanInstall.get())
+					{
+						cleanInstall.set(false);
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -400,19 +405,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							ServoyLog.logError(e);
 						}
-						if (cleanInstall.get())
-						{
-							cleanInstall.set(false);
-							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-							}
-							catch (Exception e)
-							{
-								ServoyLog.logError(e);
-							}
-						}
+					}
+					if (SOURCE_DEBUG)
+					{
+						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
+					}
+					else
+					{
+
 						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch", "--max_old_space_size=4096"));
 						try
 						{
@@ -562,6 +562,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
 
 									String location = packageFolder.getCanonicalPath();
+									File packageJson = new File(packageFolder, "package.json");
+									boolean packageJsonChanged = !packageJson.exists();
+									if (!packageJsonChanged)
+									{
+										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
+										packageJsonChanged = new File(file.getFile("package.json").getRawLocationURI()).lastModified() > packageJson
+											.lastModified();
+									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(project.getName()) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
@@ -590,7 +598,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (!installedVersion.endsWith("packages/" + packageName))
+									if (packageJsonChanged || !installedVersion.endsWith("packages/" + packageName))
 									{
 										return location;
 									}
@@ -622,8 +630,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					boolean exists = packageFolder.exists();
 					if (exists)
 					{
-						File entry = new File(packageFolder, entryPoint);
-						if (packageFolder.lastModified() < packageReader.getResource().lastModified() || !entry.exists())
+						File entry = new File(packageFolder, ".timestamp");
+						try
+						{
+							if (!entry.exists() || Long.parseLong(FileUtils.readFileToString(entry, "UTF8")) != packageReader.getResource().lastModified())
+							{
+								FileUtils.deleteQuietly(packageFolder);
+								exists = false;
+							}
+						}
+						catch (Exception e)
 						{
 							FileUtils.deleteQuietly(packageFolder);
 							exists = false;
@@ -636,12 +652,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!exists)
 						{
 							ZipUtils.extractZip(packageReader.getResource().toURI().toURL(), packageFolder);
+							FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(packageReader.getResource().lastModified()),
+								"UTF8");
 						}
 						File entry = new File(packageFolder, entryPoint);
 						if (entry.exists())
 						{
 							String installedVersion = dependencies.optString(packageName);
-							if (!installedVersion.endsWith(entryPoint))
+							if (!exists || !installedVersion.endsWith(entryPoint))
 							{
 								return entry.getCanonicalPath();
 							}
