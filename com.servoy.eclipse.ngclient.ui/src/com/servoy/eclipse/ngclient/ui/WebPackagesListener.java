@@ -99,7 +99,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// service are based just on all service specifications
 				Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
 				SpecProviderState specProviderState = WebServiceSpecProvider.getSpecProviderState();
-				WebObjectSpecification[] allServices = specProviderState.getAllWebComponentSpecifications();
+				WebObjectSpecification[] allServices = specProviderState.getAllWebObjectSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
 					if (!webObjectSpecification.getNG2Config().isNull("packageName"))
