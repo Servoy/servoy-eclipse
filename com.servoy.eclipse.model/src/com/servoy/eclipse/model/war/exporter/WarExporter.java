@@ -153,6 +153,15 @@ public class WarExporter
 	{
 		EXCLUDED_RESOURCES_BY_NAME = new HashSet<>();
 		EXCLUDED_RESOURCES_BY_NAME.add(".git");
+		EXCLUDED_RESOURCES_BY_NAME.add(".gitignore");
+		EXCLUDED_RESOURCES_BY_NAME.add(".project");
+		EXCLUDED_RESOURCES_BY_NAME.add("angular.json");
+		EXCLUDED_RESOURCES_BY_NAME.add("node_modules");
+		EXCLUDED_RESOURCES_BY_NAME.add("webpackage.json");
+		EXCLUDED_RESOURCES_BY_NAME.add("package.json");
+		EXCLUDED_RESOURCES_BY_NAME.add("package-lock.json");
+		EXCLUDED_RESOURCES_BY_NAME.add(".sourcepath");
+		EXCLUDED_RESOURCES_BY_NAME.add("tsconfig.json");
 	}
 
 	private final IWarExportModel exportModel;
@@ -664,6 +673,12 @@ public class WarExporter
 				File resource = packageReader.getResource();
 				if (resource != null)
 				{
+					String entryDir = packageReader.getManifest().getMainAttributes().getValue("Entry-Point");
+					if (entryDir != null)
+					{
+						int index = entryDir.indexOf('/');
+						if (index != -1) entryDir = entryDir.substring(0, index);
+					}
 					boolean copy = false;
 					String name = packageReader.getPackageName();
 					if ((IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()) ||
@@ -692,11 +707,23 @@ public class WarExporter
 					{
 						if (resource.isDirectory())
 						{
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, EXCLUDED_RESOURCES_BY_NAME);
+							Set<String> excludes = EXCLUDED_RESOURCES_BY_NAME;
+							if (entryDir != null)
+							{
+								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
+								excludes.add(entryDir);
+							}
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes);
 						}
 						else
 						{
-							extractJar(name, resource, tmpWarDir, allTemplates);
+							Set<String> excludes = EXCLUDED_RESOURCES_BY_NAME;
+							if (entryDir != null)
+							{
+								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
+								excludes.add(entryDir + '/'); // extractaJar is startsWith because of the jar entries.
+							}
+							extractJar(name, resource, tmpWarDir, allTemplates, excludes);
 						}
 					}
 				}
@@ -782,7 +809,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates)
+	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
 	{
 		try (JarFile jarfile = new JarFile(file))
 		{
@@ -791,6 +818,7 @@ public class WarExporter
 			{
 				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
+				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
 				File fl = new File(destdir, je.getName());
 				if (!fl.exists())
 				{
