@@ -47,7 +47,7 @@ export class BSWindowManager {
     }
 
     resortWindows() {
-        const startZIndex = 9000;
+        const startZIndex = 900;
          this.windows.forEach( (window, index) => {
             window.setIndex(startZIndex + index * this.zIndexIncrement);
         });
