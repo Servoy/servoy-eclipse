@@ -456,7 +456,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packageFolder = new File(packagesFolder, packageName);
 
 									JSONObject sourcePathJson = null;
-									String sourcePathContents = FileUtils.readFileToString(sourcePath.getFullPath().toFile(), "UTF8");
+									String sourcePathContents = FileUtils.readFileToString(sourcePath.getLocation().toFile(), "UTF8");
 									sourcePathJson = new JSONObject(sourcePathContents);
 									IFolder file = project.getFolder(sourcePathJson.getString("srcDir"));
 									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
@@ -467,7 +467,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									if (!packageJsonChanged)
 									{
 										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
-										packageJsonChanged = file.getFile("package.json").getFullPath().toFile().lastModified() > packageJson
+										packageJsonChanged = file.getFile("package.json").getLocation().toFile().lastModified() > packageJson
 											.lastModified();
 									}
 									// check/copy the dist folder to the target packages location
@@ -477,7 +477,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(project.getName());
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
-										File srcDir = file.getFullPath().toFile();
+										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
 										WebPackagesListener.watchCreated.put(project.getName(), new DirectorySync(srcDir, packageFolder, null));
 									}
