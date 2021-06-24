@@ -24,7 +24,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
     <div *ngIf="containedForm.absoluteLayout">
         <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
             <div *ngFor="let item of cache.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
-                <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this }"></ng-template>  <!-- component  -->
+                <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
             </div>
         </div>
     </div>
@@ -40,6 +40,16 @@ import { ServoyApi } from '../../ngclient/servoy_api';
     <div [svyContainerStyle]="state" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
+</ng-template>
+<ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
+          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
+               </div>
+          </div>
+</ng-template>
+<ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
+        <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
 </ng-template>
 <!-- structure template generate start -->
 <!-- structure template generate end -->
@@ -57,6 +67,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() onSelectionChanged: (event: any) => void;
 
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
+    @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
+    @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
     @ViewChild('element', { static: true }) elementRef: ElementRef;
@@ -328,7 +340,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
         }
          if (item instanceof FormComponentCache) {
-            return this.parent.getTemplate(item);
+            return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         }
         return this.parent.getTemplateForLFC(item);
     }
