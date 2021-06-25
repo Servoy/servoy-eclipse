@@ -52,10 +52,10 @@ export class PropertyUtils {
         }
         if ( newVal.type === 'TitledBorder' ) {
             const fieldset = renderer.createElement( 'fieldset' );
-            renderer.setAttribute( fieldset, 'style', 'padding:1px;margin:0px;border:1px solid silver;width:100%;height:100%' );
+            renderer.setAttribute( fieldset, 'style', 'padding:5px;margin:0px;border:1px solid silver;width:100%;height:100%' );
 
             const legend = renderer.createElement( 'legend' );
-            renderer.setAttribute( legend, 'style', 'border-bottom:0px; margin:0px;width:auto;color:' + newVal.color + ';text-align:' + newVal.titleJustification );
+            renderer.setAttribute( legend, 'style', 'float: none;border-bottom:0px; margin:0px;width:auto;color:' + newVal.color + ';text-align:' + newVal.titleJustification );
             if ( newVal.font ) {
                 for ( const key of Object.keys(newVal.font) ) {
                     // keys like 'fontSize' need to be converted into 'font-size'
