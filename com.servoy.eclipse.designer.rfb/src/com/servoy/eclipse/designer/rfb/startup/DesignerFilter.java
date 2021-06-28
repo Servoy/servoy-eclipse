@@ -132,8 +132,7 @@ public class DesignerFilter implements Filter
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
-					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications()
-						.entrySet())
+					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications().entrySet())
 					{
 						PackageSpecification<WebObjectSpecification> value = entry.getValue();
 						for (WebObjectSpecification spec : value.getSpecifications().values())
@@ -150,7 +149,7 @@ public class DesignerFilter implements Filter
 							if (pair == null)
 							{
 								List<WebObjectSpecification> list = new ArrayList<>();
-								pair = new Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>(value, list);
+								pair = new Pair<>(value, list);
 								componentCategories.put(categoryName, pair);
 							}
 							pair.getRight().add(spec);

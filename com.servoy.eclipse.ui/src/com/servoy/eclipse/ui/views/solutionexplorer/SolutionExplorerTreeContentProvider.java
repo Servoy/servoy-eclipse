@@ -964,9 +964,6 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
-								.getFolder(
-									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
@@ -982,15 +979,12 @@ public class SolutionExplorerTreeContentProvider
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
-								.getFolder(
-									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
-								Image img = loadImageFromFolder(folder, spec.getIcon());
+								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
@@ -1021,7 +1015,7 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
 								if (files.length == 1)
 								{
 									IFile f = files[0];
@@ -1192,7 +1186,7 @@ public class SolutionExplorerTreeContentProvider
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
-				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
 				if (files.length == 1)
 				{
 					IFile f = files[0];
@@ -1277,7 +1271,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				try
 				{
-					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
 					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
 					{
 						folder = (IFolder)specFile[0].getParent();
@@ -1385,21 +1379,25 @@ public class SolutionExplorerTreeContentProvider
 			if (resource != null && resource.isFile())
 			{
 				IFile[] files = root.findFilesForLocationURI(resource.toURI());
-				if (files.length == 1 && allReferencedProjects.contains(files[0].getProject()))
+				for (IFile locatedFile : files) // for example if one would import from git a whole repo as project and then some projects from that repo as also eclipse projects - it can be that the same file is found in multiple places/paths in the workspace
 				{
-					UserNodeType nodeType = UserNodeType.COMPONENTS_NONPROJECT_PACKAGE;
-					String displayName = reader.getPackageDisplayname();
-					if (IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+					if (allReferencedProjects.contains(locatedFile.getProject()))
 					{
-						nodeType = UserNodeType.LAYOUT_NONPROJECT_PACKAGE;
+						UserNodeType nodeType = UserNodeType.COMPONENTS_NONPROJECT_PACKAGE;
+						String displayName = reader.getPackageDisplayname();
+						if (IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+						{
+							nodeType = UserNodeType.LAYOUT_NONPROJECT_PACKAGE;
+						}
+						else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
+						{
+							nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
+						} // else it's a components package
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
+						node.parent = un;
+						result.add(node);
+						break;
 					}
-					else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
-					{
-						nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
-					} // else it's a components package
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
-					node.parent = un;
-					result.add(node);
 				}
 			}
 		}
@@ -1411,6 +1409,8 @@ public class SolutionExplorerTreeContentProvider
 
 		// the package project could be referenced by active solution/modules or not (we still have to know it's display name)
 		if (getComponentsSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
+			displayName = getComponentsSpecProviderState().getPackageDisplayName(iProject.getName());
+		else if (getComponentsSpecProviderState().getLayoutSpecifications().containsKey(iProject.getName()))
 			displayName = getComponentsSpecProviderState().getPackageDisplayName(iProject.getName());
 		else if (getServicesSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
 			displayName = getServicesSpecProviderState().getPackageDisplayName(iProject.getName());

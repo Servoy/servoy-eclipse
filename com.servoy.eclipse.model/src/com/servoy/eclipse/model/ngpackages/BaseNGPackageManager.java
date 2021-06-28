@@ -332,14 +332,15 @@ public abstract class BaseNGPackageManager
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, pr, ngPackageChangesPerReferencingProject))
 				{
-					if (componentsSpecProviderState.getPackageNames().contains(pr.getPackageName())) componentsReallyToUnload.add(pr);
+					if (componentsSpecProviderState.getPackageNames().contains(pr.getPackageName()) ||
+						componentsSpecProviderState.getLayoutSpecifications().containsKey(pr.getPackageName())) componentsReallyToUnload.add(pr);
 					else serviceReallyToUnload.add(pr);
 				}
 			}
 
 			for (IPackageReader packageReader : packagesToLoad)
 			{
-				if (packageReader == null) continue;//spec reader marker will show in this case
+				if (packageReader == null) continue; // spec reader marker will show in this case
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageReader, ngPackageChangesPerReferencingProject))
 				{
 					if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects

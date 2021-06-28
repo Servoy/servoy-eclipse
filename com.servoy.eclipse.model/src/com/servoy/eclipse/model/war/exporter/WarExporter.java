@@ -599,7 +599,7 @@ public class WarExporter
 		}
 
 		if ((exportedComponents == null && exportedServices == null) ||
-			(exportedComponents.size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
+			(exportedComponents.size() == componentsSpecProviderState.getAllWebComponentSpecifications().length &&
 				exportedServices.size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
 			return;
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");

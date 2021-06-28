@@ -115,7 +115,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 				// modules and css of the components those are based on the Packages itself
 				TreeSet<String> cssLibs = new TreeSet<>();
-				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentSpecToReader = new TreeMap<>(
+				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
 					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
@@ -125,7 +125,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
-						componentSpecToReader.put(entry, packageReader);
+						componentPackageSpecToReader.put(entry, packageReader);
 					}
 
 					List<String> libs = entry.getNg2CssLibrary();
@@ -136,6 +136,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
+					List<String> libs = entry.getNg2CssLibrary();
+					if (libs != null)
+					{
+						cssLibs.addAll(libs);
+					}
+
 					Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
 					specifications.values().forEach(spec -> {
 						PropertyDescription tagType = spec.getProperty("tagType");
@@ -148,7 +154,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 
 				boolean sourceChanged = false;
-				if (ng2Services.size() > 0 || componentSpecToReader.size() > 0)
+				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
 					try
 					{
@@ -170,7 +176,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 
-						componentSpecToReader.entrySet().forEach(entry -> {
+						componentPackageSpecToReader.entrySet().forEach(entry -> {
 							PackageSpecification<WebObjectSpecification> spec = entry.getKey();
 							String packageName = spec.getNpmPackageName();
 							IPackageReader packageReader = entry.getValue();
@@ -303,7 +309,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// generate the all components.module.ts
 					StringBuilder allComponentsModule = new StringBuilder(256);
 					allComponentsModule.append("import { NgModule } from '@angular/core';\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append("import { ");
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(" } from '");
@@ -316,7 +322,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// end
 
 					allComponentsModule.append("@NgModule({\n imports: [\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
@@ -325,7 +331,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					allComponentsModule.append("ServoyDefaultComponentsModule,\n");
 					// end
 					allComponentsModule.append(" ],\n exports: [\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
