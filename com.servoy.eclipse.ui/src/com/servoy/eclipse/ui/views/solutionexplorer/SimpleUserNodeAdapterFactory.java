@@ -91,7 +91,8 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 						{
 							if (TeamPreferences.isAutomaticResourceSynch())
 							{
-								ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+								ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel()
+									.getActiveResourcesProject();
 
 								if (servoyResourcesProject != null)
 								{
@@ -335,10 +336,34 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				SimpleResourceMapping servers = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME);
 				if (servers != null) return servers.getModelObject();
 			}
+			else if (type == UserNodeType.SERVER && userNode.getRealObject() instanceof IServerInternal)
+			{
+				IServerInternal server = (IServerInternal)userNode.getRealObject();
+				SimpleResourceMapping serverResourceMapping = getResourceProjectResourceMapping(
+					SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + server.getName());
+				if (serverResourceMapping != null) return serverResourceMapping.getModelObject();
+			}
+			else if (type == UserNodeType.TABLE && userNode.getRealObject() instanceof TableWrapper)
+			{
+				TableWrapper table = (TableWrapper)userNode.getRealObject();
+				SimpleResourceMapping tableResourceMapping = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR +
+					table.getServerName() + IPath.SEPARATOR + table.getTableName() + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
+				if (tableResourceMapping != null) return tableResourceMapping.getModelObject();
+			}
 			else if (type == UserNodeType.STYLES)
 			{
 				SimpleResourceMapping styles = getResourceProjectResourceMapping(StringResourceDeserializer.STYLES_DIR_NAME);
 				if (styles != null) return styles.getModelObject();
+			}
+			else if (type == UserNodeType.COMPONENTS_FROM_RESOURCES)
+			{
+				SimpleResourceMapping components = getResourceProjectResourceMapping(SolutionSerializer.COMPONENTS_DIR_NAME);
+				if (components != null) return components.getModelObject();
+			}
+			else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
+			{
+				SimpleResourceMapping services = getResourceProjectResourceMapping(SolutionSerializer.SERVICES_DIR_NAME);
+				if (services != null) return services.getModelObject();
 			}
 			else if (type == UserNodeType.TEMPLATES)
 			{

@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 
 /**
  * Problem decorator
@@ -101,9 +102,9 @@ public class ProblemDecorator implements ILightweightLabelDecorator
 	 */
 	public void decorate(Object element, IDecoration decoration)
 	{
-		if (element instanceof PlatformSimpleUserNode)
+		if (element instanceof SimpleUserNode)
 		{
-			IResource resource = (IResource)((PlatformSimpleUserNode)element).getAdapter(IResource.class);
+			IResource resource = (IResource)((SimpleUserNode)element).getAdapter(IResource.class);
 			if (resource != null && resource.isAccessible())
 			{
 				try

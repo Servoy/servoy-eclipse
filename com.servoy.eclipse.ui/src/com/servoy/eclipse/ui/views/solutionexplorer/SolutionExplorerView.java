@@ -80,6 +80,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -4187,6 +4188,8 @@ public class SolutionExplorerView extends ViewPart
 
 	class ViewLabelDecorator extends LabelDecorator
 	{
+		private final ILabelDecorator defaultSystemDecorator = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+
 		@Override
 		public Image decorateImage(Image image, Object element, IDecorationContext context)
 		{
@@ -4249,6 +4252,26 @@ public class SolutionExplorerView extends ViewPart
 					}
 				}
 			}
+			if (defaultSystemDecorator != null)
+			{
+				if (defaultSystemDecorator instanceof LabelDecorator)
+				{
+					LabelDecorator ld2 = (LabelDecorator)defaultSystemDecorator;
+					Image decorated = ld2.decorateImage(resultImage != null ? resultImage : image, element, DecorationContext.DEFAULT_CONTEXT);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+				else
+				{
+					Image decorated = defaultSystemDecorator.decorateImage(resultImage != null ? resultImage : image, element);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+			}
 			return resultImage;
 		}
 
@@ -4304,10 +4327,18 @@ public class SolutionExplorerView extends ViewPart
 
 		public void addListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.addListener(listener);
+			}
 		}
 
 		public void dispose()
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.dispose();
+			}
 		}
 
 		public boolean isLabelProperty(Object element, String property)
@@ -4317,6 +4348,10 @@ public class SolutionExplorerView extends ViewPart
 
 		public void removeListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.removeListener(listener);
+			}
 		}
 
 		@Override
