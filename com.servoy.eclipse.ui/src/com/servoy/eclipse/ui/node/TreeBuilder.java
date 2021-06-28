@@ -55,10 +55,6 @@ public class TreeBuilder
 		return docManager;
 	}
 
-	/**
-	 * @param prefix
-	 * @return
-	 */
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
 		Image propertiesIcon = imageLookup.loadImage("properties.png");
