@@ -1130,6 +1130,10 @@ public class SolutionExplorerTreeContentProvider
 							{
 								IPackageReader packageType = getPackageType(getComponentsSpecProviderState(), iProject);
 								if (packageType == null) packageType = getPackageType(getServicesSpecProviderState(), iProject);
+								if (packageType == null && iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+								{
+									packageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
+								}
 								if (packageType == null) continue;
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
 									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);

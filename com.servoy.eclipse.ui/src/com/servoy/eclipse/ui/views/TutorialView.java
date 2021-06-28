@@ -134,14 +134,6 @@ public class TutorialView extends ViewPart
 		});
 	}
 
-	private boolean isLightColor(Color c)
-	{
-		double hsp = Math.sqrt(0.299 * (c.getRed() * c.getRed()) +
-			0.587 * (c.getGreen() * c.getGreen()) +
-			0.114 * (c.getBlue() * c.getBlue()));
-		return hsp > 127.5;
-	}
-
 	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
 		parent.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
@@ -156,6 +148,7 @@ public class TutorialView extends ViewPart
 		ScrolledComposite sc = new ScrolledComposite(rootComposite, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Composite mainContainer = new Composite(sc, SWT.NONE);
+		mainContainer.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		sc.setContent(mainContainer);
 		sc.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		layout = new GridLayout();
@@ -170,12 +163,6 @@ public class TutorialView extends ViewPart
 		layout.numColumns = 1;
 		actionsContainer.setLayout(layout);
 
-		//this is a workaround, the background of the main container is not really set with setData until the view is focused out
-		//TODO remove this when the background is set on the main container using setData
-		if (isLightColor(parent.getBackground())) mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		//end workaround
-
-		mainContainer.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 
 		if (createDefaultTutorialsList)
 		{

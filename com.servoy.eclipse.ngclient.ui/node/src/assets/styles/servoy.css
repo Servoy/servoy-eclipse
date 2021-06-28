@@ -379,3 +379,11 @@ fieldset[disabled] .btn-default.focus {
   background-color: #fff;
   border-color: #ccc;
 }
+
+.svy-main-window-container {
+	z-index: 0;
+}
+
+.svy-main-window-navigator-container {
+	z-index: 0;
+}

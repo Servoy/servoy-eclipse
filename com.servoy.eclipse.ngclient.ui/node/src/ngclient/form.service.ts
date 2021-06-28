@@ -320,10 +320,10 @@ export class FormService {
     private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.styleclass, elem.attributes);
+                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
-                    parent = new StructureCache(null);
+                    parent = new StructureCache(null, null);
                     formCache.mainStructure = parent;
                 }
                 if (parent instanceof StructureCache || parent instanceof FormComponentCache) {

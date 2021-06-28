@@ -41,8 +41,6 @@ import com.servoy.j2db.util.Debug;
  */
 public class DirectorySync
 {
-	private final File srcRoot;
-	private final File targetDir;
 	private final Predicate<String> ignoreFilter;
 	private volatile WatchService watchService;
 	private volatile boolean destroy = false;
@@ -50,8 +48,6 @@ public class DirectorySync
 
 	public DirectorySync(File srcRoot, File targetDir, Predicate<String> ignoreFilter)
 	{
-		this.srcRoot = srcRoot;
-		this.targetDir = targetDir;
 		this.ignoreFilter = ignoreFilter;
 
 		try

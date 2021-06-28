@@ -1,1 +1,27 @@
-<div class="palette"><h3>Servoy Designer Palette</h3></div>
+<div id="palette" class="palette">
+    <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
+    <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
+    <ngb-accordion [activeIds]="activeIds" [type]="'light'">
+        <ngb-panel *ngFor="let package of packages| searchTextFilterDeep : 'components' : 'displayName' : searchText;let i = index" [id]="package.id">
+         <ng-template ngbPanelTitle>
+           {{package.packageDisplayname}}
+        </ng-template>
+         <ng-template ngbPanelContent>
+            <ul>
+                <li *ngFor="let component of package.components | searchTextFilter : 'displayName' : searchText" (click)="onClick(component)">
+                    <img *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
+                    <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    <ul>
+                    <li *ngFor="let ghost of component.types"><img [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
+                    </ul>
+                    <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
+                        <li *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
+                    </ul>
+                </li>
+                
+            </ul>
+        </ng-template>
+        </ngb-panel>
+    </ngb-accordion>
+    
+</div>

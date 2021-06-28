@@ -34,6 +34,8 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.themes.ITheme;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.w3c.dom.css.CSSStyleDeclaration;
@@ -62,6 +64,9 @@ public class E4ThemeColor
 				}
 			} else if (cssValue.startsWith("#")) { //$NON-NLS-1$
 				String rest = cssValue.substring(1, cssValue.length());
+				ITheme theme  = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme();
+				RGB rgb = theme.getColorRegistry().getRGB(rest.replaceAll("-", "."));
+				if (rgb != null) return rgb;
 				int idx = rest.indexOf("#"); //$NON-NLS-1$
 				if (idx != -1) {
 					rest = rest.substring(idx + 1, rest.length());

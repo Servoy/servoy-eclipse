@@ -53,8 +53,10 @@ import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.Package.ZipPackageReader;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -96,15 +98,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
 				Set<String> packageToInstall = new HashSet<>();
+				Set<String> structureTagNames = new TreeSet<>();
 				// service are based just on all service specifications
 				Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
-				SpecProviderState specProviderState = WebServiceSpecProvider.getSpecProviderState();
-				WebObjectSpecification[] allServices = specProviderState.getAllWebObjectSpecifications();
+				SpecProviderState serviceProviderState = WebServiceSpecProvider.getSpecProviderState();
+				WebObjectSpecification[] allServices = serviceProviderState.getAllWebObjectSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
 					if (!webObjectSpecification.getNG2Config().isNull("packageName"))
 					{
-						IPackageReader packageReader = specProviderState
+						IPackageReader packageReader = serviceProviderState
 							.getPackageReader(webObjectSpecification.getPackageName());
 						ng2Services.put(webObjectSpecification, packageReader);
 					}
@@ -114,23 +117,35 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				TreeSet<String> cssLibs = new TreeSet<>();
 				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentSpecToReader = new TreeMap<>(
 					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
-				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-				for (PackageSpecification<WebObjectSpecification> entry : componentsSpecProviderState.getWebObjectSpecifications().values())
+				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
+				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
 				{
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
 					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
 					{
-						IPackageReader packageReader = componentsSpecProviderState.getPackageReader(entry.getPackageName());
+						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentSpecToReader.put(entry, packageReader);
 					}
 
-					List<String> libs = entry.getNg2CssDesignLibrary();
+					List<String> libs = entry.getNg2CssLibrary();
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
 					}
 				}
+				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
+				{
+					Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
+					specifications.values().forEach(spec -> {
+						PropertyDescription tagType = spec.getProperty("tagType");
+						if (tagType != null && tagType.getDefaultValue() != null && !"div".equals(tagType.getDefaultValue()))
+						{
+							structureTagNames.add((String)tagType.getDefaultValue());
+						}
+					});
+				}
+
 
 				boolean sourceChanged = false;
 				if (ng2Services.size() > 0 || componentSpecToReader.size() > 0)
@@ -244,6 +259,30 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						componentTemplates.getLeft());
 					content = replace(content, "// component viewchild template generate start", "// component viewchild template generate end",
 						componentTemplates.getRight());
+
+					// add structure templates
+					if (structureTagNames.size() > 0)
+					{
+						LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
+						content = replace(content, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+							generateStructureTemplate.getFormComponentTemplate());
+						content = replace(content, "// structure viewchild template generate start", "// structure viewchild template generate end",
+							generateStructureTemplate.getViewChilds());
+
+						String lfc = FileUtils.readFileToString(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), "UTF-8");
+						String oldLFC = lfc;
+						lfc = replace(lfc, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+							generateStructureTemplate.getLFFormComponentTemplate());
+						lfc = replace(lfc, "// structure viewchild template generate start", "// structure viewchild template generate end",
+							generateStructureTemplate.getViewChilds());
+						if (!oldLFC.equals(lfc))
+						{
+							sourceChanged = true;
+							writeConsole(console, "LFC components ts file changed");
+							FileUtils.writeStringToFile(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), lfc, "UTF-8");
+						}
+
+					}
 					if (!old.equals(content))
 					{
 						sourceChanged = true;
@@ -345,14 +384,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("--legacy-peer-deps");
-					if (SOURCE_DEBUG)
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+					try
 					{
-						writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
-						writeConsole(console, "npm command not done: " + RunNPMCommand.commandArgsToString(command));
+						npmCommand.runCommand(monitor);
 					}
-					else
+					catch (Exception e)
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+						ServoyLog.logError(e);
+					}
+					if (cleanInstall.get())
+					{
+						cleanInstall.set(false);
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -361,20 +405,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							ServoyLog.logError(e);
 						}
-						if (cleanInstall.get())
-						{
-							cleanInstall.set(false);
-							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-							}
-							catch (Exception e)
-							{
-								ServoyLog.logError(e);
-							}
-						}
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
+					}
+					if (SOURCE_DEBUG)
+					{
+						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
+					}
+					else
+					{
+
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch", "--max_old_space_size=4096"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -407,6 +446,67 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					checkPackages(false);
 				}
 			}
+		}
+
+		private LayoutTemplates generateStructureTemplate(Set<String> tags)
+		{
+			StringBuilder template = new StringBuilder();
+			StringBuilder viewChild = new StringBuilder();
+			StringBuilder templateLFC = new StringBuilder();
+
+			template.append("<!-- structure template generate start -->\n");
+			templateLFC.append("<!-- structure template generate start -->\n");
+			viewChild.append("// structure viewchild template generate start\n");
+
+			tags.forEach(tag -> {
+				template.append("<ng-template  #svyResponsive");
+				template.append(tag);
+				template.append("  let-state=\"state\" >\n<");
+				template.append(tag);
+				template.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				template.append(
+					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
+				template.append(tag);
+				template.append(">\n</ng-template>\n");
+
+				templateLFC.append("<ng-template  #svyResponsive");
+				templateLFC.append(tag);
+				templateLFC.append("  let-state=\"state\" let-row=\"row\" let-i=\"i\">\n<");
+				templateLFC.append(tag);
+				templateLFC.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				templateLFC.append(
+					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
+				templateLFC.append(tag);
+				templateLFC.append(">\n</ng-template>\n");
+
+				viewChild.append("@ViewChild('svyResponsive");
+				viewChild.append(tag);
+				viewChild.append("', { static: true }) readonly svyResponsive");
+				viewChild.append(tag);
+				viewChild.append(": TemplateRef<any>;\n");
+			});
+			template.append("<!-- structure template generate end -->");
+			templateLFC.append("<!-- structure template generate end -->");
+			viewChild.append("// structure viewchild template generate end");
+			return new LayoutTemplates()
+			{
+				@Override
+				public CharSequence getViewChilds()
+				{
+					return viewChild;
+				}
+
+				public CharSequence getLFFormComponentTemplate()
+				{
+					return templateLFC;
+				}
+
+				@Override
+				public CharSequence getFormComponentTemplate()
+				{
+					return template;
+				}
+			};
 		}
 
 		/**
@@ -456,12 +556,20 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packageFolder = new File(packagesFolder, packageName);
 
 									JSONObject sourcePathJson = null;
-									String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
+									String sourcePathContents = FileUtils.readFileToString(sourcePath.getFullPath().toFile(), "UTF8");
 									sourcePathJson = new JSONObject(sourcePathContents);
 									IFolder file = project.getFolder(sourcePathJson.getString("srcDir"));
 									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
 
 									String location = packageFolder.getCanonicalPath();
+									File packageJson = new File(packageFolder, "package.json");
+									boolean packageJsonChanged = !packageJson.exists();
+									if (!packageJsonChanged)
+									{
+										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
+										packageJsonChanged = file.getFile("package.json").getFullPath().toFile().lastModified() > packageJson
+											.lastModified();
+									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(project.getName()) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
@@ -469,7 +577,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(project.getName());
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
-										File srcDir = new File(file.getRawLocationURI());
+										File srcDir = file.getFullPath().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
 										WebPackagesListener.watchCreated.put(project.getName(), new DirectorySync(srcDir, packageFolder, null));
 									}
@@ -490,7 +598,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (!installedVersion.endsWith("packages/" + packageName))
+									if (packageJsonChanged || !installedVersion.endsWith("packages/" + packageName))
 									{
 										return location;
 									}
@@ -522,8 +630,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					boolean exists = packageFolder.exists();
 					if (exists)
 					{
-						File entry = new File(packageFolder, entryPoint);
-						if (packageFolder.lastModified() < packageReader.getResource().lastModified() || !entry.exists())
+						File entry = new File(packageFolder, ".timestamp");
+						try
+						{
+							if (!entry.exists() || Long.parseLong(FileUtils.readFileToString(entry, "UTF8")) != packageReader.getResource().lastModified())
+							{
+								FileUtils.deleteQuietly(packageFolder);
+								exists = false;
+							}
+						}
+						catch (Exception e)
 						{
 							FileUtils.deleteQuietly(packageFolder);
 							exists = false;
@@ -536,12 +652,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!exists)
 						{
 							ZipUtils.extractZip(packageReader.getResource().toURI().toURL(), packageFolder);
+							FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(packageReader.getResource().lastModified()),
+								"UTF8");
 						}
 						File entry = new File(packageFolder, entryPoint);
 						if (entry.exists())
 						{
 							String installedVersion = dependencies.optString(packageName);
-							if (!installedVersion.endsWith(entryPoint))
+							if (!exists || !installedVersion.endsWith(entryPoint))
 							{
 								return entry.getCanonicalPath();
 							}
@@ -570,7 +688,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			return null;
 		}
 
-		private String replace(String content, String start, String end, StringBuilder toInsert)
+		private String replace(String content, String start, String end, CharSequence toInsert)
 		{
 			int startIndex = content.indexOf(start);
 			int endIndex = content.indexOf(end) + end.length();
@@ -628,5 +746,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			// there is only 1 job and that one is running (not scheduled) then increase by one to make it run again
 			scheduled.incrementAndGet();
 		}
+	}
+
+	private interface LayoutTemplates
+	{
+		CharSequence getFormComponentTemplate();
+
+		CharSequence getLFFormComponentTemplate();
+
+		CharSequence getViewChilds();
 	}
 }

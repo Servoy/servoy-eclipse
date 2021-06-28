@@ -142,4 +142,11 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		super.refreshBrowserUrl(true);
 	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (!browser.isDisposed()) browser.dispose();
+	}
 }
