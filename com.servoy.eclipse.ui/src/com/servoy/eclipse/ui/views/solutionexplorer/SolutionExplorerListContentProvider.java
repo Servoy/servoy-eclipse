@@ -65,8 +65,6 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
-import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -1244,7 +1242,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						String dataSource = server.getTableDatasource(name);
 						if (dataSource != null)
 						{
-							UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
+							UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
+								uiActivator.loadImageFromBundle("table.png"));
 							//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 							node.setFlags(SimpleUserNode.FLAG_NO_PK);
 							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
@@ -1252,7 +1251,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						}
 					}
 				}
-
 			}
 			catch (RepositoryException e)
 			{
@@ -1277,25 +1275,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return SimpleUserNode.FLAG_NO_PK;
 		}
 		return 0;
-	}
-
-	private static Image loadImageForTableNode()
-	{
-		final String TABLE_ERROR_IMAGE = "table.png_IMG_DEC_FIELD_ERROR";
-
-		Image errorIcon = uiActivator.loadImageFromCache(TABLE_ERROR_IMAGE);
-		if (errorIcon == null)
-		{
-			Image IMG_ERROR = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
-			if (IMG_ERROR != null)
-			{
-				errorIcon = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("table.png"), ImageDescriptor.createFromImage(IMG_ERROR),
-					IDecoration.BOTTOM_LEFT).createImage();
-				uiActivator.putImageInCache(TABLE_ERROR_IMAGE, errorIcon);
-			}
-		}
-
-		return errorIcon;
 	}
 
 	public static SimpleUserNode[] createProcedures(IServerInternal s, UserNodeType type)
