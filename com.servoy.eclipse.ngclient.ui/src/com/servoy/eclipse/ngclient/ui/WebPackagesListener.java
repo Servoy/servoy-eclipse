@@ -419,7 +419,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					else
 					{
 
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch", "--max_old_space_size=4096"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
