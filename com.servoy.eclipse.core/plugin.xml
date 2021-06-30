@@ -646,7 +646,7 @@
       <theme
             basestylesheeturi="servoytheme/servoy.css"
             id="com.servoy.eclipse.core.servoytheme"
-            label="Servoy Default Theme">
+            label="Servoy Default">
       </theme>
       <stylesheet
             uri="servoydarktheme/servoydark.css">
