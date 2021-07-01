@@ -17,12 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import java.util.Arrays;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -62,45 +59,45 @@ public class SystemVisualFormEditorDesignPage extends RfbVisualFormEditorDesignP
 			return;
 		}
 
-		try
-		{
-			// install fake WebSocket in case browser does not support it
-			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
-			// install console
-			new BrowserFunction(browser, "consoleLog")
-			{
-				@Override
-				public Object function(Object[] arguments)
-				{
-					if (arguments.length > 1)
-					{
-						if ("log".equals(arguments[0]))
-						{
-							ServoyLog.logInfo(arguments[1] != null ? arguments[1].toString() : null);
-						}
-						else if ("error".equals(arguments[0]))
-						{
-							ServoyLog.logError(arguments[1] != null ? arguments[1].toString() : null, null);
-						}
-						else if ("onerror".equals(arguments[0]))
-						{
-							ServoyLog.logError(Arrays.toString(arguments), null);
-						}
-					}
-					return null;
-				}
-			};
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("couldn't load the editor: ", e);
-		}
+//		try
+//		{
+//			// install fake WebSocket in case browser does not support it
+//			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
+//			// install console
+//			new BrowserFunction(browser, "consoleLog")
+//			{
+//				@Override
+//				public Object function(Object[] arguments)
+//				{
+//					if (arguments.length > 1)
+//					{
+//						if ("log".equals(arguments[0]))
+//						{
+//							ServoyLog.logInfo(arguments[1] != null ? arguments[1].toString() : null);
+//						}
+//						else if ("error".equals(arguments[0]))
+//						{
+//							ServoyLog.logError(arguments[1] != null ? arguments[1].toString() : null, null);
+//						}
+//						else if ("onerror".equals(arguments[0]))
+//						{
+//							ServoyLog.logError(Arrays.toString(arguments), null);
+//						}
+//					}
+//					return null;
+//				}
+//			};
+//		}
+//		catch (Exception e)
+//		{
+//			ServoyLog.logError("couldn't load the editor: ", e);
+//		}
 	}
 
 	@Override
 	protected void showUrl(String url)
 	{
-		if (!browser.isDisposed()) browser.setUrl(url + "&replacewebsocket=true"); // + "&replacewebsocket=true");
+		if (!browser.isDisposed()) browser.setUrl(url); // + "&replacewebsocket=true");
 	}
 
 	@Override

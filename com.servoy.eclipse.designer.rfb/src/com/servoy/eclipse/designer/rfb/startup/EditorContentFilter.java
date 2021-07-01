@@ -107,6 +107,7 @@ public class EditorContentFilter implements Filter
 				Map<String, Object> variableSubstitution = new HashMap<String, Object>();
 				variableSubstitution.put("orientation", Integer.valueOf(0)); // fs.getSolution().getTextOrientation()
 				variableSubstitution.put("contextPort", Integer.valueOf(ApplicationServerRegistry.get().getWebServerPort()));
+				variableSubstitution.put("host", httpServletRequest.getServerName());
 				List<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
 				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
