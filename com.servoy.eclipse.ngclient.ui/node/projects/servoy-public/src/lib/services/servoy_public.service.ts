@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { getLocaleNumberSymbol, NumberSymbol } from '@angular/common';
 import { EventLike, JSEvent } from '../jsevent';
+import {PopupForm} from '../utils/popupform';
 
 @Injectable()
 export abstract class ServoyPublicService {
@@ -19,6 +20,8 @@ export abstract class ServoyPublicService {
     public getLocaleNumberSymbol(symbol: NumberSymbol): string {
         return getLocaleNumberSymbol(this.getLocale(), symbol);
     }
+    public abstract showForm(popup: PopupForm) : void;
+    public abstract cancelFormPopup(disableClearPopupFormCallToServer: boolean): void;
 }
 
 export interface IFormCache {

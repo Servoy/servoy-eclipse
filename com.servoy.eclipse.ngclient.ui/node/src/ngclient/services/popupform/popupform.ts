@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import { PopupForm } from '../popupform.service';
 import { DOCUMENT } from '@angular/common';
-import { FormService } from '../../form.service';
+import { ServoyPublicService, PopupForm } from '@servoy/public';
 
 @Component({
     selector: 'svy-popupform',
@@ -15,7 +14,7 @@ export class ServoyFormPopupComponent {
     _width = 0;
     _height = 0;
 
-    constructor(@Inject(DOCUMENT) private doc: Document, private formService: FormService) {
+    constructor(@Inject(DOCUMENT) private doc: Document, private formService: ServoyPublicService) {
     }
 
     setPopupForm(popup: PopupForm) {

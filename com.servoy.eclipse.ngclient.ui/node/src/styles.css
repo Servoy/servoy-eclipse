@@ -4,7 +4,6 @@
 @import "assets/bootstrap-window/bootstrap-window.css";
 @import "assets/styles/servoy.css";
 @import "~@fortawesome/fontawesome-free/css/all.css";
-@import "servoydefault/defaultcomponents.css";
 
-@import "window_service/servoy-menu.css";
+@import "../projects/window/servoy-menu.css";
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";

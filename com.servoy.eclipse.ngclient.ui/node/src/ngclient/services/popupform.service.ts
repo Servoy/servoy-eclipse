@@ -4,6 +4,7 @@ import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
+import { PopupForm } from '@servoy/public';
 
 @Injectable()
 export class PopupFormService {
@@ -113,21 +114,4 @@ export class PopupFormService {
             return;
         }
     };
-}
-
-export class PopupForm {
-    public component: string;
-    public form: string;
-    public x: number;
-    public y: number;
-    public width: number;
-    public height: number;
-    public showBackdrop: boolean;
-    public doNotCloseOnClickOutside: boolean;
-    public onClose: Callback;
-}
-
-export class Callback {
-    public formname: string;
-    public script: string;
 }

@@ -231,6 +231,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						}
 					});
+
+					//window plugin
+					imports.append("import { WindowService as WindowPlugin, WindowServiceModule} from '@servoy/window';\n");
+					services.append("private window: WindowPlugin,\n");
+					modules.append("WindowServiceModule,\n");
+					providers.append("WindowServiceModule,\n");
+
+					// dialogs plugin
+					imports.append("import { DialogModule, DialogService } from '@servoy/dialogs';\n");
+					services.append("private dialogs: DialogService,\n");
+					modules.append("DialogModule,\n");
+
+					// ngutils plugin
+					imports.append("import { ServoyNGUtilsModule, NGUtilsService } from '@servoy/ngutils';\n");
+					services.append("private ngclientutils: NGUtilsService,\n");
+					modules.append("ServoyNGUtilsModule,\n");
+
 					imports.append("// generated imports end");
 					services.append("// generated services end");
 					providers.append("// generated providers end");
@@ -318,7 +335,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					});
 
 					// static list for now
-					allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
+					//TODO filter out if needed
+					allComponentsModule.append("import { ServoyDefaultComponentsModule } from '@servoy/servoydefault';\n");
+					cssLibs.add("../projects/servoydefault/defaultcomponents.css");
 					// end
 
 					allComponentsModule.append("@NgModule({\n imports: [\n");

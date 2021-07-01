@@ -1,6 +1,6 @@
 import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 
-import {ServoyDefaultBaseComponent} from '../../servoydefault/basecomponent';
+import {ServoyDefaultBaseComponent} from '@servoy/servoydefault';
 
 @Component( {
     selector: 'servoycore-slider',

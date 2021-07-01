@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
-import { ServoyDefaultBaseComponent } from '../../servoydefault/basecomponent';
+import { ServoyDefaultBaseComponent } from '@servoy/servoydefault';
 
 @Component({
     selector: 'servoycore-formcontainer',

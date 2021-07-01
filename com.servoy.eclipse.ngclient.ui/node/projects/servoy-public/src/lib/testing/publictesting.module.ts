@@ -1,6 +1,7 @@
 import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
+import { PopupForm } from '../utils/popupform';
 import { IComponentCache, IFormCache, ServoyPublicService } from '../services/servoy_public.service';
 import { ServoyPublicModule } from '../servoy_public.module';
 
@@ -95,6 +96,14 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
     
     public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+        
+    }
+    
+    public showForm(popup: PopupForm) : void{
+        
+    }
+    
+    public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
         
     }
 }
