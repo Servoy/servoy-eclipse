@@ -1,6 +1,6 @@
-import { TrustAsHtmlPipe } from './../../../projects/servoy-public/src/lib/format/pipes';
+import { TrustAsHtmlPipe } from './../../../../../servoy-public/src/lib/format/pipes';
 import { OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { ICustomObject } from './../../../projects/servoy-public/src/lib/spectypes.service';
+import { ICustomObject } from './../../../../../servoy-public/src/lib/spectypes.service';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
