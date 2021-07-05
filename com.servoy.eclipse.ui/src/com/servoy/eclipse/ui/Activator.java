@@ -290,23 +290,43 @@ public class Activator extends AbstractUIPlugin
 			{
 				final Display d = Display.getDefault();
 				final IThemeEngine engine = manager.getEngineForDisplay(d);
-				final ITheme it = engine.getActiveTheme();
-				String label = it.getLabel();
-				if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-					!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+				if (engine != null)
 				{
-					IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
-					IconPreferences.getInstance().save(true);
-					ServoyModelManager.getServoyModelManager().getServoyModel()
-						.addDoneListener(() -> {
-							if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-								label + " theme was detected",
-								"It is strongly recommended to restart the developer for the " + label +
-									" theme preferences to be applied. Would you like to restart now?"))
-							{
-								PlatformUI.getWorkbench().restart();
-							}
-						});
+					final ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						String label = it.getLabel();
+						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
+							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+						{
+							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
+							IconPreferences.getInstance().save(true);
+							ServoyModelManager.getServoyModelManager().getServoyModel()
+								.addDoneListener(() -> {
+									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										label + " theme was detected",
+										"It is strongly recommended to restart the developer for the " + label +
+											" theme preferences to be applied. Would you like to restart now?"))
+									{
+										PlatformUI.getWorkbench().restart();
+									}
+								});
+						}
+					}
+					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
+					{
+						IconPreferences.getInstance().setUseDarkThemeIcons(false);
+						IconPreferences.getInstance().save(true);
+						ServoyModelManager.getServoyModelManager().getServoyModel()
+							.addDoneListener(() -> {
+								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+									"Theming is disabled",
+									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
+								{
+									PlatformUI.getWorkbench().restart();
+								}
+							});
+					}
 				}
 			}
 		}
