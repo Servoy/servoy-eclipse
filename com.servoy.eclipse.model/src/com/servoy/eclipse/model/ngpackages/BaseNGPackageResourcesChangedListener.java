@@ -419,6 +419,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				}
 				for (IProject addedProject : usedPackageProjects)
 				{
+					if (addedProject.getName().endsWith(".gitignore")) continue;
 					IPackageReader readPackageResource = baseNGPackageManager.readPackageResource(addedProject);
 					getAddedPackageReaders(changedProject.getName()).add(readPackageResource);
 				}

@@ -46,7 +46,8 @@ public class TreeBuilder
 		{
 			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml");
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-			if (documentationManagerProvider != null)
+			//url can be null if running from sources and the url: doc/servoydoc_jslib.xml is not up to date
+			if (documentationManagerProvider != null && url != null)
 			{
 				docManager = documentationManagerProvider.fromXML(url, null);
 			}

@@ -246,6 +246,7 @@ public abstract class BaseNGPackageManager
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
+							if (resource.getName().endsWith(".gitignore")) continue;
 							IPackageReader reader = readPackageResource(resource);
 							if (reader != null)
 							{
@@ -397,6 +398,7 @@ public abstract class BaseNGPackageManager
 				{
 					if (!alreadyAddedNGPackageProject.contains(servoyNGPackageProject))
 					{
+						if (servoyNGPackageProject.getProject().getName().endsWith(".gitignore")) continue;
 						collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m);
 						alreadyAddedNGPackageProject.add(servoyNGPackageProject);
 					}
@@ -528,6 +530,7 @@ public abstract class BaseNGPackageManager
 				m.beginTask("Reading packages", members.length);
 				for (IResource resource : members)
 				{
+					if (resource.getName().endsWith(".gitignore")) continue;
 					IPackageReader reader = readPackageResource(resource);
 					if (reader != null)
 					{
