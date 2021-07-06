@@ -40,7 +40,8 @@ export class ContentComponent implements OnInit {
           this.packageLists[packageListIdx].updateCount = this.getUpgradeCount(p.packages);
         }
       }
-    })
+      this.wpmService.setPackageLists(this.packageLists);
+    });
   }
 
   getPackageTabLabel(packageList: PackageList): string {
