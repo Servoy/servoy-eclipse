@@ -1,6 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { WpmService, Repository } from '../wpm.service';
+import { WpmService, Repository, Package } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { PackageList } from '../content/content.component';
+import { UpdatePackagesDialog } from '../update-dialog/update-dialog.component';
 
 const ADD_REMOVE_TEXT: string = "Add...";
 const SERVOY_DEFAULT: string = "Servoy Default";
@@ -14,6 +16,7 @@ export class HeaderComponent implements OnInit {
 
   repositories: string[] = [SERVOY_DEFAULT, ADD_REMOVE_TEXT];
   activeRepository: string = SERVOY_DEFAULT;
+  packageLists: PackageList[];
 
   constructor(public wpmService: WpmService, public dialog: MatDialog) {
   }
@@ -33,9 +36,28 @@ export class HeaderComponent implements OnInit {
         this.activeRepository = newActiveRepository;
         this.wpmService.setNewSelectedRepository(this.activeRepository);
       }
-    })
+    });
 
+    this.wpmService.packageLists.subscribe(packageLists => {
+      this.packageLists = packageLists;
+    });
 
+  }
+
+  openDialog() { 
+    const packages : Package[] = [];
+    this.packageLists.forEach(list => {
+      list.packages.forEach(pack => {
+        if (pack.installed && !this.isLatestRelease(pack)) {
+          packages.push(pack);
+        } 
+      });
+    });
+    this.dialog.open(UpdatePackagesDialog, {data: packages});
+  }
+
+  isLatestRelease(p: Package): boolean {
+    return p.installed == p.releases[0].version;
   }
 
   getActiveSolution(): string {

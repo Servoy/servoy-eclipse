@@ -3,6 +3,7 @@ import { WebsocketService } from './websocket.service';
 import { Subject, Observable, Observer } from 'rxjs';
 import { map, share } from "rxjs/operators";
 import * as Rx from 'rxjs'
+import { PackageList } from './content/content.component';
 
 export const PACKAGE_TYPE_WEB_COMPONENT = "Web-Component";
 export const PACKAGE_TYPE_WEB_SERVICE = "Web-Service";
@@ -83,6 +84,8 @@ export class WpmService {
   repositoriesObservable: Observable<Repository[]>;
   repositoriesObserver: Observer<Repository[]>;
 
+  packageLists: Rx.BehaviorSubject<PackageList[]>;
+
   needRefresh: boolean = false;
 
   contentAvailable: boolean = true;
@@ -116,6 +119,8 @@ export class WpmService {
     this.repositoriesObservable = Rx.Observable.create((obs: Rx.Observer<Repository[]>) => {
       this.repositoriesObserver = obs;
     }).pipe(share());
+    
+    this.packageLists = new Rx.BehaviorSubject([]);
   }
 
   /**
@@ -147,6 +152,10 @@ export class WpmService {
 
   getPackages(): Observable<PackagesInfo> {
     return this.packagesObservable;
+  }
+
+  setPackageLists(packageLists: PackageList[]) {
+    this.packageLists.next(packageLists);
   }
 
   install(p: Package) {
@@ -275,6 +284,31 @@ export class WpmService {
 
   setSelectedRepository(newPackages: Package[]) {
     this.requestAllInstalledPackages(newPackages);
+  }
+
+  versionCompare(v1: string, v2: string): number {
+    const av1 = v1.split('.');
+    const av2 = v2.split('.');
+
+    const sizeDiff = av2.length - av1.length;
+    if(sizeDiff) {
+      for(let i = 0; i < Math.abs(sizeDiff); i++) {
+        if(sizeDiff > 0) av1.push('0')
+        else av2.push('0');
+      }
+    }
+
+    for(let i = 0; i < av1.length; i++) {
+      const ival1 = parseInt(av1[i]);
+      const ival2 = parseInt(av2[i]);
+      if(ival1 != NaN && ival2 !=NaN) {
+        if(ival1 != ival2) return ival1 - ival2;
+      }
+      else if(av1[i] < av2[i]) return -1;
+      else if(av1[i] > av2[i]) return 1;
+    }
+
+    return 0;
   }
   
 }

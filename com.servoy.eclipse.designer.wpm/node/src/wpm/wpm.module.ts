@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { MainComponent } from './main.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatOptionModule } from '@angular/material/core';
@@ -20,6 +21,7 @@ import { PackagesComponent } from './packages/packages.component'
 import { WebsocketService } from './websocket.service';
 import { WpmService } from './wpm.service';
 import { FormsModule } from '@angular/forms'
+import { UpdatePackagesDialog } from './update-dialog/update-dialog.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,7 @@ import { FormsModule } from '@angular/forms'
     HeaderComponent,
     ContentComponent,
     PackagesComponent,
+    UpdatePackagesDialog,
     AddRepositoryDialog,
     ErrorDialog
   ],
@@ -43,6 +46,7 @@ import { FormsModule } from '@angular/forms'
     MatProgressBarModule,
     MatDialogModule,
     MatInputModule,
+    MatCheckboxModule,
     FormsModule
   ],
   providers: [WebsocketService, WpmService],

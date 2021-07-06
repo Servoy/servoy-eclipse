@@ -5,7 +5,7 @@
       </mat-select>
       <button mat-icon-button *ngIf="showRemoveRepository()" matTooltip="Remove the repository url" (click)="removeRepository()"><mat-icon>delete_outline</mat-icon></button>
     </div>
-    <h1 class="wpm-title">Servoy Package Manager</h1>
+    <span> <h1 class="wpm-title">Servoy Package Manager</h1> <button class="updateButton" (click)="openDialog()" tooltip="Update packages">Update ALL</button></span>
     <p *ngIf="isNeedRefresh()" class="warning">There are new packages available! Reopen the Web Package Manager to load them.</p>
     <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
 </div>
