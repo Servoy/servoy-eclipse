@@ -6,6 +6,8 @@ export class EditorSessionService {
     
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
+    private state = new State();
+
     
     constructor(private websocketService: WebsocketService) {
     }
@@ -226,4 +228,16 @@ export class EditorSessionService {
             "zoomLevel": value
         }, false)
     }
+
+    getState(): State {
+        return this.state;
+    }
+}
+
+class State {
+    showWireframe: boolean;
+    design_highlight: string;
+    showSolutionLayoutsCss: boolean;
+    showSolutionCss: boolean;
+    maxLevel: any;
 }
