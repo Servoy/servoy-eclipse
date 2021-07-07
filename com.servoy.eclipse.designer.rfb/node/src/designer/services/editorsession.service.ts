@@ -135,7 +135,7 @@ export class EditorSessionService {
         }, true)
     }
 
-    executeAction(action, params) {
+    executeAction(action, params?) {
         this.wsSession.callService('formeditor', action, params, true)
     }
 

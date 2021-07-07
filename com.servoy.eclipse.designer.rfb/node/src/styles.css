@@ -1,4 +1,5 @@
 @import "~bootstrap/dist/css/bootstrap.min.css";
+@import url("designer/toolbar/toolbar.css");
 
 html, body
 {

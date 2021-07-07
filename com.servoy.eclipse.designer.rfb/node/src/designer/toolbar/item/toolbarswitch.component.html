@@ -1,0 +1,9 @@
+<div (click)="item.onclick()" class="toolbar-switch"> <div class="btn btn-xs ng-binding" >{{item.text}}</div>
+	<div class="onoffswitch">
+	    <input type="checkbox" name="onoffswitch" [(ngModel)]="item.state" [disabled]="true" class="onoffswitch-checkbox" [id]="item.text">
+	    <label class="onoffswitch-label" [for]="item.text">
+	        <span class="onoffswitch-inner"></span>
+	        <span class="onoffswitch-switch"></span>
+	    </label>
+	</div>
+</div>

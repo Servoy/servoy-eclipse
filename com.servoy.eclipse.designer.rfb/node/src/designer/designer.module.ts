@@ -20,11 +20,17 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
+import { ToolbarSpinnerComponent } from './toolbar/item/toolbarspinner.component';
+import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
 
 @NgModule({
   declarations: [
     DesignerComponent,
     ToolbarComponent,
+    ToolbarButtonComponent,
+    ToolbarSpinnerComponent,
+    ToolbarSwitchComponent,
     StatusBarComponent,
     PaletteComponent,
     ResizerComponent,
