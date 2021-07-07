@@ -907,4 +907,15 @@
             value="true">
       </persistent>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.missingProjectReference"
+         name="Missing Project Reference"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
 </plugin>
