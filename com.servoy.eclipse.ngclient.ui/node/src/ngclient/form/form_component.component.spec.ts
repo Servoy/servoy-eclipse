@@ -13,7 +13,7 @@ import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-
+import { PopupFormService } from '../services/popupform.service';
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -39,7 +39,7 @@ describe('FormComponent', () => {
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
-                               {provide: ServoyService, useValue:  servoyService }
+                               {provide: ServoyService, useValue:  servoyService }, PopupFormService
                              ],
        schemas: [
               CUSTOM_ELEMENTS_SCHEMA
