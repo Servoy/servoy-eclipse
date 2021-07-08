@@ -732,9 +732,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				for (IProject p : monitoredProjects)
 				{
 					/*
-					 * If you have a reference to a project and then you close that project it will not do a build. That is why p.isOpen() is commented.
+					 * If you have a reference to a project and then you close or delete that project it will not do a build. That is why p.exists() and
+					 * p.isOpen() is commented.
 					 */
-					if (p.exists() /* && p.isOpen() */ && !needFullBuild)
+					if (/* p.exists() && p.isOpen() && */ !needFullBuild)
 					{
 						IResourceDelta delta = getDelta(p);
 						if (delta != null)
