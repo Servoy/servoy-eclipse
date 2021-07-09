@@ -3,16 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import { WindowService } from './window.service';
 import { ShortcutService } from './shortcut.service';
 import {PopupMenuService} from './popupmenu.service';
-import { ServoyPublicModule , ServoyPublicTestingModule} from '@servoy/public';
-import { PopupFormService } from './popupform.service';
+import { ServoyPublicTestingModule} from '@servoy/public';
 
 describe('WindowService', () => {
   let service: WindowService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-        imports: [ ServoyPublicTestingModule, ServoyPublicModule],
-        providers:[WindowService, ShortcutService, PopupMenuService, PopupFormService]
+        imports: [ ServoyPublicTestingModule],
+        providers:[WindowService, ShortcutService, PopupMenuService]
     });
     service = TestBed.inject(WindowService);
   });
