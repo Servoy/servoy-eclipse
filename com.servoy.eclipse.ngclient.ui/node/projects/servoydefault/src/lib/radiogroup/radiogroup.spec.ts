@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule, IValuelist } from '@servoy/public';
+import { ServoyPublicTestingModule, IValuelist , FormattingService, TooltipService, NotNullOrEmptyPipe} from '@servoy/public';
 import { FormsModule } from '@angular/forms';
-import { FormattingService, TooltipService } from '@servoy/public';
 import { By } from '@angular/platform-browser';
-import { NotNullOrEmptyPipe } from '@servoy/public';
 import { DebugElement } from '@angular/core';
 
 import {ChoiceElementDirective} from '../basechoice';
@@ -36,7 +33,7 @@ describe('ServoyDefaultRadiogroup', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultRadiogroup,ChoiceElementDirective],
-      imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
+      imports: [ServoyPublicTestingModule, FormsModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })
     .compileComponents();

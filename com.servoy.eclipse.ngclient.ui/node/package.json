@@ -13,6 +13,7 @@
     "build_lib_debug": "ng build @servoy/public --watch",
     "test": "ng test --watch --browsers Chrome",
     "test_public": "ng test @servoy/public --watch --browsers Chrome",
+    "test_default": "ng test @servoy/servoydefault --watch --browsers Chrome",
     "test_dialogs": "ng test @servoy/dialogs --watch --browsers Chrome",
     "test_edge": "ng test --watch --browsers Edge",
     "test_edge_nowatch": "ng test --watch=false --browsers Edge",

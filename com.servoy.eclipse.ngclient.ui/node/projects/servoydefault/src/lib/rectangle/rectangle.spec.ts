@@ -1,13 +1,12 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultRectangle } from './rectangle';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
 
 import {FormsModule} from '@angular/forms';
-import {ServoyApi,TooltipService,FormattingService} from '@servoy/public';
+import { ServoyPublicTestingModule ,ServoyApi,TooltipService,FormattingService} from '@servoy/public';
 import { SimpleChange } from '@angular/core';
 import { By } from '@angular/platform-browser';
+
 describe('ServoyDefaultRectangle', () => {
   let component: ServoyDefaultRectangle;
   let fixture: ComponentFixture<ServoyDefaultRectangle>;
@@ -18,7 +17,7 @@ describe('ServoyDefaultRectangle', () => {
       servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
       TestBed.configureTestingModule({
         declarations: [ ServoyDefaultRectangle ],
-        imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
+        imports: [ServoyPublicTestingModule, FormsModule],
         providers: [FormattingService, TooltipService]
       })
       .compileComponents();

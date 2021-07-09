@@ -1,28 +1,32 @@
-import { async, ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/testing';
+import {  ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ServoyPublicModule, } from '@servoy/public';
-
+import { ServoyPublicTestingModule, FormattingService, TooltipService, Format, ServoyPublicService } from '@servoy/public';
+import numbro from 'numbro';
+import languages from 'numbro/dist/languages.min';
 import { ServoyDefaultTextField } from './textfield';
-import { FormattingService, TooltipService, Format} from '@servoy/public';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { LocaleService } from '../../ngclient/locale.service';
-import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { runOnPushChangeDetection } from '../testingutils';
 
 describe('ServoyDefaultTextField', () => {
   let component: ServoyDefaultTextField;
   let fixture: ComponentFixture<ServoyDefaultTextField>;
   let textField;
-
+  let servoyPublicService;
+   
+  beforeAll(() => {
+       numbro.registerLanguage(languages['en-GB']);
+       numbro.registerLanguage(languages['nl-NL']);
+    });
+    
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTextField],
-      imports: [ServoyTestingModule, ServoyPublicModule, FormsModule],
-      providers: [I18NProvider, FormattingService, TooltipService, LocaleService ]
+      imports: [ServoyPublicTestingModule, FormsModule],
+      providers: [FormattingService, TooltipService]
     })
     .compileComponents();
+    servoyPublicService = TestBed.inject(ServoyPublicService);
   });
 
   beforeEach(waitForAsync(() => {
@@ -49,16 +53,15 @@ describe('ServoyDefaultTextField', () => {
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
-  it('should have formatted value 1.000,00', waitForAsync(inject([LocaleService], (locationService: LocaleService) => {
-      locationService.setLocale('nl', 'NL');
-      locationService.isLoaded().then(() => {
-        component.dataProviderID = 1000;
-        runOnPushChangeDetection(fixture);
-        fixture.whenStable().then(() => {
-        expect(component.getNativeElement().value).toBe('1.000,00');
+  it('should have formatted value 1.000,00', () => {
+      servoyPublicService.setLocale('nl', 'NL');
+      numbro.setLanguage('nl-NL');
+      component.dataProviderID = 1000;
+      runOnPushChangeDetection(fixture);
+      fixture.whenStable().then(() => {
+         expect(component.getNativeElement().value).toBe('1.000,00');
       });
-    });
-  })));
+  });
 
   it('should call update method', () => {
     spyOn(component, 'pushUpdate');

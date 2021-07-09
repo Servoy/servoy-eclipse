@@ -1,11 +1,7 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ServoyPublicModule } from '@servoy/public';
+import { Format, ServoyPublicTestingModule } from '@servoy/public';
 
-import { LocaleService } from '../../ngclient/locale.service';
-import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
-
-import { Format} from '@servoy/public';
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from './calendar';
 import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
@@ -13,24 +9,18 @@ import { Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { runOnPushChangeDetection } from '../testingutils';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('ServoyDefaultCalendar', () => {
     let component: ServoyDefaultCalendar;
     let fixture: ComponentFixture<ServoyDefaultCalendar>;
-    let i18nProvider;
     // let dateTimeAdapter;
    // let owlDateTimeIntl;
 
     beforeEach(() => {
-        i18nProvider = jasmine.createSpyObj('I18NProvider', ['getI18NMessages']);
-        const promise = Promise.resolve({});
-        i18nProvider.getI18NMessages.and.returnValue(promise);
-
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
-            imports: [ServoyTestingModule, BrowserModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
-            providers: [Renderer2, FormsModule, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
+            imports: [ServoyPublicTestingModule, BrowserModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
+            providers: [Renderer2, FormsModule,
                 OwlDateTimeIntl]
         }).compileComponents();
     });

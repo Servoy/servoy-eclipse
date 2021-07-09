@@ -22,7 +22,8 @@
     "paths": {
       "@servoy/public": [
         "../projects/servoy-public/src/public-api",
-        "./projects/servoy-public/src/public-api"
+        "./projects/servoy-public/src/public-api",
+        "../servoy-public/src/public-api"
       ],
       "@servoy/ngutils": [
         "../projects/ngutils/src/public-api",

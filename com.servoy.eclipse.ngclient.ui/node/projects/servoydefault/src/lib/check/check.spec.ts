@@ -2,10 +2,8 @@ import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angul
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
 
-import { ServoyPublicModule } from '@servoy/public';
-import { FormattingService, ServoyApi, TooltipService} from '@servoy/public';
+import { ServoyPublicTestingModule,  FormattingService, ServoyApi, TooltipService} from '@servoy/public';
 import {FormsModule} from '@angular/forms';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('CheckComponent', () => {
   let component: ServoyDefaultCheck;
@@ -16,7 +14,7 @@ describe('CheckComponent', () => {
   servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultCheck ],
-      imports: [ServoyTestingModule, FormsModule, ServoyPublicModule],
+      imports: [ServoyPublicTestingModule, FormsModule],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();

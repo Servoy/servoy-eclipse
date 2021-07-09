@@ -1,42 +1,30 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
+import { ServoyPublicTestingModule, UploadDirective, FormattingService, TooltipService, ServoyApi, ServoyPublicService } from '@servoy/public';
 import { ServoyDefaultImageMedia } from './imagemedia';
-import { ServoyService } from '../../ngclient/servoy.service';
-import { LocaleService } from '../../ngclient/locale.service';
-import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
-import { FormattingService, TooltipService, ServoyApi} from '@servoy/public';
-import { UploadDirective } from '@servoy/public';
 import { DebugElement } from '@angular/core';
-import { ApplicationService } from '../../ngclient/services/application.service';
 import { By } from '@angular/platform-browser';
-import { ViewportService } from '../../ngclient/services/viewport.service';
-import { FormService } from '../../ngclient/form.service';
-import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 
 describe('ServoyDefaultImageMedia', () => {
   let component: ServoyDefaultImageMedia;
   let fixture: ComponentFixture<ServoyDefaultImageMedia>;
   let imgUpload: DebugElement[];
-  let applicationService: any;
+  let servoyPublicService;
   let servoyApi: any;
 
   beforeEach(() => {
 
-    applicationService = jasmine.createSpyObj('ApplicationService', ['showFileOpenDialog', 'generateUploadUrl']);
     servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'getFormName','registerComponent','unRegisterComponent']);
 
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultImageMedia, UploadDirective],
-        imports: [ServoyTestingModule, ServoyPublicModule],
-        providers: [FormattingService, TooltipService, ClientFunctionService, { provide: ApplicationService, useValue: applicationService},
-          ServoyService, I18NProvider, {provide: ServoyApi, useValue: servoyApi},
-          ViewportService, FormService , { provide: LocaleService, useValue: {getLocale: () => 'en' }}],
+        imports: [ServoyPublicTestingModule],
+        providers: [FormattingService, TooltipService, {provide: ServoyApi, useValue: servoyApi}],
       })
       .compileComponents();
-
+    servoyPublicService = TestBed.inject(ServoyPublicService);
     fixture = TestBed.createComponent(ServoyDefaultImageMedia);
+    
     component = fixture.componentInstance;
     component.servoyApi = servoyApi as ServoyApi;
     component.enabled = true;
@@ -62,10 +50,11 @@ describe('ServoyDefaultImageMedia', () => {
   });
 
   it('should call the upload service', () => {
+    const spy = spyOn(servoyPublicService, 'showFileOpenDialog');
     imgUpload = fixture.debugElement.queryAll(By.css('.fa-upload'));
     imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
-    expect(applicationService.showFileOpenDialog).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
   });
 
   it('should download file', () => {

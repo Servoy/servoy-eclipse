@@ -1,11 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
-
 import { ServoyDefaultHTMLView } from './htmlview';
 
-import { FormattingService, TooltipService, ServoyApi } from '@servoy/public';
+import { ServoyPublicTestingModule,FormattingService, TooltipService, ServoyApi } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 
 import { runOnPushChangeDetection } from '../testingutils';
@@ -18,7 +15,7 @@ describe('ServoyDefaultHTMLView', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultHTMLView],
-      imports: [ServoyTestingModule, ServoyPublicModule ],
+      imports: [ServoyPublicTestingModule ],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();
