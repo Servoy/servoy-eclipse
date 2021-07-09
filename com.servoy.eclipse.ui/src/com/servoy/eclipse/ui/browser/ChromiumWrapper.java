@@ -19,9 +19,10 @@ package com.servoy.eclipse.ui.browser;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.chromium.Browser;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+
+import com.equo.chromium.swt.Browser;
 
 /**
  * @author jcompagner
