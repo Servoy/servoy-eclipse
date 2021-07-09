@@ -1181,7 +1181,19 @@ public class SolutionSerializer
 			{
 				child = it.next();
 				if (!(child instanceof IScriptElement))
+				{
+					if (child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() > 0 &&
+						!((ISupportChilds)child).getAllObjects().hasNext())
+					{
+						IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)child);
+						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);
+						Map<String, Object> persistProperties = getPersistAsValueMap(child, repository, true);
+						boolean equals = persistProperties.entrySet().stream().filter(p -> !"uuid".equals(p) && !"extendsID".equals(p))
+							.allMatch(e -> e.getValue().equals(parentProperties.get(e.getKey())));
+						if (equals) continue; //do not serialize persist if it is the same as its parent persist
+					}
 					itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey, valueFilter));
+				}
 			}
 			if (itemsArrayList.size() > 0)
 			{
