@@ -4008,14 +4008,16 @@ public class TypeCreator extends TypeCache
 				return addType(null, createBaseType(context, fullTypeName));
 			}
 
-			if (cachedSuperTypeTemplateType == null)
+			Type superTypeTemplateType = cachedSuperTypeTemplateType;
+			if (superTypeTemplateType == null)
 			{
-				cachedSuperTypeTemplateType = createBaseType(context, cls.getSimpleName());
+				superTypeTemplateType = createBaseType(context, cls.getSimpleName());
+				cachedSuperTypeTemplateType = superTypeTemplateType;
 			}
 
 			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 
-			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			EList<Member> members = superTypeTemplateType.getMembers();
 
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
