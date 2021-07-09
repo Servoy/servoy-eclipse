@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnInit } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -94,7 +95,8 @@ export class ToolbarComponent implements OnInit {
 
   btnShowErrors: ToolbarItem;
 
-  constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService) {
+  constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
+    @Inject(DOCUMENT) private doc: Document) {
     this.createItems();
   }
   
@@ -175,12 +177,12 @@ export class ToolbarComponent implements OnInit {
 			}
 		});
 		
-		if (document.getElementById("errorsDiv") !== null) {
+		if (this.doc.getElementById("errorsDiv") !== null) {
 			this.btnShowErrors.enabled = true;
-			if (document.getElementById("closeErrors")) {
-  				document.getElementById("closeErrors").addEventListener('click', (e) => {
+			if (this.doc.getElementById("closeErrors")) {
+  				this.doc.getElementById("closeErrors").addEventListener('click', (e) => {
 				this.btnShowErrors.state = !this.btnShowErrors.state;
-				document.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
+				this.doc.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
   			});
 		  }
     }
@@ -909,8 +911,7 @@ export class ToolbarComponent implements OnInit {
       false,
       () => {
           this.btnShowErrors.state = !this.btnShowErrors.state;
-          // TODO:
-          //document.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
+          this.doc.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
         }
     );
     this.btnShowErrors.disabledIcon = "toolbar/icons/disabled_error.png";
@@ -955,6 +956,56 @@ export class ToolbarComponent implements OnInit {
       // this.editorSession.setContentSizes();
     });
   }
+
+  // TODO:
+	// $rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+	// 	// disable or enable buttons.
+	// 	$rootScope.$evalAsync(function() {
+	// 		btnTabSequence.enabled = selection.length > 1;
+	// 		btnSameWidth.enabled = selection.length > 1;
+	// 		btnSameHeight.enabled = selection.length > 1;
+	// 		btnZoomOut.enabled = $editorService.isShowingContainer();
+	// 		if (editorScope.isAbsoluteFormLayout()) {
+	// 			btnDistributeHorizontalSpacing.enabled = selection.length > 2;
+	// 			btnDistributeHorizontalCenters.enabled = selection.length > 2;
+	// 			btnDistributeLeftward.enabled = selection.length > 2;
+	// 			btnDistributeVerticalSpacing.enabled = selection.length > 2;
+	// 			btnDistributeVerticalCenters.enabled = selection.length > 2;
+	// 			btnDistributeUpward.enabled = selection.length > 2;
+
+	// 			btnLeftAlign.enabled = selection.length > 1;
+	// 			btnRightAlign.enabled = selection.length > 1;
+	// 			btnTopAlign.enabled = selection.length > 1;
+	// 			btnBottomAlign.enabled = selection.length > 1;
+	// 			btnCenterAlign.enabled = selection.length > 1;
+	// 			btnMiddleAlign.enabled = selection.length > 1;
+	// 			//TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
+	// 			btnGroup.enabled = selection.length >= 2;
+	// 			btnUngroup.enabled = function() {
+	// 				//at least one selected element should be a group
+	// 				for (var i = 0; i < selection.length; i++)
+	// 				{
+	// 					var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
+	// 					if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+	// 					{
+	// 						return true;
+	// 					}
+	// 				}
+	// 				return false;
+	// 			}();
+	// 			btnBringForward.enabled = selection.length > 0;
+	// 			btnSendBackward.enabled = selection.length > 0;
+	// 			btnBringToFront.enabled = selection.length > 0;
+	// 			btnSendToBack.enabled = selection.length > 0;				
+	// 		}
+	// 		else {
+	// 			btnMoveUp.enabled = selection.length == 1;
+	// 			btnMoveDown.enabled = selection.length == 1;
+	// 			btnZoomIn.enabled = selection.length == 1 ;
+	// 		}
+	// 	});
+	// })
+
 }
 
 export class ToolbarItem {
