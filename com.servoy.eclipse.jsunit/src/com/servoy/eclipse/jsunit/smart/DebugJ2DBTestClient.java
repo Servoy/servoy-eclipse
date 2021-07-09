@@ -52,7 +52,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 
 	public DebugJ2DBTestClient(DebugClientHandler debugClientHandler)
 	{
-		super(false, debugClientHandler);
+		super(debugClientHandler);
 		userManager = new JSUnitUserManager(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager());
 		setUnitTestMode(true); // TODO move all unit test code from superclass here
 	}
