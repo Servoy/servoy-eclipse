@@ -402,18 +402,21 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		{
 			public void modifyText(ModifyEvent e)
 			{
-				String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
-				if (urlValues != null && urlValues.length == urlPropertiesFields.size())
+				if (serverTemplateDefinition != null)
 				{
-					for (int i = 0; i < urlPropertiesFields.size(); i++)
+					String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
+					if (urlValues != null && urlValues.length == urlPropertiesFields.size())
 					{
-						if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+						for (int i = 0; i < urlPropertiesFields.size(); i++)
 						{
-							if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
-							urlPropertiesFields.get(i).setText(urlValues[i]);
-							if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
-						}
+							if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+							{
+								if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
+								urlPropertiesFields.get(i).setText(urlValues[i]);
+								if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
+							}
 
+						}
 					}
 				}
 			}
