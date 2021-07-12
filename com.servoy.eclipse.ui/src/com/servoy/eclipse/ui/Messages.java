@@ -272,6 +272,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotFound;
 	public static String ErrorWarningPreferencePage_constantsUsed;
 	public static String ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem;
+	public static String ErrorWarningPreferencePage_errorMissingProjectReference;
 	public static String ErrorWarningPreferencePage_styleNotFound;
 	public static String ErrorWarningPreferencePage_styleClassNoStyle;
 	public static String ErrorWarningPreferencePage_styleClassNotFound;

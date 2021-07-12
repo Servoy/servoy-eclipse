@@ -322,6 +322,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	// problems with resource projects
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>("referencesToMultipleResources",
 		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> ERROR_MISSING_PROJECT_REFERENCE = new Pair<String, ProblemSeverity>("missingProjectReference",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
 		"propertyMultipleMethodsOnSameTable", ProblemSeverity.INFO);
@@ -3045,7 +3047,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!p.isAccessible())
 				{
 					ServoyMarker mk = MarkerMessages.MissingProjectReference.fill(p.getName(), project.getName());
-					addMarker(project, mk.getType(), mk.getText(), -1, REFERENCES_TO_MULTIPLE_RESOURCES, IMarker.PRIORITY_NORMAL, null, null);
+					addMarker(project, mk.getType(), mk.getText(), -1, ERROR_MISSING_PROJECT_REFERENCE, IMarker.PRIORITY_NORMAL, null, null);
 				}
 			}
 
