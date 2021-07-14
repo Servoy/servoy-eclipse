@@ -1,3 +1,4 @@
+
 <h1 mat-dialog-title>Update packages</h1>
 <div mat-dialog-content>
   <table class="table-package">
@@ -19,6 +20,6 @@
 </div>
 <div mat-dialog-actions>
     <button mat-button mat-dialog-close (click)="closeDialog()">Close</button>
-    <button *ngIf="extendedData.length > 0" title="Update only the selected packages" mat-dialog-close (click)="updateSelected()" class="updateButton" >Update selected</button>
-    <button *ngIf="extendedData.length > 0" title="Update all packages regardless what is selected" mat-dialog-close style="margin-left: 30px" class="updateButton" (click)="updateAll()" >Update ALL</button>
+    <button mat-button *ngIf="extendedData.length > 0" title="Update only the selected packages" [mat-dialog-close]="extendedData" (click)="updateSelected()" class="updateButton" >Update selected</button>
+    <button mat-button *ngIf="extendedData.length > 0" title="Update all packages regardless what is selected" [mat-dialog-close]="extendedData" style="margin-left: 30px" class="updateButton" (click)="updateAll()" >Update ALL</button>
 </div>

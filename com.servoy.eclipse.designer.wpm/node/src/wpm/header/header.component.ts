@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { WpmService, Repository, Package } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PackageList } from '../content/content.component';
-import { UpdatePackagesDialog } from '../update-dialog/update-dialog.component';
+import { ExtendedPackage, UpdatePackagesDialog } from '../update-dialog/update-dialog.component';
 
 const ADD_REMOVE_TEXT: string = "Add...";
 const SERVOY_DEFAULT: string = "Servoy Default";
@@ -16,7 +16,8 @@ export class HeaderComponent implements OnInit {
 
   repositories: string[] = [SERVOY_DEFAULT, ADD_REMOVE_TEXT];
   activeRepository: string = SERVOY_DEFAULT;
-  packageLists: PackageList[];
+  packages: Package[] = [];
+  isUpdateAllButtonDisabled = false;
 
   constructor(public wpmService: WpmService, public dialog: MatDialog) {
   }
@@ -39,21 +40,48 @@ export class HeaderComponent implements OnInit {
     });
 
     this.wpmService.packageLists.subscribe(packageLists => {
-      this.packageLists = packageLists;
+      packageLists.forEach(list => {
+        list.packages.forEach((pack: Package) => {
+          if (pack.installed && !this.isLatestRelease(pack) && !this.packages.find(p => p.name === pack.name)) {
+            this.packages.push(pack);
+          } 
+
+          // update the package list in case the version has changed
+          this.packages.forEach(p => {
+            if (p.name === pack.name && pack.selected && this.wpmService.versionCompare(pack.selected, p.installed) !== 0) {
+              p = pack;
+              if (this.isLatestRelease(p)) {
+                p.hasLatestVersion = true;
+              }
+            }
+          });
+        });
+      });
+      this.updateStateForUpdateAllButton();
     });
 
   }
 
   openDialog() { 
-    const packages : Package[] = [];
-    this.packageLists.forEach(list => {
-      list.packages.forEach(pack => {
-        if (pack.installed && !this.isLatestRelease(pack)) {
-          packages.push(pack);
-        } 
+    const readyPackages = this.packages.filter(p => !p.hasLatestVersion); 
+    const dialogRef = this.dialog.open(UpdatePackagesDialog, {data: readyPackages});
+    dialogRef.afterClosed().subscribe(result => {
+      result.forEach((el: ExtendedPackage) => {
+        if (el.isSelected) {
+          this.packages.forEach(p => {
+            if (p.name === el.package.name) {
+              p.hasLatestVersion = true;
+            }
+          });
+        }
       });
+      this.updateStateForUpdateAllButton();
     });
-    this.dialog.open(UpdatePackagesDialog, {data: packages});
+  }
+
+  updateStateForUpdateAllButton() {
+      // the update all button will be disabled if all packages have the latest version installed
+      this.isUpdateAllButtonDisabled = this.packages.find(p => !p.hasLatestVersion) ? false : true;
   }
 
   isLatestRelease(p: Package): boolean {

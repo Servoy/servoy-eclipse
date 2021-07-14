@@ -28,7 +28,6 @@ export class UpdatePackagesDialog {
                 this.wpmService.install(data.package);
             }
         });
-        this.dialogRef.close();
      }
 
      updateAll(): void {
@@ -36,7 +35,6 @@ export class UpdatePackagesDialog {
             data.package.selected = data.package.releases[0].version;
             this.wpmService.install(data.package);
         });
-        this.dialogRef.close();
      }
 
      closeDialog(): void {
@@ -44,7 +42,7 @@ export class UpdatePackagesDialog {
      }
 }
 
-interface ExtendedPackage {
+export interface ExtendedPackage {
     package: Package;
     isSelected: boolean;
 }

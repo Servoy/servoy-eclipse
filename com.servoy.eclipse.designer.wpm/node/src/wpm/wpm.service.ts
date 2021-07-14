@@ -53,6 +53,7 @@ export interface Package {
   sourceUrl: string;
   top: boolean;
   wikiUrl: string;
+  hasLatestVersion: boolean;
 }
 
 export interface PackagesInfo {
