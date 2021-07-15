@@ -1182,10 +1182,10 @@ public class SolutionSerializer
 				child = it.next();
 				if (!(child instanceof IScriptElement))
 				{
+					IPersist superPersist = null;
 					if (child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() > 0 &&
-						!((ISupportChilds)child).getAllObjects().hasNext())
+						!((ISupportChilds)child).getAllObjects().hasNext() && (superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)child)) != null)
 					{
-						IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)child);
 						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);
 						Map<String, Object> persistProperties = getPersistAsValueMap(child, repository, true);
 						boolean equals = persistProperties.entrySet().stream().filter(p -> !"uuid".equals(p) && !"extendsID".equals(p))
