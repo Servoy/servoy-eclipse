@@ -4,7 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'designer/solution/:solutionname',
+    path: 'designer/solution/:solutionname/form/:formname/clientnr/:clientnr',
     loadChildren: () => import('../designer/servoydesigner.module').then(m => m.ServoyDesignerModule)
   },
   {

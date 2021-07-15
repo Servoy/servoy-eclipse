@@ -277,12 +277,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					// adjust component templates
 					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), "UTF-8");
+					String editorContent = FileUtils.readFileToString(new File(projectFolder, "src/designer/designform_component.component.ts"), "UTF-8");
 					String old = content;
+					String oldEditor = editorContent;
 					content = replace(content, "<!-- component template generate start -->", "<!-- component template generate end -->",
 						componentTemplates.getLeft());
 					content = replace(content, "// component viewchild template generate start", "// component viewchild template generate end",
 						componentTemplates.getRight());
-
+					editorContent = replace(editorContent, "<!-- component template generate start -->", "<!-- component template generate end -->",
+						componentTemplates.getLeft());
+					editorContent = replace(editorContent, "// component viewchild template generate start", "// component viewchild template generate end",
+						componentTemplates.getRight());
 					// add structure templates
 					if (structureTagNames.size() > 0)
 					{
@@ -290,6 +295,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						content = replace(content, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
 							generateStructureTemplate.getFormComponentTemplate());
 						content = replace(content, "// structure viewchild template generate start", "// structure viewchild template generate end",
+							generateStructureTemplate.getViewChilds());
+
+						editorContent = replace(editorContent, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+							generateStructureTemplate.getFormComponentTemplate());
+						editorContent = replace(editorContent, "// structure viewchild template generate start", "// structure viewchild template generate end",
 							generateStructureTemplate.getViewChilds());
 
 						String lfc = FileUtils.readFileToString(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), "UTF-8");
@@ -311,6 +321,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						sourceChanged = true;
 						writeConsole(console, "components ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
+					}
+
+					if (!oldEditor.equals(editorContent))
+					{
+						sourceChanged = true;
+						writeConsole(console, "editor ts file changed");
+						FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
 					}
 
 				}
