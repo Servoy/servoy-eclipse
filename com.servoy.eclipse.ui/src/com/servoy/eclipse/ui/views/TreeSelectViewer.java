@@ -569,16 +569,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 					public void modifyText(ModifyEvent e)
 					{
 						textChanged();
-					}
-				};
-				text.addModifyListener(textModifyListener);
-				createContentProposalAdapter();
-
-				text.addFocusListener(new FocusAdapter()
-				{
-					@Override
-					public void focusLost(FocusEvent e)
-					{
 						String contents = text.getText();
 						if (!Strings.isEmpty(contents))
 						{
@@ -590,7 +580,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 							}
 						}
 					}
-				});
+				};
+				text.addModifyListener(textModifyListener);
+				createContentProposalAdapter();
 			}
 		}
 	}
