@@ -1183,7 +1183,7 @@ public class SolutionSerializer
 				if (!(child instanceof IScriptElement))
 				{
 					IPersist superPersist = null;
-					if (child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() > 0 &&
+					if (child instanceof ISupportChilds && child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() > 0 &&
 						!((ISupportChilds)child).getAllObjects().hasNext() && (superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)child)) != null)
 					{
 						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);
