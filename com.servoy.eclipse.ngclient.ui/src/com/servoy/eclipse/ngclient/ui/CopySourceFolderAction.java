@@ -43,10 +43,10 @@ public class CopySourceFolderAction extends Action
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
 
-				"Choosing 'Copy and build' will copy sources and run a normal ng build.\n" +
-				"Choosing 'Copy & clean build' will clean out the 'node_modules' dir and do a full npm -ci." +
+				"Choosing 'Copy && Build' will copy sources and run a normal ng build.\n" +
+				"Choosing 'Copy && Clean build' will clean out the 'node_modules' dir and do a full npm -ci." +
 				"(do this if there are problems when building (see 'NG2 Build Console' in the 'Console' view).",
-			SWT.NONE, new String[] { "Copy && build", "Copy && Clean build", "Cancel" });
+			SWT.NONE, new String[] { "Copy && Build", "Copy && Clean build", "Cancel" });
 
 		if (choice < 0 || choice == 2) return; // cancel
 
