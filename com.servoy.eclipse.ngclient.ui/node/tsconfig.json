@@ -24,22 +24,6 @@
         "../projects/servoy-public/src/public-api",
         "./projects/servoy-public/src/public-api",
         "../servoy-public/src/public-api"
-      ],
-      "@servoy/ngutils": [
-        "../projects/ngutils/src/public-api",
-        "./projects/ngutils/src/public-api"
-      ],
-      "@servoy/dialogs": [
-        "../projects/dialogs/src/public-api",
-        "./projects/dialogs/src/public-api"
-      ],
-      "@servoy/window": [
-        "../projects/window/src/public-api",
-        "./projects/window/src/public-api"
-      ],
-      "@servoy/servoydefault": [
-        "../projects/servoydefault/src/public-api",
-        "./projects/servoydefault/src/public-api"
       ]
     },
 	"outDir": "./out-tsc/app"
