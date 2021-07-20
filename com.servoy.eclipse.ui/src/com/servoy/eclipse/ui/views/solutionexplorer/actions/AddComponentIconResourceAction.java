@@ -35,7 +35,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
@@ -48,8 +47,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -132,10 +133,9 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 			FileInputStream fis = null;
 			try
 			{
-				IFile[] dirResource = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-				if (dirResource.length == 1 && dirResource[0].exists())
+				IFile specfile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				if (specfile != null && specfile.exists())
 				{
-					IFile specfile = dirResource[0];
 					IFolder componentFolder = (IFolder)specfile.getParent();
 					Path toCopy = new Path(fileName);
 					String imageFileName = toCopy.lastSegment();
@@ -254,7 +254,8 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
 			if ((node.getType() == UserNodeType.COMPONENT) &&
-				(node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject))
+				(node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject ||
+					node.parent.getRealObject() instanceof DirPackageReader))
 			{
 
 				selection = node;

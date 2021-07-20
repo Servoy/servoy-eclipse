@@ -42,7 +42,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -67,6 +66,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener.CHANGE_REASON;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Pair;
@@ -777,8 +777,8 @@ public abstract class BaseNGPackageManager
 						man.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), result);
 						File mfFile = new File(dir, "META-INF/MANIFEST.MF");
 
-						final IFile[] workspaceMFs = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(mfFile.toURI());
-						if (workspaceMFs.length == 1 && workspaceMFs[0] != null)
+						final IFile workspaceMFs = ResourcesUtils.findFileWithLongestPathForLocationURI(mfFile.toURI());
+						if (workspaceMFs != null)
 						{
 							// we do this later as currently we are executing during a read/get (maybe resource change listener notification) - and we might not be allowed to write or event want to write right away
 							scheduleSystemJob(new Job("Updating manifest file in package from '" + dir.getAbsolutePath() + "'; auto-adding package type...")
@@ -786,14 +786,14 @@ public abstract class BaseNGPackageManager
 								@Override
 								protected IStatus run(IProgressMonitor monitor)
 								{
-									if (workspaceMFs[0].exists())
+									if (workspaceMFs.exists())
 									{
 										try
 										{
 											ByteArrayOutputStream contentWriter = new ByteArrayOutputStream(1024);
 											man.write(contentWriter);
 
-											workspaceMFs[0].setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
+											workspaceMFs.setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
 												IResource.FORCE | IResource.KEEP_HISTORY, monitor);
 										}
 										catch (IOException | CoreException e)
@@ -805,7 +805,7 @@ public abstract class BaseNGPackageManager
 									}
 									return Status.OK_STATUS;
 								}
-							}, workspaceMFs[0]);
+							}, workspaceMFs);
 						}
 
 					}

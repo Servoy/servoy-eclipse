@@ -97,6 +97,7 @@ import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackage
 import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
@@ -1015,11 +1016,10 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
-								if (files.length == 1)
+								IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+								if (file != null)
 								{
-									IFile f = files[0];
-									if (f.getProjectRelativePath().segmentCount() > 1)
+									if (file.getProjectRelativePath().segmentCount() > 1)
 									{
 										Image img = getIconFromSpec(spec, false);
 										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
@@ -1186,11 +1186,10 @@ public class SolutionExplorerTreeContentProvider
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
-				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
-				if (files.length == 1)
+				IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				if (file != null)
 				{
-					IFile f = files[0];
-					if (f.getProjectRelativePath().segmentCount() > 1)
+					if (file.getProjectRelativePath().segmentCount() > 1)
 					{
 						Image img = getIconFromSpec(spec, false);
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
@@ -1271,10 +1270,10 @@ public class SolutionExplorerTreeContentProvider
 			{
 				try
 				{
-					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI()); // TODO what if you have the (same) file imported in as multiple (nested) projects in workspace? it is there, we just have to figure out which one to use! Maybe the one in the deepest nested project?
-					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
+					IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+					if (specFile != null && specFile.getParent() instanceof IFolder)
 					{
-						folder = (IFolder)specFile[0].getParent();
+						folder = (IFolder)specFile.getParent();
 					}
 				}
 				catch (Exception e)

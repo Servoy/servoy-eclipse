@@ -49,6 +49,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -163,8 +164,8 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 
 			if (resource != null && resource.isFile())
 			{
-				IFile[] files = root.findFilesForLocationURI(resource.toURI());
-				if (files.length == 1 && list.contains(files[0].getProject()))
+				IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(resource.toURI());
+				if (file != null && list.contains(file.getProject()))
 				{
 					String packName = resource.getName().toLowerCase().split("\\.")[0];
 					if (packName.equals(name.toLowerCase())) return true;

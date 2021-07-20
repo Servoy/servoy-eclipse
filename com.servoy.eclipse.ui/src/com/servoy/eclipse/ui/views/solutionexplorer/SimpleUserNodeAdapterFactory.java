@@ -47,6 +47,7 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.actions.Openable;
@@ -268,10 +269,10 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					try
 					{
-						IFile[] specFile = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-						if (specFile.length == 1)
+						IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+						if (specFile != null)
 						{
-							mappings.add(new SimpleResourceMapping(specFile[0].getParent())); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
+							mappings.add(new SimpleResourceMapping(specFile.getParent())); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
 						}
 					}
 					catch (URISyntaxException e)
@@ -456,10 +457,10 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					try
 					{
-						IFile[] specFile = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-						if (specFile.length == 1)
+						IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+						if (specFile != null)
 						{
-							return specFile[0].getParent(); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
+							return specFile.getParent(); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
 						}
 					}
 					catch (URISyntaxException e)

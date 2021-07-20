@@ -97,6 +97,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
@@ -830,10 +831,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			try
 			{
-				IFile[] specFile = resources.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-				if (specFile.length == 1)
+				IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				if (specFile != null)
 				{
-					List<SimpleUserNode> list = createComponentList("", specFile[0].getParent());
+					List<SimpleUserNode> list = createComponentList("", specFile.getParent());
 					return list.toArray(new SimpleUserNode[list.size()]);
 				}
 			}

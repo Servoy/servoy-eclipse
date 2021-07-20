@@ -41,6 +41,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -115,11 +116,11 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			{
 				try
 				{
-					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(
+					IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(
 						((WebObjectSpecification)selectedNode.getRealObject()).getSpecURL().toURI());
-					if (specFile.length == 1)
+					if (specFile != null)
 					{
-						folder = specFile[0].getParent();
+						folder = specFile.getParent();
 					}
 					else
 					{
@@ -132,23 +133,30 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 				}
 			}
 
-			IFile file = folder.getFile(new Path(newFileName));
-			if (!file.exists())
+			if (folder != null)
 			{
-				try
+				IFile file = folder.getFile(new Path(newFileName));
+				if (!file.exists())
 				{
-					file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-					EditorUtil.openFileEditor(file);
+					try
+					{
+						file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
+						EditorUtil.openFileEditor(file);
+					}
+					catch (CoreException e)
+					{
+						MessageDialog.openError(shell, getText(), "Could not create file.");
+						ServoyLog.logError(e);
+					}
 				}
-				catch (CoreException e)
+				else
 				{
-					MessageDialog.openError(shell, getText(), "Could not create file.");
-					ServoyLog.logError(e);
+					MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
 				}
 			}
 			else
 			{
-				MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
+				MessageDialog.openError(shell, getText(), "Could not create file. Spec file location incorrect.");
 			}
 		}
 	}
