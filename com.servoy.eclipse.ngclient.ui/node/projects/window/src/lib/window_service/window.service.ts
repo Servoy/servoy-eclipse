@@ -6,7 +6,7 @@ import { PopupMenuService, Popup } from './popupmenu.service';
 import { LoggerFactory, LoggerService, ServoyPublicService, PopupForm, Callback } from '@servoy/public';
 
 @Injectable()
-export class WindowService {
+export class WindowPluginService {
     private _shortcuts: Shortcut[];
     private _popupmenus: Popup[];
     private _popupMenuShowCommand: PopupMenuShowCommand;
