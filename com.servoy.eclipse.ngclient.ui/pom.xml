@@ -47,7 +47,7 @@
 						</configuration>
 					</execution>
 
-					<!-- 2. Install karma and karma plugins -->
+					<!-- run npm install over the projects -->
 					<execution>
 						<id>npm install</id>
 						<phase>initialize</phase>
@@ -56,49 +56,43 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<arguments>ci --force</arguments>
+							<arguments>install --legacy-peer-deps</arguments>
 						</configuration>
 					</execution>
 
-					<!-- 3. npm run build_lib
 					<execution>
-						<id>npm run build_lib</id>
-						<phase>compile</phase>
+						<id>npm install</id>
+						<phase>initialize</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<workingDirectory>node</workingDirectory>
-							<arguments>run build_lib</arguments>
+							<workingDirectory>node/projects/servoydefault</workingDirectory>
+							<arguments>install --legacy-peer-deps</arguments>
 						</configuration>
 					</execution>
- -->
-					<!-- 4. npm run fix_lib 
+
 					<execution>
-						<id>npm run fix_lib</id>
-						<phase>compile</phase>
+						<id>npm install</id>
+						<phase>initialize</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<workingDirectory>node</workingDirectory>
-							<arguments>run fix_lib</arguments>
+							<workingDirectory>node/projects/dialogs</workingDirectory>
+							<arguments>install --legacy-peer-deps</arguments>
 						</configuration>
 					</execution>
--->
-					<!-- 5. npm run build 
-					<execution>
-						<id>npm run build</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<workingDirectory>node</workingDirectory>
-							<arguments>run build_debug_nowatch</arguments> 
-						</configuration>
-					</execution>
--->
+
+					<!-- 3. npm run build_lib <execution> <id>npm run build_lib</id> <phase>compile</phase> 
+						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
+						<arguments>run build_lib</arguments> </configuration> </execution> -->
+					<!-- 4. npm run fix_lib <execution> <id>npm run fix_lib</id> <phase>compile</phase> 
+						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
+						<arguments>run fix_lib</arguments> </configuration> </execution> -->
+					<!-- 5. npm run build <execution> <id>npm run build</id> <phase>compile</phase> 
+						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
+						<arguments>run build_debug_nowatch</arguments> </configuration> </execution> -->
 					<!-- 6. Run karma tests -->
 					<execution>
 						<id>angular karma test</id>
