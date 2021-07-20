@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.sablo.specification.NG2Config;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.Package.ZipPackageReader;
@@ -73,6 +76,17 @@ import com.servoy.j2db.util.Utils;
  */
 public class WebPackagesListener implements ILoadedNGPackagesListener
 {
+	// list of packages that are in node/projects folder
+	private static final String[] defaultPackages = new String[] { "@servoy/servoydefault", "@servoy/dialogs", "@servoy/ngclientutils", "@servoy/window" };
+	private static final Map<String, String> NG1MAPPING = new HashMap<>();
+	static
+	{
+		Arrays.sort(defaultPackages);
+		NG1MAPPING.put("@servoy/ngclientutils", "servoy_ng_only_services");
+		NG1MAPPING.put("@servoy/dialogs", "servoydefaultservices");
+		NG1MAPPING.put("@servoy/servoydefault", "servoydefault");
+	}
+
 	/**
 	 * @author jcompanger
 	 * @since 2021.06
@@ -97,6 +111,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				long time = System.currentTimeMillis();
 				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
+				// modules and css of the components those are based on the Packages itself
+				TreeSet<String> cssLibs = new TreeSet<>();
 				Set<String> packageToInstall = new HashSet<>();
 				Set<String> structureTagNames = new TreeSet<>();
 				// service are based just on all service specifications
@@ -105,16 +121,26 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				WebObjectSpecification[] allServices = serviceProviderState.getAllWebComponentSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
-					if (!webObjectSpecification.getNG2Config().isNull("packageName"))
+					List<String> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
+					if (libs != null)
 					{
-						IPackageReader packageReader = serviceProviderState
-							.getPackageReader(webObjectSpecification.getPackageName());
-						ng2Services.put(webObjectSpecification, packageReader);
+						cssLibs.addAll(libs);
+					}
+					if (webObjectSpecification.getNG2Config().getPackageName() != null)
+					{
+						if (isDefaultPackageEnabled(webObjectSpecification.getNG2Config().getPackageName()))
+						{
+							IPackageReader packageReader = serviceProviderState
+								.getPackageReader(webObjectSpecification.getPackageName());
+							ng2Services.put(webObjectSpecification, packageReader);
+						}
+					}
+					else
+					{
+						System.err.println(webObjectSpecification);
 					}
 				}
 
-				// modules and css of the components those are based on the Packages itself
-				TreeSet<String> cssLibs = new TreeSet<>();
 				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
 					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
@@ -126,6 +152,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
+					}
+					else
+					{
+						System.err.println(entry);
 					}
 
 					List<String> libs = entry.getNg2CssLibrary();
@@ -164,10 +194,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONObject dependencies = jsonObject.optJSONObject("dependencies");
 						ng2Services.entrySet().forEach(entry -> {
 							WebObjectSpecification spec = entry.getKey();
-							JSONObject ng2Config = spec.getNG2Config();
-							String packageName = ng2Config.optString("packageName");
+							NG2Config ng2Config = spec.getNG2Config();
+							String packageName = ng2Config.getPackageName();
 							IPackageReader packageReader = entry.getValue();
-							String entryPoint = ng2Config.optString("entryPoint", null);
+							String entryPoint = ng2Config.getEntryPoint();
 							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
@@ -202,14 +232,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					StringBuilder providers = new StringBuilder("// generated providers start\n");
 					StringBuilder modules = new StringBuilder("// generated modules start\n");
 					ng2Services.keySet().forEach(service -> {
-						if (service.getNG2Config().has("serviceName"))
+						if (service.getNG2Config().getServiceName() != null)
 						{
+							String moduleName = service.getNG2Config().getModuleName();
 							// import the service
 							imports.append("import { ");
-							String serviceName = service.getNG2Config().optString("serviceName");
+							String serviceName = service.getNG2Config().getServiceName();
 							imports.append(serviceName);
+							// add it to the modules
+							if (moduleName != null)
+							{
+								imports.append(',');
+								imports.append(moduleName);
+								modules.append(moduleName);
+								modules.append(",\n");
+							}
 							imports.append(" } from '");
-							imports.append(service.getNG2Config().optString("packageName"));
+							imports.append(service.getNG2Config().getPackageName());
 							imports.append("';\n");
 							// add it to the service declarations in the constructor
 							services.append("private ");
@@ -218,35 +257,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							services.append(serviceName);
 							services.append(",\n");
 							// add it to the providers (if it is not a module)
-							if (!"aggridservice".equals(service.getPackageName()))
+							if (!"aggridservice".equals(service.getPackageName()) && moduleName == null)
 							{
 								providers.append(serviceName);
 								providers.append(",\n");
 							}
-							// add it to the modules
-							if (service.getNG2Config().has("moduleName"))
-							{
-								modules.append(service.getNG2Config().getString("moduleName"));
-								modules.append(",\n");
-							}
 						}
 					});
-
-					//window plugin
-					imports.append("import { WindowService as WindowPlugin, WindowServiceModule} from '@servoy/window';\n");
-					services.append("private window: WindowPlugin,\n");
-					modules.append("WindowServiceModule,\n");
-					providers.append("WindowServiceModule,\n");
-
-					// dialogs plugin
-					imports.append("import { DialogModule, DialogService } from '@servoy/dialogs';\n");
-					services.append("private dialogs: DialogService,\n");
-					modules.append("DialogModule,\n");
-
-					// ngutils plugin
-					imports.append("import { ServoyNGUtilsModule, NGUtilsService } from '@servoy/ngutils';\n");
-					services.append("private ngclientutils: NGUtilsService,\n");
-					modules.append("ServoyNGUtilsModule,\n");
 
 					imports.append("// generated imports end");
 					services.append("// generated services end");
@@ -351,29 +368,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule.append("';\n");
 					});
 
-					// static list for now
-					//TODO filter out if needed
-					allComponentsModule.append("import { ServoyDefaultComponentsModule } from '@servoy/servoydefault';\n");
-					cssLibs.add("../projects/servoydefault/defaultcomponents.css");
-					// end
-
 					allComponentsModule.append("@NgModule({\n imports: [\n");
 					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
 
-					// static list for now
-					allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-					// end
 					allComponentsModule.append(" ],\n exports: [\n");
 					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
-					// static list for now
-					allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-					// end
 					allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 					String current = allComponentsModule.toString();
 					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");
@@ -578,8 +583,42 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
 			{
+				if (Arrays.binarySearch(defaultPackages, packageName) >= 0)
+				{
+					// test if this internal package should be ignored:
+					if (isDefaultPackageEnabled(packageName))
+					{
+						File projectFolder = Activator.getInstance().getProjectFolder();
+						File packageFolder = new File(projectFolder, entryPoint);
+						File tsConfig = new File(projectFolder, "tsconfig.json");
+						try
+						{
+							String tsConfigContents = FileUtils.readFileToString(tsConfig, "UTF8");
+							JSONObject json = new JSONObject(tsConfigContents);
+							JSONObject paths = json.getJSONObject("compilerOptions").getJSONObject("paths");
+							if (!paths.has(packageName))
+							{
+								JSONArray array = new JSONArray();
+								array.put(new File(packageFolder, "src/public-api").getCanonicalPath());
+								paths.put(packageName, array);
+								FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
+							}
+							String installedVersion = dependencies.optString(packageName);
+							if (!installedVersion.endsWith(entryPoint))
+							{
+								return packageFolder.getCanonicalPath();
+							}
+							return null;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else return null;
+				}
 				// its a file based service (something installed in the workspace as a source project)
-				if (packageReader instanceof DirPackageReader)
+				else if (packageReader instanceof DirPackageReader)
 				{
 					try
 					{
@@ -757,6 +796,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
 		checkPackages(false);
+	}
+
+	/**
+	 * returns true if the given package is enabled, will return falso only when the given package is a ng1 default package mapping
+	 * and the preference says it is disabled
+	 * @param packageName
+	 * @return
+	 */
+	private static boolean isDefaultPackageEnabled(String packageName)
+	{
+		String ng1Name = NG1MAPPING.get(packageName);
+		return ng1Name != null ? PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + ng1Name) : true;
 	}
 
 	/**
