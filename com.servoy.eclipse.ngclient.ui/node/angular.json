@@ -176,21 +176,21 @@
         }
       }
     },
-    "@servoy/ngutils": {
+    "@servoy/ngclientutils": {
       "projectType": "library",
-      "root": "projects/ngutils",
-      "sourceRoot": "projects/ngutils/src",
+      "root": "projects/ngclientutils",
+      "sourceRoot": "projects/ngclientutils/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "projects/ngutils/tsconfig.lib.json",
-            "project": "projects/ngutils/ng-package.json"
+            "tsConfig": "projects/ngclientutils/tsconfig.lib.json",
+            "project": "projects/ngclientutils/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngutils/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngclientutils/tsconfig.lib.prod.json"
             }
           }
         },
@@ -198,9 +198,9 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "preserveSymlinks": true,
-            "main": "projects/ngutils/src/test.ts",
-            "tsConfig": "projects/ngutils/tsconfig.spec.json",
-            "karmaConfig": "projects/ngutils/karma.conf.js",
+            "main": "projects/ngclientutils/src/test.ts",
+            "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
+            "karmaConfig": "projects/ngclientutils/karma.conf.js",
             "codeCoverage": true
           }
         },
@@ -208,8 +208,8 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/ngutils/tsconfig.lib.json",
-              "projects/ngutils/tsconfig.spec.json"
+              "projects/ngclientutils/tsconfig.lib.json",
+              "projects/ngclientutils/tsconfig.spec.json"
             ],
             "exclude": [
               "**/node_modules/**"

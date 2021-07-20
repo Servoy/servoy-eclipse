@@ -2,7 +2,7 @@
   "name": "@servoy/dialogs",
   "version": "2021.6.0",
   "peerDependencies": {
-    "@servoy/public": "*",
+    "@servoy/public": "2021.6.0-rc7",
     "@angular/animations": ">=12",
     "@angular/common": ">=12",
     "@angular/core": ">=12",

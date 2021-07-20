@@ -1,6 +1,3 @@
-import { TrustAsHtmlPipe } from './../../../../../servoy-public/src/lib/format/pipes';
-import { OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
-import { ICustomObject } from './../../../../../servoy-public/src/lib/spectypes.service';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -8,8 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { DialogBodyComponent } from '../dialog-body/dialog-body.component';
-import { iteratee } from 'lodash-es';
-import { By, Title } from '@angular/platform-browser';
+import { By } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 
 export class DialogRefMock {

@@ -1,19 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 
-import { WindowService } from './window.service';
+import { WindowPluginService } from './window.service';
 import { ShortcutService } from './shortcut.service';
 import {PopupMenuService} from './popupmenu.service';
 import { ServoyPublicTestingModule} from '@servoy/public';
 
 describe('WindowService', () => {
-  let service: WindowService;
+  let service: WindowPluginService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
         imports: [ ServoyPublicTestingModule],
-        providers:[WindowService, ShortcutService, PopupMenuService]
+        providers:[WindowPluginService, ShortcutService, PopupMenuService]
     });
-    service = TestBed.inject(WindowService);
+    service = TestBed.inject(WindowPluginService);
   });
 
   it('should be created', () => {
