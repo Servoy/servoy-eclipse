@@ -135,10 +135,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							ng2Services.put(webObjectSpecification, packageReader);
 						}
 					}
-					else
-					{
-						System.err.println(webObjectSpecification);
-					}
 				}
 
 				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
@@ -152,10 +148,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
-					}
-					else
-					{
-						System.err.println(entry);
 					}
 
 					List<String> libs = entry.getNg2CssLibrary();
