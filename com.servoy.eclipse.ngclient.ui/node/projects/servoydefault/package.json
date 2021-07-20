@@ -2,11 +2,18 @@
   "name": "@servoy/servoydefault",
   "version": "2021.6.0",
   "peerDependencies": {
+    "@servoy/public": "*",
     "@angular/common": ">=12",
     "@angular/core": ">=12"
   },
   "dependencies": {
-    "@servoy/public": "^2021.6.0-rc7",
+    "@danielmoncada/angular-datetime-picker": ">=12",
+    "@ng-bootstrap/ng-bootstrap": ">=10",
+    "@tinymce/tinymce-angular": ">=4",
+    "bootstrap": ">=5",
+    "ng-select2-component": ">=8",
+    "tinymce": ">=5",
+    "tinymce-i18n": ">=20",
     "tslib": "*"
   },
   "license": "MIT",

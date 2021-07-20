@@ -1,5 +1,5 @@
 {
-  "name": "@servoy/ngutils",
+  "name": "@servoy/ngclientutils",
   "version": "2021.6.0",
   "peerDependencies": {
     "@angular/common": ">=12",
