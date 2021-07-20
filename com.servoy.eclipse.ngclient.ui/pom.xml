@@ -47,6 +47,30 @@
 						</configuration>
 					</execution>
 
+                    <execution>
+                        <id>install node and npm (defaults)</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node/projects/servoydefault</workingDirectory>
+                            <nodeVersion>v16.3.0</nodeVersion>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>install node and npm (dialogs)</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node/projects/dialogs</workingDirectory>
+                            <nodeVersion>v16.3.0</nodeVersion>
+                        </configuration>
+                    </execution>
+                    
 					<!-- run npm install over the projects -->
 					<execution>
 						<id>npm install</id>
