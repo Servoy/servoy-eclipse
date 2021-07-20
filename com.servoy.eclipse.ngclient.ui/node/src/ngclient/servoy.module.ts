@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { MainComponent } from './main.component';
 
@@ -53,7 +52,6 @@ import {MainRoutingModule} from './main-routing.module';
     ],
     imports: [
         CommonModule,
-        NgbModule,
         FormsModule,
         SabloModule,
         AllComponentsModule,
