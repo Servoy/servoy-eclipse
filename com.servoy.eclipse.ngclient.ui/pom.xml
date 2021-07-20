@@ -61,7 +61,7 @@
 					</execution>
 
 					<execution>
-						<id>npm install</id>
+						<id>npm install servoydefault</id>
 						<phase>initialize</phase>
 						<goals>
 							<goal>npm</goal>
@@ -73,7 +73,7 @@
 					</execution>
 
 					<execution>
-						<id>npm install</id>
+						<id>npm install dialogs</id>
 						<phase>initialize</phase>
 						<goals>
 							<goal>npm</goal>
