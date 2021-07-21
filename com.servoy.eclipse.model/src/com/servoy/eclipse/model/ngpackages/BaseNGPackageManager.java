@@ -777,8 +777,8 @@ public abstract class BaseNGPackageManager
 						man.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), result);
 						File mfFile = new File(dir, "META-INF/MANIFEST.MF");
 
-						final IFile workspaceMFs = ResourcesUtils.findFileWithLongestPathForLocationURI(mfFile.toURI());
-						if (workspaceMFs != null)
+						final IFile workspaceMF = ResourcesUtils.findFileWithShortestPathForLocationURI(mfFile.toURI());
+						if (workspaceMF != null)
 						{
 							// we do this later as currently we are executing during a read/get (maybe resource change listener notification) - and we might not be allowed to write or event want to write right away
 							scheduleSystemJob(new Job("Updating manifest file in package from '" + dir.getAbsolutePath() + "'; auto-adding package type...")
@@ -786,14 +786,14 @@ public abstract class BaseNGPackageManager
 								@Override
 								protected IStatus run(IProgressMonitor monitor)
 								{
-									if (workspaceMFs.exists())
+									if (workspaceMF.exists())
 									{
 										try
 										{
 											ByteArrayOutputStream contentWriter = new ByteArrayOutputStream(1024);
 											man.write(contentWriter);
 
-											workspaceMFs.setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
+											workspaceMF.setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
 												IResource.FORCE | IResource.KEEP_HISTORY, monitor);
 										}
 										catch (IOException | CoreException e)
@@ -805,7 +805,7 @@ public abstract class BaseNGPackageManager
 									}
 									return Status.OK_STATUS;
 								}
-							}, workspaceMFs);
+							}, workspaceMF);
 						}
 
 					}

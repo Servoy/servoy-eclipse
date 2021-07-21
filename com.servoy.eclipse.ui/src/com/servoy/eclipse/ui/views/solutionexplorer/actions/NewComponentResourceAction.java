@@ -116,7 +116,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			{
 				try
 				{
-					IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(
+					IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(
 						((WebObjectSpecification)selectedNode.getRealObject()).getSpecURL().toURI());
 					if (specFile != null)
 					{

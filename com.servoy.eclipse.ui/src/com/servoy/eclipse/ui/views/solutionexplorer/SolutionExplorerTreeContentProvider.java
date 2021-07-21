@@ -1016,7 +1016,7 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+								IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 								if (file != null)
 								{
 									if (file.getProjectRelativePath().segmentCount() > 1)
@@ -1186,7 +1186,7 @@ public class SolutionExplorerTreeContentProvider
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
-				IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 				if (file != null)
 				{
 					if (file.getProjectRelativePath().segmentCount() > 1)
@@ -1270,7 +1270,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				try
 				{
-					IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+					IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 					if (specFile != null && specFile.getParent() instanceof IFolder)
 					{
 						folder = (IFolder)specFile.getParent();

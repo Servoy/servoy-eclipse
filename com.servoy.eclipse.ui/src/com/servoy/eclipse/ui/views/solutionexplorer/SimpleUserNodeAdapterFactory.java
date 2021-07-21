@@ -269,7 +269,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					try
 					{
-						IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+						IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 						if (specFile != null)
 						{
 							mappings.add(new SimpleResourceMapping(specFile.getParent())); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
@@ -457,7 +457,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					try
 					{
-						IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+						IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 						if (specFile != null)
 						{
 							return specFile.getParent(); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well

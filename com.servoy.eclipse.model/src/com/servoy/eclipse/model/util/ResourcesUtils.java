@@ -76,13 +76,13 @@ public class ResourcesUtils
 	}
 
 	/**
-	 * Reads the handles of all files that are mapped to the given URI and returns only the file in the nested-most-project( the one with the least path segments in it).
+	 * Reads the handles of all files that are mapped to the given URI and returns only the file in the nested-most-project (the one with the least path segments in it).
 	 * <br>
 	 * There are scenarios when more than one file will be returned by IWorkspaceRoot.findFilesForLocationURI(location),
-	 * in this case only the project in the solution is required.
+	 * in this case only the location in the most specific project should be used (in case there are nested locations imported as projects in the workspace).
 	 * <br>
 	 * For example:
-	 * <br>- You have Servoy project "testtwo" that is imported alongside repository "servoy_test" in Servoy developer;
+	 * <br>- You have Servoy project "testtwo" which is part of "servoy_test" repository that is imported as a project and you have "servoy_test" itself imported as a project;
 	 * <br>- Then you create a new solution in which you add this "testtwo" project as a reference project;
 	 * <br>- In this case all the components found in "testtwo" will have more files returned by the method "IWorkspaceRoot.findFilesForLocationURI(location)";
 	 * <br>- IFile[] array returned :"[L/servoy_test/testtwo/button2/button2.spec, L/testtwo/button2/button2.spec]";
@@ -91,7 +91,7 @@ public class ResourcesUtils
 	 * @param location
 	 * @return the file in the nested-most-project or null if no file was found for the given URI.
 	 */
-	public static IFile findFileWithLongestPathForLocationURI(URI location)
+	public static IFile findFileWithShortestPathForLocationURI(URI location)
 	{
 		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(location);
 		IFile mostNestedFile = null;

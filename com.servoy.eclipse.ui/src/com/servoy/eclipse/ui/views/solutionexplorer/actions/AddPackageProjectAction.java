@@ -164,7 +164,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 
 			if (resource != null && resource.isFile())
 			{
-				IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(resource.toURI());
+				IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(resource.toURI());
 				if (file != null && list.contains(file.getProject()))
 				{
 					String packName = resource.getName().toLowerCase().split("\\.")[0];

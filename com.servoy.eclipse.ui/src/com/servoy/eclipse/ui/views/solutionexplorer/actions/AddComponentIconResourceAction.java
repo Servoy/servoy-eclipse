@@ -133,7 +133,7 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 			FileInputStream fis = null;
 			try
 			{
-				IFile specfile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				IFile specfile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 				if (specfile != null && specfile.exists())
 				{
 					IFolder componentFolder = (IFolder)specfile.getParent();

@@ -831,7 +831,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			try
 			{
-				IFile specFile = ResourcesUtils.findFileWithLongestPathForLocationURI(spec.getSpecURL().toURI());
+				IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
 				if (specFile != null)
 				{
 					List<SimpleUserNode> list = createComponentList("", specFile.getParent());

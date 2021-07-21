@@ -230,7 +230,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	{
 		if (packageFile != null && packageFile.isFile())
 		{
-			IFile file = ResourcesUtils.findFileWithLongestPathForLocationURI(packageFile.toURI());
+			IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(packageFile.toURI());
 			if (file != null && file.exists())
 			{
 				return file.getProject().getName();
