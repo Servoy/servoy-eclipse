@@ -13,7 +13,6 @@ import { GhostsContainerComponent } from './ghostscontainer/ghostscontainer.comp
 import { EditorContentComponent } from './editorcontent/editorcontent.component';
 import {EditorSessionService} from './services/editorsession.service';
 import {URLParserService} from './services/urlparser.service';
-import { SabloModule } from '@servoy/sablo';
 import { WindowRefService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -44,7 +43,6 @@ import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
   ],
   imports: [
     BrowserModule,
-    SabloModule,
     FormsModule,
     CommonModule,
     HttpClientModule,

@@ -5,7 +5,6 @@ import { ServoyDesignerComponent } from './servoydesigner.component';
 import { AllServicesModules } from '../ngclient/allservices.service';
 import { AllComponentsModule } from '../ngclient/allcomponents.module';
 import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
-import { SabloModule } from '../sablo/sablo.module';
 import {DesignFormComponent, AddAttributeDirective} from './designform_component.component';
 import { ServoyPublicServiceImpl } from '../ngclient/services/servoy_public_impl.service';
 import { ServerDataService } from '../ngclient/services/serverdata.service';
@@ -16,8 +15,7 @@ import { ServerDataService } from '../ngclient/services/serverdata.service';
     ServoyDesignerRoutingModule,
     AllComponentsModule,
     AllServicesModules,
-    ServoyPublicModule,
-    SabloModule
+    ServoyPublicModule
   ],
   declarations: [ServoyDesignerComponent, DesignFormComponent, AddAttributeDirective],
   providers: [ServerDataService, ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],

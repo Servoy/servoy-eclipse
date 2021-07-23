@@ -14,7 +14,6 @@ import { ApplicationService } from '../ngclient/services/application.service';
 import { ServoyService } from '../ngclient/servoy.service';
 import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 import { SvyUtilsService } from '../ngclient/utils.service';
-import { SabloModule } from '../sablo/sablo.module';
 import { SabloService } from '../sablo/sablo.service';
 
 
@@ -68,7 +67,6 @@ export class TestSabloService extends SabloService {
 
   ],
   imports: [
-    SabloModule
   ],
   exports: [
 

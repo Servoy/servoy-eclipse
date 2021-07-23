@@ -6,8 +6,6 @@ import { MainComponent } from './main.component';
 
 import { FormComponent, AddAttributeDirective } from './form/form_component.component';
 
-import { SabloModule } from '../sablo/sablo.module';
-
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
@@ -53,7 +51,6 @@ import {MainRoutingModule} from './main-routing.module';
     imports: [
         CommonModule,
         FormsModule,
-        SabloModule,
         AllComponentsModule,
         AllServicesModules,
         ServoyPublicModule,
