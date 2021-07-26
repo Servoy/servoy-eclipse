@@ -797,18 +797,14 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					else
 					{
-						UUID uuid = null;
-						if (importInfo.cleanImport)
-						{
-							uuid = importInfo.cleanImportUUIDMap.get(elementInfo.elementUuid);
-						}
-						else
-						{
-							uuid = UUID.fromString(elementInfo.elementUuid);
-						}
+						UUID uuid = UUID.fromString(elementInfo.elementUuid);
 						if (uuid != null)
-						{
+						{//at this point, on cleanImport, imported elements still contains the old uuid's - the new uuid's are generated but not yet replaced the old ones
 							UUID formUUID = getFormUUID(importInfo, rootObjectImportInfo, uuid);
+							if (importInfo.cleanImport)
+							{//on cleanImport we need to add security data to new uuid
+								uuid = importInfo.cleanImportUUIDMap.get(elementInfo.elementUuid);
+							}
 							userManager.addFormSecurityAccess(groupInfo.name, elementInfo.elementAccess, uuid, formUUID);
 						}
 					}
