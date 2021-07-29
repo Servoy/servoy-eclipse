@@ -550,6 +550,10 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.invalidTableNoPrimaryKey">
+      </markerResolutionGenerator>    
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.missingProjectReference">
       </markerResolutionGenerator>     
    </extension>
    <extension

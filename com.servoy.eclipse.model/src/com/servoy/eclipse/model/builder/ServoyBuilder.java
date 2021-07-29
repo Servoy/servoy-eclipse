@@ -3047,7 +3047,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!p.isAccessible())
 				{
 					ServoyMarker mk = MarkerMessages.MissingProjectReference.fill(p.getName(), project.getName());
-					addMarker(project, mk.getType(), mk.getText(), -1, ERROR_MISSING_PROJECT_REFERENCE, IMarker.PRIORITY_NORMAL, null, null);
+					final IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, ERROR_MISSING_PROJECT_REFERENCE, IMarker.PRIORITY_NORMAL, null,
+						null);
+					try
+					{
+						marker.setAttribute("projectReferenceName", p.getName());
+					}
+					catch (CoreException e)
+					{
+						Debug.error(e);
+					}
 				}
 			}
 

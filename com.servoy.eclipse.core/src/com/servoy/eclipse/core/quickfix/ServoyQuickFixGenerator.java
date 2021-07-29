@@ -305,6 +305,12 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				final String tableName = (String)marker.getAttribute("tableName");
 				fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
 			}
+			else if (type.equals(ServoyBuilder.MISSING_PROJECT_REFERENCE))
+			{
+				final String projectReferenceName = (String)marker.getAttribute("projectReferenceName");
+				fixes = new IMarkerResolution[] { new OpenMissingProjectReferenceQuickFix(projectReferenceName), new DeleteMissingProjectReferenceQuickFix(
+					projectReferenceName) };
+			}
 		}
 		catch (CoreException e)
 		{
