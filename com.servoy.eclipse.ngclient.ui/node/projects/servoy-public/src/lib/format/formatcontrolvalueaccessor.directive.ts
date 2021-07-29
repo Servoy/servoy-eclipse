@@ -54,6 +54,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private isKeyPressEventFired = false;
     private oldInputValue = null;
     private listeners = [];
+    private maskFormat : MaskFormat;
     private readonly log: LoggerService;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
@@ -203,6 +204,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private setFormat() {
         this.listeners.forEach(lFn => lFn());
         this.listeners = [];
+        if (this.maskFormat){
+           this.maskFormat.destroy();
+           this.maskFormat = null; 
+        } 
         if (this.format) {
             if (!this.findmode && (this.format.uppercase || this.format.lowercase)) {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));
@@ -222,7 +227,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 }
             }
             if (!this.findmode && this.format.isMask) {
-                new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
+                this.maskFormat = new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
             }
             this.writeValue(this.realValue);
         }
