@@ -6,7 +6,7 @@ import { FormCache, StructureCache, FormComponentCache, ComponentCache, PartCach
 import { ServoyService } from '../ngclient/servoy.service';
 
 import { SabloService } from '../sablo/sablo.service';
-import { LoggerService, LoggerFactory, ServoyBaseComponent } from '@servoy/public';
+import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
@@ -23,6 +23,9 @@ import { DOCUMENT } from '@angular/common';
                <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
+          </div>
+          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+                   <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
       <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
@@ -133,12 +136,26 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     private _containers: { added: any; removed: any; };
     private _cssstyles: { [x: string]: any; };
 
+    draggedElementItem : ComponentCache;
+    
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
                 private el: ElementRef, private renderer: Renderer2,
-                @Inject(DOCUMENT) private document: Document) {
+                @Inject(DOCUMENT) private document: Document,
+                private windowRefService: WindowRefService) {
         this.log = logFactory.getLogger('FormComponent');
+        this.windowRefService.nativeWindow.addEventListener("message", (event) => {
+            if (event.data.id == 'createElement'){
+                const elWidth = event.data.model.size ? event.data.model.size.width : 200;
+                const elHeight = event.data.model.size ? event.data.model.size.height : 100;
+                this.draggedElementItem = new ComponentCache('dragged_element',event.data.name, event.data.model, [], {width: elWidth +'px' , height: elHeight +'px', top: '-200px', left: '-200px'});
+            }
+            if (event.data.id == 'destroyElement'){
+                this.draggedElementItem = null;
+            }
+            this.detectChanges();
+        })
     }
 
     public detectChanges() {

@@ -12,6 +12,7 @@
 .palette {
     overflow-y: auto;
     max-height:100%;
+    user-select:none;
 }
 
 .palette ul {
