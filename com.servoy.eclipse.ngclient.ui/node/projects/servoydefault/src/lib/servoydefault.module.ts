@@ -35,7 +35,6 @@ import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
 
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
-import { Select2Module } from 'ng-select2-component';
 import { Tab } from './tabpanel/basetabpanel';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 
@@ -73,7 +72,6 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     ServoyPublicModule,
-    Select2Module,
     EditorModule
   ],
   exports: [
