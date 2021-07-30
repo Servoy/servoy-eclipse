@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
+import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -7,9 +8,9 @@ export enum TOOLBAR_CONSTANTS {
   LAYOUTS_COMPONENTS_CSS = "Layouts & Components CSS",
   COMPONENTS_CSS = "Components CSS",
   NO_CSS = "No CSS",
-  LAYOUTS_COMPONENTS_CSS_ICON = "url(images/layouts_components_css.png)",
-  COMPONENTS_CSS_ICON = "url(images/components_css.png)",
-  NO_CSS_ICON = "url(images/no_css.png)"
+  LAYOUTS_COMPONENTS_CSS_ICON = "url(designer/assets/images/layouts_components_css.png)",
+  COMPONENTS_CSS_ICON = "url(designer/assets/images/components_css.png)",
+  NO_CSS_ICON = "url(designer/assets/images/no_css.png)"
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -95,16 +96,37 @@ export class ToolbarComponent implements OnInit {
 
   btnShowErrors: ToolbarItem;
 
+  elements: ToolbarItem[];
+  form: ToolbarItem[];
+  display: ToolbarItem[];
+  ordering: ToolbarItem[];
+  alignment: ToolbarItem[];
+  distribution: ToolbarItem[];
+  sizing: ToolbarItem[];
+  grouping: ToolbarItem[];
+  zoom_level: ToolbarItem[];
+  design_mode: ToolbarItem[];
+  sticky: ToolbarItem[];
+  zoom: ToolbarItem[];
+  standard_actions: ToolbarItem[];
+  show_data: ToolbarItem[];
+
   constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-    @Inject(DOCUMENT) private doc: Document) {
+    @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService ) {
     this.createItems();
+    this.designSize.createItems(this);
   }
   
   ngOnInit(): void {
     this.setupItems();
+    this.designSize.setupItems(this);
   }
 
   setupItems() {
+    this.elements = this.getCategoryItems(TOOLBAR_CATEGORIES.ELEMENTS);
+    this.form = this.getCategoryItems(TOOLBAR_CATEGORIES.FORM);
+    this.standard_actions = this.getCategoryItems(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+
 		if (this.urlParser.isAbsoluteFormLayout()) {
 			this.btnToggleDesignMode.enabled = false;
 			this.btnZoomIn.hide = true;
@@ -120,6 +142,14 @@ export class ToolbarComponent implements OnInit {
 				this.btnPlaceAccordion.hide = true;
 			}
 
+      this.display = this.getCategoryItems(TOOLBAR_CATEGORIES.DISPLAY);
+      this.ordering = this.getCategoryItems(TOOLBAR_CATEGORIES.ORDERING);
+      this.alignment = this.getCategoryItems(TOOLBAR_CATEGORIES.ALIGNMENT);
+      this.distribution = this.getCategoryItems(TOOLBAR_CATEGORIES.DISTRIBUTION);
+      this.sizing = this.getCategoryItems(TOOLBAR_CATEGORIES.SIZING);
+      //TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
+      this.grouping = this.getCategoryItems(TOOLBAR_CATEGORIES.GROUPING);
+
 		} else {
 			this.btnPlaceField.hide = true;
 			this.btnPlaceImage.hide = true;
@@ -130,7 +160,17 @@ export class ToolbarComponent implements OnInit {
 			this.btnTabSequence.hide = true;
 			this.btnClassicEditor.hide = true;
 			this.btnHideInheritedElements.hide = true;
+
+      this.ordering = this.getCategoryItems(TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
+      this.zoom_level = this.getCategoryItems(TOOLBAR_CATEGORIES.ZOOM_LEVEL);
+      this.design_mode = this.getCategoryItems(TOOLBAR_CATEGORIES.DESIGN_MODE);
+      this.sticky = this.getCategoryItems(TOOLBAR_CATEGORIES.STICKY);
 		}
+
+    if (!this.urlParser.isAbsoluteFormLayout() || this.urlParser.isShowingContainer()) {
+      this.zoom = this.getCategoryItems(TOOLBAR_CATEGORIES.ZOOM);
+    }
+
 		this.btnZoomOut.enabled = this.urlParser.isShowingContainer();
 		const promise = this.editorSession.isShowData();
 		promise.then((result) => {
@@ -503,7 +543,7 @@ export class ToolbarComponent implements OnInit {
         this.editorSession.executeAction('responsive_move_up');
       }
     );
-    this.btnMoveUp.disabledIcon = "../../images/move_back-disabled.png";
+    this.btnMoveUp.disabledIcon = "images/move_back-disabled.png";
   
     this.btnMoveDown = new ToolbarItem(
       "Move to right inside parent container",
@@ -513,7 +553,7 @@ export class ToolbarComponent implements OnInit {
         this.editorSession.executeAction('responsive_move_down');
       }
     );
-    this.btnMoveDown.disabledIcon = "../../images/move_forward-disabled.png";
+    this.btnMoveDown.disabledIcon = "images/move_forward-disabled.png";
 
     this.add(this.btnMoveUp, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
     this.add(this.btnMoveDown, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);

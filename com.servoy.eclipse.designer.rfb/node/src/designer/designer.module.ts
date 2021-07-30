@@ -22,6 +22,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
 import { ToolbarSpinnerComponent } from './toolbar/item/toolbarspinner.component';
 import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
+import { DesignSizeService } from './services/designsize.service';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,7 @@ import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
     NgbModule,
     DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

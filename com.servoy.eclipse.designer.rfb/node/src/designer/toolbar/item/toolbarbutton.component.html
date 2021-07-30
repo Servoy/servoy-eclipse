@@ -1,4 +1,4 @@
-<div *ngIf="!item.hide && !item.list" class="btn-group">
+<div *ngIf="!item.list" class="btn-group">
 	<button type="button" class="btn btn-xs" [ngClass]="item.state !== undefined && item.state ? 'toggle-on' : ''" (click)="item.onclick()" [disabled]="!item.enabled" [style]="item.style">
 		<img [src]="'designer/assets/' +  (!item.enabled && item.disabledIcon ?  item.disabledIcon : item.icon)" alt="{{item.text}}" title="{{item.text}}"/>
 	</button>
@@ -7,7 +7,7 @@
 	<button type="button" *ngIf="!item.getIconStyle" title="{{item.tooltip}}" class="btn btn-xs" (click)="item.onclick(item.text)" [disabled]="!item.enabled">{{item.getIconStyle ? "" : item.text}}</button>
 	<button type="button" class="btn" [ngClass]="item.getIconStyle ? '' : 'btn-xs dropdown-toggle'" data-toggle="dropdown" [disabled]="!item.enabled" 
 	style="background-repeat:no-repeat;background-position:left center;min-width:26px;height:24px;padding-left:0px"
-	[ngStyle]="item.getIconStyle(item.text)" (click)="item.onclick(item.text)" title="{{item.tooltip}}">
+	[ngStyle]="item.getIconStyle ? item.getIconStyle(item.text) : {}" (click)="item.onclick(item.text)" title="{{item.tooltip}}">
 		<span [ngClass]="item.getIconStyle ? '' : 'caret'"></span>
 	</button>
 	<ul class="dropdown-menu dropdown-menu-right" role="menu" style="min-width:inherit;">
