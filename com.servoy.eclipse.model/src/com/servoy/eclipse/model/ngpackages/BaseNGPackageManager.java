@@ -42,7 +42,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -67,6 +66,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener.CHANGE_REASON;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Pair;
@@ -246,6 +246,7 @@ public abstract class BaseNGPackageManager
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
+							if (!resource.getName().endsWith(".zip")) continue;
 							IPackageReader reader = readPackageResource(resource);
 							if (reader != null)
 							{
@@ -332,14 +333,15 @@ public abstract class BaseNGPackageManager
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, pr, ngPackageChangesPerReferencingProject))
 				{
-					if (componentsSpecProviderState.getPackageNames().contains(pr.getPackageName())) componentsReallyToUnload.add(pr);
+					if (componentsSpecProviderState.getPackageNames().contains(pr.getPackageName()) ||
+						componentsSpecProviderState.getLayoutSpecifications().containsKey(pr.getPackageName())) componentsReallyToUnload.add(pr);
 					else serviceReallyToUnload.add(pr);
 				}
 			}
 
 			for (IPackageReader packageReader : packagesToLoad)
 			{
-				if (packageReader == null) continue;//spec reader marker will show in this case
+				if (packageReader == null) continue; // spec reader marker will show in this case
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageReader, ngPackageChangesPerReferencingProject))
 				{
 					if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
@@ -527,6 +529,7 @@ public abstract class BaseNGPackageManager
 				m.beginTask("Reading packages", members.length);
 				for (IResource resource : members)
 				{
+					if (resource.getType() == IResource.FILE && !resource.getName().endsWith(".zip")) continue;
 					IPackageReader reader = readPackageResource(resource);
 					if (reader != null)
 					{
@@ -575,12 +578,6 @@ public abstract class BaseNGPackageManager
 		}
 		else if (resource instanceof IFile)
 		{
-			String name = resource.getName();
-			int index = name.lastIndexOf('.');
-			if (index != -1)
-			{
-				name = name.substring(0, index);
-			}
 			if (resource.getName().endsWith(".zip") || resource.getName().endsWith(".jar"))
 			{
 				reader = new ZipFilePackageReader(resource);
@@ -780,8 +777,8 @@ public abstract class BaseNGPackageManager
 						man.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), result);
 						File mfFile = new File(dir, "META-INF/MANIFEST.MF");
 
-						final IFile[] workspaceMFs = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(mfFile.toURI());
-						if (workspaceMFs.length == 1 && workspaceMFs[0] != null)
+						final IFile workspaceMF = ResourcesUtils.findFileWithShortestPathForLocationURI(mfFile.toURI());
+						if (workspaceMF != null)
 						{
 							// we do this later as currently we are executing during a read/get (maybe resource change listener notification) - and we might not be allowed to write or event want to write right away
 							scheduleSystemJob(new Job("Updating manifest file in package from '" + dir.getAbsolutePath() + "'; auto-adding package type...")
@@ -789,14 +786,14 @@ public abstract class BaseNGPackageManager
 								@Override
 								protected IStatus run(IProgressMonitor monitor)
 								{
-									if (workspaceMFs[0].exists())
+									if (workspaceMF.exists())
 									{
 										try
 										{
 											ByteArrayOutputStream contentWriter = new ByteArrayOutputStream(1024);
 											man.write(contentWriter);
 
-											workspaceMFs[0].setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
+											workspaceMF.setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
 												IResource.FORCE | IResource.KEEP_HISTORY, monitor);
 										}
 										catch (IOException | CoreException e)
@@ -808,7 +805,7 @@ public abstract class BaseNGPackageManager
 									}
 									return Status.OK_STATUS;
 								}
-							}, workspaceMFs[0]);
+							}, workspaceMF);
 						}
 
 					}

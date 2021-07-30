@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.sablo.specification.NG2Config;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.Package.ZipPackageReader;
@@ -73,6 +76,17 @@ import com.servoy.j2db.util.Utils;
  */
 public class WebPackagesListener implements ILoadedNGPackagesListener
 {
+	// list of packages that are in node/projects folder
+	private static final String[] defaultPackages = new String[] { "@servoy/servoydefault", "@servoy/dialogs", "@servoy/ngclientutils", "@servoy/window" };
+	private static final Map<String, String> NG1MAPPING = new HashMap<>();
+	static
+	{
+		Arrays.sort(defaultPackages);
+		NG1MAPPING.put("@servoy/ngclientutils", "servoy_ng_only_services");
+		NG1MAPPING.put("@servoy/dialogs", "servoydefaultservices");
+		NG1MAPPING.put("@servoy/servoydefault", "servoydefault");
+	}
+
 	/**
 	 * @author jcompanger
 	 * @since 2021.06
@@ -97,6 +111,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				long time = System.currentTimeMillis();
 				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
+				// modules and css of the components those are based on the Packages itself
+				TreeSet<String> cssLibs = new TreeSet<>();
 				Set<String> packageToInstall = new HashSet<>();
 				Set<String> structureTagNames = new TreeSet<>();
 				// service are based just on all service specifications
@@ -105,17 +121,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				WebObjectSpecification[] allServices = serviceProviderState.getAllWebComponentSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
-					if (!webObjectSpecification.getNG2Config().isNull("packageName"))
+					List<String> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
+					if (libs != null)
 					{
-						IPackageReader packageReader = serviceProviderState
-							.getPackageReader(webObjectSpecification.getPackageName());
-						ng2Services.put(webObjectSpecification, packageReader);
+						cssLibs.addAll(libs);
+					}
+					if (webObjectSpecification.getNG2Config().getPackageName() != null)
+					{
+						if (isDefaultPackageEnabled(webObjectSpecification.getNG2Config().getPackageName()))
+						{
+							IPackageReader packageReader = serviceProviderState
+								.getPackageReader(webObjectSpecification.getPackageName());
+							ng2Services.put(webObjectSpecification, packageReader);
+						}
 					}
 				}
 
-				// modules and css of the components those are based on the Packages itself
-				TreeSet<String> cssLibs = new TreeSet<>();
-				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentSpecToReader = new TreeMap<>(
+				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
 					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
@@ -125,7 +147,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
-						componentSpecToReader.put(entry, packageReader);
+						componentPackageSpecToReader.put(entry, packageReader);
 					}
 
 					List<String> libs = entry.getNg2CssLibrary();
@@ -136,6 +158,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
+					List<String> libs = entry.getNg2CssLibrary();
+					if (libs != null)
+					{
+						cssLibs.addAll(libs);
+					}
+
 					Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
 					specifications.values().forEach(spec -> {
 						PropertyDescription tagType = spec.getProperty("tagType");
@@ -148,7 +176,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 
 				boolean sourceChanged = false;
-				if (ng2Services.size() > 0 || componentSpecToReader.size() > 0)
+				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
 					try
 					{
@@ -158,10 +186,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONObject dependencies = jsonObject.optJSONObject("dependencies");
 						ng2Services.entrySet().forEach(entry -> {
 							WebObjectSpecification spec = entry.getKey();
-							JSONObject ng2Config = spec.getNG2Config();
-							String packageName = ng2Config.optString("packageName");
+							NG2Config ng2Config = spec.getNG2Config();
+							String packageName = ng2Config.getPackageName();
 							IPackageReader packageReader = entry.getValue();
-							String entryPoint = ng2Config.optString("entryPoint", null);
+							String entryPoint = ng2Config.getEntryPoint();
 							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
@@ -170,7 +198,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 
-						componentSpecToReader.entrySet().forEach(entry -> {
+						componentPackageSpecToReader.entrySet().forEach(entry -> {
 							PackageSpecification<WebObjectSpecification> spec = entry.getKey();
 							String packageName = spec.getNpmPackageName();
 							IPackageReader packageReader = entry.getValue();
@@ -196,14 +224,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					StringBuilder providers = new StringBuilder("// generated providers start\n");
 					StringBuilder modules = new StringBuilder("// generated modules start\n");
 					ng2Services.keySet().forEach(service -> {
-						if (service.getNG2Config().has("serviceName"))
+						if (service.getNG2Config().getServiceName() != null)
 						{
+							String moduleName = service.getNG2Config().getModuleName();
 							// import the service
 							imports.append("import { ");
-							String serviceName = service.getNG2Config().optString("serviceName");
+							String serviceName = service.getNG2Config().getServiceName();
 							imports.append(serviceName);
+							// add it to the modules
+							if (moduleName != null)
+							{
+								imports.append(',');
+								imports.append(moduleName);
+								modules.append(moduleName);
+								modules.append(",\n");
+							}
 							imports.append(" } from '");
-							imports.append(service.getNG2Config().optString("packageName"));
+							imports.append(service.getNG2Config().getPackageName());
 							imports.append("';\n");
 							// add it to the service declarations in the constructor
 							services.append("private ");
@@ -212,19 +249,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							services.append(serviceName);
 							services.append(",\n");
 							// add it to the providers (if it is not a module)
-							if (!"aggridservice".equals(service.getPackageName()))
+							if (!"aggridservice".equals(service.getPackageName()) && moduleName == null)
 							{
 								providers.append(serviceName);
 								providers.append(",\n");
 							}
-							// add it to the modules
-							if (service.getNG2Config().has("moduleName"))
-							{
-								modules.append(service.getNG2Config().getString("moduleName"));
-								modules.append(",\n");
-							}
 						}
 					});
+
 					imports.append("// generated imports end");
 					services.append("// generated services end");
 					providers.append("// generated providers end");
@@ -254,12 +286,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					// adjust component templates
 					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), "UTF-8");
+					String editorContent = FileUtils.readFileToString(new File(projectFolder, "src/designer/designform_component.component.ts"), "UTF-8");
 					String old = content;
+					String oldEditor = editorContent;
 					content = replace(content, "<!-- component template generate start -->", "<!-- component template generate end -->",
 						componentTemplates.getLeft());
 					content = replace(content, "// component viewchild template generate start", "// component viewchild template generate end",
 						componentTemplates.getRight());
-
+					editorContent = replace(editorContent, "<!-- component template generate start -->", "<!-- component template generate end -->",
+						componentTemplates.getLeft());
+					editorContent = replace(editorContent, "// component viewchild template generate start", "// component viewchild template generate end",
+						componentTemplates.getRight());
 					// add structure templates
 					if (structureTagNames.size() > 0)
 					{
@@ -267,6 +304,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						content = replace(content, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
 							generateStructureTemplate.getFormComponentTemplate());
 						content = replace(content, "// structure viewchild template generate start", "// structure viewchild template generate end",
+							generateStructureTemplate.getViewChilds());
+
+						editorContent = replace(editorContent, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+							generateStructureTemplate.getFormComponentTemplate());
+						editorContent = replace(editorContent, "// structure viewchild template generate start", "// structure viewchild template generate end",
 							generateStructureTemplate.getViewChilds());
 
 						String lfc = FileUtils.readFileToString(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), "UTF-8");
@@ -290,6 +332,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
 					}
 
+					if (!oldEditor.equals(editorContent))
+					{
+						sourceChanged = true;
+						writeConsole(console, "editor ts file changed");
+						FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
+					}
+
 				}
 				catch (IOException e1)
 				{
@@ -303,7 +352,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// generate the all components.module.ts
 					StringBuilder allComponentsModule = new StringBuilder(256);
 					allComponentsModule.append("import { NgModule } from '@angular/core';\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append("import { ");
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(" } from '");
@@ -311,27 +360,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						allComponentsModule.append("';\n");
 					});
 
-					// static list for now
-					allComponentsModule.append("import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';\n");
-					// end
-
 					allComponentsModule.append("@NgModule({\n imports: [\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
 
-					// static list for now
-					allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-					// end
 					allComponentsModule.append(" ],\n exports: [\n");
-					componentSpecToReader.keySet().forEach(spec -> {
+					componentPackageSpecToReader.keySet().forEach(spec -> {
 						allComponentsModule.append(spec.getNg2Module());
 						allComponentsModule.append(",\n");
 					});
-					// static list for now
-					allComponentsModule.append("ServoyDefaultComponentsModule,\n");
-					// end
 					allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 					String current = allComponentsModule.toString();
 					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");
@@ -384,14 +423,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("--legacy-peer-deps");
-					if (SOURCE_DEBUG)
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+					try
 					{
-						writeConsole(console, "SOURCE DEBUG, skipping npm install and npm run debug, need to be run by your self");
-						writeConsole(console, "npm command not done: " + RunNPMCommand.commandArgsToString(command));
+						npmCommand.runCommand(monitor);
 					}
-					else
+					catch (Exception e)
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+						ServoyLog.logError(e);
+					}
+					if (cleanInstall.get())
+					{
+						cleanInstall.set(false);
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -400,20 +444,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							ServoyLog.logError(e);
 						}
-						if (cleanInstall.get())
-						{
-							cleanInstall.set(false);
-							npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-							}
-							catch (Exception e)
-							{
-								ServoyLog.logError(e);
-							}
-						}
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch", "--max_old_space_size=4096"));
+					}
+					if (SOURCE_DEBUG)
+					{
+						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
+					}
+					else
+					{
+
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -536,8 +575,42 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
 			{
+				if (Arrays.binarySearch(defaultPackages, packageName) >= 0)
+				{
+					// test if this internal package should be ignored:
+					if (isDefaultPackageEnabled(packageName))
+					{
+						File projectFolder = Activator.getInstance().getProjectFolder();
+						File packageFolder = new File(projectFolder, entryPoint);
+						File tsConfig = new File(projectFolder, "tsconfig.json");
+						try
+						{
+							String tsConfigContents = FileUtils.readFileToString(tsConfig, "UTF8");
+							JSONObject json = new JSONObject(tsConfigContents);
+							JSONObject paths = json.getJSONObject("compilerOptions").getJSONObject("paths");
+							if (!paths.has(packageName))
+							{
+								JSONArray array = new JSONArray();
+								array.put(new File(packageFolder, "src/public-api").getCanonicalPath());
+								paths.put(packageName, array);
+								FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
+							}
+							String installedVersion = dependencies.optString(packageName);
+							if (!installedVersion.endsWith(entryPoint))
+							{
+								return packageFolder.getCanonicalPath();
+							}
+							return null;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else return null;
+				}
 				// its a file based service (something installed in the workspace as a source project)
-				if (packageReader instanceof DirPackageReader)
+				else if (packageReader instanceof DirPackageReader)
 				{
 					try
 					{
@@ -556,12 +629,20 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packageFolder = new File(packagesFolder, packageName);
 
 									JSONObject sourcePathJson = null;
-									String sourcePathContents = FileUtils.readFileToString(new File(sourcePath.getRawLocationURI()), "UTF8");
+									String sourcePathContents = FileUtils.readFileToString(sourcePath.getLocation().toFile(), "UTF8");
 									sourcePathJson = new JSONObject(sourcePathContents);
 									IFolder file = project.getFolder(sourcePathJson.getString("srcDir"));
 									File apiFile = new File(packageFolder, sourcePathJson.getString("apiFile") + ".ts");
 
 									String location = packageFolder.getCanonicalPath();
+									File packageJson = new File(packageFolder, "package.json");
+									boolean packageJsonChanged = !packageJson.exists();
+									if (!packageJsonChanged)
+									{
+										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
+										packageJsonChanged = file.getFile("package.json").getLocation().toFile().lastModified() > packageJson
+											.lastModified();
+									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(project.getName()) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
@@ -569,7 +650,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(project.getName());
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
-										File srcDir = new File(file.getRawLocationURI());
+										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
 										WebPackagesListener.watchCreated.put(project.getName(), new DirectorySync(srcDir, packageFolder, null));
 									}
@@ -590,7 +671,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (!installedVersion.endsWith("packages/" + packageName))
+									if (packageJsonChanged || !installedVersion.endsWith("packages/" + packageName))
 									{
 										return location;
 									}
@@ -622,8 +703,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					boolean exists = packageFolder.exists();
 					if (exists)
 					{
-						File entry = new File(packageFolder, entryPoint);
-						if (packageFolder.lastModified() < packageReader.getResource().lastModified() || !entry.exists())
+						File entry = new File(packageFolder, ".timestamp");
+						try
+						{
+							if (!entry.exists() || Long.parseLong(FileUtils.readFileToString(entry, "UTF8")) != packageReader.getResource().lastModified())
+							{
+								FileUtils.deleteQuietly(packageFolder);
+								exists = false;
+							}
+						}
+						catch (Exception e)
 						{
 							FileUtils.deleteQuietly(packageFolder);
 							exists = false;
@@ -636,12 +725,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!exists)
 						{
 							ZipUtils.extractZip(packageReader.getResource().toURI().toURL(), packageFolder);
+							FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(packageReader.getResource().lastModified()),
+								"UTF8");
 						}
 						File entry = new File(packageFolder, entryPoint);
 						if (entry.exists())
 						{
 							String installedVersion = dependencies.optString(packageName);
-							if (!installedVersion.endsWith(entryPoint))
+							if (!exists || !installedVersion.endsWith(entryPoint))
 							{
 								return entry.getCanonicalPath();
 							}
@@ -697,6 +788,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
 		checkPackages(false);
+	}
+
+	/**
+	 * returns true if the given package is enabled, will return falso only when the given package is a ng1 default package mapping
+	 * and the preference says it is disabled
+	 * @param packageName
+	 * @return
+	 */
+	private static boolean isDefaultPackageEnabled(String packageName)
+	{
+		String ng1Name = NG1MAPPING.get(packageName);
+		return ng1Name != null ? PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + ng1Name) : true;
 	}
 
 	/**

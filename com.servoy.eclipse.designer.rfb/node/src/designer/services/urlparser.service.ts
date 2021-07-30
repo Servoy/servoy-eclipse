@@ -13,7 +13,8 @@ export class URLParserService {
     formWidth: number;
     formHeight: number;
     formComponent: string;
-
+    contentClientNr : string;
+    
     constructor(private websocketService: WebsocketService) {
         this.parseURL();
     }
@@ -21,13 +22,14 @@ export class URLParserService {
     parseURL() {
         this.formName = this.websocketService.getURLParameter('f');
         this.solutionName = this.websocketService.getURLParameter('s');
-        this.layout = this.websocketService.getURLParameter('layout');
+        this.layout = this.websocketService.getURLParameter('l');
         this.hideDefault = this.websocketService.getURLParameter("hd");
         this.marqueeSelectOuter = this.websocketService.getURLParameter("mso");
         this.formWidth = parseInt(this.websocketService.getURLParameter("w"), 10);
         this.formHeight = parseInt(this.websocketService.getURLParameter("h"), 10);
         this.formComponent = this.websocketService.getURLParameter("fc");
         this.showingInContainer = this.websocketService.getURLParameter("cont");
+        this.contentClientNr = this.websocketService.getURLParameter("c_clientnr");
     }
 
     public getFormName() {
@@ -68,6 +70,10 @@ export class URLParserService {
 
     public getFormHeight() {
         return this.formHeight;
+    }
+    
+    public getContentClientNr(){
+        return this.contentClientNr;
     }
 
 }

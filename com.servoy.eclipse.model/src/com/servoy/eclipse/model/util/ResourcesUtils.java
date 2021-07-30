@@ -17,11 +17,13 @@
 package com.servoy.eclipse.model.util;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IScriptProjectFilenames;
@@ -71,6 +73,38 @@ public class ResourcesUtils
 		{
 			parent.getFolder(new Path("")).create(force, true, null);
 		}
+	}
+
+	/**
+	 * Reads the handles of all files that are mapped to the given URI and returns only the file in the nested-most-project (the one with the least path segments in it).
+	 * <br>
+	 * There are scenarios when more than one file will be returned by IWorkspaceRoot.findFilesForLocationURI(location),
+	 * in this case only the location in the most specific project should be used (in case there are nested locations imported as projects in the workspace).
+	 * <br>
+	 * For example:
+	 * <br>- You have Servoy project "testtwo" which is part of "servoy_test" repository that is imported as a project and you have "servoy_test" itself imported as a project;
+	 * <br>- Then you create a new solution in which you add this "testtwo" project as a reference project;
+	 * <br>- In this case all the components found in "testtwo" will have more files returned by the method "IWorkspaceRoot.findFilesForLocationURI(location)";
+	 * <br>- IFile[] array returned :"[L/servoy_test/testtwo/button2/button2.spec, L/testtwo/button2/button2.spec]";
+	 * <br>- In this scenario we would need "L/testtwo/button2/button2.spec]" (the file with the least path segments in it).
+	 *
+	 * @param location
+	 * @return the file in the nested-most-project or null if no file was found for the given URI.
+	 */
+	public static IFile findFileWithShortestPathForLocationURI(URI location)
+	{
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(location);
+		IFile mostNestedFile = null;
+		int min = -1;
+		for (IFile file : files)
+		{
+			if (file.getFullPath().segments().length < min || min == -1)
+			{
+				min = file.getFullPath().segments().length;
+				mostNestedFile = file;
+			}
+		}
+		return mostNestedFile;
 	}
 
 	public static String getParentDatasource(IFile file, boolean tableEditing)

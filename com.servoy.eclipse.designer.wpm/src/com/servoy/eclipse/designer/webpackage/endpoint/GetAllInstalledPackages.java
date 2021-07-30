@@ -37,7 +37,6 @@ import java.util.zip.Checksum;
 
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -56,7 +55,6 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.core.util.SemVerComparator;
@@ -64,6 +62,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.AvoidMultipleExecutionsJob;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.Solution;
@@ -231,11 +230,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	{
 		if (packageFile != null && packageFile.isFile())
 		{
-			IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
-			IFile[] files = root.findFilesForLocationURI(packageFile.toURI());
-			if (files.length == 1 && files[0] != null && files[0].exists())
+			IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(packageFile.toURI());
+			if (file != null && file.exists())
 			{
-				return files[0].getProject().getName();
+				return file.getProject().getName();
 			}
 		}
 

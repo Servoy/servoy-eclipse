@@ -1,15 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { MainComponent } from './main.component';
-import { FormService } from './form.service';
-import { ServoyService } from './servoy.service';
 
 import { FormComponent, AddAttributeDirective } from './form/form_component.component';
-
-import { SabloModule } from '../sablo/sablo.module';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
@@ -55,9 +50,7 @@ import {MainRoutingModule} from './main-routing.module';
     ],
     imports: [
         CommonModule,
-        NgbModule,
         FormsModule,
-        SabloModule,
         AllComponentsModule,
         AllServicesModules,
         ServoyPublicModule,

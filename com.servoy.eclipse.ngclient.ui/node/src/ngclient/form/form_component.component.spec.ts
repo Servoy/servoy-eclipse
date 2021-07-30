@@ -8,12 +8,11 @@ import {ServoyService} from '../servoy.service';
 import {SabloService} from '../../sablo/sablo.service';
 
 import { ErrorBean } from '../../servoycore/error-bean/error-bean';
-import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-
+import { PopupFormService } from '../services/popupform.service';
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -35,11 +34,11 @@ describe('FormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean ],
       imports: [
-                ServoyTestingModule,ServoyDefaultComponentsModule, ServoyPublicModule
+                ServoyTestingModule, ServoyPublicModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
-                               {provide: ServoyService, useValue:  servoyService }
+                               {provide: ServoyService, useValue:  servoyService }, PopupFormService
                              ],
        schemas: [
               CUSTOM_ELEMENTS_SCHEMA

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
@@ -7,6 +7,7 @@ import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 import { ApplicationService } from './application.service';
 import { I18NProvider } from './i18n_provider.service';
+import {PopupFormService} from './popupform.service';
 
 @Injectable()
 export class ServoyPublicServiceImpl extends ServoyPublicService {
@@ -16,7 +17,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         private localeService: LocaleService,
         private applicationService: ApplicationService,
         private servoyService: ServoyService,
-        private formService: FormService,) {
+        private formService: FormService,
+        private popupFormService : PopupFormService) {
         super();
     }
 
@@ -58,6 +60,14 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
     sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
         this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
+    }
+    
+    showForm(popup: PopupForm) : void{
+        this.popupFormService.showForm(popup);
+    }
+    
+    cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
+         this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
 }
 

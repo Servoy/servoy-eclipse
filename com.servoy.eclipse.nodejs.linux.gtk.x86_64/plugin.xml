@@ -6,9 +6,9 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
             name="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
-            nodePath="node-v16.3.0-linux-x64/bin/node"
-            npmPath="node-v16.3.0-linux-x64/bin/npm"
-            archive="node-v16.3.0-linux-x64.tar.xz">
+            nodePath="node-v16.4.2-linux-x64/bin/node"
+            npmPath="node-v16.4.2-linux-x64/bin/npm"
+            archive="node-v16.4.2-linux-x64.tar.xz">
       </nodejs>
    </extension>
 

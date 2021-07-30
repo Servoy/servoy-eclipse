@@ -1,2 +1,2 @@
 export * from './websocket.service';
-export * from './sablo.module';
+export * from './services.service';

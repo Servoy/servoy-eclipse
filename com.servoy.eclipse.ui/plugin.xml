@@ -1183,7 +1183,7 @@
          adaptable="true"
          state="true">
 	<enablement>
-		<objectClass name= "com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode"/>
+		<objectClass name= "com.servoy.eclipse.ui.node.SimpleUserNode"/>
 	</enablement>	
      <description>
         Servoy solution explorer problem decorator

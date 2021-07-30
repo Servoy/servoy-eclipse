@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -222,16 +224,13 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 
 	private boolean isNameValid(SimpleUserNode node)
 	{
-		SpecProviderState specProviderState;
-		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
-		{
-			specProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
-		else
-		{
-			specProviderState = WebComponentSpecProvider.getSpecProviderState();
-		}
-		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
+		List<PackageSpecification< ? extends WebObjectSpecification>> allPackageSpecs = new ArrayList<>(
+			WebServiceSpecProvider.getSpecProviderState().getWebObjectSpecifications().values());
+		SpecProviderState compspecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		allPackageSpecs.addAll(compspecProviderState.getWebObjectSpecifications().values());
+		allPackageSpecs.addAll(compspecProviderState.getLayoutSpecifications().values());
+
+		for (PackageSpecification< ? extends WebObjectSpecification> p : allPackageSpecs)
 		{
 			if (p.getPackageName().equals(packageName))
 			{

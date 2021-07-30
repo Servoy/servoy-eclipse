@@ -9,13 +9,6 @@ import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import {PopupFormService} from './services/popupform.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
-import { WindowService as WindowPlugin} from '../window_service/window.service';
-
-// TODO move to generated
-import { WindowServiceModule} from '../window_service/windowservice.module';
-import { DialogModule } from '../dialogservice/dialog.module';
-import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
-import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
 // generated imports start
@@ -36,10 +29,6 @@ export class AllServiceService implements ServiceProvider {
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
         private $sabloService: SabloService,
-        // TODO move to generated
-        private ngclientutils: NGUtilsService,
-        private window: WindowPlugin,
-        private dialogs: DialogService,
         // generated services start
         // generated services end
         private clientFunctionService: ClientFunctionService,
@@ -58,17 +47,13 @@ export class AllServiceService implements ServiceProvider {
 
 @NgModule( {
     providers: [AllServiceService, ApplicationService, WindowService, SessionService, PopupFormService,
-                // TODO move to generated
-                NGUtilsService,
                 // generated providers start
                 // generated providers end
                 ClientFunctionService
                 ],
     imports: [
-                DialogModule,
                 // generated modules start
                 // generated modules end
-                WindowServiceModule
                 ]
 } )
 export class AllServicesModules { }

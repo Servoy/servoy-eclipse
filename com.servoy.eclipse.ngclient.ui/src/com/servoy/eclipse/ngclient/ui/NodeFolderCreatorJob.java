@@ -183,7 +183,7 @@ public class NodeFolderCreatorJob extends Job
 
 	private static boolean ignoredResource(String filename)
 	{
-		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.startsWith("/node_modules/") ||
+		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.indexOf("/node_modules/") != -1 ||
 			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts") ||
 			filename.startsWith("/.gitignore");
 	}

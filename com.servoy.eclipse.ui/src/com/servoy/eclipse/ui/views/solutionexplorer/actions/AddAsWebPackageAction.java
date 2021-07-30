@@ -105,6 +105,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 				for (String projectName : selectedProjects)
 				{
 					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					if (project == null || project.getLocationURI() == null) return; // project was deleted
 					File dir = new File(project.getLocationURI());
 					if (dir.exists())
 					{

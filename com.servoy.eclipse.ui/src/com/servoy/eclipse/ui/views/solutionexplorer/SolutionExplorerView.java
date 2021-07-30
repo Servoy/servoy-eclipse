@@ -80,6 +80,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -182,11 +183,13 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -4117,10 +4120,23 @@ public class SolutionExplorerView extends ViewPart
 							}
 						}
 					}
+					else if (resourcesProject != null && segments[0].equals(resourcesProject.getProject().getName()) &&
+						segments[1].equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+					{
+						String serverName = segments[2];
+						PlatformSimpleUserNode serversNode = cp.getServers();
+						if (serversNode.children != null) for (SimpleUserNode serverNode : serversNode.children)
+						{
+							if (serverNode.getRealObject() instanceof IServerInternal &&
+								serverName.equals(((IServerInternal)serverNode.getRealObject()).getName()))
+							{
+								if (segments.length == 3) return new SimpleUserNode[] { serverNode };
+							}
+						}
+					}
 				}
 				break;
 			case IResource.FILE :
-				// we only handle files under solution/forms
 				if (selectedProject != null)
 				{
 					if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node
@@ -4151,6 +4167,31 @@ public class SolutionExplorerView extends ViewPart
 						if (simpleUserNodes != null && simpleUserNodes.length > 0)
 						{
 							return Arrays.asList(simpleUserNodes).toArray(new SimpleUserNode[simpleUserNodes.length]);
+						}
+					}
+				}
+				else if (resourcesProject != null && segments[0].equals(resourcesProject.getProject().getName()))
+				{
+					if (segments.length == 4 && segments[1].equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+					{
+						String serverName = segments[2];
+						PlatformSimpleUserNode serversNode = cp.getServers();
+						if (serversNode.children != null) for (SimpleUserNode serverNode : serversNode.children)
+						{
+							if (serverNode.getRealObject() instanceof IServerInternal &&
+								serverName.equals(((IServerInternal)serverNode.getRealObject()).getName()))
+							{
+								if (serverNode.children != null) for (SimpleUserNode tableNode : serverNode.children)
+								{
+									String tableName = segments[3]
+										.substring(0, segments[3].length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+									if (tableNode.getRealObject() instanceof IDataSourceWrapper &&
+										tableName.equals(((IDataSourceWrapper)tableNode.getRealObject()).getTableName()))
+									{
+										return new SimpleUserNode[] { tableNode };
+									}
+								}
+							}
 						}
 					}
 				}
@@ -4187,6 +4228,8 @@ public class SolutionExplorerView extends ViewPart
 
 	class ViewLabelDecorator extends LabelDecorator
 	{
+		private final ILabelDecorator defaultSystemDecorator = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+
 		@Override
 		public Image decorateImage(Image image, Object element, IDecorationContext context)
 		{
@@ -4249,6 +4292,26 @@ public class SolutionExplorerView extends ViewPart
 					}
 				}
 			}
+			if (defaultSystemDecorator != null)
+			{
+				if (defaultSystemDecorator instanceof LabelDecorator)
+				{
+					LabelDecorator ld2 = (LabelDecorator)defaultSystemDecorator;
+					Image decorated = ld2.decorateImage(resultImage != null ? resultImage : image, element, DecorationContext.DEFAULT_CONTEXT);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+				else
+				{
+					Image decorated = defaultSystemDecorator.decorateImage(resultImage != null ? resultImage : image, element);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+			}
 			return resultImage;
 		}
 
@@ -4304,10 +4367,18 @@ public class SolutionExplorerView extends ViewPart
 
 		public void addListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.addListener(listener);
+			}
 		}
 
 		public void dispose()
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.dispose();
+			}
 		}
 
 		public boolean isLabelProperty(Object element, String property)
@@ -4317,6 +4388,10 @@ public class SolutionExplorerView extends ViewPart
 
 		public void removeListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.removeListener(listener);
+			}
 		}
 
 		@Override

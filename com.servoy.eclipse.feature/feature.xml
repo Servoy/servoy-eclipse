@@ -119,8 +119,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.emf.common.ui" version="2.8.0.v20130610-0406"/>
       <import feature="org.eclipse.emf.ecore" version="2.9.0.v20130528-0742"/>
-      <import feature="org.eclipse.swt.chromium.feature" version="76.0.14.202103240507" match="greaterOrEqual"/>
-      <import feature="com.make.chromium.cef.feature" version="76.0.2.202012180206" match="greaterOrEqual"/>
+      <import feature="com.equo.chromium.cef.feature" version="80.0.3.202107210611"/>
+      <import feature="com.equo.chromium.feature" version="80.0.3.202107211641"/>
    </requires>
 
    <plugin
@@ -564,7 +564,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.2.0"/>
+         version="16.4.2"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
@@ -573,7 +573,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.2.0"/>
+         version="16.4.2"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
@@ -582,7 +582,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.2.0"/>
+         version="16.4.2"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"

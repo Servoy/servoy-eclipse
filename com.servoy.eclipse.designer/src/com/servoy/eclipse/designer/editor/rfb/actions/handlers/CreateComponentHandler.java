@@ -579,8 +579,8 @@ public class CreateComponentHandler implements IServerService
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 						if (description != null && description.getDefaultValue() instanceof JSONObject)
 						{
-							webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-								((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
+								((JSONObject)description.getDefaultValue()).optInt("height", 80));
 						}
 						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 						for (String string : allPropertiesNames)

@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.core.runtime,
  servoy_shared,
  sablo,
  com.servoy.eclipse.model,
- org.eclipse.ui.console
+ org.eclipse.ui.console,
+ org.eclipse.ui.workbench
 Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui
 Export-Package: com.servoy.eclipse.ngclient.ui,

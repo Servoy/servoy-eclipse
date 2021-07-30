@@ -24,6 +24,7 @@ export * from './lib/directives/startedit.directive';
 export * from './lib/directives/upload.directive';
 export * from './lib/utils/property_utils';
 export * from './lib/utils/date_utils';
+export * from './lib/utils/popupform';
 export * from './lib/spectypes.service';
 export * from './lib/testing/publictesting.module';
 export * from './lib/testing/utils';

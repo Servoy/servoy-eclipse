@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
-import { ServoyDefaultBaseComponent } from '../../servoydefault/basecomponent';
 
 @Component({
     selector: 'servoycore-formcontainer',
@@ -8,12 +8,14 @@ import { ServoyDefaultBaseComponent } from '../../servoydefault/basecomponent';
     styleUrls: ['./formcontainer.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServoyCoreFormContainer extends ServoyDefaultBaseComponent<HTMLDivElement> {
+export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() containedForm: any;
     @Input() relationName: any;
     @Input() waitForData: any;
     @Input() height: number;
+    @Input() tabSeq: number;
+    @Input() toolTipText: string;
 
     @ContentChild(TemplateRef, { static: true })
     templateRef: TemplateRef<any>;

@@ -43,6 +43,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -379,18 +380,47 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			else
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
-				ServerConfig serverConfig = null;
-				IServerInternal serverPrototype = null;
-				ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
-				for (ServerConfig sc : serverConfigs)
+				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(false, true, true, false);
+				ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(name);
+				if (serverConfig != null)
 				{
-					if (sc.isEnabled() && sc.isPostgresDriver())
+					if (!serverConfig.isEnabled())
 					{
-						serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
-						if (serverPrototype != null && serverPrototype.isValid())
+						boolean[] enable = new boolean[] { true };
+						Display.getDefault().syncExec(() -> {
+							enable[0] = MessageDialog.openConfirm(shell, "Server found",
+								"The database server '" + name + "' was found, but it is disabled. Do you wish to enable it?");
+						});
+						if (!enable[0])
 						{
-							if (ApplicationServerRegistry.get().getServerManager().getServerConfig(name) == null)
+							return CANCEL_ACTION;
+						}
+						try
+						{
+							serverConfig = serverConfig.getEnabledCopy(true);
+							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+							serverManager.testServerConfigConnection(serverConfig, 0);
+							serverManager.saveServerConfig(name, serverConfig);
+							s = name;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+							MessageDialog.openError(shell, "Cannot enable server", e.getMessage());
+							return CANCEL_ACTION;
+						}
+					}
+				}
+				else
+				{
+					IServerInternal serverPrototype = null;
+					ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
+					for (ServerConfig sc : serverConfigs)
+					{
+						if (sc.isEnabled() && sc.isPostgresDriver())
+						{
+							serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
+							if (serverPrototype != null && serverPrototype.isValid())
 							{
 								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
@@ -403,46 +433,50 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 									serverConfig = null;
 								}
 							}
-
 						}
 					}
-				}
-				final int[] selectedOption = new int[1];
-				String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
-					: new String[] { "Replace Server", "Cancel" };
-				int defaultOption = serverConfig != null ? 1 : 0;
-				Display.getDefault().syncExec(new Runnable()
-				{
-					public void run()
+
+					final int[] selectedOption = new int[1];
+					String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
+						: new String[] { "Replace Server", "Cancel" };
+					int defaultOption = serverConfig != null ? 1 : 0;
+					Display.getDefault().syncExec(new Runnable()
 					{
-						final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
-							"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
-							MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
-						retval = optionDialog.open();
-						selectedOption[0] = optionDialog.getSelectedOption();
-					}
-				});
-				if (serverConfig != null && retval == 1)
-				{
-					// create server
-					ITransactionConnection connection = null;
-					PreparedStatement ps = null;
-					try
+						public void run()
+						{
+							final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
+								"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
+								MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
+							retval = optionDialog.open();
+							selectedOption[0] = optionDialog.getSelectedOption();
+						}
+					});
+					if (serverConfig != null && retval == 1)
 					{
-						connection = serverPrototype.getUnmanagedConnection();
-						ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
-						ps.execute();
-						ps.close();
-						ps = null;
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-					finally
-					{
-						Utils.closeConnection(connection);
-						Utils.closeStatement(ps);
+						// create server
+						ITransactionConnection connection = null;
+						PreparedStatement ps = null;
+						try
+						{
+							connection = serverPrototype.getUnmanagedConnection();
+							ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
+							ps.execute();
+							ps.close();
+							ps = null;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+						finally
+						{
+							Utils.closeConnection(connection);
+							Utils.closeStatement(ps);
+						}
+						if (retval == Window.OK)
+						{
+							s = serverNames[selectedOption[0]];
+						}
 					}
 
 					try
@@ -463,10 +497,6 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						});
 					}
 					return RETRY_ACTION;
-				}
-				if (retval == Window.OK)
-				{
-					s = serverNames[selectedOption[0]];
 				}
 				unknownServerNameMap.put(name, s);
 			}

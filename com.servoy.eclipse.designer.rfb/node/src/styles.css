@@ -1,7 +1,37 @@
+@import "~bootstrap/dist/css/bootstrap.min.css";
+@import url("designer/toolbar/toolbar.css");
+
 html, body
 {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+.palette .card-body {
+    padding: 0px;
+    font-weight: 600;
+}
+
+.palette .card-header{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px;
+}
+.palette .btn-link{
+     font-size: 12px;
+     padding: 0px;
+     text-decoration: none;
+     color: #000;
+}
+
+.palette > input { /*search field*/
+   border: 0px solid #e5e5e5;
+   border-bottom-width: 2px;
+}
+
+.palette > input::placeholder {
+   font-style: italic;
 }

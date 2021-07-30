@@ -97,6 +97,7 @@ import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackage
 import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
@@ -964,9 +965,6 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
-								.getFolder(
-									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
@@ -982,15 +980,12 @@ public class SolutionExplorerTreeContentProvider
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
-								.getFolder(
-									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
-								Image img = loadImageFromFolder(folder, spec.getIcon());
+								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
@@ -1021,11 +1016,10 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-								if (files.length == 1)
+								IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
+								if (file != null)
 								{
-									IFile f = files[0];
-									if (f.getProjectRelativePath().segmentCount() > 1)
+									if (file.getProjectRelativePath().segmentCount() > 1)
 									{
 										Image img = getIconFromSpec(spec, false);
 										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
@@ -1130,6 +1124,10 @@ public class SolutionExplorerTreeContentProvider
 							{
 								IPackageReader packageType = getPackageType(getComponentsSpecProviderState(), iProject);
 								if (packageType == null) packageType = getPackageType(getServicesSpecProviderState(), iProject);
+								if (packageType == null && iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+								{
+									packageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
+								}
 								if (packageType == null) continue;
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
 									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);
@@ -1188,11 +1186,10 @@ public class SolutionExplorerTreeContentProvider
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
-				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-				if (files.length == 1)
+				IFile file = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
+				if (file != null)
 				{
-					IFile f = files[0];
-					if (f.getProjectRelativePath().segmentCount() > 1)
+					if (file.getProjectRelativePath().segmentCount() > 1)
 					{
 						Image img = getIconFromSpec(spec, false);
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
@@ -1273,10 +1270,10 @@ public class SolutionExplorerTreeContentProvider
 			{
 				try
 				{
-					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
+					IFile specFile = ResourcesUtils.findFileWithShortestPathForLocationURI(spec.getSpecURL().toURI());
+					if (specFile != null && specFile.getParent() instanceof IFolder)
 					{
-						folder = (IFolder)specFile[0].getParent();
+						folder = (IFolder)specFile.getParent();
 					}
 				}
 				catch (Exception e)
@@ -1381,21 +1378,25 @@ public class SolutionExplorerTreeContentProvider
 			if (resource != null && resource.isFile())
 			{
 				IFile[] files = root.findFilesForLocationURI(resource.toURI());
-				if (files.length == 1 && allReferencedProjects.contains(files[0].getProject()))
+				for (IFile locatedFile : files) // for example if one would import from git a whole repo as project and then some projects from that repo as also eclipse projects - it can be that the same file is found in multiple places/paths in the workspace
 				{
-					UserNodeType nodeType = UserNodeType.COMPONENTS_NONPROJECT_PACKAGE;
-					String displayName = reader.getPackageDisplayname();
-					if (IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+					if (allReferencedProjects.contains(locatedFile.getProject()))
 					{
-						nodeType = UserNodeType.LAYOUT_NONPROJECT_PACKAGE;
+						UserNodeType nodeType = UserNodeType.COMPONENTS_NONPROJECT_PACKAGE;
+						String displayName = reader.getPackageDisplayname();
+						if (IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+						{
+							nodeType = UserNodeType.LAYOUT_NONPROJECT_PACKAGE;
+						}
+						else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
+						{
+							nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
+						} // else it's a components package
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
+						node.parent = un;
+						result.add(node);
+						break;
 					}
-					else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
-					{
-						nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
-					} // else it's a components package
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
-					node.parent = un;
-					result.add(node);
 				}
 			}
 		}
@@ -1407,6 +1408,8 @@ public class SolutionExplorerTreeContentProvider
 
 		// the package project could be referenced by active solution/modules or not (we still have to know it's display name)
 		if (getComponentsSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
+			displayName = getComponentsSpecProviderState().getPackageDisplayName(iProject.getName());
+		else if (getComponentsSpecProviderState().getLayoutSpecifications().containsKey(iProject.getName()))
 			displayName = getComponentsSpecProviderState().getPackageDisplayName(iProject.getName());
 		else if (getServicesSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
 			displayName = getServicesSpecProviderState().getPackageDisplayName(iProject.getName());

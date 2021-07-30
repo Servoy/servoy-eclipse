@@ -71,6 +71,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -180,23 +181,31 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			case "getData" :
 			{
-				JSONWriter writer = new JSONStringer();
-				writer.object();
-				writer.key("formProperties");
-				writer.value(new JSONObject(wrapper.getPropertiesString()));
-				writer.key("parentUuid");
-				writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
-				Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
-				Collection<IFormElement> deleted = Collections.emptyList();
-				sendComponents(fs, writer, baseComponents, deleted);
-				writer.key("solutionProperties");
-				writer.object();
-				writer.key("styleSheets");
-				writer.value(getSolutionStyleSheets(fs));
-				writer.endObject();
-				generateParts(flattenedForm, context, writer, wrapper.getParts());
-				writer.endObject();
-				return writer.toString();
+				boolean isNG2 = args.optBoolean("ng2", false);
+				if (isNG2)
+				{
+					return new AngularFormGenerator(fs, form, form.getName(), true).generateJS();
+				}
+				else
+				{
+					JSONWriter writer = new JSONStringer();
+					writer.object();
+					writer.key("formProperties");
+					writer.value(new JSONObject(wrapper.getPropertiesString()));
+					writer.key("parentUuid");
+					writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
+					Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
+					Collection<IFormElement> deleted = Collections.emptyList();
+					sendComponents(fs, writer, baseComponents, deleted);
+					writer.key("solutionProperties");
+					writer.object();
+					writer.key("styleSheets");
+					writer.value(getSolutionStyleSheets(fs));
+					writer.endObject();
+					generateParts(flattenedForm, context, writer, wrapper.getParts());
+					writer.endObject();
+					return writer.toString();
+				}
 			}
 			case "getTemplate" :
 			{
@@ -844,7 +853,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				fe.propertiesAsTemplateJSON(writer,
 					new FormElementContext(fe, new ServoyDataConverterContext(ServoyModelFinder.getServoyModel().getFlattenedSolution(),
-						ServoyModelFinder.getServoyModel().getMessagesManager()), null));
+						ServoyModelFinder.getServoyModel().getMessagesManager()), null),
+					true);
 
 				Collection<PropertyDescription> properties = fe.getProperties(FormComponentPropertyType.INSTANCE);
 				if (properties.size() > 0)

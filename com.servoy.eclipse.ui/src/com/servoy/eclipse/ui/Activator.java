@@ -37,6 +37,9 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.e4.ui.css.swt.theme.ITheme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -265,6 +268,7 @@ public class Activator extends AbstractUIPlugin
 					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
 					findMissingSpecs.schedule();
 				}
+
 			}
 
 			@Override
@@ -273,8 +277,59 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
+
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
+
+		final BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
+		final ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
+		if (serviceReference != null)
+		{
+			final IThemeManager manager = ctx.getService(serviceReference);
+			if (manager != null)
+			{
+				final Display d = Display.getDefault();
+				final IThemeEngine engine = manager.getEngineForDisplay(d);
+				if (engine != null)
+				{
+					final ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						String label = it.getLabel();
+						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
+							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+						{
+							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
+							IconPreferences.getInstance().save(true);
+							ServoyModelManager.getServoyModelManager().getServoyModel()
+								.addDoneListener(() -> {
+									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										label + " theme was detected",
+										"It is strongly recommended to restart the developer for the " + label +
+											" theme preferences to be applied. Would you like to restart now?"))
+									{
+										PlatformUI.getWorkbench().restart();
+									}
+								});
+						}
+					}
+					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
+					{
+						IconPreferences.getInstance().setUseDarkThemeIcons(false);
+						IconPreferences.getInstance().save(true);
+						ServoyModelManager.getServoyModelManager().getServoyModel()
+							.addDoneListener(() -> {
+								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+									"Theming is disabled",
+									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
+								{
+									PlatformUI.getWorkbench().restart();
+								}
+							});
+					}
+				}
+			}
+		}
 
 		listenForThemeChanges();
 	}

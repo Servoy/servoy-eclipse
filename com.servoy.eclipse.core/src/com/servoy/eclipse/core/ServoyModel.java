@@ -66,7 +66,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -1091,20 +1091,21 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		final IRunnableWithProgress op = new IRunnableWithProgress()
 		{
-			public void run(final IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException
+			public void run(final IProgressMonitor iProgressMonitor) throws InvocationTargetException, InterruptedException
 			{
+				SubMonitor progress = SubMonitor.convert(iProgressMonitor, 7);
 				try
 				{
 					if (project == null)
 					{
-						progressMonitor.beginTask("Processing solution deactivation", 7);
+						progress.setTaskName("Processing solution deactivation");
 					}
 					else
 					{
-						progressMonitor.beginTask("Activating solution \"" + project + "\"", 7);
+						progress.setTaskName("Activating solution \"" + project + "\"");
 					}
 
-					progressMonitor.subTask("Loading solution...");
+					progress.subTask("Loading solution...");
 					if (project != null && project.getSolution() == null)
 					{
 						ServoyLog.logError(
@@ -1133,8 +1134,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						});
 					}
 
-					progressMonitor.worked(1);
-					progressMonitor.subTask("Announcing activation intent...");
+					progress.worked(1);
+					progress.subTask("Announcing activation intent...");
 
 					ReturnValueRunnable<Boolean> uiRunnable = new ReturnValueRunnable<Boolean>()
 					{
@@ -1156,7 +1157,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						setActiveProjectReferenceInternal(project);
 						activatingProject.set(false);
 
-						progressMonitor.subTask("Loading modules...");
+						progress.subTask("Loading modules...");
 						EclipseRepository.ActivityMonitor moduleMonitor = new EclipseRepository.ActivityMonitor()
 						{
 							public void loadingRootObject(final RootObjectMetaData rootObject)
@@ -1167,7 +1168,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									{
 										public void run()
 										{
-											progressMonitor.subTask("Loading modules... Module '" + rootObject.getName() + "'");
+											progress.subTask("Loading modules... Module '" + rootObject.getName() + "'");
 										}
 									});
 								}
@@ -1190,11 +1191,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							}
 						}
 
-						progressMonitor.worked(1);
+						progress.worked(1);
 						if (activeProject != null)
 						{
 							// prefetch the editting solution to minimize ui lags
-							progressMonitor.subTask("Preparing solution for editing...");
+							progress.subTask("Preparing solution for editing...");
 							if (Display.getCurrent() != null)
 							{
 								// update the ui if we are the ui thread in this progress dialog
@@ -1218,11 +1219,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							pluginPreferences.setValue(SERVOY_ACTIVE_PROJECT, project.getProject().getName());
 							Activator.getDefault().savePluginPreferences();
 						}
-						progressMonitor.worked(1);
+						progress.worked(1);
 
-						updateResources(IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED, new SubProgressMonitor(progressMonitor, 4)); // if the active solution changes, it is possible that the used resources project will change
+						updateResources(IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED, progress.newChild(4)); // if the active solution changes, it is possible that the used resources project will change
 
-						progressMonitor.subTask("Announcing activation...");
+						progress.subTask("Announcing activation...");
 						Display.getDefault().syncExec(new Runnable()
 						{
 							public void run()
@@ -1230,7 +1231,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								fireActiveProjectChanged();
 							}
 						});
-						progressMonitor.worked(1);
+						progress.worked(1);
 
 						updateWorkingSet();
 						testBuildPathsAndBuild(project, buildProject);
@@ -1241,9 +1242,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						resetActiveEditingFlattenedSolutions();
 						updateFlattenedSolution(false);
 
-						progressMonitor.worked(1);
+						progress.worked(1);
 
-						progressMonitor.subTask("Closing active editors...");
+						progress.subTask("Closing active editors...");
 
 						Display.getDefault().syncExec(new Runnable()
 						{
@@ -1338,7 +1339,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							}
 						});
 
-						progressMonitor.worked(1);
+						progress.worked(1);
 
 						fireLoadingDone();
 					}
@@ -1346,7 +1347,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				finally
 				{
 					activatingProject.set(false);
-					progressMonitor.done();
+					iProgressMonitor.done(); // "progress" according to javadoc doesn't need done, but the IProgressMonitor it's converted from does need it...
 				}
 			}
 		};
@@ -2720,8 +2721,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				final Job job = new UIJob("Check changed script files")
 				{
 					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor)
+					public IStatus runInUIThread(IProgressMonitor iProgressMonitor)
 					{
+						SubMonitor progress = SubMonitor.convert(iProgressMonitor, 3);
 						//if (true) return Status.OK_STATUS;
 						Set<IFile> recreatedFiles = new HashSet<IFile>();
 						for (IPersist persist : changedScriptElements)
@@ -2741,7 +2743,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
 								try
 								{
-									textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+									textFileBufferManager.connect(scriptFile.getFullPath(), LocationKind.IFILE, progress.newChild(1));
 								}
 								catch (CoreException e)
 								{
@@ -2773,13 +2775,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									{
 										if (openEditor != null)
 										{
-											openEditor.doSave(monitor);
+											openEditor.doSave(progress.newChild(1));
 										}
 										else
 										{
 											try
 											{
-												textFileBuffer.commit(monitor, true);
+												textFileBuffer.commit(progress.newChild(1), true);
 											}
 											catch (CoreException e)
 											{
@@ -2792,7 +2794,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								{
 									try
 									{
-										textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+										textFileBufferManager.disconnect(scriptFile.getFullPath(), LocationKind.IFILE, progress.newChild(1));
 									}
 									catch (CoreException e)
 									{
@@ -2801,6 +2803,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								}
 							}
 						}
+						iProgressMonitor.done();
 						return Status.OK_STATUS;
 					}
 				};

@@ -284,6 +284,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
+	public static final String MISSING_PROJECT_REFERENCE = _PREFIX + ".missingProjectReference";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
@@ -320,6 +321,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// problems with resource projects
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>("referencesToMultipleResources",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> ERROR_MISSING_PROJECT_REFERENCE = new Pair<String, ProblemSeverity>("missingProjectReference",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
@@ -730,7 +733,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				IResourceDelta resourcesProjectDelta = null;
 				for (IProject p : monitoredProjects)
 				{
-					if (p.exists() && p.isOpen() && !needFullBuild)
+					/*
+					 * If you have a reference to a project and then you close or delete that project it will not do a build. That is why p.exists() and
+					 * p.isOpen() is commented.
+					 */
+					if (/* p.exists() && p.isOpen() && */ !needFullBuild)
 					{
 						IResourceDelta delta = getDelta(p);
 						if (delta != null)
@@ -3025,6 +3032,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkResourcesForServoyProject(IProject project)
 	{
 		deleteMarkers(project, MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
+		deleteMarkers(project, MISSING_PROJECT_REFERENCE);
 		try
 		{
 			// check if this project references more than one or no resources projects
@@ -3035,6 +3043,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID))
 				{
 					count++;
+				}
+				if (!p.isAccessible())
+				{
+					ServoyMarker mk = MarkerMessages.MissingProjectReference.fill(p.getName(), project.getName());
+					final IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, ERROR_MISSING_PROJECT_REFERENCE, IMarker.PRIORITY_NORMAL, null,
+						null);
+					try
+					{
+						marker.setAttribute("projectReferenceName", p.getName());
+					}
+					catch (CoreException e)
+					{
+						Debug.error(e);
+					}
 				}
 			}
 

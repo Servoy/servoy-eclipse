@@ -17,12 +17,14 @@
     "lib": [
       "es2017",
       "dom",
-      "es2018.promise"
+      "es2018.promise",
+       "dom.Iterable"
     ],
     "paths": {
       "@servoy/public": [
         "../projects/servoy-public/src/public-api",
-        "./projects/servoy-public/src/public-api"
+        "./projects/servoy-public/src/public-api",
+        "../servoy-public/src/public-api"
       ]
     },
 	"outDir": "./out-tsc/app"

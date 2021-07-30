@@ -37,7 +37,9 @@ export class MaskFormat {
     private mask: string;
     private focusText: string;
     private filteredMask: string;
-
+    
+    private listeners = [];
+    
     constructor(private format: Format, private _renderer: Renderer2, private element: HTMLInputElement,
                         private formatService: FormattingService, @Inject(DOCUMENT) private doc: Document) {
         this.ignore = false;
@@ -99,13 +101,13 @@ export class MaskFormat {
             return this.tests[i] ? this.getPlaceHolder(i) : c;
         }, this);
 
-        this._renderer.listen(this.element, 'input', () => {
-this.setCaret(this.checkVal(true));
-});
-        this._renderer.listen(this.element, 'focus', () => this.onFocus());
-        this._renderer.listen(this.element, 'blur', () => this.onBlur());
-        this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event));
-        this._renderer.listen(this.element, 'keydown', (event) => this.onKeydown(event));
+        this.listeners.push(this._renderer.listen(this.element, 'input', () => {
+            this.setCaret(this.checkVal(true));
+        }));
+        this.listeners.push(this._renderer.listen(this.element, 'focus', () => this.onFocus()));
+        this.listeners.push(this._renderer.listen(this.element, 'blur', () => this.onBlur()));
+        this.listeners.push(this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event)));
+        this.listeners.push(this._renderer.listen(this.element, 'keydown', (event) => this.onKeydown(event)));
     }
 
     private onFocus() {
@@ -327,6 +329,11 @@ this.setCaret(this.checkVal(true));
 
     private getPlaceHolder(i: number): any {
         return this.settings['placeholder'].length > 1 ? this.settings['placeholder'].charAt(i) : this.settings['placeholder'];
+    }
+    
+    public destroy(){
+         this.listeners.forEach(unregisterFunction => unregisterFunction());
+         this.listeners = [];
     }
 }
 

@@ -175,6 +175,174 @@
           }
         }
       }
+    },
+    "@servoy/ngclientutils": {
+      "projectType": "library",
+      "root": "projects/ngclientutils",
+      "sourceRoot": "projects/ngclientutils/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/ngclientutils/tsconfig.lib.json",
+            "project": "projects/ngclientutils/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngclientutils/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/ngclientutils/src/test.ts",
+            "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
+            "karmaConfig": "projects/ngclientutils/karma.conf.js",
+            "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ngclientutils/tsconfig.lib.json",
+              "projects/ngclientutils/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "@servoy/dialogs": {
+      "projectType": "library",
+      "root": "projects/dialogs",
+      "sourceRoot": "projects/dialogs/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/dialogs/tsconfig.lib.json",
+            "project": "projects/dialogs/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/dialogs/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/dialogs/src/test.ts",
+            "tsConfig": "projects/dialogs/tsconfig.spec.json",
+            "karmaConfig": "projects/dialogs/karma.conf.js",
+            "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/dialogs/tsconfig.lib.json",
+              "projects/dialogs/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+     "@servoy/window": {
+      "projectType": "library",
+      "root": "projects/window",
+      "sourceRoot": "projects/window/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/window/tsconfig.lib.json",
+            "project": "projects/window/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/window/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/window/src/test.ts",
+            "tsConfig": "projects/window/tsconfig.spec.json",
+            "karmaConfig": "projects/window/karma.conf.js",
+            "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/window/tsconfig.lib.json",
+              "projects/window/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+     "@servoy/servoydefault": {
+      "projectType": "library",
+      "root": "projects/servoydefault",
+      "sourceRoot": "projects/servoydefault/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/servoydefault/tsconfig.lib.json",
+            "project": "projects/servoydefault/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/servoydefault/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/servoydefault/src/test.ts",
+            "tsConfig": "projects/servoydefault/tsconfig.spec.json",
+            "karmaConfig": "projects/servoydefault/karma.conf.js",
+            "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/servoydefault/tsconfig.lib.json",
+              "projects/servoydefault/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "ngclient2",

@@ -26,7 +26,7 @@ export class ApplicationService {
                             @Inject(DOCUMENT) private doc: Document,
                             private modalService: NgbModal,
                             private serverData: ServerDataService,
-                            private logFactory: LoggerFactory) {
+                            logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('ApplicationService');
     }
 

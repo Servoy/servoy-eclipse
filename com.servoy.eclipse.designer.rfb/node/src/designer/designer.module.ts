@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { DesignerComponent } from './designer.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { StatusBarComponent } from './statusbar/statusbar.component';
-import { PaletteComponent } from './palette/palette.component';
+import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
 import { MouseSelectionComponent } from './mouseselection/mouseselection.component';
@@ -13,15 +13,24 @@ import { GhostsContainerComponent } from './ghostscontainer/ghostscontainer.comp
 import { EditorContentComponent } from './editorcontent/editorcontent.component';
 import {EditorSessionService} from './services/editorsession.service';
 import {URLParserService} from './services/urlparser.service';
-import { SabloModule } from '@servoy/sablo';
 import { WindowRefService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
+import { ToolbarSpinnerComponent } from './toolbar/item/toolbarspinner.component';
+import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
+import { DesignSizeService } from './services/designsize.service';
 
 @NgModule({
   declarations: [
     DesignerComponent,
     ToolbarComponent,
+    ToolbarButtonComponent,
+    ToolbarSpinnerComponent,
+    ToolbarSwitchComponent,
     StatusBarComponent,
     PaletteComponent,
     ResizerComponent,
@@ -29,15 +38,19 @@ import { CommonModule } from '@angular/common';
     MouseSelectionComponent,
     HighlightComponent,
     GhostsContainerComponent,
-    EditorContentComponent
+    EditorContentComponent,
+    SearchTextPipe,
+    SearchTextDeepPipe
   ],
   imports: [
     BrowserModule,
-    SabloModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    HttpClientModule,
+    NgbModule,
+    DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }
