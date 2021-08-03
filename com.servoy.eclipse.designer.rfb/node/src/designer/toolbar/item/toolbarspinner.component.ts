@@ -1,13 +1,28 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnChanges, OnInit } from "@angular/core";
 import { ToolbarItemComponent } from "./toolbaritem.component";
 
 @Component({
     selector: 'designer-toolbar-spinner',
     templateUrl: './toolbarspinner.component.html'
   })
-export class ToolbarSpinnerComponent extends ToolbarItemComponent{
+export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnInit, OnChanges {
 
   @Input() value: number;
+
+  ngOnInit() {
+    if(this.item.initialValue !== undefined) {
+      this.value = this.item.initialValue;
+    }
+    else if(this.item.min !== undefined){
+      this.value = this.item.min;
+    }
+  }
+
+  ngOnChanges() {
+    if(this.item.initialValue !== undefined) {
+      this.value = this.item.initialValue;
+    }
+  }
 
   dec() {
     this.value--;
@@ -26,5 +41,5 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent{
       this.value = this.item.max;
     }
   }
-
+  
 }

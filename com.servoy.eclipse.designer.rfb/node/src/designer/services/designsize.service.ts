@@ -102,7 +102,7 @@ export class DesignSizeService {
         this.btnCustomWidth.onclick(selection);
         return selection;
       };
-      //this.faIcon: "fa fa-times fa-lg";
+      this.btnCustomWidth.faIcon = "fas fa-times fa-sm";
   
       toolbar.add(this.btnDesktopSize, TOOLBAR_CATEGORIES.STICKY);
       toolbar.add(this.btnTabletSize, TOOLBAR_CATEGORIES.STICKY);
@@ -123,11 +123,11 @@ export class DesignSizeService {
             this.lastWidth = result.width ? result.width : this.lastWidth;
             this.btnCustomWidth.text = this.lastWidth;
             if (result.height || result.width) {
-  //              editor.contentLoaded.then(function() {
-                  this.setSize(this.lastWidth, this.lastHeight, true);
-  //              });
+//              editor.contentLoaded.then(function() {
+                this.setSize(this.lastWidth, this.lastHeight, true);
+//              });
             }
-        });        
+        });
     }
 
     setSize(width: string , height: string, fixedSize: boolean) {

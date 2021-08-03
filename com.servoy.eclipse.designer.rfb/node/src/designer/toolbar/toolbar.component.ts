@@ -117,9 +117,11 @@ export class ToolbarComponent implements OnInit {
     this.designSize.createItems(this);
   }
   
-  ngOnInit(): void {
-    this.setupItems();
-    this.designSize.setupItems(this);
+  ngOnInit() {
+    this.editorSession.getSession().onopen(() => {
+      this.setupItems();
+      this.designSize.setupItems(this);
+    });
   }
 
   setupItems() {
