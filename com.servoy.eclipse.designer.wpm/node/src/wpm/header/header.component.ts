@@ -47,14 +47,12 @@ export class HeaderComponent implements OnInit {
           } 
 
           // update the package list in case the version has changed
-          this.packages.forEach(p => {
-            if (p.name === pack.name && pack.selected && this.wpmService.versionCompare(pack.selected, p.installed) !== 0) {
-              p = pack;
-              if (this.isLatestRelease(p)) {
-                p.hasLatestVersion = true;
-              }
-            }
-          });
+          this.packages.forEach((p, i, arr) => {
+            if (p.name === pack.name && pack.selected && pack.installed && this.wpmService.versionCompare(pack.selected, p.selected) !== 0) {
+              arr[i].selected = pack.selected; 
+              arr[i].hasLatestVersion = arr[i].selected === p.releases[0].version;    
+            }      
+          }); 
         });
       });
       this.updateStateForUpdateAllButton();
@@ -65,17 +63,19 @@ export class HeaderComponent implements OnInit {
   openDialog() { 
     const readyPackages = this.packages.filter(p => !p.hasLatestVersion); 
     const dialogRef = this.dialog.open(UpdatePackagesDialog, {data: readyPackages});
-    dialogRef.afterClosed().subscribe(result => {
-      result.forEach((el: ExtendedPackage) => {
-        if (el.isSelected) {
-          this.packages.forEach(p => {
-            if (p.name === el.package.name) {
-              p.hasLatestVersion = true;
-            }
-          });
-        }
-      });
-      this.updateStateForUpdateAllButton();
+    dialogRef.beforeClosed().subscribe(result => {
+      if (result) {
+        result.forEach((el: ExtendedPackage) => {
+          if (el.isSelected) {
+            this.packages.forEach(p => {
+              if (p.name === el.package.name) {
+                p.hasLatestVersion = true;
+              }
+            });
+          }
+        });
+        this.updateStateForUpdateAllButton();
+      }
     });
   }
 
