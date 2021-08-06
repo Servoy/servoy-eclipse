@@ -58,11 +58,7 @@ export class PopupMenuService {
                 if (item.enabled === false) link.classList.add('disabled');
                 if (item.callback) {
                     li.addEventListener('click', () => {
-                        let args = [index, -1, item.selected, null, item.text];
-                        if (item.methodArguments && item.methodArguments.length) {
-                            args = args.concat(item.methodArguments);
-                        }
-                        this.servoyService.executeInlineScript(item.callback.formname, item.callback.script, args);
+                        this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
                 }
                 let faicon = item.fa_icon;
@@ -128,6 +124,7 @@ export class Popup {
 }
 
 export class MenuItem {
+    public id: string;
     public text: string;
     public callback: Callback;
     public name: string;
