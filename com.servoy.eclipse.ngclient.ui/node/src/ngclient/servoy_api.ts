@@ -1,14 +1,15 @@
 import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
-import { ServoyBaseComponent } from '@servoy/public';
+import { ServoyBaseComponent, ServoyApi as Api } from '@servoy/public';
 import { ComponentCache } from './types';
 
-export class ServoyApi {
+export class ServoyApi extends Api {
     constructor( private item: ComponentCache,
                  private formname: string,
                  private absolute: boolean,
                  private formservice: FormService,
                  private servoyService: ServoyService) {
+                    super();
     }
 
 
