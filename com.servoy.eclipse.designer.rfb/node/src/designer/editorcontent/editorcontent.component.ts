@@ -3,6 +3,7 @@ import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject } from '@an
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
+import {WindowRefService} from '@servoy/public';
 
 @Component({
   selector: 'designer-editorcontent',
@@ -26,12 +27,12 @@ export class EditorContentComponent implements OnInit{
     @ViewChild('element', { static: true }) elementRef: ElementRef;
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document) {
+        protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService) {
         designSize.setEditor(this);
     }
     
     ngOnInit() {
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://localhost:8080/designer/solution/'+this.urlParser.getSolutionName()+'/form/'+ this.urlParser.getFormName()+'/clientnr/'+ this.urlParser.getContentClientNr() +'/index.html');
+        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://'+ this.windowRef.nativeWindow.location.host+'/designer/solution/'+this.urlParser.getSolutionName()+'/form/'+ this.urlParser.getFormName()+'/clientnr/'+ this.urlParser.getContentClientNr() +'/index.html');
         if (this.urlParser.isAbsoluteFormLayout())
         {
             this.renderer.setStyle(this.elementRef.nativeElement, 'width', this.urlParser.getFormWidth()+'px');
