@@ -55,6 +55,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         throw new Error('Method not implemented.');
     }
 
+    public  callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
+        throw new Error('Method not implemented.');
+    }
+
     public addMessage(key: string, message: string) {
         this.messages[key] = message;
     }
@@ -95,17 +99,17 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public setLocaleNumberSymbol(symbol: string): void {
         this.localeNumberSymbol = symbol;
     }
-    
+
     public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
-        
+
     }
-    
-    public showForm(popup: PopupForm) : void{
-        
+
+    public showForm(popup: PopupForm): void{
+
     }
-    
+
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
-        
+
     }
 }
 @NgModule({
