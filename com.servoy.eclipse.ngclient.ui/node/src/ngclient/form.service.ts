@@ -199,7 +199,7 @@ export class FormService {
         return this.sabloService.callService('formService', 'callServerSideApi', { formname, beanname, methodName, args });
     }
 
-    public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
+    public callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
         return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: servicename, methodName, args });
     }
 

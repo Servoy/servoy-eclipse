@@ -11,6 +11,7 @@ export abstract class ServoyPublicService {
     public abstract callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T>;
     public abstract getI18NMessages(...keys: string[]): Promise<any>;
     public abstract executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T>;
+    public abstract callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T>;
     public abstract generateUploadUrl(formname: string, componentName: string, propertyName: string): string;
     public abstract generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string;
     public abstract generateMediaDownloadUrl(media : string) : string;

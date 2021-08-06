@@ -18,13 +18,17 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         private applicationService: ApplicationService,
         private servoyService: ServoyService,
         private formService: FormService,
-        private popupFormService : PopupFormService) {
+        private popupFormService: PopupFormService) {
         super();
     }
 
     executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
         return this.servoyService.executeInlineScript(formname, script, params);
     }
+    callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
+        return this.formService.callServiceServerSideApi(servicename, methodName, args);
+    }
+
     getI18NMessages(...keys: string[]): Promise<any> {
         return this.i18nProvider.getI18NMessages(...keys);
     }
@@ -49,10 +53,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
         return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
     }
-    generateMediaDownloadUrl(media : string) : string{
+    generateMediaDownloadUrl(media: string): string{
         return this.applicationService.generateMediaDownloadUrl(media);
     }
-    getUIProperty(key : string) : any{
+    getUIProperty(key: string): any{
         return this.applicationService.getUIProperty(key);
     }
     getFormCacheByName(containedForm: string): IFormCache {
@@ -61,11 +65,11 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
         this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
     }
-    
-    showForm(popup: PopupForm) : void{
+
+    showForm(popup: PopupForm): void{
         this.popupFormService.showForm(popup);
     }
-    
+
     cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
          this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
