@@ -72,6 +72,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
+import com.servoy.j2db.server.ngclient.ChildrenJSONGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -196,7 +197,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
 					Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
 					Collection<IFormElement> deleted = Collections.emptyList();
-					sendComponents(fs, writer, baseComponents, deleted);
+					sendComponents(fs, writer, baseComponents, deleted, false);
 					writer.key("solutionProperties");
 					writer.object();
 					writer.key("styleSheets");
@@ -556,7 +557,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 		JSONWriter writer = new JSONStringer();
 		writer.object();
-		sendComponents(fs, writer, baseComponents, deletedComponents);
+		sendComponents(fs, writer, baseComponents, deletedComponents, true);
 
 		if (formComponentsComponents.size() > 0)
 		{
@@ -662,6 +663,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.endObject();
 			}
 			writer.endArray();
+
+			writer.key("ng2containers");
+			writer.array();
+			for (LayoutContainer container : containersList)
+			{
+				writer.object();
+				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, true);
+				writer.endObject();
+			}
+			writer.endArray();
+
 		}
 		if (deletedLayoutContainers.size() > 0)
 		{
@@ -829,7 +841,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return fixedFormElementName.replace('-', '_');
 	}
 
-	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<IFormElement> baseComponents, Collection<IFormElement> deletedComponents)
+	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<IFormElement> baseComponents, Collection<IFormElement> deletedComponents,
+		boolean writeNG2)
 	{
 		if (baseComponents.size() > 0)
 		{
@@ -870,6 +883,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 			writer.endObject();
+			if (writeNG2)
+			{
+				writer.key("ng2components");
+				writer.array();
+				for (IFormElement baseComponent : components)
+				{
+					writer.object();
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+					ChildrenJSONGenerator.writeFormElement(writer, baseComponent, form, fe, null, new ServoyDataConverterContext(fs), true);
+					writer.endObject();
+				}
+				writer.endArray();
+			}
 			if (formComponentTemplates.size() > 0)
 			{
 				writer.key("formcomponenttemplates");

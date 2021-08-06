@@ -1,5 +1,7 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
+import {
+    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject
+} from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, PartCache, FormComponentProperties } from '../ngclient/types';
 
@@ -19,12 +21,12 @@ import { DOCUMENT } from '@angular/common';
     /* eslint-disable max-len */
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
-           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part"> <!-- part div -->
-               <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
-                </div>
+          <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
-          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+          <div *ngFor="let item of formCache.componentCache | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngStyle]="item.value.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
+          </div>
+          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
@@ -33,15 +35,15 @@ import { DOCUMENT } from '@angular/common';
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
-          <div [svyContainerStyle]="state" class="svy-layoutcontainer">
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
       <!-- structure template generate start -->
       <!-- structure template generate end -->
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
-          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                </div>
           </div>
@@ -80,7 +82,7 @@ import { DOCUMENT } from '@angular/common';
 <ng-template #servoydefaultTypeahead let-callback="callback" let-state="state"><servoydefault-typeahead  [servoyAttributes]="state.model.servoyAttributes" [background]="state.model.background" [borderType]="state.model.borderType" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [displaysTags]="state.model.displaysTags" [editable]="state.model.editable" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [fontType]="state.model.fontType" [foreground]="state.model.foreground" [format]="state.model.format" [horizontalAlignment]="state.model.horizontalAlignment" [location]="state.model.location" (locationChange)="callback.datachange(state,'location',$event)" [margin]="state.model.margin" [placeholderText]="state.model.placeholderText" [readOnly]="state.model.readOnly" [selectOnEnter]="state.model.selectOnEnter" [size]="state.model.size" (sizeChange)="callback.datachange(state,'size',$event)" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [transparent]="state.model.transparent" [valuelistID]="state.model.valuelistID" *ngIf="state.model.visible" [onActionMethodID]="callback.getHandler(state,'onActionMethodID')" [onDataChangeMethodID]="callback.getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="callback.getHandler(state,'onFocusGainedMethodID')" [onFocusLostMethodID]="callback.getHandler(state,'onFocusLostMethodID')" [onRightClickMethodID]="callback.getHandler(state,'onRightClickMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoydefault-typeahead></ng-template>
      <!-- component template generate end -->
    `
-   /* eslint-enable max-len */
+    /* eslint-enable max-len */
 })
 
 export class DesignFormComponent implements OnDestroy, OnChanges {
@@ -136,22 +138,22 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     private _containers: { added: any; removed: any; };
     private _cssstyles: { [x: string]: any; };
 
-    draggedElementItem : ComponentCache;
-    
+    draggedElementItem: ComponentCache;
+
     constructor(private formservice: FormService, private sabloService: SabloService,
-                private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, private renderer: Renderer2,
-                @Inject(DOCUMENT) private document: Document,
-                private windowRefService: WindowRefService) {
+        private servoyService: ServoyService, logFactory: LoggerFactory,
+        private changeHandler: ChangeDetectorRef,
+        private el: ElementRef, private renderer: Renderer2,
+        @Inject(DOCUMENT) private document: Document,
+        private windowRefService: WindowRefService) {
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
-            if (event.data.id == 'createElement'){
+            if (event.data.id == 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
-                this.draggedElementItem = new ComponentCache('dragged_element',event.data.name, event.data.model, [], {width: elWidth +'px' , height: elHeight +'px', top: '-200px', left: '-200px'});
+                this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], { width: elWidth + 'px', height: elHeight + 'px', top: '-200px', left: '-200px' });
             }
-            if (event.data.id == 'destroyElement'){
+            if (event.data.id == 'destroyElement') {
                 this.draggedElementItem = null;
             }
             this.detectChanges();
@@ -162,8 +164,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         this.changeHandler.markForCheck();
     }
 
-    public formCacheChanged(cache: FormCache): void {
-        this.formCache = cache;
+    public formCacheChanged(): void {
         this.detectChanges();
     }
 
@@ -175,7 +176,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         const comp = this.componentCache[componentName];
         if (comp) {
             const change = {};
-            change[property] = new SimpleChange(value,value,false);
+            change[property] = new SimpleChange(value, value, false);
             comp.ngOnChanges(change);
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
@@ -183,7 +184,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     }
 
     @Input('containers')
-    set containers(containers: {added: any, removed: any}) {
+    set containers(containers: { added: any, removed: any }) {
         if (!containers) return;
         this._containers = containers;
         for (let containername in containers.added) {
@@ -238,8 +239,8 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
             this.servoyApiCache = {};
             this.componentCache = {};
 
-           //this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
-            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
+            //this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
+            this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
 
         }
     }
@@ -250,8 +251,8 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
-        } else if (item instanceof FormComponentCache ) {
+            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv;
+        } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
@@ -262,14 +263,14 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         }
     }
 
-    getTemplateForLFC(state: ComponentCache ): TemplateRef<any> {
+    getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
             // TODO: this has to be replaced with a type property on the state object
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
-            compDirectiveName =  compDirectiveName.replace('-','');
+            compDirectiveName = compDirectiveName.replace('-', '');
             return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
         }
     }
@@ -277,8 +278,8 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent('');
 
-        for (const key in this.absolutFormPosition){
-            if (this.absolutFormPosition.hasOwnProperty(key)){
+        for (const key in this.absolutFormPosition) {
+            if (this.absolutFormPosition.hasOwnProperty(key)) {
                 delete this.absolutFormPosition[key];
             }
         }
@@ -299,8 +300,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         }
 
         if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null)
-            {
+            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
                 // see svyFormstyle from ng1
                 this.absolutFormPosition['minWidth'] = formData.model.size.width + 'px';
                 this.absolutFormPosition['minHeight'] = formData.model.size.height + 'px';
@@ -325,11 +325,11 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         return null;
     }
 
-    registerComponent(component: ServoyBaseComponent<any> ): void {
+    registerComponent(component: ServoyBaseComponent<any>): void {
         this.componentCache[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent<any> ): void {
+    unRegisterComponent(component: ServoyBaseComponent<any>): void {
         delete this.componentCache[component.name];
     }
 
@@ -346,49 +346,52 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         return null;
     }
 
-    private getContainerByName(containername: string) : Element {
-       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
+    private getContainerByName(containername: string): Element {
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
 }
 
 class FormComponentServoyApi extends ServoyApi {
     constructor(item: ComponentCache,
-                formname: string,
-                absolute: boolean,
-                formservice: FormService,
-                servoyService: ServoyService,
-                private fc: DesignFormComponent) {
-        super(item,formname,absolute,formservice,servoyService);
+        formname: string,
+        absolute: boolean,
+        formservice: FormService,
+        servoyService: ServoyService,
+        private fc: DesignFormComponent) {
+        super(item, formname, absolute, formservice, servoyService);
     }
 
-    registerComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.registerComponent(comp);
+    registerComponent(comp: ServoyBaseComponent<any>) {
+        this.fc.registerComponent(comp);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.unRegisterComponent(comp);
+    unRegisterComponent(comp: ServoyBaseComponent<any>) {
+        this.fc.unRegisterComponent(comp);
     }
 }
 
 @Directive({ selector: '[svyContainerStyle]' })
-export class AddAttributeDirective implements OnInit {
+export class AddAttributeDirective implements OnChanges {
     @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
+    @Input() svyContainerLayout;
+    @Input() svyContainerClasses;
+    @Input() svyContainerAttributes;
 
     constructor(private el: ElementRef, private renderer: Renderer2, @Inject(DesignFormComponent) private parent: DesignFormComponent) { }
 
-    ngOnInit() {
-        if ('classes' in this.svyContainerStyle) {
-            this.svyContainerStyle.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.svyContainerClasses) {
+            this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
 
-        if ('layout' in this.svyContainerStyle) {
-            for (const key of Object.keys(this.svyContainerStyle.layout)) {
-                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.layout[key]);
+        if (changes.svyContainerLayout && this.svyContainerLayout) {
+            for (const key of Object.keys(this.svyContainerLayout)) {
+                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerLayout[key]);
             }
         }
-        if ('attributes' in this.svyContainerStyle) {
-              for (const key of Object.keys(this.svyContainerStyle.attributes)) {
-                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
+        if (changes.svyContainerAttributes) {
+            for (const key of Object.keys(this.svyContainerAttributes)) {
+                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
                 if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }

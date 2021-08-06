@@ -37,7 +37,7 @@ export class PaletteComponent {
                 this.packages = got;
             }
             for (let i = 0; i < this.packages.length; i++) {
-                this.packages[i].id = this.packages[i].packageName.replace(/[|&;$%@"<>()+,]/g, "").replace(/\s+/g, "_");
+                this.packages[i].id = ('svy_' + this.packages[i].packageName).replace(/[|&;$%@"<>()+,]/g, "").replace(/\s+/g, "_");
                 this.activeIds.push(this.packages[i].id);
                 if (this.packages[i].components) {
                     for (let j = 0; j < this.packages[i].components.length; j++) {
