@@ -6,6 +6,9 @@ import { EditorContentService } from './editorcontent.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 import {DesignFormComponent} from './designform_component.component';
 
+import { Injectable, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+
 @Component({
     selector: 'servoy-designer',
     templateUrl: './servoydesigner.component.html'
@@ -18,7 +21,12 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
     solutionName: string;
     private wsSession: WebsocketSession;
     
-    constructor(private windowRef: WindowRefService, private websocketService: WebsocketService, private formService: FormService, private services: ServicesService, private editorContentService: EditorContentService) { }
+    constructor(private windowRef: WindowRefService, 
+                        private websocketService: WebsocketService, 
+                        private formService: FormService,
+                        private services: ServicesService,
+                        private editorContentService: EditorContentService,
+                        @Inject(DOCUMENT) private doc: Document) { }
 
     ngOnInit() {
         let path: string = this.windowRef.nativeWindow.location.pathname;
@@ -36,6 +44,20 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
             const formState = JSON.parse(data)[formName];
             this.formService.createFormCache(formName, formState, null);
             this.mainForm = formName;
+        });
+        this.wsSession.callService("$editor", "getStyleSheets", {
+            form: formName,
+            solution: this.solutionName,
+            ng2: true
+        }).then((paths) => {
+            if (paths) {
+                for (const path of paths) {
+                    const link: HTMLLinkElement = this.doc.createElement('link');
+                    link.setAttribute('rel', 'stylesheet');
+                    this.doc.head.appendChild(link);
+                    link.setAttribute('href', path);
+                }
+            }
         });
         let _editorContentService = this.editorContentService;
         this.editorContentService.setDesignFormComponent(this);
