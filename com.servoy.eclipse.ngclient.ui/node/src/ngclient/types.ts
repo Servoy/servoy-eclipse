@@ -1,14 +1,15 @@
 import { IComponentCache, IFormCache } from '@servoy/public';
 
 export class FormSettings {
-  public name: string;
-  public size: { width: number; height: number };
+    public name: string;
+    public size: { width: number; height: number };
 }
 
-export class FormCache implements IFormCache{
+export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
-    private componentCache: Map<string, ComponentCache>;
+    public componentCache: Map<string, ComponentCache>;
+    public layoutContainersCache: Map<string, StructureCache>;
     private _mainStructure: StructureCache;
     private _formComponents: Map<string, FormComponentCache>;
     private _parts: Array<PartCache>;
@@ -22,6 +23,10 @@ export class FormCache implements IFormCache{
     }
     public add(comp: ComponentCache) {
         this.componentCache.set(comp.name, comp);
+    }
+
+    public addLayourContainer(container: StructureCache) {
+        this.layoutContainersCache.set(container.id, container);
     }
 
     public addPart(part: PartCache) {
@@ -56,10 +61,22 @@ export class FormCache implements IFormCache{
         return this.componentCache.get(name);
     }
 
+    public getLayoutContainer(id: string): StructureCache {
+        return this.layoutContainersCache.get(id);
+    }
+
+    public removeComponent(name: string) {
+        this.componentCache.delete(name);
+    }
+
+    public removeLayoutContainer(id: string) {
+        this.layoutContainersCache.delete(id);
+    }
+    
     public getConversionInfo(beanname: string) {
         return this.conversionInfo[beanname];
     }
-    public addConversionInfo(beanname: string, conversionInfo: { [property: string]: string}) {
+    public addConversionInfo(beanname: string, conversionInfo: { [property: string]: string }) {
         const beanConversion = this.conversionInfo[beanname];
         if (beanConversion == null) {
             this.conversionInfo[beanname] = conversionInfo;
@@ -71,6 +88,9 @@ export class FormCache implements IFormCache{
     private findComponents(structure: StructureCache | FormComponentCache) {
         structure.items.forEach(item => {
             if (item instanceof StructureCache || item instanceof FormComponentCache) {
+                if (item instanceof StructureCache && item.id) {
+                    this.addLayourContainer(item);
+                }
                 this.findComponents(item);
             } else {
                 this.add(item);
@@ -90,7 +110,7 @@ export interface IFormComponent extends IApiExecutor {
 }
 
 export interface IApiExecutor {
- callApi(componentName: string, apiName: string, args: Array<any>, path?: string[]): any;
+    callApi(componentName: string, apiName: string, args: Array<any>, path?: string[]): any;
 }
 
 export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
@@ -102,15 +122,16 @@ export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
 export class ComponentCache implements IComponentCache {
     constructor(public readonly name: string,
         public readonly type: string,
-        public readonly model: { [property: string]: any },
+        public model: { [property: string]: any },
         public readonly handlers: Array<string>,
-        public readonly layout: { [property: string]: string }) {
+        public layout: { [property: string]: string }) {
     }
 }
 
 export class StructureCache {
-    constructor(public readonly tagname: string, public readonly classes: Array<string>,  public readonly attributes?: { [property: string]: string },
-        public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>) {
+    constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
+        public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
+        public readonly id?: string) {
         if (!this.items) this.items = [];
     }
 
@@ -120,12 +141,20 @@ export class StructureCache {
             return child as StructureCache;
         return null;
     }
+
+    removeChild(child: StructureCache | ComponentCache | FormComponentCache) : boolean{
+        const index = this.items.indexOf(child);
+        if (index >= 0) {
+            this.items.splice(index, 1);
+            return true;
+        }
+    }
 }
 
 export class PartCache {
     constructor(public readonly classes: Array<string>,
         public readonly layout: { [property: string]: string },
-        public readonly items?: Array<ComponentCache | FormComponentCache  >) {
+        public readonly items?: Array<ComponentCache | FormComponentCache>) {
         if (!this.items) this.items = [];
     }
 
@@ -140,17 +169,17 @@ export class FormComponentCache implements IComponentCache {
     public items: Array<StructureCache | ComponentCache | FormComponentCache>;
 
     constructor(
-            public readonly name: string,
-            public readonly model: { [property: string]: any },
-            public readonly handlers: { [property: string]: any },
-            public readonly responsive: boolean,
-            public readonly layout: { [property: string]: string },
-            public readonly formComponentProperties: FormComponentProperties,
-            public readonly hasFoundset: boolean,
-            items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
-            if ( !items ) this.items = [];
-            else this.items = items;
-        }
+        public readonly name: string,
+        public readonly model: { [property: string]: any },
+        public readonly handlers: { [property: string]: any },
+        public readonly responsive: boolean,
+        public readonly layout: { [property: string]: string },
+        public readonly formComponentProperties: FormComponentProperties,
+        public readonly hasFoundset: boolean,
+        items?: Array<StructureCache | ComponentCache | FormComponentCache>) {
+        if (!items) this.items = [];
+        else this.items = items;
+    }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {
         if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
@@ -165,7 +194,7 @@ export class FormComponentProperties {
     }
 }
 
-export class Dimension{
+export class Dimension {
     public width: number;
     public height: number;
 }

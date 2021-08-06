@@ -12,7 +12,6 @@
     "@ng-bootstrap/ng-bootstrap": ">=10",
     "@tinymce/tinymce-angular": ">=4",
     "bootstrap": ">=5",
-    "ng-select2-component": ">=8",
     "tinymce": ">=5",
     "tinymce-i18n": ">=20",
     "tslib": "*"

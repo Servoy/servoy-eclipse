@@ -317,10 +317,10 @@ export class FormService {
         formComponent.detectChanges();
     }
 
-    private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
+    public walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes);
+                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, elem.id);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);

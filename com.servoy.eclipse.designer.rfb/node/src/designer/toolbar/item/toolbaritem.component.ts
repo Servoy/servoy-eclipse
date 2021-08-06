@@ -9,4 +9,8 @@ export class ToolbarItemComponent {
         const text = this.item.onselection(selection);
         if(text) this.item.text = text;
     }
+
+    isDisabled(): boolean {
+        return typeof(this.item.enabled) == 'function' ? !this.item.enabled() : !this.item.enabled;
+    }
 }

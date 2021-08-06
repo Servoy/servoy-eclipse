@@ -263,6 +263,10 @@ export class EditorSessionService {
     getState(): State {
         return this.state;
     }
+
+    getSession(): WebsocketSession {
+        return this.wsSession;
+    }
 }
 
 export interface ISelectionChangedListener {

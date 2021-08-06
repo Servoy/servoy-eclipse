@@ -192,3 +192,18 @@
     line-height: 1.5;
     border-radius: 3px;
 }
+
+.toolbar .dropdown-toggle::after {
+    display:none;
+}
+
+.toolbar .caret {
+    display: inline-block;
+    margin-left: .255em;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}

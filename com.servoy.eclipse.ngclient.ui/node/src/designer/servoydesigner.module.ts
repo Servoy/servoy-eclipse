@@ -8,6 +8,7 @@ import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import {DesignFormComponent, AddAttributeDirective} from './designform_component.component';
 import { ServoyPublicServiceImpl } from '../ngclient/services/servoy_public_impl.service';
 import { ServerDataService } from '../ngclient/services/serverdata.service';
+import {EditorContentService} from './editorcontent.service';
 
 @NgModule({
   imports: [
@@ -18,7 +19,7 @@ import { ServerDataService } from '../ngclient/services/serverdata.service';
     ServoyPublicModule
   ],
   declarations: [ServoyDesignerComponent, DesignFormComponent, AddAttributeDirective],
-  providers: [ServerDataService, ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
+  providers: [EditorContentService, ServerDataService, ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
   schemas: [
               CUSTOM_ELEMENTS_SCHEMA
     ]
