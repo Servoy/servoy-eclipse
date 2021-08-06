@@ -24,7 +24,8 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
             getComponent: (name: string) => {
                 const comp: IComponentCache = {
                     name,
-                    model: {}
+                    model: {},
+                    layout: {}
                 };
                 return comp;
             }

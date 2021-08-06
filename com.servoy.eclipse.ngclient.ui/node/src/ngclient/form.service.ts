@@ -308,7 +308,12 @@ export class FormService {
                         formComponent.propertyChanged(beanname, property, value);
                     }
                 }
-                comp.model[property] = value;
+                if (property == 'cssPosition'){
+                    comp.layout = value;
+                }
+                else{
+                    comp.model[property] = value;
+                }
             }
             if (beanname === '') {
                 servoyService.setFindMode(formname, formData[beanname]['findmode']);

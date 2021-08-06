@@ -33,4 +33,5 @@ export interface IFormCache {
 export interface IComponentCache {
     name: string;
     model: { [property: string]: any };
+    layout: { [property: string]: any };
 }
