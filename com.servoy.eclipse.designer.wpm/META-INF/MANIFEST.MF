@@ -5,9 +5,12 @@ Bundle-SymbolicName: com.servoy.eclipse.designer.wpm;singleton:=true
 Bundle-Version: 2021.9.0.3700_rc
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: javax.servlet,
- javax.websocket,
- jabsorb,
+Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
+ javax.servlet.annotation;version="[4.0.0,5.0.0)",
+ javax.servlet.http;version="[4.0.0,5.0.0)",
+ javax.websocket;version="[1.1.0,2.0.0)",
+ javax.websocket.server;version="[1.1.0,2.0.0)"
+Require-Bundle: jabsorb,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.jface,
