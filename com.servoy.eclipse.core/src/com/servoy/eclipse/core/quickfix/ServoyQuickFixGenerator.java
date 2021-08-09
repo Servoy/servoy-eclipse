@@ -307,9 +307,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.MISSING_PROJECT_REFERENCE))
 			{
-				final String projectReferenceName = (String)marker.getAttribute("projectReferenceName");
-				fixes = new IMarkerResolution[] { new OpenMissingProjectReferenceQuickFix(projectReferenceName), new DeleteMissingProjectReferenceQuickFix(
-					projectReferenceName) };
+				fixes = new IMarkerResolution[] { new OpenMissingProjectReferenceQuickFix(), new DeleteMissingProjectReferenceQuickFix() };
 			}
 		}
 		catch (CoreException e)

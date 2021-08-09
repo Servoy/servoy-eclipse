@@ -293,6 +293,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SERVICE_MUST_AUTHENTICATE_MARKER_TYPE = _PREFIX + ".serviceMustAuthenticateProblem";
 	public static final String NAMED_FOUNDSET_DATASOURCE = _PREFIX + ".namedFoundsetDatasourceProblem";
 
+	public static final String PROJECT_REFERENCE_NAME = "projectReferenceName";
+
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
 
@@ -3053,7 +3055,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						try
 						{
-							marker.setAttribute("projectReferenceName", p.getName());
+							marker.setAttribute(PROJECT_REFERENCE_NAME, p.getName());
 						}
 						catch (CoreException e)
 						{
