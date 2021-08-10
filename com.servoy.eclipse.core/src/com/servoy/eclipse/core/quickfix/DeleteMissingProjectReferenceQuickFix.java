@@ -45,7 +45,7 @@ public class DeleteMissingProjectReferenceQuickFix implements IMarkerResolution
 	@Override
 	public String getLabel()
 	{
-		return "Delete referenced project from list.";
+		return "Remove reference to missing or closed project from the active solution or module.";
 	}
 
 	/*
