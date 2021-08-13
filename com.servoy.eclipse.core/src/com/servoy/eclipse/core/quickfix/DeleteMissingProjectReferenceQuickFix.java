@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
@@ -36,18 +37,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class DeleteMissingProjectReferenceQuickFix implements IMarkerResolution
 {
 
-	private final String projectReferenceName;
-
-	/**
-	 * @param projectReferenceName
-	 * @param solutionName
-	 */
-	public DeleteMissingProjectReferenceQuickFix(String projectReferenceName)
-	{
-		super();
-		this.projectReferenceName = projectReferenceName;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -56,7 +45,7 @@ public class DeleteMissingProjectReferenceQuickFix implements IMarkerResolution
 	@Override
 	public String getLabel()
 	{
-		return "Delete referenced project from list.";
+		return "Remove reference to missing or closed project from the active solution or module.";
 	}
 
 	/*
@@ -75,7 +64,7 @@ public class DeleteMissingProjectReferenceQuickFix implements IMarkerResolution
 			final List<IProject> newReferencedProjectsList = new ArrayList<>();
 			for (IProject p : referencedProjects)
 			{
-				if (!p.getName().equalsIgnoreCase(projectReferenceName))
+				if (!p.getName().equalsIgnoreCase((String)marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME)))
 				{
 					newReferencedProjectsList.add(p);
 				}

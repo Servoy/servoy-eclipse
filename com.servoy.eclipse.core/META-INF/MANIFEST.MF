@@ -48,8 +48,7 @@ Require-Bundle: org.eclipse.core.runtime,
  sj.jsonschemavalidation,
  slf4j.api,
  com.servoy.eclipse.ngclient,
- org.apache.tomcat,
- javax.servlet
+ org.apache.tomcat
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.builder,
@@ -66,3 +65,6 @@ Export-Package: com.servoy.eclipse.core,
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.servoy.eclipse.core
+Import-Package: javax.servlet;version="4.0.0",
+ javax.servlet.annotation;version="4.0.0",
+ javax.servlet.http;version="4.0.0"

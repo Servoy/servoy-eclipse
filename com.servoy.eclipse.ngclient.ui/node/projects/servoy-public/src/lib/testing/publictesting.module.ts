@@ -24,7 +24,8 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
             getComponent: (name: string) => {
                 const comp: IComponentCache = {
                     name,
-                    model: {}
+                    model: {},
+                    layout: {}
                 };
                 return comp;
             }
@@ -51,6 +52,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
 
     public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
+        throw new Error('Method not implemented.');
+    }
+
+    public  callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
         throw new Error('Method not implemented.');
     }
 
@@ -94,17 +99,17 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public setLocaleNumberSymbol(symbol: string): void {
         this.localeNumberSymbol = symbol;
     }
-    
+
     public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
-        
+
     }
-    
-    public showForm(popup: PopupForm) : void{
-        
+
+    public showForm(popup: PopupForm): void{
+
     }
-    
+
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
-        
+
     }
 }
 @NgModule({

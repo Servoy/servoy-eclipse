@@ -41,6 +41,7 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -602,6 +603,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
 			checkAndAutoUpgradeLicenses(exportModel);
 
+			if (exportModel.isExportNG2())
+			{
+				Activator.getInstance();
+			}
 			WarExporter warExporter = new WarExporter(exportModel);
 
 			warExporter.doExport(new IProgressMonitor()

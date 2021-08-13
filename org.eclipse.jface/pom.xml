@@ -19,7 +19,7 @@
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.22.100.v20210126-0831</version>
+  <version>3.22.200.v20210401-0958</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>

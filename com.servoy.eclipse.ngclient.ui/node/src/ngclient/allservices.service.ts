@@ -49,7 +49,6 @@ export class AllServiceService implements ServiceProvider {
     providers: [AllServiceService, ApplicationService, WindowService, SessionService, PopupFormService,
                 // generated providers start
                 // generated providers end
-                ClientFunctionService
                 ],
     imports: [
                 // generated modules start

@@ -20,8 +20,16 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
-        if(changes['horizontalAlignment'])
-            this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment);
+        for (const property in changes) {
+            switch (property) {
+                case 'dataProviderID':
+                    this.setSelectionFromDataprovider();
+                    break;
+                case'horizontalAlignment':
+                    this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment);
+                    break;
+            }
+        }
     }
     
     getFocusElement() {

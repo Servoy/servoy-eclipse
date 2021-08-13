@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -39,6 +40,7 @@ import org.json.JSONWriter;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -294,8 +296,28 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.endObject();
 				return writer.toString();
 			}
+			case "getStyleSheets" :
+			{
+				return getStyleSheets();
+			}
 		}
 		return null;
+	}
+
+
+	private String[] getStyleSheets()
+	{
+		TreeSet<String> designCssLibs = new TreeSet<>();
+		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
+		for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
+		{
+			List<String> libs = entry.getNg2CssDesignLibrary();
+			if (libs != null)
+			{
+				designCssLibs.addAll(libs);
+			}
+		}
+		return designCssLibs.toArray(new String[designCssLibs.size()]);
 	}
 
 	/**

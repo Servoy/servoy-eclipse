@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
@@ -31,17 +32,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class OpenMissingProjectReferenceQuickFix implements IMarkerResolution
 {
-
-	private final String projectReferenceName;
-
-	/**
-	 * @param projectReferenceName
-	 * @param solutionName
-	 */
-	public OpenMissingProjectReferenceQuickFix(String projectReferenceName)
-	{
-		this.projectReferenceName = projectReferenceName;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -68,7 +58,7 @@ public class OpenMissingProjectReferenceQuickFix implements IMarkerResolution
 			final IProject[] referencedProjects = servoyProject.getDescription().getReferencedProjects();
 			for (IProject p : referencedProjects)
 			{
-				if (p.getName() == projectReferenceName)
+				if (p.getName().equalsIgnoreCase((String)marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME)))
 				{
 					if (p.exists() && !p.isOpen())
 					{

@@ -11,11 +11,13 @@ Require-Bundle: sablo,
  servoy_ngclient,
  j2db_server,
  org.eclipse.osgi,
- javax.servlet,
  slf4j.api,
  org.apache.tomcat,
  org.apache.commons.io,
  org.eclipse.core.runtime
+Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
+ javax.servlet.annotation;version="[4.0.0,5.0.0)",
+ javax.servlet.http;version="[4.0.0,5.0.0)"
 Bundle-Vendor: Servoy
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.servoy.eclipse.ngclient.startup.Activator

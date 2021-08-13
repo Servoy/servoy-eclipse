@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 
 /**
@@ -133,6 +134,10 @@ public class Activator extends Plugin
 	public void exportNG2ToWar(File location, IProgressMonitor monitor)
 	{
 		if (exporter != null) exporter.accept(location, monitor);
+		else
+		{
+			ServoyLog.logWarning("Couldn't export NG2 because the exporter was not configured", null);
+		}
 	}
 
 	public void setNG2WarExporter(BiConsumer<File, IProgressMonitor> exporter)

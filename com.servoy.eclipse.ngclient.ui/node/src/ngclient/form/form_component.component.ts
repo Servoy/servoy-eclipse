@@ -20,8 +20,8 @@ import { ServoyBaseComponent } from '@servoy/public';
     /* eslint-disable max-len */
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
-           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part"> <!-- part div -->
-               <div *ngFor="let item of part.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
+               <div *ngFor="let item of part.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
           </div>
@@ -31,15 +31,15 @@ import { ServoyBaseComponent } from '@servoy/public';
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
-          <div [svyContainerStyle]="state" class="svy-layoutcontainer">
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
       <!-- structure template generate start -->
       <!-- structure template generate end -->
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
-          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                </div>
           </div>
@@ -346,24 +346,27 @@ class FormComponentServoyApi extends ServoyApi {
 }
 
 @Directive({ selector: '[svyContainerStyle]' })
-export class AddAttributeDirective implements OnInit {
+export class AddAttributeDirective implements OnChanges {
     @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
-
+    @Input() svyContainerLayout;
+    @Input() svyContainerClasses;
+    @Input() svyContainerAttributes;
+    
     constructor(private el: ElementRef, private renderer: Renderer2, @Inject(FormComponent) private parent: FormComponent) { }
 
-    ngOnInit() {
-        if ('classes' in this.svyContainerStyle) {
-            this.svyContainerStyle.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
+     ngOnChanges(changes: SimpleChanges) {
+        if (changes.svyContainerClasses) {
+            this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
 
-        if ('layout' in this.svyContainerStyle) {
-            for (const key of Object.keys(this.svyContainerStyle.layout)) {
-                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerStyle.layout[key]);
+        if (changes.svyContainerLayout && this.svyContainerLayout) {
+            for (const key of Object.keys(this.svyContainerLayout)) {
+                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerLayout[key]);
             }
         }
-        if ('attributes' in this.svyContainerStyle) {
-              for (const key of Object.keys(this.svyContainerStyle.attributes)) {
-                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerStyle.attributes[key]);
+        if (changes.svyContainerAttributes) {
+            for (const key of Object.keys(this.svyContainerAttributes)) {
+                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
                 if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }

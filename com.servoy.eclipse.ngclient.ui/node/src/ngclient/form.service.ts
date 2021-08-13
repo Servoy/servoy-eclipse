@@ -199,7 +199,7 @@ export class FormService {
         return this.sabloService.callService('formService', 'callServerSideApi', { formname, beanname, methodName, args });
     }
 
-    public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
+    public callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
         return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: servicename, methodName, args });
     }
 
@@ -308,7 +308,12 @@ export class FormService {
                         formComponent.propertyChanged(beanname, property, value);
                     }
                 }
-                comp.model[property] = value;
+                if (property == 'cssPosition'){
+                    comp.layout = value;
+                }
+                else{
+                    comp.model[property] = value;
+                }
             }
             if (beanname === '') {
                 servoyService.setFindMode(formname, formData[beanname]['findmode']);
