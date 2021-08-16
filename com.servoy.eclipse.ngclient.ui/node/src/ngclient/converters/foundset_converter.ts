@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { Deferred, LoggerService, LoggerFactory, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
+import { Deferred, LoggerService, LoggerFactory, PromiseWithContext, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
     IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
@@ -54,6 +54,7 @@ export class FoundsetConverter implements IConverter {
         } else {
             // check for updates
             let updates = false;
+            let requestContexts: Object[];
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] !== undefined) {
                 if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = {
                     oldValue: currentClientValue.serverSize,
@@ -127,6 +128,12 @@ export class FoundsetConverter implements IConverter {
                 handledRequests.forEach((handledReq) => {
                     const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
                     if (defer) {
+                        const promise: PromiseWithContext = defer.promise;
+                        if (hasListeners && 'context' in promise) {
+                            if (!Array.isArray(requestContexts)) requestContexts = [];
+
+                            requestContexts.push(promise.context);
+                        }
                         if (defer === internalState.selectionUpdateDefer) {
                             this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], currentClientValue.selectedRowIndexes, handledReq[FoundsetConverter.VALUE_KEY]);
                             delete internalState.selectionUpdateDefer;
@@ -233,6 +240,9 @@ export class FoundsetConverter implements IConverter {
                     JSON.stringify(newValue.selectedRowIndexes) : newValue) + ')')));
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
+                
+                if (Array.isArray(requestContexts)) notificationParamForListeners.context = requestContexts;
+
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
                 currentClientValue.state.fireChanges(notificationParamForListeners);
             }
