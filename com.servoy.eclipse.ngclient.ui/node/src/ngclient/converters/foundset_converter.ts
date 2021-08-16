@@ -54,7 +54,7 @@ export class FoundsetConverter implements IConverter {
         } else {
             // check for updates
             let updates = false;
-            let requestContexts: Object[];
+            let requestContexts: any[];
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] !== undefined) {
                 if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = {
                     oldValue: currentClientValue.serverSize,
