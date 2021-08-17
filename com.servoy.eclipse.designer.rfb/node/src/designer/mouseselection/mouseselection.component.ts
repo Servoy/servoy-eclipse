@@ -124,13 +124,13 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
                     this.nodes = newNodes;
                     selection = [id];
                 }
-                this.editorSession.setSelection(selection);
+                this.editorSession.setSelection(selection, this);
                 return node;
             }
         });
         if (!found) {
             this.nodes = [];
-            this.editorSession.setSelection([]);
+            this.editorSession.setSelection([], this);
 
             this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
@@ -168,7 +168,7 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
                 }
             });
             this.nodes = newNodes;
-            this.editorSession.setSelection(newSelection);
+            this.editorSession.setSelection(newSelection, this);
         }
         this.lassostarted = false;
     }
