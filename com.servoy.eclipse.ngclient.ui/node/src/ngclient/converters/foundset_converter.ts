@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { Deferred, LoggerService, LoggerFactory, PromiseWithContext, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
+import { Deferred, LoggerService, LoggerFactory, RequestInfoPromise, IFoundset, ChangeListener, ViewPort, ViewportRowUpdates, FoundsetChangeEvent, FoundsetChangeListener,
     IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
@@ -54,7 +54,6 @@ export class FoundsetConverter implements IConverter {
         } else {
             // check for updates
             let updates = false;
-            let requestContexts: any[];
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] !== undefined) {
                 if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = {
                     oldValue: currentClientValue.serverSize,
@@ -125,14 +124,14 @@ export class FoundsetConverter implements IConverter {
                 const handledRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
                 const internalState = currentClientValue.state;
 
+                let requestInfos: any[];
                 handledRequests.forEach((handledReq) => {
                     const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
                     if (defer) {
-                        const promise: PromiseWithContext = defer.promise;
-                        if (hasListeners && 'context' in promise) {
-                            if (!Array.isArray(requestContexts)) requestContexts = [];
-
-                            requestContexts.push(promise.context);
+                        const promise: RequestInfoPromise<any> = defer.promise;
+                        if (hasListeners && promise.requestInfo) {
+                            if (!requestInfos) requestInfos = [];
+                            requestInfos.push(promise.requestInfo);
                         }
                         if (defer === internalState.selectionUpdateDefer) {
                             this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], currentClientValue.selectedRowIndexes, handledReq[FoundsetConverter.VALUE_KEY]);
@@ -142,6 +141,7 @@ export class FoundsetConverter implements IConverter {
                         }
                     }
                 });
+                if (hasListeners && requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 
                 updates = true;
             }
@@ -240,8 +240,6 @@ export class FoundsetConverter implements IConverter {
                     JSON.stringify(newValue.selectedRowIndexes) : newValue) + ')')));
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
-                
-                if (Array.isArray(requestContexts)) notificationParamForListeners.context = requestContexts;
 
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
                 currentClientValue.state.fireChanges(notificationParamForListeners);
@@ -339,7 +337,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
         return this.state;
     }
 
-    public loadRecordsAsync(startIndex: number, size: number): Promise<any> {
+    public loadRecordsAsync(startIndex: number, size: number): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadRecordsAsync requested with (' + startIndex + ', ' + size + ')')));
         if (isNaN(startIndex) || isNaN(size)) throw new Error('loadRecordsAsync: start or size are not numbers (' + startIndex + ',' + size + ')');
 
@@ -352,7 +350,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
         return this.state.deferred[requestID].defer.promise;
     }
 
-    public loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any> {
+    public loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadLessRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadLessRecordsAsync: lessrecords is not a number (' + negativeOrPositiveCount + ')');
 
@@ -365,7 +363,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
         return this.state.deferred[requestID].defer.promise;
     }
 
-    public loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any> {
+    public loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadExtraRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadExtraRecordsAsync: extrarecords is not a number (' + negativeOrPositiveCount + ')');
 
@@ -383,7 +381,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
         if (this.state.requests.length > 0) this.state.notifyChangeListener();
     }
 
-    public sort(columns: Array<{ name: string; direction: ('asc' | 'desc') }>): Promise<any> {
+    public sort(columns: Array<{ name: string; direction: ('asc' | 'desc') }>): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * sort requested with ' + JSON.stringify(columns))));
         const req = { sort: columns };
         const requestID = this.sabloDeferHelper.getNewDeferId(this.state);
@@ -404,7 +402,7 @@ export class Foundset implements IChangeAwareValue, IFoundset {
         this.state.notifyChangeListener();
     }
 
-    public requestSelectionUpdate(tmpSelectedRowIdxs: Array<number>): Promise<any> {
+    public requestSelectionUpdate(tmpSelectedRowIdxs: Array<number>): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * requestSelectionUpdate called with ' + JSON.stringify(tmpSelectedRowIdxs))));
         if (this.state.selectionUpdateDefer) {
             this.state.selectionUpdateDefer.reject('Selection change defer cancelled because we are already sending another selection to server.');

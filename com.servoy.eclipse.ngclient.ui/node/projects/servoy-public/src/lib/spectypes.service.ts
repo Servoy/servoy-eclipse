@@ -142,8 +142,26 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
-export interface PromiseWithContext extends Promise<any> {
-    context?: any;
+/**
+ * Besides working like a normal Promise that you can use to get notified when some action is done (success/error/finally), chain etc., this promise also
+ * contains field "requestInfo" which can be set by the user and could later be reported in some listener events back to the user (in case this same action
+ * is going to trigger those listeners as well).
+ *
+ * @since 2021.09
+ */
+export interface RequestInfoPromise<T> extends Promise<T> {
+
+    /**
+     * You can assign any value to it. The value that you assign - if any - will be given back in the event object of any listener that will be triggered
+     * as a result of the promise's action. So in case the same action, when done, will trigger both the "then" of the Promise and a separate listener,
+     * that separate listener will contain this "requestInfo" value.
+     *
+     * This is useful for some components that want to know if some change (reported by the listener) happened due to an action that the component
+     * requested or due to changes in the outside world. (eg: IFoundset.loadRecordsAsync(...) returns RequestInfoPromise and
+     * FoundsetChangeEvent.requestInfos array can return that RequestInfoPromise.requestInfo on the event that was triggered by that loadRecordsAsync)
+     */
+    requestInfo?: any;
+
 }
 
 export interface IFoundsetFieldsOnly {
@@ -221,8 +239,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *
      * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadRecordsAsync(startIndex: number, size: number): PromiseWithContext;
+    loadRecordsAsync(startIndex: number, size: number): RequestInfoPromise<any>;
 
     /**
      * Request more records for your viewPort; if the argument is positive more records will be
@@ -240,8 +260,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): PromiseWithContext;
+    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any>;
 
     /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
@@ -258,8 +280,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   -side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): PromiseWithContext;
+    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any>;
 
     /**
      * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
@@ -285,8 +309,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * @return (added in Servoy 8.2.1) a promise that will get resolved when the new sort
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): PromiseWithContext;
+    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): RequestInfoPromise<any>;
 
     /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
@@ -298,8 +324,13 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * first call will be rejected and the caller will receive the string 'canceled' as the value
      * for the parameter serverRows.
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
+     *
+     * @return a promise that will get resolved when the requested selection update arrived back browser-
+     *                   side. As with any promise you can register success, error callbacks, finally, ...
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    requestSelectionUpdate(selectedRowIdxs: number[]): PromiseWithContext;
+    requestSelectionUpdate(selectedRowIdxs: number[]): RequestInfoPromise<any>;
 
     /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
@@ -390,7 +421,19 @@ export interface ViewportChangeEvent {
 }
 
 export interface FoundsetChangeEvent extends ViewportChangeEvent {
-    context?: any[];
+
+    /**
+     * If this change event is caused by one or more calls (by the component) on the IFoundset obj (like loadRecordsAsync requestSelectionUpdate and so on),
+     * and the caller then assigned a value to the returned RequestInfoPromise's "requestInfo" field, then that value will be present in this array.
+     *
+     * This is useful for some components that want to know if some change (reported in this FoundsetChangeEvent) happened due to an action that the component
+     * requested or due to changes in the outside world. (eg: IFoundset.loadRecordsAsync(...) returns RequestInfoPromise and
+     * FoundsetChangeEvent.requestInfos array can contain that RequestInfoPromise.requestInfo on the event that was triggered by that loadRecordsAsync)
+     *
+     * @since 2021.09
+     */
+    requestInfos?: any[];
+
     /**
      * If the previous value was non-null, had listeners and a full value update was
      * received from server, this key is set on the change event; if newValue is non-null, it will keep the same reference as before;
