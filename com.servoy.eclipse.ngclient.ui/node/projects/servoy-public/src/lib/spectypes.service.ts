@@ -142,6 +142,10 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
+export interface PromiseWithContext extends Promise<any> {
+    context?: any;
+}
+
 export interface IFoundsetFieldsOnly {
 
     /**
@@ -218,7 +222,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      */
-    loadRecordsAsync(startIndex: number, size: number): Promise<any>;
+    loadRecordsAsync(startIndex: number, size: number): PromiseWithContext;
 
     /**
      * Request more records for your viewPort; if the argument is positive more records will be
@@ -237,7 +241,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
+    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): PromiseWithContext;
 
     /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
@@ -255,7 +259,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
-    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
+    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): PromiseWithContext;
 
     /**
      * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
@@ -282,7 +286,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
      */
-    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): Promise<any>;
+    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): PromiseWithContext;
 
     /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
@@ -295,7 +299,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * for the parameter serverRows.
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
      */
-    requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
+    requestSelectionUpdate(selectedRowIdxs: number[]): PromiseWithContext;
 
     /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
@@ -386,6 +390,7 @@ export interface ViewportChangeEvent {
 }
 
 export interface FoundsetChangeEvent extends ViewportChangeEvent {
+    context?: any[];
     /**
      * If the previous value was non-null, had listeners and a full value update was
      * received from server, this key is set on the change event; if newValue is non-null, it will keep the same reference as before;
