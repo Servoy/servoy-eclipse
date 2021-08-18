@@ -62,6 +62,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
@@ -244,7 +245,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							imports.append("';\n");
 							// add it to the service declarations in the constructor
 							services.append("private ");
-							services.append(service.getName());
+							services.append(ClientService.convertToJSName(service.getName()));
 							services.append(": ");
 							services.append(serviceName);
 							services.append(",\n");
