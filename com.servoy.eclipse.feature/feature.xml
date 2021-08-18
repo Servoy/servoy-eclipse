@@ -599,7 +599,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.0.2"/>
+         version="16.0.1"/>
 
    <plugin
          id="jakarta.servlet-api"

@@ -12,10 +12,10 @@
 	
 	<artifactId>com.servoy.eclipse.jre.linux.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>16.0.1</version>
+	<version>16.0.2</version>
 	
 	<properties>
-		<jre.version>jdk-16.0.1+9-jre</jre.version>
+		<jre.version>jdk-16.0.2+7-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -43,7 +43,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9_openj9-0.26.0/OpenJDK16U-jre_x64_linux_openj9_16.0.1_9_openj9-0.26.0.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/semeru16-binaries/releases/download/jdk-16.0.2%2B7_openj9-0.27.0/ibm-semeru-open-jre_x64_linux_16.0.2_7_openj9-0.27.0.tar.gz</url>
 							<outputFileName>${jre.version}.tar.gz</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 						</configuration>
