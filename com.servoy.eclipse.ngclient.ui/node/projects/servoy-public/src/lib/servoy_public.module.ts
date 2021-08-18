@@ -49,6 +49,6 @@ import { SpecTypesService } from './spectypes.service';
               SabloTabseq,
               TrustAsHtmlPipe
              ],
-    providers: [ TooltipService, FormattingService, ComponentContributor, SpecTypesService, WindowRefService ]
+    providers: [ TooltipService, FormattingService, ComponentContributor]
 })
 export class ServoyPublicModule { }
