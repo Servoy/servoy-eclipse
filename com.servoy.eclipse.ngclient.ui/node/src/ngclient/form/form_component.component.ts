@@ -333,7 +333,7 @@ class FormComponentServoyApi extends ServoyApi {
                 formservice: FormService,
                 servoyService: ServoyService,
                 private fc: FormComponent) {
-        super(item,formname,absolute,formservice,servoyService);
+        super(item,formname,absolute,formservice,servoyService,false);
     }
 
     registerComponent(comp: ServoyBaseComponent<any> ) {

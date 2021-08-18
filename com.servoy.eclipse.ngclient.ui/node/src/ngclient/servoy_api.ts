@@ -8,7 +8,8 @@ export class ServoyApi extends Api {
                  private formname: string,
                  private absolute: boolean,
                  private formservice: FormService,
-                 private servoyService: ServoyService) {
+                 private servoyService: ServoyService,
+                 private isDesigner: boolean) {
                     super();
     }
 
@@ -40,7 +41,7 @@ export class ServoyApi extends Api {
     public getFormComponentElements( _propertyName: string, _formComponentValue: any ) { }
 
     public isInDesigner() {
-        return false;
+        return this.isDesigner;
     }
 
     public trustAsHtml() {

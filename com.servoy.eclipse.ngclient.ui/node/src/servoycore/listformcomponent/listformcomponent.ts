@@ -565,7 +565,7 @@ class ListFormComponentServoyApi extends ServoyApi {
         formservice: FormService,
         servoyService: ServoyService,
         private fc: ListFormComponent) {
-        super(cell.state, formname, absolute, formservice, servoyService);
+        super(cell.state, formname, absolute, formservice, servoyService,false);
         this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }
 

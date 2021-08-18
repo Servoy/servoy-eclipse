@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 
@@ -8,7 +8,7 @@ import { EditorSessionService, ISelectionChangedListener } from '../services/edi
     styleUrls: ['./mouseselection.component.css']
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
-export class MouseSelectionComponent implements OnInit, ISelectionChangedListener {
+export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener {
 
     @ViewChild('lasso', { static: false }) lassoRef: ElementRef;
 
@@ -27,22 +27,27 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
 
     ngOnInit(): void {
         this.editorSession.requestSelection();
+        let content = this.doc.querySelector('.content-area') as HTMLElement;
+        content.addEventListener('mousedown', (event) => this.onMouseDown(event));
+        content.addEventListener('mouseup', (event) => this.onMouseUp(event));
+        content.addEventListener('mousemove', (event) => this.onMouseMove(event));
+    }
+
+    ngAfterViewInit(): void {
+        this.doc.querySelector('iframe').addEventListener('load', () => {
+            this.contentInit = true;
+            this.calculateAdjustToMainRelativeLocation();
+            this.createNodes(this.editorSession.getSelection())
+        });
     }
 
     selectionChanged(selection: Array<string>): void {
         if (this.contentInit) {
             this.createNodes(selection);
         }
-        else {
-            this.doc.querySelector('iframe').addEventListener('load', () => {
-                this.calculateAdjustToMainRelativeLocation();
-                this.createNodes(selection)
-            });
-        }
     }
 
     private createNodes(selection: Array<string>) {
-        this.contentInit = true;
         let newNodes = new Array<SelectionNode>();
         if (selection.length > 0) {
             let iframe = this.doc.querySelector('iframe');
@@ -54,6 +59,7 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
             Array.from(elements).forEach(node => {
                 if (selection.indexOf(node.getAttribute('svy-id')) >= 0) {
                     let position = node.getBoundingClientRect();
+                    this.adjustElementRect(node, position);
                     let style = {
                         height: position.height + 'px',
                         width: position.width + 'px',
@@ -75,9 +81,6 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
         if (!this.topAdjust) {
             let content = this.doc.querySelector('.content-area') as HTMLElement;
             this.contentRect = content.getBoundingClientRect()
-            content.addEventListener('mousedown', (event) => this.onMouseDown(event));
-            content.addEventListener('mouseup', (event) => this.onMouseUp(event));
-            content.addEventListener('mousemove', (event) => this.onMouseMove(event));
             let computedStyle = window.getComputedStyle(content, null)
             this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace("px", ""));
             this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace("px", ""))
@@ -91,10 +94,12 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
         let frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
         point.y = point.y - frameRect.top;
+        this.calculateAdjustToMainRelativeLocation();
 
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         let found = Array.from(elements).find((node) => {
             let position = node.getBoundingClientRect();
+            this.adjustElementRect(node, position);
             if (position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 let id = node.getAttribute('svy-id');
                 let selection = this.editorSession.getSelection();
@@ -151,6 +156,7 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
             let newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
                 let position = node.getBoundingClientRect();
+                this.adjustElementRect(node, position);
                 if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
@@ -203,6 +209,22 @@ export class MouseSelectionComponent implements OnInit, ISelectionChangedListene
             return true;
         }
         return false;
+    }
+
+    private adjustElementRect(node: Element, position: DOMRect) {
+        if (position.width == 0 || position.height == 0) {
+            let correctWidth = position.width;
+            let correctHeight = position.height;
+            let currentNode = node.parentElement;
+            while (correctWidth == 0 || correctHeight == 0) {
+                let parentPosition = currentNode.getBoundingClientRect();
+                correctWidth = parentPosition.width;
+                correctHeight = parentPosition.height;
+                currentNode = currentNode.parentElement;
+            }
+            if (position.width == 0) position.width = correctWidth;
+            if (position.height == 0) position.height = correctHeight;
+        }
     }
 }
 
