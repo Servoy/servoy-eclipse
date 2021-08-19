@@ -13,7 +13,8 @@ export class MnemonicletterFilterPipe implements PipeTransform {
 export class NotNullOrEmptyPipe implements PipeTransform {
   transform(value: any[], _args?: any): any {
       if(value)
-        return value.filter(a => a && (a.realValue ||a.displayValue));
+        return value.filter(a => a && !(a.realValue === null || a.realValue === '') 
+                || !(a.displayValue === null || a.displayValue === ''));
       return value;
   }
 }
