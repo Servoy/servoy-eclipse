@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FileUploadWindowComponent } from './file-upload-window.component';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { I18NProvider } from '../i18n_provider.service';
 
@@ -16,7 +15,7 @@ describe('FileUploadWindowComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ FileUploadWindowComponent ],
-      providers: [ { provide: NgbActiveModal }, { provide: HttpClient }, {provide:HttpHandler}, {provide: I18NProvider, useValue: i18nProvider }]
+      providers: [ { provide: HttpClient }, {provide:HttpHandler}, {provide: I18NProvider, useValue: i18nProvider }]
 
     })
     .compileComponents();

@@ -1,3 +1,35 @@
+.svy-modal-dialog{
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+
+.svy-modal-content{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.svy-modal-header{
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: calc(.3rem - 1px);
+    border-top-right-radius: calc(.3rem - 1px);
+}
+
+.svy-modal-body{
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+}
+
 .svy-login-title {
     margin-top: 0;
     margin-bottom: 0;

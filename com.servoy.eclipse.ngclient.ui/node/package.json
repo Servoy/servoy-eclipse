@@ -36,7 +36,6 @@
     "@angular/platform-browser-dynamic": "12.1.4",
     "@angular/router": "12.1.4",
     "@fortawesome/fontawesome-free": "5.15.3",
-    "@ng-bootstrap/ng-bootstrap": "10.0.0",
     "core-js": "3.16.0",
     "custom-event-polyfill": "1.0.7",
     "lodash-es": "4.17.21",
