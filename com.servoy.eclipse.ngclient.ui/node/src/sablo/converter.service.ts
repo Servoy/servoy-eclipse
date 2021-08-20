@@ -100,7 +100,7 @@ export class ConverterService {
     if (value instanceof Date) {
       value = this.convertFromClientToServer(value, 'Date', null);
     } else if (value && typeof value[ConverterService.DEFAULT_CONVERSION_TO_SERVER_FUNC] === 'function') {
-      return value[ConverterService.DEFAULT_CONVERSION_TO_SERVER_FUNC]();
+      return value[ConverterService.DEFAULT_CONVERSION_TO_SERVER_FUNC](value);
     }
     return value;
   }

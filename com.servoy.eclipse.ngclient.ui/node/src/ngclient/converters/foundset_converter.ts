@@ -198,9 +198,9 @@ export class FoundsetConverter implements IConverter {
                     this.sabloDeferHelper.initInternalStateForDeferring(internalState, 'svy foundset * ');
                     internalState.rowPrototype = {};
                     // conversion of rows to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
-                    internalState.rowPrototype[SabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC] = () => {
-                        if (internalState.rowPrototype._svyRowId) {
-                            const r: FoundsetRow = { _svyRowId: internalState.rowPrototype._svyRowId, foundsetId: newValue.foundsetId };
+                    internalState.rowPrototype[ConverterService.DEFAULT_CONVERSION_TO_SERVER_FUNC] = (value: any) => {
+                        if (value._svyRowId) {
+                            const r: FoundsetRow = { _svyRowId: value._svyRowId, foundsetId: newValue.foundsetId };
                             return r;
                         }
                         return null;

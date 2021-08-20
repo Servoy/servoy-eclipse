@@ -608,10 +608,6 @@ export class SabloUtils {
     // or whenever during a (blocking) API call to client we want some messages sent to the server to still be processed.
     static readonly EVENT_LEVEL_SYNC_API_CALL = 500;
 
-    // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
-    // usage as handler arg. for example where we don't know the arg. types on client)
-    static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = '_dctsf';
-
     /**
      * Makes a clone of "obj" (new object + iterates on properties and copies them over (so shallow clone)) that will have it's [[Prototype]] set to "newPrototype".
      * It is not aware of property descriptors. It uses plain property assignment when cloning.
