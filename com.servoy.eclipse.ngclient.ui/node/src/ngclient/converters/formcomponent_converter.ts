@@ -15,37 +15,37 @@ export class FormcomponentConverter implements IConverter {
             serverSentData.formHeight,
             serverSentData.formWidth,
             serverSentData.startName,
-            serverSentData[ConverterService.TYPES_KEY],
             serverSentData.useCssPosition,
             serverSentData.uuid);
         }
         if ( serverSentData[ConverterService.TYPES_KEY] ) {
             conversionInfo = serverSentData[ConverterService.TYPES_KEY];
+            delete serverSentData[ConverterService.TYPES_KEY];
         }
-        if ( conversionInfo ) {
-            for ( const key of Object.keys(conversionInfo) ) {
-                let elem = serverSentData[key];
-                state.conversionInfo[key] = conversionInfo[key];
-                state[key] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo[key], currentClientData ? currentClientData[key] : undefined, propertyContext );
 
-                if (instanceOfChangeAwareValue(elem)) {
-                    // child is able to handle it's own change mechanism
-                    elem.getStateHolder().setChangeListener(() => {
-                      state.notifyChangeListener();
-                    });
-                }
-                if ( key === 'childElements' && elem ) {
-                    for ( const i of Object.keys(elem)) {
-                        const comp = elem[i];
-                        if (instanceOfChangeAwareValue(comp)) {
-                            comp.getStateHolder().setChangeListener(() => {
-                              state.notifyChangeListener();
-                            });
-                        }
+        for ( const key of Object.keys(serverSentData) ) {
+            let elem = serverSentData[key];
+            if (conversionInfo?.[key]) state.conversionInfo[key] = conversionInfo[key];
+            state[key] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo?.[key], currentClientData ? currentClientData[key] : undefined, propertyContext );
+
+            if (instanceOfChangeAwareValue(elem)) {
+                // child is able to handle it's own change mechanism
+                elem.getStateHolder().setChangeListener(() => {
+                  state.notifyChangeListener();
+                });
+            }
+            if ( key === 'childElements' && elem ) {
+                for ( const i of Object.keys(elem)) {
+                    const comp = elem[i];
+                    if (instanceOfChangeAwareValue(comp)) {
+                        comp.getStateHolder().setChangeListener(() => {
+                          state.notifyChangeListener();
+                        });
                     }
                 }
             }
         }
+
         return state;
     }
 
@@ -68,7 +68,6 @@ export class FormComponentState extends ChangeAwareState implements IChangeAware
         public formHeight: number,
         public formWidth: number,
         public startName: string,
-        public svyTypes: any[],
         public useCssPosition: boolean,
         public uuid: string) {
         super();
