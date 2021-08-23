@@ -233,7 +233,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String serviceName = service.getNG2Config().getServiceName();
 							imports.append(serviceName);
 							// add it to the modules
-							if (moduleName != null)
+							if (moduleName != null && modules.indexOf(moduleName + ',') == -1)
 							{
 								imports.append(',');
 								imports.append(moduleName);
