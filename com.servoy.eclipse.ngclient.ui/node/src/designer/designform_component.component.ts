@@ -36,7 +36,7 @@ import { DOCUMENT } from '@angular/common';
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
-          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" [ngClass]="getNGClass(state)" class="svy-layoutcontainer">
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
@@ -90,12 +90,14 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     formCache: FormCache;
 
     absolutFormPosition = {};
+    showWireframe = false;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
     private _containers: { added: any; removed: any; };
     private _cssstyles: { [x: string]: any; };
+    private designMode : boolean;
 
     draggedElementItem: ComponentCache;
 
@@ -107,13 +109,20 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         private windowRefService: WindowRefService) {
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
-            if (event.data.id == 'createElement') {
+            if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
                 this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], { width: elWidth + 'px', height: elHeight + 'px', top: '-200px', left: '-200px' });
+                
+                this.designMode = this.showWireframe;
+                this.showWireframe = true;
             }
-            if (event.data.id == 'destroyElement') {
+            if (event.data.id === 'destroyElement') {
                 this.draggedElementItem = null;
+                this.showWireframe = this.designMode;
+            }
+            if (event.data.id === 'showWireframe') {
+                this.showWireframe = event.data.value; 
             }
             this.detectChanges();
         })
@@ -301,6 +310,12 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         return api;
     }
 
+  getNGClass(item: StructureCache) {
+      var ngclass = {};
+      ngclass[item.attributes.designclass] =this.showWireframe;
+      return ngclass;
+    }
+
     public callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
         return null;
     }
@@ -350,6 +365,7 @@ export class AddAttributeDirective implements OnChanges {
         }
         if (changes.svyContainerAttributes) {
             for (const key of Object.keys(this.svyContainerAttributes)) {
+                if (key === 'designclass') continue;
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
                 if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }

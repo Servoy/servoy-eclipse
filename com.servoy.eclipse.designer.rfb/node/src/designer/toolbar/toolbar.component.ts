@@ -182,6 +182,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         wireframePromise.then((result) => {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
+            this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -323,9 +324,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             true,
             () => {
                 const promise = this.editorSession.toggleShowWireframe();
-                promise.then(function(result) {
-                    this.toggleDesignMode.state = result;
+                promise.then((result) => {
+                    this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
+                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
                     // this.editorSession.setContentSizes();
