@@ -250,7 +250,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 	}
 
-	private void checkAndExportSolutions(T configuration)
+	protected void checkAndExportSolutions(T configuration)
 	{
 		List<IProject> importedProjects = new ArrayList<IProject>();
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
@@ -563,8 +563,9 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				{
 					for (IExtension extension : extensions)
 					{
-						IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension(
-							"class");
+						IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0]
+							.createExecutableExtension(
+								"class");
 						ss.setBaseClassloader(provider.getClassLoader());
 						break; //we support only one
 					}

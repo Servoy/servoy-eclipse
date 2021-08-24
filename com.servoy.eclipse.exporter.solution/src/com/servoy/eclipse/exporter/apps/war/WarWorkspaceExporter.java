@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.apps.war;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +43,8 @@ import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.ngclient.ui.Activator;
+import com.servoy.eclipse.ngclient.ui.StringOutputStream;
+import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -588,6 +591,30 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	}
 
 	@Override
+	protected void checkAndExportSolutions(WarArgumentChest configuration)
+	{
+		if (configuration.isNG2Export())
+		{
+			WebPackagesListener.setIgnore(true);
+			Activator.getInstance().setConsole(() -> new StringOutputStream()
+			{
+				@Override
+				public void write(CharSequence chars) throws IOException
+				{
+					outputExtra(chars.toString().trim());
+				}
+
+				@Override
+				public void close() throws IOException
+				{
+				}
+			});
+			Activator.getInstance().copyNodeFolder();
+		}
+		super.checkAndExportSolutions(configuration);
+	}
+
+	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
 		boolean isNGExport = false;
@@ -603,10 +630,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
 			checkAndAutoUpgradeLicenses(exportModel);
 
-			if (exportModel.isExportNG2())
-			{
-				Activator.getInstance();
-			}
 			WarExporter warExporter = new WarExporter(exportModel);
 
 			warExporter.doExport(new IProgressMonitor()

@@ -516,7 +516,7 @@ public abstract class BaseNGPackageManager
 	 * @param packageName the name of the package to be checked
 	 * @return true if the package should be used; false otherwise.
 	 */
-	protected abstract boolean isDefaultPackageEnabled(String packageName);
+	public abstract boolean isDefaultPackageEnabled(String packageName);
 
 	protected void readParentOfPackagesDir(Map<String, List<IPackageReader>> readers, IProject iProject, String folderName, IProgressMonitor m)
 	{

@@ -45,10 +45,9 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.NG2Config;
@@ -94,18 +93,21 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
+		private final boolean production;
+
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name)
+		private PackageCheckerJob(String name, boolean production)
 		{
 			super(name);
+			this.production = production;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
-			IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 			try
 			{
 				scheduled.incrementAndGet();
@@ -415,7 +417,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					ServoyLog.logError(e);
 				}
-				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
+				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || production)
 				{
 					// first exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
@@ -452,8 +454,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", production ? "build" : "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -553,7 +554,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param console
 		 * @param pck
 		 */
-		private void writeConsole(IOConsoleOutputStream console, String message)
+		private void writeConsole(StringOutputStream console, String message)
 		{
 			try
 			{
@@ -571,7 +572,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param packageReader
 		 * @param entryPoint
 		 */
-		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, IOConsoleOutputStream console)
+		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
@@ -800,7 +801,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static boolean isDefaultPackageEnabled(String packageName)
 	{
 		String ng1Name = NG1MAPPING.get(packageName);
-		return ng1Name != null ? PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + ng1Name) : true;
+		return ng1Name != null ? ServoyModelFinder.getServoyModel().getNGPackageManager().isDefaultPackageEnabled(ng1Name) : true;
 	}
 
 	/**
@@ -824,13 +825,44 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// only schedule 1 and a bit later to relax first the system
 		if (scheduled.compareAndSet(0, 1))
 		{
-			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services");
+			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services", false);
 			job.schedule(5000);
 		}
 		else if (scheduled.get() == 2)
 		{
 			// there is only 1 job and that one is running (not scheduled) then increase by one to make it run again
 			scheduled.incrementAndGet();
+		}
+	}
+
+	/**
+	 *  exports the state location dir to the location given that should be a WAR layout
+	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
+	 * @throws IOException
+	 */
+	public static void exportNG2ToWar(File location, IProgressMonitor monitor)
+	{
+		Activator activator = Activator.getInstance();
+		activator.waitForNodeExtraction();
+
+		try
+		{
+			// TODO get exactly the exported components and services and adjust the sources
+			// check what happens if there was a debug watch command on the sources..
+
+			// create the production build
+			new PackageCheckerJob("production_build", true).run(new NullProgressMonitor());
+			// copy the production build
+			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
+			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
+
+			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+
+			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
+		}
+		catch (Exception e)
+		{
+			activator.getLog().error("exceptions when exporting NG2 to WAR", e);
 		}
 	}
 
