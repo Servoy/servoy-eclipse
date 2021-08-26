@@ -618,11 +618,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 						IContainer[] containers = root.findContainersForLocationURI(packageReader.getPackageURL().toURI());
-						if (containers != null && containers.length == 1)
+						if (containers != null && containers.length > 0)
 						{
 							try
 							{
-								IProject project = containers[0].getProject();
+								IProject project = null;
+								if (containers.length == 1)
+								{
+									project = containers[0].getProject();
+								}
+								else
+								{
+									for (IContainer container : containers)
+									{
+										if (container instanceof IProject)
+										{
+											project = (IProject)container;
+											break;
+										}
+									}
+									if (project == null) project = containers[0].getProject();
+								}
 								IFile sourcePath = project.getFile(".sourcepath");
 								if (sourcePath.exists())
 								{

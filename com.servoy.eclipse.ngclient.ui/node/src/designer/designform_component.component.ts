@@ -3,7 +3,7 @@ import {
     TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject
 } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, PartCache, FormComponentProperties } from '../ngclient/types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
 
 import { ServoyService } from '../ngclient/servoy.service';
 
@@ -25,6 +25,9 @@ import { DOCUMENT } from '@angular/common';
           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
           <div *ngFor="let item of formCache.componentCache | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
+          </div>
+           <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
           <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
@@ -344,54 +347,7 @@ class FormComponentServoyApi extends ServoyApi {
     }
 }
 
-@Directive({ selector: '[svyContainerStyle]' })
-export class AddAttributeDirective implements OnChanges {
-    @Input() svyContainerStyle: StructureCache | ComponentCache | FormComponentCache | PartCache | FormComponentProperties;
-    @Input() svyContainerLayout;
-    @Input() svyContainerClasses;
-    @Input() svyContainerAttributes;
 
-    constructor(private el: ElementRef, private renderer: Renderer2, @Inject(DesignFormComponent) private parent: DesignFormComponent) { }
-
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.svyContainerClasses) {
-            this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
-        }
-
-        if (changes.svyContainerLayout && this.svyContainerLayout) {
-            for (const key of Object.keys(this.svyContainerLayout)) {
-                this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerLayout[key]);
-            }
-        }
-        if (changes.svyContainerAttributes) {
-            for (const key of Object.keys(this.svyContainerAttributes)) {
-                if (key === 'designclass') continue;
-                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
-                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
-            }
-        }
-    }
-
-    private restoreCss() {
-        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
-            const name = this.svyContainerStyle.attributes.name.split('.')[1];
-            if (this.parent.cssstyles && this.parent.cssstyles[name]) {
-                const stylesMap = this.parent.cssstyles[name];
-                for (let k in stylesMap) {
-                    this.renderer.setStyle(this.el.nativeElement, k, stylesMap[k]);
-                }
-            }
-            if (this.parent.containers) {
-                if (this.parent.containers.added && this.parent.containers.added[name]) {
-                    this.parent.containers.added[name].forEach((cls: string) => this.renderer.addClass(this.el.nativeElement, cls));
-                }
-                if (this.parent.containers.removed && this.parent.containers.removed[name]) {
-                    this.parent.containers.removed[name].forEach((cls: string) => this.renderer.removeClass(this.el.nativeElement, cls));
-                }
-            }
-        }
-    }
-}
 
 
 
