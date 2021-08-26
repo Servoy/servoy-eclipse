@@ -96,6 +96,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.Activator;
+import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -282,7 +283,27 @@ public class WarExporter
 
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
 	{
-		Activator.getDefault().exportNG2ToWar(tmpWarDir, monitor);
+		Activator.getDefault().exportNG2ToWar(new ING2WarExportModel()
+		{
+
+			@Override
+			public IProgressMonitor getProgressMonitor()
+			{
+				return monitor;
+			}
+
+			@Override
+			public IWarExportModel getModel()
+			{
+				return exportModel;
+			}
+
+			@Override
+			public File getExportLocation()
+			{
+				return tmpWarDir;
+			}
+		});
 	}
 
 	/**

@@ -380,10 +380,13 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 				SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
 		}
 
-		// these are always required
+		// these core components are always required
 		usedComponents.add("servoycore-defaultLoadingIndicator");
 		usedComponents.add("servoycore-errorbean");
 		usedComponents.add("servoycore-portal");
+		usedComponents.add("servoycore-formcomponent");
+		usedComponents.add("servoycore-formcontainer");
+		usedComponents.add("servoycore-listformcomponent");
 		usedServices.addAll(servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices").getSpecifications().keySet());
 	}
 

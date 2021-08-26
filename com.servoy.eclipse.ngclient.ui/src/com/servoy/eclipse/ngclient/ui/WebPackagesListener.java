@@ -45,7 +45,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
@@ -63,9 +62,11 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -93,15 +94,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
-		private final boolean production;
+		private final IWarExportModel warExportModel;
 
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name, boolean production)
+		private PackageCheckerJob(String name, IWarExportModel warExportModel)
 		{
 			super(name);
-			this.production = production;
+			this.warExportModel = warExportModel;
 		}
 
 		@Override
@@ -124,6 +125,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				WebObjectSpecification[] allServices = serviceProviderState.getAllWebComponentSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(webObjectSpecification.getPackageName()))
+					{
+						continue;
+					}
 					List<String> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
 					if (libs != null)
 					{
@@ -145,6 +150,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					{
+						continue;
+					}
+
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
 					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
@@ -161,6 +171,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					{
+						continue;
+					}
+
 					List<String> libs = entry.getNg2CssLibrary();
 					if (libs != null)
 					{
@@ -229,6 +244,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					ng2Services.keySet().forEach(service -> {
 						if (service.getNG2Config().getServiceName() != null)
 						{
+							if (this.warExportModel != null && !this.warExportModel.getExportedServices().contains(service.getName()))
+							{
+								return;
+							}
+
 							String moduleName = service.getNG2Config().getModuleName();
 							// import the service
 							imports.append("import { ");
@@ -284,7 +304,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
-				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate();
+				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
 				try
 				{
 					// adjust component templates
@@ -417,7 +437,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					ServoyLog.logError(e);
 				}
-				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || production)
+				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || warExportModel != null)
 				{
 					// first exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
@@ -454,7 +474,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", production ? "build" : "build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", warExportModel != null ? "build" : "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -841,7 +861,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// only schedule 1 and a bit later to relax first the system
 		if (scheduled.compareAndSet(0, 1))
 		{
-			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services", false);
+			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services", null);
 			job.schedule(5000);
 		}
 		else if (scheduled.get() == 2)
@@ -856,23 +876,20 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
 	 * @throws IOException
 	 */
-	public static void exportNG2ToWar(File location, IProgressMonitor monitor)
+	public static void exportNG2ToWar(ING2WarExportModel model)
 	{
 		Activator activator = Activator.getInstance();
 		activator.waitForNodeExtraction();
 
 		try
 		{
-			// TODO get exactly the exported components and services and adjust the sources
-			// check what happens if there was a debug watch command on the sources..
-
 			// create the production build
-			new PackageCheckerJob("production_build", true).run(new NullProgressMonitor());
+			new PackageCheckerJob("production_build", model.getModel()).run(model.getProgressMonitor());
 			// copy the production build
 			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
-			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
+			FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
 
-			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
+			FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
 
 			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
 		}
