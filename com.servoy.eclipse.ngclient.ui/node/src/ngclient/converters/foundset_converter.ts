@@ -43,6 +43,8 @@ export class FoundsetConverter implements IConverter {
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
         const hasListeners = (currentClientValue && currentClientValue.state.changeListeners.length > 0);
         const notificationParamForListeners: FoundsetChangeEvent = hasListeners ? {} : undefined;
+        let requestInfos: any[]; // these will end up in notificationParamForListeners but only if there is another change that
+        // need to be announced; otherwise, they should not trigger the listener just by themselves - the requestInfos
 
         // see if this is an update or whole value and handle it
         if (!serverJSONValue) {
@@ -124,7 +126,6 @@ export class FoundsetConverter implements IConverter {
                 const handledRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
                 const internalState = currentClientValue.state;
 
-                let requestInfos: any[];
                 handledRequests.forEach((handledReq) => {
                     const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
                     if (defer) {
@@ -141,7 +142,6 @@ export class FoundsetConverter implements IConverter {
                         }
                     }
                 });
-                if (hasListeners && requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 
                 updates = true;
             }
@@ -240,6 +240,8 @@ export class FoundsetConverter implements IConverter {
                     JSON.stringify(newValue.selectedRowIndexes) : newValue) + ')')));
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
+
+                if (requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
                 currentClientValue.state.fireChanges(notificationParamForListeners);
