@@ -254,7 +254,14 @@ public class WarExporter
 			if (exportModel.isExportNG2())
 			{
 				monitor.subTask("Copy NGClient2 resources");
-				copyNGClient2(tmpWarDir, monitor);
+				try
+				{
+					copyNGClient2(tmpWarDir, monitor);
+				}
+				catch (RuntimeException e)
+				{
+					throw new ExportException("could not create/copy NGClient2 resources", e);
+				}
 			}
 			monitor.worked(1);
 		}

@@ -883,19 +883,25 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 		try
 		{
+			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
+			FileUtils.deleteQuietly(distFolder);
 			// create the production build
 			new PackageCheckerJob("production_build", model.getModel()).run(model.getProgressMonitor());
 			// copy the production build
-			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
-			FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
+			if (distFolder.exists())
+			{
+				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
 
-			FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
-
-			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
+				FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
+			}
+			else
+			{
+				throw new RuntimeException("NGClient2 production resources not generated, see log");
+			}
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			activator.getLog().error("exceptions when exporting NG2 to WAR", e);
+			throw new RuntimeException("Error generating NGClient2 production resources", e);
 		}
 	}
 
