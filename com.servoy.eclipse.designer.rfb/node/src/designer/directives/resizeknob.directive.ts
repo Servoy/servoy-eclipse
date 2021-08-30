@@ -63,12 +63,15 @@ export class ResizeKnobDirective implements OnInit {
                     }
 
                     if (element) {
-                        if(!this.initialElementInfo) this.initialElementInfo = new Map<string, ElementInfo>();
+                        if(!this.initialElementInfo) {
+                            this.initialElementInfo = new Map<string, ElementInfo>();
+                            this.currentElementInfo = new Map<string, ElementInfo>();
+                        }
                         this.initialElementInfo.set(nodeid, new ElementInfo(element));
+                        this.currentElementInfo.set(nodeid, new ElementInfo(element));
                     }
                 }
             }
-            this.currentElementInfo = new Map(this.initialElementInfo);
 
             this.contentArea.addEventListener("mousemove", this.contentAreaMouseMove = (event: MouseEvent) => {
                 this.resizeSelection(event);
@@ -85,6 +88,16 @@ export class ResizeKnobDirective implements OnInit {
             this.contentArea.addEventListener("keydown", this.contentAreaKeyDown = (event: KeyboardEvent) => {
                 if (event.keyCode == 27)
                 {
+                    for(const elementInfo of this.initialElementInfo.values()) {
+                        elementInfo.element.style.top = elementInfo.y + "px";
+                        elementInfo.element.style.left =  elementInfo.x + "px";
+                        this.resizeInfo.node.style.top = elementInfo.y + this.topContentAreaAdjust + "px";
+                        this.resizeInfo.node.style.left = elementInfo.x + this.leftContentAreaAdjust + "px";
+        
+        
+                        this.resizeInfo.node.style.width = elementInfo.element.style.width = elementInfo.width + "px";
+                        this.resizeInfo.node.style.height = elementInfo.element.style.height = elementInfo.height + "px";
+                    }                    
                     this.sendChanges(this.initialElementInfo);
                     this.setCursorStyle("");
                     this.cleanResizeState();
