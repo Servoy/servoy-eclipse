@@ -4,7 +4,7 @@ import { Deferred, LoggerService, LoggerFactory, RequestInfoPromise, IFoundset, 
     IFoundsetFieldsOnly, ColumnRef, ChangeAwareState, IChangeAwareValue } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { SabloUtils } from '../../sablo/websocket.service';
+import { SabloUtils, WebsocketService } from '../../sablo/websocket.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
 
 @Injectable()
@@ -240,6 +240,11 @@ export class FoundsetConverter implements IConverter {
                     JSON.stringify(newValue.selectedRowIndexes) : newValue) + ')')));
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
+
+                if (this.sabloService.getCurrentRequestInfo()) {
+                    if (!requestInfos) requestInfos = [];
+                    requestInfos.push(this.sabloService.getCurrentRequestInfo());
+                }
 
                 if (requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 

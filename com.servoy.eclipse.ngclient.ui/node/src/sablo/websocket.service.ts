@@ -5,7 +5,7 @@ import { Subscription, interval, Subject } from 'rxjs';
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
 import { WindowRefService } from '@servoy/public';
-import { Deferred } from '@servoy/public';
+import { Deferred, RequestInfoPromise } from '@servoy/public';
 import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
 import { LoggerService, LogLevel, LoggerFactory } from '@servoy/public';
@@ -198,6 +198,8 @@ export class WebsocketSession {
 
     private currentEventLevelForServer;
 
+    private currentRequestInfo = undefined;
+
     private nextMessageId = 1;
     private log: LoggerService;
 
@@ -348,6 +350,10 @@ export class WebsocketSession {
         return this.currentEventLevelForServer;
     }
 
+    public getCurrentRequestInfo(): any {
+        return this.currentRequestInfo;
+    }
+
     public addIncomingMessageHandlingDoneTask(func: () => any) {
         if (this.functionsToExecuteAfterIncommingMessageWasHandled) this.functionsToExecuteAfterIncommingMessageWasHandled.push(func);
         else func(); // will not addPostIncommingMessageHandlingTask while not handling an incoming message;
@@ -433,6 +439,10 @@ export class WebsocketSession {
 
             obj = JSON.parse(message_data);
 
+            // Storing the currentRequestInfo before processing messages, so the message processing code can access it through $webSocket.getCurrentRequestinfo()
+            const deferPromise: RequestInfoPromise<any> = this.deferredEvents?.[obj.cmsgid]?.promise;
+            this.currentRequestInfo = deferPromise?.requestInfo;
+
             if (obj.services) {
                 // services call, first process the once with the flag 'apply_first'
                 if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].services) {
@@ -455,28 +465,6 @@ export class WebsocketSession {
                 this.loadingIndicatorService.hideLoading();
             }
 
-            // data got back from the server
-            if (obj.cmsgid) { // response to event
-                const deferredEvent = this.deferredEvents[obj.cmsgid];
-                if (deferredEvent !== null) {
-                    if (obj.exception) {
-                        // something went wrong
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception) {
-                            obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
-                        }
-                        deferredEvent.reject(obj.exception);
-                    } else {
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret) {
-                            obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
-                        }
-                        deferredEvent.resolve(obj.ret);
-                    }
-                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
-                delete this.deferredEvents[obj.cmsgid];
-                this.testability.testEvents();
-                this.loadingIndicatorService.hideLoading();
-            }
-
             // message
             if (obj.msg) {
                 // eslint-disable-next-line guard-for-in
@@ -488,7 +476,7 @@ export class WebsocketSession {
                 }
             }
 
-            if (obj.msg && obj.msg.services) {
+            if (obj?.msg?.services) {
                 this.services.updateServiceScopes(obj.msg.services,
                     (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].msg) ? obj[ConverterService.TYPES_KEY].msg.services : undefined);
             }
@@ -517,7 +505,7 @@ export class WebsocketSession {
                     this.log.spam('sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).');
                 }
             }
-            if (obj && obj.smsgid) {
+            if (obj.smsgid) {
                 if (responseValue instanceof Promise) {
                     // the server wants a response, this could be a promise so a dialog could be shown
                     // then just let protractor go through.
@@ -552,6 +540,29 @@ export class WebsocketSession {
                     this.sendMessageObject(response);
                 });
             }
+
+            // got the return value for a clientside defer back from the server
+            // note: obj.cmsgid must be processed last, so execution order is the same regardless of whether they are bundled together or not, see IWebsocketEndpoint.includePendingResponse(...)
+            if (obj.cmsgid) { // response to event
+                const deferredEvent = this.deferredEvents[obj.cmsgid];
+                if (deferredEvent !== null) {
+                    if (obj.exception) {
+                        // something went wrong
+                        if (obj?.[ConverterService.TYPES_KEY]?.exception) {
+                            obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
+                        }
+                        deferredEvent.reject(obj.exception);
+                    } else {
+                        if (obj?.[ConverterService.TYPES_KEY]?.ret) {
+                            obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
+                        }
+                        deferredEvent.resolve(obj.ret);
+                    }
+                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
+                delete this.deferredEvents[obj.cmsgid];
+                this.testability.testEvents();
+                this.loadingIndicatorService.hideLoading();
+            }
         } catch (e) {
             this.log.error(this.log.buildMessage(() => ('Error (follows below) in parsing/processing this message: ' + message_data)));
             this.log.error(e);
@@ -568,6 +579,9 @@ export class WebsocketSession {
             }
         } finally {
             let err;
+
+            this.currentRequestInfo = undefined;
+
             for (const i of Object.keys(this.functionsToExecuteAfterIncommingMessageWasHandled)) {
                 try {
                     this.functionsToExecuteAfterIncommingMessageWasHandled[i]();

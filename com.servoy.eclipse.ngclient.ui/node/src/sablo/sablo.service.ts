@@ -118,6 +118,10 @@ export class SabloService {
         }
         return this.locale;
     }
+    
+    public getCurrentRequestInfo(): any {
+        return this.wsSession.getCurrentRequestInfo();
+    }
 
     public setLocale(loc) {
         this.locale = loc;
@@ -160,13 +164,17 @@ export class SabloService {
         this.currentServiceCallDone = false;
         this.currentServiceCallWaiting = times.length;
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
-        return promise.then((arg) => {
+        promise.then((arg) => {
             this.currentServiceCallDone = true;
-            return arg;
         }, (arg) => {
             this.currentServiceCallDone = true;
-            return Promise.reject(arg);
         });
+
+        // returning the provided promise, not the promise returned by the thenable above,
+        // as the provided promise is stored in deferredEvents. Users can add a requestInfo property
+        // to the promise returned below and that must be the one stored on the promise stored in deferredEvents,
+        // so the ws message processing logic can retrieve the requestInfo(s) again
+        return promise
     }
 
     public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
@@ -178,7 +186,6 @@ export class SabloService {
     public addIncomingMessageHandlingDoneTask(func: () => any) {
         this.wsSession.addIncomingMessageHandlingDoneTask(func);
     }
-
 
     private getAPICallFunctions(call, formState) {
         let funcThis;
