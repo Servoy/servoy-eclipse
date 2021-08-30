@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA, SimpleChange } from '@angular/core';
 
-import { FormComponent, AddAttributeDirective } from './form_component.component';
+import { FormComponent } from './form_component.component';
 
 import {FormService} from '../form.service';
 import {ServoyService} from '../servoy.service';
@@ -13,6 +13,7 @@ import {ServoyCoreSlider} from '../../servoycore/slider/slider';
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { PopupFormService } from '../services/popupform.service';
+import { AddAttributeDirective } from '../../servoycore/addattribute.directive';
 
 describe('FormComponent', () => {
   let component: FormComponent;
