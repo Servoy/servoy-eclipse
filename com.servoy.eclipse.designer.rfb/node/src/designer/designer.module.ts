@@ -23,6 +23,7 @@ import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
 import { ToolbarSpinnerComponent } from './toolbar/item/toolbarspinner.component';
 import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
 import { DesignSizeService } from './services/designsize.service';
+import { ResizeKnobDirective } from './directives/resizeknob.directive';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { DesignSizeService } from './services/designsize.service';
     GhostsContainerComponent,
     EditorContentComponent,
     SearchTextPipe,
-    SearchTextDeepPipe
+    SearchTextDeepPipe,
+    ResizeKnobDirective
   ],
   imports: [
     BrowserModule,

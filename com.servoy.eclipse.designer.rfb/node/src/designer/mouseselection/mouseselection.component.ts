@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
+import { URLParserService } from '../services/urlparser.service';
 
 @Component({
     selector: 'selection-decorators',
@@ -21,7 +22,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     mousedownpoint: Point;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2) {
+    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
+        protected urlParser: URLParserService) {
         this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -67,8 +69,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
                     };
+
                     newNodes.push({
-                        style: style
+                        style: style,
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
                     })
                 }
             });
@@ -110,7 +114,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         top: position.top + this.topAdjust + 'px',
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
-                    }
+                    },
+                    isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
                 };
                 if (event.ctrlKey || event.metaKey) {
                     let index = selection.indexOf(id);
@@ -168,7 +173,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             top: position.top + this.topAdjust + 'px',
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
-                        }
+                        },
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
                     });
                     newSelection.push(node.getAttribute('svy-id'))
                 }
@@ -227,12 +233,17 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 }
-
-class SelectionNode {
+export class SelectionNode {
     style: any;
+    isResizable?: ResizeDefinition;
 }
-
 class Point {
     x: number;
     y: number;
+}
+class ResizeDefinition {
+    t: boolean;
+    l: boolean;
+    b: boolean;
+    r: boolean;
 }
