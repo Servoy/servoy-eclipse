@@ -134,8 +134,7 @@ export class ConverterService {
 
     let ret = arguments[0];
     if (ret === undefined || ret === null || arguments.length === 1) return ret;
-    let i;
-    for (i = 1; i < arguments.length; i++) {
+    for (let i = 1; i < arguments.length; i++) {
       ret = ret[arguments[i]];
       if (ret === undefined || ret === null) {
         return i === arguments.length - 1 ? ret : undefined;
