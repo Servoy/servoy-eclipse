@@ -72,7 +72,6 @@ export class JSONArrayConverter implements IConverter {
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is
                 // leading/has priority because not all server side values might support being recreated from client values)
                 if (state[JSONArrayConverter.CONTENT_VERSION] === serverJSONValue[JSONArrayConverter.CONTENT_VERSION]) {
-                    let i;
                     for (const granularOp of serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
                         const startIndex_endIndex_opType = granularOp[JSONArrayConverter.OP_ARRAY_START_END_TYPE]; // it's an array of 3 elements in the order given in name
                         const startIndex: number = startIndex_endIndex_opType[0];
@@ -82,7 +81,7 @@ export class JSONArrayConverter implements IConverter {
                         if (opType === JSONArrayConverter.CHANGED) {
                             const granularOpConversionInfo = granularOp[ConverterService.TYPES_KEY];
                             const changedData = granularOp[JSONArrayConverter.GRANULAR_UPDATE_DATA];
-                            for (i = startIndex; i <= endIndex; i++) {
+                            for (let i = startIndex; i <= endIndex; i++) {
                                 const relIdx = i - startIndex;
 
                                 // apply the conversions, update value and kept conversion info for changed indexes
@@ -112,7 +111,7 @@ export class JSONArrayConverter implements IConverter {
 
                             // shift conversion info after insert to the right
                             if (state.conversionInfo) {
-                                for (i = oldLength - 1; i >= startIndex; i--) {
+                                for (let i = oldLength - 1; i >= startIndex; i--) {
                                     state.conversionInfo[i + numberOfInsertedRows] = state.conversionInfo[i];
                                     delete state.conversionInfo[i];
                                 }
@@ -121,13 +120,13 @@ export class JSONArrayConverter implements IConverter {
                             // do insert the new data, remember conversion info
                             currentClientValue.splice.apply(currentClientValue, [startIndex, 0].concat(changedData));
                             if (granularOpConversionInfo) {
-                                for (i = 0; i < changedData.length ; i++) {
+                                for (let i = 0; i < changedData.length ; i++) {
                                     if (granularOpConversionInfo[i]) state.conversionInfo[startIndex + i] = granularOpConversionInfo[i];
                                 }
                             }
 
                             // update any affected change notifiers
-                            for (i = startIndex; i < currentClientValue.length; i++) {
+                            for (let i = startIndex; i < currentClientValue.length; i++) {
                                 if (instanceOfChangeAwareValue(currentClientValue[i])) {
                                     // child is able to handle it's own change mechanism
                                     currentClientValue[i].getStateHolder().setChangeListener(() => {
@@ -142,9 +141,9 @@ export class JSONArrayConverter implements IConverter {
 
                             if (state.conversionInfo) {
                                 // delete conversion info for deleted rows and shift left what is after deletion
-                                for (i = startIndex; i <= endIndex; i++)
+                                for (let i = startIndex; i <= endIndex; i++)
                                     delete state.conversionInfo[i];
-                                for (i = endIndex + 1; i < oldLength; i++) {
+                                for (let i = endIndex + 1; i < oldLength; i++) {
                                     state.conversionInfo[i - numberOfDeletedRows] = state.conversionInfo[i];
                                     delete state.conversionInfo[i];
                                 }
@@ -152,7 +151,7 @@ export class JSONArrayConverter implements IConverter {
                             currentClientValue.splice(startIndex, numberOfDeletedRows);
 
                             // update any affected change notifiers
-                            for (i = startIndex; i < currentClientValue.length; i++) {
+                            for (let i = startIndex; i < currentClientValue.length; i++) {
                                 if (instanceOfChangeAwareValue(currentClientValue[i])) {
                                     // child is able to handle it's own change mechanism
                                     currentClientValue[i].getStateHolder().setChangeListener(() => {
