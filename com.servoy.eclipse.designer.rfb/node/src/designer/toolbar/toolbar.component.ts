@@ -182,7 +182,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         wireframePromise.then((result) => {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
-            this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
+            this.editorSession.stateListener.next('showWireframe');
+            this.sendWireframeState(result);
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -227,6 +228,18 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.doc.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
+        }
+    }
+
+    private sendWireframeState(result: boolean) {
+        const iframe = this.doc.querySelector('iframe');
+        let elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
+        if (elements.length == 0) {
+            setTimeout(() => this.sendWireframeState(result), 400);
+            return;
+        }
+        else {
+            iframe.contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
         }
     }
 
@@ -328,6 +341,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
                     this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
+                    this.editorSession.stateListener.next('showWireframe');
+                    this.editorSession.setSelection(this.editorSession.getSelection());
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
                     // this.editorSession.setContentSizes();

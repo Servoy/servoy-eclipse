@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
+import { BehaviorSubject, Observable, Observer } from 'rxjs';
 
 @Injectable()
 export class EditorSessionService {
@@ -9,6 +10,7 @@ export class EditorSessionService {
     private state = new State();
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
+    public stateListener:  BehaviorSubject<string>;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService) {
         let _this = this;
@@ -20,6 +22,7 @@ export class EditorSessionService {
                 return null;
             }
         } as ServiceProvider)
+        this.stateListener = new BehaviorSubject('');
     }
 
     connect() {

@@ -297,7 +297,7 @@ html, body
 }
 
 #highlight.showWireframe::before {
-  content				  : attr(svytitle);
+  content				  : attr(svy-title);
   background-color		  : var(--svyBackgroundColor);
   border                  : 1px dotted rgb(0, 153, 255);
   border-bottom           : none;

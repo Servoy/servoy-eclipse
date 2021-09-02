@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -12,6 +12,7 @@ import { URLParserService } from '../services/urlparser.service';
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener {
 
     @ViewChild('lasso', { static: false }) lassoRef: ElementRef;
+    @ViewChildren('selected') selectedRef: QueryList<ElementRef>;
 
     nodes: Array<SelectionNode> = new Array<SelectionNode>();
     contentInit: boolean = false;
@@ -41,6 +42,39 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.calculateAdjustToMainRelativeLocation();
             this.createNodes(this.editorSession.getSelection())
         });
+
+        this.editorSession.stateListener.subscribe(id => {
+        if (id === 'showWireframe') {
+            Array.from(this.selectedRef).forEach((selectedNode) => {
+                if (!this.editorSession.getState().showWireframe) {
+                    this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
+                }
+            });
+
+            setTimeout(()=> {
+                this.redrawDecorators();
+                if (this.editorSession.getState().showWireframe) {
+                    this.applyWireframe();
+                }
+            }, 400);//TODO can we do this without timeouts? how do we know the iframe content is there?
+        }});
+    }
+    redrawDecorators() {
+        if (this.nodes.length > 0) {
+            const iframe = this.doc.querySelector('iframe');
+            Array.from(this.nodes).forEach(selected => {
+                let node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selected.svyid + '"]')[0];
+                if (node === undefined) return;
+                const position = node.getBoundingClientRect();
+                selected.style = {
+                    height: position.height + 'px',
+                    width: position.width + 'px',
+                    top: position.top + this.topAdjust + 'px',
+                    left: position.left + this.leftAdjust + 'px',
+                    display: 'block'
+                };
+            });
+        }
     }
 
     selectionChanged(selection: Array<string>): void {
@@ -72,7 +106,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
                     newNodes.push({
                         style: style,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false},
+                        svyid: node.getAttribute('svy-id')
                     })
                 }
             });
@@ -104,7 +139,24 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         let found = Array.from(elements).find((node) => {
             let position = node.getBoundingClientRect();
             this.adjustElementRect(node, position);
+            let addToSelection = false;
             if (position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
+                addToSelection = true;
+            }
+            else if (parseInt(window.getComputedStyle(node, ":before").height) > 0) {
+                const computedStyle = window.getComputedStyle(node, ":before");
+                //the top and left positions of the before pseudo element are computed as the sum of:
+                //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
+                const top = position.top + parseInt(window.getComputedStyle(node).paddingTop) + parseInt(computedStyle.marginTop);
+                const left = position.left + parseInt(window.getComputedStyle(node).paddingLeft) + parseInt(computedStyle.marginLeft);
+                const height = parseInt(computedStyle.height);
+                const width = parseInt(computedStyle.width);
+                if (point.y >= top && point.x >= left && point.y <= top + height && point.x <= left + width) {
+                    addToSelection = true;
+                }
+            }
+
+            if (addToSelection) {
                 let id = node.getAttribute('svy-id');
                 let selection = this.editorSession.getSelection();
                 let newNode = {
@@ -115,7 +167,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
                     },
-                    isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
+                    isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false},
+                    svyid: node.getAttribute('svy-id')
                 };
                 if (event.ctrlKey || event.metaKey) {
                     let index = selection.indexOf(id);
@@ -135,6 +188,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     selection = [id];
                 }
                 this.editorSession.setSelection(selection, this);
+                this.selectedRef.changes.subscribe(() => {
+                    this.applyWireframe();
+                })
                 return node;
             }
         });
@@ -166,7 +222,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y + position.height })) {
-                    newNodes.push({
+                    let newNode: SelectionNode = {
                         style: {
                             height: position.height + 'px',
                             width: position.width + 'px',
@@ -174,8 +230,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
                         },
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false}
-                    });
+                        svyid: node.getAttribute('svy-id')
+                    };
+                    newNodes.push(newNode);
                     newSelection.push(node.getAttribute('svy-id'))
                 }
             });
@@ -183,6 +240,32 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.editorSession.setSelection(newSelection, this);
         }
         this.lassostarted = false;
+        this.applyWireframe();
+    }
+
+    private applyWireframe() {
+        Array.from(this.selectedRef).forEach((selectedNode) => {
+            this.applyWireframeForNode(selectedNode);
+        });
+    }
+    applyWireframeForNode(selectedNode: ElementRef<any>) {
+        let iframe = this.doc.querySelector('iframe');
+        let node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selectedNode.nativeElement.getAttribute('id') + '"]')[0];
+        if (node === undefined) return;
+        const position = node.getBoundingClientRect();
+        // TODO is && node.getAttribute('svy-layoutname') needed??
+        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && position.width > 0 && position.height > 0) {
+        	this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title'));
+            if (this.editorSession.getState().showWireframe) {
+            	this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
+            }
+            selectedNode.nativeElement.style.setProperty('--svyBackgroundColor', window.getComputedStyle(node).backgroundColor);
+            if (node.classList.contains('maxLevelDesign')) {
+            //fix for IE container background, the one above is still needed for the ::before pseudoelement
+            selectedNode.nativeElement.style.setProperty('backgroundColor', window.getComputedStyle(node).backgroundColor);
+            this.renderer.addClass(selectedNode.nativeElement, 'maxLevelDesign');
+		    }
+	    }
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -234,6 +317,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 }
 export class SelectionNode {
+    svyid:string;
     style: any;
     isResizable?: ResizeDefinition;
 }
