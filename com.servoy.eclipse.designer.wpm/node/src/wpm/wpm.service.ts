@@ -38,6 +38,7 @@ export interface Release {
 }
 
 export interface Package {
+  markedAsRemoved: boolean;
   activeSolution: string;
   description: string;
   displayName: string;
@@ -86,6 +87,7 @@ export class WpmService {
   repositoriesObserver: Observer<Repository[]>;
 
   packageLists: Rx.BehaviorSubject<PackageList[]>;
+  packageToBeRemoved: Rx.BehaviorSubject<Package>;
 
   needRefresh: boolean = false;
 
@@ -122,6 +124,7 @@ export class WpmService {
     }).pipe(share());
     
     this.packageLists = new Rx.BehaviorSubject([]);
+    this.packageToBeRemoved = new Rx.BehaviorSubject({} as Package);
   }
 
   /**
@@ -166,6 +169,7 @@ export class WpmService {
   }
 
   uninstall(p: Package) {
+    this.packageToBeRemoved.next(p);
     p.removing = true;
     const command: Message = { method: "remove", package: p };
     this.messages.next(command);
