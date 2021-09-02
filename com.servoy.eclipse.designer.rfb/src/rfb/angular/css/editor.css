@@ -200,7 +200,7 @@ html, body
 }
 
 .decorationOverlay.showWireframe::before {
-  content				  : attr(svytitle);
+  content				  : attr(svy-title);
   background-color		  : var(--svyBackgroundColor);
   border                  : 1px solid #2BADDF;
   border-bottom           : none;
