@@ -12,7 +12,6 @@ import { PackageList } from '../content/content.component';
 export class PackagesComponent {
 
   @Input() packages: Package[];
-  @Input() packageLists: PackageList[];
   selectedPackage: Package;
   descriptionExpanded: boolean;
 

@@ -1,7 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { WpmService, Repository, Package } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { PackageList } from '../content/content.component';
 import { ExtendedPackage, UpdatePackagesDialog } from '../update-dialog/update-dialog.component';
 
 const ADD_REMOVE_TEXT: string = "Add...";
@@ -37,7 +36,7 @@ export class HeaderComponent implements OnInit {
         this.activeRepository = newActiveRepository;
         this.wpmService.setNewSelectedRepository(this.activeRepository);
       }
-    });
+    });  
 
     this.wpmService.packageLists.subscribe(packageLists => {
       packageLists.forEach(list => {
@@ -48,9 +47,12 @@ export class HeaderComponent implements OnInit {
 
           // update the package list in case the version has changed
           this.packages.forEach((p, i, arr) => {
-            if (p.name === pack.name && pack.selected && pack.installed && this.wpmService.versionCompare(pack.selected, p.selected) !== 0) {
-              arr[i].selected = pack.selected; 
+            if (p.name === pack.name && pack.selected && pack.installing) {  
+              if (this.wpmService.versionCompare(pack.selected, p.selected) !== 0) {
+                arr[i].selected = pack.selected; 
+              }  
               arr[i].hasLatestVersion = arr[i].selected === p.releases[0].version;    
+              arr[i].markedAsRemoved = false;
             }      
           }); 
         });
@@ -58,10 +60,19 @@ export class HeaderComponent implements OnInit {
       this.updateStateForUpdateAllButton();
     });
 
+    this.wpmService.packageToBeRemoved.subscribe(pack => {
+      this.packages.forEach(p => {
+        if (p.name === pack.name) {
+          p.markedAsRemoved = true;
+        }
+      });
+    });
+
+    this.updateStateForUpdateAllButton();
   }
 
   openDialog() { 
-    const readyPackages = this.packages.filter(p => !p.hasLatestVersion); 
+    const readyPackages = this.packages.filter(p => !p.hasLatestVersion && !p.markedAsRemoved); 
     const dialogRef = this.dialog.open(UpdatePackagesDialog, {data: readyPackages});
     dialogRef.beforeClosed().subscribe(result => {
       if (result) {
@@ -69,7 +80,7 @@ export class HeaderComponent implements OnInit {
           if (el.isSelected) {
             this.packages.forEach(p => {
               if (p.name === el.package.name) {
-                p.hasLatestVersion = true;
+                p.hasLatestVersion = true; 
               }
             });
           }
@@ -78,14 +89,14 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
-
-  updateStateForUpdateAllButton() {
+ 
+  updateStateForUpdateAllButton() { 
       // the update all button will be disabled if all packages have the latest version installed
-      this.isUpdateAllButtonDisabled = this.packages.find(p => !p.hasLatestVersion) ? false : true;
+      this.isUpdateAllButtonDisabled = this.packages.find(p => !p.hasLatestVersion && !p.markedAsRemoved) ? false : true;
   }
 
   isLatestRelease(p: Package): boolean {
-    return p.installed == p.releases[0].version;
+    return (p.installed == p.releases[0].version) || (this.wpmService.versionCompare(p.installed, p.releases[0].version) > 0);
   }
 
   getActiveSolution(): string {
