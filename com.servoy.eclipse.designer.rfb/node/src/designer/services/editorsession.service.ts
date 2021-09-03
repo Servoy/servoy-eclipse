@@ -167,8 +167,15 @@ export class EditorSessionService {
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids));
     }
 
-    addSelectionChangedListener(listener: ISelectionChangedListener) {
+    addSelectionChangedListener(listener: ISelectionChangedListener) : ()=> void{
         this.selectionChangedListeners.push(listener);
+        return () => this.removeSelectionChangedListener(listener);
+    }
+    removeSelectionChangedListener(listener: ISelectionChangedListener): void {
+        const index = this.selectionChangedListeners.indexOf(listener);
+        if (index > -1) {
+            this.selectionChangedListeners.splice(index, 1);
+        }
     }
 
     getSelection(): Array<string> {

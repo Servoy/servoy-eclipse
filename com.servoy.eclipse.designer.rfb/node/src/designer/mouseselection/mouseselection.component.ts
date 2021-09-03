@@ -9,7 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     styleUrls: ['./mouseselection.component.css']
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
-export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener {
+export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy {
 
     @ViewChild('lasso', { static: false }) lassoRef: ElementRef;
     @ViewChildren('selected') selectedRef: QueryList<ElementRef>;
@@ -22,10 +22,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     lassostarted: boolean = false;
 
     mousedownpoint: Point;
+    selectedRefSubscription: any;
+    editorStateSubscription: any;
+    removeSelectionChangedListener: () => void;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService) {
-        this.editorSession.addSelectionChangedListener(this);
+        this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
     ngOnInit(): void {
@@ -36,6 +39,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         content.addEventListener('mousemove', (event) => this.onMouseMove(event));
     }
 
+    ngOnDestroy(): void {
+        if (this.selectedRefSubscription !== undefined) this.selectedRefSubscription.unsubscribe();
+        this.editorStateSubscription.unsubscribe();
+        this.removeSelectionChangedListener();
+    }
+
     ngAfterViewInit(): void {
         this.doc.querySelector('iframe').addEventListener('load', () => {
             this.contentInit = true;
@@ -43,7 +52,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.createNodes(this.editorSession.getSelection())
         });
 
-        this.editorSession.stateListener.subscribe(id => {
+        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
         if (id === 'showWireframe') {
             Array.from(this.selectedRef).forEach((selectedNode) => {
                 if (!this.editorSession.getState().showWireframe) {
@@ -188,7 +197,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     selection = [id];
                 }
                 this.editorSession.setSelection(selection, this);
-                this.selectedRef.changes.subscribe(() => {
+                this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
                     this.applyWireframe();
                 })
                 return node;
