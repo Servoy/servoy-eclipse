@@ -157,6 +157,10 @@
     			     "description": "The npm package name",
     			     "type": "string"
     			},
+                "moduleName": {
+                     "description": "The module name for this service, then it is imported based on the module and not the service if this is given",
+                     "type": "string"
+                },
                 "serviceName":  {
                      "description": "The exported service name",
                      "type": "string"

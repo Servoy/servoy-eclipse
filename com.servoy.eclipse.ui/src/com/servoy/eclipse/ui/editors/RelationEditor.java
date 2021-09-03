@@ -67,6 +67,7 @@ import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -808,6 +809,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		{
 			checkInconsistency();
 			Relation r = getRelation();
+			FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(r,
+				ServoyModelFinder.getServoyModel().getFlattenedSolution());
 			int count = getRowCount();
 			if (count > 0)
 			{
@@ -869,7 +872,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 			{
 				r.setPrimaryDataSource(r.getForeignDataSource());
 			}
-			String errorMessage = r.checkKeyTypes(null);
+			String errorMessage = r.checkKeyTypes(relationFlattenedSolution);
 			if (errorMessage != null && oldDataSource == null)
 			{
 				r.setPrimaryDataSource(oldDataSource);

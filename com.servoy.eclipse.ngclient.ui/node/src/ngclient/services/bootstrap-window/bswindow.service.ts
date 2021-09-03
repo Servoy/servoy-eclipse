@@ -63,8 +63,7 @@ export class BSWindow {
                 footer: null
             },
             references: {
-                body: this.utilsService.getMainBody(), // Is there a better way?
-                window: this.windowRefService
+                body: this.utilsService.getMainBody() // Is there a better way?
             },
             parseHandleForTitle: true,
             title: 'No Title',
@@ -73,6 +72,7 @@ export class BSWindow {
         };
 
         this.options = this.utilsService.deepExtend([true, defaults, options]) as BSWindowOptions;
+        this.options.references.window = this.windowRefService.nativeWindow;
         this.initialize(this.options);
     }
 
@@ -121,8 +121,8 @@ export class BSWindow {
             this.setSize(this.options.size);
         }
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            this.renderer.listen(this.options.references.window.nativeWindow, 'orientationchange', () => _this.centerWindow());
-            this.renderer.listen(this.options.references.window.nativeWindow, 'resize', () => _this.centerWindow());
+            this.renderer.listen(this.options.references.window, 'orientationchange', () => _this.centerWindow());
+            this.renderer.listen(this.options.references.window, 'resize', () => _this.centerWindow());
         }
 
         this.renderer.listen(this.element, 'touchmove', (e) => {
@@ -153,17 +153,17 @@ export class BSWindow {
 
     centerWindow() {  
         let top: number; let left: number;
-        const bodyTop = this.options.references.body.offsetTop + parseInt(this.options.references.body.style.paddingTop, 10);
-        left = (this.options.references.window.nativeWindow.innerWidth / 2) - (this.element.getBoundingClientRect().width / 2);
-        top = (this.options.references.window.nativeWindow.innerHeight / 2) - (this.element.getBoundingClientRect().height / 2);
+        const bodyTop = this.options.references.body.offsetTop + this.getInteger(this.options.references.body.style.paddingTop);
+        left = (this.options.references.window.innerWidth / 2) - (this.element.getBoundingClientRect().width / 2);
+        top = (this.options.references.window.innerHeight / 2) - (this.element.getBoundingClientRect().height / 2);
         if (top < bodyTop) {
             top = bodyTop;
         }
         const maxHeight = ((this.options.references.body.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) +
             this.getInteger(this.options.elements.footer.style.height))) - 45;
         this.renderer.setStyle(this.options.elements.body, 'maxHeight', maxHeight);
-        this.renderer.setStyle(this.element, 'left', left);
-        this.renderer.setStyle(this.element, 'top', top);
+        this.renderer.setStyle(this.element, 'left', left+'px');
+        this.renderer.setStyle(this.element, 'top', top+'px');
     }
 
     close() {
@@ -540,7 +540,7 @@ export interface BSWindowOptions {
     elements?: {handle: HTMLElement; title: HTMLElement; body: HTMLElement; footer: HTMLElement};
     title?: string;
     sticky?: boolean;
-    references?: {body: HTMLElement; window: WindowRefService };
+    references?: {body: HTMLElement; window: Window };
     parent?: BSWindow;
     blocker?: BSWindow;
     resizable?: boolean;

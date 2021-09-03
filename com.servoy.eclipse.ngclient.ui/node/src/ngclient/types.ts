@@ -11,7 +11,7 @@ export class FormCache implements IFormCache {
     public componentCache: Map<string, ComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     private _mainStructure: StructureCache;
-    private _formComponents: Map<string, FormComponentCache>;
+    public formComponents: Map<string, FormComponentCache>;
     private _parts: Array<PartCache>;
     private conversionInfo = {};
 
@@ -19,7 +19,7 @@ export class FormCache implements IFormCache {
         this.size = size;
         this.componentCache = new Map();
         this._parts = [];
-        this._formComponents = new Map();
+        this.formComponents = new Map();
     }
     public add(comp: ComponentCache) {
         this.componentCache.set(comp.name, comp);
@@ -50,11 +50,11 @@ export class FormCache implements IFormCache {
     }
 
     public addFormComponent(formComponent: FormComponentCache) {
-        this._formComponents.set(formComponent.name, formComponent);
+        this.formComponents.set(formComponent.name, formComponent);
     }
 
     public getFormComponent(name: string): FormComponentCache {
-        return this._formComponents.get(name);
+        return this.formComponents.get(name);
     }
 
     public getComponent(name: string): ComponentCache {

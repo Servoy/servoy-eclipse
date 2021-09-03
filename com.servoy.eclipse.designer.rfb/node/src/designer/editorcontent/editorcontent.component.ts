@@ -80,7 +80,9 @@ export class EditorContentComponent implements OnInit{
 
     setContentSize(width: string, height: string, fixedSize: boolean) {
         this.contentStyle['width'] = width;
-        this.contentStyle['height'] = height;
+        if (this.urlParser.isAbsoluteFormLayout()) {
+			this.contentStyle['height'] = height;
+		}
         if (fixedSize) this.contentSizeFull = false;
         delete this.contentStyle['top'];
         delete this.contentStyle['left'];
@@ -98,8 +100,9 @@ export class EditorContentComponent implements OnInit{
                 svyForm.style['height'] = height;
             }
             this.setMainContainerSize();
-            const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0];
-            contentFrame.style['height'] = height;
+            //const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0];
+            //contentFrame.style['height'] = height;
+             this.renderer.setStyle(this.elementRef.nativeElement, 'height', '100%');
         }
         // TODO
         // $scope.adjustGlassPaneSize(width, height);

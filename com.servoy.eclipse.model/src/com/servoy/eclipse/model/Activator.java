@@ -17,12 +17,10 @@
 
 package com.servoy.eclipse.model;
 
-import java.io.File;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -48,7 +46,7 @@ public class Activator extends Plugin
 	// The shared instance
 	private static Activator plugin;
 
-	private BiConsumer<File, IProgressMonitor> exporter;
+	private Consumer<ING2WarExportModel> exporter;
 
 	/**
 	 * The constructor
@@ -131,16 +129,16 @@ public class Activator extends Plugin
 		return mobileExportClient;
 	}
 
-	public void exportNG2ToWar(File location, IProgressMonitor monitor)
+	public void exportNG2ToWar(ING2WarExportModel model)
 	{
-		if (exporter != null) exporter.accept(location, monitor);
+		if (exporter != null) exporter.accept(model);
 		else
 		{
 			ServoyLog.logWarning("Couldn't export NG2 because the exporter was not configured", null);
 		}
 	}
 
-	public void setNG2WarExporter(BiConsumer<File, IProgressMonitor> exporter)
+	public void setNG2WarExporter(Consumer<ING2WarExportModel> exporter)
 	{
 		this.exporter = exporter;
 	}

@@ -53,7 +53,6 @@ import com.servoy.j2db.util.Debug;
 public class RemovePackageProjectReferenceAction extends Action implements ISelectionChangedListener
 {
 
-
 	private final Shell shell;
 	private ServoyNGPackageProject selectedProject;
 	private ServoyProject parentSolutionProject;

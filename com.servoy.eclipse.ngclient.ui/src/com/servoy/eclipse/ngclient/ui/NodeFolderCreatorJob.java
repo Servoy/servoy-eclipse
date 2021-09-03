@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.servoy.j2db.util.Utils;
 
@@ -64,7 +63,7 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
-		IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 		try
 		{
 			long startTime = System.currentTimeMillis();
@@ -118,10 +117,15 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (createWatcher) createFileWatcher(nodeFolder, null);
 			writeConsole(console, "Total time to copy done " + Math.round((System.currentTimeMillis() - startTime) / 1000) + "s\n");
-			Activator.getInstance().countDown();
+		}
+		catch (RuntimeException e)
+		{
+			writeConsole(console, "Exception when creating node/ng2 folder: " + e.getMessage());
+			e.printStackTrace();
 		}
 		finally
 		{
+			Activator.getInstance().countDown();
 			try
 			{
 				console.close();
@@ -133,7 +137,7 @@ public class NodeFolderCreatorJob extends Job
 		return Status.OK_STATUS;
 	}
 
-	private void writeConsole(IOConsoleOutputStream console, String message)
+	private void writeConsole(StringOutputStream console, String message)
 	{
 		try
 		{

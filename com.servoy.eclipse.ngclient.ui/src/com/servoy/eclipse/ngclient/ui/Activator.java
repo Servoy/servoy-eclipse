@@ -3,11 +3,9 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -19,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
@@ -42,7 +39,7 @@ public class Activator extends Plugin
 	private File npmPath;
 	private RunNPMCommand buildCommand;
 	private File projectFolder;
-	private IOConsole console;
+	private IConsole console;
 
 
 	public static Activator getInstance()
@@ -54,25 +51,30 @@ public class Activator extends Plugin
 	public void start(BundleContext context) throws Exception
 	{
 		plugin = this;
-		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(this::exportNG2ToWar);
+		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(WebPackagesListener::exportNG2ToWar);
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
 		extractNode();
-		copyNodeFolder();
 	}
 
-	public synchronized IOConsole getConsole()
+	public synchronized IConsole getConsole()
 	{
 		if (console == null)
 		{
 			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
-			console = new IOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+			EclipseIOConsole eclipseConsole = new EclipseIOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
 			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-			consoleManager.addConsoles(new IConsole[] { console });
-			consoleManager.showConsoleView(console);
+			consoleManager.addConsoles(new IOConsole[] { eclipseConsole });
+			consoleManager.showConsoleView(eclipseConsole);
+			console = eclipseConsole;
 		}
 		return console;
+	}
+
+	public synchronized void setConsole(IConsole console)
+	{
+		this.console = console;
 	}
 
 	void countDown()
@@ -87,7 +89,7 @@ public class Activator extends Plugin
 		}
 	}
 
-	private void copyNodeFolder()
+	public void copyNodeFolder()
 	{
 		new NodeFolderCreatorJob(this.projectFolder, true, false).schedule();
 	}
@@ -203,10 +205,7 @@ public class Activator extends Plugin
 		buildCommand.setSystem(true);
 	}
 
-	/**
-	 *
-	 */
-	private void waitForNodeExtraction()
+	void waitForNodeExtraction()
 	{
 		try
 		{
@@ -222,35 +221,5 @@ public class Activator extends Plugin
 	public void stop(BundleContext context) throws Exception
 	{
 		if (buildCommand != null) buildCommand.cancel();
-	}
-
-	/**
-	 *  exports the state location dir to the location given that should be a WAR layout
-	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
-	 * @throws IOException
-	 */
-	public void exportNG2ToWar(File location, IProgressMonitor monitor)
-	{
-		waitForNodeExtraction();
-
-		try
-		{
-			// TODO get exactly the exported components and services and adjust the sources
-			// check what happens if there was a debug watch command on the sources..
-
-			// create the production build
-			createNPMCommand(Arrays.asList("run", "build")).runCommand(monitor);
-			// copy the production build
-			File distFolder = new File(projectFolder, "dist/app_prod");
-			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
-
-			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
-
-			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
-		}
-		catch (Exception e)
-		{
-			getLog().error("exceptions when exporting NG2 to WAR", e);
-		}
 	}
 }

@@ -343,9 +343,9 @@ export class FormService {
                     const layout: { [property: string]: string } = {};
                     if (!elem.responsive) {
                         let height = elem.model.height;
-                        if (!height) height = elem.model.containedForm.formHeight;
+                        if (!height && elem.model.containedForm) height = elem.model.containedForm.formHeight;
                         let width = elem.model.width;
-                        if (!width) width = elem.model.containedForm.formWidth;
+                        if (!width && elem.model.containedForm) width = elem.model.containedForm.formWidth;
                         if (height) {
                             layout.height = height + 'px';
                         }

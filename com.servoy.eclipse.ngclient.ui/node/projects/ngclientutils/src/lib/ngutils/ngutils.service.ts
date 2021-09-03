@@ -6,18 +6,19 @@ import { WindowRefService, ServoyPublicService } from '@servoy/public';
 @Injectable()
 export class NGUtilsService {
     private _tags: Tag[];
+    private _tagscopy: Tag[];
     private _styleclasses: any;
     private _backActionCB: any;
     private confirmMessage: string;
     private renderer: Renderer2;
 
     constructor(private windowRef: WindowRefService,
-            private servoyService: ServoyPublicService,
-            private platformLocation: PlatformLocation,
-            rendererFactory: RendererFactory2,
-            @Inject(DOCUMENT) private document: Document) {
+        private servoyService: ServoyPublicService,
+        private platformLocation: PlatformLocation,
+        rendererFactory: RendererFactory2,
+        @Inject(DOCUMENT) private document: Document) {
         this.windowRef.nativeWindow.location.hash = '';
-        this.renderer = rendererFactory.createRenderer(null,null);
+        this.renderer = rendererFactory.createRenderer(null, null);
     }
 
     get contributedTags(): Tag[] {
@@ -25,10 +26,59 @@ export class NGUtilsService {
     }
 
     set contributedTags(tags: Tag[]) {
-        this._tags = tags;
-        this.document.querySelectorAll('head > [hhsManagedTag]').forEach(e => e.remove());
-        this._tags.forEach(tag => {
-            const elem = this.renderer.createElement(tag.tagname);
+        let newTags = tags.slice();
+        var uitags = this.document.querySelectorAll('head > [hhsManagedTag]');
+        if (this._tagscopy) {
+            for (let i = 0; i < this._tagscopy.length; i++) {
+                let oldTag = this._tagscopy[i];
+                let newIndex = -1;
+                for (let j = 0; j < newTags.length; j++) {
+                    let tag = newTags[j];
+                    if (oldTag.tagName == tag.tagName && oldTag.attrs.length == tag.attrs.length) {
+                        let sameAttributes = true;
+                        for (let k = 0; k < tag.attrs.length; k++) {
+                            if (oldTag.attrs[k].name != tag.attrs[k].name || oldTag.attrs[k].value != tag.attrs[k].value) {
+                                sameAttributes = false;
+                                break;
+                            }
+                        }
+                        if (sameAttributes) {
+                            newIndex = j;
+                            break;
+                        }
+                    }
+                }
+                if (newIndex >= 0) {
+                    // element was found unchanged, just leave it alone
+                    newTags.splice(newIndex, 1);
+                }
+                else {
+                    // element was deleted or changed, we must remove it from dom
+                    for (let j = 0; j < uitags.length; j++) {
+                        let uitag = uitags[j];
+                        if (uitag.tagName.toLowerCase() == oldTag.tagName.toLowerCase()) {
+                            var sameAttributes = true;
+                            for (var k = 0; k < oldTag.attrs.length; k++) {
+                                if (uitag.getAttribute(oldTag.attrs[k].name) != oldTag.attrs[k].value) {
+                                    sameAttributes = false;
+                                    break;
+                                }
+                            }
+                            if (sameAttributes) {
+                                uitag.remove();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            uitags.forEach(e => e.remove());;
+        }
+
+        newTags.forEach(tag => {
+            const elem = this.renderer.createElement(tag.tagName);
             if (tag.attrs) {
                 tag.attrs.forEach(attr => {
                     this.renderer.setAttribute(elem, attr.name, attr.value);
@@ -37,6 +87,8 @@ export class NGUtilsService {
             this.renderer.setAttribute(elem, 'hhsManagedTag', '');
             this.renderer.appendChild(this.document.head, elem);
         });
+        this._tags = tags;
+        this._tagscopy = tags.slice();
     }
 
     get styleclasses(): any {
@@ -61,9 +113,9 @@ export class NGUtilsService {
                 }
 
                 newCls.forEach((cls: string) => {
-                   if(!form.classList.contains(cls)) {
-                    this.renderer.addClass(form, cls);
-                   }
+                    if (!form.classList.contains(cls)) {
+                        this.renderer.addClass(form, cls);
+                    }
                 });
             }
         });
@@ -240,7 +292,7 @@ export class NGUtilsService {
      * @param formname the form name to add to.
      * @param styleclass the styleclass to be added to form tag.
      */
-    public addFormStyleClass(_formname: string,_styleclass: string) {
+    public addFormStyleClass(_formname: string, _styleclass: string) {
         // implemented in ngutils_server.js
     }
 
@@ -303,7 +355,7 @@ export class NGUtilsService {
         this.platformLocation.onPopState(() => {
             if (this._backActionCB) {
                 if (this.platformLocation.hash) {
-                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[this.platformLocation.hash]);
+                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script, [this.platformLocation.hash]);
                 } else if (this.platformLocation.href.endsWith('/index.html')) {
                     this.platformLocation.forward(); // if the back button is registered then don't allow to move back, go to the first page again.
                 }
@@ -318,7 +370,7 @@ export class NGUtilsService {
 }
 
 class Tag {
-    public tagname: string;
+    public tagName: string;
     public attrs: Attribute[];
 }
 

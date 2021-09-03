@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MainComponent } from './main.component';
 
-import { FormComponent, AddAttributeDirective } from './form/form_component.component';
+import { FormComponent } from './form/form_component.component';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
@@ -15,15 +15,10 @@ import { ServoyFormPopupComponent } from './services/popupform/popupform';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import { I18NProvider } from './services/i18n_provider.service';
-import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
-import { ErrorBean } from '../servoycore/error-bean/error-bean';
-import { ServoyCoreSlider } from '../servoycore/slider/slider';
-import { SessionView } from '../servoycore/session-view/session-view';
-import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
 
 import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
-import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindow } from './services/bootstrap-window/bswindow.service';
@@ -35,18 +30,11 @@ import {MainRoutingModule} from './main-routing.module';
     declarations: [
         MainComponent,
         FormComponent,
-        AddAttributeDirective,
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
-        DefaultNavigator,
-        SessionView,
-        ErrorBean,
-        ServoyCoreSlider,
-        ServoyCoreFormContainer,
         DialogWindowComponent,
         ServoyFormPopupComponent,
-        LoadingIndicatorComponent,
-        ListFormComponent
+        LoadingIndicatorComponent
     ],
     imports: [
         CommonModule,
@@ -54,7 +42,8 @@ import {MainRoutingModule} from './main-routing.module';
         AllComponentsModule,
         AllServicesModules,
         ServoyPublicModule,
-        MainRoutingModule
+        MainRoutingModule,
+        ServoyCoreComponentsModule
     ],
     providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
 					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe,

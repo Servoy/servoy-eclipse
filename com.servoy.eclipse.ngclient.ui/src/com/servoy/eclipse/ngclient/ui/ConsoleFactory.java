@@ -10,8 +10,11 @@ public class ConsoleFactory implements IConsoleFactory
 	@Override
 	public void openConsole()
 	{
-		IOConsole console = Activator.getInstance().getConsole();
-		IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-		consoleManager.showConsoleView(console);
+		IConsole console = Activator.getInstance().getConsole();
+		if (console instanceof IOConsole)
+		{
+			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+			consoleManager.showConsoleView((IOConsole)console);
+		}
 	}
 }

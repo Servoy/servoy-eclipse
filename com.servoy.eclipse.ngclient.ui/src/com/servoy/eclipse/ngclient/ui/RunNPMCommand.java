@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 
@@ -91,7 +90,7 @@ public class RunNPMCommand extends WorkspaceJob
 
 	public void runCommand(IProgressMonitor monitor) throws IOException, InterruptedException
 	{
-		IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 
 		if (monitor.isCanceled())
 		{
@@ -194,7 +193,7 @@ public class RunNPMCommand extends WorkspaceJob
 		}
 	}
 
-	private void writeConsole(IOConsoleOutputStream console, String message)
+	private void writeConsole(StringOutputStream console, String message)
 	{
 		try
 		{
@@ -215,7 +214,7 @@ public class RunNPMCommand extends WorkspaceJob
 	{
 		if (process != null)
 		{
-			IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 
 			writeConsole(console, "Cancel requested by user... Trying to stop process...");
 //			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status

@@ -92,13 +92,16 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
-							if (persist instanceof BaseComponent && CSSPositionUtils.useCSSPosition(persist) && properties.has("x") && properties.has("y") &&
-								properties.has("width") && properties.has("height"))
+							if (persist instanceof BaseComponent && CSSPositionUtils.useCSSPosition(persist) && (properties.has("x") || properties.has("y") ||
+								properties.has("width") || properties.has("height")))
 							{
+								Point oldLocation = CSSPositionUtils.getLocation((BaseComponent)persist);
+								Dimension oldSize = CSSPositionUtils.getSize((BaseComponent)persist);
 								// we need to calculate the new cssposition
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(), CSSPositionUtils.adjustCSSPosition((BaseComponent)persist,
-										properties.optInt("x"), properties.optInt("y"), properties.optInt("width"), properties.optInt("height"))));
+										properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y), properties.optInt("width", oldSize.width),
+										properties.optInt("height", oldSize.height))));
 							}
 							else
 							{

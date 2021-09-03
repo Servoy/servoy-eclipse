@@ -47,8 +47,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.NG2Config;
@@ -62,10 +60,13 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -93,18 +94,21 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
+		private final IWarExportModel warExportModel;
+
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name)
+		private PackageCheckerJob(String name, IWarExportModel warExportModel)
 		{
 			super(name);
+			this.warExportModel = warExportModel;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
-			IOConsoleOutputStream console = Activator.getInstance().getConsole().newOutputStream();
+			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 			try
 			{
 				scheduled.incrementAndGet();
@@ -121,6 +125,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				WebObjectSpecification[] allServices = serviceProviderState.getAllWebComponentSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(webObjectSpecification.getPackageName()))
+					{
+						continue;
+					}
 					List<String> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
 					if (libs != null)
 					{
@@ -142,6 +150,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					{
+						continue;
+					}
+
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
 					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
@@ -158,6 +171,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					{
+						continue;
+					}
+
 					List<String> libs = entry.getNg2CssLibrary();
 					if (libs != null)
 					{
@@ -226,13 +244,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					ng2Services.keySet().forEach(service -> {
 						if (service.getNG2Config().getServiceName() != null)
 						{
+							if (this.warExportModel != null && !this.warExportModel.getExportedServices().contains(service.getName()))
+							{
+								return;
+							}
+
 							String moduleName = service.getNG2Config().getModuleName();
 							// import the service
 							imports.append("import { ");
 							String serviceName = service.getNG2Config().getServiceName();
 							imports.append(serviceName);
 							// add it to the modules
-							if (moduleName != null)
+							if (moduleName != null && modules.indexOf(moduleName + ',') == -1)
 							{
 								imports.append(',');
 								imports.append(moduleName);
@@ -244,7 +267,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							imports.append("';\n");
 							// add it to the service declarations in the constructor
 							services.append("private ");
-							services.append(service.getName());
+							services.append(ClientService.convertToJSName(service.getName()));
 							services.append(": ");
 							services.append(serviceName);
 							services.append(",\n");
@@ -281,7 +304,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
-				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate();
+				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
 				try
 				{
 					// adjust component templates
@@ -414,7 +437,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					ServoyLog.logError(e);
 				}
-				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
+				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || warExportModel != null)
 				{
 					// first exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
@@ -451,8 +474,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", "build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", warExportModel != null ? "build" : "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -552,7 +574,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param console
 		 * @param pck
 		 */
-		private void writeConsole(IOConsoleOutputStream console, String message)
+		private void writeConsole(StringOutputStream console, String message)
 		{
 			try
 			{
@@ -570,7 +592,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * @param packageReader
 		 * @param entryPoint
 		 */
-		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, IOConsoleOutputStream console)
+		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
 			if (entryPoint != null)
@@ -616,11 +638,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 						IContainer[] containers = root.findContainersForLocationURI(packageReader.getPackageURL().toURI());
-						if (containers != null && containers.length == 1)
+						if (containers != null && containers.length > 0)
 						{
 							try
 							{
-								IProject project = containers[0].getProject();
+								IProject project = null;
+								if (containers.length == 1)
+								{
+									project = containers[0].getProject();
+								}
+								else
+								{
+									for (IContainer container : containers)
+									{
+										if (container instanceof IProject)
+										{
+											project = (IProject)container;
+											break;
+										}
+									}
+									if (project == null) project = containers[0].getProject();
+								}
 								IFile sourcePath = project.getFile(".sourcepath");
 								if (sourcePath.exists())
 								{
@@ -799,7 +837,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static boolean isDefaultPackageEnabled(String packageName)
 	{
 		String ng1Name = NG1MAPPING.get(packageName);
-		return ng1Name != null ? PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + ng1Name) : true;
+		return ng1Name != null ? ServoyModelFinder.getServoyModel().getNGPackageManager().isDefaultPackageEnabled(ng1Name) : true;
 	}
 
 	/**
@@ -823,13 +861,47 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// only schedule 1 and a bit later to relax first the system
 		if (scheduled.compareAndSet(0, 1))
 		{
-			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services");
+			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services", null);
 			job.schedule(5000);
 		}
 		else if (scheduled.get() == 2)
 		{
 			// there is only 1 job and that one is running (not scheduled) then increase by one to make it run again
 			scheduled.incrementAndGet();
+		}
+	}
+
+	/**
+	 *  exports the state location dir to the location given that should be a WAR layout
+	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
+	 * @throws IOException
+	 */
+	public static void exportNG2ToWar(ING2WarExportModel model)
+	{
+		Activator activator = Activator.getInstance();
+		activator.waitForNodeExtraction();
+
+		try
+		{
+			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
+			FileUtils.deleteQuietly(distFolder);
+			// create the production build
+			new PackageCheckerJob("production_build", model.getModel()).run(model.getProgressMonitor());
+			// copy the production build
+			if (distFolder.exists())
+			{
+				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
+
+				FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
+			}
+			else
+			{
+				throw new RuntimeException("NGClient2 production resources not generated, see log");
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Error generating NGClient2 production resources", e);
 		}
 	}
 

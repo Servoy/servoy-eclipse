@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { LocalStorageService} from '@servoy/public';
 
 import { SabloService } from '../../../sablo/sablo.service';
-import { NgbModule ,NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import { DefaultLoginWindowComponent } from './default-login-window.component';
 
 describe('DefaultLoginWindowComponent', () => {
@@ -19,7 +18,7 @@ describe('DefaultLoginWindowComponent', () => {
     TestBed.configureTestingModule({
       imports: [ FormsModule ],
       declarations: [ DefaultLoginWindowComponent ],
-      providers: [ { provide: SabloService,useValue:sabloService }, { provide: NgbActiveModal,useValue:ngbActiveModal }, { provide: LocalStorageService ,useValue:localStorageService }]
+      providers: [ { provide: SabloService,useValue:sabloService }, { provide: LocalStorageService ,useValue:localStorageService }]
     })
     .compileComponents();
   }));

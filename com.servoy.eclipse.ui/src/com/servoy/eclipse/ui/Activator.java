@@ -151,6 +151,7 @@ public class Activator extends AbstractUIPlugin
 
 		// make sure that core is fully initialized; this should also make sure app. server is initialised
 		com.servoy.eclipse.core.Activator.getDefault();
+		com.servoy.eclipse.ngclient.ui.Activator.getInstance().copyNodeFolder();
 
 		// warn if incompatible extensions are found
 //		doExtensionRelatedChecks(); disabled for now as marketplace/extensions are not currently in production

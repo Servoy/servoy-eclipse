@@ -1,26 +1,28 @@
 import { Injectable } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
+import { BehaviorSubject, Observable, Observer } from 'rxjs';
 
 @Injectable()
 export class EditorSessionService {
-    
+
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
     private state = new State();
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
-    
-    constructor(private websocketService: WebsocketService,  private services: ServicesService) {
+    public stateListener:  BehaviorSubject<string>;
+
+    constructor(private websocketService: WebsocketService, private services: ServicesService) {
         let _this = this;
         this.services.setServiceProvider({
-             getService( name: string ){
-                if (name == '$editorService')
-                {
+            getService(name: string) {
+                if (name == '$editorService') {
                     return _this;
                 }
                 return null;
             }
         } as ServiceProvider)
+        this.stateListener = new BehaviorSubject('');
     }
 
     connect() {
@@ -33,7 +35,7 @@ export class EditorSessionService {
         //     deferred = null;
         // }
         // return promise;
-        
+
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')])
     }
@@ -79,14 +81,15 @@ export class EditorSessionService {
     requestSelection() {
         return this.wsSession.callService('formeditor', 'requestSelection', null, true)
     }
-    
-    setSelection(selection : Array<string>){
-         this.selection = selection;
-         this.wsSession.callService('formeditor', 'setSelection', {
+
+    setSelection(selection: Array<string>, skipListener? : ISelectionChangedListener) {
+        this.selection = selection;
+        this.wsSession.callService('formeditor', 'setSelection', {
             selection: selection
-        }, true)   
+        }, true);
+        this.selectionChangedListeners.forEach(listener => { if (listener != skipListener) listener.selectionChanged(selection) });
     }
-    
+
     isInheritedForm() {
         return this.wsSession.callService('formeditor', 'getBooleanState', {
             "isInheritedForm": true
@@ -158,20 +161,20 @@ export class EditorSessionService {
     executeAction(action, params?) {
         this.wsSession.callService('formeditor', action, params, true)
     }
-    
+
     updateSelection(ids) {
         this.selection = ids;
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids));
     }
-    
-    addSelectionChangedListener(listener : ISelectionChangedListener){
+
+    addSelectionChangedListener(listener: ISelectionChangedListener) {
         this.selectionChangedListeners.push(listener);
-    }  
-    
-    getSelection() :Array<string>{
-        return this.selection; 
     }
-    
+
+    getSelection(): Array<string> {
+        return this.selection;
+    }
+
     openContainedForm(ghost) {
         this.wsSession.callService('formeditor', 'openContainedForm', {
             "uuid": ghost.uuid

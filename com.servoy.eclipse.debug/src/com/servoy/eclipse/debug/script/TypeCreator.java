@@ -77,8 +77,6 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
@@ -247,6 +245,7 @@ import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
@@ -1393,34 +1392,41 @@ public class TypeCreator extends TypeCache
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
+			recordType.setName("FoundsetPropertyType");
 			EList<Member> members = recordType.getMembers();
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName("foundset");
 			property.setType(getTypeRef(context, FoundSet.JS_FOUNDSET));
 			members.add(property);
-			Object config = pd.getConfig();
-			if (config instanceof JSONObject)
+			Object cfg = pd.getConfig();
+			if (cfg instanceof FoundsetPropertyTypeConfig)
 			{
-				if (((JSONObject)config).optBoolean("dynamicDataproviders", false))
+				FoundsetPropertyTypeConfig config = (FoundsetPropertyTypeConfig)cfg;
+				if (config.hasDynamicDataproviders)
 				{
 					property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName("dataproviders");
+					property.setDescription(
+						"FoundsetPropertyType.dataproviders - component was configured to use dynamic dataproviders.\n This is an object in which the key is the client side dataprovider name while the value is the server side dataprovider to use.");
 					property.setType(getTypeRef(context, ITypeNames.OBJECT));
 					members.add(property);
 				}
 				else
 				{
-					JSONArray dataproviders = ((JSONObject)config).optJSONArray("dataproviders");
+					String[] dataproviders = config.dataproviders;
 					if (dataproviders != null)
 					{
 						property = TypeInfoModelFactory.eINSTANCE.createProperty();
 						property.setName("dataproviders");
+						property.setDescription(
+							"This component was configured to use a fixed set of dataproviders. This is an object in which the key is the client side dataprovider name while the value is the server side dataprovider to use.");
 						Type dataprovidersType = TypeInfoModelFactory.eINSTANCE.createType();
+						dataprovidersType.setName("FixedFoundsetDataproviders");
 						EList<Member> dpMembers = dataprovidersType.getMembers();
-						for (int i = 0; i < dataproviders.length(); i++)
+						for (String dataprovider : dataproviders)
 						{
 							Property dbProp = TypeInfoModelFactory.eINSTANCE.createProperty();
-							dbProp.setName(dataproviders.optString(i));
+							dbProp.setName(dataprovider);
 							dbProp.setType(getTypeRef(context, ITypeNames.STRING));
 							dpMembers.add(dbProp);
 						}
