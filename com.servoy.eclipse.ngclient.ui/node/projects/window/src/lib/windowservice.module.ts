@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {ShortcutService} from './window_service/shortcut.service';
-import {WindowPluginService} from './window_service/window.service';
-import {PopupMenuService} from './window_service/popupmenu.service';
-import { ServoyPublicModule } from '@servoy/public';
+import {ShortcutService, Shortcut} from './window_service/shortcut.service';
+import {WindowPluginService, PopupMenuShowCommand} from './window_service/window.service';
+import {PopupMenuService, MenuItem, Popup} from './window_service/popupmenu.service';
+import { ServoyPublicModule, PopupForm, SpecTypesService } from '@servoy/public';
 
 @NgModule({
    declarations: [],
@@ -11,4 +11,12 @@ import { ServoyPublicModule } from '@servoy/public';
    providers: [WindowPluginService, ShortcutService, PopupMenuService],
    entryComponents: []
 })
-export class WindowServiceModule {}
+export class WindowServiceModule {
+     constructor( specTypesService: SpecTypesService ) {
+        specTypesService.registerType('window.popupMenuShowCommand', PopupMenuShowCommand);
+        specTypesService.registerType('window.popup', Popup);
+        specTypesService.registerType('window.shortcut', Shortcut);
+        specTypesService.registerType('window.menuitem', MenuItem);
+        specTypesService.registerType('window.popupform', PopupForm);
+    }
+}

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import {BaseCustomObject} from '@servoy/public';
 
 @Injectable()
 export class ShortcutService {
@@ -17,7 +18,7 @@ export class ShortcutService {
             disable_in_input: false,
             target: this.doc,
             keycode: false
-        };
+        } as Shortcut;
         if (!opt) opt = default_options;
         else {
             for (const dfo in default_options) {
@@ -242,7 +243,7 @@ export class ShortcutService {
     }
 }
 
-class Shortcut {
+export class Shortcut extends BaseCustomObject{
     public type?: string;
     public propagate?: boolean;
     public disable_in_input?: boolean;

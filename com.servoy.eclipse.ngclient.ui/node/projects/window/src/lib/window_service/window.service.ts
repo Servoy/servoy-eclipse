@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
-import { ShortcutService } from './shortcut.service';
+import { ShortcutService, Shortcut as Shortcut2 } from './shortcut.service';
 import { PopupMenuService, Popup } from './popupmenu.service';
-import { LoggerFactory, LoggerService, ServoyPublicService, PopupForm, Callback } from '@servoy/public';
+import { LoggerFactory, LoggerService, ServoyPublicService, PopupForm, Callback, BaseCustomObject } from '@servoy/public';
 
 @Injectable()
 export class WindowPluginService {
@@ -80,7 +80,7 @@ export class WindowPluginService {
                         return retValue;
 
                     }
-                        , { propagate: true, disable_in_input: false });
+                        , { propagate: true, disable_in_input: false } as Shortcut2);
                 }
             });
         }
@@ -187,7 +187,7 @@ class Shortcut {
 
 }
 
-class PopupMenuShowCommand {
+export class PopupMenuShowCommand extends BaseCustomObject {
     public popupName: string;
     public elementId: string;
     public x: number;

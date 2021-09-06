@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { ServoyPublicService, Callback } from '@servoy/public';
+import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
 
 @Injectable()
 export class PopupMenuService {
@@ -117,13 +117,13 @@ export class PopupMenuService {
     }
 }
 
-export class Popup {
+export class Popup extends BaseCustomObject {
     public name: string;
     public cssClass: string;
     public items: MenuItem[];
 }
 
-export class MenuItem {
+export class MenuItem extends BaseCustomObject{
     public id: string;
     public text: string;
     public callback: Callback;
