@@ -7,7 +7,8 @@
       class='svy-calendar form-control form-control-sm input-sm svy-line-height-normal'
       style="height:100%"
       [id]="servoyApi.getMarkupId()"
-      [(ngModel)]="dataProviderID"
+      [ngModel]="dataProviderID"
+      (ngModelChange)="onModelChange($event)"
       [svyFormat]="format"
       (change)="pushUpdate()"
       [svyStartEdit]="'dataProviderID'"
