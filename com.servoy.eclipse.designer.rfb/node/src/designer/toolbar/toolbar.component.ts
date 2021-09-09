@@ -183,7 +183,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            this.sendWireframeState(result);
+            this.sendState('showWireframe', result);
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -217,6 +217,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
+                this.sendState('maxLevel', result);
+                this.editorSession.setZoomLevel(result);
             }
         });
 
@@ -231,15 +233,15 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         }
     }
 
-    private sendWireframeState(result: boolean) {
+    private sendState(key:string, result: any) {
         const iframe = this.doc.querySelector('iframe');
         let elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
         if (elements.length == 0) {
-            setTimeout(() => this.sendWireframeState(result), 400);
+            setTimeout(() => this.sendState(key, result), 400);
             return;
         }
         else {
-            iframe.contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
+            iframe.contentWindow.postMessage({ id: key, value: result},  '*');
         }
     }
 
@@ -444,7 +446,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             () => {
                 return this.editorSession.getState().showWireframe;
             },
-            null
+            (value) => {
+                this.editorSession.getState().maxLevel = value;
+                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value},  '*');
+                this.editorSession.setZoomLevel(value);
+            }
         );
         this.btnSetMaxLevelContainer.max = 10;
         this.btnSetMaxLevelContainer.min = 3;
@@ -453,13 +459,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnSetMaxLevelContainer.incbutton_text = "Increase zoom level";
         this.btnSetMaxLevelContainer.incIcon = "images/zoom_in_xs.png";
         this.btnSetMaxLevelContainer.state = false;
-        this.btnSetMaxLevelContainer.onSet = (value) => {
-            this.editorSession.getState().maxLevel = value;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setZoomLevel(value);
-        };
-
 
         this.btnSaveAsTemplate = new ToolbarItem(
             "Save as template...",
