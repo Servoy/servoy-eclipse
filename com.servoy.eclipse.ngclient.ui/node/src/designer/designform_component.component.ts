@@ -102,6 +102,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private _containers: { added: any; removed: any; };
     private _cssstyles: { [x: string]: any; };
     private designMode : boolean;
+	private maxLevel = 3;
 
     draggedElementItem: ComponentCache;
 
@@ -128,6 +129,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'showWireframe') {
                 this.showWireframe = event.data.value; 
+            }
+            if (event.data.id === 'maxLevel') {
+                this.maxLevel = parseInt(event.data.value);
             }
             this.detectChanges();
         })
@@ -315,9 +319,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return api;
     }
 
-  getNGClass(item: StructureCache) {
-      var ngclass = {};
-      ngclass[item.attributes.designclass] =this.showWireframe;
+  getNGClass(item: StructureCache) : { [klass: string]: any; } {
+      const  ngclass = {};
+      ngclass[item.attributes.designclass] = this.showWireframe;
+      ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
+      const children = item.items.length;
+      if (children > 0 && children < 10)  {
+          ngclass['containerChildren'+children] = this.showWireframe && item.getDepth()  === this.maxLevel + 1;
+      }
+      if (children >= 10)  {
+          ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel + 1;
+      }
       return ngclass;
     }
 
