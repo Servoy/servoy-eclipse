@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2017 Servoy BV
+  This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2021 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,6 +88,8 @@ public class ExportPage extends WizardPage
 	private Text updateUrlText;
 	private Text emailAddress;
 	private Button storeBtn;
+	private Group notificationGroup;
+	private ToolBar notificationBar;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
@@ -306,8 +310,8 @@ public class ExportPage extends WizardPage
 		});
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
-		includeUpdateBtn.setText("Include update");
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
+		includeUpdateBtn.setText("Include update (*)");
+		includeUpdateBtn.setEnabled(canCreateUpdate());
 		includeUpdateBtn.setSelection(getIncludeUpdate());
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -337,7 +341,7 @@ public class ExportPage extends WizardPage
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 		updateUrlText.setEditable(true);
 		updateUrlText.setVisible(true);
-		updateUrlText.setEnabled(isUpdateSupported());
+		updateUrlText.setEnabled(isUpdatableVersion());
 		updateUrlText.setText(getUpdateUrl());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -366,18 +370,26 @@ public class ExportPage extends WizardPage
 		storeBtn.setToolTipText("If not checked, artifacts will be deleted after several hours ...");
 		storeBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("store_data"));
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalSpan = 2;
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
-		emptyLabel.setText("");
-		emptyLabel.setEnabled(false); //set to gray
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalAlignment = GridData.GRAB_VERTICAL;
+		notificationGroup = new Group(composite, SWT.SHADOW_NONE);
+		final RowLayout notifLayout = new RowLayout(SWT.HORIZONTAL);
+		notifLayout.marginTop = 50;
+		notificationGroup.setLayout(notifLayout);
+		notificationGroup.setEnabled(false);//this disable events for embedded toolbar
+
+		notificationBar = new ToolBar(notificationGroup, SWT.FLAT);
+		final ToolItem item = new ToolItem(notificationBar, SWT.PUSH);
+		item.setText("(*) Windows only");
+		item.setEnabled(true);
+
+		notificationBar.setEnabled(canCreateUpdate());
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
-		emptyLabel.setLayoutData(gd);
-		emptyLabel.setVisible(true);
+		notificationGroup.setLayoutData(gd);
+
 
 		setControl(composite);
 		this.getWizard().getContainer().getShell().pack();
@@ -402,8 +414,9 @@ public class ExportPage extends WizardPage
 
 	private void srcVersionListener(SelectionEvent event)
 	{
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		updateUrlText.setEnabled(isUpdateSupported());
+		includeUpdateBtn.setEnabled(canCreateUpdate());
+		notificationBar.setEnabled(canCreateUpdate());
+		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	private List<String> getAvailableVersions()
@@ -524,11 +537,16 @@ public class ExportPage extends WizardPage
 		return getInitialImportPath();
 	}
 
-	private Object platformSelectionChangeListener(String selectedPlatform)
+	private void platformSelectionChangeListener(String selectedPlatform)
 	{
 		final int index = selectedPlatforms.indexOf(selectedPlatform);
-		// the return type is different depending on the execution leaf
-		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
+
+		if (index >= 0) selectedPlatforms.remove(index);
+		else selectedPlatforms.add(selectedPlatform);
+
+		includeUpdateBtn.setEnabled(canCreateUpdate());
+		notificationBar.setEnabled(canCreateUpdate());
+		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	public List<String> getSelectedPlatforms()
@@ -536,19 +554,21 @@ public class ExportPage extends WizardPage
 		return selectedPlatforms;
 	}
 
-	private boolean isUpdateAvailable()
+	private boolean isUpdatableVersion()
 	{
+		if (selectedPlatforms.size() == 0) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		if (result > 0)
+		if (result >= 0)
 			return true;
 		return false;
 	}
 
-	private boolean isUpdateSupported()
+	//return true
+	private boolean canCreateUpdate()
 	{
 		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		if (result >= 0)
+		if (result > 0)
 			return true;
 		return false;
 	}
