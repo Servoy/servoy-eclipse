@@ -32,6 +32,7 @@ import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -306,7 +307,11 @@ public class ExportPage extends WizardPage
 		});
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
-		includeUpdateBtn.setText("Include update (Windows only)"); //SWT and parent's grid layout - this will set the available space for displayed text - so set the maximum one
+		GridDataFactory.swtDefaults()//
+			.grab(true, false)//
+			.hint(0, SWT.DEFAULT)// width hint prevents text from expanding to full line
+			.align(SWT.FILL, SWT.CENTER)//
+			.applyTo(includeUpdateBtn);
 		setIncludeUpdateState();
 
 
@@ -392,7 +397,6 @@ public class ExportPage extends WizardPage
 
 	private void srcVersionListener(SelectionEvent event)
 	{
-		includeUpdateBtn.setEnabled(canCreateUpdate());
 		setIncludeUpdateState();
 		updateUrlText.setEnabled(isUpdatableVersion());
 	}
@@ -545,7 +549,7 @@ public class ExportPage extends WizardPage
 		}
 		includeUpdateBtn.setSelection(getIncludeUpdate());
 		includeUpdateBtn.setText("Include update");
-		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows only)");
+		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows)");
 		includeUpdateBtn.setVisible(true);
 	}
 
@@ -587,7 +591,7 @@ public class ExportPage extends WizardPage
 		if (widthText.getText().trim().length() > 0)
 			settings.put("ngdesktop_height", heightText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
-		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
+		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
 		if (appNameText.getText().trim().length() > 0)
 			settings.put("application_name", appNameText.getText().trim());
 		if (updateUrlText.getText().trim().length() > 0)
