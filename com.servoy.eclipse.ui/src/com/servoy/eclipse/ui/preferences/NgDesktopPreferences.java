@@ -31,7 +31,7 @@ public class NgDesktopPreferences
 {
 
 	public static final String NGDESKTOP_VERSION = "ngdesktopVersion";
-	public static final String NGDESKTOP_VERSION_DEFAULT = "2020.12";
+	public static final String NGDESKTOP_VERSION_DEFAULT = "2021.09";
 
 	private final IEclipsePreferences eclipsePreferences;
 
