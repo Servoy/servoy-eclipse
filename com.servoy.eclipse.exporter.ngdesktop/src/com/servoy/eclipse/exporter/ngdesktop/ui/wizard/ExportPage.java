@@ -47,8 +47,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -88,8 +86,6 @@ public class ExportPage extends WizardPage
 	private Text updateUrlText;
 	private Text emailAddress;
 	private Button storeBtn;
-	private Group notificationGroup;
-	private ToolBar notificationBar;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
@@ -310,9 +306,9 @@ public class ExportPage extends WizardPage
 		});
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
-		includeUpdateBtn.setText("Include update (*)");
-		includeUpdateBtn.setEnabled(canCreateUpdate());
-		includeUpdateBtn.setSelection(getIncludeUpdate());
+		includeUpdateBtn.setText("Include update (Windows only)"); //SWT and parent's grid layout - this will set the available space for displayed text - so set the maximum one
+		setIncludeUpdateState();
+
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -373,24 +369,6 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		notificationGroup = new Group(composite, SWT.SHADOW_NONE);
-		final RowLayout notifLayout = new RowLayout(SWT.HORIZONTAL);
-		notifLayout.marginTop = 50;
-		notificationGroup.setLayout(notifLayout);
-		notificationGroup.setEnabled(false);//this disable events for embedded toolbar
-
-		notificationBar = new ToolBar(notificationGroup, SWT.FLAT);
-		final ToolItem item = new ToolItem(notificationBar, SWT.PUSH);
-		item.setText("(*) Windows only");
-		item.setEnabled(true);
-
-		notificationBar.setEnabled(canCreateUpdate());
-
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
-		notificationGroup.setLayoutData(gd);
-
-
 		setControl(composite);
 		this.getWizard().getContainer().getShell().pack();
 	}
@@ -415,7 +393,7 @@ public class ExportPage extends WizardPage
 	private void srcVersionListener(SelectionEvent event)
 	{
 		includeUpdateBtn.setEnabled(canCreateUpdate());
-		notificationBar.setEnabled(canCreateUpdate());
+		setIncludeUpdateState();
 		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
@@ -544,14 +522,31 @@ public class ExportPage extends WizardPage
 		if (index >= 0) selectedPlatforms.remove(index);
 		else selectedPlatforms.add(selectedPlatform);
 
-		includeUpdateBtn.setEnabled(canCreateUpdate());
-		notificationBar.setEnabled(canCreateUpdate());
+		setIncludeUpdateState();
 		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	public List<String> getSelectedPlatforms()
 	{
 		return selectedPlatforms;
+	}
+
+	private void setIncludeUpdateState()
+	{
+		if (!selectedPlatforms.contains(WINDOWS_PLATFORM))
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		if (!canCreateUpdate())
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		includeUpdateBtn.setSelection(getIncludeUpdate());
+		includeUpdateBtn.setText("Include update");
+		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows only)");
+		includeUpdateBtn.setVisible(true);
 	}
 
 	private boolean isUpdatableVersion()
