@@ -12,6 +12,7 @@ import {EditorContentService} from './editorcontent.service';
 import { BSWindow } from '../ngclient/services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from '../ngclient/services/bootstrap-window/bswindow_manager.service';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
+import {AbstractFormComponent} from '../ngclient/form/form_component.component';
 
 @NgModule({
   imports: [
@@ -23,7 +24,8 @@ import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
     ServoyCoreComponentsModule
   ],
   declarations: [ServoyDesignerComponent, DesignFormComponent ],
-  providers: [EditorContentService, BSWindow, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }],
+  providers: [EditorContentService, BSWindow, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl, 
+            { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }],
   schemas: [
               CUSTOM_ELEMENTS_SCHEMA
     ]

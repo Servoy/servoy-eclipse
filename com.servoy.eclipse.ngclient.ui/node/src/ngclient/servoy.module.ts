@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MainComponent } from './main.component';
 
-import { FormComponent } from './form/form_component.component';
+import { FormComponent, AbstractFormComponent } from './form/form_component.component';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';

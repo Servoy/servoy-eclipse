@@ -13,6 +13,12 @@ import { FormService } from '../form.service';
 import { DOCUMENT } from '@angular/common';
 import { ServoyBaseComponent } from '@servoy/public';
 
+export abstract class AbstractFormComponent{
+     abstract getFormCache(): FormCache;
+     
+     abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
+}
+
 @Component({
     // eslint-disable-next-line
     selector: 'svy-form',
@@ -59,8 +65,7 @@ import { ServoyBaseComponent } from '@servoy/public';
    `
    /* eslint-enable max-len */
 })
-
-export class FormComponent implements OnDestroy, OnChanges {
+export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
@@ -97,6 +102,7 @@ export class FormComponent implements OnDestroy, OnChanges {
                 private changeHandler: ChangeDetectorRef,
                 private el: ElementRef, private renderer: Renderer2,
                 @Inject(DOCUMENT) private document: Document) {
+                    super();
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -344,8 +350,4 @@ class FormComponentServoyApi extends ServoyApi {
      this.fc.unRegisterComponent(comp);
     }
 }
-
-
-
-
 

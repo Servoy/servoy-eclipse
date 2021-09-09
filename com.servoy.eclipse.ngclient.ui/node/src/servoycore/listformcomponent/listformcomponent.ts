@@ -1,8 +1,9 @@
 import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges
+    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector
 } from '@angular/core';
-import { FormComponent } from '../../ngclient/form/form_component.component';
+import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
+import { DesignFormComponent } from '../../designer/designform_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ComponentConverter, ComponentModel } from '../../ngclient/converters/component_converter';
 import { ServoyBaseComponent } from '@servoy/public';
@@ -23,7 +24,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
     <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
     <div *ngIf="containedForm.absoluteLayout">
         <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-            <div *ngFor="let item of cache.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+            <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
             </div>
         </div>
@@ -37,12 +38,12 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 </div>
 
 <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" class="svy-layoutcontainer">
+    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
 </ng-template>
 <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
-          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
+          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
                <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
                </div>
@@ -86,15 +87,26 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private rowItems: Array<ComponentModel | FormComponentCache>;
 
     private waitingForLoad = false;  
-
+    parent : AbstractFormComponent;
+    
     constructor(protected readonly renderer: Renderer2,
         private formservice: FormService,
         private servoyService: ServoyService,
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
-        @Inject(FormComponent) private parent: FormComponent,
+        private _injector: Injector,
         @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
+        try{
+            this.parent = this._injector.get<FormComponent>(FormComponent);
+        }
+        catch(e){
+            //ignore
+        }
+        
+        if (!this.parent){
+            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+        }
         this.log = logFactory.getLogger('ListFormComponent');
     }
 
@@ -144,7 +156,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     ngOnChanges(changes: SimpleChanges) {
         super.ngOnChanges(changes);
-        if (changes.containedForm) {
+        if (this.containedForm &&this.containedForm.childElements) {
             this.rowItems = [];
             this.containedForm.childElements.forEach(elem => {
                 if (elem.type === 'servoycore-formcomponent')
@@ -464,6 +476,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     calculateCells() {
         // if it is still loading then don't calculate it right now again.
         if (this.waitingForLoad) return;
+        if (this.servoyApi.isInDesigner()) {
+            this.numberOfCells = 1;
+            return 
+        }
         this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
             if (this.servoyApi.isInAbsoluteLayout()) {

@@ -13,6 +13,7 @@ import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } f
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
+import {AbstractFormComponent} from '../ngclient/form/form_component.component';
 
 @Component({
     // eslint-disable-next-line
@@ -68,7 +69,7 @@ import { DOCUMENT } from '@angular/common';
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent implements OnDestroy, OnChanges {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
@@ -110,6 +111,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         private el: ElementRef, private renderer: Renderer2,
         @Inject(DOCUMENT) private document: Document,
         private windowRefService: WindowRefService) {
+            super();
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
             if (event.data.id === 'createElement') {
