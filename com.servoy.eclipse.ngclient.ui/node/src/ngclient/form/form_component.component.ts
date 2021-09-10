@@ -13,10 +13,63 @@ import { FormService } from '../form.service';
 import { DOCUMENT } from '@angular/common';
 import { ServoyBaseComponent } from '@servoy/public';
 
+@Component({
+  template: ''
+})
 export abstract class AbstractFormComponent{
+    
      abstract getFormCache(): FormCache;
      
      abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
+     
+     abstract getContainerByName(containername: string) : Element;
+     
+     _containers: { added: any; removed: any; };
+     _cssstyles: { [x: string]: any; };
+    
+    constructor(protected renderer: Renderer2) {
+    }
+    
+    @Input('containers')
+    set containers(containers: {added: any, removed: any}) {
+        if (!containers) return;
+        this._containers = containers;
+        for (let containername in containers.added) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
+            }
+        }
+        for (let containername in containers.removed) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
+            }
+        }
+    }
+
+    get containers() {
+        return this._containers;
+    }
+
+    @Input('cssStyles')
+    set cssstyles(cssStyles: { [x: string]: any; }) {
+        if (!cssStyles) return;
+        this._cssstyles = cssStyles;
+        for (let containername in cssStyles) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                const stylesMap = cssStyles[containername];
+                for (let key in stylesMap) {
+                    this.renderer.setStyle(container, key, stylesMap[key]);
+                }
+            }
+        }
+    }
+
+    get cssstyles() {
+        return this._cssstyles;
+    }
 }
 
 @Component({
@@ -94,15 +147,13 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
-    private _containers: { added: any; removed: any; };
-    private _cssstyles: { [x: string]: any; };
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, private renderer: Renderer2,
+                private el: ElementRef, protected renderer: Renderer2,
                 @Inject(DOCUMENT) private document: Document) {
-                    super();
+                    super(renderer);
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -128,47 +179,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
         }
-    }
-
-    @Input('containers')
-    set containers(containers: {added: any, removed: any}) {
-        if (!containers) return;
-        this._containers = containers;
-        for (let containername in containers.added) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
-            }
-        }
-        for (let containername in containers.removed) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
-            }
-        }
-    }
-
-    get containers() {
-        return this._containers;
-    }
-
-    @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
-        if (!cssStyles) return;
-        this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
-                    this.renderer.setStyle(container, key, stylesMap[key]);
-                }
-            }
-        }
-    }
-
-    get cssstyles() {
-        return this._cssstyles;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -327,7 +337,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
     }
 
-    private getContainerByName(containername: string) : Element {
+    getContainerByName(containername: string) : Element {
        return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
     }
 }

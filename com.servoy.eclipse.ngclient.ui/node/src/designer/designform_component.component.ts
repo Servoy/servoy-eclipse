@@ -99,20 +99,18 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
-    private _containers: { added: any; removed: any; };
-    private _cssstyles: { [x: string]: any; };
     private designMode : boolean;
-	private maxLevel = 3;
-
+    private maxLevel = 3;
+    
     draggedElementItem: ComponentCache;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
         private changeHandler: ChangeDetectorRef,
-        private el: ElementRef, private renderer: Renderer2,
+        private el: ElementRef, protected renderer: Renderer2,
         @Inject(DOCUMENT) private document: Document,
         private windowRefService: WindowRefService) {
-            super();
+             super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
             if (event.data.id === 'createElement') {
@@ -158,47 +156,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
         }
-    }
-
-    @Input('containers')
-    set containers(containers: { added: any, removed: any }) {
-        if (!containers) return;
-        this._containers = containers;
-        for (let containername in containers.added) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
-            }
-        }
-        for (let containername in containers.removed) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
-            }
-        }
-    }
-
-    get containers() {
-        return this._containers;
-    }
-
-    @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
-        if (!cssStyles) return;
-        this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
-                    this.renderer.setStyle(container, key, stylesMap[key]);
-                }
-            }
-        }
-    }
-
-    get cssstyles() {
-        return this._cssstyles;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -337,7 +294,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return null;
     }
 
-    private getContainerByName(containername: string): Element {
+    getContainerByName(containername: string): Element {
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
 }
