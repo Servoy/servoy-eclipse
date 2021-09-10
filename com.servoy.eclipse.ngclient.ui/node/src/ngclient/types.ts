@@ -129,7 +129,7 @@ export class ComponentCache implements IComponentCache {
 }
 
 export class StructureCache {
-    protected parent;
+    private level = 0;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string) {
@@ -139,7 +139,7 @@ export class StructureCache {
     addChild(child: StructureCache | ComponentCache | FormComponentCache): StructureCache {
         this.items.push(child);
         if (child instanceof StructureCache) {
-           child.parent = this;
+           child.setDepth(this.level);
             return child as StructureCache;
         }
         return null;
@@ -152,18 +152,17 @@ export class StructureCache {
             return true;
         }
         if (child instanceof StructureCache) {
-            child.parent = undefined;
+            child.level = 0;
         }
     }
     
+    setDepth(level: number) {
+        this.level = level + 1;
+        this.items.filter(item => item instanceof StructureCache).forEach(item => (item as StructureCache).setDepth(this.level));
+    }
+    
     getDepth() : number {
-       let  level = -1;
-       let parent = this.parent;
-       while (parent !== undefined) {
-           level += 1;
-           parent = parent.parent;
-       }
-       return level;
+        return this.level;
     }
 }
 
