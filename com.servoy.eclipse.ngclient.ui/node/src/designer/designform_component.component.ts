@@ -282,10 +282,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
       const children = item.items.length;
       if (children > 0 && children < 10)  {
-          ngclass['containerChildren'+children] = this.showWireframe && item.getDepth()  === this.maxLevel + 1;
+          ngclass['containerChildren'+children] = this.showWireframe && item.getDepth()  === this.maxLevel;
       }
       if (children >= 10)  {
-          ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel + 1;
+          ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel;
       }
       return ngclass;
     }
