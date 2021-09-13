@@ -11,7 +11,7 @@ import { FormComponentState } from '../../ngclient/converters/formcomponent_conv
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
-import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset  } from '@servoy/public';
+import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
 import { ServoyApi } from '../../ngclient/servoy_api';
@@ -86,9 +86,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private log: LoggerService;
     private rowItems: Array<ComponentModel | FormComponentCache>;
 
-    private waitingForLoad = false;  
-    parent : AbstractFormComponent;
-    
+    private waitingForLoad = false;
+    parent: AbstractFormComponent;
+
     constructor(protected readonly renderer: Renderer2,
         private formservice: FormService,
         private servoyService: ServoyService,
@@ -97,14 +97,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         private _injector: Injector,
         @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
-        try{
+        try {
             this.parent = this._injector.get<FormComponent>(FormComponent);
         }
-        catch(e){
+        catch (e) {
             //ignore
         }
-        
-        if (!this.parent){
+
+        if (!this.parent) {
             this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
         }
         this.log = logFactory.getLogger('ListFormComponent');
@@ -156,11 +156,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     ngOnChanges(changes: SimpleChanges) {
         super.ngOnChanges(changes);
-        if (this.containedForm &&this.containedForm.childElements) {
+        if (this.containedForm && this.containedForm.childElements) {
             this.rowItems = [];
             this.containedForm.childElements.forEach(elem => {
                 if (elem.type === 'servoycore-formcomponent')
-                     this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
+                    this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
                 else this.rowItems.push(elem);
             });
         }
@@ -193,7 +193,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         }
                     } else insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                 });
-                if (insertOrDeletes)   this.calculateCells();
+                if (insertOrDeletes) this.calculateCells();
             } else {
                 if (event.serverFoundsetSizeChanged) {
                     this.updatePagingControls();
@@ -298,6 +298,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getViewportRows(): ViewPortRow[] {
+        if (this.servoyApi.isInDesigner()) {
+            return [{} as ViewPortRow];
+        }
         if (this.numberOfCells === 0) return [];
         return this.foundset.viewPort.rows;
     }
@@ -347,23 +350,28 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
     }
 
-    getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache ): TemplateRef<any> {
+    getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
+            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv;
         }
-         if (item instanceof FormComponentCache) {
+        if (item instanceof FormComponentCache) {
             return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         }
         return this.parent.getTemplateForLFC(item);
     }
 
-    getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache{
+    getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache {
         if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
         }
         let cm: ComponentModel = null;
         if (item instanceof ComponentCache) {
-            cm = this.getRowItems().find(elem => elem.name === item.name) as ComponentModel;
+            if (this.servoyApi.isInDesigner()) {
+                cm = this.cache.items.find(elem => elem['name'] === item.name) as ComponentModel;
+            }
+            else {
+                cm = this.getRowItems().find(elem => elem.name === item.name) as ComponentModel;
+            }
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
@@ -404,9 +412,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 rowItem.model[p] = cm[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
             });
         }
-        cm.mappedHandlers.forEach((value, key) => {
-            rowItem.handlers[key] = value.selectRecordHandler(rowId);
-        });
+        if (cm.mappedHandlers) {
+            cm.mappedHandlers.forEach((value, key) => {
+                rowItem.handlers[key] = value.selectRecordHandler(rowId);
+            });
+        }
 
         if (!row._cache) row._cache = new Map();
         row._cache.set(cm.name, rowItem);
@@ -478,7 +488,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.waitingForLoad) return;
         if (this.servoyApi.isInDesigner()) {
             this.numberOfCells = 1;
-            return 
+            return
         }
         this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
@@ -581,7 +591,7 @@ class ListFormComponentServoyApi extends ServoyApi {
         formservice: FormService,
         servoyService: ServoyService,
         private fc: ListFormComponent) {
-        super(cell.state, formname, absolute, formservice, servoyService,false);
+        super(cell.state, formname, absolute, formservice, servoyService, false);
         this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }
 

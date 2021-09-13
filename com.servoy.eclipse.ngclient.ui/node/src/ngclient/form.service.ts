@@ -391,10 +391,7 @@ export class FormService {
                             formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
                         }
                         const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
-                        formCache.add(comp);
-                        if (parent != null) {
-                            parent.addChild(comp);
-                        }
+                        formCache.add(comp, parent);
                     }
         });
     }

@@ -9,6 +9,7 @@ export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
     public componentCache: Map<string, ComponentCache>;
+    public partComponentsCache: Map<string, ComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     private _mainStructure: StructureCache;
     public formComponents: Map<string, FormComponentCache>;
@@ -18,11 +19,18 @@ export class FormCache implements IFormCache {
     constructor(readonly formname: string, size: Dimension, public readonly url: string) {
         this.size = size;
         this.componentCache = new Map();
+        this.partComponentsCache = new Map();
         this._parts = [];
         this.formComponents = new Map();
     }
-    public add(comp: ComponentCache) {
+    public add(comp: ComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
         this.componentCache.set(comp.name, comp);
+        if (parent != null) {
+            parent.addChild(comp);
+        }
+        if (parent instanceof PartCache){
+             this.partComponentsCache.set(comp.name, comp);
+        }
     }
 
     public addLayourContainer(container: StructureCache) {
@@ -67,12 +75,13 @@ export class FormCache implements IFormCache {
 
     public removeComponent(name: string) {
         this.componentCache.delete(name);
+        this.partComponentsCache.delete(name);
     }
 
     public removeLayoutContainer(id: string) {
         this.layoutContainersCache.delete(id);
     }
-    
+
     public getConversionInfo(beanname: string) {
         return this.conversionInfo[beanname];
     }
@@ -139,13 +148,13 @@ export class StructureCache {
     addChild(child: StructureCache | ComponentCache | FormComponentCache): StructureCache {
         this.items.push(child);
         if (child instanceof StructureCache) {
-           child.parent = this;
+            child.parent = this;
             return child as StructureCache;
         }
         return null;
     }
 
-    removeChild(child: StructureCache | ComponentCache | FormComponentCache) : boolean{
+    removeChild(child: StructureCache | ComponentCache | FormComponentCache): boolean {
         const index = this.items.indexOf(child);
         if (index >= 0) {
             this.items.splice(index, 1);
@@ -155,15 +164,15 @@ export class StructureCache {
             child.parent = undefined;
         }
     }
-    
-    getDepth() : number {
-       let  level = -1;
-       let parent = this.parent;
-       while (parent !== undefined) {
-           level += 1;
-           parent = parent.parent;
-       }
-       return level;
+
+    getDepth(): number {
+        let level = -1;
+        let parent = this.parent;
+        while (parent !== undefined) {
+            level += 1;
+            parent = parent.parent;
+        }
+        return level;
     }
 }
 
