@@ -190,7 +190,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         const highlightPromise = this.editorSession.isShowHighlight();
         highlightPromise.then((result) => {
             this.btnHighlightWebcomponents.state = result;
-            this.editorSession.getState().design_highlight = result ? "highlight_element" : null;
+            this.editorSession.fireHighlightChangedListeners(result);
         });
         const hideInheritedPromise = this.editorSession.isHideInherited();
         hideInheritedPromise.then((result) => {
@@ -308,7 +308,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 const promise = this.editorSession.toggleHighlight();
                 promise.then((result) => {
                     this.btnHighlightWebcomponents.state = result;
-                    this.editorSession.getState().design_highlight = result ? "highlight_element" : null;
+                    this.editorSession.fireHighlightChangedListeners(result);
                 })
             }
         );

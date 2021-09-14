@@ -10,6 +10,7 @@ export class EditorSessionService {
     private state = new State();
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
+    private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener:  BehaviorSubject<string>;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService) {
@@ -178,6 +179,14 @@ export class EditorSessionService {
         }
     }
 
+    addHighlightChangedListener(listener: IShowHighlightChangedListener) : void{
+        this.highlightChangedListeners.push(listener);
+    }
+    
+    fireHighlightChangedListeners(showHighlight : boolean){
+       this.highlightChangedListeners.forEach(listener => listener.highlightChanged(showHighlight)); 
+    }
+    
     getSelection(): Array<string> {
         return this.selection;
     }
@@ -285,9 +294,14 @@ export interface ISelectionChangedListener {
 
 }
 
+export interface IShowHighlightChangedListener {
+
+    highlightChanged(showHighlight : boolean): void;
+
+}
+
 class State {
     showWireframe: boolean;
-    design_highlight: string;
     showSolutionLayoutsCss: boolean;
     showSolutionCss: boolean;
     maxLevel: any;

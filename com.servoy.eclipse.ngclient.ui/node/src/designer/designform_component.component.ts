@@ -1,6 +1,6 @@
 import {
     Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject
+    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
@@ -20,6 +20,7 @@ import {AbstractFormComponent} from '../ngclient/form/form_component.component';
     selector: 'svy-designform',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrls: ['./designform.css'],
+    encapsulation: ViewEncapsulation.None,
     /* eslint-disable max-len */
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->

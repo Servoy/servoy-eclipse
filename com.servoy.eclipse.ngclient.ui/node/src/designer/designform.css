@@ -1,3 +1,7 @@
+.highlight_element {
+    outline:1px solid lightblue;
+}
+
 .invisible_element {
     opacity: 0.3;
     border: 2px dashed;
