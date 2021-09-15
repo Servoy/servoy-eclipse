@@ -145,14 +145,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.calculateAdjustToMainRelativeLocation();
 
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        let found = Array.from(elements).find((node) => {
+        let found = Array.from(elements).reverse().find((node) => {
             let position = node.getBoundingClientRect();
             this.adjustElementRect(node, position);
             let addToSelection = false;
-            if (position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
+            if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 addToSelection = true;
             }
-            else if (parseInt(window.getComputedStyle(node, ":before").height) > 0) {
+            else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ":before").height) > 0) {
                 const computedStyle = window.getComputedStyle(node, ":before");
                 //the top and left positions of the before pseudo element are computed as the sum of:
                 //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
