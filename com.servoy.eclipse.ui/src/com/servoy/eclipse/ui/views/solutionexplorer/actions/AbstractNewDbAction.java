@@ -72,6 +72,13 @@ public abstract class AbstractNewDbAction extends Action
 	public void run()
 	{
 		HashMap<String, ServerConfig> serverMap = getServerMap();
+
+		if (serverMap.isEmpty())
+		{
+			MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "No existing database connection, at least one is needed to create a new one.");
+			return;
+		}
+
 		String dbSelection = getDbServerSelection(serverMap);
 		if (dbSelection == null) return;
 
@@ -153,7 +160,7 @@ public abstract class AbstractNewDbAction extends Action
 		return state;
 	}
 
-	private HashMap<String, ServerConfig> getServerMap()
+	protected HashMap<String, ServerConfig> getServerMap()
 	{
 		ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
 		HashMap<String, ServerConfig> serverMap = new HashMap<String, ServerConfig>();
@@ -164,11 +171,6 @@ public abstract class AbstractNewDbAction extends Action
 			{
 				serverMap.put(serverURL, sc);
 			}
-		}
-
-		if (serverMap.isEmpty())
-		{
-			MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "No existing database connection, at least one is needed to create a new one.");
 		}
 		return serverMap;
 	}
@@ -268,6 +270,11 @@ public abstract class AbstractNewDbAction extends Action
 				EditorUtil.openServerEditor(serverConfig);
 			}
 		});
+	}
+
+	public boolean isVisible()
+	{
+		return true;
 	}
 
 }

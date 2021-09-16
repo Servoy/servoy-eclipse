@@ -2675,7 +2675,7 @@ public class SolutionExplorerView extends ViewPart
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase");
 
 			createDBSubmenu.add(newPostgresqlDatabase);
-			createDBSubmenu.add(newSybaseDatabase);
+			if (newSybaseDatabase.isVisible()) createDBSubmenu.add(newSybaseDatabase);
 			manager.add(createDBSubmenu);
 		}
 
