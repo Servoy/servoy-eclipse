@@ -903,7 +903,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			return false;
 		}
 
-		if (!page.canOverwiteModules(file))
+		File decryptedFile = fileDecryption(file);
+
+		if (!page.canOverwiteModules(decryptedFile))
 		{
 			Display.getDefault().asyncExec(() -> {
 				if (!getShell().isDisposed()) getShell().close();
@@ -916,7 +918,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		final boolean isCleanImport = page.isCleanImport();
 		final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 		final boolean doActivateSolution = page.getActivateSolution();
-		doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
+		doImport(decryptedFile, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
 			page.projectLocationComposite.getProjectLocation(), getContainer(), null, false, false, null);
 
 		return true;
