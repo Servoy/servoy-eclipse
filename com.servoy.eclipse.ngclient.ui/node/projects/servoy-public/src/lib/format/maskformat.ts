@@ -291,7 +291,8 @@ export class MaskFormat {
         const test = this.element.value;
         let lastMatch = -1;
         let firstError = -1;
-        for (let i = 0, pos = 0; i < this.mask.length; i++) {
+        let i = 0;
+        for (let pos = 0; i < this.mask.length; i++) {
             if (this.tests[i]) {
                 this.buffer[i] = this.getPlaceHolder(i);
                 while (pos++ < test.length) {
@@ -324,7 +325,7 @@ export class MaskFormat {
             this.writeBuffer();
             if (!allow) this.element.value = this.element.value.substring(0, lastMatch + 1);
         }
-        return firstError !== -1 ? firstError : (partialPosition ? lastMatch : this.firstNonMaskPos);
+        return firstError !== -1 ? firstError : (partialPosition ? i : this.firstNonMaskPos);
     }
 
     private getPlaceHolder(i: number): any {
