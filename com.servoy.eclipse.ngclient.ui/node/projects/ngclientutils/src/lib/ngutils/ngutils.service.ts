@@ -367,6 +367,29 @@ export class NGUtilsService {
         (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
         return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
     };
+    
+    /**
+     * Move the scrollbar to the position of the given anchorSelector.
+     * The target anchorSelector can be a Servoy Form, Layout Container or element in a responsive form or any element in a form.
+     * You can use styleClass as selector.
+     * For example: you can add 'scroll-element' to an element of the form.
+     * Examples of usage: 
+     * - plugins.ngclientutils.scrollIntoView(".toScroll-To");
+     * - plugins.ngclientutils.scrollIntoView(".toScroll-To", { behavior: "smooth", block: "start", inline: "nearest" });
+     
+     * @param anchorSelector {string} the selector to which the scrollbar should be moved to.
+     * @param scrollIntoViewOptions option argument used for scrolling animation (example:  { behavior: "smooth", block: "start", inline: "nearest" }).
+     */
+    public scrollIntoView( anchorSelector: string, scrollIntoViewOptions?: any ) {
+        let anchor = this.document.querySelector( anchorSelector );
+        if ( anchor ) {
+            if ( !scrollIntoViewOptions ) scrollIntoViewOptions = { behavior: "smooth", block: "start", inline: "nearest" };
+            // move scrolling to position
+            anchor.scrollIntoView( scrollIntoViewOptions );
+        } else {
+            console.log( 'cannot find anchor element ' + anchorSelector );
+        }
+    }
 }
 
 class Tag {
