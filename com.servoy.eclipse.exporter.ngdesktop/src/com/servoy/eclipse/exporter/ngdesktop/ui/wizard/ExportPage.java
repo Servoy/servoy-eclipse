@@ -287,11 +287,12 @@ public class ExportPage extends WizardPage
 		srcVersionLabel.setToolTipText("NG Desktop version");
 
 		versionGroup = new Group(composite, SWT.NONE);
-		versionGroup.setLayout(new GridLayout(2, false));
+		versionGroup.setLayout(new GridLayout(3, false));
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
 		remoteVersions = getAvailableVersions();
+		srcVersionCombo.add("latest");
 
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
@@ -314,6 +315,9 @@ public class ExportPage extends WizardPage
 			.applyTo(includeUpdateBtn);
 		setIncludeUpdateState();
 
+		gd = new GridData();
+		gd.widthHint = 180;
+		includeUpdateBtn.setLayoutData(gd);
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -566,6 +570,8 @@ public class ExportPage extends WizardPage
 	private boolean canCreateUpdate()
 	{
 		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
+		if ("latest".equals(srcVersionCombo.getText()))
+			return true;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result > 0)
 			return true;
