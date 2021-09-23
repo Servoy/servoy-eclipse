@@ -27,6 +27,9 @@
                 "blockingOn": {
                     "type": "boolean"
                 },
+                "blockingChanges": {
+                    "type": "boolean"
+                },                
                 "provideColumnFormats": {
                     "type": "boolean"
                 },
