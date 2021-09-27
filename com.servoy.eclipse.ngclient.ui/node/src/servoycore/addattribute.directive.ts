@@ -25,7 +25,7 @@ export class AddAttributeDirective implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.svyContainerClasses) {
+        if (changes.svyContainerClasses && this.svyContainerClasses) {
             this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
 
@@ -34,7 +34,7 @@ export class AddAttributeDirective implements OnChanges {
                 this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerLayout[key]);
             }
         }
-        if (changes.svyContainerAttributes) {
+        if (changes.svyContainerAttributes && this.svyContainerAttributes) {
             for (const key of Object.keys(this.svyContainerAttributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
                 //if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
