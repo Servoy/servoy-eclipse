@@ -1,6 +1,7 @@
 import { Component, Inject, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
+import { URLParserService } from '../services/urlparser.service';
 
 @Component({
     selector: 'designer-highlight',
@@ -10,7 +11,7 @@ import { EditorSessionService, IShowHighlightChangedListener } from '../services
 export class HighlightComponent implements IShowHighlightChangedListener {
     highlightedComponent: Node;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2) {
+    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService) {
         this.editorSession.addHighlightChangedListener(this);
     }
 
@@ -20,6 +21,7 @@ export class HighlightComponent implements IShowHighlightChangedListener {
     }
 
     private onMouseMove(event: MouseEvent) {
+        let statusBarTxt = "";
         let point = { x: event.pageX, y: event.pageY };
         let frameElem = this.doc.querySelector('iframe');
         let frameRect = frameElem.getBoundingClientRect();
@@ -40,13 +42,31 @@ export class HighlightComponent implements IShowHighlightChangedListener {
                 this.renderer.removeClass(this.highlightedComponent, "highlight_element");
             }
         }
+        if (found && !this.urlParser.isAbsoluteFormLayout()) {
+            let parent = found;
+            while (parent) {
+                let id = parent.getAttribute('svy-id');
+                if (id) {
+                    let type = parent.getAttribute('svy-layoutname');
+                    if (!type) type = parent.getAttribute('svy-formelement-type');
+                    if (!type) type = parent.children[0].nodeName;
+                    if (type && type.indexOf(".") >= 0) type = type.substring(type.indexOf(".") + 1);
+                    let name = parent.getAttribute('svy-name');
+                    if (name) type += ' [ ' + name + ' ] ';
+
+                    statusBarTxt = type + (statusBarTxt.length == 0 ? "" : ' <strong>&nbsp;/&nbsp;</strong> ') + statusBarTxt;
+                }
+                parent = parent.parentElement;
+            }
+        }
+        this.editorSession.setStatusBarText(statusBarTxt);
         this.highlightedComponent = found;
     }
 
     highlightChanged(showHighlight: boolean): void {
         let frameElem = this.doc.querySelector('iframe');
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0 )   setTimeout(() => this.highlightChanged(showHighlight), 400);
+        if (elements.length == 0) setTimeout(() => this.highlightChanged(showHighlight), 400);
         Array.from(elements).forEach((node) => {
             if (showHighlight) {
                 this.renderer.addClass(node, "highlight_element");

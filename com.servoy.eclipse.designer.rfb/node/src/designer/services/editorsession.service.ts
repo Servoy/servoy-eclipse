@@ -11,7 +11,7 @@ export class EditorSessionService {
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
-    public stateListener:  BehaviorSubject<string>;
+    public stateListener: BehaviorSubject<string>;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService) {
         let _this = this;
@@ -83,7 +83,7 @@ export class EditorSessionService {
         return this.wsSession.callService('formeditor', 'requestSelection', null, true)
     }
 
-    setSelection(selection: Array<string>, skipListener? : ISelectionChangedListener) {
+    setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
         this.selection = selection;
         this.wsSession.callService('formeditor', 'setSelection', {
             selection: selection
@@ -168,7 +168,7 @@ export class EditorSessionService {
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids));
     }
 
-    addSelectionChangedListener(listener: ISelectionChangedListener) : ()=> void{
+    addSelectionChangedListener(listener: ISelectionChangedListener): () => void {
         this.selectionChangedListeners.push(listener);
         return () => this.removeSelectionChangedListener(listener);
     }
@@ -179,14 +179,14 @@ export class EditorSessionService {
         }
     }
 
-    addHighlightChangedListener(listener: IShowHighlightChangedListener) : void{
+    addHighlightChangedListener(listener: IShowHighlightChangedListener): void {
         this.highlightChangedListeners.push(listener);
     }
-    
-    fireHighlightChangedListeners(showHighlight : boolean){
-       this.highlightChangedListeners.forEach(listener => listener.highlightChanged(showHighlight)); 
+
+    fireHighlightChangedListeners(showHighlight: boolean) {
+        this.highlightChangedListeners.forEach(listener => listener.highlightChanged(showHighlight));
     }
-    
+
     getSelection(): Array<string> {
         return this.selection;
     }
@@ -279,6 +279,11 @@ export class EditorSessionService {
         }, false)
     }
 
+    setStatusBarText(text:string) {
+        this.state.statusText = text;
+        this.stateListener.next('statusText');
+    }
+
     getState(): State {
         return this.state;
     }
@@ -296,7 +301,7 @@ export interface ISelectionChangedListener {
 
 export interface IShowHighlightChangedListener {
 
-    highlightChanged(showHighlight : boolean): void;
+    highlightChanged(showHighlight: boolean): void;
 
 }
 
@@ -304,5 +309,6 @@ class State {
     showWireframe: boolean;
     showSolutionLayoutsCss: boolean;
     showSolutionCss: boolean;
+    statusText: string;
     maxLevel: any;
 }
