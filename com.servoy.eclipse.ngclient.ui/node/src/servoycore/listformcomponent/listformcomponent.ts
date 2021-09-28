@@ -272,8 +272,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs);
                         if (availableExtraRecords > 0) this.foundset.loadExtraRecordsAsync(Math.min(deltaSize, availableExtraRecords), true);
                     } else if (deltaSize < 0) {
-                        // we need to show less records
-                        this.foundset.loadLessRecordsAsync(-deltaSize, true);
+                        // we need to show less records; deltaSize is already negative; so it will load less from end of viewport
+                        this.foundset.loadLessRecordsAsync(deltaSize, true);
                     } // else it's already ok
                 }
 
