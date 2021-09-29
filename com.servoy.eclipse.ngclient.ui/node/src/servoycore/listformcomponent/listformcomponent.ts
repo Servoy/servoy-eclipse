@@ -23,7 +23,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
     <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
     <div *ngIf="containedForm.absoluteLayout">
         <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-            <div *ngFor="let item of cache.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+            <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
             </div>
         </div>
@@ -37,13 +37,13 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 </div>
 
 <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" class="svy-layoutcontainer">
+    <div [svyContainerStyle]="state"  [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
 </ng-template>
 <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
-          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
                </div>
           </div>
