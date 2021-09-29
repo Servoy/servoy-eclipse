@@ -44,7 +44,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 </ng-template>
 <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
           <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
                </div>
           </div>
