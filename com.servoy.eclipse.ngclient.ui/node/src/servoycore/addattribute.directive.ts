@@ -1,6 +1,7 @@
 import { Directive, Input, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector } from '@angular/core';
 import { DesignFormComponent } from '../designer/designform_component.component';
 import { AbstractFormComponent, FormComponent } from '../ngclient/form/form_component.component';
+import { StructureCache } from '../ngclient/types';
 
 @Directive({ selector: '[svyContainerStyle]' })
 export class AddAttributeDirective implements OnChanges {
@@ -37,7 +38,7 @@ export class AddAttributeDirective implements OnChanges {
         if (changes.svyContainerAttributes && this.svyContainerAttributes) {
             for (const key of Object.keys(this.svyContainerAttributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
-                //if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
+                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }
     }
