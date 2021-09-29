@@ -51,20 +51,23 @@ public class AutomaticInstallWPMPackages implements IAutomaticImportWPMPackages
 	private void importPackageList(List<String> packageNames)
 	{
 		JSONArray packages = GetAllInstalledPackages.getAllInstalledPackages(true, false);
-		packages.forEach(pck -> {
-			String name = ((JSONObject)pck).optString("name");
-			if (packageNames.contains(name))
-			{
-				try
+		if (packages != null)
+		{
+			packages.forEach(pck -> {
+				String name = ((JSONObject)pck).optString("name");
+				if (packageNames.contains(name))
 				{
-					InstallWebPackageHandler.importPackage((JSONObject)pck, null);
+					try
+					{
+						InstallWebPackageHandler.importPackage((JSONObject)pck, null);
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
-				catch (IOException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override
