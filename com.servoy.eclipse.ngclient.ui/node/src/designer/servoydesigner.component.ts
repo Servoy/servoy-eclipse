@@ -56,6 +56,7 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
                     link.setAttribute('rel', 'stylesheet');
                     this.doc.head.appendChild(link);
                     link.setAttribute('href', path);
+                    if (path.indexOf('resources/fs/') >= 0) link.setAttribute('svy-stylesheet', path);
                 }
             }
         });

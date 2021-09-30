@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -112,7 +112,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     show_data: ToolbarItem[];
 
     constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService) {
+        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService, private readonly renderer: Renderer2) {
         this.createItems();
         this.designSize.createItems(this);
         this.editorSession.addSelectionChangedListener(this);
@@ -200,17 +200,19 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
         const solutionLayoutsCssPromise = this.editorSession.isShowSolutionLayoutsCss();
         solutionLayoutsCssPromise.then((result) => {
-            if (!result) this.btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
-            this.editorSession.getState().showSolutionLayoutsCss = result;
-            // TODO:
-            // this.editorSession.setContentSizes();
+            if (!result) {
+                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
+                this.setSolutionLayoutsCss(result);
+            }
+            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
         });
         const solutionCssPromise = this.editorSession.isShowSolutionCss();
         solutionCssPromise.then((result) => {
-            if (!result) this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+            if (!result) {
+                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+                this.setShowSolutionCss(result);
+            }
             this.editorSession.getState().showSolutionCss = result;
-            // TODO:
-            // this.editorSession.setContentSizes();
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
         zoomLevelPromise.then((result) => {
@@ -233,7 +235,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         }
     }
 
-    private sendState(key:string, result: any) {
+    private sendState(key: string, result: any) {
         const iframe = this.doc.querySelector('iframe');
         let elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
         if (elements.length == 0) {
@@ -241,7 +243,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             return;
         }
         else {
-            iframe.contentWindow.postMessage({ id: key, value: result},  '*');
+            iframe.contentWindow.postMessage({ id: key, value: result }, '*');
         }
     }
 
@@ -342,7 +344,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 promise.then((result) => {
                     this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
-                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
+                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result }, '*');
                     this.editorSession.stateListener.next('showWireframe');
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
@@ -361,7 +363,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (!this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -369,7 +371,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (!this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -377,7 +379,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -448,7 +450,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             },
             (value) => {
                 this.editorSession.getState().maxLevel = value;
-                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value},  '*');
+                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value }, '*');
                 this.editorSession.setZoomLevel(value);
             }
         );
@@ -1004,24 +1006,50 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     toggleShowSolutionLayoutsCss() {
         const promise = this.editorSession.toggleShowSolutionLayoutsCss();
-        promise.then(function(result) {
-            this.editorSession.getState().showSolutionLayoutsCss = result;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setContentSizes();
+        promise.then((result) => {
+            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
+            this.setSolutionLayoutsCss(result);
         });
     }
 
     toggleShowSolutionCss() {
         const promise = this.editorSession.toggleShowSolutionCss();
-        promise.then(function(result) {
+        promise.then((result) => {
             this.editorSession.getState().showSolutionCss = result;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setContentSizes();
+            this.setShowSolutionCss(result);
         });
     }
 
+    setSolutionLayoutsCss(state) {
+        let frameElem = this.doc.querySelector('iframe');
+        frameElem.contentWindow.document.querySelectorAll('[svy-solution-layout-class]').forEach(element => {
+            let classes = element.getAttribute('svy-solution-layout-class');
+            if (classes) {
+                classes.split(" ").forEach(cssclass => {
+                    if (state) {
+                        this.renderer.addClass(element, cssclass);
+                    }
+                    else {
+                        this.renderer.removeClass(element, cssclass);
+                    }
+                });
+            }
+        });
+    }
+
+    setShowSolutionCss(state) {
+        let frameElem = this.doc.querySelector('iframe');
+        frameElem.contentWindow.document.head.querySelectorAll('link').forEach(link => {
+            if (link.getAttribute('svy-stylesheet')) {
+                if (state) {
+                    link.disabled = false;
+                }
+                else {
+                    link.disabled = true;
+                }
+            }
+        });
+    }
     sameSize(width: boolean) {
         var selection = this.editorSession.getSelection();
         if (selection && selection.length > 1) {

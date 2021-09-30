@@ -307,7 +307,7 @@ export interface IShowHighlightChangedListener {
 
 class State {
     showWireframe: boolean;
-    showSolutionLayoutsCss: boolean;
+    showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
     statusText: string;
     maxLevel: any;

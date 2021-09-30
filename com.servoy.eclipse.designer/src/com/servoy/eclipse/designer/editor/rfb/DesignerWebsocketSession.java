@@ -298,14 +298,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			case "getStyleSheets" :
 			{
-				return getStyleSheets();
+				return getDesignerStyleSheets(fs);
 			}
 		}
 		return null;
 	}
 
 
-	private String[] getStyleSheets()
+	private String[] getDesignerStyleSheets(FlattenedSolution fs)
 	{
 		TreeSet<String> designCssLibs = new TreeSet<>();
 		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
@@ -317,6 +317,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				designCssLibs.addAll(libs);
 			}
 		}
+		// also add the solution css
+		designCssLibs.addAll(Arrays.asList(getSolutionStyleSheets(fs)));
 		return designCssLibs.toArray(new String[designCssLibs.size()]);
 	}
 
