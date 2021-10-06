@@ -67,8 +67,8 @@ export class EditorSessionService {
         this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    getGhostComponents(node) {
-        return this.wsSession.callService('formeditor', 'getGhostComponents', node, false)
+    getGhostComponents() {
+        return this.wsSession.callService('formeditor', 'getGhostComponents', null, false)
     }
 
     getPartsStyles() {

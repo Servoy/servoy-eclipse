@@ -16,10 +16,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     contentStyle: any = {
         position: "absolute",
         top: "20px",
-        left: "20px",
-        right: "20px",
-        minWidth: "992px",
-        bottom: "20px"
+        left: "20px"
     };
     contentSizeFull = true;
 
@@ -34,12 +31,13 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.renderer.setStyle(this.elementRef.nativeElement, 'width', this.urlParser.getFormWidth() + 'px');
-            this.renderer.setStyle(this.elementRef.nativeElement, 'height', this.urlParser.getFormHeight() + 'px');
+            this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
+            this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
         }
         else {
-            this.renderer.setStyle(this.elementRef.nativeElement, 'bottom', '20px');
-            this.renderer.setStyle(this.elementRef.nativeElement, 'right', '20px');
+            this.contentStyle['bottom'] = '20px';
+            this.contentStyle['right'] = '20px';
+            this.contentStyle['minWidth'] = '992px';
         }
     }
 
@@ -58,9 +56,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     adjustFromContentSize() {
         let iframe = this.doc.querySelector('iframe');
-        if (iframe.contentWindow.document.body.clientHeight == 0) { 
-            setTimeout(() => this.adjustFromContentSize(), 300); 
-            return; 
+        if (iframe.contentWindow.document.body.clientHeight == 0) {
+            setTimeout(() => this.adjustFromContentSize(), 300);
+            return;
         }
         const contentPane = this.doc.querySelector('.content-area') as HTMLElement;
         if (iframe.contentWindow.document.body.clientHeight + 20 > contentPane.clientHeight) {

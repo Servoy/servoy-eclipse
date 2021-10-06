@@ -79,9 +79,14 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
     refresh(){
         this.designFormComponent.formCacheChanged();
     }
+    
+    renderGhosts(){
+        this.windowRef.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+    }
 
 }
 export declare interface IDesignFormComponent {
     getFormName(): string;
     refresh() : void;
+    renderGhosts() : void;
 }

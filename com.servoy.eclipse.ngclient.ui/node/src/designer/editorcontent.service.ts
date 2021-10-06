@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { FormService } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
 import { ComponentCache, StructureCache } from '../ngclient/types';
+import { ConverterService } from '../sablo/converter.service';
 
 @Injectable()
 export class EditorContentService {
     designFormCallback: IDesignFormComponent;
 
-    constructor(private formService: FormService) {
+    constructor(private formService: FormService,protected converterService:ConverterService ) {
 
     }
 
@@ -23,8 +24,16 @@ export class EditorContentService {
             data.ng2components.forEach((elem) => {
                 let component = formCache.getComponent(elem.name);
                 if (component) {
-                    component.model = elem.model;
                     component.layout = elem.position;
+                    const beanConversion = elem.model[ConverterService.TYPES_KEY];
+                    for (const property of Object.keys(elem.model)) {
+                        let value = elem.model[property];
+                        if (beanConversion && beanConversion[property]) {
+                            value = this.converterService.convertFromServerToClient(value, beanConversion[property], component.model[property],
+                                (prop: string) => component.model ? component.model[prop] : component.model);
+                        }
+                        component.model[property] = value;
+                    }
                 }
                 else {
                     const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
@@ -85,9 +94,13 @@ export class EditorContentService {
             });
             refresh = true;
         }
+        if (data.renderGhosts) {
+            this.designFormCallback.renderGhosts();
+        }
         if (refresh) {
             this.designFormCallback.refresh();
         }
+
     }
 
     updateForm() {

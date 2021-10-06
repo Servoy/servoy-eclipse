@@ -12,7 +12,6 @@ import {EditorContentService} from './editorcontent.service';
 import { BSWindow } from '../ngclient/services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from '../ngclient/services/bootstrap-window/bswindow_manager.service';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
-import {AbstractFormComponent} from '../ngclient/form/form_component.component';
 
 @NgModule({
   imports: [

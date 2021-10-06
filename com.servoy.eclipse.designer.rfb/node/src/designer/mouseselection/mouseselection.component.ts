@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Render
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
+import {DesignerUtilsService} from '../services/designerutils.service';
 
 @Component({
     selector: 'selection-decorators',
@@ -27,7 +28,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     removeSelectionChangedListener: () => void;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService) {
+        protected urlParser: URLParserService, protected designerUtilsService :DesignerUtilsService) {
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -104,7 +105,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             Array.from(elements).forEach(node => {
                 if (selection.indexOf(node.getAttribute('svy-id')) >= 0) {
                     let position = node.getBoundingClientRect();
-                    this.adjustElementRect(node, position);
+                    this.designerUtilsService.adjustElementRect(node, position);
                     let style = {
                         height: position.height + 'px',
                         width: position.width + 'px',
@@ -147,7 +148,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         let found = Array.from(elements).reverse().find((node) => {
             let position = node.getBoundingClientRect();
-            this.adjustElementRect(node, position);
+            this.designerUtilsService.adjustElementRect(node, position);
             let addToSelection = false;
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 addToSelection = true;
@@ -226,7 +227,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             let newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
                 let position = node.getBoundingClientRect();
-                this.adjustElementRect(node, position);
+                this.designerUtilsService.adjustElementRect(node, position);
                 if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
@@ -307,22 +308,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             return true;
         }
         return false;
-    }
-
-    private adjustElementRect(node: Element, position: DOMRect) {
-        if (position.width == 0 || position.height == 0) {
-            let correctWidth = position.width;
-            let correctHeight = position.height;
-            let currentNode = node.parentElement;
-            while (correctWidth == 0 || correctHeight == 0) {
-                let parentPosition = currentNode.getBoundingClientRect();
-                correctWidth = parentPosition.width;
-                correctHeight = parentPosition.height;
-                currentNode = currentNode.parentElement;
-            }
-            if (position.width == 0) position.width = correctWidth;
-            if (position.height == 0) position.height = correctHeight;
-        }
     }
 }
 export class SelectionNode {

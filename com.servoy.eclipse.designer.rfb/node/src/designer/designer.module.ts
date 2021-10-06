@@ -24,6 +24,7 @@ import { ToolbarSpinnerComponent } from './toolbar/item/toolbarspinner.component
 import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
 import { DesignSizeService } from './services/designsize.service';
 import { ResizeKnobDirective } from './directives/resizeknob.directive';
+import {DesignerUtilsService} from './services/designerutils.service';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,7 @@ import { ResizeKnobDirective } from './directives/resizeknob.directive';
     NgbModule,
     DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

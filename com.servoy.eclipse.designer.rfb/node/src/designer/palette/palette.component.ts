@@ -3,6 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { EditorSessionService } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
+import {DesignerUtilsService} from '../services/designerutils.service';
 
 @Component({
     selector: 'designer-palette',
@@ -20,7 +21,8 @@ export class PaletteComponent {
     leftAdjust: number;
     glasspane: HTMLElement;
 
-    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2) {
+    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document, 
+        protected readonly renderer: Renderer2, protected designerUtilsService : DesignerUtilsService) {
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = "Absolute-Layout";
@@ -178,6 +180,7 @@ export class PaletteComponent {
                     let y = event.pageY - this.topAdjust;
                     let found = Array.from(elements).find((node) => {
                         let position = node.getBoundingClientRect();
+                        this.designerUtilsService.adjustElementRect(node, position);
                         if (position.x <= x && position.x + position.width >= x && position.y <= y && position.y + position.height >= y) {
                             if (node.getAttribute("svy-types").split(',').indexOf(this.dragItem.ghost.type) >= 0) {
                                 return node;
