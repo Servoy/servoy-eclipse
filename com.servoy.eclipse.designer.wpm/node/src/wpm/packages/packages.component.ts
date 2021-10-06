@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Package, WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
-import { UpdatePackagesDialog } from '../update-dialog/update-dialog.component'; 
-import { PackageList } from '../content/content.component';
 
 @Component({
   selector: 'app-packages',

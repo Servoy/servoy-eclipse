@@ -182,8 +182,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					}
 					else
 					{
-						IPackageReader reader = componentSpecProviderState.getPackageReader(name);
-						if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
+						IPackageReader reader = componentSpecProviderState.getPackageReaderForWpm(name);
+						if (reader == null) reader = serviceSpecProviderState.getPackageReaderForWpm(name);
 						if (reader != null)
 						{
 							pack.put("installed", reader.getVersion());
