@@ -48,6 +48,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -2197,11 +2198,19 @@ public class ServoyFormBuilder
 		String inForm, IPersist o, Object valuelistUUID) throws CoreException
 	{
 		int realValueType = valuelist.getRealValueType();
-		if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+		int dataProviderType = dataProvider.getDataProviderType();
+		if (realValueType != 0 && realValueType != dataProviderType)
 		{
+
 			boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-				((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-					(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
+				((realValueType == IColumnTypes.INTEGER && dataProviderType == IColumnTypes.NUMBER) ||
+					(realValueType == IColumnTypes.NUMBER && dataProviderType == IColumnTypes.INTEGER));
+
+			if (!isValidNumberVariable && dataProvider.hasFlag(IBaseColumn.UUID_COLUMN))
+			{
+				// if the dataprovider is a uuid column then allow text or media columns.
+				isValidNumberVariable = realValueType == IColumnTypes.TEXT || realValueType == IColumnTypes.MEDIA;
+			}
 
 			if (!isValidNumberVariable)
 			{
