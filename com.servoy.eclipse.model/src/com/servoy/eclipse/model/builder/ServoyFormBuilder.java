@@ -2197,8 +2197,8 @@ public class ServoyFormBuilder
 			if (!isValidNumberVariable)
 			{
 
-				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-					elementName != null ? elementName : "UNNAMED", inForm);
+				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(), Column.getDisplayTypeString(realValueType),
+					Column.getDisplayTypeString(dataProviderType), elementName != null ? elementName : "UNNAMED", inForm);
 				IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
 					IMarker.PRIORITY_NORMAL, null, o);
 				marker.setAttribute("Uuid", valuelistUUID.toString());
