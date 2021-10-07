@@ -229,7 +229,7 @@ public class MarkerMessages
 		"Valuelist \"{0}\" has fallback valuelist \"{1}\" which has a fallback valuelist as well. This is not supported.",
 		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 	public static ServoyMarker ValuelistDataproviderTypeMismatch = new ServoyMarker(
-		"Valuelist \"{0}\" real value type does not match the dataProvider type of element \"{1}\" in form \"{2}\"",
+		"Valuelist \"{0}\" real value type \"{1}\" does not match the dataProvider type \"{2}\"' of element \"{3}\" in form \"{4}\"",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE);
