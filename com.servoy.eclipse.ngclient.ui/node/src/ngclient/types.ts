@@ -9,7 +9,7 @@ export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
     public componentCache: Map<string, ComponentCache>;
-    public partComponentsCache: Map<string, ComponentCache>;
+    public partComponentsCache: Array<ComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     private _mainStructure: StructureCache;
     public formComponents: Map<string, FormComponentCache>;
@@ -19,7 +19,7 @@ export class FormCache implements IFormCache {
     constructor(readonly formname: string, size: Dimension, public readonly url: string) {
         this.size = size;
         this.componentCache = new Map();
-        this.partComponentsCache = new Map();
+        this.partComponentsCache = new Array();
         this._parts = [];
         this.formComponents = new Map();
     }
@@ -29,7 +29,7 @@ export class FormCache implements IFormCache {
             parent.addChild(comp);
         }
         if (parent instanceof PartCache){
-             this.partComponentsCache.set(comp.name, comp);
+             this.partComponentsCache.push(comp);
         }
     }
 
@@ -74,8 +74,11 @@ export class FormCache implements IFormCache {
     }
 
     public removeComponent(name: string) {
+        let comp = this.componentCache.get(name);
         this.componentCache.delete(name);
-        this.partComponentsCache.delete(name);
+        if (comp){
+             this.partComponentsCache.splice(this.partComponentsCache.indexOf(comp),1);
+        }
     }
 
     public removeLayoutContainer(id: string) {
@@ -129,6 +132,8 @@ export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
     obj != null && (obj).detectChanges instanceof Function;
 
 export class ComponentCache implements IComponentCache {
+    public parent : StructureCache;
+    
     constructor(public readonly name: string,
         public readonly type: string,
         public model: { [property: string]: any },
@@ -138,7 +143,7 @@ export class ComponentCache implements IComponentCache {
 }
 
 export class StructureCache {
-    protected parent;
+    public parent : StructureCache;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string) {
@@ -150,6 +155,9 @@ export class StructureCache {
         if (child instanceof StructureCache) {
             child.parent = this;
             return child as StructureCache;
+        }
+        if (child instanceof ComponentCache) {
+            child.parent = this;
         }
         return null;
     }
