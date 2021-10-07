@@ -22,9 +22,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +34,8 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -95,7 +95,7 @@ public class NewSolutionWizardDefaultPackages
 	// map with <name, version> of downloaded packages
 	private final HashMap<String, String> downloadedPackages = new HashMap<String, String>();
 
-	public void setup(List<JSONObject> packages)
+	public void setup(List<JSONObject> packages) throws IOException
 	{
 		File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
 		if (!packagesFolder.exists()) packagesFolder.mkdir();
@@ -139,17 +139,15 @@ public class NewSolutionWizardDefaultPackages
 
 								if (url != null)
 								{
+									File dataFile = Utils.downloadUrlPackage(url);
+
 									BufferedOutputStream out = null;
-									BufferedInputStream in = null;
+									BufferedInputStream in = new BufferedInputStream(new FileInputStream(dataFile));
 									try
 									{
 										File packageFile = new File(packagesFolder, name + "_" + version);
 
-										URL urlObj = new URL(url);
-										URLConnection conn = urlObj.openConnection();
-
 										out = new BufferedOutputStream(new FileOutputStream(packageFile));
-										in = new BufferedInputStream(conn.getInputStream());
 										Utils.streamCopy(in, out);
 										String oldVersion = downloadedPackages.put(name, version);
 
@@ -179,7 +177,8 @@ public class NewSolutionWizardDefaultPackages
 	 * @param name the name of the package
 	 * @return a pair containing the version and the package input stream
 	 */
-	public Pair<String, InputStream> getPackage(String name)
+	//public Pair<String, InputStream> getPackage(String name)
+	public Pair<String, File> getPackage(String name)
 	{
 		try
 		{
@@ -189,7 +188,7 @@ public class NewSolutionWizardDefaultPackages
 				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));
 				if (packageFile.exists())
 				{
-					return new Pair<String, InputStream>(downloadedPackages.get(name), new FileInputStream(packageFile));
+					return new Pair<String, File>(downloadedPackages.get(name), packageFile);
 				}
 			}
 		}
@@ -198,17 +197,32 @@ public class NewSolutionWizardDefaultPackages
 			ServoyLog.logError(ex);
 		}
 
-		if (Arrays.asList(PACKAGES).indexOf(name) != -1)
+		try
 		{
-			return new Pair<String, InputStream>("", NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip"));
+			if (Arrays.asList(PACKAGES).indexOf(name) != -1)
+			{
+				File dataFile = Utils.downloadUrlPackage(NewServerWizard.class.getResource("resources/packages/" + name + ".zip").toString());
+				return new Pair<String, File>("", dataFile);
+			}
+			else if (getSolutionsNames().indexOf(name) != -1)
+			{
+				String solutionVersion = getSolutionVersion(name);
+				File dataFile = Utils
+					.downloadUrlPackage(NewServerWizard.class.getResource("resources/solutions/" + name + "_" + solutionVersion + ".servoy").toString());
+				return new Pair<String, File>(solutionVersion, dataFile);
+			}
 		}
-		else if (getSolutionsNames().indexOf(name) != -1)
+		catch (IOException e)
 		{
-			String solutionVersion = getSolutionVersion(name);
-			return new Pair<String, InputStream>(solutionVersion,
-				NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + "_" + solutionVersion + ".servoy"));
+			ServoyLog.logError(e);
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+				}
+			});
 		}
-
 		return null;
 	}
 
