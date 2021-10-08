@@ -1768,6 +1768,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			extractDocsFromJsFile(spec, spec.getDefinitionURL());
 			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
+			extractDocsFromJsFile(spec, spec.getDocFileURL());
 		}
 	}
 
@@ -1848,6 +1849,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							return super.visitObjectInitializer(node);
 						}
 
+						@Override
+						public ASTNode visitFunctionStatement(FunctionStatement node)
+						{
+							WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
+							if (api != null && node.getDocumentation() != null)
+							{
+								api.setDocumentation(node.getDocumentation().getText());
+							}
+							return super.visitFunctionStatement(node);
+						}
 					});
 				}
 			}
