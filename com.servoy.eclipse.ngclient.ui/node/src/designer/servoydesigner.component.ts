@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -13,10 +13,20 @@ import { DOCUMENT } from '@angular/common';
     selector: 'servoy-designer',
     templateUrl: './servoydesigner.component.html'
 })
-export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
+export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {
 
     @ViewChild(DesignFormComponent) designFormComponent: DesignFormComponent;
-
+    @ViewChild('element', { static: false }) set elementRef(elementRef: ElementRef) 
+    { 
+        if(elementRef) 
+        { 
+            this.elementRefInit = elementRef;  
+            this.resizeObserver.observe(this.elementRefInit.nativeElement);
+        }
+    }
+    elementRefInit: ElementRef;
+    
+    private resizeObserver: ResizeObserver;
     mainForm: string;
     solutionName: string;
     private wsSession: WebsocketSession;
@@ -69,7 +79,10 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
                 }
                 return null;
             }
-        } as ServiceProvider)
+        } as ServiceProvider);
+         this.resizeObserver = new ResizeObserver(() => {
+             this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
+        });
     }
 
     getFormName() {
@@ -83,7 +96,14 @@ export class ServoyDesignerComponent implements OnInit, IDesignFormComponent {
     renderGhosts(){
         this.windowRef.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
     }
-
+    
+    ngAfterViewInit(){
+        this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
+    }
+    
+    ngOnDestroy(){
+        if (this.resizeObserver) this.resizeObserver.unobserve(this.elementRefInit.nativeElement);
+    }
 }
 export declare interface IDesignFormComponent {
     getFormName(): string;

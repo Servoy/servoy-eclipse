@@ -38,6 +38,11 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
             this.contentStyle['bottom'] = '20px';
             this.contentStyle['right'] = '20px';
             this.contentStyle['minWidth'] = '992px';
+            this.windowRef.nativeWindow.addEventListener("message", (event) => {
+                if (event.data.id === 'contentSizeChanged') {
+                    this.adjustFromContentSize();
+                }
+            });
         }
     }
 
@@ -49,17 +54,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
                 this.renderer.setStyle(glassPane, 'height', formHeight + 'px');
             }
         }
-        else {
-            setTimeout(() => this.adjustFromContentSize(), 300);
-        }
     }
 
     adjustFromContentSize() {
         let iframe = this.doc.querySelector('iframe');
-        if (iframe.contentWindow.document.body.clientHeight == 0) {
-            setTimeout(() => this.adjustFromContentSize(), 300);
-            return;
-        }
         const contentPane = this.doc.querySelector('.content-area') as HTMLElement;
         if (iframe.contentWindow.document.body.clientHeight + 20 > contentPane.clientHeight) {
             this.renderer.setStyle(contentPane, 'height', (iframe.contentWindow.document.body.clientHeight + 20) + 'px');
