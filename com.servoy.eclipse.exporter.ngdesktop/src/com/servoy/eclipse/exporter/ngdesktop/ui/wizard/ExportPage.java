@@ -595,7 +595,7 @@ public class ExportPage extends WizardPage
 		if (widthText.getText().trim().length() > 0)
 			settings.put("ngdesktop_height", heightText.getText().trim());
 		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_height", heightText.getText().trim());
+			settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
 		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
 		if (appNameText.getText().trim().length() > 0)
