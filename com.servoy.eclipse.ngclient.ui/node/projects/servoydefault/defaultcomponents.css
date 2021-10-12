@@ -9,7 +9,7 @@
 
 .input-sm {
     font-size: 12px;
-    min-height: initial;
+    min-height: 100% !important;
 }
 
 .svy-dropdown::after {
