@@ -297,7 +297,7 @@ public class ExportPage extends WizardPage
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
 		});
-		srcVersionCombo.select(getVersionIndex());
+		srcVersionCombo.select(getVersionIndex() + 1);
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -314,6 +314,7 @@ public class ExportPage extends WizardPage
 			.align(SWT.FILL, SWT.CENTER)//
 			.applyTo(includeUpdateBtn);
 		setIncludeUpdateState();
+		includeUpdateBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("include_update")); //initial selection
 
 		gd = new GridData();
 		gd.widthHint = 180;
@@ -474,11 +475,6 @@ public class ExportPage extends WizardPage
 		return result < 0 ? 0 : result;
 	}
 
-	private boolean getIncludeUpdate()
-	{
-		return exportElectronWizard.getDialogSettings().getBoolean("include_update");
-	}
-
 	private String getUpdateUrl()
 	{
 		String urlStr = exportElectronWizard.getDialogSettings().get("update_url");
@@ -546,15 +542,16 @@ public class ExportPage extends WizardPage
 			includeUpdateBtn.setVisible(false);
 			return;
 		}
-		if (!canCreateUpdate())
+		if (!isUpdatableVersion())
 		{
 			includeUpdateBtn.setVisible(false);
 			return;
 		}
-		includeUpdateBtn.setSelection(getIncludeUpdate());
 		includeUpdateBtn.setText("Include update");
 		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows)");
 		includeUpdateBtn.setVisible(true);
+		if (includeUpdateBtn.getSelection() == true && isUpdatableVersion()) return; //selection is not changing
+		includeUpdateBtn.setSelection(false);
 	}
 
 	private boolean isUpdatableVersion()
@@ -562,18 +559,6 @@ public class ExportPage extends WizardPage
 		if (selectedPlatforms.size() == 0) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result >= 0)
-			return true;
-		return false;
-	}
-
-	//return true
-	private boolean canCreateUpdate()
-	{
-		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
-		if ("latest".equals(srcVersionCombo.getText()))
-			return true;
-		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		if (result > 0)
 			return true;
 		return false;
 	}
