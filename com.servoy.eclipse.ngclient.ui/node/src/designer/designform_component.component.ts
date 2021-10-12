@@ -250,10 +250,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     datachange(component: ComponentCache, property: string, value, dataprovider: boolean) {
-        const model = this.formCache.getComponent(component.name).model;
-        const oldValue = model[property];
-        this.formCache.getComponent(component.name).model[property] = value;
-        //this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
+        // no operation needed for this dataprovider change event
     }
 
     getHandler(item: ComponentCache, handler: string) {

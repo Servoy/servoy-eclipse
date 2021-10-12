@@ -47,6 +47,10 @@ export class EditorContentService {
                     }
                 }
                 else {
+                    if (elem.model[ConverterService.TYPES_KEY] != null) {
+                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
+                                (property: string) => elem.model ? elem.model[property] : elem.model);
+                    }
                     const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                     formCache.add(comp);
                     if (!formCache.absolute) {
