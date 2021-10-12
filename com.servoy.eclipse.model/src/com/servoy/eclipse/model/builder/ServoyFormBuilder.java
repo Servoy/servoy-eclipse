@@ -1639,6 +1639,14 @@ public class ServoyFormBuilder
 							IMarker.PRIORITY_NORMAL,
 							null, o);
 					}
+					if (uuid != null && handlerDefinition.isDeprecated())
+					{
+						ServoyMarker mk = MarkerMessages.DeprecatedHandler.fill(handler,
+							"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
+							handlerDefinition.getDeprecatedMessage());
+						ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+							ServoyBuilder.DEPRECATED_HANDLER, IMarker.PRIORITY_NORMAL, null, o);
+					}
 				}
 
 			}
