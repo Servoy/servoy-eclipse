@@ -1,8 +1,9 @@
-import { Component, OnInit, Inject, Renderer2, OnDestroy } from '@angular/core';
+import { Component, OnInit, Inject, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
+import { Point } from '../mouseselection/mouseselection.component';
 
 @Component({
     selector: 'designer-ghostscontainer',
@@ -10,9 +11,13 @@ import { WindowRefService } from '@servoy/public';
     styleUrls: ['./ghostscontainer.component.css']
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy {
-
+    
+    @ViewChild('element', { static: false }) elementRef: ElementRef;
+    
     ghosts: Array<GhostContainer>;
     removeSelectionChangedListener: () => void;
+    mousedownpoint: Point;
+    draggingGhost: Ghost;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private windowRefService: WindowRefService) {
@@ -26,6 +31,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
     ngOnInit(): void {
         this.renderGhosts();
+        let content = this.doc.querySelector('.content-area') as HTMLElement;
+        content.addEventListener('mouseup', (event) => this.onMouseUp(event));
     }
 
     ngOnDestroy(): void {
@@ -146,7 +153,22 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     onMouseDown(event, ghost) {
         event.stopPropagation();
         this.editorSession.setSelection([ghost.uuid]);
+        if (event.button == 0) {
+            this.mousedownpoint = { x: event.pageX, y: event.pageY };
+            this.draggingGhost = ghost;
+        }
         return false
+    }
+
+    private onMouseUp(event: MouseEvent) {
+        if (this.draggingGhost && this.mousedownpoint.y != event.pageY) {
+            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
+                const obj = {};
+                obj[this.draggingGhost.uuid] = { 'y': event.pageY - this.elementRef.nativeElement.getBoundingClientRect().top};
+                this.editorSession.sendChanges(obj);
+            }
+        }
+        this.draggingGhost = null;
     }
 
     selectionChanged(selection: Array<string>): void {

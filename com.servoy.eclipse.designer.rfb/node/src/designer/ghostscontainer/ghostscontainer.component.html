@@ -1,4 +1,4 @@
-<div class="ghostcontainer {{container.class}}" *ngFor="let container of ghosts"
+<div #element class="ghostcontainer {{container.class}}" *ngFor="let container of ghosts"
      [ngStyle]="container.style">
     <div class="ghostContainerPropName" *ngIf="container.propertyName">property '{{container.propertyName}}'</div>
     <div class="ghost label {{ghost.class}}" *ngFor="let ghost of container.ghosts"

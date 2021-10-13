@@ -315,7 +315,7 @@ export class SelectionNode {
     style: any;
     isResizable?: ResizeDefinition;
 }
-class Point {
+export class Point {
     x: number;
     y: number;
 }
