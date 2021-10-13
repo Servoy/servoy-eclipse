@@ -414,7 +414,10 @@
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
 											match="${project.version}" replace="${newVersion}"
 											byline="true" />
-									</target>
+                                        <replaceregexp
+                                            file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
+                                            match="${project.version}" replace="${newVersion}"
+                                            byline="true" />									</target>
 								</configuration>
 							</execution>
 						</executions>
