@@ -118,9 +118,33 @@ export class WindowPluginService {
                     if (this._popupMenuShowCommand.elementId) {
                         const element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
-                            const rect = element.getBoundingClientRect();
-                            x = element.scrollLeft + rect.left + this._popupMenuShowCommand.x;
-                            y = element.scrollTop + rect.top + this._popupMenuShowCommand.y;
+
+                            //get element bounds relativ to viewport
+                            const compRect = element.getBoundingClientRect();
+                            const roomAbove = compRect.top - 1;
+							const roomBelow = document.documentElement.clientHeight - compRect.top - this._popupMenuShowCommand.height;
+                            //get menu region
+                            const menuRect = this.popupMenuService.getMenuRect(this._popupmenus[i]);
+                            const menuHeight = menuRect.bottom - menuRect.top;
+                            const xyReceived = this._popupMenuShowCommand.y !== undefined;
+							const mx = xyReceived ? this._popupMenuShowCommand.x : 0;
+							const my = xyReceived ? this._popupMenuShowCommand.y : 0;
+							if ((this._popupMenuShowCommand.positionTop === true && menuHeight <= roomAbove) || //top position wanted
+							    (this._popupMenuShowCommand.positionTop === false && (menuHeight > roomBelow) && (menuHeight <= roomAbove))) {//no space below
+								//draw on component's top
+                                x = element.scrollLeft + compRect.left + mx;
+                                y = element.scrollTop + compRect.top + my - menuHeight;
+
+                                // oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + y - menuHeight); //draw on component's top
+							} else if (menuHeight <= roomBelow) { //default we are drawing below component
+                                x = element.scrollLeft + compRect.left + mx;
+                                y = element.scrollTop + compRect.top + my + (xyReceived ? 0 : this._popupMenuShowCommand.height);
+								// oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + y + (xyReceived ? 0 : newvalue.popupMenuShowCommand.height));
+							} else {//no room for popup menu so let's browser decide
+                                x = element.scrollLeft + compRect.left + mx;
+                                y = element.scrollTop + compRect.top + my;
+								// oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + 1); 
+							}
                         } else {
                             this.log.error('Cannot display popup, element with id:' + this._popupMenuShowCommand.elementId + ' , not found');
                             return;
@@ -190,6 +214,8 @@ class Shortcut {
 export class PopupMenuShowCommand extends BaseCustomObject {
     public popupName: string;
     public elementId: string;
+    public height: number;
+    public positionTop: boolean
     public x: number;
     public y: number;
 }

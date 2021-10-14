@@ -22,6 +22,26 @@ export class PopupMenuService {
         this.doc.addEventListener('click', listener);
     }
 
+    public getMenuRect(popup: Popup) {
+        const menu = this.doc.createElement('ul');
+        menu.style.zIndex = '15000';
+        menu.classList.add('dropdown-menu');
+        menu.classList.add('svy-popup-menu');
+        if (popup.cssClass) menu.classList.add(popup.cssClass);
+
+        this.generateMenuItems(popup.items, menu, false);
+
+        menu.style.left = 0 + 'px';
+        menu.style.top = 0 + 'px';
+        menu.style.display = 'block';
+        menu.style.visibility = 'hidden';
+        this.doc.body.appendChild(menu);
+        const menuRect = menu.getBoundingClientRect();
+        //can't keep menu for future use; showMenu - called from different places is creating another menu
+        this.doc.body.removeChild(menu);
+        return menuRect;
+    }
+
     public showMenu(x: number, y: number, popup: Popup) {
         this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
             item.remove();
