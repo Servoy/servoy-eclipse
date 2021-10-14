@@ -311,4 +311,6 @@ class State {
     showSolutionCss: boolean;
     statusText: string;
     maxLevel: any;
+    dragging: boolean = false;
+    pointerEvents: string = 'none';
 }

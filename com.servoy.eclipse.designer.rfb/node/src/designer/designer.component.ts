@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
+import { URLParserService } from "src/designer/services/urlparser.service";
 
 @Component({
     selector: 'app-designer',
@@ -7,7 +8,7 @@ import { EditorSessionService } from './services/editorsession.service';
     styleUrls: ['./designer.component.css']
 })
 export class DesignerComponent implements OnInit {
-    constructor(protected readonly editorSession: EditorSessionService) {
+    constructor(public readonly editorSession: EditorSessionService, public urlParser: URLParserService) {
     }
 
     ngOnInit() {

@@ -181,7 +181,7 @@ export class ResizeKnobDirective implements OnInit {
     }
 }
 
-class ElementInfo {
+export class ElementInfo {
 
     x:number;
     y:number;

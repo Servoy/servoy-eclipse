@@ -27,7 +27,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     editorStateSubscription: any;
     removeSelectionChangedListener: () => void;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
+    constructor(public readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, protected designerUtilsService :DesignerUtilsService) {
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
@@ -137,6 +137,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseDown(event: MouseEvent) {
+        if (this.editorSession.getState().dragging) return;
         this.lassostarted = false;
         let point = { x: event.pageX, y: event.pageY };
         let frameElem = this.doc.querySelector('iframe');
@@ -219,6 +220,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseUp(event: MouseEvent) {
+        if (this.editorSession.getState().dragging) return;
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
             let frameElem = this.doc.querySelector('iframe');
             let frameRect = frameElem.getBoundingClientRect();
@@ -279,6 +281,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseMove(event: MouseEvent) {
+        if (this.editorSession.getState().dragging) return;
         if (this.lassostarted) {
             if (event.pageX < this.mousedownpoint.x) {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');

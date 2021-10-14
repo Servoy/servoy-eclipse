@@ -25,6 +25,7 @@ import { ToolbarSwitchComponent } from './toolbar/item/toolbarswitch.component';
 import { DesignSizeService } from './services/designsize.service';
 import { ResizeKnobDirective } from './directives/resizeknob.directive';
 import {DesignerUtilsService} from './services/designerutils.service';
+import { DragselectionComponent } from './dragselection/dragselection.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import {DesignerUtilsService} from './services/designerutils.service';
     EditorContentComponent,
     SearchTextPipe,
     SearchTextDeepPipe,
-    ResizeKnobDirective
+    ResizeKnobDirective,
+    DragselectionComponent
   ],
   imports: [
     BrowserModule,

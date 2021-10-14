@@ -35,4 +35,50 @@
     flex-direction: column;
 }
 
+.rightAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	right: 0px;
+	width: 30px;
+	height: 100%;
+	margin-top : -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
 
+.bottomAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	bottom: 0px;
+	height: 60px;
+	width: 100%;
+	margin-left : -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.leftAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	width: 30px;
+	height: 100%;
+	margin-top : -20px;
+	margin-left: -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.topAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	height: 30px;
+	width: 100%;
+	margin-top : -20px;
+	margin-left : -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}

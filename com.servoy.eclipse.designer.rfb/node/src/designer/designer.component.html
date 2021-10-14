@@ -8,9 +8,14 @@
             <selection-decorators></selection-decorators>
             <designer-highlight></designer-highlight>
             <designer-ghostscontainer></designer-ghostscontainer>
+            <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
         </div>
         <designer-editorcontent></designer-editorcontent> 
     </div>
+    <div class="bottomAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
+	<div class="rightAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
+	<div class="topAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
+	<div class="leftAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
 </div>
 <designer-status-bar></designer-status-bar>
 </div>
