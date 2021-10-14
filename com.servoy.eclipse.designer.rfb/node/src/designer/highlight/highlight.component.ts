@@ -10,6 +10,8 @@ import { URLParserService } from '../services/urlparser.service';
 })
 export class HighlightComponent implements IShowHighlightChangedListener {
     highlightedComponent: Node;
+    showPermanentHighlight: boolean = false;
+    onMoveTimer: any;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService) {
         this.editorSession.addHighlightChangedListener(this);
@@ -21,6 +23,16 @@ export class HighlightComponent implements IShowHighlightChangedListener {
     }
 
     private onMouseMove(event: MouseEvent) {
+        if (this.onMoveTimer) {
+            clearTimeout(this.onMoveTimer);
+        }
+        this.onMoveTimer = setTimeout(() => {
+            this.drawHighlightOnMove(event);
+        }, 300);
+
+    }
+
+    private drawHighlightOnMove(event: MouseEvent) {
         let statusBarTxt = "";
         let point = { x: event.pageX, y: event.pageY };
         let frameElem = this.doc.querySelector('iframe');
@@ -34,7 +46,7 @@ export class HighlightComponent implements IShowHighlightChangedListener {
                 return node;
             }
         });
-        if (this.highlightedComponent != found) {
+        if (!this.showPermanentHighlight && this.highlightedComponent != found) {
             if (found) {
                 this.renderer.addClass(found, "highlight_element");
             }
@@ -64,6 +76,7 @@ export class HighlightComponent implements IShowHighlightChangedListener {
     }
 
     highlightChanged(showHighlight: boolean): void {
+        this.showPermanentHighlight = showHighlight;
         let frameElem = this.doc.querySelector('iframe');
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         if (elements.length == 0) setTimeout(() => this.highlightChanged(showHighlight), 400);
