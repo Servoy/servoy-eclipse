@@ -605,10 +605,15 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	 */
 	protected abstract void showUrl(final String url);
 
+	enum RefreshType
+	{
+		NO_REFRESH, FULL_REFRESH, PALETTE_REFRESH;
+	}
+
 	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener
 	{
 		private boolean hidden = false;
-		private boolean refresh = false;
+		private RefreshType refresh = RefreshType.NO_REFRESH;
 
 		@Override
 		public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
@@ -617,41 +622,39 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			{
 				if (!hidden)
 				{
-					refreshEntireForm();
+					refresh(true);
 				}
-				else refresh = true;
+				else refresh = RefreshType.FULL_REFRESH;
 			}
-		}
-
-		private void refreshEntireForm()
-		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
-				}
-			});
 		}
 
 		public void formComponentChanged()
 		{
 			if (!hidden)
 			{
-				refresh();
+				refresh(false);
 			}
-			else refresh = true;
+			else if (refresh != RefreshType.FULL_REFRESH)
+			{
+				refresh = RefreshType.PALETTE_REFRESH;
+			}
 		}
 
-		private void refresh()
+		private void refresh(boolean full)
 		{
 			Display.getDefault().asyncExec(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+					if (full)
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					}
+					else
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+					}
 				}
 			});
 		}
@@ -661,10 +664,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		{
 			if ((partRef.getPart(false) == getEditorPart()))
 			{
-				if (refresh)
+				if (refresh != RefreshType.NO_REFRESH)
 				{
-					refresh = false;
-					refresh();
+					refresh(refresh == RefreshType.FULL_REFRESH);
+					refresh = RefreshType.NO_REFRESH;
 				}
 				hidden = false;
 			}
@@ -716,9 +719,9 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			{
 				if (!hidden)
 				{
-					refreshEntireForm();
+					refresh(true);
 				}
-				else refresh = true;
+				else refresh = RefreshType.FULL_REFRESH;
 			}
 		}
 	}
