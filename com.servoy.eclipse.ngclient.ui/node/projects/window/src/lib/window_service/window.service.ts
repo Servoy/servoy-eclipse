@@ -110,15 +110,14 @@ export class WindowPluginService {
                 if (this._popupMenuShowCommand.popupName === this._popupmenus[i].name) {
                     let x: number;
                     let y: number;
-
                     this.popupMenuService.initClosePopupHandler(() => {
                         this._popupMenuShowCommand = null;
                         this.servoyService.sendServiceChanges('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     });
+                    this.popupMenuService.initMenu(this._popupmenus[i]);
                     if (this._popupMenuShowCommand.elementId) {
                         const element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
                         if (element) {
-
                             //get element bounds relativ to viewport
                             const compRect = element.getBoundingClientRect();
                             const roomAbove = compRect.top - 1;
@@ -134,16 +133,12 @@ export class WindowPluginService {
 								//draw on component's top
                                 x = element.scrollLeft + compRect.left + mx;
                                 y = element.scrollTop + compRect.top + my - menuHeight;
-
-                                // oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + y - menuHeight); //draw on component's top
 							} else if (menuHeight <= roomBelow) { //default we are drawing below component
                                 x = element.scrollLeft + compRect.left + mx;
                                 y = element.scrollTop + compRect.top + my + (xyReceived ? 0 : this._popupMenuShowCommand.height);
-								// oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + y + (xyReceived ? 0 : newvalue.popupMenuShowCommand.height));
 							} else {//no room for popup menu so let's browser decide
                                 x = element.scrollLeft + compRect.left + mx;
                                 y = element.scrollTop + compRect.top + my;
-								// oMenu.moveTo(jsCompReg.left  + x, jsCompReg.top + 1); 
 							}
                         } else {
                             this.log.error('Cannot display popup, element with id:' + this._popupMenuShowCommand.elementId + ' , not found');
@@ -153,8 +148,7 @@ export class WindowPluginService {
                         x = this._popupMenuShowCommand.x;
                         y = this._popupMenuShowCommand.y;
                     }
-
-                    this.popupMenuService.showMenu(x, y, this._popupmenus[i]);
+                    this.popupMenuService.showMenu(x, y);
                     break;
                 }
             }

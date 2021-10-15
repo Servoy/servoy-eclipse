@@ -5,6 +5,8 @@ import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public'
 @Injectable()
 export class PopupMenuService {
 
+    menu: HTMLElement = null;
+
     constructor(private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
     }
@@ -13,6 +15,7 @@ export class PopupMenuService {
         const listener = () => {
             this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
                 item.remove();
+                this.menu = null;
             });
             if (handler) {
                 handler();
@@ -23,42 +26,38 @@ export class PopupMenuService {
     }
 
     public getMenuRect(popup: Popup) {
-        const menu = this.doc.createElement('ul');
-        menu.style.zIndex = '15000';
-        menu.classList.add('dropdown-menu');
-        menu.classList.add('svy-popup-menu');
-        if (popup.cssClass) menu.classList.add(popup.cssClass);
-
-        this.generateMenuItems(popup.items, menu, false);
-
-        menu.style.left = 0 + 'px';
-        menu.style.top = 0 + 'px';
-        menu.style.display = 'block';
-        menu.style.visibility = 'hidden';
-        this.doc.body.appendChild(menu);
-        const menuRect = menu.getBoundingClientRect();
-        //can't keep menu for future use; showMenu - called from different places is creating another menu
-        this.doc.body.removeChild(menu);
-        return menuRect;
+        if (this.menu != null) {
+            return this.menu.getBoundingClientRect();
+        }
+        return null;
     }
 
-    public showMenu(x: number, y: number, popup: Popup) {
+    public initMenu(popup: Popup) {
+        this.menu = this.doc.createElement('ul');
+        this.menu.style.zIndex = '15000';
+        this.menu.classList.add('dropdown-menu');
+        this.menu.classList.add('svy-popup-menu');
+        this.menu.style.visibility = 'hidden';
+        if (popup.cssClass)this. menu.classList.add(popup.cssClass);
+
+        this.generateMenuItems(popup.items, this.menu, false);
+
+        this.menu.style.left = 0 + 'px';
+        this.menu.style.top = 0 + 'px';
+        this.menu.style.display = 'block';
+
+        this.doc.body.appendChild(this.menu);
+    }
+
+    public showMenu(x: number, y: number) {
         this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
             item.remove();
         });
 
-        const menu = this.doc.createElement('ul');
-        menu.style.zIndex = '15000';
-        menu.classList.add('dropdown-menu');
-        menu.classList.add('svy-popup-menu');
-        if (popup.cssClass) menu.classList.add(popup.cssClass);
-
-        this.generateMenuItems(popup.items, menu, false);
-
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
-        menu.style.display = 'block';
-        this.doc.body.appendChild(menu);
+        this.menu.style.left = x + 'px';
+        this.menu.style.top = y + 'px';
+        this.menu.style.visibility = 'visible';
+        this.doc.body.appendChild(this.menu);
     }
 
     private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
