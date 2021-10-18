@@ -55,7 +55,7 @@ public class Activator extends Plugin
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
-		extractNode();
+//		extractNode();
 	}
 
 	public synchronized IConsole getConsole()
@@ -89,9 +89,9 @@ public class Activator extends Plugin
 		}
 	}
 
-	public void copyNodeFolder()
+	public void copyNodeFolder(boolean createWatcher, boolean force)
 	{
-		new NodeFolderCreatorJob(this.projectFolder, true, false).schedule();
+		new NodeFolderCreatorJob(this.projectFolder, createWatcher, force).schedule();
 	}
 
 	private String getSystemOrEvironmentProperty(String propertyName)
@@ -104,7 +104,7 @@ public class Activator extends Plugin
 		return value;
 	}
 
-	private void extractNode()
+	public void extractNode()
 	{
 		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
 		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
