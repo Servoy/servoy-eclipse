@@ -26,9 +26,9 @@ export class DragselectionComponent implements OnInit {
     selectionToDrag: string[]= null;
     
     currentElementInfo: Map<string, ElementInfo>;
-    autoscrollEnter: any[];
-    autoscrollStop: any[];
-    autoscrollLeave: any[];
+    autoscrollEnter = [];
+    autoscrollStop = [];
+    autoscrollLeave = [];
     
 
   constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService) { }
@@ -92,47 +92,56 @@ export class DragselectionComponent implements OnInit {
 
     startAutoScroll(direction: any, callback): any {
         let autoScrollPixelSpeed = 2;
+        const selection = this.selectionToDrag;
+        const info = this.currentElementInfo;
         return setInterval(() => {
-            const content = this.doc.querySelector('.content-area') as HTMLElement;
-            let changeX = 0;
-            let changeY = 0;
-            switch (direction) {
-                case "BOTTOM_AUTOSCROLL":
-                    if ((content.scrollTop + content.offsetHeight) === content.scrollHeight)
-                        this.glasspane.style.height = parseInt(this.glasspane.style.height.replace('px', '')) + + autoScrollPixelSpeed + "px";
-                    content.style.setProperty('scrollTop', content.style['scrollTop'] + autoScrollPixelSpeed);
-                    changeY = autoScrollPixelSpeed;
-                    break;
-                case "RIGHT_AUTOSCROLL":
-                    if ((content.scrollLeft + content.offsetWidth) === content.scrollWidth)
-                        this.glasspane.style.width = parseInt(this.glasspane.style.width.replace('px', '')) + + autoScrollPixelSpeed + "px";
-                    content.style.setProperty('scrollLeft', content.style['scrollLeft'] + autoScrollPixelSpeed);
-                    changeX = autoScrollPixelSpeed;
-                    break;
-                case "LEFT_AUTOSCROLL":
-                    if (content.scrollLeft >= autoScrollPixelSpeed) {
-                        content.scrollLeft -= autoScrollPixelSpeed;
-                        changeX = -autoScrollPixelSpeed;
-                    } else {
-                        changeX = -content.scrollLeft;
-                        content.scrollLeft = 0;
-                    }
-                    break;
-                case "TOP_AUTOSCROLL":
-                    if (content.scrollTop >= autoScrollPixelSpeed) {
-                        content.scrollTop -= autoScrollPixelSpeed;
-                        changeY = -autoScrollPixelSpeed;
-                    } else {
-                        changeY = -content.scrollTop;
-                        content.scrollTop -= 0;
-                    }
-                    break;
-            }
-
-            if (autoScrollPixelSpeed < 15) autoScrollPixelSpeed++;
-
-            if (callback) callback(this.selectionToDrag, changeX, changeY, 0, 0);
+            autoScrollPixelSpeed = this.autoScroll(selection, info, direction, autoScrollPixelSpeed, callback);
         }, 50);
+    }
+
+    private autoScroll(selection: string[], info: Map<string, ElementInfo>, direction: any, autoScrollPixelSpeed: number, callback: any) {
+        const content = this.doc.querySelector('.content-area') as HTMLElement;
+        let changeX = 0;
+        let changeY = 0;
+        switch (direction) {
+            case "BOTTOM_AUTOSCROLL":
+                if ((content.scrollTop + content.offsetHeight) === content.scrollHeight)
+                    this.glasspane.style.height = parseInt(this.glasspane.style.height.replace('px', '')) + autoScrollPixelSpeed + "px";
+                content.scrollTop += autoScrollPixelSpeed;
+                changeY = autoScrollPixelSpeed;
+                break;
+            case "RIGHT_AUTOSCROLL":
+                if ((content.scrollLeft + content.offsetWidth) === content.scrollWidth)
+                    this.glasspane.style.width = parseInt(this.glasspane.style.width.replace('px', '')) + autoScrollPixelSpeed + "px";
+                content.scrollLeft += autoScrollPixelSpeed;
+                changeX = autoScrollPixelSpeed;
+                break;
+            case "LEFT_AUTOSCROLL":
+                if (content.scrollLeft >= autoScrollPixelSpeed) {
+                    content.scrollLeft -= autoScrollPixelSpeed;
+                    changeX = -autoScrollPixelSpeed;
+                } else {
+                    changeX = -content.scrollLeft;
+                    content.scrollLeft = 0;
+                }
+                break;
+            case "TOP_AUTOSCROLL":
+                if (content.scrollTop >= autoScrollPixelSpeed) {
+                    content.scrollTop -= autoScrollPixelSpeed;
+                    changeY = -autoScrollPixelSpeed;
+                } else {
+                    changeY = -content.scrollTop;
+                    content.scrollTop -= 0;
+                }
+                break;
+        }
+
+        if (autoScrollPixelSpeed < 15)
+            autoScrollPixelSpeed++;
+
+        if (callback)
+            callback(selection, info, changeX, changeY, 0, 0);
+        return autoScrollPixelSpeed;
     }
 
    isInsideAutoscrollElementClientBounds(clientX: number, clientY: number): any {
@@ -224,6 +233,7 @@ export class DragselectionComponent implements OnInit {
               if (!this.editorSession.getState().dragging) {
                   if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                     this.editorSession.getState().dragging = true;
+                    this.autoscrollElementClientBounds = this.getAutoscrollElementClientBounds();
                   } else return;
               }
              
@@ -274,8 +284,8 @@ export class DragselectionComponent implements OnInit {
               if (this.selectionToDrag.length > 0) {
                   let firstSelectedNode = this.selectionToDrag[0];
                   if (firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
-                      const changeX = event.clientX- this.dragStartEvent.clientX;
-                      const changeY = event.clientY- this.dragStartEvent.clientY;
+                      const changeX = event.clientX - this.dragStartEvent.clientX;
+                      const changeY = event.clientY - this.dragStartEvent.clientY;
                       
                       //make sure no element goes offscreen
                       let canMove = true;                    
@@ -295,15 +305,28 @@ export class DragselectionComponent implements OnInit {
                       
                       if (canMove)
                       {
-                          this.updateAbsoluteLayoutComponentsLocations(event, changeX, changeY);
+                          this.updateAbsoluteLayoutComponentsLocations(this.selectionToDrag, this.currentElementInfo, changeX, changeY);
                       }
                       this.dragStartEvent = event;
               }
       }
+    getAutoscrollElementClientBounds(): any {
+        const bottomAutoscrollArea = this.doc.querySelector('.bottomAutoscrollArea') as HTMLElement;
+
+        let autoscrollElementClientBounds;
+        if (bottomAutoscrollArea) {
+            autoscrollElementClientBounds = [];
+            autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();
+            autoscrollElementClientBounds[1] = (this.doc.querySelector('.rightAutoscrollArea') as HTMLElement).getBoundingClientRect();
+            autoscrollElementClientBounds[2] = (this.doc.querySelector('.leftAutoscrollArea') as HTMLElement).getBoundingClientRect();
+            autoscrollElementClientBounds[3] = (this.doc.querySelector('.topAutoscrollArea') as HTMLElement).getBoundingClientRect();
+        }
+        return autoscrollElementClientBounds;
+    }
               
-    private updateAbsoluteLayoutComponentsLocations(event: MouseEvent, changeX: number, changeY: number, minX?: number, minY?: number) {
-        for (let i = 0; i < this.selectionToDrag.length; i++) {
-            const elementInfo = this.currentElementInfo.get(this.selectionToDrag[i]);
+    private updateAbsoluteLayoutComponentsLocations(selectionToDrag:string[], currentElementInfo: Map<string, ElementInfo>, changeX: number, changeY: number, minX?: number, minY?: number) {
+        for (let i = 0; i < selectionToDrag.length; i++) {
+            const elementInfo = currentElementInfo.get(selectionToDrag[i]);
             elementInfo.x = elementInfo.x + changeX;
             if (minX != undefined && elementInfo.x < minX) elementInfo.x = minX;
             elementInfo.y = elementInfo.y + changeY;
