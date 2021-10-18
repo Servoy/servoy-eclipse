@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject, Observable, Observer } from 'rxjs';
 
@@ -13,7 +14,10 @@ export class EditorSessionService {
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener: BehaviorSubject<string>;
 
-    constructor(private websocketService: WebsocketService, private services: ServicesService) {
+    private bIsDirty = false;
+
+    constructor(private websocketService: WebsocketService, private services: ServicesService,
+        @Inject(DOCUMENT) private doc: Document) {
         let _this = this;
         this.services.setServiceProvider({
             getService(name: string) {
@@ -290,6 +294,44 @@ export class EditorSessionService {
 
     getSession(): WebsocketSession {
         return this.wsSession;
+    }
+
+    sameSize(width: boolean) {
+        var selection = this.getSelection();
+        if (selection && selection.length > 1) {
+            let obj = {};
+            let firstSize = null;
+            let frameElem = this.doc.querySelector('iframe');
+            for (let i = 0; i < selection.length; i++) {
+                let nodeid = selection[i];
+                let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                if (element) {
+                    let elementRect = element.getBoundingClientRect();
+                    if (firstSize == null) {
+                        firstSize = { width: elementRect.width, height: elementRect.height };
+                    } else {
+                        let newSize;
+                        if (width) {
+                            newSize = {
+                                width: firstSize.width,
+                                height: elementRect.height
+                            };
+                        } else {
+                            newSize = {
+                                width: elementRect.width,
+                                height: firstSize.height
+                            };
+                        }
+                        obj[nodeid] = newSize;
+                    }
+                }
+            }
+            this.sendChanges(obj);
+        }
+    }
+
+    isDirty(): boolean {
+        return this.bIsDirty;
     }
 }
 

@@ -573,7 +573,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             "images/same_width.png",
             false,
             () => {
-                this.sameSize(true);
+                this.editorSession.sameSize(true);
             }
         );
         this.btnSameWidth.disabledIcon = "images/same_width-disabled.png";
@@ -583,7 +583,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             "images/same_height.png",
             false,
             () => {
-                this.sameSize(false);
+                this.editorSession.sameSize(false);
             }
         );
         this.btnSameHeight.disabledIcon = "images/same_height-disabled.png";
@@ -1049,39 +1049,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         });
-    }
-    sameSize(width: boolean) {
-        var selection = this.editorSession.getSelection();
-        if (selection && selection.length > 1) {
-            let obj = {};
-            let firstSize = null;
-            let frameElem = this.doc.querySelector('iframe');
-            for (let i = 0; i < selection.length; i++) {
-                let nodeid = selection[i];
-                let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
-                if (element) {
-                    let elementRect = element.getBoundingClientRect();
-                    if (firstSize == null) {
-                        firstSize = { width: elementRect.width, height: elementRect.height };
-                    } else {
-                        let newSize;
-                        if (width) {
-                            newSize = {
-                                width: firstSize.width,
-                                height: elementRect.height
-                            };
-                        } else {
-                            newSize = {
-                                width: elementRect.width,
-                                height: firstSize.height
-                            };
-                        }
-                        obj[nodeid] = newSize;
-                    }
-                }
-            }
-            this.editorSession.sendChanges(obj);
-        }
     }
 
     selectionChanged(selection: Array<string>): void {

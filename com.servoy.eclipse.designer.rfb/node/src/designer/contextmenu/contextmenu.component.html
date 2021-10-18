@@ -1,1 +1,18 @@
-<div></div>
+<div id="contextMenu" class="dropdown clearfix" style="position:absolute;display:none;z-index:1000;" #element>
+	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+      <li *ngFor="let item of menuItems" [ngClass]="item.getItemClass ? item.getItemClass() : ''">
+      		<a class="dropdown-item" tabindex="-1" href="#" (click)="item.execute()" (mouseover)="adjustMenuPosition()" style="margin-left:5px; height:24px;background-repeat:no-repeat;background-position:left center;" [ngStyle]="item.getIconStyle ? item.getIconStyle() : null">
+      			<span style="float:left">{{item.text}}</span>
+      			<span style="float:right;" [hidden]="item.shortcut === undefined" class="actionshortcut">{{item.shortcut}}</span>
+      		</a>
+      		<ul class="dropdown-menu" [hidden]="item.subMenu === undefined" style="min-width:100%">
+				<li *ngFor="let subitem of item.subMenu" [ngClass]="subitem.getItemClass ? subitem.getItemClass() : ''">
+					<a class="dropdown-item" tabindex="-1" href="#" (click)="subitem.execute()" style="min-width:100%;margin-left:10px;height:24px;background-repeat:no-repeat;background-position:left center;" [ngStyle]="subitem.getIconStyle ? subitem.getIconStyle() : null">
+						<span style="float:left">{{subitem.text}}</span>
+						<span style="float:right;" [hidden]="subitem.shortcut === undefined" class="actionshortcut">{{subitem.shortcut}}</span>
+					</a>
+				</li>
+      		</ul>
+      </li>
+    </ul>
+</div>

@@ -11,6 +11,7 @@
             <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
         </div>
         <designer-editorcontent></designer-editorcontent> 
+        <designer-contextmenu></designer-contextmenu>
     </div>
     <div class="bottomAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
 	<div class="rightAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
