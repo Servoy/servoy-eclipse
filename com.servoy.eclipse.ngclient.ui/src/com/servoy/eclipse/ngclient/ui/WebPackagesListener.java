@@ -500,7 +500,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				// remove the schedules 1 and start + 1 from the scheduled.
 				// if that is still higher then 0 we need to start another.
-				if (scheduled.addAndGet(-2) > 0)
+				if (scheduled.addAndGet(-2) <= 0)
+				{
+					// this can be a WAR export, then it was 1 not 2 when running.
+					scheduled.set(0);
+				}
+				else
 				{
 					// first just set it now to 0 to start over.
 					scheduled.set(0);
