@@ -82,7 +82,7 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == -0)
+			if (nodeReady.getCount() == -0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
