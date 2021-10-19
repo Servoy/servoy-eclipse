@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -34,7 +35,7 @@ export class ContextMenuComponent implements OnInit {
   menuItems: ContextmenuItem[];
 
   selection: string[];
-  beanAnchor = 0;
+  selectionAnchor = 0;
 
   constructor(protected readonly editorSession: EditorSessionService,
 	protected urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document) {
@@ -48,21 +49,25 @@ export class ContextMenuComponent implements OnInit {
 	});
     this.contentArea = this.doc.querySelector('.content-area') as HTMLElement;
     this.contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
-	  this.selection = this.editorSession.getSelection();
-		// TODO: get selection anchor info (beanAnchor)
-		//   if (this.selection && this.selection.length == 1)
-		//   {
-		// 	  const node = this.selection[0];
-		// 	  const beanModel = editorScope.getBeanModel(node);
-		// 	  if (beanModel)
-		// 	  {
-		// 		  this.beanAnchor = beanModel.anchors;
-		// 	  }
-		//   }
-      this.show(event);
-	  this.adjustMenuPosition(this.element.nativeElement);
-      event.preventDefault();
-      event.stopPropagation();
+		this.selection = this.editorSession.getSelection();
+		if (this.selection && this.selection.length == 1)
+		{
+			let node = this.doc.querySelector("[svy-id='" + this.selection[0] + "']")
+			if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_PART) {
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			const frameElem = this.doc.querySelector('iframe');
+			node = frameElem.contentWindow.document.querySelector("[svy-id='" + this.selection[0] + "']");
+			if(node && node.hasAttribute('svy-anchors')) {
+				this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
+			}
+		}
+      	this.show(event);
+	  	this.adjustMenuPosition(this.element.nativeElement);
+      	event.preventDefault();
+      	event.stopPropagation();
     });
     this.doc.body.addEventListener('click', (event: MouseEvent) => {
       this.hide();
@@ -472,16 +477,12 @@ export class ContextMenuComponent implements OnInit {
 		entry.shortcut = shortcuts[SHORTCUT_IDS.UNGROUP_ID];
 		entry.getItemClass = () => {
 			if (!this.hasSelection()) return "disabled";
-			// TODO:
-			//at least one selected element should be a group
-			// for (let i = 0; i < this.selection.length; i++)
-			// {
-			// 	const ghost = this.editorSession.getGhost(selection[i].getAttribute("svy-id"));
-			// 	if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-			// 	{
-			// 		return;
-			// 	}
-			// }
+			for (let i = 0; i < this.selection.length; i++) {
+				let node = this.doc.querySelector("[svy-id='" + this.selection[i] + "']")
+				if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_GROUP) {
+					return '';
+				}
+			}
 			return "disabled";
 		};
 		groupingActions.push(entry);
@@ -636,9 +637,9 @@ export class ContextMenuComponent implements OnInit {
   {
 	  if (this.selection && this.selection.length == 1)
 	  {
-		  if(this.beanAnchor == 0)
-			   this.beanAnchor = 1 + 8; // top left
-		  if ((this.beanAnchor & anchor) == anchor)
+		  if(this.selectionAnchor == 0)
+			   this.selectionAnchor = 1 + 8; // top left
+		  if ((this.selectionAnchor & anchor) == anchor)
 		  {
 			  return true;
 		  }
@@ -647,34 +648,25 @@ export class ContextMenuComponent implements OnInit {
   }
 
   private setAnchoring (anchor, opposite){
-	  if (this.selection && this.selection.length == 1)
-	  {
+	  if (this.selection && this.selection.length == 1) {
 		  const obj = {};
-		  let node = this.selection[0];
-		// TODO: get selection beanAnchor
-		//   let beanModel = editorScope.getBeanModel(node);
-		//   if (beanModel)
-		//   {
-		// 	  var beanAnchor = beanModel.anchors;
-		// 	  if(beanAnchor == 0)
-		// 		   beanAnchor = 1 + 8; // top left
-		// 	  if ((beanAnchor & anchor) == anchor)
-		// 	  {
-		// 		  // already exists, remove it
-		// 		  beanAnchor = beanAnchor - anchor;
-		// 		  if ((beanAnchor & opposite) != opposite) beanAnchor += opposite;
-		// 	  }
-		// 	  else
-		// 	  {
-		// 		  beanAnchor = beanAnchor + anchor;
-		// 	  }
-		// 	  beanModel.anchors = beanAnchor;
-		// 	  obj[node] = {anchors:beanModel.anchors}
-		// 	  this.editorSession.sendChanges(obj);
-		//   }
-
-		  obj[node] = {anchors:anchor};
-		  this.editorSession.sendChanges(obj);
+		  let nodeid = this.selection[0];
+		  const frameElem = this.doc.querySelector('iframe');
+		  let node = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+		  if (node && node.hasAttribute('svy-anchors')) {
+			  let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
+			  if(beanAnchor == 0)
+				   beanAnchor = 1 + 8; // top left
+			  if ((beanAnchor & anchor) == anchor) {
+				  // already exists, remove it
+				  beanAnchor = beanAnchor - anchor;
+				  if ((beanAnchor & opposite) != opposite) beanAnchor += opposite;
+			  } else {
+				  beanAnchor = beanAnchor + anchor;
+			  }
+			  obj[nodeid] = {anchors:beanAnchor}
+			  this.editorSession.sendChanges(obj);
+		  }
 	  }
   }
   

@@ -195,7 +195,7 @@ class Ghost {
     hrstyle: any;
 }
 
-enum GHOST_TYPES {
+export enum GHOST_TYPES {
     GHOST_TYPE_CONFIGURATION = "config",
     GHOST_TYPE_COMPONENT = "comp",
     GHOST_TYPE_PART = "part",

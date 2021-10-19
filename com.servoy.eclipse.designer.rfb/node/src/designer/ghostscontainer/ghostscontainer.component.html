@@ -2,7 +2,7 @@
      [ngStyle]="container.style">
     <div class="ghostContainerPropName" *ngIf="container.propertyName">property '{{container.propertyName}}'</div>
     <div class="ghost label {{ghost.class}}" *ngFor="let ghost of container.ghosts"
-        [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]"
+        [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]" [attr.svy-ghosttype]="[ghost.type]"
         (dblclick)="openContainedForm(ghost)" (mousedown)="onMouseDown($event, ghost)">
         <hr [ngStyle]="ghost.hrstyle">{{ghost.text}}&nbsp;
     </div>
