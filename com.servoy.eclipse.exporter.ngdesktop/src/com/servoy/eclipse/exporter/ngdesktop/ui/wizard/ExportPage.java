@@ -379,7 +379,7 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		setControl(composite);
+		setControl(rootComposite);
 		this.getWizard().getContainer().getShell().pack();
 	}
 
