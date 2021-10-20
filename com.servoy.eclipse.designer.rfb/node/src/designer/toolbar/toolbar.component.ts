@@ -443,7 +443,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnZoomOut.disabledIcon = "images/zoom_out_disabled.png";
 
         this.btnSetMaxLevelContainer = new ToolbarItem(
-            "Adjust zoom level",
+            "Maximum level for a container to be fully displayed",
             null,
             () => {
                 return this.editorSession.getState().showWireframe;
@@ -456,9 +456,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
         this.btnSetMaxLevelContainer.max = 10;
         this.btnSetMaxLevelContainer.min = 3;
-        this.btnSetMaxLevelContainer.decbutton_text = "Decrease zoom level";
+        this.btnSetMaxLevelContainer.decbutton_text = "Decrease maximum display level";
         this.btnSetMaxLevelContainer.decIcon = "images/zoom_out_xs.png";
-        this.btnSetMaxLevelContainer.incbutton_text = "Increase zoom level";
+        this.btnSetMaxLevelContainer.incbutton_text = "Increase maximum display level";
         this.btnSetMaxLevelContainer.incIcon = "images/zoom_in_xs.png";
         this.btnSetMaxLevelContainer.state = false;
 
