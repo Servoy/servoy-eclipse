@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { URLParserService } from './urlparser.service';
 
 @Injectable()
 export class EditorSessionService {
@@ -13,11 +14,12 @@ export class EditorSessionService {
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener: BehaviorSubject<string>;
+    private allowedChildren: any;
 
     private bIsDirty = false;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
-        @Inject(DOCUMENT) private doc: Document) {
+        @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {
         let _this = this;
         this.services.setServiceProvider({
             getService(name: string) {
@@ -42,7 +44,12 @@ export class EditorSessionService {
         // return promise;
 
         // do we need the promise
-        this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')])
+        this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
+        if (!this.urlParser.isAbsoluteFormLayout()) {
+            this.wsSession.callService('formeditor', 'getAllowedChildren').then((result) => {
+                this.allowedChildren = JSON.parse(result);
+            });
+        }
     }
 
     activated() {
@@ -253,8 +260,11 @@ export class EditorSessionService {
         return this.wsSession.callService('formeditor', 'openPackageManager', null, true);
     }
 
-    loadAllowedChildren() {
-        return this.wsSession.callService('formeditor', 'getAllowedChildren');
+    getAllowedChildrenForContainer(container:string): string[] {
+        if (this.allowedChildren) {
+            return this.allowedChildren[container];
+        }
+        return null;
     }
 
     getSuperForms() {
