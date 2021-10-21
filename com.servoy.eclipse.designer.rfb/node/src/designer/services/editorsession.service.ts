@@ -262,7 +262,7 @@ export class EditorSessionService {
 
     getAllowedChildrenForContainer(container:string): string[] {
         if (this.allowedChildren) {
-            return this.allowedChildren[container];
+            return this.allowedChildren[container ? container : 'topContainer'];
         }
         return null;
     }

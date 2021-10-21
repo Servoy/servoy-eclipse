@@ -36,7 +36,7 @@ export class ContextMenuComponent implements OnInit {
 
   selection: string[];
   selectionAnchor = 0;
-
+  
   constructor(protected readonly editorSession: EditorSessionService,
 	protected urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document) {
   }
@@ -44,26 +44,90 @@ export class ContextMenuComponent implements OnInit {
   ngOnInit(): void {
 	this.editorSession.getShortcuts().then((shortcuts) => {
 		this.editorSession.getSuperForms().then((superForms) => {
-			this.createItems(shortcuts, superForms);
+			this.setup(shortcuts, superForms);
 		});
 	});
+  }
+
+  private setup(shortcuts, superForms): void {
+	this.createItems(shortcuts, superForms);
     this.contentArea = this.doc.querySelector('.content-area') as HTMLElement;
     this.contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
+		let node;
+		const frameElem = this.doc.querySelector('iframe');
 		this.selection = this.editorSession.getSelection();
 		if (this.selection && this.selection.length == 1)
 		{
-			let node = this.doc.querySelector("[svy-id='" + this.selection[0] + "']")
+			node = this.contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
 			if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_PART) {
 				event.preventDefault();
 				event.stopPropagation();
 				return;
 			}
-			const frameElem = this.doc.querySelector('iframe');
 			node = frameElem.contentWindow.document.querySelector("[svy-id='" + this.selection[0] + "']");
 			if(node && node.hasAttribute('svy-anchors')) {
 				this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
 			}
 		}
+		if(!node) {
+			node = frameElem.contentWindow.document.querySelector(".svy-form");
+		}
+		if(node) {
+			for(let i = 0; i < this.menuItems.length; i++) {
+				if(this.menuItems[i].text === 'Add') {
+					let allowedChildren = node.getAttribute("svy-types") != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute("svy-layoutname"));
+					let types = node.getAttribute("svy-types");
+					if(allowedChildren || types) {
+						this.menuItems[i].getItemClass = function() { return "dropdown-submenu" };
+						this.menuItems[i].subMenu = [];
+						let typesArray: any[] = allowedChildren ? allowedChildren : [];
+
+						let typesStartIdx = typesArray.length; 
+						if(types) {
+							let typesA = types.slice(1, -1).split(",");
+							let propertiesA = node.getAttribute("svy-types-properties").slice(1, -1).split(",");
+
+							for(let x = 0; x < typesA.length; x++) {
+								typesArray.push({"type" : typesA[x], "property" : propertiesA[x]});
+							}
+						}
+
+						for(let k = 0; k < typesArray.length; k++){
+							let submenuItem = new ContextmenuItem(
+								k < typesStartIdx ? this.getDisplayName(typesArray[k]) : typesArray[k].type + ' for ' + typesArray[k].property,
+								() => {
+									this.hide();
+									let component:any = {};
+									if(node.getAttribute("svy-id")) component.dropTargetUUID = node.getAttribute("svy-id");
+
+									if(k < typesStartIdx) {
+										if (typesArray[k].indexOf(".") > 0) {
+											const nameAndPackage = typesArray[k].split(".");
+											component.name = nameAndPackage[1];
+											component.packageName = nameAndPackage[0];
+										} else {
+											component.name = typesArray[k];
+											component.packageName = undefined;
+										}
+									} else {
+										component.type = typesArray[k].type; 
+										component.ghostPropertyName = typesArray[k].property;
+									}
+
+									component = this.convertToContentPoint(component);
+									this.editorSession.createComponent(component);
+								}
+						  	);
+							this.menuItems[i].subMenu.push(submenuItem);
+						}
+					}
+					else {
+						this.menuItems[i].getItemClass = function() { return "invisible" };
+					}
+				}
+			}
+		}
+
       	this.show(event);
 	  	this.adjustMenuPosition(this.element.nativeElement);
       	event.preventDefault();
@@ -675,7 +739,58 @@ export class ContextMenuComponent implements OnInit {
 	  {
 		  this.editorSession.setCssAnchoring(this.selection[0], {"top":top, "right":right, "bottom":bottom, "left":left});
 	  }
-  }  
+  }
+
+  private findComponentDisplayName(arrayOfComponents:any[] , componentName: string) {
+	if(arrayOfComponents && arrayOfComponents.length) {
+		for(let j = 0; j < arrayOfComponents.length; j++) {
+			if(arrayOfComponents[j].name == componentName) {
+				return arrayOfComponents[j].displayName;
+			}
+		}
+	}
+	return null;
+  }
+
+  private  getDisplayName(componentName: string): string {
+	// TODO:
+	// if($scope.packages && $scope.packages.length) {
+	// 	var packageAndComponent = componentName.split(".");
+	// 	if(componentName == "component" || packageAndComponent[1] == "*") return "Component [...]";
+	// 	if (componentName == "template") return "Template [...]";
+	// 	for(var i = 0; i < $scope.packages.length; i++) {
+	// 		if($scope.packages[i].packageName == packageAndComponent[0]) {
+	// 			var displayName = findComponentDisplayName($scope.packages[i].components, packageAndComponent[1]);
+	// 			if(displayName) return displayName;
+
+	// 			var categories = $scope.packages[i].categories;
+	// 			if(categories) {
+	// 				for (property in categories) {
+	// 					if (categories.hasOwnProperty(property)) {
+	// 						displayName = findComponentDisplayName(categories[property], packageAndComponent[1]);
+	// 						if(displayName) return displayName;
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }	
+	return componentName;
+  }
+
+  private convertToContentPoint(point) {
+	let glasspane = this.doc.querySelector('.contentframe-overlay') as HTMLElement;
+	let frameRect = glasspane.getBoundingClientRect();
+
+	if(point.x && point.y) {
+		point.x = point.x - frameRect.left;
+		point.y = point.y - frameRect.top;
+	} else if (point.top && point.left) {
+		point.left = point.left - frameRect.left;
+		point.top = point.top - frameRect.top;
+	}
+	return point
+  }
 }
 
 export class ContextmenuItem {
