@@ -39,6 +39,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -81,6 +82,8 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 			IProject project = parentProject.getProject();
 			IProject projectToBeRemoved = selectedProject.getProject();
 			removeProjectReference(project, projectToBeRemoved);
+			ServoyModelManager.getServoyModelManager().getServoyModel().getNGPackageManager()
+				.reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 		}
 	}
 
