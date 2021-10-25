@@ -76,7 +76,7 @@ export class EditorContentService {
         }
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
-                let container = formCache.getLayoutContainer(elem.id);
+                let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
                 if (container) {
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
@@ -86,9 +86,9 @@ export class EditorContentService {
                     }
                 }
                 else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, elem.id);
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
                     formCache.addLayourContainer(container);
-                    let parentUUID = data.childParentMap[elem.name].uuid;
+                    let parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
                         let parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {

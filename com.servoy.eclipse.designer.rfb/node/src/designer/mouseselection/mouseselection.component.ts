@@ -1,8 +1,8 @@
-import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
-import {DesignerUtilsService} from '../services/designerutils.service';
+import { DesignerUtilsService } from '../services/designerutils.service';
 
 @Component({
     selector: 'selection-decorators',
@@ -28,7 +28,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     removeSelectionChangedListener: () => void;
 
     constructor(public readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService, protected designerUtilsService :DesignerUtilsService) {
+        protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService) {
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -54,20 +54,21 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         });
 
         this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-        if (id === 'showWireframe') {
-            Array.from(this.selectedRef).forEach((selectedNode) => {
-                if (!this.editorSession.getState().showWireframe) {
-                    this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
-                }
-            });
+            if (id === 'showWireframe') {
+                Array.from(this.selectedRef).forEach((selectedNode) => {
+                    if (!this.editorSession.getState().showWireframe) {
+                        this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
+                    }
+                });
 
-            setTimeout(()=> {
-                this.redrawDecorators();
-                if (this.editorSession.getState().showWireframe) {
-                    this.applyWireframe();
-                }
-            }, 400);//TODO can we do this without timeouts? how do we know the iframe content is there?
-        }});
+                setTimeout(() => {
+                    this.redrawDecorators();
+                    if (this.editorSession.getState().showWireframe) {
+                        this.applyWireframe();
+                    }
+                }, 400);//TODO can we do this without timeouts? how do we know the iframe content is there?
+            }
+        });
     }
     redrawDecorators() {
         if (this.nodes.length > 0) {
@@ -116,8 +117,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
                     newNodes.push({
                         style: style,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false},
-                        svyid: node.getAttribute('svy-id')
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        svyid: node.getAttribute('svy-id'),
+                        isContainer: node.getAttribute('svy-layoutname') != null,
+                        maxLevelDesign: node.classList.contains('maxLevelDesign')
                     })
                 }
             });
@@ -139,16 +142,16 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseDown(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
         this.lassostarted = false;
-        let point = { x: event.pageX, y: event.pageY };
-        let frameElem = this.doc.querySelector('iframe');
-        let frameRect = frameElem.getBoundingClientRect();
+        const point = { x: event.pageX, y: event.pageY };
+        const frameElem = this.doc.querySelector('iframe');
+        const frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
         point.y = point.y - frameRect.top;
         this.calculateAdjustToMainRelativeLocation();
 
-        let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         let found = Array.from(elements).reverse().find((node) => {
-            let position = node.getBoundingClientRect();
+            const position = node.getBoundingClientRect();
             this.designerUtilsService.adjustElementRect(node, position);
             let addToSelection = false;
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
@@ -168,9 +171,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
 
             if (addToSelection) {
-                let id = node.getAttribute('svy-id');
+                const id = node.getAttribute('svy-id');
                 let selection = this.editorSession.getSelection();
-                let newNode = {
+                const newNode = {
                     style: {
                         height: position.height + 'px',
                         width: position.width + 'px',
@@ -178,8 +181,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
                     },
-                    isResizable: this.urlParser.isAbsoluteFormLayout() ? {t:true, l:true, b:true, r:true} : {t:false, l:false, b:false, r:false},
-                    svyid: node.getAttribute('svy-id')
+                    isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                    svyid: node.getAttribute('svy-id'),
+                    isContainer: node.getAttribute('svy-layoutname') != null,
+                    maxLevelDesign: node.classList.contains('maxLevelDesign')
                 };
                 if (event.ctrlKey || event.metaKey) {
                     let index = selection.indexOf(id);
@@ -222,11 +227,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseUp(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
-            let frameElem = this.doc.querySelector('iframe');
-            let frameRect = frameElem.getBoundingClientRect();
-            let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-            let newNodes = new Array<SelectionNode>();
-            let newSelection = new Array<string>();
+            const frameElem = this.doc.querySelector('iframe');
+            const frameRect = frameElem.getBoundingClientRect();
+            const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+            const newNodes = new Array<SelectionNode>();
+            const newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
                 let position = node.getBoundingClientRect();
                 this.designerUtilsService.adjustElementRect(node, position);
@@ -242,7 +247,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
                         },
-                        svyid: node.getAttribute('svy-id')
+                        svyid: node.getAttribute('svy-id'),
+                        isContainer: node.getAttribute('svy-layoutname') != null,
+                        maxLevelDesign: node.classList.contains('maxLevelDesign')
                     };
                     newNodes.push(newNode);
                     newSelection.push(node.getAttribute('svy-id'))
@@ -261,23 +268,23 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         });
     }
     applyWireframeForNode(selectedNode: ElementRef<any>) {
-        let iframe = this.doc.querySelector('iframe');
-        let node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selectedNode.nativeElement.getAttribute('id') + '"]')[0];
+        const iframe = this.doc.querySelector('iframe');
+        const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selectedNode.nativeElement.getAttribute('id') + '"]')[0];
         if (node === undefined) return;
         const position = node.getBoundingClientRect();
         // TODO is && node.getAttribute('svy-layoutname') needed??
         if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && position.width > 0 && position.height > 0) {
-        	this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title'));
+            this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title'));
             if (this.editorSession.getState().showWireframe) {
-            	this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
+                this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
             }
             selectedNode.nativeElement.style.setProperty('--svyBackgroundColor', window.getComputedStyle(node).backgroundColor);
             if (node.classList.contains('maxLevelDesign')) {
-            //fix for IE container background, the one above is still needed for the ::before pseudoelement
-            selectedNode.nativeElement.style.setProperty('backgroundColor', window.getComputedStyle(node).backgroundColor);
-            this.renderer.addClass(selectedNode.nativeElement, 'maxLevelDesign');
-		    }
-	    }
+                //fix for IE container background, the one above is still needed for the ::before pseudoelement
+                selectedNode.nativeElement.style.setProperty('backgroundColor', window.getComputedStyle(node).backgroundColor);
+                this.renderer.addClass(selectedNode.nativeElement, 'maxLevelDesign');
+            }
+        }
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -289,8 +296,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             if (event.pageY < this.mousedownpoint.y) {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
             }
-            let currentWidth = event.pageX - this.mousedownpoint.x;
-            let currentHeight = event.pageY - this.mousedownpoint.y;
+            const currentWidth = event.pageX - this.mousedownpoint.x;
+            const currentHeight = event.pageY - this.mousedownpoint.y;
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
@@ -312,11 +319,82 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
         return false;
     }
+
+    deleteAction(event: MouseEvent) {
+        event.stopPropagation();
+        this.editorSession.keyPressed({ "keyCode": 46 });
+    }
+
+    zoomInAction(event: MouseEvent) {
+        event.stopPropagation();
+        this.editorSession.executeAction("zoomIn");
+    }
+
+    copyAction(event: MouseEvent) {
+        event.stopPropagation();
+        this.editorSession.executeAction("copy");
+    }
+
+    insertACopyAction(event: MouseEvent, node: SelectionNode, before: boolean) {
+        event.stopPropagation();
+        const component = {}
+        const frameElem = this.doc.querySelector('iframe');
+        const htmlNode = frameElem.contentWindow.document.querySelector('[svy-id="' + node.svyid + '"]');
+
+        const layoutPackage = htmlNode.getAttribute("svy-layoutname").split(".");
+        component['packageName'] = layoutPackage[0];
+        component['name'] = layoutPackage[1];
+        var droptarget = (htmlNode.parentNode as HTMLElement).getAttribute("svy-id");
+        if (droptarget) component['dropTargetUUID'] = droptarget;
+        if (before) {
+            component['rightSibling'] = node.svyid;
+        }
+        else
+            if (htmlNode.nextElementSibling) {
+                component['rightSibling'] = htmlNode.nextElementSibling.getAttribute("svy-id");
+            }
+
+        component['keepOldSelection'] = true;
+        this.editorSession.createComponent(component);
+    }
+
+    onEnter(event: MouseEvent) {
+        ((event.srcElement as Node).nextSibling as HTMLElement).style.display = 'block'
+    }
+
+    onLeave(event: MouseEvent) {
+        (event.srcElement as HTMLElement).style.display = 'none'
+    }
+
 }
+@Directive({
+    selector: '[positionMenu]'
+})
+export class PositionMenuDirective implements OnInit {
+    @Input('positionMenu') selectionNode: SelectionNode;
+    
+    constructor(@Inject(DOCUMENT) private doc: Document,  private elementRef: ElementRef){
+        
+    }
+     
+    ngOnInit(): void {
+        const frameElem = this.doc.querySelector('iframe');
+        const htmlNode = frameElem.contentWindow.document.querySelector('[svy-id="' + this.selectionNode.svyid + '"]');
+        if (parseInt(window.getComputedStyle(htmlNode, ":before").height) > 0) {
+            const computedStyle = window.getComputedStyle(htmlNode, ":before");
+            const left = parseInt( window.getComputedStyle(htmlNode, null).getPropertyValue('padding-left')) + parseInt(computedStyle.marginLeft);
+            const right = htmlNode.getBoundingClientRect().width - left - parseInt(computedStyle.width);
+            this.elementRef.nativeElement.style.marginRight  =  right + "px";
+        }
+    }
+}
+
 export class SelectionNode {
-    svyid:string;
+    svyid: string;
     style: any;
     isResizable?: ResizeDefinition;
+    isContainer: boolean;
+    maxLevelDesign: boolean;
 }
 export class Point {
     x: number;

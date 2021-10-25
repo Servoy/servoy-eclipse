@@ -325,7 +325,7 @@ export class FormService {
     public walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, elem.id);
+                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);
@@ -334,6 +334,7 @@ export class FormService {
                 if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
                     parent.addChild(structure);
                 }
+               formCache.addLayourContainer(structure);
             } else
                 if (elem.formComponent) {
                     const classes: Array<string> = new Array();

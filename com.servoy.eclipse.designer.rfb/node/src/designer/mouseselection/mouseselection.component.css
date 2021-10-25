@@ -99,3 +99,31 @@
 }
 
 .knob.hidden {display:none}
+
+.menubar {
+    color: white;
+    position: relative;
+    height: 16px;
+    top: -10px;
+    width: auto;
+    float:right;
+    pointer-events: auto;
+    cursor: pointer;
+    display:inline;
+    white-space:nowrap;
+    z-index: 10000;
+}
+
+.containerAction{
+    display: inline-block;
+    background-color: #606060;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    width: 20px;
+    height: 18px;
+}
+.containerActionWithText{
+     background-position: left center;
+     background-repeat: no-repeat;
+}

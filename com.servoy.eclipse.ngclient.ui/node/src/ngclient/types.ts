@@ -22,6 +22,7 @@ export class FormCache implements IFormCache {
         this.partComponentsCache = new Array();
         this._parts = [];
         this.formComponents = new Map();
+        this.layoutContainersCache = new Map();
     }
     public add(comp: ComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
         this.componentCache.set(comp.name, comp);
@@ -34,7 +35,9 @@ export class FormCache implements IFormCache {
     }
 
     public addLayourContainer(container: StructureCache) {
-        this.layoutContainersCache.set(container.id, container);
+        if (container.id){
+            this.layoutContainersCache.set(container.id, container);
+        }
     }
 
     public addPart(part: PartCache) {
