@@ -7,7 +7,7 @@ import { StatusBarComponent } from './statusbar/statusbar.component';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
-import { MouseSelectionComponent } from './mouseselection/mouseselection.component';
+import { MouseSelectionComponent, PositionMenuDirective } from './mouseselection/mouseselection.component';
 import { HighlightComponent } from './highlight/highlight.component';
 import { GhostsContainerComponent } from './ghostscontainer/ghostscontainer.component';
 import { EditorContentComponent } from './editorcontent/editorcontent.component';
@@ -45,6 +45,7 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
     SearchTextPipe,
     SearchTextDeepPipe,
     ResizeKnobDirective,
+    PositionMenuDirective,
     DragselectionComponent
   ],
   imports: [
