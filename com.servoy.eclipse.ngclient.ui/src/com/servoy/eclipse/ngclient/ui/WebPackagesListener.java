@@ -687,15 +687,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 											.lastModified();
 									}
 									// check/copy the dist folder to the target packages location
-									if (!WebPackagesListener.watchCreated.containsKey(project.getName()) || !packageFolder.exists() ||
+									if (!WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
 									{
-										DirectorySync directorySync = WebPackagesListener.watchCreated.get(project.getName());
+										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
-										WebPackagesListener.watchCreated.put(project.getName(), new DirectorySync(srcDir, packageFolder, null));
+										WebPackagesListener.watchCreated.put(packageReader.getPackageName(), new DirectorySync(srcDir, packageFolder, null));
 									}
 									// also add if this is a src thing to the ts config
 									if (sourcePathJson != null)
@@ -739,10 +739,39 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				else if (packageReader instanceof ZipPackageReader)
 				{
+
 					// this has an entry point in the zip, extract this package.
 					File projectFolder = Activator.getInstance().getProjectFolder();
 					File packagesFolder = new File(projectFolder, "packages");
 					File packageFolder = new File(packagesFolder, packageName);
+
+					// if we previously had a project reference and now we switched back to the zip we need to remove what was generated for it
+					try
+					{
+						if (WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()))
+						{
+							DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
+							if (directorySync != null) directorySync.destroy();
+							if (packageFolder.exists()) FileUtils.deleteQuietly(packageFolder);
+
+							File tsConfig = new File(projectFolder, "tsconfig.json");
+							String tsConfigContents = FileUtils.readFileToString(tsConfig, "UTF8");
+							JSONObject json = new JSONObject(tsConfigContents);
+							JSONObject paths = json.getJSONObject("compilerOptions").getJSONObject("paths");
+							if (paths.has(packageName))
+							{
+								if (paths.remove(packageName) != null)
+								{
+									FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
+								}
+							}
+						}
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError(e);
+					}
+
 					boolean exists = packageFolder.exists();
 					if (exists)
 					{

@@ -43,9 +43,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -92,7 +90,6 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 			{
 				List<IProject> selectedProjectsList = new ArrayList<IProject>();
 				IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
-				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionProject.getName());
 
 				ArrayList<IProject> selectablePackages = new ArrayList<IProject>();
 				IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
@@ -130,8 +127,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 
 				if (dialog.getReturnCode() == Window.CANCEL) return;
 
-				ArrayList<IProject> list = new ArrayList<IProject>();
-				Iterator iterator = ((IStructuredSelection)dialog.getSelection()).iterator();
+				Iterator< ? > iterator = ((IStructuredSelection)dialog.getSelection()).iterator();
 				IProjectDescription solutionProjectDescription = solutionProject.getDescription();
 				while (iterator.hasNext())
 				{
