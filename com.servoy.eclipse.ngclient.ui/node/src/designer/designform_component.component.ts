@@ -102,7 +102,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private log: LoggerService;
     private designMode : boolean;
     private maxLevel = 3;
-    
+    private dropHighlight: string = null;
+    private allowedChildren: unknown;
     draggedElementItem: ComponentCache;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
@@ -131,6 +132,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value);
+            }
+            if (event.data.id === 'dropHighlight') {
+                this.dropHighlight = event.data.value;
+            }
+            if (event.data.id == 'allowedChildren') {
+                this.allowedChildren = event.data.value;
             }
             this.detectChanges();
         })
@@ -285,6 +292,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       if (children >= 10)  {
           ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel;
       }
+          ngclass['drop_highlight']  = this.canContainDraggedElement(item.attributes['svy-layoutname']);
       return ngclass;
     }
 
@@ -294,6 +302,19 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getContainerByName(containername: string): Element {
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
+    }
+    
+    private canContainDraggedElement(container: string): boolean {
+        if (this.dropHighlight === null) return false;
+        const drop = this.dropHighlight.split(".");
+        const allowedChildren = this.allowedChildren[container];
+        if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
+        
+        for (const layout in allowedChildren){
+          const a = allowedChildren[layout].split(".");
+          if(a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+        }
+        return false;
     }
 }
 

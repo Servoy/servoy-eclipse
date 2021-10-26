@@ -2,6 +2,10 @@
     outline:1px solid lightblue;
 }
 
+.drop_highlight {
+	outline:2px solid green;
+}
+
 .invisible_element {
     opacity: 0.3;
     border: 2px dashed;
