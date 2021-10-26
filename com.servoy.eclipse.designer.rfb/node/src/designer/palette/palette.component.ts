@@ -30,9 +30,9 @@ export class PaletteComponent {
             layoutType = 'Responsive-Layout';
         this.activeIds = [];
         this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: Array<Package>) => {
-            let propertyValues;
-            if (got[got.length - 1] && got[got.length - 1]['propertyValues']) {
-                propertyValues = got[got.length - 1]['propertyValues'];
+            let propertyValues: Array<PaletteComp>;
+            if (got[got.length - 1] && got[got.length - 1].propertyValues) {
+                propertyValues = got[got.length - 1].propertyValues;
                 this.packages = got.slice(0, got.length - 1);
             }
             else {
@@ -48,9 +48,9 @@ export class PaletteComponent {
                             //we still need to have the components with properties on the component for filtering
 
                             if (propertyValues && propertyValues.length && this.packages[i].components[j].name == 'servoycore-formcomponent') {
-                                const newPropertyValues = [];
+                                const newPropertyValues : Array<PaletteComp> = [];
                                 for (let n = 0; n < propertyValues.length; n++) {
-                                    if (!propertyValues[n]['isAbsoluteCSSPositionMix']) {
+                                    if (!propertyValues[n].isAbsoluteCSSPositionMix) {
                                         newPropertyValues.push(propertyValues[n]);
                                     }
                                 }
@@ -76,7 +76,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: unknown, ghost: PaletteComp, propertyName? :string, propertyValue? : unknown) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}) {
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -216,14 +216,14 @@ export class PaletteComponent {
 
 @Pipe({ name: 'searchTextFilter' })
 export class SearchTextPipe implements PipeTransform {
-    transform(items: any[], propertyName: string, text: string): any {
+    transform(items: Array<PaletteComp>, text: string):  Array<PaletteComp> {
         let sortedItems = items;
         if (items && text)
             sortedItems = items.filter(item => {
-                return item && item[propertyName] && item[propertyName].toLowerCase().indexOf(text.toLowerCase()) >= 0;
+                return item && item.displayName && item.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
             });
         sortedItems.sort((item1, item2) => {
-            return (item1[propertyName] < item2[propertyName] ? -1 : (item1[propertyName] > item2[propertyName] ? 1 : 0))
+            return (item1.displayName < item2.displayName ? -1 : (item1.displayName > item2.displayName ? 1 : 0))
         });
         return sortedItems;
     }
@@ -231,13 +231,13 @@ export class SearchTextPipe implements PipeTransform {
 
 @Pipe({ name: 'searchTextFilterDeep' })
 export class SearchTextDeepPipe implements PipeTransform {
-    transform(items: any[], arrayProperty: string, propertyName: string, text: string): any {
+    transform(items: Array<Package>, text: string): Array<Package> {
         if (items)
             return items.filter(item => {
-                if (!item[arrayProperty] || item[arrayProperty].length == 0) return false;
+                if (!item.components || item.components.length == 0) return false;
                 if (!text) return true;
-                return item[arrayProperty].filter(component => {
-                    return component?.propertyName?.toLowerCase().indexOf(text.toLowerCase()) >= 0;
+                return item.components.filter(component => {
+                    return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
                 }).length > 0;
             });
         return items;
@@ -251,11 +251,12 @@ class DragItem {
     packageName?: string;
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName? :string;
-    propertyValue? : unknown;
+    propertyValue? : {property : string};
 }
 
 export class PaletteComp {
     name: string;
+    displayName : string;
     packageName: string;
     x: number;
     y: number;
@@ -265,11 +266,19 @@ export class PaletteComp {
     isOpen: boolean;
     propertyName: string; // ghost
     components: Array<PaletteComp>;
-    properties: unknown;
+    properties: Array<string>;
+    isAbsoluteCSSPositionMix ?:boolean; // formcomponent property
+    icon? : string;
+    model? : {property : any};
+    types? : Array<PaletteComp>; // the ghosts
+    multiple? : boolean; //ghost property
+    propertyValue?: {property : string}; // formcomponents
 }
 
 class Package {
     id: string;
     packageName: string;
+    packageDisplayname : string;
     components: Array<PaletteComp>;
+    propertyValues?: Array<PaletteComp>;
 }
