@@ -1,5 +1,5 @@
-import { Directive, Input } from "@angular/core";
-import { ToolbarItem } from "../toolbar.component";
+import { Directive, Input } from '@angular/core';
+import { ToolbarItem } from '../toolbar.component';
 
 @Directive()
 export class ToolbarItemComponent {

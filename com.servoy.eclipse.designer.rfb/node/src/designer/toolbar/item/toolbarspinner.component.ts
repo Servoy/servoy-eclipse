@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
-import { ToolbarItemComponent } from "./toolbaritem.component";
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ToolbarItemComponent } from './toolbaritem.component';
 
 @Component({
     selector: 'designer-toolbar-spinner',

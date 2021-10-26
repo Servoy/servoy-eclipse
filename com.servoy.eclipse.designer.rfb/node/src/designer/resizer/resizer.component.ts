@@ -7,19 +7,19 @@ import { DOCUMENT } from '@angular/common';
     styleUrls: ['./resizer.component.css']
 })
 export class ResizerComponent implements OnInit {
-    @ViewChild('element', { static: true }) elementRef: ElementRef;
+    @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
 
     constructor(protected readonly renderer: Renderer2, @Inject(DOCUMENT) private doc: Document) {
     }
 
     ngOnInit() {
-        this.elementRef.nativeElement.addEventListener('mousedown', (event) => {
+        this.elementRef.nativeElement.addEventListener('mousedown', () => {
             this.doc.addEventListener('mousemove', this.mousemove);
             this.doc.addEventListener('mouseup', this.mouseup);
         });
     }
 
-    mousemove = (event) => {
+    mousemove = (event: MouseEvent) => {
         const palette = this.doc.querySelector('.palette');
         this.renderer.setStyle(palette, 'width', event.pageX +'px');
     }

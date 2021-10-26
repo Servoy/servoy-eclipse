@@ -13,15 +13,15 @@ import { WindowRefService } from '@servoy/public';
 export class EditorContentComponent implements OnInit, AfterViewInit {
 
     initialWidth: string;
-    contentStyle: any = {
-        position: "absolute",
-        top: "20px",
-        left: "20px"
-    };
+    contentStyle: CSSStyleDeclaration = {
+        position: 'absolute',
+        top: '20px',
+        left: '20px'
+    } as CSSStyleDeclaration;
     contentSizeFull = true;
 
     clientURL: SafeResourceUrl;
-    @ViewChild('element', { static: true }) elementRef: ElementRef;
+    @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
 
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService) {
@@ -38,7 +38,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
             this.contentStyle['bottom'] = '20px';
             this.contentStyle['right'] = '20px';
             this.contentStyle['minWidth'] = '992px';
-            this.windowRef.nativeWindow.addEventListener("message", (event) => {
+            this.windowRef.nativeWindow.addEventListener('message', (event: MessageEvent) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (event.data.id === 'contentSizeChanged') {
                     this.adjustFromContentSize();
                 }
@@ -48,7 +49,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
         if (this.urlParser.isAbsoluteFormLayout()) {
-            const glassPane = this.doc.querySelector('.contentframe-overlay') as HTMLElement;
+            const glassPane = this.doc.querySelector('.contentframe-overlay') ;
             const formHeight = this.urlParser.getFormHeight() + 50;//should we calculate this number?
             if (glassPane.clientHeight < formHeight) {
                 this.renderer.setStyle(glassPane, 'height', formHeight + 'px');
@@ -57,8 +58,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     adjustFromContentSize() {
-        let iframe = this.doc.querySelector('iframe');
-        const contentPane = this.doc.querySelector('.content-area') as HTMLElement;
+        const iframe = this.doc.querySelector('iframe');
+        const contentPane = this.doc.querySelector('.content-area') ;
         if (iframe.contentWindow.document.body.clientHeight + 20 > contentPane.clientHeight) {
             this.renderer.setStyle(contentPane, 'height', (iframe.contentWindow.document.body.clientHeight + 20) + 'px');
         }
@@ -67,21 +68,21 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     setContentSizeFull(redraw: boolean) {
         this.contentStyle = {
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            right: "20px",
-            bottom: "20px"
-        };
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            right: '20px',
+            bottom: '20px'
+        } as CSSStyleDeclaration;
         this.contentSizeFull = true;
         delete this.contentStyle['width'];
         delete this.contentStyle['height'];
         delete this.contentStyle['h'];
         delete this.contentStyle['w'];
         if (this.getContentDocument()) {
-            const svyForm: any = this.getContentDocument().getElementsByClassName('svy-form')[0];
-            svyForm.style['height'] = "";
-            svyForm.style['width'] = "";
+            const svyForm = this.getContentDocument().getElementsByClassName('svy-form')[0] as HTMLElement;
+            svyForm.style['height'] = '';
+            svyForm.style['width'] = '';
         }
         // TODO
         // $scope.adjustGlassPaneSize();
@@ -92,7 +93,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     getFormInitialWidth() {
         if (!this.initialWidth) {
-            this.initialWidth = Math.round(this.elementRef.nativeElement.getBoundingClientRect().width) + "px";
+            this.initialWidth = Math.round(this.elementRef.nativeElement.getBoundingClientRect().width) + 'px';
         }
         return this.initialWidth;
     }
@@ -114,7 +115,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
         if (!this.urlParser.isAbsoluteFormLayout()) {
             if (this.getContentDocument()) {
-                const svyForm: any = this.getContentDocument().getElementsByClassName('svy-form')[0];
+                const svyForm = this.getContentDocument().getElementsByClassName('svy-form')[0] as HTMLElement;
                 svyForm.style['width'] = width;
                 svyForm.style['height'] = height;
             }
@@ -128,12 +129,14 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         // $scope.redrawDecorators();
     }
 
-    setMainContainerSize = function() {
+    setMainContainerSize = () => {
         if (this.getContentDocument()) {
-            const maincontainer = this.getContentDocument().querySelector('*[data-maincontainer="true"]');
+            const maincontainer: HTMLElement = this.getContentDocument().querySelector('*[data-maincontainer="true"]');
             if (maincontainer) {
-                const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0];
+                const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0] as HTMLElement;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 maincontainer.style['min-height'] = contentFrame.style['min-height'];
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 maincontainer.style['min-width'] = contentFrame.style['min-width'];
             }
         }

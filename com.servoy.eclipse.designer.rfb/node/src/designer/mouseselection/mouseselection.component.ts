@@ -3,6 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'selection-decorators',
@@ -12,19 +13,19 @@ import { DesignerUtilsService } from '../services/designerutils.service';
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy {
 
-    @ViewChild('lasso', { static: false }) lassoRef: ElementRef;
-    @ViewChildren('selected') selectedRef: QueryList<ElementRef>;
+    @ViewChild('lasso', { static: false }) lassoRef: ElementRef<HTMLElement>;
+    @ViewChildren('selected') selectedRef: QueryList<ElementRef<HTMLElement>>;
 
     nodes: Array<SelectionNode> = new Array<SelectionNode>();
-    contentInit: boolean = false;
+    contentInit= false;
     topAdjust: number;
     leftAdjust: number;
     contentRect: DOMRect;
-    lassostarted: boolean = false;
+    lassostarted= false;
 
     mousedownpoint: Point;
-    selectedRefSubscription: any;
-    editorStateSubscription: any;
+    selectedRefSubscription: Subscription;
+    editorStateSubscription: Subscription;
     removeSelectionChangedListener: () => void;
 
     constructor(public readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
@@ -33,8 +34,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     ngOnInit(): void {
-        this.editorSession.requestSelection();
-        let content = this.doc.querySelector('.content-area') as HTMLElement;
+        void this.editorSession.requestSelection();
+        const content: HTMLElement = this.doc.querySelector('.content-area');
         content.addEventListener('mousedown', (event) => this.onMouseDown(event));
         content.addEventListener('mouseup', (event) => this.onMouseUp(event));
         content.addEventListener('mousemove', (event) => this.onMouseMove(event));
@@ -74,7 +75,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (this.nodes.length > 0) {
             const iframe = this.doc.querySelector('iframe');
             Array.from(this.nodes).forEach(selected => {
-                let node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selected.svyid + '"]')[0];
+                const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selected.svyid + '"]')[0];
                 if (node === undefined) return;
                 const position = node.getBoundingClientRect();
                 selected.style = {
@@ -83,7 +84,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     top: position.top + this.topAdjust + 'px',
                     left: position.left + this.leftAdjust + 'px',
                     display: 'block'
-                };
+                } as CSSStyleDeclaration;
             });
         }
     }
@@ -95,25 +96,25 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private createNodes(selection: Array<string>) {
-        let newNodes = new Array<SelectionNode>();
+        const newNodes = new Array<SelectionNode>();
         if (selection.length > 0) {
-            let iframe = this.doc.querySelector('iframe');
-            let elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
+            const iframe = this.doc.querySelector('iframe');
+            const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
             if (elements.length == 0) {
                 setTimeout(() => this.createNodes(selection), 400);
                 return;
             }
             Array.from(elements).forEach(node => {
                 if (selection.indexOf(node.getAttribute('svy-id')) >= 0) {
-                    let position = node.getBoundingClientRect();
+                    const position = node.getBoundingClientRect();
                     this.designerUtilsService.adjustElementRect(node, position);
-                    let style = {
+                    const style = {
                         height: position.height + 'px',
                         width: position.width + 'px',
                         top: position.top + this.topAdjust + 'px',
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
-                    };
+                    } as CSSStyleDeclaration;
 
                     newNodes.push({
                         style: style,
@@ -131,11 +132,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private calculateAdjustToMainRelativeLocation() {
         if (!this.topAdjust) {
-            let content = this.doc.querySelector('.content-area') as HTMLElement;
+            const content: HTMLElement = this.doc.querySelector('.content-area');
             this.contentRect = content.getBoundingClientRect()
-            let computedStyle = window.getComputedStyle(content, null)
-            this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace("px", ""));
-            this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace("px", ""))
+            const computedStyle = window.getComputedStyle(content, null)
+            this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
+            this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
         }
     }
 
@@ -150,15 +151,15 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.calculateAdjustToMainRelativeLocation();
 
         const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        let found = Array.from(elements).reverse().find((node) => {
+        const found = Array.from(elements).reverse().find((node) => {
             const position = node.getBoundingClientRect();
             this.designerUtilsService.adjustElementRect(node, position);
             let addToSelection = false;
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 addToSelection = true;
             }
-            else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ":before").height) > 0) {
-                const computedStyle = window.getComputedStyle(node, ":before");
+            else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
+                const computedStyle = window.getComputedStyle(node, ':before');
                 //the top and left positions of the before pseudo element are computed as the sum of:
                 //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
                 const top = position.top + parseInt(window.getComputedStyle(node).paddingTop) + parseInt(computedStyle.marginTop);
@@ -180,14 +181,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         top: position.top + this.topAdjust + 'px',
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
-                    },
+                    } as CSSStyleDeclaration,
                     isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                     svyid: node.getAttribute('svy-id'),
                     isContainer: node.getAttribute('svy-layoutname') != null,
                     maxLevelDesign: node.classList.contains('maxLevelDesign')
                 };
                 if (event.ctrlKey || event.metaKey) {
-                    let index = selection.indexOf(id);
+                    const index = selection.indexOf(id);
                     if (index >= 0) {
                         this.nodes.splice(index, 1);
                         selection.splice(index, 1);
@@ -198,7 +199,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     }
                 }
                 else {
-                    let newNodes = new Array<SelectionNode>();
+                    const newNodes = new Array<SelectionNode>();
                     newNodes.push(newNode);
                     this.nodes = newNodes;
                     selection = [id];
@@ -233,20 +234,20 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             const newNodes = new Array<SelectionNode>();
             const newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
-                let position = node.getBoundingClientRect();
+                const position = node.getBoundingClientRect();
                 this.designerUtilsService.adjustElementRect(node, position);
                 if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y + position.height })) {
-                    let newNode: SelectionNode = {
+                    const newNode: SelectionNode = {
                         style: {
                             height: position.height + 'px',
                             width: position.width + 'px',
                             top: position.top + this.topAdjust + 'px',
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
-                        },
+                        } as CSSStyleDeclaration,
                         svyid: node.getAttribute('svy-id'),
                         isContainer: node.getAttribute('svy-layoutname') != null,
                         maxLevelDesign: node.classList.contains('maxLevelDesign')
@@ -267,7 +268,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.applyWireframeForNode(selectedNode);
         });
     }
-    applyWireframeForNode(selectedNode: ElementRef<any>) {
+    applyWireframeForNode(selectedNode: ElementRef<HTMLElement>) {
         const iframe = this.doc.querySelector('iframe');
         const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selectedNode.nativeElement.getAttribute('id') + '"]')[0];
         if (node === undefined) return;
@@ -305,12 +306,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private rectangleContainsPoint(p1: Point, p2: Point, toCheck: Point): boolean {
         if (p1.x > p2.x) {
-            let temp = p1.x;
+            const temp = p1.x;
             p1.x = p2.x;
             p2.x = temp;
         }
         if (p1.y > p2.y) {
-            let temp = p1.y;
+            const temp = p1.y;
             p1.y = p2.y;
             p2.y = temp;
         }
@@ -322,17 +323,17 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     deleteAction(event: MouseEvent) {
         event.stopPropagation();
-        this.editorSession.keyPressed({ "keyCode": 46 });
+        this.editorSession.keyPressed({ 'keyCode': 46 });
     }
 
     zoomInAction(event: MouseEvent) {
         event.stopPropagation();
-        this.editorSession.executeAction("zoomIn");
+        this.editorSession.executeAction('zoomIn');
     }
 
     copyAction(event: MouseEvent) {
         event.stopPropagation();
-        this.editorSession.executeAction("copy");
+        this.editorSession.executeAction('copy');
     }
 
     insertACopyAction(event: MouseEvent, node: SelectionNode, before: boolean) {
@@ -341,17 +342,17 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         const frameElem = this.doc.querySelector('iframe');
         const htmlNode = frameElem.contentWindow.document.querySelector('[svy-id="' + node.svyid + '"]');
 
-        const layoutPackage = htmlNode.getAttribute("svy-layoutname").split(".");
+        const layoutPackage = htmlNode.getAttribute('svy-layoutname').split('.');
         component['packageName'] = layoutPackage[0];
         component['name'] = layoutPackage[1];
-        var droptarget = (htmlNode.parentNode as HTMLElement).getAttribute("svy-id");
+        const droptarget = (htmlNode.parentNode as HTMLElement).getAttribute('svy-id');
         if (droptarget) component['dropTargetUUID'] = droptarget;
         if (before) {
             component['rightSibling'] = node.svyid;
         }
         else
             if (htmlNode.nextElementSibling) {
-                component['rightSibling'] = htmlNode.nextElementSibling.getAttribute("svy-id");
+                component['rightSibling'] = htmlNode.nextElementSibling.getAttribute('svy-id');
             }
 
         component['keepOldSelection'] = true;
@@ -373,25 +374,25 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 export class PositionMenuDirective implements OnInit {
     @Input('positionMenu') selectionNode: SelectionNode;
     
-    constructor(@Inject(DOCUMENT) private doc: Document,  private elementRef: ElementRef){
+    constructor(@Inject(DOCUMENT) private doc: Document,  private elementRef: ElementRef<HTMLElement>){
         
     }
      
     ngOnInit(): void {
         const frameElem = this.doc.querySelector('iframe');
         const htmlNode = frameElem.contentWindow.document.querySelector('[svy-id="' + this.selectionNode.svyid + '"]');
-        if (parseInt(window.getComputedStyle(htmlNode, ":before").height) > 0) {
-            const computedStyle = window.getComputedStyle(htmlNode, ":before");
+        if (parseInt(window.getComputedStyle(htmlNode, ':before').height) > 0) {
+            const computedStyle = window.getComputedStyle(htmlNode, ':before');
             const left = parseInt( window.getComputedStyle(htmlNode, null).getPropertyValue('padding-left')) + parseInt(computedStyle.marginLeft);
             const right = htmlNode.getBoundingClientRect().width - left - parseInt(computedStyle.width);
-            this.elementRef.nativeElement.style.marginRight  =  right + "px";
+            this.elementRef.nativeElement.style.marginRight  =  right + 'px';
         }
     }
 }
 
 export class SelectionNode {
     svyid: string;
-    style: any;
+    style: CSSStyleDeclaration;
     isResizable?: ResizeDefinition;
     isContainer: boolean;
     maxLevelDesign: boolean;

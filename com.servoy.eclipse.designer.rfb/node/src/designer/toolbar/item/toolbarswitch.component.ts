@@ -1,5 +1,5 @@
-import { Component, Input } from "@angular/core";
-import { ToolbarItemComponent } from "./toolbaritem.component";
+import { Component } from '@angular/core';
+import { ToolbarItemComponent } from './toolbaritem.component';
 
 @Component({
     selector: 'designer-toolbar-switch',

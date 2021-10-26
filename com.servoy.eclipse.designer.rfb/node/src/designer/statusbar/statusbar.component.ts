@@ -1,4 +1,5 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
@@ -7,8 +8,8 @@ import { EditorSessionService } from '../services/editorsession.service';
     styleUrls: ['./statusbar.component.css']
 })
 export class StatusBarComponent implements AfterViewInit, OnDestroy {
-    statusText: string = "";
-    editorStateSubscription: any;
+    statusText = '';
+    editorStateSubscription: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService) {
     }

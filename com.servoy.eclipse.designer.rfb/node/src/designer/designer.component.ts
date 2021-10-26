@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
-import { URLParserService } from "src/designer/services/urlparser.service";
+import { URLParserService } from 'src/designer/services/urlparser.service';
 
 @Component({
     selector: 'app-designer',

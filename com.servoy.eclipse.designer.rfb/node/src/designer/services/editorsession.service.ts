@@ -1,11 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
 
 @Injectable()
-export class EditorSessionService {
+export class EditorSessionService implements ServiceProvider {
 
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
@@ -14,24 +14,22 @@ export class EditorSessionService {
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener: BehaviorSubject<string>;
-    private allowedChildren: any;
+    private allowedChildren: unknown;
 
     private bIsDirty = false;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {
-        let _this = this;
-        this.services.setServiceProvider({
-            getService(name: string) {
-                if (name == '$editorService') {
-                    return _this;
-                }
-                return null;
-            }
-        } as ServiceProvider)
+        this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
     }
 
+   public getService(name: string) {
+            if (name == '$editorService') {
+                return this;
+            }
+            return null;
+    }
     connect() {
         //if (deferred) return deferred.promise;
         //deferred = $q.defer();
@@ -46,9 +44,9 @@ export class EditorSessionService {
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
-            this.wsSession.callService('formeditor', 'getAllowedChildren').then((result) => {
+            this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
                 this.allowedChildren = JSON.parse(result);
-            });
+            }).catch(e => console.log(e));
         }
     }
 
@@ -56,8 +54,8 @@ export class EditorSessionService {
         return this.wsSession.callService('formeditor', 'activated')
     }
 
-    keyPressed(event) {
-        this.wsSession.callService('formeditor', 'keyPressed', {
+    keyPressed(event: {ctrlKey?: string; shiftKey?: string; altKey?: string; metaKey?: string; keyCode?: number}) {
+        void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,
             shift: event.shiftKey,
             alt: event.altKey,
@@ -67,19 +65,19 @@ export class EditorSessionService {
     }
 
     sendChanges(properties) {
-        this.wsSession.callService('formeditor', 'setProperties', properties, true)
+        void this.wsSession.callService('formeditor', 'setProperties', properties, true)
     }
 
     moveResponsiveComponent(properties) {
-        this.wsSession.callService('formeditor', 'moveComponent', properties, true)
+        void this.wsSession.callService('formeditor', 'moveComponent', properties, true)
     }
 
     createComponent(component) {
-        this.wsSession.callService('formeditor', 'createComponent', component, true)
+        void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    getGhostComponents() {
-        return this.wsSession.callService('formeditor', 'getGhostComponents', null, false)
+    getGhostComponents<T>() {
+        return this.wsSession.callService<T>('formeditor', 'getGhostComponents', null, false)
     }
 
     getPartsStyles() {
@@ -96,7 +94,7 @@ export class EditorSessionService {
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
         this.selection = selection;
-        this.wsSession.callService('formeditor', 'setSelection', {
+        void this.wsSession.callService('formeditor', 'setSelection', {
             selection: selection
         }, true);
         this.selectionChangedListeners.forEach(listener => { if (listener != skipListener) listener.selectionChanged(selection) });
@@ -104,77 +102,77 @@ export class EditorSessionService {
 
     isInheritedForm() {
         return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "isInheritedForm": true
+            'isInheritedForm': true
         }, false)
     }
 
     isShowData() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "showData": true
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showData': true
         }, false)
     }
 
     isShowWireframe() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "showWireframe": true
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showWireframe': true
         }, false)
     }
 
     toggleShowWireframe() {
-        var res = this.wsSession.callService('formeditor', 'toggleShow', {
-            "show": "showWireframeInDesigner"
+        const res = this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showWireframeInDesigner'
         }, false);
         //this.getEditor().redrawDecorators();
         return res;
     }
 
     isShowSolutionLayoutsCss() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "showSolutionLayoutsCss": true
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showSolutionLayoutsCss': true
         }, false)
     }
 
     toggleShowSolutionLayoutsCss() {
-        var res = this.wsSession.callService('formeditor', 'toggleShow', {
-            "show": "showSolutionLayoutsCssInDesigner"
+        const res = this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showSolutionLayoutsCssInDesigner'
         }, false);
         //this.getEditor().redrawDecorators();
         return res;
     }
 
     isShowSolutionCss() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "showSolutionCss": true
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showSolutionCss': true
         }, false)
     }
 
     toggleShowSolutionCss() {
-        return this.wsSession.callService('formeditor', 'toggleShow', {
-            "show": "showSolutionCssInDesigner"
+        return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showSolutionCssInDesigner'
         }, false);
     }
 
     createComponents(components) {
-        this.wsSession.callService('formeditor', 'createComponents', components, true)
+        void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
 
-    openElementWizard(elementType) {
-        this.wsSession.callService('formeditor', 'openElementWizard', {
+    openElementWizard(elementType: string) {
+        void this.wsSession.callService('formeditor', 'openElementWizard', {
             elementType: elementType
         }, true)
     }
 
-    updateFieldPositioner(location) {
-        this.wsSession.callService('formeditor', 'updateFieldPositioner', {
+    updateFieldPositioner(location: {x: number;y: number}) {
+        void this.wsSession.callService('formeditor', 'updateFieldPositioner', {
             location: location
         }, true)
     }
 
-    executeAction(action, params?) {
-        this.wsSession.callService('formeditor', action, params, true)
+    executeAction(action: string, params?) {
+        void this.wsSession.callService('formeditor', action, params, true)
     }
 
-    updateSelection(ids) {
+    updateSelection(ids: Array<string>) {
         this.selection = ids;
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids));
     }
@@ -202,16 +200,16 @@ export class EditorSessionService {
         return this.selection;
     }
 
-    openContainedForm(ghost) {
-        this.wsSession.callService('formeditor', 'openContainedForm', {
-            "uuid": ghost.uuid
+    openContainedForm(uuid: string) {
+        void this.wsSession.callService('formeditor', 'openContainedForm', {
+            'uuid': uuid
         }, true)
     }
 
-    setInlineEditMode(edit) {
+    setInlineEditMode(edit: boolean) {
         this.inlineEdit = edit
-        this.wsSession.callService('formeditor', 'setInlineEditMode', {
-            "inlineEdit": this.inlineEdit
+        void this.wsSession.callService('formeditor', 'setInlineEditMode', {
+            'inlineEdit': this.inlineEdit
         }, true)
     }
 
@@ -219,36 +217,36 @@ export class EditorSessionService {
         return this.inlineEdit;
     }
 
-    getComponentPropertyWithTags(svyId, propertyName) {
+    getComponentPropertyWithTags(svyId: string, propertyName: string) {
         return this.wsSession.callService('formeditor', 'getComponentPropertyWithTags', {
-            "svyId": svyId,
-            "propertyName": propertyName
+            'svyId': svyId,
+            'propertyName': propertyName
         }, false);
     }
 
     getShortcuts() {
-        return this.wsSession.callService('formeditor', 'getShortcuts');
+        return this.wsSession.callService< { [key: string]: string; }>('formeditor', 'getShortcuts');
     }
 
     toggleHighlight() {
-        return this.wsSession.callService('formeditor', 'toggleShow', {
-            "show": "showHighlightInDesigner"
+        return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showHighlightInDesigner'
         }, false);
     }
 
     isShowHighlight() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "showHighlight": true
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showHighlight': true
         }, false)
     }
 
     toggleShowData() {
-        this.wsSession.callService('formeditor', 'toggleShowData', null, true);
+        void this.wsSession.callService('formeditor', 'toggleShowData', null, true);
     }
 
     isHideInherited() {
-        return this.wsSession.callService('formeditor', 'getBooleanState', {
-            "isHideInherited": false
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'isHideInherited': false
         }, false)
     }
 
@@ -268,28 +266,28 @@ export class EditorSessionService {
     }
 
     getSuperForms() {
-        return this.wsSession.callService('formeditor', 'getSuperForms');
+        return this.wsSession.callService<Array<string>>('formeditor', 'getSuperForms');
     }
 
-    setCssAnchoring(selection, anchors) {
-        this.wsSession.callService('formeditor', 'setCssAnchoring', { "selection": selection, "anchors": anchors }, true);
+    setCssAnchoring(selection: Array<string>, anchors: {top:string;left:string;bottom:string;right:string}) {
+        void this.wsSession.callService('formeditor', 'setCssAnchoring', { 'selection': selection, 'anchors': anchors }, true);
     }
 
     getFormFixedSize() {
-        return this.wsSession.callService('formeditor', 'getFormFixedSize');
+        return this.wsSession.callService<{width:string;height:string}>('formeditor', 'getFormFixedSize');
     }
 
-    setFormFixedSize(args) {
+    setFormFixedSize(args: {width:string;height?:string}) {
         return this.wsSession.callService('formeditor', 'setFormFixedSize', args);
     }
 
     getZoomLevel() {
-        return this.wsSession.callService('formeditor', 'getZoomLevel', {}, false)
+       return this.wsSession.callService<number>('formeditor', 'getZoomLevel', {}, false);
     }
 
-    setZoomLevel(value) {
-        return this.wsSession.callService('formeditor', 'setZoomLevel', {
-            "zoomLevel": value
+    setZoomLevel(value: number) {
+        void this.wsSession.callService('formeditor', 'setZoomLevel', {
+            'zoomLevel': value
         }, false)
     }
 
@@ -307,20 +305,20 @@ export class EditorSessionService {
     }
 
     sameSize(width: boolean) {
-        var selection = this.getSelection();
+        const selection = this.getSelection();
         if (selection && selection.length > 1) {
-            let obj = {};
-            let firstSize = null;
-            let frameElem = this.doc.querySelector('iframe');
+            const obj: { [key: string]: {width:number; height:number} ; } = {};
+            let firstSize: {width:number; height:number} = null;
+            const frameElem = this.doc.querySelector('iframe');
             for (let i = 0; i < selection.length; i++) {
-                let nodeid = selection[i];
-                let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                const nodeid = selection[i];
+                const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                 if (element) {
-                    let elementRect = element.getBoundingClientRect();
+                    const elementRect = element.getBoundingClientRect();
                     if (firstSize == null) {
                         firstSize = { width: elementRect.width, height: elementRect.height };
                     } else {
-                        let newSize;
+                        let newSize:  {width:number; height:number};
                         if (width) {
                             newSize = {
                                 width: firstSize.width,
@@ -362,7 +360,7 @@ class State {
     showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
     statusText: string;
-    maxLevel: any;
-    dragging: boolean = false;
-    pointerEvents: string = 'none';
+    maxLevel: number;
+    dragging = false;
+    pointerEvents = 'none';
 }

@@ -1,4 +1,4 @@
-import { Component, Inject, Renderer2 } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -8,18 +8,18 @@ import { URLParserService } from '../services/urlparser.service';
     templateUrl: './highlight.component.html',
     styleUrls: ['./highlight.component.css']
 })
-export class HighlightComponent implements IShowHighlightChangedListener {
+export class HighlightComponent implements IShowHighlightChangedListener, OnInit {
     highlightedComponent: Node;
-    showPermanentHighlight: boolean = false;
-    onMoveTimer: any;
+    showPermanentHighlight = false;
+    onMoveTimer:  ReturnType<typeof setTimeout>;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService) {
         this.editorSession.addHighlightChangedListener(this);
     }
 
     ngOnInit(): void {
-        let content = this.doc.querySelector('.content-area') as HTMLElement;
-        content.addEventListener('mousemove', (event) => this.onMouseMove(event));
+        const content = this.doc.querySelector('.content-area');
+        content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -33,40 +33,40 @@ export class HighlightComponent implements IShowHighlightChangedListener {
     }
 
     private drawHighlightOnMove(event: MouseEvent) {
-        let statusBarTxt = "";
-        let point = { x: event.pageX, y: event.pageY };
-        let frameElem = this.doc.querySelector('iframe');
-        let frameRect = frameElem.getBoundingClientRect();
+        let statusBarTxt = '';
+        const point = { x: event.pageX, y: event.pageY };
+        const frameElem = this.doc.querySelector('iframe');
+        const frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
         point.y = point.y - frameRect.top;
-        let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        let found = Array.from(elements).reverse().find((node) => {
-            let position = node.getBoundingClientRect();
+        const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        const found = Array.from(elements).reverse().find((node) => {
+            const position = node.getBoundingClientRect();
             if (position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 return node;
             }
         });
         if (!this.showPermanentHighlight && this.highlightedComponent != found) {
             if (found) {
-                this.renderer.addClass(found, "highlight_element");
+                this.renderer.addClass(found, 'highlight_element');
             }
             if (this.highlightedComponent) {
-                this.renderer.removeClass(this.highlightedComponent, "highlight_element");
+                this.renderer.removeClass(this.highlightedComponent, 'highlight_element');
             }
         }
         if (found && !this.urlParser.isAbsoluteFormLayout()) {
             let parent = found;
             while (parent) {
-                let id = parent.getAttribute('svy-id');
+                const id = parent.getAttribute('svy-id');
                 if (id) {
                     let type = parent.getAttribute('svy-layoutname');
                     if (!type) type = parent.getAttribute('svy-formelement-type');
                     if (!type) type = parent.children[0].nodeName;
-                    if (type && type.indexOf(".") >= 0) type = type.substring(type.indexOf(".") + 1);
-                    let name = parent.getAttribute('svy-name');
+                    if (type && type.indexOf('.') >= 0) type = type.substring(type.indexOf('.') + 1);
+                    const name = parent.getAttribute('svy-name');
                     if (name) type += ' [ ' + name + ' ] ';
 
-                    statusBarTxt = type + (statusBarTxt.length == 0 ? "" : ' <strong>&nbsp;/&nbsp;</strong> ') + statusBarTxt;
+                    statusBarTxt = type + (statusBarTxt.length == 0 ? '' : ' <strong>&nbsp;/&nbsp;</strong> ') + statusBarTxt;
                 }
                 parent = parent.parentElement;
             }
@@ -77,15 +77,15 @@ export class HighlightComponent implements IShowHighlightChangedListener {
 
     highlightChanged(showHighlight: boolean): void {
         this.showPermanentHighlight = showHighlight;
-        let frameElem = this.doc.querySelector('iframe');
-        let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        const frameElem = this.doc.querySelector('iframe');
+        const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         if (elements.length == 0) setTimeout(() => this.highlightChanged(showHighlight), 400);
         Array.from(elements).forEach((node) => {
             if (showHighlight) {
-                this.renderer.addClass(node, "highlight_element");
+                this.renderer.addClass(node, 'highlight_element');
             }
             else {
-                this.renderer.removeClass(node, "highlight_element");
+                this.renderer.removeClass(node, 'highlight_element');
             }
         });
     }
