@@ -140,10 +140,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     getContentDocument(): Document {
-        // TODO
-        // this throws SecurityError: Blocked a frame with origin  from accessing a cross-origin frame
-        // let iframe = this.doc.querySelector('iframe');
-        // return iframe.contentWindow.document;
-        return null;
+        const iframe = this.doc.querySelector('iframe');
+        return iframe.contentWindow.document;
     }
 }
