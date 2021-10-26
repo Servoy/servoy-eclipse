@@ -412,7 +412,7 @@ export class ContextMenuComponent implements OnInit {
 				() => {
 					if (this.selection && this.selection.length > 0) 
 					{
-						this.editorSession.setCssAnchoring(this.selection[0], null);
+						this.editorSession.setCssAnchoring(this.selection, null);
 					}
 				}
 			);
@@ -737,7 +737,7 @@ export class ContextMenuComponent implements OnInit {
   private setCssAnchoring (top, right, bottom, left) {
 	  if (this.selection && this.selection.length > 0) 
 	  {
-		  this.editorSession.setCssAnchoring(this.selection[0], {"top":top, "right":right, "bottom":bottom, "left":left});
+		  this.editorSession.setCssAnchoring(this.selection, {"top":top, "right":right, "bottom":bottom, "left":left});
 	  }
   }
 
