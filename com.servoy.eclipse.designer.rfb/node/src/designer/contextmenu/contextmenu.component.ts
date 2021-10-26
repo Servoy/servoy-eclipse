@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
+import { PaletteComp } from '../palette/palette.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -77,43 +78,50 @@ export class ContextMenuComponent implements OnInit {
                         const allowedChildren = node.getAttribute('svy-types') != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute('svy-layoutname'));
                         const types = node.getAttribute('svy-types');
                         if (allowedChildren || types) {
-                            this.menuItems[i].getItemClass = function() { return 'dropdown-submenu' };
+                            this.menuItems[i].getItemClass = () => { return 'dropdown-submenu' };
                             this.menuItems[i].subMenu = [];
-                            const typesArray: any[] = allowedChildren ? allowedChildren : [];
+                            const typesArray: Array<{ type: string; property: string }> = [];
 
-                            const typesStartIdx = typesArray.length;
                             if (types) {
                                 const typesA = types.slice(1, -1).split(',');
                                 const propertiesA = node.getAttribute('svy-types-properties').slice(1, -1).split(',');
 
                                 for (let x = 0; x < typesA.length; x++) {
-                                    typesArray.push({ 'type': typesA[x], 'property': propertiesA[x] });
+                                    typesArray.push({ type: typesA[x], property: propertiesA[x] });
                                 }
                             }
+                            if (allowedChildren)
+                                for (const child of allowedChildren) {
+                                    const submenuItem = new ContextmenuItem(this.getDisplayName(child),
+                                        () => {
+                                            this.hide();
+                                            let component: PaletteComp = {} as PaletteComp;
+                                            if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id');
 
-                            for (let k = 0; k < typesArray.length; k++) {
-                                const submenuItem = new ContextmenuItem(
-                                    k < typesStartIdx ? this.getDisplayName(typesArray[k]) : typesArray[k].type + ' for ' + typesArray[k].property,
-                                    () => {
-                                        this.hide();
-                                        let component: any = {};
-                                        if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id');
-
-                                        if (k < typesStartIdx) {
-                                            if (typesArray[k].indexOf('.') > 0) {
-                                                const nameAndPackage = typesArray[k].split('.');
+                                            if (child.indexOf('.') > 0) {
+                                                const nameAndPackage = child.split('.');
                                                 component.name = nameAndPackage[1];
                                                 component.packageName = nameAndPackage[0];
                                             } else {
-                                                component.name = typesArray[k];
+                                                component.name = child;
                                                 component.packageName = undefined;
                                             }
-                                        } else {
-                                            component.type = typesArray[k].type;
-                                            component.ghostPropertyName = typesArray[k].property;
-                                        }
+                                            component = this.convertToContentPoint(component) as PaletteComp;
+                                            this.editorSession.createComponent(component);
+                                        });
+                                        this.menuItems[i].subMenu.push(submenuItem);
+                                }
+                            for (const type of typesArray) {
+                                const submenuItem = new ContextmenuItem(type.type + ' for ' + type.property,
+                                    () => {
+                                        this.hide();
+                                        let component: PaletteComp = {} as PaletteComp;
+                                        if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id');
 
-                                        component = this.convertToContentPoint(component);
+                                        component.type = type.type;
+                                        component.ghostPropertyName = type.property;
+
+                                        component = this.convertToContentPoint(component) as PaletteComp;
                                         this.editorSession.createComponent(component);
                                     }
                                 );
@@ -196,7 +204,7 @@ export class ContextMenuComponent implements OnInit {
         }
     }
 
-    private getElementOffset(nativeElement: HTMLElement): {top: number; left: number; right?: number; bottom?: number} {
+    private getElementOffset(nativeElement: HTMLElement): { top: number; left: number; right?: number; bottom?: number } {
         const rect = nativeElement.getBoundingClientRect();
         const win = nativeElement.ownerDocument.defaultView;
         return {
@@ -205,7 +213,7 @@ export class ContextMenuComponent implements OnInit {
         };
     }
 
-    private createItems(shortcuts: { [key: string]: string;}, forms: Array<string>) {
+    private createItems(shortcuts: { [key: string]: string; }, forms: Array<string>) {
         this.menuItems = new Array<ContextmenuItem>();
         let entry: ContextmenuItem;
 

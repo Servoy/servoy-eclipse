@@ -254,7 +254,7 @@ class DragItem {
     propertyValue? : unknown;
 }
 
-class PaletteComp {
+export class PaletteComp {
     name: string;
     packageName: string;
     x: number;
