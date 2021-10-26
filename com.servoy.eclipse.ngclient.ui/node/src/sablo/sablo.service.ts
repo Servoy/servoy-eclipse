@@ -124,8 +124,8 @@ export class SabloService {
     }
 
     public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
-        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async);
-        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]);
+        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async) as Promise<T>;
+        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]) as Promise<T>;
     }
 
     public addToCurrentServiceCall(func: () => void) {

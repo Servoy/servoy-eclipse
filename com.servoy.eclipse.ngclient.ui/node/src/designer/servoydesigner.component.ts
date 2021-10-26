@@ -50,7 +50,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             form: formName,
             solution: this.solutionName,
             ng2: true
-        }, false).then((data) => {
+        }, false).then((data: string) => {
             const formState = JSON.parse(data)[formName];
             this.formService.createFormCache(formName, formState, null);
             this.mainForm = formName;
@@ -59,7 +59,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             form: formName,
             solution: this.solutionName,
             ng2: true
-        }).then((paths) => {
+        }).then((paths: string[]) => {
             if (paths) {
                 for (const path of paths) {
                     const link: HTMLLinkElement = this.doc.createElement('link');
