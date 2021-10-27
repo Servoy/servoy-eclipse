@@ -386,11 +386,10 @@ public class ResourceProvider implements Filter
 			{
 				String packageName = URLDecoder.decode(pathInfo.substring(0, index), "UTF8");
 				packageName = packageName.startsWith("/") ? packageName.substring(1) : packageName;
-				List<IPackageReader> reader = componentReaders.get(packageName);
-				if (reader != null && !reader.isEmpty())
+				IPackageReader packageReader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(packageName);
+				if (packageReader != null)
 				{
-					// just take the first?
-					url = reader.get(0).getUrlForPath(pathInfo.substring(index));
+					url = packageReader.getUrlForPath(pathInfo.substring(index));
 					if (url == null)
 					{
 						Debug.error("url '" + pathInfo.substring(index) + "' for package: '" + packageName + "' is not found in the component package");
@@ -398,11 +397,10 @@ public class ResourceProvider implements Filter
 				}
 				else
 				{
-					reader = serviceReaders.get(packageName);
-					if (reader != null && !reader.isEmpty())
+					packageReader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(packageName);
+					if (packageReader != null)
 					{
-						// just take the first?
-						url = reader.get(0).getUrlForPath(pathInfo.substring(index));
+						url = packageReader.getUrlForPath(pathInfo.substring(index));
 						if (url == null)
 						{
 							Debug.error("url '" + pathInfo.substring(index) + "' for package: '" + packageName + "' is not found in the service package");
