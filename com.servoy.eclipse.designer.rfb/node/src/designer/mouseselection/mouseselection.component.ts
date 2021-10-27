@@ -249,6 +249,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             display: 'block'
                         } as CSSStyleDeclaration,
                         svyid: node.getAttribute('svy-id'),
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         isContainer: node.getAttribute('svy-layoutname') != null,
                         maxLevelDesign: node.classList.contains('maxLevelDesign')
                     };
