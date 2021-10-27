@@ -178,7 +178,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
 			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
 				jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0)
+			if (settings.get("copyright") != null && settings.get("copyright").trim().length() > 0)
 				jsonObj.put("copyright", settings.get("copyright"));
 			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0)
 				jsonObj.put("url", settings.get("app_url"));
