@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, Inject, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -79,21 +79,10 @@ export class DragselectionResponsiveComponent implements OnInit {
       this.renderer.setStyle(this.dragCloneDiv, 'width', '200px');
       this.renderer.setStyle(this.dragCloneDiv, 'height', '100px');
     }
-
-    this.type = "component";
-    this.editorSession.getState().drop_highlight = this.type;
     //TODO needed???
     //let firstSelectedNode = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  this.dragNode.id + '"]')[0] as Element;
 		//if (firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
-    const layoutName = this.dragNode.getAttribute("svy-layoutname");
-    if (layoutName) {
-      if (this.dropHighlight !== layoutName){
-        this.editorSession.sendState('dropHighlight', layoutName);
-        this.dropHighlight = layoutName;
-      }
-      this.type = "layout";
-    }
-    this.topContainer = this.designerUtilsService.isTopContainer(layoutName);
+    this.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname"));
   }
 
   onMouseMove(event: MouseEvent) {
@@ -101,6 +90,18 @@ export class DragselectionResponsiveComponent implements OnInit {
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
+        const layoutName = this.dragNode.getAttribute("svy-layoutname");
+        if (layoutName) {
+          if (this.dropHighlight !== layoutName) {
+            this.editorSession.sendState('dropHighlight', layoutName);
+            this.dropHighlight = layoutName;
+          }
+          this.type = "layout";
+        }
+        else {
+          this.type = "component";
+        }
+        this.editorSession.getState().drop_highlight = this.type;
       } else return;
     }
 
