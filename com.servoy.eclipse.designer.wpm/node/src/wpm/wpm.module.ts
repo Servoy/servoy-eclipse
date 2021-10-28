@@ -15,13 +15,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HeaderComponent, AddRepositoryDialog, ErrorDialog } from './header/header.component';
+import { HeaderComponent, AddRepositoryDialogComponent, ErrorDialogComponent } from './header/header.component';
 import { ContentComponent } from './content/content.component';
 import { PackagesComponent } from './packages/packages.component'
 import { WebsocketService } from './websocket.service';
 import { WpmService } from './wpm.service';
 import { FormsModule } from '@angular/forms'
-import { UpdatePackagesDialog } from './update-dialog/update-dialog.component';
+import { UpdatePackagesDialogComponent } from './update-dialog/update-dialog.component';
 
 @NgModule({
   declarations: [
@@ -29,9 +29,9 @@ import { UpdatePackagesDialog } from './update-dialog/update-dialog.component';
     HeaderComponent,
     ContentComponent,
     PackagesComponent,
-    UpdatePackagesDialog,
-    AddRepositoryDialog,
-    ErrorDialog
+    UpdatePackagesDialogComponent,
+    AddRepositoryDialogComponent,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -51,6 +51,6 @@ import { UpdatePackagesDialog } from './update-dialog/update-dialog.component';
   ],
   providers: [WebsocketService, WpmService],
   bootstrap: [MainComponent],
-  entryComponents: [AddRepositoryDialog, ErrorDialog]
+  entryComponents: [AddRepositoryDialogComponent, ErrorDialogComponent]
 })
 export class WpmModule { }

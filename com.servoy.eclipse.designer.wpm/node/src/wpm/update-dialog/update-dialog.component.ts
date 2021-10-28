@@ -1,18 +1,19 @@
 import {Component, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { Package, WpmService } from '../wpm.service';
+import { Package } from '../websocket.service';
+import {  WpmService } from '../wpm.service';
 
 @Component({
-    selector: 'update-dialog',
+    selector: 'wpm-update-dialog',
     templateUrl: './update-dialog.component.html',
     styleUrls: ['./update-dialog.component.css']
 })
-export class UpdatePackagesDialog {
+export class UpdatePackagesDialogComponent {
 
     extendedData: ExtendedPackage[] = [];
     installingOrRemoving = false;
 
-    constructor(public dialogRef: MatDialogRef<UpdatePackagesDialog>, 
+    constructor(public dialogRef: MatDialogRef<UpdatePackagesDialogComponent>, 
         @Inject(MAT_DIALOG_DATA) public data: Package[], public wpmService: WpmService) {
         data.forEach(p => {
             if (this.wpmService.versionCompare(p.installed, p.releases[0].version) < 0) {

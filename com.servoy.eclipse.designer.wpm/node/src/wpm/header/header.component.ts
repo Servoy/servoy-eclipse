@@ -1,10 +1,11 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { WpmService, Repository, Package } from '../wpm.service';
+import { WpmService } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ExtendedPackage, UpdatePackagesDialog } from '../update-dialog/update-dialog.component';
+import { ExtendedPackage, UpdatePackagesDialogComponent } from '../update-dialog/update-dialog.component';
+import { Package, Repository } from '../websocket.service';
 
-const ADD_REMOVE_TEXT: string = "Add...";
-const SERVOY_DEFAULT: string = "Servoy Default";
+const ADD_REMOVE_TEXT = 'Add...';
+const SERVOY_DEFAULT= 'Servoy Default';
 
 @Component({
   selector: 'app-header',
@@ -24,9 +25,9 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
 
     this.wpmService.getAllRepositories().subscribe(repositories => {
-      const newRepositories = [];
+      const newRepositories: string[] = [];
       let newActiveRepository = this.activeRepository;
-      for(let repository of repositories) {
+      for(const repository of repositories) {
         if(repository.selected) newActiveRepository = repository.name;
         newRepositories.push(repository.name);
       }
@@ -75,10 +76,10 @@ export class HeaderComponent implements OnInit {
 
   openDialog() { 
     const readyPackages = this.packages.filter(p => !p.hasLatestVersion && !p.markedAsRemoved); 
-    const dialogRef = this.dialog.open(UpdatePackagesDialog, {data: readyPackages});
-    dialogRef.beforeClosed().subscribe(result => {
+    const dialogRef = this.dialog.open(UpdatePackagesDialogComponent, {data: readyPackages});
+    dialogRef.beforeClosed().subscribe( (result: ExtendedPackage[]) => {
       if (result) {
-        result.forEach((el: ExtendedPackage) => {
+        result.forEach((el) => {
           if (el.isSelected) {
             this.packages.forEach(p => {
               if (p.name === el.package.name) {
@@ -135,8 +136,8 @@ export class HeaderComponent implements OnInit {
   }
 
   showAddRepositoryDialog(): void {
-    const dialogRef = this.dialog.open(AddRepositoryDialog, {
-      data: <Repository> { name: "", url: ""}
+    const dialogRef = this.dialog.open(AddRepositoryDialogComponent, {
+      data: <Repository> { name: '', url: ''}
     });
   
     dialogRef.afterClosed().subscribe(result => {
@@ -147,14 +148,14 @@ export class HeaderComponent implements OnInit {
           this.showAddRepositoryErrorDialog("The name can't be " + ADD_REMOVE_TEXT);
           return;
         }
-        if (newRepo.name == "" || newRepo.url == "") {
-          this.showAddRepositoryErrorDialog("The name or url must be filled in");
+        if (newRepo.name == '' || newRepo.url == '') {
+          this.showAddRepositoryErrorDialog('The name or url must be filled in');
           return;
           
         }
-        for (let repository of this.repositories) {
+        for (const repository of this.repositories) {
           if (newRepo.name == repository) {
-            this.showAddRepositoryErrorDialog("The name is already defined");
+            this.showAddRepositoryErrorDialog('The name is already defined');
             return; 
           }
         }
@@ -171,7 +172,7 @@ export class HeaderComponent implements OnInit {
   }
 
   showAddRepositoryErrorDialog(message: string) {
-    this.dialog.open(ErrorDialog, {
+    this.dialog.open(ErrorDialogComponent, {
       data: message
     }).afterClosed().subscribe(result => {
       this.showAddRepositoryDialog();
@@ -180,13 +181,13 @@ export class HeaderComponent implements OnInit {
 }
 
 @Component({
-  selector: 'add-repository-dialog',
+  selector: 'wpm-add-repository-dialog',
   templateUrl: 'add-repository-dialog.html',
 })
-export class AddRepositoryDialog {
+export class AddRepositoryDialogComponent {
 
   constructor(
-    public dialogRef: MatDialogRef<AddRepositoryDialog>, @Inject(MAT_DIALOG_DATA) public data: Repository) {}
+    public dialogRef: MatDialogRef<AddRepositoryDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: Repository) {}
 
   onCancelClick(): void {
     this.dialogRef.close();
@@ -194,12 +195,12 @@ export class AddRepositoryDialog {
 
 }
 @Component({
-  selector: 'error-dialog',
+  selector: 'wpm-error-dialog',
   templateUrl: 'error-dialog.html'
 })
-export class ErrorDialog {
+export class ErrorDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<ErrorDialog>, @Inject(MAT_DIALOG_DATA) public data: string) {}
+    public dialogRef: MatDialogRef<ErrorDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: string) {}
 
   onOkClick(): void {
     this.dialogRef.close();
