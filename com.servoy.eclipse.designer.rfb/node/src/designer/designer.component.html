@@ -9,6 +9,7 @@
             <designer-highlight></designer-highlight>
             <designer-ghostscontainer></designer-ghostscontainer>
             <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
+            <dragselection-responsive *ngIf="!urlParser.isAbsoluteFormLayout()"></dragselection-responsive>
         </div>
         <designer-editorcontent></designer-editorcontent> 
         <designer-contextmenu></designer-contextmenu>

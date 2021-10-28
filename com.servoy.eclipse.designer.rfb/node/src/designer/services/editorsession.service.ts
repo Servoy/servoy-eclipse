@@ -46,6 +46,7 @@ export class EditorSessionService implements ServiceProvider {
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
                 this.allowedChildren = JSON.parse(result);
+				this.sendState('allowedChildren', this.allowedChildren);
             }).catch(e => console.log(e));
         }
     }
@@ -341,6 +342,19 @@ export class EditorSessionService implements ServiceProvider {
     isDirty(): boolean {
         return this.bIsDirty;
     }
+
+    //TODO remove from toolbar
+    sendState(key: string, result: unknown) {
+        const iframe = this.doc.querySelector('iframe');
+        const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
+        if (elements.length == 0) {
+            setTimeout(() => this.sendState(key, result), 400);
+            return;
+        }
+        else {
+            iframe.contentWindow.postMessage({ id: key, value: result }, '*');
+        }
+    }
 }
 
 export interface ISelectionChangedListener {
@@ -364,6 +378,7 @@ class State {
     dragging = false;
     pointerEvents = 'none';
     packages : Array<Package>;
+	drop_highlight: string;
 }
 
 export class PaletteComp {
@@ -385,6 +400,9 @@ export class PaletteComp {
     types? : Array<PaletteComp>; // the ghosts
     multiple? : boolean; //ghost property
     propertyValue?: {property : string}; // formcomponents
+    componentType?: string;
+    topContainer: boolean;
+    layoutName?: string;
 }
 
 export class Package {

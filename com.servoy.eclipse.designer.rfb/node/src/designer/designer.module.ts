@@ -26,6 +26,7 @@ import { DesignSizeService } from './services/designsize.service';
 import { ResizeKnobDirective } from './directives/resizeknob.directive';
 import {DesignerUtilsService} from './services/designerutils.service';
 import { DragselectionComponent } from './dragselection/dragselection.component';
+import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
     SearchTextDeepPipe,
     ResizeKnobDirective,
     PositionMenuDirective,
-    DragselectionComponent
+    DragselectionComponent,
+    DragselectionResponsiveComponent
   ],
   imports: [
     BrowserModule,

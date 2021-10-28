@@ -56,20 +56,6 @@ export class DragselectionComponent implements OnInit {
       }
   }
   
-  convertToContentPoint(point: {x?:number; y?:number; top?:number; left?:number}) {
-      if  (this.frameRect === undefined) {
-          this.frameRect = this.glasspane.getBoundingClientRect();
-      }
-      if (point.x && point.y) {
-          point.x = point.x - this.frameRect.left;
-          point.y = point.y - this.frameRect.top;
-      } else if (point.top && point.left) {
-          point.left = point.left - this.frameRect.left;
-          point.top = point.top - this.frameRect.top;
-      }
-      return point
-  }
-  
   addAutoscrollListeners(direction: string) {
     this.editorSession.getState().pointerEvents = 'all';
    
@@ -253,7 +239,7 @@ export class DragselectionComponent implements OnInit {
                   const selection = this.editorSession.getSelection();
                 
                   const elements = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id]');
-                  const point = this.convertToContentPoint({ x: this.dragStartEvent.pageX, y: this.dragStartEvent.pageY });
+                  const point = this.designerUtilsService.convertToContentPoint(this.glasspane, { x: this.dragStartEvent.pageX, y: this.dragStartEvent.pageY });
                   const elementAtMousePos = Array.from(elements).reverse().find((node) => {
                       const position = node.getBoundingClientRect();
                       this.designerUtilsService.adjustElementRect(node, position);
