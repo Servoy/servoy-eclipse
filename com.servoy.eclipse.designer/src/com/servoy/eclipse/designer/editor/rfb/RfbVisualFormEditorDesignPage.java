@@ -258,7 +258,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			boolean marqueeSelectOuter = designerPreferences.getMarqueeSelectOuter();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
-			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
+			final String path = (new DesignerPreferences()).showNG2Designer() ? "angular2" : "angular";
+			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/" + path + "/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault + "&mso=" + marqueeSelectOuter +
 				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
