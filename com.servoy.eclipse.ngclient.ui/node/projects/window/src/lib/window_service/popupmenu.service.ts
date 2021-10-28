@@ -50,10 +50,6 @@ export class PopupMenuService {
     }
 
     public showMenu(x: number, y: number) {
-        this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
-            item.remove();
-        });
-
         this.menu.style.left = x + 'px';
         this.menu.style.top = y + 'px';
         this.menu.style.visibility = 'visible';
