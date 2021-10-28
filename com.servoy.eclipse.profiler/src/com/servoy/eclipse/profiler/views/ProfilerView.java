@@ -1037,7 +1037,7 @@ public class ProfilerView extends ViewPart
 		ownTimeColumn.setWidth(ownTimeColumnWidth);
 
 		timeColumn = new TreeColumn(tree, SWT.NONE);
-		timeColumn.setText("Time (ms)");
+		timeColumn.setText("Total Time (ms)");
 		timeColumn.setResizable(true);
 		timeColumn.setWidth(timeColumnWidth);
 
@@ -1047,7 +1047,7 @@ public class ProfilerView extends ViewPart
 		argsColumn.setWidth(argsColumnWidth);
 
 		timeQueryColumn = new TreeColumn(tree, SWT.NONE);
-		timeQueryColumn.setText("SQL Own Time");
+		timeQueryColumn.setText("SQL Aggregated Time");
 		timeQueryColumn.setResizable(true);
 		timeQueryColumn.setWidth(timeQueryColumnWidth);
 
@@ -1135,7 +1135,7 @@ public class ProfilerView extends ViewPart
 		name.setResizable(true);
 
 		time = new TableColumn(table, SWT.NONE);
-		time.setText("Time (ms)");
+		time.setText("Own Time (ms)");
 		time.setWidth(timeTableColumnWidth);
 		time.setResizable(true);
 
