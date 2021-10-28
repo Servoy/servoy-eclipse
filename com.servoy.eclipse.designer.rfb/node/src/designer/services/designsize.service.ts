@@ -123,9 +123,7 @@ export class DesignSizeService {
             this.lastWidth = result.width ? result.width : this.lastWidth;
             this.btnCustomWidth.text = this.lastWidth;
             if (result.height || result.width) {
-//              editor.contentLoaded.then(function() {
                 this.setSize(this.lastWidth, this.lastHeight, true);
-//              });
             }
         });
     }
