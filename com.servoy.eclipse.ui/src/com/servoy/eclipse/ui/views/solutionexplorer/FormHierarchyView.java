@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -88,6 +90,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -704,7 +707,20 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		fParent = parent;
 		fDialogSettings = Activator.getDefault().getDialogSettings();
-		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null) fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
+		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null)
+		{
+			IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+			String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+				SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+			if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+			{
+				fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
+			}
+			else
+			{
+				fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_SCRIPT_EDITOR);
+			}
+		}
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
 		fSplitter = new SashForm(fParent, SWT.NONE);
