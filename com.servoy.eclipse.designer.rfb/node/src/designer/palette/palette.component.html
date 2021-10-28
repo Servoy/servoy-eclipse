@@ -2,7 +2,7 @@
     <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
     <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
     <ngb-accordion [activeIds]="activeIds" [type]="'light'">
-        <ngb-panel *ngFor="let package of packages| searchTextFilterDeep : searchText;let i = index" [id]="package.id">
+        <ngb-panel *ngFor="let package of getPackages()| searchTextFilterDeep : searchText;let i = index" [id]="package.id">
          <ng-template ngbPanelTitle>
            {{package.packageDisplayname}}
         </ng-template>

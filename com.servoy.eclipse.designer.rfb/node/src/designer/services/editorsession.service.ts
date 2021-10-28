@@ -363,4 +363,35 @@ class State {
     maxLevel: number;
     dragging = false;
     pointerEvents = 'none';
+    packages : Array<Package>;
+}
+
+export class PaletteComp {
+    name: string;
+    displayName : string;
+    packageName: string;
+    x: number;
+    y: number;
+    type: string;
+    ghostPropertyName: string;
+    dropTargetUUID: string; 
+    isOpen: boolean;
+    propertyName: string; // ghost
+    components: Array<PaletteComp>;
+    properties: Array<string>;
+    isAbsoluteCSSPositionMix ?:boolean; // formcomponent property
+    icon? : string;
+    model? : {property : any};
+    types? : Array<PaletteComp>; // the ghosts
+    multiple? : boolean; //ghost property
+    propertyValue?: {property : string}; // formcomponents
+}
+
+export class Package {
+    id: string;
+    packageName: string;
+    packageDisplayname : string;
+    components: Array<PaletteComp>;
+    propertyValues?: Array<PaletteComp>;
+    categories?: {property : PaletteComp};
 }

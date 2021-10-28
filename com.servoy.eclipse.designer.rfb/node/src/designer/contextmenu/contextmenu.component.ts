@@ -1,8 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
-import { PaletteComp } from '../palette/palette.component';
-import { EditorSessionService } from '../services/editorsession.service';
+import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
 export enum SHORTCUT_IDS {
@@ -109,7 +108,7 @@ export class ContextMenuComponent implements OnInit {
                                             component = this.convertToContentPoint(component) as PaletteComp;
                                             this.editorSession.createComponent(component);
                                         });
-                                        this.menuItems[i].subMenu.push(submenuItem);
+                                    this.menuItems[i].subMenu.push(submenuItem);
                                 }
                             for (const type of typesArray) {
                                 const submenuItem = new ContextmenuItem(type.type + ' for ' + type.property,
@@ -753,28 +752,26 @@ export class ContextMenuComponent implements OnInit {
     }
 
     private getDisplayName(componentName: string): string {
-        // TODO:
-        // if($scope.packages && $scope.packages.length) {
-        // 	var packageAndComponent = componentName.split(".");
-        // 	if(componentName == "component" || packageAndComponent[1] == "*") return "Component [...]";
-        // 	if (componentName == "template") return "Template [...]";
-        // 	for(var i = 0; i < $scope.packages.length; i++) {
-        // 		if($scope.packages[i].packageName == packageAndComponent[0]) {
-        // 			var displayName = findComponentDisplayName($scope.packages[i].components, packageAndComponent[1]);
-        // 			if(displayName) return displayName;
+        const packages = this.editorSession.getState().packages;
+        if (packages && packages.length) {
+            const packageAndComponent = componentName.split('.');
+            if (componentName == 'component' || packageAndComponent[1] == '*') return 'Component [...]';
+            if (componentName == 'template') return 'Template [...]';
+            for (let i = 0; i < packages.length; i++) {
+                if (packages[i].packageName == packageAndComponent[0]) {
+                    let displayName = this.findComponentDisplayName(packages[i].components, packageAndComponent[1]);
+                    if (displayName) return displayName;
 
-        // 			var categories = $scope.packages[i].categories;
-        // 			if(categories) {
-        // 				for (property in categories) {
-        // 					if (categories.hasOwnProperty(property)) {
-        // 						displayName = findComponentDisplayName(categories[property], packageAndComponent[1]);
-        // 						if(displayName) return displayName;
-        // 					}
-        // 				}
-        // 			}
-        // 		}
-        // 	}
-        // }	
+                    const categories = packages[i].categories;
+                    if (categories) {
+                        for (const property in categories) {
+                            displayName = this.findComponentDisplayName(categories[property], packageAndComponent[1]);
+                            if (displayName) return displayName;
+                        }
+                    }
+                }
+            }
+        }
         return componentName;
     }
 

@@ -1,6 +1,6 @@
 import { Component, Pipe, PipeTransform, Renderer2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { EditorSessionService } from '../services/editorsession.service';
+import { EditorSessionService, Package, PaletteComp } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import {DesignerUtilsService} from '../services/designerutils.service';
@@ -13,7 +13,6 @@ import {DesignerUtilsService} from '../services/designerutils.service';
 export class PaletteComponent {
 
     public searchText: string;
-    public packages: Array<Package>;;
     public activeIds: Array<string>;
 
     dragItem: DragItem = {};
@@ -30,39 +29,41 @@ export class PaletteComponent {
             layoutType = 'Responsive-Layout';
         this.activeIds = [];
         this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: Array<Package>) => {
+            let packages: Array<Package>
             let propertyValues: Array<PaletteComp>;
             if (got[got.length - 1] && got[got.length - 1].propertyValues) {
                 propertyValues = got[got.length - 1].propertyValues;
-                this.packages = got.slice(0, got.length - 1);
+                packages = got.slice(0, got.length - 1);
             }
             else {
-                this.packages = got;
+                packages = got;
             }
-            for (let i = 0; i < this.packages.length; i++) {
-                this.packages[i].id = ('svy_' + this.packages[i].packageName).replace(/[|&;$%@"<>()+,]/g, '').replace(/\s+/g, '_');
-                this.activeIds.push(this.packages[i].id);
-                if (this.packages[i].components) {
-                    for (let j = 0; j < this.packages[i].components.length; j++) {
-                        if (propertyValues && this.packages[i].components[j].properties) {
-                            this.packages[i].components[j].isOpen = false;
+            for (let i = 0; i < packages.length; i++) {
+                packages[i].id = ('svy_' + packages[i].packageName).replace(/[|&;$%@"<>()+,]/g, '').replace(/\s+/g, '_');
+                this.activeIds.push(packages[i].id);
+                if (packages[i].components) {
+                    for (let j = 0; j < packages[i].components.length; j++) {
+                        if (propertyValues && packages[i].components[j].properties) {
+                            packages[i].components[j].isOpen = false;
                             //we still need to have the components with properties on the component for filtering
 
-                            if (propertyValues && propertyValues.length && this.packages[i].components[j].name == 'servoycore-formcomponent') {
+                            if (propertyValues && propertyValues.length && packages[i].components[j].name == 'servoycore-formcomponent') {
                                 const newPropertyValues : Array<PaletteComp> = [];
                                 for (let n = 0; n < propertyValues.length; n++) {
                                     if (!propertyValues[n].isAbsoluteCSSPositionMix) {
                                         newPropertyValues.push(propertyValues[n]);
                                     }
                                 }
-                                this.packages[i].components[j].components = newPropertyValues;
+                                packages[i].components[j].components = newPropertyValues;
                             }
                             else {
-                                this.packages[i].components[j].components = propertyValues;
+                                packages[i].components[j].components = propertyValues;
                             }
                         }
                     }
                 }
             }
+            this.editorSession.getState().packages = packages;
         });
         this.doc.body.addEventListener('mouseup', this.onMouseUp);
         this.doc.body.addEventListener('mousemove', this.onMouseMove);
@@ -212,6 +213,10 @@ export class PaletteComponent {
         }
         return name;
     }
+    
+    getPackages() : Array<Package>{
+        return  this.editorSession.getState().packages;  
+    }
 }
 
 @Pipe({ name: 'searchTextFilter' })
@@ -243,8 +248,7 @@ export class SearchTextDeepPipe implements PipeTransform {
         return items;
     }
 }
-
-class DragItem {
+export class DragItem {
     paletteItemBeingDragged?: Element;
     contentItemBeingDragged?: Node;
     elementName?: string;
@@ -252,33 +256,4 @@ class DragItem {
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName? :string;
     propertyValue? : {property : string};
-}
-
-export class PaletteComp {
-    name: string;
-    displayName : string;
-    packageName: string;
-    x: number;
-    y: number;
-    type: string;
-    ghostPropertyName: string;
-    dropTargetUUID: string; 
-    isOpen: boolean;
-    propertyName: string; // ghost
-    components: Array<PaletteComp>;
-    properties: Array<string>;
-    isAbsoluteCSSPositionMix ?:boolean; // formcomponent property
-    icon? : string;
-    model? : {property : any};
-    types? : Array<PaletteComp>; // the ghosts
-    multiple? : boolean; //ghost property
-    propertyValue?: {property : string}; // formcomponents
-}
-
-class Package {
-    id: string;
-    packageName: string;
-    packageDisplayname : string;
-    components: Array<PaletteComp>;
-    propertyValues?: Array<PaletteComp>;
 }
