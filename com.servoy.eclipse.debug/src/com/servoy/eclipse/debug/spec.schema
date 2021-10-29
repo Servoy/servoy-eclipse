@@ -492,7 +492,11 @@
 								},
 								"deprecated": {
                                     "type": "string"
-                                }
+                                },
+                                "allowaccess": {
+                                    "description": "Comma separated list of properties for which blocking is ignored, like 'visible'.",
+                                    "type": "string"
+                                }                                               
 							},
 							"additionalProperties": false
 						}
@@ -586,7 +590,7 @@
 						},
 						"doc": {
                             "type": "string",
-                            "description": "Api documentation description.",
+                            "description": "Api documentation description."
                         }
 								
 					},
