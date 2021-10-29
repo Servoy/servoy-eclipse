@@ -131,7 +131,7 @@ export class DragselectionResponsiveComponent implements OnInit {
     if (canDrop.dropTarget) {
       if (this.glasspane.style.cursor == "pointer" && !this.dragNode.contains(canDrop.dropTarget)) {
         if (canDrop.beforeChild) {
-          this.renderer.insertBefore(canDrop.dropTarget, this.dragNode, this.type === "layout" ? canDrop.beforeChild : canDrop.beforeChild.parentElement);
+          this.renderer.insertBefore(canDrop.dropTarget, this.dragNode, this.type === "component" && canDrop.beforeChild.parentElement !== canDrop.dropTarget ? canDrop.beforeChild.parentElement : canDrop.beforeChild);
         } else if (this.designerUtilsService.getParent(this.dragNode) != canDrop.dropTarget || canDrop.append) {
           this.renderer.appendChild(canDrop.dropTarget, this.dragNode);
         }

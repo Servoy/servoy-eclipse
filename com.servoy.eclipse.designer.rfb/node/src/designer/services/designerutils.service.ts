@@ -35,7 +35,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(doc: Document, type: string, topContainer:boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?) {
+    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?) {
         let dropTarget = null;
         if (type == "layout" || type == "component") {
             const realName = layoutName ? layoutName : "component";
@@ -46,7 +46,7 @@ export class DesignerUtilsService {
                 const formRect = content.getBoundingClientRect();
                 //it can be hard to drop on bottom, so just allow it to the end
                 const isForm = event.clientX > formRect.left && event.clientX < formRect.right &&
-                event.clientY > formRect.top;
+                    event.clientY > formRect.top;
                 // this is on the form, can this layout container be dropped on the form?
                 if (!isForm || !topContainer) {
                     return {
@@ -56,27 +56,25 @@ export class DesignerUtilsService {
                 let beforeNode = null;
                 dropTarget = doc.querySelector('iframe').contentWindow.document.body.querySelector('.svy-form');
                 //droptarget is the form but has no svy-id
-                for (let i = dropTarget.childNodes.length - 1; i >= 0; i--)
-                {
+                for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
                     const node = dropTarget.childNodes[i];
-                    if (node && node.getAttribute && node.getAttribute('svy-id'))
-                    {
+                    if (node && node.getAttribute && node.getAttribute('svy-id')) {
                         const clientRec = node.getBoundingClientRect();
-                        const absolutePoint = this.convertToAbsolutePoint(doc, {
+                        const absolutePoint = //this.convertToAbsolutePoint(doc, 
+                        {
                             x: clientRec.right,
                             y: clientRec.bottom
-                        });
+                        };//);
                         // if cursor is in rectangle between 0,0 and bottom right corner of component we consider it to be before that component
                         // can we enhance it ?
-                        if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x)
-                        {
+                        if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x) {
                             beforeNode = node;
                         }
                         else
                             break;
 
-                    }	
-                }	
+                    }
+                }
                 return {
                     dropAllowed: true,
                     dropTarget: null,
@@ -102,13 +100,13 @@ export class DesignerUtilsService {
                         // the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
 
                         dropTarget = dropTarget.nextElementSibling;
-                        realDropTarget = this.getParent(dropTarget, realName);
+						//realDropTarget = this.getParent(dropTarget, realName);
 
                         // if there is no nextElementSibling then force it to append so that it is moved to the last position.
                         if (!dropTarget) {
                             return {
                                 dropAllowed: true,
-                                dropTarget: realDropTarget, //TODO check
+                                dropTarget: realDropTarget,
                                 append: true
                             };
                         }
@@ -118,18 +116,18 @@ export class DesignerUtilsService {
                     }
                     return {
                         dropAllowed: true,
-                        dropTarget: realDropTarget, //TODO check
+                        dropTarget: realDropTarget,
                         beforeChild: dropTarget
                     };
                 }
                 else {
                     // we drop directly on the node, try to determine its position between children
                     let beforeNode = null;
-                    for (var i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                        var node = dropTarget.childNodes[i];
+                    for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
+                        const node = dropTarget.childNodes[i];
                         if (node && node.getAttribute && node.getAttribute('svy-id')) {
-                            var clientRec = node.getBoundingClientRect();
-                            var absolutePoint = this.convertToAbsolutePoint(doc, {
+                            const clientRec = node.getBoundingClientRect();
+                            const absolutePoint = this.convertToAbsolutePoint(doc, {
                                 x: clientRec.right,
                                 y: clientRec.bottom
                             });
@@ -183,7 +181,7 @@ export class DesignerUtilsService {
             allowedChildren = dt.getAttribute("svy-types");
             if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
                 let parent = dt.parentElement;
-                while (parent !== null && !parent.hasAttribute('svy-id') && parent.parentElement) {
+                while (parent !== null && !parent.hasAttribute('svy-id') && parent.parentElement && parent.classList.contains('svy-layoutcontainer')) {
                     parent = parent.parentElement;
                 }
                 return this.getParent(parent, realName); // the drop target doesn't allow this layout container type
@@ -207,12 +205,10 @@ export class DesignerUtilsService {
         let frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
         point.y = point.y - frameRect.top;
-        
         let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         let found = Array.from(elements).reverse().find((node) => {
             let position = node.getBoundingClientRect();
             this.adjustElementRect(node, position);
-            let addToSelection = false;
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 return node;
             }
@@ -229,7 +225,6 @@ export class DesignerUtilsService {
                 }
             }
         });
-        
         return found;
     }
 
