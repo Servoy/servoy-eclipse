@@ -707,20 +707,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		fParent = parent;
 		fDialogSettings = Activator.getDefault().getDialogSettings();
-		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null)
-		{
-			IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
-			String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
-				SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
-			if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
-			{
-				fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
-			}
-			else
-			{
-				fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_SCRIPT_EDITOR);
-			}
-		}
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
 		fSplitter = new SashForm(fParent, SWT.NONE);
@@ -803,13 +789,31 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			@Override
 			public void run()
 			{
-				if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+				fDialogSettings = Activator.getDefault().getDialogSettings();
+				if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null)
 				{
-					openFormEditor.run();
+					IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+					String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+						SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+					if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+					{
+						openFormEditor.run();
+					}
+					else
+					{
+						openScriptEditor.run();
+					}
 				}
 				else
 				{
-					openScriptEditor.run();
+					if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+					{
+						openFormEditor.run();
+					}
+					else
+					{
+						openScriptEditor.run();
+					}
 				}
 			}
 		});
@@ -1121,7 +1125,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			super(text, AS_RADIO_BUTTON);
 			this.selectionValue = selectionValue;
 			setImageDescriptor(Activator.loadImageDescriptorFromBundle(image));
-			setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
+			if (fDialogSettings.get(OPEN_FORM_PREFERENCE) != null) setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
 		}
 
 		@Override
