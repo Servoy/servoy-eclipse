@@ -11,6 +11,10 @@
     border: 2px dashed;
 }
 
+.inherited_element {
+    outline:1px dotted red;
+}
+
 .maxLevelDesign > * {
 	display: none !important;
 }

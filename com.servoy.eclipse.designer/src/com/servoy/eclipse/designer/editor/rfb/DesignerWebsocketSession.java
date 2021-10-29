@@ -187,7 +187,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean isNG2 = args.optBoolean("ng2", false);
 				if (isNG2)
 				{
-					return new AngularFormGenerator(fs, form, form.getName(), true).generateJS();
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true).generateJS();
 				}
 				else
 				{

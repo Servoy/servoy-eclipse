@@ -26,10 +26,10 @@ import {AbstractFormComponent} from '../ngclient/form/form_component.component';
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
-          <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
+          <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-           <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
+           <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
           <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">

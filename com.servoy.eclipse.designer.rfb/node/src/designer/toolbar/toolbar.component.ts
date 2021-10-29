@@ -195,8 +195,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         const hideInheritedPromise = this.editorSession.isHideInherited();
         void hideInheritedPromise.then((result: boolean) => {
             this.btnHideInheritedElements.state = result;
-            // TODO:
-            // this.editorSession.hideInheritedElements(result);
+            if (result) {
+                this.applyHideInherited(result);
+            }
         });
         const solutionLayoutsCssPromise = this.editorSession.isShowSolutionLayoutsCss();
         void solutionLayoutsCssPromise.then((result: boolean) => {
@@ -490,8 +491,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.btnHideInheritedElements.state = true;
                     this.btnHideInheritedElements.text = 'Hide inherited elements'
                 }
-                // TODO:
-                //this.editorSession.hideInheritedElements(btnHideInheritedElements.state);
+                this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
             }
         );
@@ -1095,6 +1095,21 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnMoveDown.enabled = selection.length == 1;
             this.btnZoomIn.enabled = selection.length == 1;
         }
+    }
+    
+    applyHideInherited(hideInherited : boolean){
+        const frameElem = this.doc.querySelector('iframe');
+        const initializedElements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        if (initializedElements.length == 0) setTimeout(() => this.applyHideInherited(hideInherited), 400);
+        const elements =  Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
+        elements.forEach((node) => {
+            if (hideInherited) {
+                this.renderer.setStyle(node, 'visibility', 'hidden');
+            }
+            else {
+                this.renderer.setStyle(node, 'visibility', 'visible' );
+            }
+        });
     }
 
 }
