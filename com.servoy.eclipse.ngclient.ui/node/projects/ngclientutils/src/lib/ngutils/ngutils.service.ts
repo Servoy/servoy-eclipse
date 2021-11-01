@@ -26,14 +26,14 @@ export class NGUtilsService {
     }
 
     set contributedTags(tags: Tag[]) {
-        let newTags = tags.slice();
-        var uitags = this.document.querySelectorAll('head > [hhsManagedTag]');
+        const newTags = tags.slice();
+        const uitags = this.document.querySelectorAll('head > [hhsManagedTag]');
         if (this._tagscopy) {
             for (let i = 0; i < this._tagscopy.length; i++) {
-                let oldTag = this._tagscopy[i];
+                const oldTag = this._tagscopy[i];
                 let newIndex = -1;
                 for (let j = 0; j < newTags.length; j++) {
-                    let tag = newTags[j];
+                    const tag = newTags[j];
                     if (oldTag.tagName == tag.tagName && oldTag.attrs.length == tag.attrs.length) {
                         let sameAttributes = true;
                         for (let k = 0; k < tag.attrs.length; k++) {
@@ -51,14 +51,13 @@ export class NGUtilsService {
                 if (newIndex >= 0) {
                     // element was found unchanged, just leave it alone
                     newTags.splice(newIndex, 1);
-                }
-                else {
+                } else {
                     // element was deleted or changed, we must remove it from dom
                     for (let j = 0; j < uitags.length; j++) {
-                        let uitag = uitags[j];
-                        if (uitag.tagName.toLowerCase() == oldTag.tagName.toLowerCase()) {
-                            var sameAttributes = true;
-                            for (var k = 0; k < oldTag.attrs.length; k++) {
+                        const uitag = uitags[j];
+                        if (uitag.tagName.toLowerCase() === oldTag.tagName.toLowerCase()) {
+                            let sameAttributes = true;
+                            for (let k = 0; k < oldTag.attrs.length; k++) {
                                 if (uitag.getAttribute(oldTag.attrs[k].name) != oldTag.attrs[k].value) {
                                     sameAttributes = false;
                                     break;
@@ -72,8 +71,7 @@ export class NGUtilsService {
                     }
                 }
             }
-        }
-        else {
+        } else {
             uitags.forEach(e => e.remove());;
         }
 
@@ -99,7 +97,8 @@ export class NGUtilsService {
         const old = this._styleclasses;
         this._styleclasses = styleclasses;
         Object.keys(this._styleclasses).forEach((key: string) => {
-            const form = this.document.querySelector('svy-form[name=' + key + '] > div');
+            const selector = 'svy-form[name=' + key.replace('$', '\\\$') + '] > div';
+            const form = this.document.querySelector(selector);
             if (form) {
                 const newCls = this._styleclasses[key] ? this._styleclasses[key].split(' ').filter((cls: string) => cls !== '') : [];
                 if (old && old[key]) {
@@ -367,23 +366,23 @@ export class NGUtilsService {
         (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
         return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
     };
-    
+
     /**
      * Move the scrollbar to the position of the given anchorSelector.
      * The target anchorSelector can be a Servoy Form, Layout Container or element in a responsive form or any element in a form.
      * You can use styleClass as selector.
      * For example: you can add 'scroll-element' to an element of the form.
-     * Examples of usage: 
+     * Examples of usage:
      * - plugins.ngclientutils.scrollIntoView(".toScroll-To");
      * - plugins.ngclientutils.scrollIntoView(".toScroll-To", { behavior: "smooth", block: "start", inline: "nearest" });
-     
+
      * @param anchorSelector {string} the selector to which the scrollbar should be moved to.
      * @param scrollIntoViewOptions option argument used for scrolling animation (example:  { behavior: "smooth", block: "start", inline: "nearest" }).
      */
     public scrollIntoView( anchorSelector: string, scrollIntoViewOptions?: any ) {
-        let anchor = this.document.querySelector( anchorSelector );
+        const anchor = this.document.querySelector( anchorSelector );
         if ( anchor ) {
-            if ( !scrollIntoViewOptions ) scrollIntoViewOptions = { behavior: "smooth", block: "start", inline: "nearest" };
+            if ( !scrollIntoViewOptions ) scrollIntoViewOptions = { behavior: 'smooth', block: 'start', inline: 'nearest' };
             // move scrolling to position
             anchor.scrollIntoView( scrollIntoViewOptions );
         } else {
