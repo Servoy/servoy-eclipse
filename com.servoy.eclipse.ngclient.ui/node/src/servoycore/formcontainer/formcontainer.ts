@@ -10,13 +10,6 @@ import {
     // ...
 } from '@angular/animations';
 
-export function myInlineMatcherFn(fromState: string, toState: string, element: any, params: {[key:string]: any}): boolean  {
-    console.log(fromState + " " + toState)
-    console.log(params)
-  // notice that `element` and `params` are also available here
-  return toState == 'yes-please-animate';
-}
-
 @Component({
     selector: 'servoycore-formcontainer',
     templateUrl: './formcontainer.html',
