@@ -238,9 +238,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							boolean isInCSSPositionContainer = false;
-							if (PersistHelper.getRealParent(baseComponent) instanceof LayoutContainer)
+							ISupportChilds realParent = PersistHelper.getRealParent(baseComponent);
+							if (realParent instanceof LayoutContainer)
 							{
-								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)PersistHelper.getRealParent(baseComponent));
+								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)realParent);
 							}
 							if (!responsive || isInCSSPositionContainer)
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
