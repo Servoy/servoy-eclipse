@@ -387,3 +387,15 @@ fieldset[disabled] .btn-default.focus {
 .svy-main-window-navigator-container {
 	z-index: 0;
 }
+
+.svy-wrapper > * > .svy-container {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    min-height: 0 !important;
+}
+
+/* Default form's height to 100% if responsive form is contained within an anchored form */
+.svy-wrapper > * > .svy-container > .tabcontainer > svy-form >.svy-respform {
+    height: 100%;
+}
