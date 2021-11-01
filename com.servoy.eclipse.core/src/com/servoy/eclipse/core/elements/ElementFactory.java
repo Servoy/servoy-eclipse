@@ -1476,7 +1476,7 @@ public class ElementFactory
 					name = (String)object.remove(SolutionSerializer.PROP_NAME);
 				}
 				Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
-				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false, true);
+				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false, true, true);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
 					SolutionDeserializer.setPersistValues(repository, entry.getKey(),
