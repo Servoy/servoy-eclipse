@@ -1,14 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { EditorSessionService } from '../services/editorsession.service';
+import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 
 @Component({
   selector: 'dragselection-responsive',
   templateUrl: './dragselection-responsive.component.html'
 })
-export class DragselectionResponsiveComponent implements OnInit {
-
+export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll {
   dragCloneDiv: HTMLElement;
   allowedChildren: any;
   dragNode: HTMLElement;
@@ -21,6 +20,8 @@ export class DragselectionResponsiveComponent implements OnInit {
   dropHighlight: string;
   type: string;
   topContainer: boolean;
+  autoscrollElementClientBounds: Array<DOMRect>;
+  autoscrollAreasEnabled: any;
   
   constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService) { }
 
@@ -90,6 +91,7 @@ export class DragselectionResponsiveComponent implements OnInit {
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
+        this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds(this.doc);
         const layoutName = this.dragNode.getAttribute("svy-layoutname");
         if (layoutName) {
           if (this.dropHighlight !== layoutName) {
@@ -105,7 +107,10 @@ export class DragselectionResponsiveComponent implements OnInit {
       } else return;
     }
 
-    //TODO autoscroll 
+    if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
+      this.autoscrollAreasEnabled = true;
+      this.editorSession.startAutoscroll(this);
+    }
 
     if (this.dragCloneDiv){
       const point = this.adjustPoint(event.pageX + 1, event.pageY + 1);
@@ -140,10 +145,15 @@ export class DragselectionResponsiveComponent implements OnInit {
   }
   
   onMouseUp(event: MouseEvent) {
-    if (this.dragStartEvent != null) {
+    if (this.dragStartEvent != null && this.editorSession.getState().dragging) {
       this.dragStartEvent = null;
       this.editorSession.getState().dragging = false;
       this.glasspane.style.cursor = "default";
+
+      //disable mouse events on the autoscroll
+      this.editorSession.getState().pointerEvents = 'none'; 
+      this.autoscrollAreasEnabled = false;
+      this.editorSession.stopAutoscroll();
 
       let obj = (event.ctrlKey || event.metaKey) ? [] : {};
       const layoutName = this.dragNode.getAttribute("svy-layoutname");
@@ -201,5 +211,9 @@ export class DragselectionResponsiveComponent implements OnInit {
     canDrop.dropAllowed = canDrop.dropAllowed && this.dragNode.classList.contains("inheritedElement")
         && this.initialParent !== null && this.initialParent[0].getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
     return canDrop;
+  }
+
+  getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void{
+    return null;
   }
 }

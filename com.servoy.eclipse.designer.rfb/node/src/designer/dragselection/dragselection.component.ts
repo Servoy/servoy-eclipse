@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, Renderer2 } from '@angular/core';
-import { EditorSessionService } from 'src/designer/services/editorsession.service';
+import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { DOCUMENT } from '@angular/common';
 import { URLParserService } from 'src/designer/services/urlparser.service';
 import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
@@ -9,7 +9,7 @@ import { DesignerUtilsService } from '../services/designerutils.service';
   selector: 'dragselection',
   templateUrl: './dragselection.component.html'
 })
-export class DragselectionComponent implements OnInit {
+export class DragselectionComponent implements OnInit, ISupportAutoscroll {
     frameRect: {x?:number; y?:number; top?:number; left?:number};
     contentArea: HTMLElement;
     leftContentAreaAdjust: number;
@@ -19,24 +19,18 @@ export class DragselectionComponent implements OnInit {
     autoscrollAreasEnabled: boolean;
     autoscrollElementClientBounds: Array<DOMRect>;
     
-//    initialParent: any;
     dragStartEvent: MouseEvent;
     dragNode: HTMLElement = null;
     glasspane: HTMLElement;
     selectionToDrag: string[]= null;
-    
     currentElementInfo: Map<string, ElementInfo>;
-    autoscrollEnter:  { [key: string]: (event: MouseEvent) => void; } = {};
-    autoscrollStop: { [key: string]: ReturnType<typeof setInterval>} = {};
-    autoscrollLeave: { [key: string]: (event: MouseEvent) => void; } = {};
-    
 
   constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService) { }
 
   ngOnInit(): void {
       const content: HTMLElement = this.doc.querySelector('.content-area');
       content.addEventListener('mousedown', (event) => this.onMouseDown(event));
-      content.addEventListener('mouseup', () => this.onMouseUp());
+      content.addEventListener('mouseup', (event) => this.onMouseUp(event));
       content.addEventListener('mousemove', (event) => this.onMouseMove(event));
       
       this.glasspane = this.doc.querySelector('.contentframe-overlay');
@@ -54,126 +48,9 @@ export class DragselectionComponent implements OnInit {
       if (event.button == 0 && this.dragNode) {
           this.dragStartEvent = event; 
       }
-  }
+  }  
   
-  addAutoscrollListeners(direction: string) {
-    this.editorSession.getState().pointerEvents = 'all';
-   
-    this.autoscrollEnter[direction] = this.registerDOMEvent('mouseenter', direction, () => {
-        this.autoscrollStop[direction] = this.startAutoScroll(direction, this.updateAbsoluteLayoutComponentsLocations);
-    }) as () => void;
-
-    this.autoscrollLeave[direction] = (event: MouseEvent) => {
-        if (this.autoscrollStop[direction]) {
-            clearInterval(this.autoscrollStop[direction]);
-            this.autoscrollStop[direction] = undefined;
-        }
-        if (event.type == 'mouseup')
-            this.onMouseUp();
-    }
-
-    this.registerDOMEvent('mouseleave', direction, this.autoscrollLeave[direction]);
-    this.registerDOMEvent('mouseup', direction, this.autoscrollLeave[direction]);
-   }
-
-    startAutoScroll(direction: string, callback: (selectionToDrag:string[], currentElementInfo: Map<string, ElementInfo>, 
-                                changeX: number, changeY: number, minX?: number, minY?: number) => void): ReturnType<typeof setInterval> {
-        let autoScrollPixelSpeed = 2;
-        const selection = this.selectionToDrag;
-        const info = this.currentElementInfo;
-        return setInterval(() => {
-            autoScrollPixelSpeed = this.autoScroll(selection, info, direction, autoScrollPixelSpeed, callback);
-        }, 50);
-    }
-
-    private autoScroll(selection: string[], info: Map<string, ElementInfo>, direction: string, autoScrollPixelSpeed: number, callback: (selectionToDrag:string[], currentElementInfo: Map<string, ElementInfo>, changeX: number, changeY: number, minX?: number, minY?: number) => void) {
-        const content: HTMLElement = this.doc.querySelector('.content-area') ;
-        let changeX = 0;
-        let changeY = 0;
-        switch (direction) {
-            case 'BOTTOM_AUTOSCROLL':
-                if ((content.scrollTop + content.offsetHeight) === content.scrollHeight)
-                    this.glasspane.style.height = parseInt(this.glasspane.style.height.replace('px', '')) + autoScrollPixelSpeed + 'px';
-                content.scrollTop += autoScrollPixelSpeed;
-                changeY = autoScrollPixelSpeed;
-                break;
-            case 'RIGHT_AUTOSCROLL':
-                if ((content.scrollLeft + content.offsetWidth) === content.scrollWidth)
-                    this.glasspane.style.width = parseInt(this.glasspane.style.width.replace('px', '')) + autoScrollPixelSpeed + 'px';
-                content.scrollLeft += autoScrollPixelSpeed;
-                changeX = autoScrollPixelSpeed;
-                break;
-            case 'LEFT_AUTOSCROLL':
-                if (content.scrollLeft >= autoScrollPixelSpeed) {
-                    content.scrollLeft -= autoScrollPixelSpeed;
-                    changeX = -autoScrollPixelSpeed;
-                } else {
-                    changeX = -content.scrollLeft;
-                    content.scrollLeft = 0;
-                }
-                break;
-            case 'TOP_AUTOSCROLL':
-                if (content.scrollTop >= autoScrollPixelSpeed) {
-                    content.scrollTop -= autoScrollPixelSpeed;
-                    changeY = -autoScrollPixelSpeed;
-                } else {
-                    changeY = -content.scrollTop;
-                    content.scrollTop -= 0;
-                }
-                break;
-        }
-
-        if (autoScrollPixelSpeed < 15)
-            autoScrollPixelSpeed++;
-
-        if (callback)
-            callback(selection, info, changeX, changeY, 0, 0);
-        return autoScrollPixelSpeed;
-    }
-
-   isInsideAutoscrollElementClientBounds(clientX: number, clientY: number): boolean {
-    if (!this.autoscrollElementClientBounds) return false;
-			
-    let inside = false;
-    let i = 0;
-    while (!inside && i < 4) { // 4 == autoscrollElementClientBounds.length always
-        const rect = this.autoscrollElementClientBounds[i++];
-        inside = (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom);
-    }
-    return inside;
-   } 
-
-    registerDOMEvent(eventType: string, target: string, callback: (event: MouseEvent) => void): (event: MouseEvent) => void {
-        let element: HTMLElement;
-        if (target === 'BOTTOM_AUTOSCROLL') {
-            element = this.doc.querySelector('.bottomAutoscrollArea') ;
-        } else if (target === 'RIGHT_AUTOSCROLL') {
-            element = this.doc.querySelector('.rightAutoscrollArea') ;
-        } else if (target === 'LEFT_AUTOSCROLL') {
-            element = this.doc.querySelector('.leftAutoscrollArea') ;
-        } else if (target === 'TOP_AUTOSCROLL') {
-            element = this.doc.querySelector('.topAutoscrollArea') ;
-        }
-        element.addEventListener(eventType, callback)
-        return callback;
-    }
-
-    unregisterDOMEvent(eventType: string, target: string, callback: (event: MouseEvent) => void) {
-        let element: HTMLElement;
-        if (target === 'BOTTOM_AUTOSCROLL') {
-            element = this.doc.querySelector('.bottomAutoscrollArea') ;
-        } else if (target === 'RIGHT_AUTOSCROLL') {
-            element = this.doc.querySelector('.rightAutoscrollArea') ;
-        } else if (target === 'LEFT_AUTOSCROLL') {
-            element = this.doc.querySelector('.leftAutoscrollArea') ;
-        } else if (target === 'TOP_AUTOSCROLL') {
-            element = this.doc.querySelector('.topAutoscrollArea') ;
-        }
-        element.removeEventListener(eventType, callback);
-    }
-  
-  
-  private onMouseUp() {
+  onMouseUp(event: MouseEvent) {
       if (this.dragStartEvent != null) {
           this.dragStartEvent = null;
           this.selectionToDrag = null;
@@ -183,16 +60,7 @@ export class DragselectionComponent implements OnInit {
           //disable mouse events on the autoscroll
           this.editorSession.getState().pointerEvents = 'none'; 
           this.autoscrollAreasEnabled = false;
-			
-			for (const direction in this.autoscrollEnter) {
-				if(this.autoscrollEnter[direction]) this.unregisterDOMEvent('mouseenter', direction, this.autoscrollEnter[direction]);
-			}
-			for (const direction in this.autoscrollLeave) {
-				if(this.autoscrollLeave[direction]) {
-					this.unregisterDOMEvent('mouseleave', direction, this.autoscrollLeave[direction]);
-					this.unregisterDOMEvent('mouseup', direction, this.autoscrollLeave[direction]);
-				}
-			}
+          this.editorSession.stopAutoscroll();
           
           this.sendChanges(this.currentElementInfo);
           //force redrawing of the selection decorator to the new position
@@ -219,18 +87,14 @@ export class DragselectionComponent implements OnInit {
               if (!this.editorSession.getState().dragging) {
                   if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                     this.editorSession.getState().dragging = true;
-                    this.autoscrollElementClientBounds = this.getAutoscrollElementClientBounds();
+                    this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds(this.doc);
                   } else return;
               }
              
               // enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
-				if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.isInsideAutoscrollElementClientBounds(event.clientX, event.clientY)) {
+				if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
 					this.autoscrollAreasEnabled = true;
-					
-					this.addAutoscrollListeners('BOTTOM_AUTOSCROLL')
-					this.addAutoscrollListeners('RIGHT_AUTOSCROLL')
-					this.addAutoscrollListeners('TOP_AUTOSCROLL')
-					this.addAutoscrollListeners('LEFT_AUTOSCROLL')
+                    this.editorSession.startAutoscroll(this);
 				}
 
               if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
@@ -291,28 +155,20 @@ export class DragselectionComponent implements OnInit {
                       
                       if (canMove)
                       {
-                          this.updateAbsoluteLayoutComponentsLocations(this.selectionToDrag, this.currentElementInfo, changeX, changeY);
+                          this.updateLocation(changeX, changeY);
                       }
                       this.dragStartEvent = event;
               }
       }
-    getAutoscrollElementClientBounds(): Array<DOMRect> {
-        const bottomAutoscrollArea: HTMLElement = this.doc.querySelector('.bottomAutoscrollArea');
-
-        let autoscrollElementClientBounds: Array<DOMRect>;
-        if (bottomAutoscrollArea) {
-            autoscrollElementClientBounds = [];
-            autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();
-            autoscrollElementClientBounds[1] = this.doc.querySelector('.rightAutoscrollArea').getBoundingClientRect();
-            autoscrollElementClientBounds[2] = this.doc.querySelector('.leftAutoscrollArea').getBoundingClientRect();
-            autoscrollElementClientBounds[3] = this.doc.querySelector('.topAutoscrollArea').getBoundingClientRect();
-        }
-        return autoscrollElementClientBounds;
+    
+    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number)=> void{
+        return this.updateLocation.bind(this);
     }
               
-    private updateAbsoluteLayoutComponentsLocations = (selectionToDrag:string[], currentElementInfo: Map<string, ElementInfo>, changeX: number, changeY: number, minX?: number, minY?: number) => {
-        for (let i = 0; i < selectionToDrag.length; i++) {
-            const elementInfo = currentElementInfo.get(selectionToDrag[i]);
+    updateLocation(changeX: number, changeY: number, minX?: number, minY?: number): void {
+        if (this.selectionToDrag == null) return;
+        for (let i = 0; i < this.selectionToDrag.length; i++) {
+            const elementInfo = this.currentElementInfo.get(this.selectionToDrag[i]);
             elementInfo.x = elementInfo.x + changeX;
             if (minX != undefined && elementInfo.x < minX) elementInfo.x = minX;
             elementInfo.y = elementInfo.y + changeY;

@@ -241,4 +241,30 @@ export class DesignerUtilsService {
         }
         return false;
     }
+
+    isInsideAutoscrollElementClientBounds(autoscrollElementClientBounds: Array<DOMRect>, clientX: number, clientY: number): boolean {
+        if (!autoscrollElementClientBounds) return false;
+
+        let inside = false;
+        let i = 0;
+        while (!inside && i < 4) { // 4 == autoscrollElementClientBounds.length always
+            const rect = autoscrollElementClientBounds[i++];
+            inside = (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom);
+        }
+        return inside;
+    }
+
+    getAutoscrollElementClientBounds(doc: Document): Array<DOMRect> {
+        const bottomAutoscrollArea: HTMLElement = doc.querySelector('.bottomAutoscrollArea');
+
+        let autoscrollElementClientBounds: Array<DOMRect>;
+        if (bottomAutoscrollArea) {
+            autoscrollElementClientBounds = [];
+            autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();
+            autoscrollElementClientBounds[1] = doc.querySelector('.rightAutoscrollArea').getBoundingClientRect();
+            autoscrollElementClientBounds[2] = doc.querySelector('.leftAutoscrollArea').getBoundingClientRect();
+            autoscrollElementClientBounds[3] = doc.querySelector('.topAutoscrollArea').getBoundingClientRect();
+        }
+        return autoscrollElementClientBounds;
+    }
 }

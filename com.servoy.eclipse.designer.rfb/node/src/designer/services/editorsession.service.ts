@@ -14,6 +14,7 @@ export class EditorSessionService implements ServiceProvider {
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener: BehaviorSubject<string>;
+    public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     private allowedChildren: unknown;
 
     private bIsDirty = false;
@@ -22,6 +23,7 @@ export class EditorSessionService implements ServiceProvider {
         @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
+        this.autoscrollBehavior = new BehaviorSubject(null);
     }
 
    public getService(name: string) {
@@ -343,8 +345,7 @@ export class EditorSessionService implements ServiceProvider {
         return this.bIsDirty;
     }
 
-    //TODO remove from toolbar
-    sendState(key: string, result: unknown) {
+    sendState(key: string, result: unknown): void {
         const iframe = this.doc.querySelector('iframe');
         const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
         if (elements.length == 0) {
@@ -354,6 +355,18 @@ export class EditorSessionService implements ServiceProvider {
         else {
             iframe.contentWindow.postMessage({ id: key, value: result }, '*');
         }
+    }
+
+    startAutoscroll(scrollComponent: ISupportAutoscroll){
+        if ( this.autoscrollBehavior == null) {
+            this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
+        }  else {
+            this.autoscrollBehavior.next(scrollComponent);
+        }
+    }
+
+    stopAutoscroll(){
+        this.autoscrollBehavior.next(null);
     }
 }
 
@@ -412,4 +425,9 @@ export class Package {
     components: Array<PaletteComp>;
     propertyValues?: Array<PaletteComp>;
     categories?: {property : PaletteComp};
+}
+
+export interface ISupportAutoscroll {
+    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void;
+    onMouseUp(event: MouseEvent): void;
 }
