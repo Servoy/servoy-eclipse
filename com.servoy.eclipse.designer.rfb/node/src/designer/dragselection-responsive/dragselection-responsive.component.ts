@@ -87,7 +87,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   }
 
   onMouseMove(event: MouseEvent) {
-    if (!this.dragStartEvent) return;
+    if (!this.dragStartEvent || event.buttons == 0) return;
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
