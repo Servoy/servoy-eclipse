@@ -119,7 +119,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
             if (autoScrollPixelSpeed < 15)
                 autoScrollPixelSpeed++;
     
-            if (scrollComponent.getUpdateLocationCallback != null)
+            if (scrollComponent.getUpdateLocationCallback() != null)
             {
                 scrollComponent.getUpdateLocationCallback()(changeX, changeY, 0, 0);
             }
