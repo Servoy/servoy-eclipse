@@ -381,6 +381,10 @@ public class ResourceProvider implements Filter
 		}
 		if (url == null)
 		{
+			url = Activator.getSaboBundle().getEntry("/META-INF/resources/" + (pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo));
+		}
+		if (url == null)
+		{
 			int index = pathInfo.indexOf('/', 1);
 			if (index > 1 && !pathInfo.substring(index).equals("/"))
 			{
@@ -410,10 +414,6 @@ public class ResourceProvider implements Filter
 			}
 		}
 
-		if (url == null)
-		{
-			url = Activator.getSaboBundle().getEntry("/META-INF/resources/" + (pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo));
-		}
 		return url;
 	}
 
