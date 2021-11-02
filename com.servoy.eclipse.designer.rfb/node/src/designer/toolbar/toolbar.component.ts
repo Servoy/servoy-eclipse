@@ -183,7 +183,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            this.sendState('showWireframe', result);
+            this.editorSession.sendState('showWireframe', result);
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -220,7 +220,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
-                this.sendState('maxLevel', result);
+                this.editorSession.sendState('maxLevel', result);
                 this.editorSession.setZoomLevel(result);
             }
         });
@@ -233,18 +233,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
-        }
-    }
-
-    private sendState(key: string, result: unknown) {
-        const iframe = this.doc.querySelector('iframe');
-        const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0) {
-            setTimeout(() => this.sendState(key, result), 400);
-            return;
-        }
-        else {
-            iframe.contentWindow.postMessage({ id: key, value: result }, '*');
         }
     }
 
