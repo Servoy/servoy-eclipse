@@ -121,7 +121,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -286,8 +285,6 @@ public class SolutionDeserializer
 		boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting) throws RepositoryException
 	{
 		if (solution == null) return null;
-		// when something changed or a solution is reloaded make sure the super persist cache is flushed.
-		PersistHelper.flushSuperPersistCache();
 		try
 		{
 			if (errorKeeper != null)

@@ -39,7 +39,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -63,8 +62,6 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	@Override
 	protected void flushExtendsStuff()
 	{
-		// flush first the persist helpers cache that could already been filled with null values in creating the index.
-		PersistHelper.flushSuperPersistCache();
 		// refresh all the extends forms, TODO this is kind of bad, because form instances are shared over clients.
 		Iterator<Form> it = getForms(false);
 		while (it.hasNext())
