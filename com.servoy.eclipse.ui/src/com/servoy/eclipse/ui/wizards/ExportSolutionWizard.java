@@ -17,7 +17,12 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.wicket.util.string.Strings;
@@ -26,6 +31,7 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,13 +40,17 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONObject;
+import org.sablo.specification.Package.DirPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -198,6 +208,31 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	@Override
 	public boolean performFinish()
 	{
+		if (exportModel.isExportReferencedWebPackages())
+		{
+			Map<String, List<String>> modulesNGPackageProjects = getModulesNGPackageProjects();
+			if (modulesNGPackageProjects.size() > 0)
+			{
+				StringBuilder modulesNGPackageProjectsAsString = new StringBuilder();
+				for (String module : modulesNGPackageProjects.keySet())
+				{
+					modulesNGPackageProjectsAsString.append("\n\n").append(module).append(": ");
+					Iterator<String> modulesNGPackageProjectIte = modulesNGPackageProjects.get(module).iterator();
+					while (modulesNGPackageProjectIte.hasNext())
+					{
+						modulesNGPackageProjectsAsString.append(modulesNGPackageProjectIte.next());
+						if (modulesNGPackageProjectIte.hasNext()) modulesNGPackageProjectsAsString.append(", ");
+					}
+				}
+				if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Cannot export referenced package projects",
+					"The following solutions have referenced package projects that cannot be exported:" + modulesNGPackageProjectsAsString +
+						"\n\nDo you want to continue by skiping exporting the referenced package projects?"))
+				{
+					return false;
+				}
+			}
+		}
+
 		IDialogSettings dialogSettings = getDialogSettings();
 		dialogSettings.put(INITIAL_FILE_NAME, exportModel.getFileName());
 		dialogSettings.put(PROTECT_WITH_PASSWORD, exportModel.isProtectWithPassword());
@@ -524,5 +559,37 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 			labelBoldFont.dispose();
 		}
 		super.dispose();
+	}
+
+	private Map<String, List<String>> getModulesNGPackageProjects()
+	{
+		Map<String, List<String>> modulesNGPackageProjects = new TreeMap<String, List<String>>();
+
+		ArrayList<String> allModules = new ArrayList<String>();
+		allModules.add(activeSolution.getName());
+		if (exportModel.isExportReferencedModules() && exportModel.getModulesToExport() != null && exportModel.getModulesToExport().length > 0)
+		{
+			allModules.addAll(Arrays.asList(exportModel.getModulesToExport()));
+		}
+
+		for (String module : allModules)
+		{
+			ServoyProject moduleProject = ServoyModelFinder.getServoyModel().getServoyProject(module);
+			if (moduleProject != null)
+			{
+				ArrayList<String> webPackages = new ArrayList<String>();
+				for (ServoyNGPackageProject ngPackageProject : moduleProject.getNGPackageProjects())
+				{
+					DirPackageReader dirPackageReader = new DirPackageReader(ngPackageProject.getProject().getLocation().toFile());
+					webPackages.add(dirPackageReader.getPackageDisplayname());
+				}
+				if (webPackages.size() > 0)
+				{
+					modulesNGPackageProjects.put(module, webPackages);
+				}
+			}
+		}
+
+		return modulesNGPackageProjects;
 	}
 }
