@@ -63,6 +63,7 @@ import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -1777,6 +1778,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (spec != null && url != null)
 		{
 			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
+			final Map<String, PropertyDescription> properties = spec.getProperties();
 			try
 			{
 				URLConnection openConnection = url.openConnection();
@@ -1859,6 +1861,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							}
 							return super.visitFunctionStatement(node);
 						}
+
+						@Override
+						public ASTNode visitVariableStatement(VariableStatement node)
+						{
+							if (node.getDocumentation() != null && node.getVariables().size() == 1)
+							{
+								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
+								if (pd != null)
+								{
+									pd.setDocumentation(node.getDocumentation().getText());
+								}
+							}
+							return super.visitVariableStatement(node);
+						}
 					});
 				}
 			}
@@ -1901,11 +1917,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private static String getParsedSample(final String name, final WebObjectFunctionDefinition api)
+	private static String getParsedSample(final String name, final String documentation)
 	{
-		if (api.getDocumentation() != null && api.getDocumentation().contains("@example"))
+		if (documentation != null && documentation.contains("@example"))
 		{
-			String description = getParsedComment(api.getDocumentation(), name, false);
+			String description = getParsedComment(documentation, name, false);
 			String example = description.split("@example")[1].split("@")[0];
 			example = example.replaceAll("<br>|<br/>", "\n");
 			example = example.replaceAll("\\<.*?\\>", "");
@@ -1968,7 +1984,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getSample(String methodName)
 							{
-								return getParsedSample(elementName, api);
+								return getParsedSample(elementName, api.getDocumentation());
 							}
 
 							@Override
@@ -1991,7 +2007,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 					}
-					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), pluginsPrefix + id);
+					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), elementName, pluginsPrefix + id);
 
 					UserNode node = new UserNode(id, actionType, feedback, real, icon);
 					node.setClientSupport(ClientSupport.ng);
@@ -2307,7 +2323,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 				{
-					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, new WebObjectFieldFeedback(pd, prefixForWebComponentMembers + name), webcomponent,
+					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
+						new WebObjectFieldFeedback(pd, webcomponent.getName(), prefixForWebComponentMembers + name), webcomponent,
 						propertiesIcon));
 				}
 			}
@@ -2341,7 +2358,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					@Override
 					public String getSample(String methodName)
 					{
-						return getParsedSample(webcomponent.getName(), api);
+						return getParsedSample(webcomponent.getName(), api.getDocumentation());
 					}
 
 					@Override
@@ -3129,13 +3146,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		private final String basicSampleCode;
 		private final PropertyDescription pd;
+		private final String elementName;
 
-		public WebObjectFieldFeedback(PropertyDescription pd, String basicSampleCode)
+		public WebObjectFieldFeedback(PropertyDescription pd, String elementName, String basicSampleCode)
 		{
-			// TODO make the whole .spec documentation work with tag resolvers for solex context/parse or provide sample code similar to what legacy beans have
-			// I think currently for custom component/service apis we support @example... use that here as well?
 			this.basicSampleCode = basicSampleCode;
 			this.pd = pd;
+			this.elementName = elementName;
 		}
 
 		public String getCode()
@@ -3145,12 +3162,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getSample()
 		{
-			return basicSampleCode;
+			return getParsedSample(elementName, pd.getDocumentation());
 		}
 
 		public String getToolTipText()
 		{
-			return pd.getDocumentation();
+			return getParsedComment(pd.getDocumentation(), elementName, false);
 		}
 	}
 
