@@ -49,8 +49,8 @@ import com.servoy.j2db.ClientVersion;
 public class NGDesktopConfiguration extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
-	private List<String> remoteVersions = new ArrayList<String>();
+	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
+	private static List<String> remoteVersions = new ArrayList<String>();
 
 	private Combo srcVersionCombo;
 
@@ -76,8 +76,12 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 
 		Label launchVersionLabel = new Label(composite, SWT.NONE);
 		launchVersionLabel.setText("Default NG Desktop version:");
+		String tooltipText = "Select \"latest\" for always using the latest NG Desktop version, otherwise the selected version will be preserved.";
+		launchVersionLabel
+			.setToolTipText(tooltipText);
 
 		srcVersionCombo = new Combo(composite, SWT.READ_ONLY);
+		srcVersionCombo.setToolTipText(tooltipText);
 
 		initializeFields();
 
@@ -88,22 +92,25 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 	{
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
 
-		remoteVersions = getAvailableVersions();
-		if (remoteVersions.isEmpty())
-		{
-			remoteVersions.add(prefs.getNgDesktopVersionKey());
-		}
-
 		srcVersionCombo.removeAll();
+		srcVersionCombo.add("latest");
+		remoteVersions = getAvailableVersions();//versions available on s3
 
 		remoteVersions.forEach((s) -> {
-			srcVersionCombo.add(s);
+			if (srcVersionCombo.indexOf(s) < 0) //avoid adding default version twice
+				srcVersionCombo.add(s);
 		});
 
-		srcVersionCombo.select(getVersionIndex(prefs.getNgDesktopVersionKey()));
+		String ngVersion = prefs.getNgDesktopVersionKey(); //this may return "latest" - if no previous prefs
+		if (srcVersionCombo.indexOf(ngVersion) < 0)
+		{
+			srcVersionCombo.add(ngVersion);
+		}
+
+		srcVersionCombo.select(srcVersionCombo.indexOf(ngVersion));
 	}
 
-	private List<String> getAvailableVersions()
+	public static List<String> getAvailableVersions()
 	{
 		try
 		{
@@ -142,13 +149,6 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		return remoteVersions;
 	}
 
-	private int getVersionIndex(String value)
-	{
-		//we need an index from a sorted list
-		final int result = remoteVersions.indexOf(value);
-		return result < 0 ? 0 : result;
-	}
-
 	@Override
 	public boolean performOk()
 	{
@@ -162,7 +162,7 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 	protected void performDefaults()
 	{
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
-		prefs.setNgDesktopVersion(NgDesktopPreferences.NGDESKTOP_VERSION_DEFAULT);
+		prefs.setNgDesktopVersion("latest");
 		prefs.save();
 		initializeFields();
 		super.performDefaults();

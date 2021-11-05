@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetTable;
@@ -351,26 +352,48 @@ public class EventsComposite extends Composite
 	{
 		public static enum EventNodeType
 		{
-			onRecordInsert(StaticContentSpecLoader.PROPERTY_ONINSERTMETHODID),
-			onRecordUpdate(StaticContentSpecLoader.PROPERTY_ONUPDATEMETHODID),
-			onRecordDelete(StaticContentSpecLoader.PROPERTY_ONDELETEMETHODID),
-			afterRecordInsert(StaticContentSpecLoader.PROPERTY_ONAFTERINSERTMETHODID),
-			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID),
-			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID),
-			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID),
-			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID),
-			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
-			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
-			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
-			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID),
-			onLoad(StaticContentSpecLoader.PROPERTY_ONFOUNDSETLOADMETHODID),
-			onValidate(StaticContentSpecLoader.PROPERTY_ONVALIDATEMETHODID);
+			onRecordInsert(StaticContentSpecLoader.PROPERTY_ONINSERTMETHODID, true, true, false),
+			onRecordUpdate(StaticContentSpecLoader.PROPERTY_ONUPDATEMETHODID, true, true, false),
+			onRecordDelete(StaticContentSpecLoader.PROPERTY_ONDELETEMETHODID, true, true, false),
+			afterRecordInsert(StaticContentSpecLoader.PROPERTY_ONAFTERINSERTMETHODID, true, true, false),
+			afterRecordUpdate(StaticContentSpecLoader.PROPERTY_ONAFTERUPDATEMETHODID, true, true, false),
+			afterRecordDelete(StaticContentSpecLoader.PROPERTY_ONAFTERDELETEMETHODID, true, true, false),
+			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID, true, true, false),
+			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID, true, true, false),
+			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID, true, true, false),
+			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID, true, true, false),
+			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID, true, true, false),
+			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID, true, true, false),
+			onLoad(StaticContentSpecLoader.PROPERTY_ONFOUNDSETLOADMETHODID, false, true, true),
+			onFoundsetChunk(StaticContentSpecLoader.PROPERTY_ONFOUNDSETNEXTCHUNKMETHODID, false, true, false),
+			onValidate(StaticContentSpecLoader.PROPERTY_ONVALIDATEMETHODID, true, true, true);
 
 			private final TypedProperty<Integer> property;
+			private final boolean forTable;
+			private final boolean forInmem;
+			private final boolean forViewfs;
 
-			EventNodeType(TypedProperty<Integer> property)
+			EventNodeType(TypedProperty<Integer> property, boolean forTable, boolean forInmem, boolean forViewfs)
 			{
 				this.property = property;
+				this.forTable = forTable;
+				this.forInmem = forInmem;
+				this.forViewfs = forViewfs;
+			}
+
+			public boolean isForInmem()
+			{
+				return forInmem;
+			}
+
+			public boolean isForTable()
+			{
+				return forTable;
+			}
+
+			public boolean isForViewfs()
+			{
+				return forViewfs;
 			}
 
 			public TypedProperty<Integer> getProperty()
@@ -442,8 +465,10 @@ public class EventsComposite extends Composite
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (EventNodeType tp : EventNodeType.values())
 			{
-				if (tp == EventNodeType.onLoad && table instanceof Table) continue;
-				if (table instanceof ViewFoundsetTable && !(tp == EventNodeType.onLoad || tp == EventNodeType.onValidate)) continue;
+				if (table instanceof Table && !tp.isForTable()) continue;
+				if (table instanceof ViewFoundsetTable && !tp.isForViewfs()) continue;
+				if (table instanceof MemTable && !tp.isForInmem()) continue;
+
 				MethodWithArguments mw = MethodWithArguments.METHOD_DEFAULT;
 				if (tableNode != null)
 				{

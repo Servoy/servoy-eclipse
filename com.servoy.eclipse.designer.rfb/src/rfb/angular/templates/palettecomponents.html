@@ -12,7 +12,7 @@
 				</li>
 			</ul>
 		</uib-accordion-heading>
-		<ul ng-repeat="propertyName in item.properties">
+		<ul ng-repeat="propertyName in item.properties" style="margin-left:19px;">
 			<li ng-repeat="comp in item.components" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName, propertyName, comp.propertyValue) " class="paletteItem" title="Drag component {{item.displayName + '-' + propertyName + ':' + comp.displayName}} to form to add it"> 
 				<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{propertyName + ': ' + comp.displayName}}
 			</li>

@@ -124,8 +124,8 @@ export class SabloService {
     }
 
     public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
-        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async);
-        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]);
+        const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
+        return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
 
     public addToCurrentServiceCall(func: () => void) {
@@ -151,7 +151,7 @@ export class SabloService {
         }
     }
 
-    private waitForServiceCallbacks(promise: Promise<{}>, times) {
+    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): Promise<T>{
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise;

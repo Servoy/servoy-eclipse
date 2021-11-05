@@ -178,12 +178,12 @@
 
 .toolbarspinner-button-left {
 	border-radius: 5px 0 0 5px;
-	margin-right: -5px;
+	margin-right: -2px;
 }
 
 .toolbarspinner-button-right {
 	border-radius: 0 5px 5px 0;
-	margin-left: -5px;
+	margin-left: -2px;
 }
 
 .toolbar-action .btn-xs {

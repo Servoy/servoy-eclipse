@@ -23,7 +23,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -56,6 +58,7 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -326,26 +329,34 @@ public class VisualFormEditorTabSequencePage extends Composite
 					groupLayout.createSequentialGroup().add(availableList, GroupLayout.PREFERRED_SIZE, 175, Short.MAX_VALUE).addPreferredGap(
 						LayoutStyle.RELATED).add(
 							groupLayout.createParallelGroup(GroupLayout.LEADING).add(addButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE).add(
-								removeButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))).add(availableElementsLabel)).addPreferredGap(
-									LayoutStyle.RELATED).add(
-										groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 175,
-											Short.MAX_VALUE).add(selectedElementsLabel, GroupLayout.PREFERRED_SIZE, 134,
-												GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-													groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 60,
-														GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 60,
-															GroupLayout.PREFERRED_SIZE))).add(defaultButton, GroupLayout.PREFERRED_SIZE, 81,
-																GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+								removeButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)))
+					.add(availableElementsLabel)).addPreferredGap(
+						LayoutStyle.RELATED)
+					.add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 175,
+							Short.MAX_VALUE).add(selectedElementsLabel, GroupLayout.PREFERRED_SIZE, 134,
+								GroupLayout.PREFERRED_SIZE))
+					.addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 60,
+							GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 60,
+								GroupLayout.PREFERRED_SIZE)))
+				.add(defaultButton, GroupLayout.PREFERRED_SIZE, 81,
+					GroupLayout.PREFERRED_SIZE))
+				.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availableElementsLabel).add(selectedElementsLabel)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-						groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
-							groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE).add(
-								groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(
-									groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-										groupLayout.createSequentialGroup().add(removeButton).addPreferredGap(LayoutStyle.RELATED).add(addButton)).add(
-											availableList, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE))))).add(10, 10, 10).add(
-												defaultButton).addContainerGap()));
+				LayoutStyle.RELATED)
+			.add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+					groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE).add(
+							groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(
+								groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+									groupLayout.createSequentialGroup().add(removeButton).addPreferredGap(LayoutStyle.RELATED).add(addButton)).add(
+										availableList, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE)))))
+			.add(10, 10, 10).add(
+				defaultButton)
+			.addContainerGap()));
 		container.setLayout(groupLayout);
 
 		scrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -369,98 +380,103 @@ public class VisualFormEditorTabSequencePage extends Composite
 	public void doRefresh()
 	{
 		// preserve selection when possible
-		ISelection availableSelection = availableListViewer.getSelection();
-		ISelection selectedSelection = selectedTableViewer.getSelection();
+		final ISelection availableSelection = availableListViewer.getSelection();
+		final ISelection selectedSelection = selectedTableViewer.getSelection();
+		doRefresh = false;
 
-		SortedList<TabSeqProperty> available = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
-		{
-			public int compare(TabSeqProperty o1, TabSeqProperty o2)
+		Job.create("refresh tabsequence", (IProgressMonitor monitor) -> {
+			SortedList<TabSeqProperty> available = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
 			{
-				String name1 = "";
-				String name2 = "";
-				IFormElement el1 = o1.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o1.element).getElement()
-					: (IFormElement)o1.element;
-				IFormElement el2 = o2.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o2.element).getElement()
-					: (IFormElement)o2.element;
-				if (el1.getName() != null)
+				public int compare(TabSeqProperty o1, TabSeqProperty o2)
 				{
-					name1 += el1.getName();
-				}
-				if (el2.getName() != null)
-				{
-					name2 += el2.getName();
-				}
-				if (el1 instanceof ISupportDataProviderID)
-				{
-					name1 += ((ISupportDataProviderID)el1).getDataProviderID();
-				}
-				if (el2 instanceof ISupportDataProviderID)
-				{
-					name2 += ((ISupportDataProviderID)el2).getDataProviderID();
-				}
-				return name1.compareTo(name2);
-			}
-		});
-		SortedList<TabSeqProperty> selected = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
-		{
-			public int compare(TabSeqProperty o1, TabSeqProperty o2)
-			{
-				return FormElementHelper.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element,
-					ModelUtils.getEditingFlattenedSolution(editor.getForm()));
-			}
-		});
-		List<IFormElement> elements = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getFlattenedObjects(null);
-		for (IFormElement persist : elements)
-		{
-			if (FormTemplateGenerator.isWebcomponentBean(persist))
-			{
-				IBasicWebComponent webComponent = (IBasicWebComponent)persist;
-				String componentType = FormTemplateGenerator.getComponentTypeName(webComponent);
-				WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
-				if (specification != null)
-				{
-					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
-					if (properties != null && properties.size() > 0)
+					String name1 = "";
+					String name2 = "";
+					IFormElement el1 = o1.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o1.element).getElement()
+						: (IFormElement)o1.element;
+					IFormElement el2 = o2.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o2.element).getElement()
+						: (IFormElement)o2.element;
+					if (el1.getName() != null)
 					{
-						for (PropertyDescription pd : properties)
+						name1 += el1.getName();
+					}
+					if (el2.getName() != null)
+					{
+						name2 += el2.getName();
+					}
+					if (el1 instanceof ISupportDataProviderID)
+					{
+						name1 += ((ISupportDataProviderID)el1).getDataProviderID();
+					}
+					if (el2 instanceof ISupportDataProviderID)
+					{
+						name2 += ((ISupportDataProviderID)el2).getDataProviderID();
+					}
+					return name1.compareTo(name2);
+				}
+			});
+			SortedList<TabSeqProperty> selected = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
+			{
+				public int compare(TabSeqProperty o1, TabSeqProperty o2)
+				{
+					return FormElementHelper.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element,
+						ModelUtils.getEditingFlattenedSolution(editor.getForm()));
+				}
+			});
+			List<IFormElement> elements = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getFlattenedObjects(null);
+			for (IFormElement persist : elements)
+			{
+				if (FormTemplateGenerator.isWebcomponentBean(persist))
+				{
+					IBasicWebComponent webComponent = (IBasicWebComponent)persist;
+					String componentType = FormTemplateGenerator.getComponentTypeName(webComponent);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					if (specification != null)
+					{
+						Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
+						if (properties != null && properties.size() > 0)
 						{
-							int tabseq = Utils.getAsInteger(webComponent.getProperty(pd.getName()));
-							if (tabseq >= 0)
+							for (PropertyDescription pd : properties)
 							{
-								selected.add(new TabSeqProperty(persist, pd.getName()));
-							}
-							else
-							{
-								available.add(new TabSeqProperty(persist, pd.getName()));
+								int tabseq = Utils.getAsInteger(webComponent.getProperty(pd.getName()));
+								if (tabseq >= 0)
+								{
+									selected.add(new TabSeqProperty(persist, pd.getName()));
+								}
+								else
+								{
+									available.add(new TabSeqProperty(persist, pd.getName()));
+								}
 							}
 						}
+						properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
+						addFormComponentProperties(persist, properties, available, selected, (IBasicWebComponent)persist);
 					}
-					properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
-					addFormComponentProperties(persist, properties, available, selected, (IBasicWebComponent)persist);
 				}
-			}
-			else if (persist instanceof ISupportTabSeq)
-			{
-				if (((ISupportTabSeq)persist).getTabSeq() >= 0)
+				else if (persist instanceof ISupportTabSeq)
 				{
-					selected.add(new TabSeqProperty(persist, null));
+					if (((ISupportTabSeq)persist).getTabSeq() >= 0)
+					{
+						selected.add(new TabSeqProperty(persist, null));
+					}
+					else
+					{
+						available.add(new TabSeqProperty(persist, null));
+					}
 				}
-				else
-				{
-					available.add(new TabSeqProperty(persist, null));
-				}
+
 			}
 
-		}
-		availableListViewer.setInput(available);
-		selectedTableViewer.setInput(selected);
+			Display.getDefault().asyncExec(() -> {
+				availableListViewer.setInput(available);
+				selectedTableViewer.setInput(selected);
 
-		availableListViewer.setSelection(availableSelection);
-		selectedTableViewer.setSelection(selectedSelection);
+				availableListViewer.setSelection(availableSelection);
+				selectedTableViewer.setSelection(selectedSelection);
 
-		configureButtons();
+				configureButtons();
+			});
+		}).schedule();
 
-		doRefresh = false;
 	}
 
 	private void addFormComponentProperties(IFormElement persist, Collection<PropertyDescription> properties, List<TabSeqProperty> available,

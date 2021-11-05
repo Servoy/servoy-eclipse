@@ -23,7 +23,8 @@ import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
     ServoyCoreComponentsModule
   ],
   declarations: [ServoyDesignerComponent, DesignFormComponent ],
-  providers: [EditorContentService, BSWindow, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }],
+  providers: [EditorContentService, BSWindow, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl, 
+            { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }],
   schemas: [
               CUSTOM_ELEMENTS_SCHEMA
     ]

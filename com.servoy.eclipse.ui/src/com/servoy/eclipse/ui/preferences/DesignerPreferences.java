@@ -112,6 +112,7 @@ public class DesignerPreferences
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 	public static final String LAUNCH_NG2 = "launchNG2";
+	public static final String NG2_DESIGNER = "ng2Designer";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -175,6 +176,7 @@ public class DesignerPreferences
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
 	public static final boolean LAUNCH_NG2_DEFAULT = false;
+	public static final boolean NG2_DESIGNER_DEFAULT = false;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -910,4 +912,13 @@ public class DesignerPreferences
 		setProperty(LAUNCH_NG2, launchNG2);
 	}
 
+	public boolean showNG2Designer()
+	{
+		return getProperty(NG2_DESIGNER, NG2_DESIGNER_DEFAULT);
+	}
+
+	public void setShowNG2Designer(boolean showNG2)
+	{
+		setProperty(NG2_DESIGNER, showNG2);
+	}
 }

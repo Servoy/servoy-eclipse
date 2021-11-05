@@ -19,9 +19,9 @@ package com.servoy.eclipse.ui.wizards;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -341,7 +341,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
 		for (String name : solutions)
 		{
-			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
 		}
 		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
@@ -384,13 +384,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 						for (String name : packs)
 						{
-							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name).getRight();
+							File dataFile = NewSolutionWizardDefaultPackages.getInstance().getPackage(name).getRight();
 							IFile eclipseFile = folder.getFile(name + ".zip");
 							try
 							{
-								eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+								eclipseFile.create(new FileInputStream(dataFile), IResource.NONE, new NullProgressMonitor());
 							}
-							catch (CoreException e)
+							catch (CoreException | FileNotFoundException e)
 							{
 								ServoyLog.logError(e);
 							}
@@ -482,7 +482,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 							String version = wpmProperties.getProperty("version");
 							if (version != null)
 							{
-								Pair<String, InputStream> pack = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+								Pair<String, File> pack = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 								if (pack != null)
 								{
 									return !pack.getLeft().equals(version);
@@ -632,7 +632,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
-			Utils.streamCopy(packageInfo.data, fos);
+			Utils.streamCopy(new FileInputStream(packageInfo.data), fos);
 		}
 
 
@@ -822,11 +822,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	public static class SolutionPackageInstallInfo
 	{
 		public String version;
-		public InputStream data;
+		public File data;
 		public boolean forceActivateResourcesProject;
 		public boolean keepResourcesProjectOpen;
 
-		public SolutionPackageInstallInfo(String version, InputStream data, boolean forceActivateResourcesProject, boolean keepResourcesProjectOpen)
+		public SolutionPackageInstallInfo(String version, File data, boolean forceActivateResourcesProject, boolean keepResourcesProjectOpen)
 		{
 			this.version = version;
 			this.data = data;

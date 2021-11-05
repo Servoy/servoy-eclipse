@@ -45,7 +45,6 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -69,7 +68,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
-import org.eclipse.ui.internal.views.markers.MarkerSupportInternalUtilities;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 import org.eclipse.ui.views.markers.internal.MarkerMessages;
 import org.eclipse.ui.views.markers.internal.Util;
@@ -128,7 +126,7 @@ public class HandleDBIMarkersWizard extends Wizard
 						}
 					}
 				}
-				addPage(new ModifiedQuickFixPage(marker.getAttribute(IMarker.MESSAGE, ""), resolutionsMap, null));
+				addPage(new ModifiedQuickFixPage("Apply a resolution for selected markers", resolutionsMap, null));
 			}
 		}
 		if (getPageCount() == 0)
@@ -462,22 +460,10 @@ public class HandleDBIMarkersWizard extends Wizard
 				public String getColumnText(Object element, int columnIndex)
 				{
 					IMarker marker = (IMarker)element;
-					if (columnIndex == 0) return Util.getContainerName(marker);
 
-					// Is the location override set?
-					String locationString = marker.getAttribute(IMarker.LOCATION, MarkerSupportInternalUtilities.EMPTY_STRING);
-					if (locationString.length() > 0)
-					{
-						return locationString;
-					}
+					if (columnIndex == 0) return marker.getAttribute(IMarker.MESSAGE, "");
+					return Util.getContainerName(marker);
 
-					// No override so use line number
-					int lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, -1);
-					String lineNumberString = null;
-					if (lineNumber < 0) lineNumberString = MarkerMessages.Unknown;
-					else lineNumberString = NLS.bind(MarkerMessages.label_lineNumber, Integer.toString(lineNumber));
-
-					return lineNumberString;
 				}
 
 				/*
@@ -562,10 +548,10 @@ public class HandleDBIMarkersWizard extends Wizard
 
 			layout.addColumnData(new ColumnWeightData(70, true));
 			TableColumn tc = new TableColumn(table, SWT.NONE, 0);
-			tc.setText(MarkerMessages.MarkerResolutionDialog_Problems_List_Location);
+			tc.setText("Marker");
 			layout.addColumnData(new ColumnWeightData(30, true));
 			tc = new TableColumn(table, SWT.NONE, 0);
-			tc.setText(MarkerMessages.MarkerResolutionDialog_Problems_List_Resource);
+			tc.setText(MarkerMessages.MarkerResolutionDialog_Problems_List_Location);
 
 		}
 

@@ -11,7 +11,6 @@
 		    <unit id="org.eclipse.gef.feature.group" version="3.11.0.201606061308"/>
 		    <repository location="http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"/>
 	    </location>
-        <location path="/crypt/servoy/github.master/servoy-eclipse/shipplugins/target/repository" type="Directory"/>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
 		    <unit id="org.apache.commons.codec" version="1.14.0.v20200818-1422"/>
@@ -23,28 +22,35 @@
 		    <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/eclipse/updates/4.20/"/>
-    	    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1200.v20210527-0259"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.20.0.I20210611-1600"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/releases/2021-06/"/>
-            <unit id="org.eclipse.emf.sdk.feature.group" version="2.26.0.v20210506-1425"/>
-            <unit id="org.eclipse.egit.feature.group" version="5.12.0.202106070339-r"/>
-            <unit id="org.eclipse.jgit.feature.group" version="5.12.0.202106070339-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.12.0.202106070339-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="5.12.0.202106070339-r"/>
-    	    <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.22.0.v202103200058"/>
+		    <repository location="https://download.eclipse.org/eclipse/updates/4.21/"/>
+    	    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1300.v20210828-0802"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.21.0.I20210906-0500"/>
 	    </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.06/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202104290801"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202104290803"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.12/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/80"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="80.0.5.202108190857"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="80.0.6.202108260514"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="80.0.9.202110280424"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="80.0.11.202110280411"/>
+        </location>
+        <location path="/crypt/servoy/github.master/servoy-eclipse/shipplugins/target/repository" type="Directory"/>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/modeling/emf/emf/builds/release/2.27/"/>
+            <unit id="org.eclipse.emf.sdk.feature.group" version="2.27.0.v20210816-1137"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/egit/updates-5.13/"/>
+            <unit id="org.eclipse.egit.feature.group" version="5.13.0.202109080827-r"/>
+            <unit id="org.eclipse.jgit.feature.group" version="5.13.0.202109080827-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.13.0.202109080827-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="5.13.0.202109080827-r"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/webtools/downloads/drops/R3.23.0/R-3.23.0-20210822084517/repository/"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.23.0.v202107101916"/>
         </location>
     </locations>
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>

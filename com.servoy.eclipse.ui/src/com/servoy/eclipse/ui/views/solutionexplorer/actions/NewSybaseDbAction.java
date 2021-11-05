@@ -245,4 +245,10 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 		}
 		return true;
 	}
+
+	@Override
+	public boolean isVisible()
+	{
+		return !getServerMap().isEmpty();
+	}
 }

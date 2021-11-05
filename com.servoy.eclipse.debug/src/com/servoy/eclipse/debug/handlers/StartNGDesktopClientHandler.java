@@ -38,6 +38,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 
@@ -53,6 +54,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.base.util.ITagResolver;
@@ -63,6 +65,7 @@ import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.NGDesktopConfiguration;
 import com.servoy.eclipse.ui.preferences.NgDesktopPreferences;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -76,7 +79,7 @@ import com.servoy.j2db.util.Utils;
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 
-	public static String NGDESKTOP_VERSION = "2020.12.0"; //version as specified in ngdesktop (electron-builder/app/package.json -> version)
+	public static String NGDESKTOP_VERSION = "2021.09.0";
 	public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
 	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
 	protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
@@ -108,18 +111,40 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	};
 
+	public static String getNgDesktopVersion(String requestedVersion)
+	{
+		String result = null;
+		if ("latest".equals(requestedVersion))
+		{
+			List<String> versions = NGDesktopConfiguration.getAvailableVersions(); //sorted list - natural order
+			if (versions.size() > 0)
+			{
+				result = versions.get(versions.size() - 1);//the last one is the latest
+			}
+			else
+			{
+				result = NGDESKTOP_VERSION; //manually set to the latest
+			}
+		}
+		else
+		{
+			result = requestedVersion;
+		}
+		final String srcNumbers[] = result.split(".");
+		if (srcNumbers.length < 3)
+		{
+			result += ".0";
+		}
+		return result;
+	}
+
 	@Override
 	public Object execute(ExecutionEvent event)
 	{
 		// UI display version may have a two numbers format (i.e. 2020.12) while the real version is ALWAYS three
 		// numbers format (i.e. 2020.12.0
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
-		NGDESKTOP_VERSION = prefs.getNgDesktopVersionKey();
-		final String srcNumbers[] = NGDESKTOP_VERSION.split(".");
-		if (srcNumbers.length < 3)
-		{
-			NGDESKTOP_VERSION += ".0";
-		}
+		NGDESKTOP_VERSION = getNgDesktopVersion(prefs.getNgDesktopVersionKey());
 		NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 
 		Job job = new Job("NGDesktop client launch")
@@ -176,7 +201,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				if (!downloadCancelled)
 				{
 					downloadVersionFile();
-					updateJsonFile(solution, monitor);
+					updateJsonFile(solution);
 					monitor.worked(2);
 					runNgDesktop(monitor);
 				}
@@ -275,42 +300,52 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	}
 
+	private JSONObject getJsonObj(File configFile, String url)
+	{
+		String jsonFile = Utils.getTXTFileContent(configFile, Charset.forName("UTF-8"));
+		JSONObject configObject = new JSONObject(jsonFile);
+
+		//put url and other options in servoy.json (we can put image also here, check servoy.json to see available options.
+		try
+		{ //newer ngdesktop no longer have the "options" section in config file
+			JSONObject options = configObject.getJSONObject("options");
+			options.put("url", url);
+			options.put("showMenu", true);
+			configObject.put("options", options);
+		}
+		catch (JSONException e)
+		{//options not found
+			configObject.put("url", url);
+			configObject.put("showMenu", true);
+		}
+
+		return configObject;
+	}
+
 	/**
 	 * Method for writing into servoy.json details about NgDesktop app.
 	 * Here can be also changed icon, url, or used modules.
 	 */
 
-	private void updateJsonFile(Solution solution, IProgressMonitor monitor)
+	private void updateJsonFile(Solution solution)
 	{
-
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() +
 			((new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
 		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		String fPath = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation;
+		File configFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation);// + fileUrl);
+		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
-		File f = new File(fPath);// + fileUrl);
-
-		//Store servoy.json file as a JSONObject
-		String jsonFile = Utils.getTXTFileContent(f, Charset.forName("UTF-8"));
-		JSONObject configFile = new JSONObject(jsonFile);
-
-		JSONObject options = (JSONObject)configFile.get("options");
-		//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
-		options.put("url", solutionUrl);
-		options.put("showMenu", true);
-		configFile.put("options", options);
-
-		try (FileWriter file = new FileWriter(f);
+		try (FileWriter file = new FileWriter(configFile);
 			BufferedWriter out = new BufferedWriter(file);)
 		{
-			out.write(configFile.toString());
+			out.write(configObject.toString());
 		}
 		catch (IOException e1)
 		{
-			//TODO: ServoyLog.logError("Error writing  in servoy.json file " + fileUrl, e1);
+			ServoyLog.logError("Error writing  in servoy.json file " + configFile.getAbsolutePath(), e1);
 		}
 	}
 

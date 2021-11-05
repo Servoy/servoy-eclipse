@@ -1,11 +1,71 @@
 import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
+import {
+    trigger,
+    state,
+    style,
+    animate,
+    transition,
+    // ...
+} from '@angular/animations';
 
 @Component({
     selector: 'servoycore-formcontainer',
     templateUrl: './formcontainer.html',
     styleUrls: ['./formcontainer.scss'],
+    animations: [
+        trigger('slideAnimation', [
+            transition('void => slide-left', [
+                style({ left: '100%'}),
+                animate('750ms ease-in', style({ left: '0%', })),
+            ]),
+            transition('slide-left => void', [
+                style({ right: '0%' }),
+                animate('750ms ease-in', style({ right: '100%'}))
+            ]),
+             transition('void => slide-right', [
+                style({ right: '100%'}),
+                animate('750ms ease-in', style({ right: '0%', })),
+            ]),
+            transition('slide-right => void', [
+                style({ left: '0%' }),
+                animate('750ms ease-in', style({ left: '100%'}))
+            ]),
+               transition('void => slide-down', [
+                style({ bottom: '100%'}),
+                animate('750ms ease-in', style({ bottom: '0%', })),
+            ]),
+            transition('slide-down => void', [
+                style({ top: '0%' }),
+                animate('750ms ease-in', style({ top: '100%'}))
+            ]),
+             transition('void => slide-up', [
+                style({ top: '100%'}),
+                animate('750ms ease-in', style({ top: '0%', })),
+            ]),
+            transition('slide-up => void', [
+                style({ bottom: '0%' }),
+                animate('750ms ease-in', style({ bottom: '100%'}))
+            ]),
+             transition('void => rotate-y', [
+              style({transform: 'rotateY(90deg)', opacity: 0}),
+              animate('750ms ease-in', style({transform: 'rotateY(0deg)', opacity: 1}))
+            ]),
+            transition('rotate-y => void', [
+               style({transform: 'rotateY(0)', opacity: 1}),
+                animate('750ms ease-out', style({transform: 'rotateY(90deg)', opacity: 0}))
+            ]),
+             transition('void => rotate-x', [
+              style({transform: 'rotateX(-90deg)', opacity: 0}),
+              animate('750ms ease-in', style({transform: 'rotateX(0deg)', opacity: 1}))
+            ]),
+            transition('rotate-x => void', [
+               style({transform: 'rotateX(0)', opacity: 1}),
+                animate('750ms ease-out', style({transform: 'rotateX(90deg)', opacity: 0}))
+            ])
+        ]),
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement> {
@@ -16,12 +76,16 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     @Input() height: number;
     @Input() tabSeq: number;
     @Input() toolTipText: string;
+    @Input() animation: string;
 
     @ContentChild(TemplateRef, { static: true })
     templateRef: TemplateRef<any>;
 
     private realContainedForm: any;
     private formWillShowCalled: any;
+
+    private formA: string;
+    private formB: string;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
         super(renderer, cdRef);
@@ -38,7 +102,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                                 this.formWillShowCalled = change.currentValue;
                                 this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
                                     .then(() => {
-                                        this.realContainedForm = this.containedForm;
+                                        this.switchForm(this.containedForm);
                                         this.cdRef.detectChanges();
                                     });
                             } else if (change.currentValue) {
@@ -68,14 +132,31 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
             this.formWillShowCalled = formName;
             if (this.waitForData) {
                 this.servoyApi.formWillShow(formName, relationName).then(() => {
-                    this.realContainedForm = formName;
+                    this.switchForm(formName);
                     this.cdRef.detectChanges();
                 });
             } else {
                 this.servoyApi.formWillShow(formName, relationName).then(() => this.cdRef.detectChanges());
-                this.realContainedForm = formName;
+                this.switchForm(formName);
             }
         }
+    }
+
+    switchForm(name: string) {
+        if (this.formA === this.realContainedForm) {
+            this.formB = name;
+        } else {
+            this.formA = name;
+        }
+        this.realContainedForm = name;
+    }
+
+    getForm1() {
+        return this.formA;
+    }
+
+    getForm2() {
+        return this.formB;
     }
 
     getForm() {

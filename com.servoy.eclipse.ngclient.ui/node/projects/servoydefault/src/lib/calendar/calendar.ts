@@ -95,6 +95,17 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         super.svyOnChanges(changes);
     }
 
+    onModelChange(newValue) {
+        const previousValue = this.dataProviderID;
+        if (newValue === "") newValue = null;
+        this.dataProviderID = newValue;
+        if(this.dataProviderID && isNaN(this.dataProviderID.getTime())) {
+            // invalid date, restore previous value
+            this.cdRef.detectChanges();
+            this.dataProviderID = previousValue;
+            this.cdRef.detectChanges();
+        }
+    }
 
     public dateChanged(event) {
         if (event && event.value) {

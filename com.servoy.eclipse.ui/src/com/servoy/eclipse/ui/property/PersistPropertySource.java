@@ -2854,6 +2854,19 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyType< ? > propertyType = propertyDescription.getType();
 		if (propertyType instanceof IYieldingType) propertyType = ((IYieldingType< ? , ? >)propertyType).getPossibleYieldType();
 
+		if (IContentSpecConstants.PROPERTY_COMMENT.equals(propertyDescription.getName()))
+		{
+			final ILabelProvider titleLabelProvider = new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT,
+				propertyDescription.getDefaultValue());
+			return new PropertyController<String, String>(id, displayName, null, titleLabelProvider, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, titleLabelProvider, null, "Edit comment",
+						Activator.getDefault().getDesignClient(), true);
+				}
+			});
+		}
 		if (propertyType == ValuesPropertyType.INSTANCE)
 		{
 			final ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();

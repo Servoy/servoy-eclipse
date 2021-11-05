@@ -2,7 +2,8 @@
 	   class='svy-textfield svy-field form-control form-control-sm svy-padding-xs  input-sm'
 	   type="text"
 	   [id]="servoyApi.getMarkupId()"
-	   [(ngModel)]="dataProviderID"
+	   [ngModel]="dataProviderID"
+	   (ngModelChange)="onModelChange($event)"
 	   (change)="pushUpdate()"
 	   [svyFormat]="format"
 	   [svyDecimalKeyConverter]="format"

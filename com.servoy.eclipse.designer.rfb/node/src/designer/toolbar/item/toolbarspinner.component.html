@@ -2,7 +2,7 @@
 	<button class="btn btn-xs toolbarspinner-button toolbarspinner-button-left" (click)="dec()" [disabled]="isDisabled() || value <= item.min" title="{{item.decbutton_text}}">
 		<img src="designer/assets/{{item.decIcon}}"/>
 	</button>
-	<input class="toolbarspinner" type="number" [(ngModel)]="value" min="{{item.min}}" max="{{item.max}}" title="{{item.text}}" (blur)="checkInput()" [disabled]="isDisabled()">
+	<input class="toolbarspinner" type="number" [(ngModel)]="value" (ngModelChange)="onSet()" min="{{item.min}}" max="{{item.max}}" title="{{item.text}}" (blur)="checkInput()" [disabled]="isDisabled()">
 	<button class="btn btn-xs toolbarspinner-button toolbarspinner-button-right" (click)="inc()" [disabled]="isDisabled() || value >= item.max" title="{{item.incbutton_text}}">
 		<img src="designer/assets/{{item.incIcon}}"/>
 	</button>

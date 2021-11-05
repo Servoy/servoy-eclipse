@@ -229,7 +229,7 @@ public class MarkerMessages
 		"Valuelist \"{0}\" has fallback valuelist \"{1}\" which has a fallback valuelist as well. This is not supported.",
 		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 	public static ServoyMarker ValuelistDataproviderTypeMismatch = new ServoyMarker(
-		"Valuelist \"{0}\" real value type does not match the dataProvider type of element \"{1}\" in form \"{2}\"",
+		"Valuelist \"{0}\" real value type \"{1}\" does not match the dataProvider type \"{2}\"' of element \"{3}\" in form \"{4}\"",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE);
@@ -701,6 +701,9 @@ public class MarkerMessages
 		ServoyBuilder.METHOD_OVERRIDE);
 
 	public static ServoyMarker DeprecatedSpecification = new ServoyMarker("The type \"{0}\" of the {1} is deprecated. {2}", ServoyBuilder.DEPRECATED_SPEC);
+
+	public static ServoyMarker DeprecatedHandler = new ServoyMarker("The handler \"{0}\" of the {1} is deprecated. {2}",
+		ServoyBuilder.DEPRECATED_ELEMENT_USAGE);
 
 	public static ServoyMarker Parameters_Mismatch = new ServoyMarker(
 		"Component {0} has handler \"{1}\" which has different number of parameters in spec and properties view.", ServoyBuilder.PARAMETERS_MISMATCH);

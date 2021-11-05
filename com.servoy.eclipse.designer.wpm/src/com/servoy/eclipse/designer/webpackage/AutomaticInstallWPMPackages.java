@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
@@ -49,24 +50,23 @@ public class AutomaticInstallWPMPackages implements IAutomaticImportWPMPackages
 
 	private void importPackageList(List<String> packageNames)
 	{
-		try
+		JSONArray packages = GetAllInstalledPackages.getAllInstalledPackages(true, false);
+		if (packages != null)
 		{
-			List<JSONObject> packages = GetAllInstalledPackages.getRemotePackages();
-			if (packages != null)
-			{
-				for (JSONObject pck : packages)
+			packages.forEach(pck -> {
+				String name = ((JSONObject)pck).optString("name");
+				if (packageNames.contains(name))
 				{
-					String name = pck.optString("name");
-					if (packageNames.contains(name))
+					try
 					{
-						InstallWebPackageHandler.importPackage(pck, null);
+						InstallWebPackageHandler.importPackage((JSONObject)pck, null);
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
-			}
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
+			});
 		}
 	}
 

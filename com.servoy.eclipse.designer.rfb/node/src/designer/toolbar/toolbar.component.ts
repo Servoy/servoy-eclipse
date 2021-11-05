@@ -1,16 +1,16 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 
 export enum TOOLBAR_CONSTANTS {
-    LAYOUTS_COMPONENTS_CSS = "Layouts & Components CSS",
-    COMPONENTS_CSS = "Components CSS",
-    NO_CSS = "No CSS",
-    LAYOUTS_COMPONENTS_CSS_ICON = "url(designer/assets/images/layouts_components_css.png)",
-    COMPONENTS_CSS_ICON = "url(designer/assets/images/components_css.png)",
-    NO_CSS_ICON = "url(designer/assets/images/no_css.png)"
+    LAYOUTS_COMPONENTS_CSS = 'Layouts & Components CSS',
+    COMPONENTS_CSS = 'Components CSS',
+    NO_CSS = 'No CSS',
+    LAYOUTS_COMPONENTS_CSS_ICON = 'url(designer/assets/images/layouts_components_css.png)',
+    COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
+    NO_CSS_ICON = 'url(designer/assets/images/no_css.png)'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -112,7 +112,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     show_data: ToolbarItem[];
 
     constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService) {
+        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService, private readonly renderer: Renderer2) {
         this.createItems();
         this.designSize.createItems(this);
         this.editorSession.addSelectionChangedListener(this);
@@ -121,7 +121,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     ngOnInit() {
         this.editorSession.getSession().onopen(() => {
             this.setupItems();
-            this.designSize.setupItems(this);
+            this.designSize.setupItems();
         });
     }
 
@@ -173,80 +173,73 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.zoom = this.getCategoryItems(TOOLBAR_CATEGORIES.ZOOM);
         }
 
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer();
+        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
         const promise = this.editorSession.isShowData();
-        promise.then((result) => {
+        void promise.then((result: boolean) => {
             this.btnToggleShowData.state = result;
         });
         const wireframePromise = this.editorSession.isShowWireframe();
-        wireframePromise.then((result) => {
+       void  wireframePromise.then((result: boolean) => {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            this.sendWireframeState(result);
+            this.editorSession.sendState('showWireframe', result);
             // TODO:
             // this.editorSession.setContentSizes();
         });
         const highlightPromise = this.editorSession.isShowHighlight();
-        highlightPromise.then((result) => {
+        void highlightPromise.then((result: boolean) => {
             this.btnHighlightWebcomponents.state = result;
-            this.editorSession.getState().design_highlight = result ? "highlight_element" : null;
+            this.editorSession.fireHighlightChangedListeners(result);
         });
         const hideInheritedPromise = this.editorSession.isHideInherited();
-        hideInheritedPromise.then((result) => {
+        void hideInheritedPromise.then((result: boolean) => {
             this.btnHideInheritedElements.state = result;
-            // TODO:
-            // this.editorSession.hideInheritedElements(result);
+            if (result) {
+                this.applyHideInherited(result);
+            }
         });
         const solutionLayoutsCssPromise = this.editorSession.isShowSolutionLayoutsCss();
-        solutionLayoutsCssPromise.then((result) => {
-            if (!result) this.btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
-            this.editorSession.getState().showSolutionLayoutsCss = result;
-            // TODO:
-            // this.editorSession.setContentSizes();
+        void solutionLayoutsCssPromise.then((result: boolean) => {
+            if (!result) {
+                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
+                this.setSolutionLayoutsCss(result);
+            }
+            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
         });
         const solutionCssPromise = this.editorSession.isShowSolutionCss();
-        solutionCssPromise.then((result) => {
-            if (!result) this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+        void solutionCssPromise.then((result: boolean) => {
+            if (!result) {
+                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+                this.setShowSolutionCss(result);
+            }
             this.editorSession.getState().showSolutionCss = result;
-            // TODO:
-            // this.editorSession.setContentSizes();
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
-        zoomLevelPromise.then((result) => {
+       void  zoomLevelPromise.then((result: number) => {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
+                this.editorSession.sendState('maxLevel', result);
+                this.editorSession.setZoomLevel(result);
             }
         });
 
-        if (this.doc.getElementById("errorsDiv") !== null) {
+        if (this.doc.getElementById('errorsDiv') !== null) {
             this.btnShowErrors.enabled = true;
-            if (this.doc.getElementById("closeErrors")) {
-                this.doc.getElementById("closeErrors").addEventListener('click', (e) => {
+            if (this.doc.getElementById('closeErrors')) {
+                this.doc.getElementById('closeErrors').addEventListener('click', () => {
                     this.btnShowErrors.state = !this.btnShowErrors.state;
-                    this.doc.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
+                    this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
         }
     }
 
-    private sendWireframeState(result: boolean) {
-        const iframe = this.doc.querySelector('iframe');
-        let elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0) {
-            setTimeout(() => this.sendWireframeState(result), 400);
-            return;
-        }
-        else {
-            iframe.contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
-        }
-    }
-
     createItems() {
         this.btnPlaceField = new ToolbarItem(
-            "Place Field Wizard",
-            "toolbar/icons/field_wizard.png",
+            'Place Field Wizard',
+            'toolbar/icons/field_wizard.png',
             true,
             () => {
                 this.editorSession.openElementWizard('field')
@@ -254,8 +247,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnPlaceImage = new ToolbarItem(
-            "Place Image Wizard",
-            "toolbar/icons/image_wizard.png",
+            'Place Image Wizard',
+            'toolbar/icons/image_wizard.png',
             true,
             () => {
                 this.editorSession.openElementWizard('image');
@@ -263,8 +256,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnPlacePortal = new ToolbarItem(
-            "Place Portal Wizard",
-            "toolbar/icons/portal_wizard.png",
+            'Place Portal Wizard',
+            'toolbar/icons/portal_wizard.png',
             true,
             () => {
                 this.editorSession.openElementWizard('portal');
@@ -272,8 +265,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnPlaceSplitPane = new ToolbarItem(
-            "Place SplitPane Wizard",
-            "toolbar/icons/split.png",
+            'Place SplitPane Wizard',
+            'toolbar/icons/split.png',
             true,
             () => {
                 this.editorSession.openElementWizard('splitpane');
@@ -281,8 +274,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnPlaceTabPanel = new ToolbarItem(
-            "Place TabPanel Wizard",
-            "toolbar/icons/tabs.png",
+            'Place TabPanel Wizard',
+            'toolbar/icons/tabs.png',
             true,
             () => {
                 this.editorSession.openElementWizard('tabpanel');
@@ -290,8 +283,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnPlaceAccordion = new ToolbarItem(
-            "Place Accordion Panel Wizard",
-            "toolbar/icons/accordion.png",
+            'Place Accordion Panel Wizard',
+            'toolbar/icons/accordion.png',
             true,
             () => {
                 this.editorSession.openElementWizard('accordion');
@@ -299,14 +292,14 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.btnHighlightWebcomponents = new ToolbarItem(
-            "Highlight webcomponents",
-            "toolbar/icons/highlight.png",
+            'Highlight webcomponents',
+            'toolbar/icons/highlight.png',
             true,
             () => {
                 const promise = this.editorSession.toggleHighlight();
-                promise.then((result) => {
+                void promise.then((result: boolean) => {
                     this.btnHighlightWebcomponents.state = result;
-                    this.editorSession.getState().design_highlight = result ? "highlight_element" : null;
+                    this.editorSession.fireHighlightChangedListeners(result);
                 })
             }
         );
@@ -322,8 +315,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
 
         this.btnToggleShowData = new ToolbarItem(
-            "Data",
-            "toolbar/icons/import.gif",
+            'Data',
+            'toolbar/icons/import.gif',
             true,
             () => {
                 this.editorSession.toggleShowData();
@@ -332,17 +325,16 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnToggleShowData.state = false;
 
         this.btnToggleDesignMode = new ToolbarItem(
-            "Exploded view",
-            "toolbar/icons/exploded-view.png",
+            'Exploded view',
+            'toolbar/icons/exploded-view.png',
             true,
             () => {
                 const promise = this.editorSession.toggleShowWireframe();
-                promise.then((result) => {
+                void promise.then((result: boolean) => {
                     this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
-                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result},  '*');
+                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result }, '*');
                     this.editorSession.stateListener.next('showWireframe');
-                    this.editorSession.setSelection(this.editorSession.getSelection());
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
                     // this.editorSession.setContentSizes();
@@ -360,7 +352,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (!this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -368,7 +360,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (!this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -376,13 +368,13 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     if (this.editorSession.getState().showSolutionCss) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionLayoutsCss) {
+                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
             }
         );
-        this.btnSolutionCss.tooltip = "Enable/disable solution css";
+        this.btnSolutionCss.tooltip = 'Enable/disable solution css';
         this.btnSolutionCss.getIconStyle = (selection) => {
             if (selection == TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS) {
                 return { 'background-image': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON };
@@ -395,9 +387,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             }
         };
         this.btnSolutionCss.list = [
-            { "text": TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS, "iconStyle": { 'background-image': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON } },
-            { "text": TOOLBAR_CONSTANTS.COMPONENTS_CSS, "iconStyle": { 'background-image': TOOLBAR_CONSTANTS.COMPONENTS_CSS_ICON } },
-            { "text": TOOLBAR_CONSTANTS.NO_CSS, "iconStyle": { 'background-image': TOOLBAR_CONSTANTS.NO_CSS_ICON } }
+            { 'text': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON } },
+            { 'text': TOOLBAR_CONSTANTS.COMPONENTS_CSS, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.COMPONENTS_CSS_ICON } },
+            { 'text': TOOLBAR_CONSTANTS.NO_CSS, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.NO_CSS_ICON } }
         ];
         this.btnSolutionCss.onselection = (selection) => {
             this.btnSolutionCss.onclick(selection);
@@ -410,61 +402,59 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
 
         this.btnTabSequence = new ToolbarItem(
-            "Set tab sequence",
-            "images/th_horizontal.png",
+            'Set tab sequence',
+            'images/th_horizontal.png',
             false,
             () => {
                 this.editorSession.executeAction('setTabSequence');
             }
         );
-        this.btnTabSequence.disabledIcon = "images/th_horizontal-disabled.png";
+        this.btnTabSequence.disabledIcon = 'images/th_horizontal-disabled.png';
 
         this.btnZoomIn = new ToolbarItem(
-            "Zoom in",
-            "images/zoom_in.png",
+            'Zoom in',
+            'images/zoom_in.png',
             false,
             () => {
                 this.editorSession.executeAction('zoomIn');
             }
         );
-        this.btnZoomIn.disabledIcon = "images/zoom_in_disabled.png";
+        this.btnZoomIn.disabledIcon = 'images/zoom_in_disabled.png';
 
         this.btnZoomOut = new ToolbarItem(
-            "Zoom out",
-            "images/zoom_out.png",
+            'Zoom out',
+            'images/zoom_out.png',
             false,
             () => {
                 this.editorSession.executeAction('zoomOut');
             }
         );
-        this.btnZoomOut.disabledIcon = "images/zoom_out_disabled.png";
+        this.btnZoomOut.disabledIcon = 'images/zoom_out_disabled.png';
 
         this.btnSetMaxLevelContainer = new ToolbarItem(
-            "Adjust zoom level",
+            'Maximum level for a container to be fully displayed',
             null,
             () => {
                 return this.editorSession.getState().showWireframe;
             },
-            null
+            (value) => {
+                const lvl = parseInt(value);
+                this.editorSession.getState().maxLevel = lvl;
+                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value }, '*');
+                this.editorSession.setZoomLevel(lvl);
+            }
         );
         this.btnSetMaxLevelContainer.max = 10;
         this.btnSetMaxLevelContainer.min = 3;
-        this.btnSetMaxLevelContainer.decbutton_text = "Decrease zoom level";
-        this.btnSetMaxLevelContainer.decIcon = "images/zoom_out_xs.png";
-        this.btnSetMaxLevelContainer.incbutton_text = "Increase zoom level";
-        this.btnSetMaxLevelContainer.incIcon = "images/zoom_in_xs.png";
+        this.btnSetMaxLevelContainer.decbutton_text = 'Decrease maximum display level';
+        this.btnSetMaxLevelContainer.decIcon = 'images/zoom_out_xs.png';
+        this.btnSetMaxLevelContainer.incbutton_text = 'Increase maximum display level';
+        this.btnSetMaxLevelContainer.incIcon = 'images/zoom_in_xs.png';
         this.btnSetMaxLevelContainer.state = false;
-        this.btnSetMaxLevelContainer.onSet = (value) => {
-            this.editorSession.getState().maxLevel = value;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setZoomLevel(value);
-        };
-
 
         this.btnSaveAsTemplate = new ToolbarItem(
-            "Save as template...",
-            "toolbar/icons/template_save.png",
+            'Save as template...',
+            'toolbar/icons/template_save.png',
             true,
             () => {
                 this.editorSession.openElementWizard('saveastemplate');
@@ -478,66 +468,65 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
         this.btnHideInheritedElements = new ToolbarItem(
-            "Hide inherited elements",
-            "images/hide_inherited.png",
+            'Hide inherited elements',
+            'images/hide_inherited.png',
             true,
             () => {
                 if (this.btnHideInheritedElements.state) {
                     this.btnHideInheritedElements.state = false;
-                    this.btnHideInheritedElements.text = "Show inherited elements";
+                    this.btnHideInheritedElements.text = 'Show inherited elements';
                 } else {
                     this.btnHideInheritedElements.state = true;
-                    this.btnHideInheritedElements.text = "Hide inherited elements"
+                    this.btnHideInheritedElements.text = 'Hide inherited elements'
                 }
-                // TODO:
-                //this.editorSession.hideInheritedElements(btnHideInheritedElements.state);
+                this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
             }
         );
-        this.btnHideInheritedElements.disabledIcon = "images/hide_inherited-disabled.png";
+        this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
         this.btnHideInheritedElements.state = false;
 
         this.add(this.btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
 
         this.btnBringForward = new ToolbarItem(
-            "Bring forward",
-            "images/bring_forward.png",
+            'Bring forward',
+            'images/bring_forward.png',
             false,
             () => {
                 this.editorSession.executeAction('z_order_bring_to_front_one_step');
             }
         );
-        this.btnBringForward.disabledIcon = "images/bring_forward-disabled.png";
+        this.btnBringForward.disabledIcon = 'images/bring_forward-disabled.png';
 
         this.btnSendBackward = new ToolbarItem(
-            "Send backward",
-            "images/send_backward.png",
+            'Send backward',
+            'images/send_backward.png',
             false,
             () => {
                 this.editorSession.executeAction('z_order_send_to_back_one_step');
             }
         );
-        this.btnSendBackward.disabledIcon = "images/send_backward-disabled.png";
+        this.btnSendBackward.disabledIcon = 'images/send_backward-disabled.png';
 
         this.btnBringToFront = new ToolbarItem(
-            "Bring to front",
-            "images/bring_to_front.png",
+            'Bring to front',
+            'images/bring_to_front.png',
             false,
             () => {
                 this.editorSession.executeAction('z_order_bring_to_front');
             }
         );
-        this.btnBringToFront.disabledIcon = "images/bring_to_front-disabled.png";
+        this.btnBringToFront.disabledIcon = 'images/bring_to_front-disabled.png';
 
         this.btnSendToBack = new ToolbarItem(
-            "Send to back",
-            "images/send_to_back.png",
+            'Send to back',
+            'images/send_to_back.png',
             false,
             () => {
                 this.editorSession.executeAction('z_order_send_to_back');
             }
         );
-        this.btnSendToBack.disabledIcon = "images/send_to_back-disabled.png";
+        this.btnSendToBack.disabledIcon = 'images/send_to_back-disabled.png';
 
         this.add(this.btnBringForward, TOOLBAR_CATEGORIES.ORDERING);
         this.add(this.btnSendBackward, TOOLBAR_CATEGORIES.ORDERING);
@@ -545,67 +534,67 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);
 
         this.btnMoveUp = new ToolbarItem(
-            "Move to left inside parent container",
-            "images/move_back.png",
+            'Move to left inside parent container',
+            'images/move_back.png',
             false,
             () => {
                 this.editorSession.executeAction('responsive_move_up');
             }
         );
-        this.btnMoveUp.disabledIcon = "images/move_back-disabled.png";
+        this.btnMoveUp.disabledIcon = 'images/move_back-disabled.png';
 
         this.btnMoveDown = new ToolbarItem(
-            "Move to right inside parent container",
-            "images/move_forward.png",
+            'Move to right inside parent container',
+            'images/move_forward.png',
             false,
             () => {
                 this.editorSession.executeAction('responsive_move_down');
             }
         );
-        this.btnMoveDown.disabledIcon = "images/move_forward-disabled.png";
+        this.btnMoveDown.disabledIcon = 'images/move_forward-disabled.png';
 
         this.add(this.btnMoveUp, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
         this.add(this.btnMoveDown, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
 
 
         this.btnSameWidth = new ToolbarItem(
-            "Same width",
-            "images/same_width.png",
+            'Same width',
+            'images/same_width.png',
             false,
             () => {
-                this.sameSize(true);
+                this.editorSession.sameSize(true);
             }
         );
-        this.btnSameWidth.disabledIcon = "images/same_width-disabled.png";
+        this.btnSameWidth.disabledIcon = 'images/same_width-disabled.png';
 
         this.btnSameHeight = new ToolbarItem(
-            "Same height",
-            "images/same_height.png",
+            'Same height',
+            'images/same_height.png',
             false,
             () => {
-                this.sameSize(false);
+                this.editorSession.sameSize(false);
             }
         );
-        this.btnSameHeight.disabledIcon = "images/same_height-disabled.png";
+        this.btnSameHeight.disabledIcon = 'images/same_height-disabled.png';
 
         this.add(this.btnSameWidth, TOOLBAR_CATEGORIES.SIZING);
         this.add(this.btnSameHeight, TOOLBAR_CATEGORIES.SIZING);
 
         this.btnLeftAlign = new ToolbarItem(
-            "Align Left",
-            "images/alignleft.png",
+            'Align Left',
+            'images/alignleft.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    let obj = {};
-                    let left = null;
-                    let frameElem = this.doc.querySelector('iframe');
+                    const obj = {};
+                    let left: number = null;
+                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (left == null) {
                                 left = elementRect.x;
                             } else if (left > elementRect.x) {
@@ -613,11 +602,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (var i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != left) {
                                 obj[nodeid] = {
                                     x: left,
@@ -630,23 +619,23 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnLeftAlign.disabledIcon = "images/alignleft-disabled.png";
+        this.btnLeftAlign.disabledIcon = 'images/alignleft-disabled.png';
 
         this.btnRightAlign = new ToolbarItem(
-            "Align Right",
-            "images/alignright.png",
+            'Align Right',
+            'images/alignright.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    let obj = {};
+                    const obj = {};
                     let right = null;
-                    let frameElem = this.doc.querySelector('iframe');
+                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (right == null) {
                                 right = elementRect.x + elementRect.width;
                             } else if (right < (elementRect.x + elementRect.width)) {
@@ -654,11 +643,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (var i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if ((elementRect.x + elementRect.width) != right) {
                                 obj[nodeid] = {
                                     x: (right - elementRect.width),
@@ -671,23 +660,23 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnRightAlign.disabledIcon = "images/alignright-disabled.png";
+        this.btnRightAlign.disabledIcon = 'images/alignright-disabled.png';
 
         this.btnTopAlign = new ToolbarItem(
-            "Align Top",
-            "images/aligntop.png",
+            'Align Top',
+            'images/aligntop.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    let obj = {};
-                    let top = null;
-                    let frameElem = this.doc.querySelector('iframe');
-                    for (var i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    const obj = {};
+                    let top: number = null;
+                    const frameElem = this.doc.querySelector('iframe');
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (top == null) {
                                 top = elementRect.y;
                             } else if (top > elementRect.y) {
@@ -695,11 +684,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (var i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (elementRect.y != top) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -712,23 +701,23 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnTopAlign.disabledIcon = "images/aligntop-disabled.png";
+        this.btnTopAlign.disabledIcon = 'images/aligntop-disabled.png';
 
         this.btnBottomAlign = new ToolbarItem(
-            "Align Bottom",
-            "images/alignbottom.png",
+            'Align Bottom',
+            'images/alignbottom.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    let obj = {};
+                    const obj = {};
                     let bottom = null;
-                    let frameElem = this.doc.querySelector('iframe');
-                    for (var i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    const frameElem = this.doc.querySelector('iframe');
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (bottom == null) {
                                 bottom = elementRect.y + elementRect.height;
                             } else if (bottom < (elementRect.y + elementRect.height)) {
@@ -736,11 +725,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (var i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if ((elementRect.y + elementRect.height) != bottom) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -753,26 +742,26 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnBottomAlign.disabledIcon = "images/alignbottom-disabled.png";
+        this.btnBottomAlign.disabledIcon = 'images/alignbottom-disabled.png';
 
         this.btnCenterAlign = new ToolbarItem(
-            "Align Center",
-            "images/aligncenter.png",
+            'Align Center',
+            'images/aligncenter.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    var obj = {};
-                    var centerElementModel = null;
-                    var sortedSelection = [];
-                    let frameElem = this.doc.querySelector('iframe');
-                    for (var i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    const obj = {};
+                    let centerElementModel: DOMRect = null;
+                    const sortedSelection: Array<DOMRect> = [];
+                    const frameElem = this.doc.querySelector('iframe');
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
-                                sortedSelection.splice(0, 0, elementRect);
+                                sortedSelection[0] = elementRect;
                             } else {
                                 let insertIndex = sortedSelection.length;
                                 for (let j = 0; j < sortedSelection.length; j++) {
@@ -786,11 +775,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
-                    for (var i = 0; i < selection.length; i++) {
-                        var nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: (centerElementModel.x + centerElementModel.width / 2 - elementRect.width / 2),
@@ -803,29 +792,29 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnCenterAlign.disabledIcon = "images/aligncenter-disabled.png";
+        this.btnCenterAlign.disabledIcon = 'images/aligncenter-disabled.png';
 
         this.btnMiddleAlign = new ToolbarItem(
-            "Align Middle",
-            "images/alignmid.png",
+            'Align Middle',
+            'images/alignmid.png',
             false,
             () => {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    let obj = {};
-                    let centerElementModel = null;
-                    let sortedSelection = [];
-                    let frameElem = this.doc.querySelector('iframe');
+                    const obj = {};
+                    let centerElementModel: DOMRect = null;
+                    const sortedSelection: Array<DOMRect> = [];
+                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
-                                sortedSelection.splice(0, 0, elementRect);
+                                sortedSelection[0] = elementRect;
                             } else {
-                                var insertIndex = sortedSelection.length;
-                                for (var j = 0; j < sortedSelection.length; j++) {
+                                let insertIndex = sortedSelection.length;
+                                for (let j = 0; j < sortedSelection.length; j++) {
                                     if ((elementRect.y + elementRect.height / 2) < (sortedSelection[j].y + sortedSelection[j].height / 2)) {
                                         insertIndex = j;
                                         break;
@@ -836,15 +825,15 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
-                    for (var i = 0; i < selection.length; i++) {
-                        let nodeid = selection[i];
-                        let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    for (let i = 0; i < selection.length; i++) {
+                        const nodeid = selection[i];
+                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
                         if (element) {
-                            let elementRect = element.getBoundingClientRect();
+                            const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
-                                    y: (centerElementModel.location.y + centerElementModel.size.height / 2 - elementRect.height / 2)
+                                    y: (centerElementModel.y + centerElementModel.height / 2 - elementRect.height / 2)
                                 };
                             }
                         }
@@ -853,7 +842,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
             }
         );
-        this.btnMiddleAlign.disabledIcon = "images/alignmid-disabled.png";
+        this.btnMiddleAlign.disabledIcon = 'images/alignmid-disabled.png';
 
         this.add(this.btnLeftAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
         this.add(this.btnRightAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
@@ -863,64 +852,64 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnMiddleAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
 
         this.btnDistributeHorizontalSpacing = new ToolbarItem(
-            "Horizontal Spacing",
-            "images/distribute_hspace.png",
+            'Horizontal Spacing',
+            'images/distribute_hspace.png',
             false,
             () => {
                 this.editorSession.executeAction('horizontal_spacing');
             }
         );
-        this.btnDistributeHorizontalSpacing.disabledIcon = "images/distribute_hspace-disabled.png";
+        this.btnDistributeHorizontalSpacing.disabledIcon = 'images/distribute_hspace-disabled.png';
 
         this.btnDistributeHorizontalCenters = new ToolbarItem(
-            "Horizontal Centers",
-            "images/distribute_hcenters.png",
+            'Horizontal Centers',
+            'images/distribute_hcenters.png',
             false,
             () => {
                 this.editorSession.executeAction('horizontal_centers');
             }
         );
-        this.btnDistributeHorizontalCenters.disabledIcon = "images/distribute_hcenters-disabled.png";
+        this.btnDistributeHorizontalCenters.disabledIcon = 'images/distribute_hcenters-disabled.png';
 
         this.btnDistributeLeftward = new ToolbarItem(
-            "Leftward",
-            "images/distribute_leftward.png",
+            'Leftward',
+            'images/distribute_leftward.png',
             false,
             () => {
                 this.editorSession.executeAction('horizontal_pack');
             }
         );
-        this.btnDistributeLeftward.disabledIcon = "images/distribute_leftward-disabled.png";
+        this.btnDistributeLeftward.disabledIcon = 'images/distribute_leftward-disabled.png';
 
         this.btnDistributeVerticalSpacing = new ToolbarItem(
-            "Vertical Spacing",
-            "images/distribute_vspace.png",
+            'Vertical Spacing',
+            'images/distribute_vspace.png',
             false,
             () => {
                 this.editorSession.executeAction('vertical_spacing');
             }
         );
-        this.btnDistributeVerticalSpacing.disabledIcon = "images/distribute_vspace-disabled.png";
+        this.btnDistributeVerticalSpacing.disabledIcon = 'images/distribute_vspace-disabled.png';
 
         this.btnDistributeVerticalCenters = new ToolbarItem(
-            "Vertical Centers",
-            "images/distribute_vcenters.png",
+            'Vertical Centers',
+            'images/distribute_vcenters.png',
             false,
             () => {
                 this.editorSession.executeAction('vertical_centers');
             }
         );
-        this.btnDistributeVerticalCenters.disabledIcon = "images/distribute_vcenters-disabled.png";
+        this.btnDistributeVerticalCenters.disabledIcon = 'images/distribute_vcenters-disabled.png';
 
         this.btnDistributeUpward = new ToolbarItem(
-            "Upward",
-            "images/distribute_upward.png",
+            'Upward',
+            'images/distribute_upward.png',
             false,
             () => {
                 this.editorSession.executeAction('vertical_pack');
             }
         );
-        this.btnDistributeUpward.disabledIcon = "images/distribute_upward-disabled.png";
+        this.btnDistributeUpward.disabledIcon = 'images/distribute_upward-disabled.png';
 
         this.add(this.btnDistributeHorizontalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
         this.add(this.btnDistributeHorizontalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
@@ -930,31 +919,31 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
 
         this.btnGroup = new ToolbarItem(
-            "Group",
-            "images/group.png",
+            'Group',
+            'images/group.png',
             false,
             () => {
                 this.editorSession.executeAction('createGroup');
             }
         );
-        this.btnGroup.disabledIcon = "images/group-disabled.png";
+        this.btnGroup.disabledIcon = 'images/group-disabled.png';
 
         this.btnUngroup = new ToolbarItem(
-            "Ungroup",
-            "images/ungroup.png",
+            'Ungroup',
+            'images/ungroup.png',
             false,
             () => {
                 this.editorSession.executeAction('clearGroup');
             }
         );
-        this.btnUngroup.disabledIcon = "images/ungroup-disabled.png";
+        this.btnUngroup.disabledIcon = 'images/ungroup-disabled.png';
 
         this.add(this.btnGroup, TOOLBAR_CATEGORIES.GROUPING);
         this.add(this.btnUngroup, TOOLBAR_CATEGORIES.GROUPING);
 
         this.btnReload = new ToolbarItem(
-            "Reload designer (use when component changes must be reflected)",
-            "images/reload.png",
+            'Reload designer (use when component changes must be reflected)',
+            'images/reload.png',
             true,
             () => {
                 this.editorSession.executeAction('reload');
@@ -964,8 +953,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnClassicEditor = new ToolbarItem(
-            "Switch to classic editor",
-            "images/classic_editor.png",
+            'Switch to classic editor',
+            'images/classic_editor.png',
             true,
             () => {
                 this.editorSession.executeAction('switchEditorClassic');
@@ -975,15 +964,15 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnClassicEditor, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnShowErrors = new ToolbarItem(
-            "Show errors console",
-            "toolbar/icons/error.png",
+            'Show errors console',
+            'toolbar/icons/error.png',
             false,
             () => {
                 this.btnShowErrors.state = !this.btnShowErrors.state;
-                this.doc.getElementById("errorsDiv").style.display = this.btnShowErrors.state ? 'block' : 'none';
+                this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
             }
         );
-        this.btnShowErrors.disabledIcon = "toolbar/icons/disabled_error.png";
+        this.btnShowErrors.disabledIcon = 'toolbar/icons/disabled_error.png';
         this.btnShowErrors.state = false;
 
         this.add(this.btnShowErrors, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
@@ -1006,63 +995,56 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     toggleShowSolutionLayoutsCss() {
         const promise = this.editorSession.toggleShowSolutionLayoutsCss();
-        promise.then(function(result) {
-            this.editorSession.getState().showSolutionLayoutsCss = result;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setContentSizes();
+        void promise.then((result: boolean) => {
+            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
+            this.setSolutionLayoutsCss(result);
         });
     }
 
     toggleShowSolutionCss() {
         const promise = this.editorSession.toggleShowSolutionCss();
-        promise.then(function(result) {
+        void promise.then((result: boolean) => {
             this.editorSession.getState().showSolutionCss = result;
-            // TODO:
-            // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
-            // this.editorSession.setContentSizes();
+            this.setShowSolutionCss(result);
         });
     }
 
-    sameSize(width: boolean) {
-        var selection = this.editorSession.getSelection();
-        if (selection && selection.length > 1) {
-            let obj = {};
-            let firstSize = null;
-            let frameElem = this.doc.querySelector('iframe');
-            for (let i = 0; i < selection.length; i++) {
-                let nodeid = selection[i];
-                let element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
-                if (element) {
-                    let elementRect = element.getBoundingClientRect();
-                    if (firstSize == null) {
-                        firstSize = { width: elementRect.width, height: elementRect.height };
-                    } else {
-                        let newSize;
-                        if (width) {
-                            newSize = {
-                                width: firstSize.width,
-                                height: elementRect.height
-                            };
-                        } else {
-                            newSize = {
-                                width: elementRect.width,
-                                height: firstSize.height
-                            };
-                        }
-                        obj[nodeid] = newSize;
+    setSolutionLayoutsCss(state) {
+        const frameElem = this.doc.querySelector('iframe');
+        frameElem.contentWindow.document.querySelectorAll('[svy-solution-layout-class]').forEach(element => {
+            const classes = element.getAttribute('svy-solution-layout-class');
+            if (classes) {
+                classes.split(' ').forEach(cssclass => {
+                    if (state) {
+                        this.renderer.addClass(element, cssclass);
                     }
+                    else {
+                        this.renderer.removeClass(element, cssclass);
+                    }
+                });
+            }
+        });
+    }
+
+    setShowSolutionCss(state) {
+        const frameElem = this.doc.querySelector('iframe');
+        frameElem.contentWindow.document.head.querySelectorAll('link').forEach(link => {
+            if (link.getAttribute('svy-stylesheet')) {
+                if (state) {
+                    link.disabled = false;
+                }
+                else {
+                    link.disabled = true;
                 }
             }
-            this.editorSession.sendChanges(obj);
-        }
+        });
     }
 
     selectionChanged(selection: Array<string>): void {
         this.btnTabSequence.enabled = selection.length > 1;
         this.btnSameWidth.enabled = selection.length > 1;
         this.btnSameHeight.enabled = selection.length > 1;
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer();
+        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.btnDistributeHorizontalSpacing.enabled = selection.length > 2;
             this.btnDistributeHorizontalCenters.enabled = selection.length > 2;
@@ -1102,6 +1084,21 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnZoomIn.enabled = selection.length == 1;
         }
     }
+    
+    applyHideInherited(hideInherited : boolean){
+        const frameElem = this.doc.querySelector('iframe');
+        const initializedElements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        if (initializedElements.length == 0) setTimeout(() => this.applyHideInherited(hideInherited), 400);
+        const elements =  Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
+        elements.forEach((node) => {
+            if (hideInherited) {
+                this.renderer.setStyle(node, 'visibility', 'hidden');
+            }
+            else {
+                this.renderer.setStyle(node, 'visibility', 'visible' );
+            }
+        });
+    }
 
 }
 
@@ -1111,7 +1108,7 @@ export class ToolbarItem {
     style: string;
     disabledIcon: string;
     faIcon: string;
-    list: any[];
+    list: Array<{text: string; iconStyle?:{ 'background-image': string}}>;
     getIconStyle: (text: string) => object;
     onselection: (text: string) => string;
     initialValue: number;
@@ -1123,12 +1120,12 @@ export class ToolbarItem {
     incbutton_text: string;
     state: boolean;
     tooltip: string;
-    onSet: (value: any) => void;
+    onSet: (value: unknown) => void;
 
     constructor(
         public text: string,
         public icon: string,
-        public enabled: any,
+        public enabled: (() => boolean) | boolean,
         public onclick: (text?: string) => void) {
     }
 }

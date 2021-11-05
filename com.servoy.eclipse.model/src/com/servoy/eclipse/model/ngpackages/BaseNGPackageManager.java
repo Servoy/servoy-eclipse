@@ -54,7 +54,6 @@ import org.sablo.specification.Package;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.DuplicateEntityException;
 import org.sablo.specification.Package.IPackageReader;
-import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -328,13 +327,12 @@ public abstract class BaseNGPackageManager
 				listOfReferencesFromSolProjectToThisReaderName.add(iPackageReader);
 			}
 
-			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			for (IPackageReader pr : packagesToUnload)
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, pr, ngPackageChangesPerReferencingProject))
 				{
-					if (componentsSpecProviderState.getPackageNames().contains(pr.getPackageName()) ||
-						componentsSpecProviderState.getLayoutSpecifications().containsKey(pr.getPackageName())) componentsReallyToUnload.add(pr);
+					if ((IPackageReader.WEB_COMPONENT.equals(pr.getPackageType())) ||
+						IPackageReader.WEB_LAYOUT.equals(pr.getPackageType())) componentsReallyToUnload.add(pr);
 					else serviceReallyToUnload.add(pr);
 				}
 			}

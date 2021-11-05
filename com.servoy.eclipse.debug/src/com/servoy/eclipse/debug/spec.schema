@@ -489,7 +489,14 @@
 								},
 								"code": {
 											"type": "string"
-								}
+								},
+								"deprecated": {
+                                    "type": "string"
+                                },
+                                "allowaccess": {
+                                    "description": "Comma separated list of properties for which blocking is ignored, like 'visible'.",
+                                    "type": "string"
+                                }                                               
 							},
 							"additionalProperties": false
 						}
@@ -507,9 +514,9 @@
 					"type": "object",
 					"properties": {
 						"returns": {
-							"description": "the datatype this api call returns",
-							"type": "string"
-						},
+                            "description": "the datatype this api call returns",
+                                            "type": "string"
+                                        },
 						"deprecated": {
 							"type": "string"
 						},
@@ -543,7 +550,7 @@
 									},
 									"optional": {
 										"type": "boolean"
-									}
+                                    }
 								},
 							"required": ["name","type"],
 								"additionalProperties": false
@@ -580,7 +587,12 @@
 						"allowaccess": {
 							"description": "Comma separated list of properties for which blocking is ignored, like 'visible'.",
 							"type": "string"
-						}		
+						},
+						"doc": {
+                            "type": "string",
+                            "description": "Api documentation description."
+                        }
+								
 					},
 					"additionalProperties": false
 				}
@@ -669,6 +681,10 @@
 			"description": "js reference that will be run on the server",
 			"type": "string"
 		},
+		"doc": {
+            "description": "doc file that will be parsed to extract api docs",
+            "type": "string"
+        },
 		"types": {
 			"description": "an object of custom types that is used in the model for property type or api for an return/parameter type",
 			"type": "object",

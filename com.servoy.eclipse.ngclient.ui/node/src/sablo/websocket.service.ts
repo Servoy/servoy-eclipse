@@ -258,8 +258,8 @@ export class WebsocketSession {
         testability.setEventList(this.deferredEvents);
     }
 
-    public createDeferredEvent(): {deferred: Deferred<any>; cmsgid: number } {
-          const deferred = new Deferred<any>();
+    public  createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
+          const deferred = new Deferred<T>();
             const cmsgid = this.getNextMessageId();
             this.deferredEvents[cmsgid] = deferred;
             return {deferred, cmsgid};
@@ -276,7 +276,7 @@ export class WebsocketSession {
     }
 
     // api
-    public callService(serviceName: string, methodName: string, argsObject?, async?: boolean): Promise<any> {
+    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): Promise<T> {
         const cmd = {
             service: serviceName,
             methodname: methodName,
@@ -285,7 +285,7 @@ export class WebsocketSession {
         if (async) {
             this.sendMessageObject(cmd);
         } else {
-            const deferred = this.createDeferredEvent();
+            const deferred = this.createDeferredEvent<T>();
             this.loadingIndicatorService.showLoading();
             cmd['cmsgid'] = deferred.cmsgid;
             this.sendMessageObject(cmd);

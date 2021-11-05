@@ -29,4 +29,17 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
                 this.onFocusLostMethodID(e);
             } );
     }
+
+    onModelChange(newValue) {
+        if(newValue && typeof newValue.getTime === 'function' && isNaN(newValue.getTime())) {
+            // invalid date, force dataprovider display with invalid date text
+            this.dataProviderID = null;
+            this.cdRef.detectChanges();
+            this.dataProviderID = newValue;
+            this.cdRef.detectChanges();
+        }
+        else {
+            this.dataProviderID = newValue;
+        }
+    }
 }

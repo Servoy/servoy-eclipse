@@ -41,14 +41,8 @@
           {
             "type": "element",
             "prefix": [
-              "servoydefault",
-              "bootstrapcomponents",
-              "bootstrapextracomponents",
-              "svychartjs",
-              "servoycore",
-              "servoyextra",
               "svy",
-              "aggrid"
+              "servoycore"
             ],
             "style": "kebab-case"
           }
@@ -58,14 +52,8 @@
           {
             "type": "attribute",
             "prefix": [
-              "servoydefault",
-              "bootstrapcomponents",
-              "bootstrapextracomponents",
-              "svychartjs",
-              "servoycore",
-              "servoyextra",
               "svy",
-              "aggrid"
+              "servoycore"
             ],
             "style": "camelCase"
           }

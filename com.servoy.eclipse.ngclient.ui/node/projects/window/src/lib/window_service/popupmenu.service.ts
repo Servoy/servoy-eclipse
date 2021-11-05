@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { ServoyPublicService, Callback } from '@servoy/public';
+import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
 
 @Injectable()
 export class PopupMenuService {
+
+    menu: HTMLElement = null;
 
     constructor(private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
@@ -13,6 +15,7 @@ export class PopupMenuService {
         const listener = () => {
             this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
                 item.remove();
+                this.menu = null;
             });
             if (handler) {
                 handler();
@@ -22,23 +25,35 @@ export class PopupMenuService {
         this.doc.addEventListener('click', listener);
     }
 
-    public showMenu(x: number, y: number, popup: Popup) {
-        this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
-            item.remove();
-        });
+    public getMenuRect(popup: Popup) {
+        if (this.menu != null) {
+            return this.menu.getBoundingClientRect();
+        }
+        return null;
+    }
 
-        const menu = this.doc.createElement('ul');
-        menu.style.zIndex = '15000';
-        menu.classList.add('dropdown-menu');
-        menu.classList.add('svy-popup-menu');
-        if (popup.cssClass) menu.classList.add(popup.cssClass);
+    public initMenu(popup: Popup) {
+        this.menu = this.doc.createElement('ul');
+        this.menu.style.zIndex = '15000';
+        this.menu.classList.add('dropdown-menu');
+        this.menu.classList.add('svy-popup-menu');
+        this.menu.style.visibility = 'hidden';
+        if (popup.cssClass)this. menu.classList.add(popup.cssClass);
 
-        this.generateMenuItems(popup.items, menu, false);
+        this.generateMenuItems(popup.items, this.menu, false);
 
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
-        menu.style.display = 'block';
-        this.doc.body.appendChild(menu);
+        this.menu.style.left = 0 + 'px';
+        this.menu.style.top = 0 + 'px';
+        this.menu.style.display = 'block';
+
+        this.doc.body.appendChild(this.menu);
+    }
+
+    public showMenu(x: number, y: number) {
+        this.menu.style.left = x + 'px';
+        this.menu.style.top = y + 'px';
+        this.menu.style.visibility = 'visible';
+        this.doc.body.appendChild(this.menu);
     }
 
     private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
@@ -117,13 +132,13 @@ export class PopupMenuService {
     }
 }
 
-export class Popup {
+export class Popup extends BaseCustomObject {
     public name: string;
     public cssClass: string;
     public items: MenuItem[];
 }
 
-export class MenuItem {
+export class MenuItem extends BaseCustomObject{
     public id: string;
     public text: string;
     public callback: Callback;

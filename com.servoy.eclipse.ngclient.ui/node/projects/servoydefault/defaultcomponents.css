@@ -9,7 +9,7 @@
 
 .input-sm {
     font-size: 12px;
-    min-height: initial;
+    min-height: 100% !important;
 }
 
 .svy-dropdown::after {
@@ -73,4 +73,5 @@ div[ngbDropdownMenu] {
 
 .svy-calendar-container .input-group-append {
     cursor: pointer;
+    height: 100%;
 }

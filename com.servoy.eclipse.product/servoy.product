@@ -25,12 +25,14 @@ and will be prosecuted to the maximum extent possible under law.
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xms40m
--Xmx1G
+      <vmArgs>-Xms512m
+-Xmx2G
 --add-modules=ALL-SYSTEM
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED
+      </vmArgsWin>
    </launcherArgs>
 
    <windowImages i16="icons/windowicon16.png" i32="icons/windowIcon.png" i48="icons/windowIcon48.png" i64="icons/windowIcon64.png" i128="icons/windowIcon128.png" i256="icons/windowIcon256.png"/>

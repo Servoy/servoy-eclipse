@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2017 Servoy BV
+  This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2021 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -32,6 +32,7 @@ import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -286,16 +287,17 @@ public class ExportPage extends WizardPage
 		srcVersionLabel.setToolTipText("NG Desktop version");
 
 		versionGroup = new Group(composite, SWT.NONE);
-		versionGroup.setLayout(new GridLayout(2, false));
+		versionGroup.setLayout(new GridLayout(3, false));
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
 		remoteVersions = getAvailableVersions();
+		srcVersionCombo.add("latest");
 
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
 		});
-		srcVersionCombo.select(getVersionIndex());
+		srcVersionCombo.select(getVersionIndex() + 1);
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -306,9 +308,17 @@ public class ExportPage extends WizardPage
 		});
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
-		includeUpdateBtn.setText("Include update");
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		includeUpdateBtn.setSelection(getIncludeUpdate());
+		GridDataFactory.swtDefaults()//
+			.grab(true, false)//
+			.hint(0, SWT.DEFAULT)// width hint prevents text from expanding to full line
+			.align(SWT.FILL, SWT.CENTER)//
+			.applyTo(includeUpdateBtn);
+		setIncludeUpdateState();
+		includeUpdateBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("include_update")); //initial selection
+
+		gd = new GridData();
+		gd.widthHint = 180;
+		includeUpdateBtn.setLayoutData(gd);
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -337,7 +347,7 @@ public class ExportPage extends WizardPage
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 		updateUrlText.setEditable(true);
 		updateUrlText.setVisible(true);
-		updateUrlText.setEnabled(isUpdateSupported());
+		updateUrlText.setEnabled(isUpdatableVersion());
 		updateUrlText.setText(getUpdateUrl());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -366,20 +376,10 @@ public class ExportPage extends WizardPage
 		storeBtn.setToolTipText("If not checked, artifacts will be deleted after several hours ...");
 		storeBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("store_data"));
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalSpan = 2;
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
-		emptyLabel.setText("");
-		emptyLabel.setEnabled(false); //set to gray
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalAlignment = GridData.GRAB_VERTICAL;
-		gd.horizontalSpan = 3;
-		emptyLabel.setLayoutData(gd);
-		emptyLabel.setVisible(true);
-
-		setControl(composite);
+		setControl(rootComposite);
 		this.getWizard().getContainer().getShell().pack();
 	}
 
@@ -402,8 +402,8 @@ public class ExportPage extends WizardPage
 
 	private void srcVersionListener(SelectionEvent event)
 	{
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		updateUrlText.setEnabled(isUpdateSupported());
+		setIncludeUpdateState();
+		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	private List<String> getAvailableVersions()
@@ -475,11 +475,6 @@ public class ExportPage extends WizardPage
 		return result < 0 ? 0 : result;
 	}
 
-	private boolean getIncludeUpdate()
-	{
-		return exportElectronWizard.getDialogSettings().getBoolean("include_update");
-	}
-
 	private String getUpdateUrl()
 	{
 		String urlStr = exportElectronWizard.getDialogSettings().get("update_url");
@@ -524,11 +519,15 @@ public class ExportPage extends WizardPage
 		return getInitialImportPath();
 	}
 
-	private Object platformSelectionChangeListener(String selectedPlatform)
+	private void platformSelectionChangeListener(String selectedPlatform)
 	{
 		final int index = selectedPlatforms.indexOf(selectedPlatform);
-		// the return type is different depending on the execution leaf
-		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
+
+		if (index >= 0) selectedPlatforms.remove(index);
+		else selectedPlatforms.add(selectedPlatform);
+
+		setIncludeUpdateState();
+		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	public List<String> getSelectedPlatforms()
@@ -536,17 +535,28 @@ public class ExportPage extends WizardPage
 		return selectedPlatforms;
 	}
 
-	private boolean isUpdateAvailable()
+	private void setIncludeUpdateState()
 	{
-		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		if (result > 0)
-			return true;
-		return false;
+		if (!selectedPlatforms.contains(WINDOWS_PLATFORM))
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		if (!isUpdatableVersion())
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		includeUpdateBtn.setText("Include update");
+		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows)");
+		includeUpdateBtn.setVisible(true);
+		if (includeUpdateBtn.getSelection() == true && isUpdatableVersion()) return; //selection is not changing
+		includeUpdateBtn.setSelection(false);
 	}
 
-	private boolean isUpdateSupported()
+	private boolean isUpdatableVersion()
 	{
-		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
+		if (selectedPlatforms.size() == 0) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result >= 0)
 			return true;
@@ -570,9 +580,9 @@ public class ExportPage extends WizardPage
 		if (widthText.getText().trim().length() > 0)
 			settings.put("ngdesktop_height", heightText.getText().trim());
 		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_height", heightText.getText().trim());
+			settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
-		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
+		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
 		if (appNameText.getText().trim().length() > 0)
 			settings.put("application_name", appNameText.getText().trim());
 		if (updateUrlText.getText().trim().length() > 0)

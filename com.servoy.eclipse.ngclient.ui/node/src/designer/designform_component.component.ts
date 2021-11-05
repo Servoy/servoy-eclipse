@@ -1,6 +1,6 @@
 import {
     Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject
+    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
@@ -13,21 +13,23 @@ import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } f
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
+import {AbstractFormComponent} from '../ngclient/form/form_component.component';
 
 @Component({
     // eslint-disable-next-line
     selector: 'svy-designform',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrls: ['./designform.css'],
+    encapsulation: ViewEncapsulation.None,
     /* eslint-disable max-len */
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
-          <div *ngFor="let item of formCache.componentCache | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
+          <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-           <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
+           <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
           <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
@@ -68,7 +70,7 @@ import { DOCUMENT } from '@angular/common';
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent implements OnDestroy, OnChanges {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
@@ -98,18 +100,19 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
-    private _containers: { added: any; removed: any; };
-    private _cssstyles: { [x: string]: any; };
     private designMode : boolean;
-
+    private maxLevel = 3;
+    private dropHighlight: string = null;
+    private allowedChildren: unknown;
     draggedElementItem: ComponentCache;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
         private changeHandler: ChangeDetectorRef,
-        private el: ElementRef, private renderer: Renderer2,
+        private el: ElementRef, protected renderer: Renderer2,
         @Inject(DOCUMENT) private document: Document,
         private windowRefService: WindowRefService) {
+             super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
             if (event.data.id === 'createElement') {
@@ -126,6 +129,15 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
             }
             if (event.data.id === 'showWireframe') {
                 this.showWireframe = event.data.value; 
+            }
+            if (event.data.id === 'maxLevel') {
+                this.maxLevel = parseInt(event.data.value);
+            }
+            if (event.data.id === 'dropHighlight') {
+                this.dropHighlight = event.data.value;
+            }
+            if (event.data.id == 'allowedChildren') {
+                this.allowedChildren = event.data.value;
             }
             this.detectChanges();
         })
@@ -152,47 +164,6 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
         }
-    }
-
-    @Input('containers')
-    set containers(containers: { added: any, removed: any }) {
-        if (!containers) return;
-        this._containers = containers;
-        for (let containername in containers.added) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
-            }
-        }
-        for (let containername in containers.removed) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
-            }
-        }
-    }
-
-    get containers() {
-        return this._containers;
-    }
-
-    @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
-        if (!cssStyles) return;
-        this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
-                    this.renderer.setStyle(container, key, stylesMap[key]);
-                }
-            }
-        }
-    }
-
-    get cssstyles() {
-        return this._cssstyles;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -286,10 +257,7 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
     }
 
     datachange(component: ComponentCache, property: string, value, dataprovider: boolean) {
-        const model = this.formCache.getComponent(component.name).model;
-        const oldValue = model[property];
-        this.formCache.getComponent(component.name).model[property] = value;
-        //this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
+        // no operation needed for this dataprovider change event
     }
 
     getHandler(item: ComponentCache, handler: string) {
@@ -313,9 +281,18 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         return api;
     }
 
-  getNGClass(item: StructureCache) {
-      var ngclass = {};
-      ngclass[item.attributes.designclass] =this.showWireframe;
+  getNGClass(item: StructureCache) : { [klass: string]: any; } {
+      const  ngclass = {};
+      ngclass[item.attributes.designclass] = this.showWireframe;
+      ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
+      const children = item.items.length;
+      if (children > 0 && children < 10)  {
+          ngclass['containerChildren'+children] = this.showWireframe && item.getDepth()  === this.maxLevel;
+      }
+      if (children >= 10)  {
+          ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel;
+      }
+          ngclass['drop_highlight']  = this.canContainDraggedElement(item.attributes['svy-layoutname']);
       return ngclass;
     }
 
@@ -323,8 +300,21 @@ export class DesignFormComponent implements OnDestroy, OnChanges {
         return null;
     }
 
-    private getContainerByName(containername: string): Element {
+    getContainerByName(containername: string): Element {
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
+    }
+    
+    private canContainDraggedElement(container: string): boolean {
+        if (this.dropHighlight === null) return false;
+        const drop = this.dropHighlight.split(".");
+        const allowedChildren = this.allowedChildren[container];
+        if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
+        
+        for (const layout in allowedChildren){
+          const a = allowedChildren[layout].split(".");
+          if(a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+        }
+        return false;
     }
 }
 

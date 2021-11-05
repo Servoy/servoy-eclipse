@@ -55,7 +55,7 @@ public class Activator extends Plugin
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
-		extractNode();
+//		extractNode();
 	}
 
 	public synchronized IConsole getConsole()
@@ -82,43 +82,64 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == -0)
+			if (nodeReady.getCount() == -0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
 		}
 	}
 
-	public void copyNodeFolder()
+	public void copyNodeFolder(boolean createWatcher, boolean force)
 	{
-		new NodeFolderCreatorJob(this.projectFolder, true, false).schedule();
+		new NodeFolderCreatorJob(this.projectFolder, createWatcher, force).schedule();
 	}
 
-	private void extractNode()
+	private String getSystemOrEvironmentProperty(String propertyName)
 	{
-		Job extractingNode = new Job("extracting nodejs")
+		String value = System.getProperty(propertyName);
+		if (value == null)
 		{
+			value = System.getenv(propertyName);
+		}
+		return value;
+	}
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor)
+	public void extractNode()
+	{
+		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
+		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
+		if (nodePth != null && npmPth != null)
+		{
+			nodePath = new File(nodePth);
+			npmPath = new File(npmPth);
+			countDown();
+		}
+		else
+		{
+			Job extractingNode = new Job("extracting nodejs")
 			{
-				IExtensionRegistry registry = Platform.getExtensionRegistry();
-				IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
-				File node = null;
-				File npm = null;
-				if (cf.length > 0)
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					node = extractPath(cf[0], "nodePath");
-					node.setExecutable(true);
-					npm = extractPath(cf[0], "npmPath");
+					IExtensionRegistry registry = Platform.getExtensionRegistry();
+					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
+					File node = null;
+					File npm = null;
+					if (cf.length > 0)
+					{
+						node = extractPath(cf[0], "nodePath");
+						node.setExecutable(true);
+						npm = extractPath(cf[0], "npmPath");
+					}
+					nodePath = node;
+					npmPath = npm;
+					countDown();
+					return Status.OK_STATUS;
 				}
-				nodePath = node;
-				npmPath = npm;
-				countDown();
-				return Status.OK_STATUS;
-			}
-		};
-		extractingNode.schedule();
+			};
+			extractingNode.schedule();
+		}
 	}
 
 	/**

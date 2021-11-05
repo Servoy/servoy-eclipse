@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
-import { ToolbarItemComponent } from "./toolbaritem.component";
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ToolbarItemComponent } from './toolbaritem.component';
 
 @Component({
     selector: 'designer-toolbar-spinner',
@@ -26,9 +26,11 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnI
 
   dec() {
     this.value--;
+    this.item.onclick(''+this.value);
   }
   inc() {
     this.value++;
+    this.item.onclick(''+this.value);
   }
   checkInput() {
     if (this.value === undefined) {
@@ -42,4 +44,7 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnI
     }
   }
   
+  onSet() {
+      if (this.value)  this.item.onclick(''+this.value);
+  }
 }

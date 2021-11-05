@@ -39,6 +39,12 @@ export class ApplicationService {
     }
 
     public setStyleSheets(paths: string[]) {
+        // this can be called multiple times; e.g. overrideStyle, so delete the old ones
+        this.doc.head.querySelectorAll('link').forEach(link => {
+            if (link.getAttribute('svy-stylesheet')){
+                link.remove();
+            }
+        });
         if (paths) {
             for (const path of paths) {
                 const link: HTMLLinkElement = this.doc.createElement('link');

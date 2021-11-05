@@ -1,4 +1,7 @@
-import { Directive , Input, ElementRef, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
+import { Directive, Input, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector } from '@angular/core';
+import { DesignFormComponent } from '../designer/designform_component.component';
+import { AbstractFormComponent, FormComponent } from '../ngclient/form/form_component.component';
+import { StructureCache } from '../ngclient/types';
 
 @Directive({ selector: '[svyContainerStyle]' })
 export class AddAttributeDirective implements OnChanges {
@@ -6,11 +9,24 @@ export class AddAttributeDirective implements OnChanges {
     @Input() svyContainerLayout;
     @Input() svyContainerClasses;
     @Input() svyContainerAttributes;
-    
-    constructor(private el: ElementRef, private renderer: Renderer2) { }
 
-     ngOnChanges(changes: SimpleChanges) {
-        if (changes.svyContainerClasses) {
+    parent: AbstractFormComponent;
+
+    constructor(private el: ElementRef, private renderer: Renderer2, private _injector: Injector) {
+        try {
+            this.parent = this._injector.get<FormComponent>(FormComponent);
+        }
+        catch (e) {
+            //ignore
+        }
+
+        if (!this.parent) {
+            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.svyContainerClasses && this.svyContainerClasses) {
             this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
 
@@ -19,15 +35,15 @@ export class AddAttributeDirective implements OnChanges {
                 this.renderer.setStyle(this.el.nativeElement, key, this.svyContainerLayout[key]);
             }
         }
-        if (changes.svyContainerAttributes) {
+        if (changes.svyContainerAttributes && this.svyContainerAttributes) {
             for (const key of Object.keys(this.svyContainerAttributes)) {
                 this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
-                //if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
+                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }
     }
 
-    /*private restoreCss() {
+    private restoreCss() {
         if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
             const name = this.svyContainerStyle.attributes.name.split('.')[1];
             if (this.parent.cssstyles && this.parent.cssstyles[name]) {
@@ -45,5 +61,5 @@ export class AddAttributeDirective implements OnChanges {
                 }
             }
         }
-    }*/
+    }
 }

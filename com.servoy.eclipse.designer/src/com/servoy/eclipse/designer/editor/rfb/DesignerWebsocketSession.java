@@ -187,7 +187,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean isNG2 = args.optBoolean("ng2", false);
 				if (isNG2)
 				{
-					return new AngularFormGenerator(fs, form, form.getName(), true).generateJS();
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true).generateJS();
 				}
 				else
 				{
@@ -238,9 +238,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							boolean isInCSSPositionContainer = false;
-							if (PersistHelper.getRealParent(baseComponent) instanceof LayoutContainer)
+							ISupportChilds realParent = PersistHelper.getRealParent(baseComponent);
+							if (realParent instanceof LayoutContainer)
 							{
-								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)PersistHelper.getRealParent(baseComponent));
+								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)realParent);
 							}
 							if (!responsive || isInCSSPositionContainer)
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
@@ -298,14 +299,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			case "getStyleSheets" :
 			{
-				return getStyleSheets();
+				return getDesignerStyleSheets(fs);
 			}
 		}
 		return null;
 	}
 
 
-	private String[] getStyleSheets()
+	private String[] getDesignerStyleSheets(FlattenedSolution fs)
 	{
 		TreeSet<String> designCssLibs = new TreeSet<>();
 		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
@@ -317,6 +318,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				designCssLibs.addAll(libs);
 			}
 		}
+		// also add the solution css
+		designCssLibs.addAll(Arrays.asList(getSolutionStyleSheets(fs)));
 		return designCssLibs.toArray(new String[designCssLibs.size()]);
 	}
 

@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.debug.handlers.StartNGDesktopClientHandler;
 import com.servoy.eclipse.exporter.ngdesktop.Activator;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -177,7 +178,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
 			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
 				jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0)
+			if (settings.get("copyright") != null && settings.get("copyright").trim().length() > 0)
 				jsonObj.put("copyright", settings.get("copyright"));
 			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0)
 				jsonObj.put("url", settings.get("app_url"));
@@ -186,7 +187,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
 				jsonObj.put("height", settings.get("ngdesktop_height"));
 			if (settings.get("ngdesktop_version") != null && settings.get("ngdesktop_version").trim().length() > 0)
-				jsonObj.put("version", settings.get("ngdesktop_version"));
+				jsonObj.put("version", getNgDesktopVersion(settings.get("ngdesktop_version")));
 			jsonObj.put("includeUpdate", settings.getBoolean("include_update"));
 			if (settings.get("update_url") != null && settings.get("update_url").trim().length() > 0)
 				jsonObj.put("updateUrl", settings.get("update_url"));
@@ -205,6 +206,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			//
 		}
 		return null;
+	}
+
+	private String getNgDesktopVersion(String selectedVersion)
+	{
+		return StartNGDesktopClientHandler.getNgDesktopVersion(selectedVersion);
 	}
 
 	private String logIn()

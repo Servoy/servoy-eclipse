@@ -92,8 +92,11 @@ public class SaveAsTemplateAction extends SelectionAction
 	}
 
 	private boolean groupTemplateElements = false;
-	private final BiPredicate<List<IPersist>, ISupportChilds> isNested = (List<IPersist> selected, ISupportChilds t) -> selected.contains(t) ? true
-		: PersistHelper.getRealParent(t) instanceof LayoutContainer && this.isNested.test(selected, PersistHelper.getRealParent(t));
+	private final BiPredicate<List<IPersist>, ISupportChilds> isNested = (List<IPersist> selected, ISupportChilds t) -> {
+		if (selected.contains(t)) return true;
+		ISupportChilds realParent = PersistHelper.getRealParent(t);
+		return realParent instanceof LayoutContainer && this.isNested.test(selected, realParent);
+	};
 
 	private static Pair<String, Boolean> askForTemplateName(Shell shell, boolean grouping)
 	{

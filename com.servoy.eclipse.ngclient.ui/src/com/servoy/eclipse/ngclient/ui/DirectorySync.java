@@ -63,6 +63,8 @@ public class DirectorySync
 					try
 					{
 						key = watchService.take();
+						if (destroy) break;
+
 					}
 					catch (InterruptedException x)
 					{
@@ -128,6 +130,15 @@ public class DirectorySync
 						key.reset();
 					}
 				}
+				try
+				{
+					if (this.watchService != null) this.watchService.close();
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+				}
+
 			}, "DirectorySync on " + srcRoot.getCanonicalPath());
 			thread.setDaemon(true);
 			thread.start();
@@ -141,14 +152,6 @@ public class DirectorySync
 	public void destroy()
 	{
 		this.destroy = true;
-		try
-		{
-			if (this.watchService != null) this.watchService.close();
-		}
-		catch (IOException e)
-		{
-			Debug.error(e);
-		}
 		thread.interrupt();
 	}
 
