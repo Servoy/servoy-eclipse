@@ -187,7 +187,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean isNG2 = args.optBoolean("ng2", false);
 				if (isNG2)
 				{
-					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true).generateJS();
+					LayoutContainer zoomedInContainer = null;
+					if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
+						((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer() instanceof LayoutContainer)
+					{
+						zoomedInContainer = (LayoutContainer)((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
+					}
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS();
 				}
 				else
 				{
