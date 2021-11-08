@@ -23,7 +23,7 @@ import {AbstractFormComponent} from '../ngclient/form/form_component.component';
     encapsulation: ViewEncapsulation.None,
     /* eslint-disable max-len */
     template: `
-      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses"> <!-- main div -->
           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
@@ -230,7 +230,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.absolutFormPosition['right'] = '0px';
         this.absolutFormPosition['bottom'] = '0px';
         this.absolutFormPosition['position'] = 'absolute';
-
+        this.absolutFormPosition['overflow'] = 'hidden';
+  
         if (formData.model.borderType) {
             const borderStyle = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
