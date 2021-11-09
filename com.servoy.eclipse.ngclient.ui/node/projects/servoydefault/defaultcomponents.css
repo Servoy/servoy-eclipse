@@ -14,13 +14,17 @@
 
 .svy-dropdown::after {
     float: right;
-    margin-top: 8px;
+    margin-top: initial;
 }
 
 .svy-dropdown {
     height: 100%;
     text-align: left;
-    padding: 1px 5px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 100% !important;
+    padding: 1px 5px !important;
 }
 
 .svy-dropdown-text {
@@ -69,6 +73,11 @@ div.svy-label-with-focus:focus{
 div[ngbDropdownMenu] {
   max-height: 300px;
   overflow-y: auto;
+}
+
+ngb-typeahead-window.dropdown-menu {
+    max-height: 200px;
+    overflow: auto;
 }
 
 .svy-calendar-container .input-group-append {

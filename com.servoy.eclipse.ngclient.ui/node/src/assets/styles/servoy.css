@@ -326,7 +326,7 @@ body {
     width: 14.5em;
 }
 
-.owl-dt-inline-container .owl-dt-calendar, .owl-dt-popup-container .owl-dt-calendar {
+.owl-dt-inline .owl-dt-calendar {
     height: 17.25em;
 }
 
