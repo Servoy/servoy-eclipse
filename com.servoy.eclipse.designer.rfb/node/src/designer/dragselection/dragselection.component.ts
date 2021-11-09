@@ -52,6 +52,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
   
   onMouseUp(event: MouseEvent) {
       if (this.dragStartEvent != null) {
+          this.sendChanges(this.currentElementInfo);
+         
           this.dragStartEvent = null;
           this.selectionToDrag = null;
           this.editorSession.getState().dragging = false;
@@ -62,7 +64,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           this.autoscrollAreasEnabled = false;
           this.editorSession.stopAutoscroll();
           
-          this.sendChanges(this.currentElementInfo);
           //force redrawing of the selection decorator to the new position
           this.editorSession.updateSelection(this.editorSession.getSelection());
       }
