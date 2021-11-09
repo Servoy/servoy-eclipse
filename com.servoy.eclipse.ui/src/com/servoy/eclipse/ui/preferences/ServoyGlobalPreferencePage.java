@@ -68,6 +68,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button contextMenuTutorialsButton;
 	private Button launchNGButton;
 	private Button showNGDesignerButton;
+	private Button showForumNotificationsButton;
 
 
 	public void init(IWorkbench workbench)
@@ -211,6 +212,10 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNGDesignerButton = new Button(rootContainer, SWT.CHECK);
 		showNGDesignerButton.setText("Open forms with the NG2 Form Designer");
 
+		// forum notifications
+		showForumNotificationsButton = new Button(rootContainer, SWT.CHECK);
+		showForumNotificationsButton.setText("Show forum notifications (require developer restart)");
+
 		initializeFields();
 
 		return rootContainer;
@@ -233,6 +238,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 		launchNGButton.setSelection(prefs.launchNG2());
 		showNGDesignerButton.setSelection(prefs.showNG2Designer());
+		showForumNotificationsButton.setSelection(prefs.showForumNotifications());
 	}
 
 	@Override
@@ -252,6 +258,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		contextMenuTutorialsButton.setSelection(DesignerPreferences.USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
 		launchNGButton.setSelection(DesignerPreferences.LAUNCH_NG2_DEFAULT);
 		showNGDesignerButton.setSelection(DesignerPreferences.NG2_DESIGNER_DEFAULT);
+		showForumNotificationsButton.setSelection(DesignerPreferences.FORUM_NOTIFICATIONS_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -282,6 +289,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setContextMenuTutorials(contextMenuTutorialsButton.getSelection());
 		prefs.setLaunchNG2(launchNGButton.getSelection());
 		prefs.setShowNG2Designer(showNGDesignerButton.getSelection());
+		prefs.setShowForumNotifications(showForumNotificationsButton.getSelection());
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();

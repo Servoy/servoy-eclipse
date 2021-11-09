@@ -113,6 +113,7 @@ public class DesignerPreferences
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 	public static final String LAUNCH_NG2 = "launchNG2";
 	public static final String NG2_DESIGNER = "ng2Designer";
+	public static final String FORUM_NOTIFICATIONS = "forumNotifications";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -177,6 +178,7 @@ public class DesignerPreferences
 
 	public static final boolean LAUNCH_NG2_DEFAULT = false;
 	public static final boolean NG2_DESIGNER_DEFAULT = false;
+	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -920,5 +922,15 @@ public class DesignerPreferences
 	public void setShowNG2Designer(boolean showNG2)
 	{
 		setProperty(NG2_DESIGNER, showNG2);
+	}
+
+	public boolean showForumNotifications()
+	{
+		return getProperty(FORUM_NOTIFICATIONS, FORUM_NOTIFICATIONS_DEFAULT);
+	}
+
+	public void setShowForumNotifications(boolean showForumNotifications)
+	{
+		setProperty(FORUM_NOTIFICATIONS, showForumNotifications);
 	}
 }

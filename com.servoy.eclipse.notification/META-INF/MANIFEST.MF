@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.model,
  org.eclipse.ui.forms,
  slf4j.api,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ com.servoy.eclipse.ui
 Export-Package: com.servoy.eclipse.notification,
  com.servoy.eclipse.notification.mylyn,
  com.servoy.eclipse.notification.rss
