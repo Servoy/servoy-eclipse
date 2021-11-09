@@ -401,7 +401,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 							serverManager.testServerConfigConnection(serverConfig, 0);
 							serverManager.saveServerConfig(name, serverConfig);
-							s = name;
+							// return retry so importer picks up the enabled server
+							return RETRY_ACTION;
 						}
 						catch (Exception e)
 						{
@@ -453,7 +454,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 					});
 					if (serverConfig != null && retval == 1)
 					{
-						// create server
+						// create server option
 						ITransactionConnection connection = null;
 						PreparedStatement ps = null;
 						try
@@ -473,30 +474,32 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							Utils.closeConnection(connection);
 							Utils.closeStatement(ps);
 						}
-						if (retval == Window.OK)
+						try
 						{
-							s = serverNames[selectedOption[0]];
+							ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
+							ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
 						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+							Display.getDefault().syncExec(new Runnable()
+							{
+								public void run()
+								{
+									MessageDialog.openError(shell, "Cannot create server '" + name + "'",
+										"An unexpected error occured while creating new server, please select an existing server or create server manually.");
+								}
+							});
+						}
+						// return retry so that the importer will pick up the new database server or show the choices again if the server was not created successfully
+						return RETRY_ACTION;
+					}
+					// replace server option
+					if (retval == 0)
+					{
+						s = serverNames[selectedOption[0]];
 					}
 
-					try
-					{
-						ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-						ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								MessageDialog.openError(shell, "Cannot create server '" + name + "'",
-									"An unexpected error occured while creating new server, please select an existing server or create server manually.");
-							}
-						});
-					}
-					return RETRY_ACTION;
 				}
 				unknownServerNameMap.put(name, s);
 			}
@@ -505,15 +508,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				lastName = s;
 				return RENAME_ACTION;
 			}
-			else
-			{
-				return CANCEL_ACTION;
-			}
+			// rename or create was not selected, so user choose to cancel
+			return CANCEL_ACTION;
 		}
-		catch (
-
-		Exception e)
-
+		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 			return CANCEL_ACTION;
