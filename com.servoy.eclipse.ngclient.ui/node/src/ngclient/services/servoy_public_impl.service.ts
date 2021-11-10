@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
@@ -40,6 +40,9 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
     getLocale(): string {
         return this.localeService.getLocale();
+    }
+    getLocaleObject(): Locale {
+        return this.sabloService.getLocale();
     }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
