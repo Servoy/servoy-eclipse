@@ -174,7 +174,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (inputType === 'email') {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
-        } else if (value && this.format) {
+        } else if ((value !== null && value !== undefined) && this.format) {
             let data = value;
             if (!this.findmode) {
                 data = inputType  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
@@ -192,7 +192,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             }
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else {
-            this._renderer.setProperty(this._elementRef.nativeElement, 'value', value ? value : '');
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', (value !== null && value !== undefined) ? value : '');
         }
     }
 
