@@ -323,11 +323,16 @@ body {
 
 .owl-dt-inline-container {
     box-shadow: none; 
-    width: 14.5em;
+    width: 100%;
 }
 
 .owl-dt-inline .owl-dt-calendar {
-    height: 17.25em;
+    height:auto;
+}
+
+.owl-dt-inline {
+    display: inline-block;
+    width: 100%;
 }
 
 .btn-default {
