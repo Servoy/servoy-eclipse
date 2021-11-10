@@ -50,11 +50,11 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
         this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
     }
-    generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string {
-       return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName);
+    generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
+       return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
     }
-    generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
-        return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
+    generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
+        return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
     }
     generateMediaDownloadUrl(media: string): string{
         return this.applicationService.generateMediaDownloadUrl(media);

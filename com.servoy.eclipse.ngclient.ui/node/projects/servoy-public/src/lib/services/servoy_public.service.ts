@@ -16,8 +16,8 @@ export abstract class ServoyPublicService {
     public abstract getI18NMessages(...keys: string[]): Promise<any>;
     public abstract executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T>;
     public abstract callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T>;
-    public abstract generateUploadUrl(formname: string, componentName: string, propertyName: string): string;
-    public abstract generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string;
+    public abstract generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string;
+    public abstract generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string;
     public abstract generateMediaDownloadUrl(media : string) : string;
     public abstract getUIProperty(key : string) : any;
     public abstract getFormCacheByName(containedForm: string): IFormCache;
