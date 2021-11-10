@@ -10,8 +10,8 @@
     "rxjs": ">=6"
   },
   "dependencies": {
-    "@angular/material": ">=12",
-    "@angular/cdk": ">=12",
+    "@angular/material": "<13",
+    "@angular/cdk": "<13",
     "tslib": "*"
   },
   "license": "MIT",
