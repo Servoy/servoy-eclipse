@@ -503,7 +503,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				}
 
 				List<Form> directChildren = getActiveSolution().getDirectlyInheritingForms(f);
-				if (showMembersAction.isChecked())
+				if (showMembersAction.isChecked() && listSelection != null)
 				{
 					for (Form directChild : directChildren)
 					{
@@ -952,7 +952,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		treeProvider.setSelection(persist);
 
-		tree.getTree().setRedraw(false);
 		tree.refresh();
 		expandTreePaths(persist);
 		try
