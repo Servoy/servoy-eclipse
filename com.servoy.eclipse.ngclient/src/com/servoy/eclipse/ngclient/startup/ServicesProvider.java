@@ -15,6 +15,7 @@ import com.servoy.j2db.server.ngclient.ClientFunctionsServlet;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.SelectNGSolutionFilter;
+import com.servoy.j2db.server.ngclient.TusServlet;
 import com.servoy.j2db.server.ngclient.endpoint.NGClientEndpoint;
 import com.servoy.j2db.server.ngclient.endpoint.RecordingEndpoint;
 
@@ -36,6 +37,7 @@ public class ServicesProvider implements IServicesProvider
 		{
 			HashSet<Class< ? >> set = new HashSet<Class< ? >>();
 			set.add(DeveloperMediaResourcesServlet.class);
+			set.add(TusServlet.class);
 			set.add(ComponentsModuleGenerator.class);
 			set.add(NGClientEntryFilter.class);
 			set.add(NGClientEndpoint.class);
