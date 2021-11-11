@@ -26,23 +26,23 @@ export abstract class AbstractFormComponent {
 
     abstract getContainerByName(containername: string): Element;
 
-    _containers: { added: any; removed: any; };
-    _cssstyles: { [x: string]: any; };
+    _containers: { added: any; removed: any };
+    _cssstyles: { [x: string]: any };
 
     constructor(protected renderer: Renderer2) {
     }
 
-    @Input('containers')
-    set containers(containers: { added: any, removed: any }) {
+    @Input()
+    set containers(containers: { added: any; removed: any }) {
         if (!containers) return;
         this._containers = containers;
-        for (let containername in containers.added) {
+        for (const containername in containers.added) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
             }
         }
-        for (let containername in containers.removed) {
+        for (const containername in containers.removed) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
@@ -55,14 +55,14 @@ export abstract class AbstractFormComponent {
     }
 
     @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
+    set cssstyles(cssStyles: { [x: string]: any }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
+        for (const containername in cssStyles) {
             const container = this.getContainerByName(containername);
             if (container) {
                 const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
+                for (const key in stylesMap) {
                     this.renderer.setStyle(container, key, stylesMap[key]);
                 }
             }
@@ -192,9 +192,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             if (styleClasses) {
                 if (!this.formClasses) {
                     this.formClasses = styleClasses.split(' ');
-                }
-                else {
-                    this.formClasses = this.formClasses.concat(styleClasses.split(' '))
+                } else {
+                    this.formClasses = this.formClasses.concat(styleClasses.split(' '));
                 }
             }
 
@@ -348,14 +347,13 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     getContainerByName(containername: string): Element {
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
-    
-    public updateFormStyleClasses(ngutilsstyleclasses : string) : void{
+
+    public updateFormStyleClasses(ngutilsstyleclasses: string): void{
         if (ngutilsstyleclasses) {
             if (!this.formClasses) {
                 this.formClasses = ngutilsstyleclasses.split(' ');
-            }
-            else {
-                this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '))
+            } else {
+                this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
             }
         }
     }
