@@ -122,6 +122,8 @@ export interface IFormComponent extends IApiExecutor {
     formCacheChanged(cache: FormCache): void;
     // called when a model property is updated for the given compponent, but the value itself didn't change  (only nested)
     propertyChanged(componentName: string, property: string, value: any): void;
+    
+    updateFormStyleClasses(ngutilsstyleclasses : string) : void;
 }
 
 export interface IApiExecutor {

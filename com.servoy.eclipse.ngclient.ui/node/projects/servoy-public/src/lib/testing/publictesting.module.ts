@@ -114,6 +114,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
 
     }
+    
+    public setFormStyleClasses(styleclasses: {property : string}): void{
+        
+    }
 }
 @NgModule({
     declarations: [

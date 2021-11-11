@@ -317,6 +317,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         }
         return false;
     }
+    
+    updateFormStyleClasses(ngutilsstyleclasses : string) : void{
+    
+    }
 }
 
 class FormComponentServoyApi extends ServoyApi {
