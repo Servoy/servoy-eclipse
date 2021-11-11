@@ -91,4 +91,7 @@
 	<bundle id='org.apache.commons.commons-fileupload'>
 		<category name="bundles" />
 	</bundle>
+    <bundle id='tus-java-server'>
+        <category name="bundles" />
+    </bundle>	
 </site>
