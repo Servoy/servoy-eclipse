@@ -620,7 +620,7 @@ public class TitleAreaDialog extends TrayDialog {
 	private void updateMessage(String newMessage) {
 		String oldMessage = messageLabel.getText();
 		messageLabel.setText(newMessage);
-		messageLabel.setEnabled(!newMessage.isBlank());
+		messageLabel.setEnabled(newMessage.length() > 0);
 		// Bug 248410 -  This snippet will only work with Windows screen readers.
 		messageLabel.getAccessible().sendEvent(ACC.EVENT_ATTRIBUTE_CHANGED,
 				null);

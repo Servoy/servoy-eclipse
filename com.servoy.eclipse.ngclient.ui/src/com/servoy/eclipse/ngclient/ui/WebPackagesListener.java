@@ -303,6 +303,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					ServoyLog.logError(e);
 				}
 
+				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications())
+				{
+					if (warExportModel == null || warExportModel.getExportedComponents().contains(spec.getName()))
+					{
+						List<String> libs = spec.getNG2Config().getDependencies().getCssLibrary();
+						if (libs != null)
+						{
+							cssLibs.addAll(libs);
+						}
+					}
+				}
+
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
 				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
 				try

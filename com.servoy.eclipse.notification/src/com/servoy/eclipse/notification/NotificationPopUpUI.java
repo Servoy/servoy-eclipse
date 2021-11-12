@@ -39,7 +39,6 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.handlers.IHandlerService;
-import org.eclipse.ui.services.IServiceLocator;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.notification.mylyn.AbstractNotificationPopup;
@@ -61,9 +60,21 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 	
 	private OnNotificationClose onCloseCallback;
 	
+	private String title;
+	
+	private boolean escapeHtmlTags;
+	
 	public NotificationPopUpUI(Display display, ArrayList<INotification> notifications, OnNotificationClose onCloseCallback)
 	{
+		this("Servoy notification", false, display, notifications, onCloseCallback);
+	}
+	
+	public NotificationPopUpUI(
+		String title, boolean escapeHtmlTags, Display display, ArrayList<INotification> notifications, OnNotificationClose onCloseCallback)
+	{
 		super(display);
+		this.title = title;
+		this.escapeHtmlTags = escapeHtmlTags;
 		servoyLogoImg = Activator.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/servoy_donut16x16.png").createImage();
 		linkColor = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
 		this.notifications = notifications;
@@ -154,7 +165,13 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 			if (descriptionText != null && !descriptionText.trim().equals("")) //$NON-NLS-1$
 			{
 				Label descriptionLabel = new Label(notificationComposite, SWT.NO_FOCUS);
+				if(this.escapeHtmlTags)
+				{
+					descriptionText = descriptionText.replaceAll("(?s)<[^>]*>(\\s*<[^>]*>)*", " ");
+					if(descriptionText.length() > 50) descriptionText = descriptionText.substring(0, 47) + "...";					
+				}
 				descriptionLabel.setText(descriptionText);
+				
 				//descriptionLabel.setBackground(parent.getBackground());
 				GridDataFactory.fillDefaults()
 					.grab(true, false)
@@ -216,11 +233,10 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 		layout.topControl = stacks.get(0);
 	}	
 	
-
 	@Override
 	protected String getPopupShellTitle()
 	{
-		return "Servoy notification";
+		return this.title;
 	}
 	
 	@Override

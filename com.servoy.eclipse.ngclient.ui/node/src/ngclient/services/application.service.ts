@@ -235,16 +235,18 @@ export class ApplicationService {
         return this.servoyService.getUIProperties().getUIProperty('trustDataAsHtml');
     }
 
-    public generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
-        return 'resources/upload/' + this.sabloService.getClientnr() +
+    public generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
+        let url = 'resources/upload/';
+        if (tus) url = 'tus/upload/';
+        return url + this.sabloService.getClientnr() +
             (formname ? '/' + formname : '') +
             (componentName ? '/' + componentName : '') +
-            (propertyName ? '/' + propertyName : '');
+            (propertyName ? '/' + propertyName : '') + '/';
     }
 
-    public generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string {
+    public generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
         // svy_services should be in sync with MediaResourceServlet.SERVICE_UPLOAD
-        return 'resources/upload/' + this.sabloService.getClientnr() + '/svy_services/' + serviceName + '/' + apiFunctionName;
+        return this.generateUploadUrl('svy_services', serviceName, apiFunctionName, tus);
     }
 
     public generateMediaDownloadUrl(media: string): string {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
@@ -7,7 +7,7 @@ import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 import { ApplicationService } from './application.service';
 import { I18NProvider } from './i18n_provider.service';
-import {PopupFormService} from './popupform.service';
+import { PopupFormService } from './popupform.service';
 
 @Injectable()
 export class ServoyPublicServiceImpl extends ServoyPublicService {
@@ -41,37 +41,44 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     getLocale(): string {
         return this.localeService.getLocale();
     }
+    getLocaleObject(): Locale {
+        return this.sabloService.getLocale();
+    }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
     }
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
         this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
     }
-    generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string {
-       return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName);
+    generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
+        return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
     }
-    generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
-        return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
+    generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
+        return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
     }
-    generateMediaDownloadUrl(media: string): string{
+    generateMediaDownloadUrl(media: string): string {
         return this.applicationService.generateMediaDownloadUrl(media);
     }
-    getUIProperty(key: string): any{
+    getUIProperty(key: string): any {
         return this.applicationService.getUIProperty(key);
     }
     getFormCacheByName(containedForm: string): IFormCache {
         return this.formService.getFormCacheByName(containedForm);
     }
-    sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+    sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
         this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
     }
 
-    showForm(popup: PopupForm): void{
+    showForm(popup: PopupForm): void {
         this.popupFormService.showForm(popup);
     }
 
-    cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
-         this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
+    cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
+        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
+    }
+
+    setFormStyleClasses(styleclasses: { property: string }): void {
+        this.formService.setFormStyleClasses(styleclasses);
     }
 }
 

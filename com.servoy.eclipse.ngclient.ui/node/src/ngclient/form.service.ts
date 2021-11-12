@@ -18,6 +18,7 @@ export class FormService {
     private formsCache: Map<string, FormCache>;
     private log: LoggerService;
     private formComponentCache: Map<string, IFormComponent | Deferred<any>>;
+    private ngUtilsFormStyleclasses: {property: string};
     //    private touchedForms:Map<String,boolean>;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
@@ -82,6 +83,25 @@ export class FormService {
         }
         this.formComponentCache.set(form.name, form);
         return this.formsCache.get(form.name);
+    }
+
+    public getFormStyleClasses(name: string){
+        if (this.ngUtilsFormStyleclasses){
+            return this.ngUtilsFormStyleclasses[name];
+        }
+        return null;
+    }
+
+    public setFormStyleClasses(styleclasses: {property: string}){
+        this.ngUtilsFormStyleclasses = styleclasses;
+        if (styleclasses) {
+            for (const formname of Object.keys(styleclasses)) {
+                if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
+                    (this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses(styleclasses[formname]);
+                }
+            }
+        }
+
     }
 
     public destroy(form: IFormComponent) {
@@ -279,7 +299,7 @@ export class FormService {
                 newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion[''], formComponent,
                   (propertyName: string) => formComponent ? formComponent[propertyName] : formComponent);
             }
-            for (var p in newFormProperties) {
+            for (const p in newFormProperties) {
                 formComponent[p] = newFormProperties[p];
             }
         }
@@ -310,8 +330,7 @@ export class FormService {
                 }
                 if (property == 'cssPosition'){
                     comp.layout = value;
-                }
-                else{
+                } else{
                     comp.model[property] = value;
                 }
             }

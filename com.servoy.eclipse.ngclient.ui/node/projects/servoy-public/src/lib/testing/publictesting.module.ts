@@ -2,12 +2,12 @@ import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { PopupForm } from '../utils/popupform';
-import { IComponentCache, IFormCache, ServoyPublicService } from '../services/servoy_public.service';
+import { IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
 import { ServoyPublicModule } from '../servoy_public.module';
 
 @Injectable()
 export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
-    private locale: string;
+    private locale: Locale;
     private messages: { [key: string]: string } = {};
     private forms: { [key: string]: IFormCache } = {};
     private localeNumberSymbol: string = null;
@@ -72,11 +72,14 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
         throw new Error('Method not implemented.');
     }
-    public setLocale(locale: string) {
+    public setLocale(locale: Locale) {
         this.locale = locale;
     }
     public getLocale(): string {
-        return this.locale ? this.locale : 'en';
+        return this.locale ? this.locale.language : 'en';
+    }
+    public getLocaleObject(): Locale {
+        return this.locale? this.locale: {language:'en', country: 'US', full: 'en-US'};
     }
     public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         const ev = new JSEvent();
@@ -110,6 +113,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
 
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
 
+    }
+    
+    public setFormStyleClasses(styleclasses: {property : string}): void{
+        
     }
 }
 @NgModule({

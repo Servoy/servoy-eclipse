@@ -344,7 +344,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.13.1"
+         version="1.14.3"
          unpack="false"/>
 
    <plugin
@@ -512,7 +512,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.commons-pool2"
          download-size="0"
          install-size="0"
-         version="2.10.0"
+         version="2.11.1"
          unpack="false"/>
 
    <plugin

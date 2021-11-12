@@ -1,5 +1,7 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
-        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
+import {
+    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
+    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject
+} from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties } from '../types';
 
@@ -14,33 +16,33 @@ import { DOCUMENT } from '@angular/common';
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
-  template: ''
+    template: ''
 })
-export abstract class AbstractFormComponent{
-    
-     abstract getFormCache(): FormCache;
-     
-     abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
-     
-     abstract getContainerByName(containername: string) : Element;
-     
-     _containers: { added: any; removed: any; };
-     _cssstyles: { [x: string]: any; };
-    
+export abstract class AbstractFormComponent {
+
+    abstract getFormCache(): FormCache;
+
+    abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
+
+    abstract getContainerByName(containername: string): Element;
+
+    _containers: { added: any; removed: any };
+    _cssstyles: { [x: string]: any };
+
     constructor(protected renderer: Renderer2) {
     }
-    
-    @Input('containers')
-    set containers(containers: {added: any, removed: any}) {
+
+    @Input()
+    set containers(containers: { added: any; removed: any }) {
         if (!containers) return;
         this._containers = containers;
-        for (let containername in containers.added) {
+        for (const containername in containers.added) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
             }
         }
-        for (let containername in containers.removed) {
+        for (const containername in containers.removed) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
@@ -53,14 +55,14 @@ export abstract class AbstractFormComponent{
     }
 
     @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
+    set cssstyles(cssStyles: { [x: string]: any }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
+        for (const containername in cssStyles) {
             const container = this.getContainerByName(containername);
             if (container) {
                 const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
+                for (const key in stylesMap) {
                     this.renderer.setStyle(container, key, stylesMap[key]);
                 }
             }
@@ -116,7 +118,7 @@ export abstract class AbstractFormComponent{
 <ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" *ngIf="state.model.visible" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
      <!-- component template generate end -->
    `
-   /* eslint-enable max-len */
+    /* eslint-enable max-len */
 })
 export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
@@ -149,11 +151,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     private log: LoggerService;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
-                private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, protected renderer: Renderer2,
-                @Inject(DOCUMENT) private document: Document) {
-                    super(renderer);
+        private servoyService: ServoyService, logFactory: LoggerFactory,
+        private changeHandler: ChangeDetectorRef,
+        private el: ElementRef, protected renderer: Renderer2,
+        @Inject(DOCUMENT) private document: Document) {
+        super(renderer);
         this.log = logFactory.getLogger('FormComponent');
     }
 
@@ -174,7 +176,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         const comp = this.componentCache[componentName];
         if (comp) {
             const change = {};
-            change[property] = new SimpleChange(value,value,false);
+            change[property] = new SimpleChange(value, value, false);
             comp.ngOnChanges(change);
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
@@ -187,10 +189,15 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             // Form Instances are reused for tabpanels that have a template reference to this.
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
-            if (styleClasses)
-                this.formClasses = styleClasses.split(' ');
-            else
-                this.formClasses = null;
+            if (styleClasses) {
+                if (!this.formClasses) {
+                    this.formClasses = styleClasses.split(' ');
+                } else {
+                    this.formClasses = this.formClasses.concat(styleClasses.split(' '));
+                }
+            }
+
+
             this._containers = this.formCache.getComponent('').model.containers;
             this._cssstyles = this.formCache.getComponent('').model.cssstyles;
             this.handlerCache = {};
@@ -198,9 +205,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.componentCache = {};
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
-            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
+            this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
 
         }
+       this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
     }
 
     ngOnDestroy() {
@@ -209,8 +217,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
-        } else if (item instanceof FormComponentCache ) {
+            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv;
+        } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
@@ -221,14 +229,14 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
     }
 
-    getTemplateForLFC(state: ComponentCache ): TemplateRef<any> {
+    getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
             // TODO: this has to be replaced with a type property on the state object
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
-            compDirectiveName =  compDirectiveName.replace('-','');
+            compDirectiveName = compDirectiveName.replace('-', '');
             return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
         }
     }
@@ -236,8 +244,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent('');
 
-        for (const key in this.absolutFormPosition){
-            if (this.absolutFormPosition.hasOwnProperty(key)){
+        for (const key in this.absolutFormPosition) {
+            if (this.absolutFormPosition.hasOwnProperty(key)) {
                 delete this.absolutFormPosition[key];
             }
         }
@@ -258,8 +266,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
 
         if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null)
-            {
+            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
                 // see svyFormstyle from ng1
                 this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
                 this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
@@ -298,11 +305,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         return func;
     }
 
-    registerComponent(component: ServoyBaseComponent<any> ): void {
+    registerComponent(component: ServoyBaseComponent<any>): void {
         this.componentCache[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent<any> ): void {
+    unRegisterComponent(component: ServoyBaseComponent<any>): void {
         delete this.componentCache[component.name];
     }
 
@@ -322,7 +329,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
                 comp.callApi(path[1], apiName, args, path.slice(2));
             } else {
                 this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
-                 ', but comp: ' + (comp == null?' is not found':comp.name + ' doesnt implement IApiExecutor') );
+                    ', but comp: ' + (comp == null ? ' is not found' : comp.name + ' doesnt implement IApiExecutor'));
             }
 
         } else {
@@ -337,27 +344,37 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
     }
 
-    getContainerByName(containername: string) : Element {
-       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
+    getContainerByName(containername: string): Element {
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
+    }
+
+    public updateFormStyleClasses(ngutilsstyleclasses: string): void{
+        if (ngutilsstyleclasses) {
+            if (!this.formClasses) {
+                this.formClasses = ngutilsstyleclasses.split(' ');
+            } else {
+                this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
+            }
+        }
     }
 }
 
 class FormComponentServoyApi extends ServoyApi {
     constructor(item: ComponentCache,
-                formname: string,
-                absolute: boolean,
-                formservice: FormService,
-                servoyService: ServoyService,
-                private fc: FormComponent) {
-        super(item,formname,absolute,formservice,servoyService,false);
+        formname: string,
+        absolute: boolean,
+        formservice: FormService,
+        servoyService: ServoyService,
+        private fc: FormComponent) {
+        super(item, formname, absolute, formservice, servoyService, false);
     }
 
-    registerComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.registerComponent(comp);
+    registerComponent(comp: ServoyBaseComponent<any>) {
+        this.fc.registerComponent(comp);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.unRegisterComponent(comp);
+    unRegisterComponent(comp: ServoyBaseComponent<any>) {
+        this.fc.unRegisterComponent(comp);
     }
 }
 

@@ -40,6 +40,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gboros
@@ -174,22 +175,22 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			final JSONObject jsonObj = new JSONObject();
 			jsonObj.put("platform", settings.get("platform"));
-			if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("icon_path")))
 				jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
-			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("image_path")))
 				jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null && settings.get("copyright").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("copyright")))
 				jsonObj.put("copyright", settings.get("copyright"));
-			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("app_url")))
 				jsonObj.put("url", settings.get("app_url"));
-			if (settings.get("ngdesktop_width") != null && settings.get("ngdesktop_width").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_width")))
 				jsonObj.put("width", settings.get("ngdesktop_width"));
-			if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_height")))
 				jsonObj.put("height", settings.get("ngdesktop_height"));
-			if (settings.get("ngdesktop_version") != null && settings.get("ngdesktop_version").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_version")))
 				jsonObj.put("version", getNgDesktopVersion(settings.get("ngdesktop_version")));
 			jsonObj.put("includeUpdate", settings.getBoolean("include_update"));
-			if (settings.get("update_url") != null && settings.get("update_url").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("update_url")))
 				jsonObj.put("updateUrl", settings.get("update_url"));
 			jsonObj.put("loginToken", settings.get("login_token"));
 			jsonObj.put("applicationName", settings.get("application_name"));
@@ -241,40 +242,35 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		if (strValue != null && strValue.trim().length() > 0)
 		{
 			final File myFile = new File(strValue);
-			if (!myFile.exists())
+			if (!myFile.exists() || !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + "doesn't exist");
+				errorMsg.append(myFile.getName() + " doesn't exist. Is a directory?");
 				return errorMsg;
 			}
-			if (myFile.isFile())
+			if (myFile.length() > LOGO_SIZE * 1024)
 			{
-
-				if (myFile.length() > LOGO_SIZE * 1024)
-				{
-					errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
-					return errorMsg;
-				}
-
-				final Dimension iconSize = ImageLoader.getSize(myFile);
-				if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
-				{
-					errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")");
-					return errorMsg;
-				}
+				errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
 			}
 
+			final Dimension iconSize = ImageLoader.getSize(myFile);
+			if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
+			{
+				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")");
+				return errorMsg;
+			}
 		}
 
 		strValue = settings.get("image_path");
 		if (strValue != null && strValue.trim().length() > 0)
 		{
 			final File myFile = new File(strValue);
-			if (myFile != null && !myFile.exists())
+			if (!myFile.exists() && !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + "doesn't exist");
+				errorMsg.append(myFile.getName() + "  doesn't exist. Is a directory?");
 				return errorMsg;
 			}
-			if (myFile.exists() && myFile.isFile() && myFile.length() > IMG_SIZE * 1024)
+			if (myFile.length() > IMG_SIZE * 1024)
 			{
 				errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
 				return errorMsg;

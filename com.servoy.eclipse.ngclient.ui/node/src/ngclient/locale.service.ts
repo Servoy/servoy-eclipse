@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred, SessionStorageService, LoggerFactory, LoggerService } from '@servoy/public';
+import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
 
 import numbro from 'numbro';
@@ -31,6 +31,10 @@ export class LocaleService {
 
     public getLocale(): string {
         return this.locale;
+    }
+
+    public getLocaleObject(): Locale {
+        return this.sabloService.getLocale();;
     }
 
     public setLocale(language: string, country: string, initializing?: boolean) {

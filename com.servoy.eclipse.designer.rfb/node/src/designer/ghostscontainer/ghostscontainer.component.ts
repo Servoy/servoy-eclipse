@@ -252,7 +252,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     selectionChanged(): void {
-        this.renderGhostsInternal(this.ghosts);
+        // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
+        // not sure how to detect when we really need to redraw
+         this.renderGhosts();
+        //this.renderGhostsInternal(this.ghosts);
     }
 }
 

@@ -46,24 +46,33 @@ import com.servoy.eclipse.notification.OnNotificationClose;
  *
  */
 public class RSSNotificationJob extends Job
-{
-	private static final long CHECK_INTERVAL = 60000 * 30; // 30 min
-	
-	private static final String RSS = "https://servoy.com/category/developer-news/feed/";
-	
+{		
 	private boolean running = true;
-	
-	private static final String PROPERTY_LAST_NOTIFICATION_TIMESTAMP = "lastNotificationTimestamp";
+	private String title;
+	private String rss;
+	private boolean isHtmlContent;
+	private long checkInterval;
+	private String propertyLastNotificationTimestamp;
 	private Date lastNotificationTimestamp;
 
 	/**
 	 * @param name
 	 */
-	public RSSNotificationJob()
+	public RSSNotificationJob(
+		String title,
+		String rss,
+		boolean isHtmlContent,
+		long checkInterval,
+		String propertyLastNotificationTimestamp)
 	{
-		super("Servoy notification job");
+		super(title + " job");
 		setSystem(true);
-		lastNotificationTimestamp = new Date(Activator.getDefault().getPreferenceStore().getLong(PROPERTY_LAST_NOTIFICATION_TIMESTAMP));
+		this.title = title;
+		this.rss = rss;
+		this.isHtmlContent = isHtmlContent;
+		this.checkInterval = checkInterval;
+		this.propertyLastNotificationTimestamp = propertyLastNotificationTimestamp;
+		lastNotificationTimestamp = new Date(Activator.getDefault().getPreferenceStore().getLong(this.propertyLastNotificationTimestamp));
 	}
 
 	/*
@@ -82,11 +91,14 @@ public class RSSNotificationJob extends Job
 				@Override
 				public void run()
 				{
-					NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(Display.getCurrent(), rssNotifications, new OnNotificationClose() {							
+					NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(
+						RSSNotificationJob.this.title,
+						RSSNotificationJob.this.isHtmlContent,
+						Display.getCurrent(), rssNotifications, new OnNotificationClose() {							
 						@Override
 						public void onClose()
 						{
-							schedule(CHECK_INTERVAL);
+							schedule(RSSNotificationJob.this.checkInterval);
 						}
 					});
 					notificationPopUpUI.setDelayClose(0);
@@ -96,7 +108,7 @@ public class RSSNotificationJob extends Job
 		}
 		else
 		{
-			schedule(CHECK_INTERVAL);
+			schedule(this.checkInterval);
 		}
 
 		return Status.OK_STATUS;
@@ -108,7 +120,7 @@ public class RSSNotificationJob extends Job
 		
 		try
 		{
-			SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(RSS)));		
+			SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(this.rss)));		
 			Iterator<SyndEntry> feedEntriesIte = feed.getEntries().iterator();
 			Date topNotificationTimestamp = null;
 			while(feedEntriesIte.hasNext())
@@ -136,7 +148,7 @@ public class RSSNotificationJob extends Job
 			{
 				lastNotificationTimestamp = topNotificationTimestamp;
 				IPreferenceStore pref = Activator.getDefault().getPreferenceStore();
-				pref.setValue(PROPERTY_LAST_NOTIFICATION_TIMESTAMP, lastNotificationTimestamp.getTime());
+				pref.setValue(this.propertyLastNotificationTimestamp, lastNotificationTimestamp.getTime());
 				if(pref instanceof IPersistentPreferenceStore) // save it asap if possible
 				{
 					try
@@ -145,18 +157,18 @@ public class RSSNotificationJob extends Job
 					}
 					catch(Exception ex)
 					{
-						ServoyLog.logError("Error saving notification timestamp", ex);
+						ServoyLog.logError("Error saving notification timestamp for '" + this.title + "'", ex);
 					}
 				}
 			}
 		}
 		catch (UnknownHostException e)
 		{
-			ServoyLog.logInfo("Cannot get RSS notifications. It's likely that either the developer or the remote site is offline: " + e.getLocalizedMessage());
+			ServoyLog.logInfo("Cannot get RSS notifications for '" + this.title + "'. It's likely that either the developer or the remote site is offline: " + e.getLocalizedMessage());
 		}
 		catch (Exception ex)
 		{
-			ServoyLog.logError("Error getting RSS notifications", ex);			
+			ServoyLog.logError("Error getting RSS notifications for '" + this.title + "'", ex);			
 		}
 		
 		return rssNotifications;
@@ -171,5 +183,5 @@ public class RSSNotificationJob extends Job
 	public void stop()
 	{
 		running = false;
-	}
+	} 
 }

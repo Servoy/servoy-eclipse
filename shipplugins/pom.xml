@@ -166,14 +166,14 @@
 			<artifactId>javax.transaction</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
-<dependency>
-    <groupId>jakarta.servlet.jsp</groupId>
-    <artifactId>jakarta.servlet.jsp-api</artifactId>
-    <version>2.3.6</version>
-</dependency>		
-		
-	<!-- Needed for Hibernate -->
+		<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
+		<dependency>
+			<groupId>jakarta.servlet.jsp</groupId>
+			<artifactId>jakarta.servlet.jsp-api</artifactId>
+			<version>2.3.6</version>
+		</dependency>
+
+		<!-- Needed for Hibernate -->
 		<dependency>
 		    <groupId>javax.persistence</groupId>
 		    <artifactId>javax.persistence-api</artifactId>
@@ -184,15 +184,8 @@
 			<artifactId>jboss-logging</artifactId>
 			<version>3.3.2.Final</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
-		<dependency>
-		    <groupId>jakarta.servlet.jsp</groupId>
-		    <artifactId>jakarta.servlet.jsp-api</artifactId>
-		    <version>2.3.6</version>
-		</dependency>
 
-	<dependency>
+		<dependency>
 			<groupId>com.servoy</groupId>
 			<artifactId>javax.websocket</artifactId>
 			<version>1.1.0  </version>
@@ -317,6 +310,11 @@
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.servoy</groupId>
+			<artifactId>tus-java-server</artifactId>
+			<version>2.0.0.s2</version>
 		</dependency>
 	</dependencies>
 </project>

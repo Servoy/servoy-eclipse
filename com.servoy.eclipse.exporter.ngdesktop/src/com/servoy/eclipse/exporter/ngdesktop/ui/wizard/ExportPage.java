@@ -565,30 +565,21 @@ public class ExportPage extends WizardPage
 
 	public void saveState()
 	{
-		//invalid values are not saved; that's easier for later validation;
 		final IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
 		settings.put("app_url", applicationUrlText.getText().trim());
-		if (iconPath.getText().trim().length() > 0)
-			settings.put("icon_path", iconPath.getText().trim());
-		if (imgPath.getText().trim().length() > 0)
-			settings.put("image_path", imgPath.getText().trim());
-		if (copyrightText.getText().trim().length() > 0)
-			settings.put("copyright", copyrightText.getText());
-		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_height", heightText.getText().trim());
-		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
 		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
-		if (appNameText.getText().trim().length() > 0)
-			settings.put("application_name", appNameText.getText().trim());
-		if (updateUrlText.getText().trim().length() > 0)
-			settings.put("update_url", updateUrlText.getText().trim());
-		if (emailAddress.getText().trim().length() > 0)
-			settings.put("email_address", emailAddress.getText().trim());
+		settings.put("icon_path", iconPath.getText().trim());
+		settings.put("image_path", imgPath.getText().trim());
+		settings.put("copyright", copyrightText.getText());
+		settings.put("ngdesktop_height", heightText.getText().trim());
+		settings.put("ngdesktop_width", widthText.getText().trim());
+		settings.put("application_name", appNameText.getText().trim());
+		settings.put("update_url", updateUrlText.getText().trim());
+		settings.put("email_address", emailAddress.getText().trim());
 		settings.put("store_data", storeBtn.getSelection());
 	}
 

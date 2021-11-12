@@ -23,7 +23,7 @@ public class ShowMembersInFormHierarchy extends Action implements ISelectionChan
 	public ShowMembersInFormHierarchy(FormHierarchyView view, boolean initValue)
 	{
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("show_members.png"));
-		setText("Show members in Form Hierarchy");
+		setText("Show selected form element in Form Hierarchy");
 		setToolTipText(getText());
 		this.view = view;
 		setChecked(initValue);

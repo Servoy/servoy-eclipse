@@ -36,8 +36,7 @@
             <unit id="com.equo.chromium.cef.feature.feature.group" version="80.0.9.202110280424"/>
             <unit id="com.equo.chromium.feature.feature.group" version="80.0.11.202110280411"/>
         </location>
-        <location path="/crypt/servoy/github.master/servoy-eclipse/shipplugins/target/repository" type="Directory"/>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/modeling/emf/emf/builds/release/2.27/"/>
             <unit id="org.eclipse.emf.sdk.feature.group" version="2.27.0.v20210816-1137"/>
         </location>
@@ -52,6 +51,7 @@
             <repository location="https://download.eclipse.org/webtools/downloads/drops/R3.23.0/R-3.23.0-20210822084517/repository/"/>
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.23.0.v202107101916"/>
         </location>
+        <location path="/crypt/servoy/github.master/servoy-eclipse/shipplugins/target/repository" type="Directory"/>
     </locations>
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
 import { SabloService } from '../sablo/sablo.service';
 import { FormService } from '../ngclient/form.service';
 import { LocaleService } from '../ngclient/locale.service';
@@ -41,17 +41,20 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     getLocale(): string {
         return this.localeService.getLocale();
     }
+    getLocaleObject(): Locale {
+        return this.localeService.getLocaleObject();
+    }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
     }
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
 
     }
-    generateServiceUploadUrl(serviceName: string, apiFunctionName: string): string {
-        return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName);
+    generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
+        return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
     }
-    generateUploadUrl(formname: string, componentName: string, propertyName: string): string {
-        return this.applicationService.generateUploadUrl(formname, componentName, propertyName);
+    generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
+        return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
     }
     generateMediaDownloadUrl(media: string): string {
         return this.applicationService.generateMediaDownloadUrl(media);
@@ -72,6 +75,9 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
 
     cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
 
+    }
+    
+    setFormStyleClasses(styleclasses: { property: string }): void {
     }
 }
 

@@ -1,5 +1,5 @@
 import { Injectable, } from '@angular/core';
-import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory } from '@servoy/public';
+import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 
@@ -8,7 +8,7 @@ import { ConverterService } from './converter.service';
 })
 export class SabloService {
 
-    private locale: { language: string; country: string; full: string } = null;
+    private locale: Locale = null;
     private wsSession: WebsocketSession;
     private currentServiceCallCallbacks = [];
     private currentServiceCallDone;
@@ -110,7 +110,7 @@ export class SabloService {
         if (!langAndCountry) langAndCountry = 'en';
         return langAndCountry;
     }
-    public getLocale(): { language: string; country: string; full: string } {
+    public getLocale(): Locale {
         if (!this.locale) {
             const langAndCountry = this.getLanguageAndCountryFromBrowser();
             const array = langAndCountry.split('-');
@@ -119,7 +119,7 @@ export class SabloService {
         return this.locale;
     }
 
-    public setLocale(loc) {
+    public setLocale(loc: Locale) {
         this.locale = loc;
     }
 
@@ -137,6 +137,17 @@ export class SabloService {
         } else {
             this.currentServiceCallCallbacks.push(func);
         }
+    }
+
+
+    public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
+        const changes = {};
+        changes[propertyName] = this.converterService.convertClientObject(value);
+        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
+    }
+
+    public addIncomingMessageHandlingDoneTask(func: () => any) {
+        this.wsSession.addIncomingMessageHandlingDoneTask(func);
     }
 
     private callServiceCallbacksWhenDone() {
@@ -168,17 +179,6 @@ export class SabloService {
             return Promise.reject(arg);
         });
     }
-
-    public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
-        const changes = {};
-        changes[propertyName] = this.converterService.convertClientObject(value);
-        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
-    }
-
-    public addIncomingMessageHandlingDoneTask(func: () => any) {
-        this.wsSession.addIncomingMessageHandlingDoneTask(func);
-    }
-
 
     private getAPICallFunctions(call, formState) {
         let funcThis;

@@ -19,8 +19,8 @@ package com.servoy.eclipse.notification;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-
 import com.servoy.eclipse.notification.rss.RSSNotificationJob;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 
 /**
@@ -79,23 +79,47 @@ public class Activator extends AbstractUIPlugin
 		return plugin;
 	}
 	
-	private RSSNotificationJob notificationJob;
+	private RSSNotificationJob servoyNotificationJob, forumNotificationJob;
 	
 	void startNotificationJob()
 	{
-		if(notificationJob == null)
+		
+		if(servoyNotificationJob == null)
 		{
-			notificationJob = new RSSNotificationJob();
-			notificationJob.schedule(20000);
+			servoyNotificationJob = new RSSNotificationJob(
+				"Servoy notification",
+				"https://servoy.com/category/developer-news/feed/",
+				false,
+				60000 * 30, // 30 min
+				"lastNotificationTimestamp"
+				);
+			servoyNotificationJob.schedule(20000);
 		}
+		final DesignerPreferences designerPreferences = new DesignerPreferences();
+		if(forumNotificationJob == null && designerPreferences.showForumNotifications())
+		{
+			forumNotificationJob = new RSSNotificationJob(
+				"Forum notification",
+				"https://forum.servoy.com/rss.php",
+				true,
+				60000 * 20, // 20 min
+				"forumLastNotificationTimestamp"
+				);
+			forumNotificationJob.schedule(40000);
+		}		
 	}
 	
 	void stopNotificationJob()
 	{
-		if(notificationJob != null)
+		if(servoyNotificationJob != null)
 		{
-			notificationJob.stop();
-			notificationJob = null;
+			servoyNotificationJob.stop();
+			servoyNotificationJob = null;
+		}
+		if(forumNotificationJob != null)
+		{
+			forumNotificationJob.stop();
+			forumNotificationJob = null;
 		}
 	}
 }

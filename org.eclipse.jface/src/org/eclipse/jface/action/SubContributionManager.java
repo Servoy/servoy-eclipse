@@ -208,7 +208,7 @@ public abstract class SubContributionManager implements IContributionManager {
 	@Deprecated
 	public Enumeration<SubContributionItem> items() {
 		final Iterator<SubContributionItem> i = mapItemToWrapper.values().iterator();
-		return new Enumeration<>() {
+		return new Enumeration<SubContributionItem>() {
 			@Override
 			public boolean hasMoreElements() {
 				return i.hasNext();

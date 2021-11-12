@@ -7,7 +7,7 @@ import { WindowRefService, ServoyPublicService } from '@servoy/public';
 export class NGUtilsService {
     private _tags: Tag[];
     private _tagscopy: Tag[];
-    private _styleclasses: any;
+    private _styleclasses: {property : string};
     private _backActionCB: any;
     private confirmMessage: string;
     private renderer: Renderer2;
@@ -94,30 +94,8 @@ export class NGUtilsService {
     }
 
     set styleclasses(styleclasses) {
-        const old = this._styleclasses;
         this._styleclasses = styleclasses;
-        Object.keys(this._styleclasses).forEach((key: string) => {
-            const selector = 'svy-form[name=' + key.replace('$', '\\\$') + '] > div';
-            const form = this.document.querySelector(selector);
-            if (form) {
-                const newCls = this._styleclasses[key] ? this._styleclasses[key].split(' ').filter((cls: string) => cls !== '') : [];
-                if (old && old[key]) {
-                    let toRemove = old[key];
-                    if (newCls.length > 0) {
-                        toRemove = old[key].split(' ').filter((cls: string) => newCls.indexOf(cls) < 0);
-                    }
-                    toRemove.forEach((cls: string) => {
-                        this.renderer.removeClass(form, cls);
-                    });
-                }
-
-                newCls.forEach((cls: string) => {
-                    if (!form.classList.contains(cls)) {
-                        this.renderer.addClass(form, cls);
-                    }
-                });
-            }
-        });
+        this.servoyService.setFormStyleClasses(styleclasses);
     }
 
     set backActionCB(backActionCB: any) {
