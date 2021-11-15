@@ -84,3 +84,7 @@ ngb-typeahead-window.dropdown-menu {
     cursor: pointer;
     height: 100%;
 }
+
+body > .dropdown{
+    z-index: 9999 !important;
+}
