@@ -30,7 +30,6 @@ export enum SHORTCUT_IDS {
 export class ContextMenuComponent implements OnInit {
 
     @ViewChild('element') element: ElementRef<HTMLElement>;
-    contentArea: HTMLElement;
 
     menuItems: ContextmenuItem[];
 
@@ -51,13 +50,13 @@ export class ContextMenuComponent implements OnInit {
 
     private setup(shortcuts: { [key: string]: string; }, superForms: Array<string>): void {
         this.createItems(shortcuts, superForms);
-        this.contentArea = this.doc.querySelector('.content-area');
-        this.contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
+        const contentArea = this.doc.querySelector('.content-area');
+        contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
             const frameElem = this.doc.querySelector('iframe');
             this.selection = this.editorSession.getSelection();
             if (this.selection && this.selection.length == 1) {
-                node = this.contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
+                node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
                 if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_PART) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -152,8 +151,8 @@ export class ContextMenuComponent implements OnInit {
 
     private show(event: MouseEvent) {
         this.element.nativeElement.style.display = 'block';
-        this.element.nativeElement.style.left = event.pageX - this.contentArea.offsetLeft + 'px';
-        this.element.nativeElement.style.top = event.pageY - this.contentArea.offsetTop + 'px';
+        this.element.nativeElement.style.left = event.pageX + 'px';
+        this.element.nativeElement.style.top = event.pageY + 'px';
     }
 
     private hide() {
@@ -184,8 +183,8 @@ export class ContextMenuComponent implements OnInit {
                 left -= nativeElement.offsetWidth - 10;
             }
 
-            this.element.nativeElement.style.left = left - this.contentArea.offsetLeft + 'px';
-            this.element.nativeElement.style.top = top - this.contentArea.offsetTop + 'px';
+            this.element.nativeElement.style.left = left + 'px';
+            this.element.nativeElement.style.top = top + 'px';
         }
         else {
             const submenu = this.doc.querySelector('.dropdown-submenu:hover');

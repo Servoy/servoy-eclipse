@@ -60,8 +60,12 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     adjustFromContentSize() {
         const iframe = this.doc.querySelector('iframe');
         const contentPane = this.doc.querySelector('.content-area');
-        if (iframe.contentWindow.document.body.clientHeight + 20 > contentPane.clientHeight) {
-            this.renderer.setStyle(contentPane, 'height', (iframe.contentWindow.document.body.clientHeight + 20) + 'px');
+        const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
+        if (newHeight > contentPane.clientHeight) {
+            this.renderer.setStyle(contentPane, 'height', newHeight + 'px');
+            const palette = this.doc.querySelector('.palette');
+            this.renderer.setStyle(palette, 'height', newHeight + 'px');
+            this.renderer.setStyle(palette, 'max-height', newHeight + 'px');
         }
 
     }
