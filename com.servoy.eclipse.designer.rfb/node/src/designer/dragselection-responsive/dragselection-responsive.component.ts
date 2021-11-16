@@ -95,7 +95,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         const layoutName = this.dragNode.getAttribute("svy-layoutname");
         if (layoutName) {
           if (this.dropHighlight !== layoutName) {
-            this.editorSession.sendState('dropHighlight', layoutName);
+            const elements = this.dragNode.querySelectorAll('[svy-id]');
+            const dropHighlightIgnoredIds = Array.from(elements).map((element) => { 
+                return element.getAttribute('svy-id');
+            });
+            this.editorSession.sendState('dropHighlight', { dropHighlight : layoutName, dropHighlightIgnoredIds : dropHighlightIgnoredIds});
             this.dropHighlight = layoutName;
           }
           this.type = "layout";

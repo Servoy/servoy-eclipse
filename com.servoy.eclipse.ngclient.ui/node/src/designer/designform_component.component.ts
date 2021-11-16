@@ -103,6 +103,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private designMode : boolean;
     private maxLevel = 3;
     private dropHighlight: string = null;
+    private dropHighlightIgnoredIds: Array<string> = null;
     private allowedChildren: unknown;
     draggedElementItem: ComponentCache;
 
@@ -134,7 +135,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.maxLevel = parseInt(event.data.value);
             }
             if (event.data.id === 'dropHighlight') {
-                this.dropHighlight = event.data.value;
+                this.dropHighlight = event.data.value ? event.data.value.dropHighlight : null;
+                this.dropHighlightIgnoredIds =  event.data.value ? event.data.value.dropHighlightIgnoredIds : null;
             }
             if (event.data.id == 'allowedChildren') {
                 this.allowedChildren = event.data.value;
@@ -293,7 +295,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       if (children >= 10)  {
           ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel;
       }
-          ngclass['drop_highlight']  = this.canContainDraggedElement(item.attributes['svy-layoutname']);
+      ngclass['drop_highlight']  = this.canContainDraggedElement(item.attributes['svy-layoutname'], item.attributes['svy-id']);
       return ngclass;
     }
 
@@ -305,8 +307,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
     
-    private canContainDraggedElement(container: string): boolean {
+    private canContainDraggedElement(container: string, svyid : string): boolean {
         if (this.dropHighlight === null) return false;
+        if (this.dropHighlightIgnoredIds && svyid && this.dropHighlightIgnoredIds.indexOf(svyid) >= 0) return false;
         const drop = this.dropHighlight.split(".");
         const allowedChildren = this.allowedChildren[container];
         if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
