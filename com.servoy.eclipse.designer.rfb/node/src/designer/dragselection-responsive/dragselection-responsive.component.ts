@@ -33,6 +33,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     content.addEventListener('mousemove', (event) => this.onMouseMove(event));
 }
   onMouseDown(event: MouseEvent) {
+      if (this.editorSession.getState().dragging) return; //prevent dnd when dragging from palette
     if (this.editorSession.getSelection() != null && this.editorSession.getSelection().length > 1)
     {
         // do not allow drag of multiple elements in responsive design
