@@ -30,6 +30,7 @@ describe('TypeaheadComponent', () => {
   beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
     mockData.hasRealValues = () => true;
+    mockData.filterList = () => of(mockData);
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTypeahead ],
