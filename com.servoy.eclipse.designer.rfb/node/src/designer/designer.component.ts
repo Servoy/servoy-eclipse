@@ -82,7 +82,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
         private autoScroll(direction: string, autoScrollPixelSpeed: number, scrollComponent: ISupportAutoscroll) {
             let changeX = 0;
             let changeY = 0;
-            const scrollElement = this.urlParser.isAbsoluteFormLayout() ? this.contentArea.nativeElement : this.contentArea.nativeElement.parentElement;
+            const scrollElement = this.contentArea.nativeElement;
             switch (direction) {
                 case 'BOTTOM_AUTOSCROLL':
                     if ((scrollElement.scrollTop + scrollElement.offsetHeight) === scrollElement.scrollHeight)

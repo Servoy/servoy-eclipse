@@ -18,7 +18,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         top: '20px',
         left: '20px'
     } as CSSStyleDeclaration;
-    contentSizeFull = true;
+    contentSizeFull = false;
+    lastHeight: string;
 
     clientURL: SafeResourceUrl;
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
@@ -58,19 +59,21 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     adjustFromContentSize() {
-        const iframe = this.doc.querySelector('iframe');
-        const contentPane = this.doc.querySelector('.content-area');
-        const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
-        if (newHeight > contentPane.clientHeight) {
-            this.renderer.setStyle(contentPane, 'height', newHeight + 'px');
-            const palette = this.doc.querySelector('.palette');
-            this.renderer.setStyle(palette, 'height', newHeight + 'px');
-            this.renderer.setStyle(palette, 'max-height', newHeight + 'px');
+        let paletteHeight : string = "100%";
+        if (this.lastHeight == 'auto' || this.contentSizeFull) {
+            const iframe = this.doc.querySelector('iframe');
+            const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
+            if (newHeight > this.elementRef.nativeElement.clientHeight) {
+                this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
+                paletteHeight = newHeight + 'px';
+            }
         }
-
+        const palette = this.doc.querySelector('.palette');
+        this.renderer.setStyle(palette, 'height', paletteHeight + 'px');
+        this.renderer.setStyle(palette, 'max-height', paletteHeight + 'px');
     }
 
-    setContentSizeFull(redraw: boolean) {
+    setContentSizeFull() {
         this.contentStyle = {
             position: 'absolute',
             top: '20px',
@@ -81,11 +84,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         this.contentSizeFull = true;
         delete this.contentStyle['width'];
         delete this.contentStyle['height'];
-        delete this.contentStyle['h'];
-        delete this.contentStyle['w'];
         if (this.getContentDocument()) {
             const svyForm = this.getContentDocument().getElementsByClassName('svy-form')[0] as HTMLElement;
-            svyForm.style['height'] = '';
             svyForm.style['width'] = '';
         }
         // TODO
@@ -95,35 +95,35 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         // }
     }
 
-    getFormInitialWidth() {
+    getFormInitialWidth() : string{
         if (!this.initialWidth) {
             this.initialWidth = Math.round(this.elementRef.nativeElement.getBoundingClientRect().width) + 'px';
         }
         return this.initialWidth;
     }
 
-    setContentSize(width: string, height: string, fixedSize: boolean) {
+    setContentSize(width: string, height: string) {
+        this.contentSizeFull = false;
+        this.lastHeight = height;
         this.contentStyle['width'] = width;
-        if (this.urlParser.isAbsoluteFormLayout()) {
+        // if size is auto, the listener from content will set the height
+        if (height != 'auto') {
             this.contentStyle['height'] = height;
         }
-        if (fixedSize) this.contentSizeFull = false;
+        else{
+            this.adjustFromContentSize();
+        }
         delete this.contentStyle['top'];
         delete this.contentStyle['left'];
         delete this.contentStyle['position'];
         delete this.contentStyle['minWidth'];
         delete this.contentStyle['bottom'];
         delete this.contentStyle['right'];
-        delete this.contentStyle['h'];
-        delete this.contentStyle['w'];
 
-        if (!this.urlParser.isAbsoluteFormLayout()) {
-            this.setFormSize(width, height);
-            //this.setMainContainerSize();
-            //const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0];
-            //contentFrame.style['height'] = height;
-            this.renderer.setStyle(this.elementRef.nativeElement, 'height', '100%');
-        }
+        this.setFormWidth(width);
+        //this.setMainContainerSize();
+        //const contentFrame = this.elementRef.nativeElement.getElementsByClassName('contentframe')[0];
+        //contentFrame.style['height'] = height;
         // TODO
         // $scope.adjustGlassPaneSize(width, height);
         // $scope.redrawDecorators();
@@ -141,19 +141,18 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
             }
         }
     }*/
-    private setFormSize(width: string, height: string) {
+    private setFormWidth(width: string) {
         const contentDoc: Document = this.getContentDocument();
         if (contentDoc) {
             const svyForm: HTMLElement = this.getContentDocument().querySelector('.svy-form');
             if (svyForm) {
                 svyForm.style['width'] = width;
-                svyForm.style['height'] = height;
-            }else{
-                setTimeout(() => this.setFormSize(width, height), 300);
+            } else {
+                setTimeout(() => this.setFormWidth(width), 300);
             }
         }
         else {
-            setTimeout(() => this.setFormSize(width, height), 300);
+            setTimeout(() => this.setFormWidth(width), 300);
         }
     }
 
