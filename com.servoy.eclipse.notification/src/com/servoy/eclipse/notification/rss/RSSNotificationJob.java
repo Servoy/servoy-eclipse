@@ -53,7 +53,7 @@ public class RSSNotificationJob extends Job
 	private boolean isHtmlContent;
 	private long checkInterval;
 	private String propertyLastNotificationTimestamp;
-	private Date lastNotificationTimestamp;
+	private long lastNotificationTimestamp;
 
 	/**
 	 * @param name
@@ -72,7 +72,7 @@ public class RSSNotificationJob extends Job
 		this.isHtmlContent = isHtmlContent;
 		this.checkInterval = checkInterval;
 		this.propertyLastNotificationTimestamp = propertyLastNotificationTimestamp;
-		lastNotificationTimestamp = new Date(Activator.getDefault().getPreferenceStore().getLong(this.propertyLastNotificationTimestamp));
+		lastNotificationTimestamp = Activator.getDefault().getPreferenceStore().getLong(this.propertyLastNotificationTimestamp);
 	}
 
 	/*
@@ -122,33 +122,29 @@ public class RSSNotificationJob extends Job
 		{
 			SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(this.rss)));		
 			Iterator<SyndEntry> feedEntriesIte = feed.getEntries().iterator();
-			Date topNotificationTimestamp = null;
+			long topNotificationTimestamp = 0;
 			while(feedEntriesIte.hasNext())
 			{
 				RSSNotification notification = new RSSNotification(feedEntriesIte.next());
-				Date notificationDate = notification.getDate();
-				if(notificationDate == null)
+				long notificationTimestamp = getNotificationTimestamp(feed, notification);  
+				if(notificationTimestamp != 0)
 				{
-					notificationDate = feed.getPublishedDate();
-				}
-				if(notificationDate != null)
-				{
-					if(lastNotificationTimestamp != null && (notificationDate.equals(lastNotificationTimestamp) || notificationDate.before(lastNotificationTimestamp)))
+					if(lastNotificationTimestamp != 0 && notificationTimestamp <= lastNotificationTimestamp)
 					{
 						break;	
 					}
-					if(topNotificationTimestamp == null)
+					if(topNotificationTimestamp == 0)
 					{
-						topNotificationTimestamp = notificationDate;
+						topNotificationTimestamp = notificationTimestamp;
 					}
 				}
 				rssNotifications.add(notification);
 			}
-			if(topNotificationTimestamp != null)
+			if(topNotificationTimestamp != 0)
 			{
 				lastNotificationTimestamp = topNotificationTimestamp;
 				IPreferenceStore pref = Activator.getDefault().getPreferenceStore();
-				pref.setValue(this.propertyLastNotificationTimestamp, lastNotificationTimestamp.getTime());
+				pref.setValue(this.propertyLastNotificationTimestamp, lastNotificationTimestamp);
 				if(pref instanceof IPersistentPreferenceStore) // save it asap if possible
 				{
 					try
@@ -172,6 +168,17 @@ public class RSSNotificationJob extends Job
 		}
 		
 		return rssNotifications;
+	}
+	
+	
+	protected long getNotificationTimestamp(SyndFeed feed, RSSNotification notification)
+	{
+		Date notificationDate = notification.getDate();
+		if(notificationDate == null)
+		{
+			notificationDate = feed.getPublishedDate();
+		}	
+		return notificationDate != null ? notificationDate.getTime() : 0;	
 	}
 	
 	@Override
