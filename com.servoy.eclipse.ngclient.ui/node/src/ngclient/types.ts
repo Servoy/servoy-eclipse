@@ -155,8 +155,13 @@ export class StructureCache {
         if (!this.items) this.items = [];
     }
 
-    addChild(child: StructureCache | ComponentCache | FormComponentCache): StructureCache {
-        this.items.push(child);
+    addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache {
+        if (insertBefore) {
+            const idx =  this.items.indexOf(insertBefore);
+           this.items.splice( idx, 0, child);
+        } else {
+            this.items.push(child);
+        }
         if (child instanceof StructureCache) {
             child.parent = this;
             return child as StructureCache;

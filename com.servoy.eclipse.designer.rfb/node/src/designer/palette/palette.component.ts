@@ -19,6 +19,8 @@ export class PaletteComponent {
     topAdjust: number;
     leftAdjust: number;
     glasspane: HTMLElement;
+    timeoutId: ReturnType<typeof setTimeout>;
+    canDrop: {dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean};
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document, 
         protected readonly renderer: Renderer2, protected designerUtilsService : DesignerUtilsService) {
@@ -77,7 +79,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }) {
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -97,6 +99,10 @@ export class PaletteComponent {
         this.dragItem.ghost = ghost;
         this.dragItem.propertyName = propertyName;
         this.dragItem.propertyValue = propertyValue;
+        this.dragItem.topContainer = topContainer;
+        this.dragItem.componentType = componentType;
+        this.dragItem.layoutName = layoutName;
+        this.dragItem.attributes = attributes;
   
         this.glasspane = this.doc.querySelector('.contentframe-overlay');
         const frameElem = this.doc.querySelector('iframe');
@@ -105,12 +111,14 @@ export class PaletteComponent {
         this.topAdjust = frameRect.top;
         this.leftAdjust = frameRect.left;
         if (!ghost) {
-            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model }, '*');
+            this.editorSession.getState().dragging = true;
+            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes}, '*');
         }
     }
 
     onMouseUp = (event: MouseEvent) => {
         if (this.dragItem.paletteItemBeingDragged) {
+            this.editorSession.getState().dragging = false;
             this.doc.body.removeChild(this.dragItem.paletteItemBeingDragged);
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
@@ -120,12 +128,31 @@ export class PaletteComponent {
             const component = {} as PaletteComp;
             component.name = this.dragItem.elementName;
             component.packageName = this.dragItem.packageName;
-            component.x = event.pageX;
-            component.y = event.pageY;
+            if (this.urlParser.isAbsoluteFormLayout()) {
+                component.x = event.pageX;
+                component.y = event.pageY;
 
-            // do we also need to set size here ?
-            component.x = component.x - this.leftAdjust;
-            component.y = component.y - this.topAdjust;
+                 // do we also need to set size here ?
+                component.x = component.x - this.leftAdjust;
+                component.y = component.y - this.topAdjust;
+            }
+            else {
+                if (this.canDrop.dropAllowed) {
+					dropAllowed = true;
+                    if (this.canDrop.dropTarget) {
+                        component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
+                    }
+                    
+                    if (this.canDrop.beforeChild) {
+                        component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                    }
+                }
+                else {
+                    frameElem.contentWindow.postMessage({ id: 'destroyElement' }, '*');
+                    return;
+                }
+            }
+           
             if (this.dragItem.ghost) {
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 const found = Array.from(elements).find((node) => {
@@ -145,7 +172,7 @@ export class PaletteComponent {
                 component[this.dragItem.propertyName] = this.dragItem.propertyValue;
             }
             
-            if (component.x >= 0 && component.y >= 0) {
+            if (component.x >= 0 && component.y >= 0 || !this.urlParser.isAbsoluteFormLayout() && this.canDrop.dropAllowed) {
                 this.editorSession.createComponent(component);
             }
 
@@ -165,6 +192,37 @@ export class PaletteComponent {
             if (this.dragItem.contentItemBeingDragged) {
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.leftAdjust + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.topAdjust + 'px');
+                
+                if (!this.urlParser.isAbsoluteFormLayout()) {
+                    this.canDrop = this.designerUtilsService.getDropNode(this.doc, this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                    if (!this.canDrop.dropAllowed) {
+                        this.glasspane.style.cursor = 'not-allowed';
+                    }
+                    else {
+                        this.glasspane.style.cursor = 'pointer';
+                    }
+
+                    if (this.dragItem.contentItemBeingDragged) {
+                        if (this.glasspane.style.cursor === "pointer") {
+                            //TODO do we need to optimize the calls to insert the dragged component?
+                            //if (this.timeoutId) clearTimeout(this.timeoutId);
+                            //this.timeoutId = setTimeout(() => {
+                                if (this.canDrop.dropAllowed) {
+                                    const frameElem = this.doc.querySelector('iframe');
+                                    frameElem.contentWindow.postMessage({
+                                        id: 'insertDraggedComponent',
+                                        dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
+                                        insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
+                                    }, '*');
+                                }
+                            //}, 200);
+                            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
+                        } else {
+                            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                        }
+
+                    }
+                }
             }
             else {
                 const frameElem = this.doc.querySelector('iframe');
@@ -256,4 +314,8 @@ export class DragItem {
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName? :string;
     propertyValue? : {property : string};
+    componentType?: string;
+    topContainer? : boolean = false;
+    layoutName? :string;
+    attributes?: { [property: string]: string };
 }

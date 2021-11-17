@@ -32,12 +32,15 @@ import {AbstractFormComponent} from '../ngclient/form/form_component.component';
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
       <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
+            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+                   <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
+          	</div>
+			<ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
@@ -96,6 +99,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     absolutFormPosition = {};
     showWireframe = false;
+    draggedElementItem: ComponentCache | StructureCache;
+    insertedCloneParent: StructureCache;
+    insertedClone: ComponentCache | StructureCache;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
@@ -105,7 +111,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private dropHighlight: string = null;
     private dropHighlightIgnoredIds: Array<string> = null;
     private allowedChildren: unknown;
-    draggedElementItem: ComponentCache;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -119,13 +124,44 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
-                this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], { width: elWidth + 'px', height: elHeight + 'px', top: '-200px', left: '-200px' });
-                
+                const model = {width: elWidth + 'px', height: elHeight + 'px'};
+                model['top'] =  '-200px';
+                model['left'] =   '-200px';
+                const model_inserted = {width: elWidth + 'px', height: elHeight + 'px'};
+                if (event.data.type === 'layout') {
+                    //we are in responsive layout
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
+                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
+                } else {
+                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], model);
+                    this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, event.data.model, [], model_inserted); //TODO only in responsive
+                }
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
+            if (event.data.id === 'insertDraggedComponent') {
+                if (this.insertedCloneParent)   this.insertedCloneParent.removeChild(this.insertedClone);
+                let beforeChild = null;
+                if(event.data.insertBefore) {
+                   beforeChild =  this.formCache.getComponent(event.data.insertBefore);
+                   if (beforeChild == null) beforeChild =  this.formCache.getLayoutContainer(event.data.insertBefore);
+                }
+
+                if (event.data.dropTarget ) {
+                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
+                }
+                else {
+                    if (this.insertedCloneParent !==  this.formCache.mainStructure) {
+                        this.insertedCloneParent =  this.formCache.mainStructure;
+                    }
+                }
+                this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+            }
             if (event.data.id === 'destroyElement') {
                 this.draggedElementItem = null;
+                if (this.insertedCloneParent)   this.insertedCloneParent.removeChild(this.insertedClone);
+                this.insertedCloneParent = null;
+                this.insertedClone = null;
                 this.showWireframe = this.designMode;
             }
             if (event.data.id === 'showWireframe') {

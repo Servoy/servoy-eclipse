@@ -402,7 +402,7 @@ export class PaletteComp {
     y: number;
     type: string;
     ghostPropertyName: string;
-    dropTargetUUID: string; 
+    dropTargetUUID?: string; 
     isOpen: boolean;
     propertyName: string; // ghost
     components: Array<PaletteComp>;
@@ -416,6 +416,8 @@ export class PaletteComp {
     componentType?: string;
     topContainer: boolean;
     layoutName?: string;
+    attributes?: { [property: string]: string };
+    rightSibling?: string;
 }
 
 export class Package {
