@@ -2,6 +2,7 @@ package com.servoy.eclipse.designer.webpackage;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -61,14 +62,17 @@ public class WebPackageManager extends EditorPart
 			}
 		}
 		browser = BrowserFactory.createBrowser(parent);
-		try
-		{
-			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError("couldn't load the package manager: " + url, ex);
-		}
+		String finalUrl = url;
+		Display.getDefault().asyncExec(() -> {
+			try
+			{
+				browser.setUrl(finalUrl, null, new String[] { "Cache-Control: no-cache" });
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("couldn't load the package manager: " + finalUrl, ex);
+			}
+		});
 	}
 
 	@Override
