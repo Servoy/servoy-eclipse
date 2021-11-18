@@ -138,7 +138,6 @@ export class PaletteComponent {
             }
             else {
                 if (this.canDrop.dropAllowed) {
-					dropAllowed = true;
                     if (this.canDrop.dropTarget) {
                         component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                     }
