@@ -180,7 +180,7 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 			}
 
 			boolean hasPrev = count > NUM_NOTIFICATIONS_TO_DISPLAY && ((count % NUM_NOTIFICATIONS_TO_DISPLAY == 0) || (count == notifications.size())); 
-			boolean hasNext = count % NUM_NOTIFICATIONS_TO_DISPLAY == 0;
+			boolean hasNext = count % NUM_NOTIFICATIONS_TO_DISPLAY == 0 && count < notifications.size();
 			
 			if(hasPrev || hasNext)
 			{

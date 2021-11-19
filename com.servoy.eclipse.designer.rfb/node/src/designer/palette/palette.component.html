@@ -8,7 +8,7 @@
         </ng-template>
          <ng-template ngbPanelContent>
             <ul>
-                <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
+                <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
                     <ul>

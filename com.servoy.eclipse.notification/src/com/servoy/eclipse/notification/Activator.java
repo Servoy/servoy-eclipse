@@ -17,8 +17,13 @@
 
 package com.servoy.eclipse.notification;
 
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.notification.rss.RSSNotification;
 import com.servoy.eclipse.notification.rss.RSSNotificationJob;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
@@ -103,8 +108,30 @@ public class Activator extends AbstractUIPlugin
 				"https://forum.servoy.com/rss.php",
 				true,
 				60000 * 20, // 20 min
-				"forumLastNotificationTimestamp"
-				);
+				"forumLastNotificationTimestampV2"
+				) {
+					protected long getNotificationTimestamp(SyndFeed feed, RSSNotification notification)
+					{
+						long notificationTimestamp = 0;
+						String link = notification.getLink();
+						if(link != null)
+						{
+							int idx = link.lastIndexOf("#p");
+							if(idx != -1)
+							{
+								try
+								{
+									notificationTimestamp = Long.parseLong(link.substring(idx + 2));
+								}
+								catch(NumberFormatException ex)
+								{
+									ServoyLog.logError(ex);
+								}
+							}
+						}
+						return notificationTimestamp;
+					}				
+				};
 			forumNotificationJob.schedule(40000);
 		}		
 	}

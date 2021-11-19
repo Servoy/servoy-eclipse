@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef, Renderer2 } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -6,7 +6,7 @@ import { EditorContentService } from './editorcontent.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 import {DesignFormComponent} from './designform_component.component';
 
-import { Injectable, Inject } from '@angular/core';
+import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
@@ -36,9 +36,11 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
                         private formService: FormService,
                         private services: ServicesService,
                         private editorContentService: EditorContentService,
+                        protected renderer: Renderer2,
                         @Inject(DOCUMENT) private doc: Document) { }
 
     ngOnInit() {
+        this.renderer.setStyle(this.doc.body,"overflow", "hidden");
         let path: string = this.windowRef.nativeWindow.location.pathname;
         let formStart = path.indexOf('/form/') + 6;
         let formName = path.substring(formStart, path.indexOf('/', formStart));

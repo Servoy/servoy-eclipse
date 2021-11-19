@@ -1181,9 +1181,12 @@ public class Activator extends Plugin
 				public void run()
 				{
 					final RadioButtonsDialog installPostgreSQLDialog = new RadioButtonsDialog(Display.getDefault().getActiveShell(),
-						Arrays.asList("I want to install PostgreSQL with all the sample data (used in samples and tutorials)",
-							"I want to install PostgreSQL without sample data", "Don't install PostgreSQL at all", "Ask me on the next start"),
-						"Default PostgreSQL database not installed.");
+						Arrays.asList("Install database (required for first use and tutorials)." +
+							" This will install PostgreSQL in the same folder as Servoy.",
+							"Install database without sample data.", "Don’t install database at all." +
+								" You must have a database running to use Servoy.",
+							"Ask me on the next start."),
+						"Default database not installed.");
 					int open = installPostgreSQLDialog.open();
 
 					if (open == 0)

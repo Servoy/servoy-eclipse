@@ -324,6 +324,7 @@ public class DesignerFilter implements Filter
 								{
 									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec, false).toString());
 								}
+								layoutJson.put("attributes", getLayoutAttributes(config, spec, false));
 
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
@@ -578,6 +579,15 @@ public class DesignerFilter implements Filter
 			}
 		}
 		return sb.append("</" + tagName + ">");
+	}
+
+	private JSONObject getLayoutAttributes(JSONObject config, WebLayoutSpecification spec, boolean isChild)
+	{
+		JSONObject result = new JSONObject();
+		String value = config.getString("class");
+		result.put("svy-title", (value.startsWith("col-") && !isChild ? "md-*" : value));
+		result.put("designclass", spec.getDesignStyleClass());
+		return result;
 	}
 
 	private List<String> getFormComponentPropertyNames(WebObjectSpecification spec)

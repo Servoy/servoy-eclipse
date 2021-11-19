@@ -16,6 +16,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
     ghostOffset = 20;
     containerLeftOffset: number;
+    containerTopOffset: number;
     leftOffsetRelativeToSelectedGhost: number;
     topOffsetRelativeToSelectedGhost: number;
 
@@ -25,6 +26,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingGhost: Ghost;
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
+    draggingGhostComponent: Element;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private windowRefService: WindowRefService) {
@@ -166,13 +168,20 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.mousedownpoint = { x: event.pageX, y: event.pageY };
             this.draggingGhost = ghost;
             this.draggingInGhostContainer = ghostContainer;
-            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                this.containerLeftOffset = (event.currentTarget as Element).parentElement.getBoundingClientRect().left;
-                this.draggingClone = (event.currentTarget as Element).cloneNode(true) as Element;
-                this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
+            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION || this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
+                this.containerLeftOffset = parentRect.left;
+                this.containerTopOffset = parentRect.top;
                 const rect =(event.currentTarget as Element).getBoundingClientRect();
                 this.leftOffsetRelativeToSelectedGhost = event.clientX - rect.left; //x position within the element.
                 this.topOffsetRelativeToSelectedGhost = event.clientY - rect.top;  //y position within the element.
+            }
+            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                this.draggingClone = (event.currentTarget as Element).cloneNode(true) as Element;
+                this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
+            }
+             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                this.draggingGhostComponent = event.currentTarget as Element;
             }
         }
         return false
@@ -192,6 +201,14 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.editorSession.sendChanges(obj);
             }
+             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                const frameElem = this.doc.querySelector('iframe');
+                const frameRect = frameElem.getBoundingClientRect();
+                const obj = {};
+                obj[this.draggingGhost.uuid] = { 'x': event.pageX - frameRect.x -  this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - frameRect.y -  this.topOffsetRelativeToSelectedGhost };
+                this.editorSession.sendChanges(obj);
+                this.renderGhosts();
+            }
         }
         if (this.draggingClone) {
             this.draggingClone.remove();
@@ -199,6 +216,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
+        this.draggingGhostComponent = null;
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -248,6 +266,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.draggingInGhostContainer.ghosts.splice(initialIndex, 1);
                 this.draggingInGhostContainer.ghosts.splice(newIndex, 0, this.draggingGhost);
             }
+        }
+        if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+            this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
+            this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
         }
     }
 

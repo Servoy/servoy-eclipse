@@ -33,6 +33,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     content.addEventListener('mousemove', (event) => this.onMouseMove(event));
 }
   onMouseDown(event: MouseEvent) {
+    if (this.editorSession.getState().dragging) return; //prevent dnd when dragging from palette
     if (this.editorSession.getSelection() != null && this.editorSession.getSelection().length > 1)
     {
         // do not allow drag of multiple elements in responsive design
@@ -95,7 +96,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         const layoutName = this.dragNode.getAttribute("svy-layoutname");
         if (layoutName) {
           if (this.dropHighlight !== layoutName) {
-            this.editorSession.sendState('dropHighlight', layoutName);
+            const elements = this.dragNode.querySelectorAll('[svy-id]');
+            const dropHighlightIgnoredIds = Array.from(elements).map((element) => { 
+                return element.getAttribute('svy-id');
+            });
+            this.editorSession.sendState('dropHighlight', { dropHighlight : layoutName, dropHighlightIgnoredIds : dropHighlightIgnoredIds});
             this.dropHighlight = layoutName;
           }
           this.type = "layout";
@@ -145,7 +150,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   }
   
   onMouseUp(event: MouseEvent) {
-    if (this.dragStartEvent != null && this.editorSession.getState().dragging) {
+    if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging) {
       this.dragStartEvent = null;
       this.editorSession.getState().dragging = false;
       this.glasspane.style.cursor = "default";

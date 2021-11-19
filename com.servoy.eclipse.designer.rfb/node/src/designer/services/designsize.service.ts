@@ -32,7 +32,7 @@ export class DesignSizeService {
             'toolbar/icons/designsize/desktop_preview.png',
             true,
             () => { 
-                this.editor.setContentSizeFull(true);
+                this.editor.setContentSizeFull();
                 this.lastWidth = this.btnCustomWidth.text = this.editor.getFormInitialWidth();
                 this.lastHeight = this.btnCustomHeight.text = 'auto';
                 void this.editorSession.setFormFixedSize({'width': this.lastWidth, 'height' : this.lastHeight});
@@ -46,10 +46,10 @@ export class DesignSizeService {
             () => {
                 if(this.lastClicked == 'Tablet') this.isPortrait = !this.isPortrait;
                 if(this.isPortrait)  {
-                    this.setSize('768px', '1024px',true);
+                    this.setSize('768px', '1024px');
                 }
                 else {
-                    this.setSize('1024px', '768px',true);
+                    this.setSize('1024px', '768px');
                 }
                 this.lastClicked = 'Tablet';
             }
@@ -62,10 +62,10 @@ export class DesignSizeService {
             () => {
                 if(this.lastClicked == 'Phone') this.isPortrait = !this.isPortrait;
                 if(this.isPortrait) {
-                    this.setSize('320px', '568px',false);
+                    this.setSize('320px', '568px');
                 }
                 else {
-                    this.setSize('568px', '320px',false);
+                    this.setSize('568px', '320px');
                 }
                 this.lastClicked = 'Phone';
             }
@@ -76,7 +76,7 @@ export class DesignSizeService {
             null,
             true,
             (selection) => {
-                this.setSize(this.lastWidth, selection,true);
+                this.setSize(this.lastWidth, selection);
             }
       );
       this.btnCustomHeight.tooltip = 'Fixed design height',
@@ -90,8 +90,8 @@ export class DesignSizeService {
         '',
         null,
         true,
-        (selection) => {
-          this.editor.setContentSize(selection, this.lastHeight, true);
+        (selection : string) => {
+          this.editor.setContentSize(selection, this.lastHeight);
           this.lastWidth = selection;
          void this.editorSession.setFormFixedSize({'width' : this.lastWidth});
         }
@@ -123,13 +123,13 @@ export class DesignSizeService {
             this.lastWidth = result.width ? result.width : this.lastWidth;
             this.btnCustomWidth.text = this.lastWidth;
             if (result.height || result.width) {
-                this.setSize(this.lastWidth, this.lastHeight, true);
+                this.setSize(this.lastWidth, this.lastHeight);
             }
         });
     }
 
-    setSize(width: string , height: string, fixedSize: boolean) {
-		this.editor.setContentSize(width, height, fixedSize);
+    setSize(width: string , height: string) {
+		this.editor.setContentSize(width, height);
 		this.lastWidth = this.btnCustomWidth.text =  width;
 		this.lastHeight = this.btnCustomHeight.text = height;
 		void this.editorSession.setFormFixedSize({'width': this.lastWidth, 'height' : this.lastHeight});

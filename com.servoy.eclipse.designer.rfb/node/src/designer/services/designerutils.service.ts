@@ -35,7 +35,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?) {
+    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?): {dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean} {
         let dropTarget = null;
         if (type == "layout" || type == "component") {
             const realName = layoutName ? layoutName : "component";
@@ -180,11 +180,11 @@ export class DesignerUtilsService {
             // maybe this is a component that has svy-types instead of svy-allowed-childrent
             allowedChildren = dt.getAttribute("svy-types");
             if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
-                let parent = dt.parentElement;
+                let parent = dt;
                 while (parent !== null && !parent.hasAttribute('svy-id') && parent.parentElement && parent.classList.contains('svy-layoutcontainer')) {
                     parent = parent.parentElement;
                 }
-                return this.getParent(parent, realName); // the drop target doesn't allow this layout container type
+                return parent !== null ? this.getParent(parent.parentElement, realName) : null; // the drop target doesn't allow this layout container type
             }
         }
         return dt;
