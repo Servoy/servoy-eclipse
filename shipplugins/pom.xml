@@ -173,6 +173,20 @@
 			<version>2.3.6</version>
 		</dependency>
 
+		<!-- Needed for Hibernate -->
+		<dependency>
+		    <groupId>javax.persistence</groupId>
+		    <artifactId>javax.persistence-api</artifactId>
+		    <version>2.2</version>
+		</dependency>
+		
+		<!-- Needed for Hibernate -->
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.4.2.Final</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.servoy</groupId>
 			<artifactId>javax.websocket</artifactId>

@@ -77,11 +77,11 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.util.SQLKeywords;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.ServoyJSONObject;
-import com.servoy.j2db.util.keyword.SQLKeywords;
 
 /**
  * @author emera
