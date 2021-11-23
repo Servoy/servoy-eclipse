@@ -170,18 +170,6 @@
             "karmaConfig": "projects/servoy-public/karma.conf.js",
             "codeCoverage": true
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/servoy-public/tsconfig.lib.json",
-              "projects/servoy-public/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     },
@@ -211,18 +199,6 @@
             "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
             "karmaConfig": "projects/ngclientutils/karma.conf.js",
             "codeCoverage": true
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/ngclientutils/tsconfig.lib.json",
-              "projects/ngclientutils/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
           }
         }
       }
@@ -254,18 +230,6 @@
             "karmaConfig": "projects/dialogs/karma.conf.js",
             "codeCoverage": true
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/dialogs/tsconfig.lib.json",
-              "projects/dialogs/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     },
@@ -296,18 +260,6 @@
             "karmaConfig": "projects/window/karma.conf.js",
             "codeCoverage": true
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/window/tsconfig.lib.json",
-              "projects/window/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     },
@@ -337,18 +289,6 @@
             "tsConfig": "projects/servoydefault/tsconfig.spec.json",
             "karmaConfig": "projects/servoydefault/karma.conf.js",
             "codeCoverage": true
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/servoydefault/tsconfig.lib.json",
-              "projects/servoydefault/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
           }
         }
       }

@@ -10,7 +10,7 @@ Firefox ESR
 not dead
 not IE 11
 not op_mini all
-not op_mob 62
+not op_mob <63
 not baidu 7.12
 not kaios 2.5
 not and_uc 12.12

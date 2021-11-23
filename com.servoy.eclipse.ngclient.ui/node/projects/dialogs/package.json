@@ -1,17 +1,17 @@
 {
   "name": "@servoy/dialogs",
-  "version": "2021.9.0",
+  "version": "2021.12.0",
   "peerDependencies": {
     "@servoy/public": "*",
-    "@angular/animations": ">=12",
-    "@angular/common": ">=12",
-    "@angular/core": ">=12",
-    "@angular/forms": ">=12",
-    "rxjs": ">=6"
+    "@angular/animations": "^13",
+    "@angular/common": "^13",
+    "@angular/core": "^13",
+    "@angular/forms": "^13",
+     "rxjs": "^7"
   },
   "dependencies": {
-    "@angular/material": "<13",
-    "@angular/cdk": "<13",
+    "@angular/material": "^13",
+    "@angular/cdk": "^13",
     "tslib": "*"
   },
   "license": "MIT",

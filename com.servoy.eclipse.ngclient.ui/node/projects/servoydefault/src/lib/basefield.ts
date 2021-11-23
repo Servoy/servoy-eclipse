@@ -65,7 +65,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                 if (this.storedTooltip === false) {
                     this.storedTooltip = this.toolTipText;
                 }
-                this.toolTipText = returnval;
+                this.toolTipText = returnval.toString();
             }
         } else {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');

@@ -2,12 +2,7 @@
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../dist/servoy/public",
   "lib": {
-    "entryFile": "src/public-api.ts",
-    "umdModuleIds": {
-      "numbro": "numbro",
-      "luxon": "luxon"
-    },
-    "umdId": "servoy.public"
+    "entryFile": "src/public-api.ts"
   },
   "allowedNonPeerDependencies": ["luxon"]
 }

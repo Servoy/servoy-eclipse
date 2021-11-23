@@ -5,11 +5,7 @@
       "defaultcomponents.css"
     ],
   "lib": {
-    "entryFile": "src/public-api.ts",
-    "umdModuleIds": {
-        "@servoy/public": "servoy.public"
-    },
-    "umdId": "servoy.servoydefault"
+    "entryFile": "src/public-api.ts"
   },
   "allowedNonPeerDependencies": []
 }

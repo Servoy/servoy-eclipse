@@ -5,11 +5,7 @@
       "servoy-menu.css"
     ],
   "lib": {
-    "entryFile": "src/public-api.ts",
-    "umdModuleIds": {
-        "@servoy/public": "servoy.public"
-    },
-    "umdId": "servoy.window"
+    "entryFile": "src/public-api.ts"
   },
   "allowedNonPeerDependencies": []
 }
