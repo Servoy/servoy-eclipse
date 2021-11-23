@@ -66,8 +66,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     adjustFromContentSize() {
-        let paletteHeight: string = "100%";
-        if (this.lastHeight == 'auto' || this.contentSizeFull) {
+        let paletteHeight = '100%';
+        if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
             const iframe = this.doc.querySelector('iframe');
             const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
             if (newHeight > this.elementRef.nativeElement.clientHeight) {
