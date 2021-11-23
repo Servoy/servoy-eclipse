@@ -1193,6 +1193,7 @@ public class TypeCreator extends TypeCache
 			}
 
 		}
+		SolutionExplorerListContentProvider.extractApiDocs(spec);
 		EList<Member> members = type.getMembers();
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
@@ -1232,12 +1233,12 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
-				Property property = createProperty(name, false, memberType, pd.getDocumentation(), null);
+				Property property = createProperty(name, false, memberType, SolutionExplorerListContentProvider.getParsedComment(pd.getDocumentation(),
+					STANDARD_ELEMENT_NAME, true), null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
 			}
 		}
-		SolutionExplorerListContentProvider.extractApiDocs(spec);
 		Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
 		for (WebObjectFunctionDefinition api : apis.values())
 		{
