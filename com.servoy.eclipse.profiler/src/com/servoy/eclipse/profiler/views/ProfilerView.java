@@ -401,6 +401,19 @@ public class ProfilerView extends ViewPart
 			}
 			return time;
 		}
+
+		public long getTotalDataQueriesTime()
+		{
+			long totalTime = this.getDataQueriesTime();
+			if (this.callees.size() > 0)
+			{
+				for (AggregateData ad : callees)
+				{
+					totalTime += ad.getTotalDataQueriesTime();
+				}
+			}
+			return totalTime;
+		}
 	}
 
 	private static final class AggregateDataComparator implements Comparator<AggregateData>
@@ -840,7 +853,7 @@ public class ProfilerView extends ViewPart
 					case 4 :
 						return Long.toString(pd.getDataQueriesTime());
 					case 5 :
-						return Long.toString(pd.getDataQueriesTime());
+						return Long.toString(pd.getTotalDataQueriesTime());
 					case 6 :
 						return pd.getSourceName();
 				}
@@ -1140,8 +1153,8 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getDataQueriesTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getDataQueriesTime();
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getTotalDataQueriesTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getTotalDataQueriesTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			} }));
