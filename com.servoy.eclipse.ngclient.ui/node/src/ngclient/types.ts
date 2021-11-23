@@ -34,7 +34,7 @@ export class FormCache implements IFormCache {
         }
     }
 
-    public addLayourContainer(container: StructureCache) {
+    public addLayoutContainer(container: StructureCache) {
         if (container.id){
             this.layoutContainersCache.set(container.id, container);
         }
@@ -104,7 +104,7 @@ export class FormCache implements IFormCache {
         structure.items.forEach(item => {
             if (item instanceof StructureCache || item instanceof FormComponentCache) {
                 if (item instanceof StructureCache && item.id) {
-                    this.addLayourContainer(item);
+                    this.addLayoutContainer(item);
                 }
                 this.findComponents(item);
             } else {

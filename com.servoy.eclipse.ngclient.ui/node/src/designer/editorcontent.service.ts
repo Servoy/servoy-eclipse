@@ -42,14 +42,14 @@ export class EditorContentService {
                             reorderLayoutContainers.push(component.parent);
                         }
                     }
-                    else  if (formCache.absolute){
+                    else if (formCache.absolute) {
                         reorderPartComponents = true;
                     }
                 }
                 else {
                     if (elem.model[ConverterService.TYPES_KEY] != null) {
-                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
-                                (property: string) => elem.model ? elem.model[property] : elem.model);
+                        this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
+                            (property: string) => elem.model ? elem.model[property] : elem.model);
                     }
                     const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                     formCache.add(comp);
@@ -80,15 +80,28 @@ export class EditorContentService {
                 if (container) {
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
-                    if (reorderLayoutContainers.indexOf(container.parent) < 0) {
+                    const parentUUID = data.childParentMap[container.id].uuid;
+                    let newParent = container.parent;
+                    if (parentUUID) {
+                        newParent = formCache.getLayoutContainer(parentUUID);
+                    }
+                    else{
+                        newParent = formCache.mainStructure
+                    }
+                    if (container.parent.id !=  newParent.id){
+                        // we moved it to another parent
+                        container.parent.removeChild(container);
+                        newParent.addChild(container);
+                    }
+                    if (reorderLayoutContainers.indexOf(newParent) < 0) {
                         // existing layout container in parent layout container , make sure is inserted in correct position
-                        reorderLayoutContainers.push(container.parent);
+                        reorderLayoutContainers.push(newParent);
                     }
                 }
                 else {
                     container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
-                    formCache.addLayourContainer(container);
-                    let parentUUID = data.childParentMap[container.id].uuid;
+                    formCache.addLayoutContainer(container);
+                    const parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
                         let parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
@@ -97,6 +110,14 @@ export class EditorContentService {
                                 // new layout container in parent layout container , make sure is inserted in correct position
                                 reorderLayoutContainers.push(parent);
                             }
+                        }
+                    }
+                    else {
+                        // dropped directly on form
+                        formCache.mainStructure.addChild(container);
+                        if (reorderLayoutContainers.indexOf(formCache.mainStructure) < 0) {
+                            // new layout container in parent form , make sure is inserted in correct position
+                            reorderLayoutContainers.push(formCache.mainStructure);
                         }
                     }
                 }
@@ -142,7 +163,7 @@ export class EditorContentService {
 
     }
 
-     updateForm(uuid : string,parentUuid : string,width : number, height : number) {
+    updateForm(uuid: string, parentUuid: string, width: number, height: number) {
         /*if (formData.parentUuid !== parentUuid)
         {
             this.contentRefresh();

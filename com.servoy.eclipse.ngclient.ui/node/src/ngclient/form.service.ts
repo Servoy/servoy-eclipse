@@ -353,7 +353,7 @@ export class FormService {
                 if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
                     parent.addChild(structure);
                 }
-               formCache.addLayourContainer(structure);
+               formCache.addLayoutContainer(structure);
             } else
                 if (elem.formComponent) {
                     const classes: Array<string> = new Array();
