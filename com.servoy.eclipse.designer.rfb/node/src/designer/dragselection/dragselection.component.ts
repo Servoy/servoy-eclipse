@@ -117,7 +117,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                   }
 
                   for (let i = 0; i < selection.length; i++) {
-                      const node = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  selection[i]  + '"]')[0] as HTMLElement;
+                      let node = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  selection[i]  + '"]')[0] as HTMLElement;
+                      node = this.getSvyWrapper(node);
                       this.selectionToDrag[i] = selection[i]; 
                       this.currentElementInfo.set( selection[i], new ElementInfo(node));
                   }    
@@ -128,7 +129,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                   if (!this.selectionToDrag || this.selectionToDrag.length == 0)
                   {
                       this.selectionToDrag = [this.dragNode.getAttribute('svy-id')];
-                      this.currentElementInfo.set(this.editorSession.getSelection()[0], new ElementInfo(this.dragNode));
+                      let node = this.getSvyWrapper(this.dragNode);
+                      this.currentElementInfo.set(this.editorSession.getSelection()[0], new ElementInfo(node));
                   }
               }
 
@@ -144,8 +146,9 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                       {
                           const elementInfo =  this.currentElementInfo.get( this.selectionToDrag[i]);
                           if (!elementInfo) {
-                              const node =this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  this.selectionToDrag[i] + '"]')[0] as HTMLElement;
-                              this.currentElementInfo.set(this.selectionToDrag[i],new ElementInfo(node));
+                              let node =this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  this.selectionToDrag[i] + '"]')[0] as HTMLElement;
+                              node = this.getSvyWrapper(node);
+                              this.currentElementInfo.set(this.selectionToDrag[i], new ElementInfo(node));
                           }
                       
                           if (elementInfo &&  (elementInfo.y + changeY < 0 || elementInfo.x + changeX < 0))  {
@@ -162,6 +165,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
               }
       }
     
+    private getSvyWrapper(node: HTMLElement) {
+        while (node && !node.classList.contains('svy-wrapper')) {
+            node = node.parentElement;
+        }
+        return node;
+    }
+
     getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number)=> void{
         return this.updateLocation.bind(this);
     }
