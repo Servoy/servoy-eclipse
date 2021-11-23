@@ -148,6 +148,7 @@ public class ProfilerView extends ViewPart
 	public static final String OWN_TIME_COLUMN_WIDTH_SETTING = "profilerView.ownTimeColumnWidth";
 	public static final String TIME_COLUMN_WIDTH_SETTING = "profilerView.timeColumnWidth";
 	public static final String TIME_QUERY_COLUMN_WIDTH_SETTING = "profilerView.timeQueryColumnWidth";
+	public static final String TOTAL_TIME_QUERY_COLUMN_WIDTH_SETTING = "profilerView.totalTimeQueryColumnWidth";
 	public static final String FILE_COLUMN_WIDTH_SETTING = "profilerView.fileColumnWidth";
 	public static final String ARGS_COLUMN_WIDTH_SETTING = "profilerView.argsColumnWidth";
 	public static final String NAME_TABLE_COLUMN_WIDTH_SETTING = "profilerView.nameTableColumnWidth";
@@ -165,7 +166,8 @@ public class ProfilerView extends ViewPart
 	public static final int TIME_COLUMN_WIDTH_DEFAULT = 80;
 	public static final int FILE_COLUMN_WIDTH_DEFAULT = 300;
 	public static final int ARGS_COLUMN_WIDTH_DEFAULT = 120;
-	public static final int TIME_QUERY_COLUMN_WIDTH_DEFAULT = 80;
+	public static final int TIME_QUERY_COLUMN_WIDTH_DEFAULT = 100;
+	public static final int TOTAL_TIME_QUERY_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int NAME_TABLE_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int TIME_TABLE_COLUMN_WIDTH_DEFAULT = 70;
 	public static final int QUERY_TABLE_COLUMN_WIDTH_DEFAULT = 350;
@@ -736,6 +738,8 @@ public class ProfilerView extends ViewPart
 					return null;
 				case 5 :
 					return null;
+				case 6 :
+					return null;
 			}
 			return null;
 		}
@@ -789,6 +793,8 @@ public class ProfilerView extends ViewPart
 					case 4 :
 						return Long.toString(pd.getDataQueriesTime());
 					case 5 :
+						return Long.toString(pd.getTotalDataQueriesTime());
+					case 6 :
 					{
 						sourceName = pd.getSourceName();
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
@@ -834,6 +840,8 @@ public class ProfilerView extends ViewPart
 					case 4 :
 						return Long.toString(pd.getDataQueriesTime());
 					case 5 :
+						return Long.toString(pd.getDataQueriesTime());
+					case 6 :
 						return pd.getSourceName();
 				}
 			}
@@ -968,6 +976,7 @@ public class ProfilerView extends ViewPart
 	private TreeColumn ownTimeColumn;
 	private TreeColumn timeColumn;
 	private TreeColumn timeQueryColumn;
+	private TreeColumn totalTimeQueryColumn;
 	private TreeColumn fileColumn;
 	private TableColumn name;
 	private TableColumn time;
@@ -1011,6 +1020,7 @@ public class ProfilerView extends ViewPart
 		int fileColumnWidth = getSavedState(FILE_COLUMN_WIDTH_SETTING, FILE_COLUMN_WIDTH_DEFAULT);
 		int argsColumnWidth = getSavedState(ARGS_COLUMN_WIDTH_SETTING, ARGS_COLUMN_WIDTH_DEFAULT);
 		int timeQueryColumnWidth = getSavedState(TIME_QUERY_COLUMN_WIDTH_SETTING, TIME_QUERY_COLUMN_WIDTH_DEFAULT);
+		int totalTimeQueryColumnWidth = getSavedState(TOTAL_TIME_QUERY_COLUMN_WIDTH_SETTING, TOTAL_TIME_QUERY_COLUMN_WIDTH_DEFAULT);
 		int nameTableColumnWidth = getSavedState(NAME_TABLE_COLUMN_WIDTH_SETTING, NAME_TABLE_COLUMN_WIDTH_DEFAULT);
 		int timeTableColumnWidth = getSavedState(TIME_TABLE_COLUMN_WIDTH_SETTING, TIME_TABLE_COLUMN_WIDTH_DEFAULT);
 		int queryTableColumnWidth = getSavedState(QUERY_TABLE_COLUMN_WIDTH_SETTING, QUERY_TABLE_COLUMN_WIDTH_DEFAULT);
@@ -1047,9 +1057,14 @@ public class ProfilerView extends ViewPart
 		argsColumn.setWidth(argsColumnWidth);
 
 		timeQueryColumn = new TreeColumn(tree, SWT.NONE);
-		timeQueryColumn.setText("SQL Aggregated Time");
+		timeQueryColumn.setText("SQL Own Time");
 		timeQueryColumn.setResizable(true);
 		timeQueryColumn.setWidth(timeQueryColumnWidth);
+
+		totalTimeQueryColumn = new TreeColumn(tree, SWT.NONE);
+		totalTimeQueryColumn.setText("SQL Total Time");
+		totalTimeQueryColumn.setResizable(true);
+		totalTimeQueryColumn.setWidth(totalTimeQueryColumnWidth);
 
 		fileColumn = new TreeColumn(tree, SWT.NONE);
 		fileColumn.setText("Source File");
@@ -1059,7 +1074,8 @@ public class ProfilerView extends ViewPart
 		methodCallViewer.setContentProvider(methodCallContentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
 		methodCallViewer.setSorter(new ColumnsSorter(methodCallViewer,
-			new TreeColumn[] { methodNameColumn, timeColumn, ownTimeColumn, fileColumn, argsColumn, timeQueryColumn }, new Comparator[] { new Comparator()
+			new TreeColumn[] { methodNameColumn, timeColumn, ownTimeColumn, fileColumn, argsColumn, timeQueryColumn, totalTimeQueryColumn },
+			new Comparator[] { new Comparator()
 			{
 
 				@Override
@@ -1117,6 +1133,15 @@ public class ProfilerView extends ViewPart
 				{
 					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getDataQueriesTime() : ((AggregateData)o1).getDataQueriesTime();
 					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getDataQueriesTime() : ((AggregateData)o2).getDataQueriesTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getDataQueriesTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getDataQueriesTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			} }));
