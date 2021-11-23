@@ -175,9 +175,9 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', action, params, true)
     }
 
-    updateSelection(ids: Array<string>) {
+    updateSelection(ids: Array<string>, redrawDecorators?: boolean) {
         this.selection = ids;
-        this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids));
+        this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators));
     }
 
     addSelectionChangedListener(listener: ISelectionChangedListener): () => void {
@@ -372,7 +372,7 @@ export class EditorSessionService implements ServiceProvider {
 
 export interface ISelectionChangedListener {
 
-    selectionChanged(selection: Array<string>): void;
+    selectionChanged(selection: Array<string>, redrawDecorators?:boolean): void;
 
 }
 

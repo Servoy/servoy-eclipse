@@ -89,9 +89,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 
-    selectionChanged(selection: Array<string>): void {
+    selectionChanged(selection: Array<string>, redrawDecorators?: boolean): void {
         if (this.contentInit) {
             this.createNodes(selection);
+        }
+        if (redrawDecorators){
+            setTimeout(() => {
+                this.redrawDecorators();
+            }, 400);
         }
     }
 
