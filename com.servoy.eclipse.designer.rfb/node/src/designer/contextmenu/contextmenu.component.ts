@@ -667,6 +667,8 @@ export class ContextMenuComponent implements OnInit {
             'Delete',
             () => {
                 this.hide();
+                this.selection = [];
+                this.editorSession.updateSelection(this.selection)
                 //46 == delete key
                 this.editorSession.keyPressed({ 'keyCode': 46 });
             }
