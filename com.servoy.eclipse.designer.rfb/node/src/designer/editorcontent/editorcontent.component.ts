@@ -34,6 +34,13 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
             this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
+            this.windowRef.nativeWindow.addEventListener('message', (event) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                if (event.data.id === 'updateFormSize') {
+                    this.contentStyle['width'] = event.data.width + 'px';
+                    this.contentStyle['height'] = event.data.height + 'px';
+                }
+            });
         }
         else {
             this.contentStyle['bottom'] = '20px';
@@ -59,7 +66,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     adjustFromContentSize() {
-        let paletteHeight : string = "100%";
+        let paletteHeight: string = "100%";
         if (this.lastHeight == 'auto' || this.contentSizeFull) {
             const iframe = this.doc.querySelector('iframe');
             const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
@@ -95,7 +102,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         // }
     }
 
-    getFormInitialWidth() : string{
+    getFormInitialWidth(): string {
         if (!this.initialWidth) {
             this.initialWidth = Math.round(this.elementRef.nativeElement.getBoundingClientRect().width) + 'px';
         }
@@ -110,7 +117,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         if (height != 'auto') {
             this.contentStyle['height'] = height;
         }
-        else{
+        else {
             this.adjustFromContentSize();
         }
         delete this.contentStyle['top'];

@@ -142,10 +142,13 @@ export class EditorContentService {
 
     }
 
-    updateForm() {
-
+     updateForm(uuid : string,parentUuid : string,width : number, height : number) {
+        /*if (formData.parentUuid !== parentUuid)
+        {
+            this.contentRefresh();
+        }*/
+        this.designFormCallback.updateForm(width, height);
     }
-
     contentRefresh() {
 
     }
