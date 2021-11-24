@@ -162,7 +162,8 @@ export class FoundsetConverter implements IConverter {
                 if (viewPortUpdate.rows !== undefined) {
                     const oldRows = currentClientValue.viewPort.rows;
                     currentClientValue.viewPort.rows = this.viewportService.updateWholeViewport(currentClientValue.viewPort.rows, internalState, viewPortUpdate.rows,
-                        viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY].rows ? viewPortUpdate[ConverterService.TYPES_KEY].rows : undefined, propertyContext);
+                        viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY].rows ? viewPortUpdate[ConverterService.TYPES_KEY].rows : undefined,
+                        propertyContext, false);
 
                     // new rows; set prototype for each row
                     const rows = currentClientValue.viewPort.rows;

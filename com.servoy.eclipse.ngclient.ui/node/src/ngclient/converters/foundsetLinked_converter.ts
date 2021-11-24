@@ -110,7 +110,7 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 
     public updateWholeViewport(propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[], conversionInfos: any[], propertyContext: PropertyContext) {
-        const rows = propValue.viewportService.updateWholeViewport(propValue, internalState, wholeViewport, conversionInfos, propertyContext);
+        const rows = propValue.viewportService.updateWholeViewport(propValue, internalState, wholeViewport, conversionInfos, propertyContext, true);
 
         // update current value reference because that is what is present in the model
         propValue.splice(0, propValue.length);

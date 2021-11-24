@@ -63,7 +63,7 @@ export class ComponentConverter implements IConverter {
 
                 componentModel.modelViewport = this.viewportService.updateWholeViewport(componentModel.modelViewport,
                     componentModel.getStateHolder(), wholeViewportUpdate, beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] ?
-                    beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
+                    beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext, false);
                 if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: currentClientData[ComponentConverter.MODEL_VIEWPORT] };
                 done = true;
             } else if (viewportUpdate) {
@@ -98,7 +98,7 @@ export class ComponentConverter implements IConverter {
                 if (serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] !== undefined) {
                     // if it's linked to a foundset, keep that info in internal state; viewport.js needs it
                     const forFoundsetPropertyName = serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
-                    componentModel[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] = () => propertyContext(forFoundsetPropertyName);
+                    componentModel.getStateHolder().forFoundset = () => propertyContext(forFoundsetPropertyName);
                     delete serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
                 }
 
@@ -148,7 +148,7 @@ export class ComponentConverter implements IConverter {
                 if (wholeViewport) {
                     serverSentData[ComponentConverter.MODEL_VIEWPORT] = this.viewportService.updateWholeViewport(serverSentData[ComponentConverter.MODEL_VIEWPORT],
                         componentModel.getStateHolder(), wholeViewport, serverSentData[ConverterService.TYPES_KEY] ?
-                        serverSentData[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
+                        serverSentData[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext, false);
                 }
                 if (serverSentData[ConverterService.TYPES_KEY] !== undefined) delete serverSentData[ConverterService.TYPES_KEY];
 
