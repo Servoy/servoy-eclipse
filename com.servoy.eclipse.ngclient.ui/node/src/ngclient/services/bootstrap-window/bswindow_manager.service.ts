@@ -11,7 +11,6 @@ export class BSWindowManager {
     options: any;
     windows: Array<BSWindow>;
     modalStack: Array<BSWindow>;
-    bsWindow: BSWindow;
 
     private renderer: Renderer2;
 
@@ -23,7 +22,6 @@ export class BSWindowManager {
         this.modalStack = [];
         this.initialize({});
         this.renderer = rendererFactory.createRenderer(null, null);
-        this.bsWindow = new BSWindow(windowRefService, rendererFactory, utils, doc);
     }
 
     findWindowByID(id) {
