@@ -40,8 +40,8 @@ export class BSWindow {
     mouseDownListenerHandle: any;
 
     private renderer: Renderer2;
-    constructor(private windowRefService: WindowRefService,
-        rendererFactory: RendererFactory2,
+    constructor(public windowRefService: WindowRefService,
+        public rendererFactory: RendererFactory2,
         private utilsService: SvyUtilsService,
         @Inject(DOCUMENT) private doc: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
@@ -151,7 +151,7 @@ export class BSWindow {
         this.renderer.setStyle(winBody, 'height', size.height + 'px');
     }
 
-    centerWindow() {  
+    centerWindow() {
         let top: number; let left: number;
         const bodyTop = this.options.references.body.offsetTop + this.getInteger(this.options.references.body.style.paddingTop);
         left = (this.options.references.window.innerWidth / 2) - (this.element.getBoundingClientRect().width / 2);

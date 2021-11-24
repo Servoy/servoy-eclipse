@@ -151,7 +151,7 @@ export class BSWindowManager {
             final_options.template = this.options.windowTemplate;
         }
         final_options = this.utils.deepExtend([true, final_options, window_options, this.options]) as BSWindowOptions; // can this be done generically in deepExtend?
-        const newWindow = this.bsWindow;
+        const newWindow = new BSWindow(this.bsWindow.windowRefService ,this.bsWindow.rendererFactory, this.utils, this.doc);
         newWindow.setOptions(final_options);
         if(final_options.isModal) {
             this.addModal(newWindow);
