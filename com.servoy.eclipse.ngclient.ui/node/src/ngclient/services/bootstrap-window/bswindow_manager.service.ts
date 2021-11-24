@@ -1,6 +1,7 @@
-import { BSWindow, BSWindowOptions } from './bswindow.service';
+import { BSWindow, BSWindowOptions } from './bswindow';
 import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { WindowRefService } from '@servoy/public';
 import { SvyUtilsService } from '../../utils.service';
 
 @Injectable()
@@ -10,17 +11,19 @@ export class BSWindowManager {
     options: any;
     windows: Array<BSWindow>;
     modalStack: Array<BSWindow>;
+    bsWindow: BSWindow;
 
     private renderer: Renderer2;
 
     constructor(@Inject(DOCUMENT) private doc: Document,
-            rendererFactory: RendererFactory2,
-            private bsWindow: BSWindow,
-            private utils: SvyUtilsService) {
+            private rendererFactory: RendererFactory2,
+            private utils: SvyUtilsService,
+            private windowRefService: WindowRefService) {
         this.windows = [];
         this.modalStack = [];
         this.initialize({});
         this.renderer = rendererFactory.createRenderer(null, null);
+        this.bsWindow = new BSWindow(windowRefService, rendererFactory, utils, doc);
     }
 
     findWindowByID(id) {
@@ -151,7 +154,7 @@ export class BSWindowManager {
             final_options.template = this.options.windowTemplate;
         }
         final_options = this.utils.deepExtend([true, final_options, window_options, this.options]) as BSWindowOptions; // can this be done generically in deepExtend?
-        const newWindow = new BSWindow(this.bsWindow.windowRefService ,this.bsWindow.rendererFactory, this.utils, this.doc);
+        const newWindow = new BSWindow(this.windowRefService, this.rendererFactory, this.utils, this.doc);
         newWindow.setOptions(final_options);
         if(final_options.isModal) {
             this.addModal(newWindow);

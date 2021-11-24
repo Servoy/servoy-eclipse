@@ -21,7 +21,7 @@ import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loadi
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
 import { ServerDataService } from './services/serverdata.service';
-import { BSWindow } from './services/bootstrap-window/bswindow.service';
+import { BSWindow } from './services/bootstrap-window/bswindow';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import {MainRoutingModule} from './main-routing.module';
@@ -46,7 +46,7 @@ import {MainRoutingModule} from './main-routing.module';
         ServoyCoreComponentsModule
     ],
     providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
-					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe,
+					ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
 					ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],

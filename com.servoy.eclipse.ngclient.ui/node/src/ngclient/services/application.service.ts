@@ -8,7 +8,7 @@ import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService } f
 import { SabloService } from '../../sablo/sablo.service';
 
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
-import { BSWindowOptions } from './bootstrap-window/bswindow.service';
+import { BSWindowOptions } from './bootstrap-window/bswindow';
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component';
 import { LocaleService } from '../locale.service';

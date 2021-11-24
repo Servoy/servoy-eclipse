@@ -1,5 +1,5 @@
 import { WindowRefService } from '@servoy/public';
-import { Renderer2, Injectable, RendererFactory2, Inject } from '@angular/core';
+import { Renderer2, RendererFactory2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { BSWindowManager } from './bswindow_manager.service';
 import { SvyUtilsService } from '../../utils.service';
@@ -11,7 +11,6 @@ const WEST = 8;
 
 const resizeConstants = { NORTH, SOUTH, EAST, WEST };
 
-@Injectable()
 export class BSWindow {
 
     resizeAnchorClasses = {
@@ -40,14 +39,14 @@ export class BSWindow {
     mouseDownListenerHandle: any;
 
     private renderer: Renderer2;
-    constructor(public windowRefService: WindowRefService,
-        public rendererFactory: RendererFactory2,
+    constructor(private windowRefService: WindowRefService,
+        rendererFactory: RendererFactory2,
         private utilsService: SvyUtilsService,
         @Inject(DOCUMENT) private doc: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
-    setOptions(options) {
+    setOptions(options: any) {
         options = options || {};
         const defaults = {
             selectors: {

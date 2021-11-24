@@ -5,7 +5,7 @@ import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
-import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow.service';
+import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
 import { WindowRefService, LocalStorageService, SessionStorageService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
