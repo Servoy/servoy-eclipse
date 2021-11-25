@@ -60,3 +60,5 @@ import 'zone.js';  // Included with Angular CLI.
 
  import 'custom-event-polyfill';
 
+
+(window as any).ICAL = {};
