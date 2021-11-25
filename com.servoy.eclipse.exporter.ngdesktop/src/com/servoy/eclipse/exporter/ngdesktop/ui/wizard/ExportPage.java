@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -69,17 +68,17 @@ public class ExportPage extends WizardPage
 	public static String LINUX_PLATFORM = "linux";
 
 	private Text applicationUrlText;
-	private Group platformGroup;
+	private Composite platformGroup;
 
 	private Text iconPath;
 	private Button browseIconButton;
 	private Text imgPath;
 	private Button browseImgButton;
 	private Text copyrightText;
-	private Group sizeGroup;
+	private Composite sizeGroup;
 	private Text widthText;
 	private Text heightText;
-	private Group versionGroup;
+	private Composite versionGroup;
 	private Combo srcVersionCombo;
 	private Button includeUpdateBtn;
 	private Text appNameText;
@@ -122,7 +121,7 @@ public class ExportPage extends WizardPage
 		final Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
 
-		platformGroup = new Group(composite, SWT.NONE);
+		platformGroup = new Composite(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 
 		final Button winBtn = new Button(platformGroup, SWT.CHECK);
@@ -259,10 +258,8 @@ public class ExportPage extends WizardPage
 
 		final Label sizeLabel = new Label(composite, SWT.NONE);
 		sizeLabel.setText("NG Desktop size:");
-		sizeGroup = new Group(composite, SWT.NONE);
-		final RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-		rowLayout.fill = true;
-		sizeGroup.setLayout(rowLayout);
+		sizeGroup = new Composite(composite, SWT.NONE);
+		sizeGroup.setLayout(new GridLayout(4, false));
 
 		widthText = new Text(sizeGroup, SWT.BORDER);
 		value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
@@ -285,7 +282,7 @@ public class ExportPage extends WizardPage
 		srcVersionLabel.setText("Version:");
 		srcVersionLabel.setToolTipText("NG Desktop version");
 
-		versionGroup = new Group(composite, SWT.NONE);
+		versionGroup = new Composite(composite, SWT.NONE);
 		versionGroup.setLayout(new GridLayout(3, false));
 
 
@@ -471,7 +468,7 @@ public class ExportPage extends WizardPage
 		//we need an index from a sorted list
 		final String version = exportElectronWizard.getDialogSettings().get("ngdesktop_version");
 		final int result = remoteVersions.indexOf(version);
-		return result < 0 ? 0 : result;
+		return result < 0 ? -1 : result;
 	}
 
 	private String getUpdateUrl()

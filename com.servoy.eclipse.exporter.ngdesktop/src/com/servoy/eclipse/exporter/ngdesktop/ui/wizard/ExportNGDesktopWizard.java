@@ -236,7 +236,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final boolean winPlatform = settings.getBoolean("win_export");
 		final boolean osxPlatform = settings.getBoolean("osx_export");
 		final boolean linuxPlatform = settings.getBoolean("linux_export");
-		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected");
+		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected\n");
 
 		String strValue = settings.get("icon_path");
 		if (strValue != null && strValue.trim().length() > 0)
@@ -244,19 +244,19 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final File myFile = new File(strValue);
 			if (!myFile.exists() || !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + " doesn't exist. Is a directory?");
+				errorMsg.append(myFile.getName() + " doesn't exist. Is a directory?\n");
 				return errorMsg;
 			}
 			if (myFile.length() > LOGO_SIZE * 1024)
 			{
-				errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+				errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length() + "\n");
 				return errorMsg;
 			}
 
 			final Dimension iconSize = ImageLoader.getSize(myFile);
 			if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
 			{
-				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")");
+				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")\n");
 				return errorMsg;
 			}
 		}
@@ -267,12 +267,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final File myFile = new File(strValue);
 			if (!myFile.exists() && !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + "  doesn't exist. Is a directory?");
+				errorMsg.append(myFile.getName() + "  doesn't exist. Is a directory?\n");
 				return errorMsg;
 			}
 			if (myFile.length() > IMG_SIZE * 1024)
 			{
-				errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
+				errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length() + "\n");
 				return errorMsg;
 			}
 		}
@@ -281,7 +281,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		strValue = settings.get("copyright");
 		if (strValue != null && strValue.trim().length() > 0 && strValue.toCharArray().length > COPYRIGHT_LENGTH)
 		{
-			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length);
+			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length + "\n");
 			return errorMsg;
 		}
 
@@ -294,7 +294,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid width size: " + strValue);
+					errorMsg.append("Invalid width size: " + strValue + "\n");
 					return errorMsg;
 				}
 			}
@@ -304,14 +304,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid height size: " + strValue);
+					errorMsg.append("Invalid height size: " + strValue + "\n");
 					return errorMsg;
 				}
 			}
 		}
 		catch (final NumberFormatException e)
 		{
-			errorMsg.append("NumberFormatException: " + e.getMessage());
+			errorMsg.append("NumberFormatException: " + e.getMessage() + "\n");
 			return errorMsg;
 
 		}
@@ -322,7 +322,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final UrlValidator urlValidator = new UrlValidator();
 			if (!urlValidator.isValid(strValue))
 			{
-				errorMsg.append("Invalid URL: " + strValue);
+				errorMsg.append("Invalid URL: " + strValue + "\n");
 				return errorMsg;
 			}
 		}
@@ -330,19 +330,20 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		strValue = settings.get("application_name");
 		if (strValue == null || strValue.trim().length() == 0)
 		{
-			errorMsg.append("Provide a name for the application ...");
+			errorMsg.append("Provide a name for the application ...\n");
 			return errorMsg;
 		}
 		if (strValue.toCharArray().length > APP_NAME_LENGTH)
 		{
-			errorMsg.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length);
+			errorMsg
+				.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length + "\n");
 			return errorMsg;
 		}
 
 		strValue = settings.get("email_address");
 		if (strValue == null || strValue.trim().length() == 0)
 		{
-			errorMsg.append("Email address is missing ...");
+			errorMsg.append("Email address is missing ...\n");
 			return errorMsg;
 		}
 		final String regex = "^(.+)@(.+)$";
@@ -351,7 +352,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final Matcher matcher = pattern.matcher(strValue);
 		if (!matcher.find())
 		{
-			errorMsg.append("Email address is not valid: " + strValue);
+			errorMsg.append("Email address is not valid: " + strValue + "\n");
 			return errorMsg;
 		}
 		return errorMsg;
