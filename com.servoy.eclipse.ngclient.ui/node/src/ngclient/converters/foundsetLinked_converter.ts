@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
-import { FoundsetChangeEvent, LoggerService, LoggerFactory, ChangeAwareState, ChangeListener, IChangeAwareValue, instanceOfChangeAwareValue, ViewportChangeEvent, IFoundset } from '@servoy/public';
+import { FoundsetChangeEvent, LoggerService, LoggerFactory, ChangeAwareState, ChangeListener, IChangeAwareValue, ViewportChangeEvent, IFoundset } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
 
@@ -114,13 +114,8 @@ export class FoundsetLinkedConverter implements IConverter {
 
         // update current value reference because that is what is present in the model
         propValue.splice(0, propValue.length);
-        for (let tz = 0; tz < rows.length; tz++) {
-            if (instanceOfChangeAwareValue(rows[tz])) {
-                rows[tz].getStateHolder().setChangeListener(() => {
-                    propValue.dataChanged(tz, rows[tz]);
-                });
-            }
-            propValue.push(rows[tz]);
+        for (const row of rows) {
+            propValue.push(row);
         }
 
         if (propValue && internalState && internalState.changeListeners.length > 0) {

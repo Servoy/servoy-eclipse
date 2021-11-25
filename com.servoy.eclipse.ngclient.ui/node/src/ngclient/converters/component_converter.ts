@@ -275,15 +275,39 @@ export class ComponentConverter implements IConverter {
                     // the convertFromServerToClient on that property type above might have triggered some listener to the component that uses it which then requested
                     // another thing from the property type and it then already has changes...) // TODO should we decouple this scenario?  if we are still processing server to client changes
                     // when change notifier is called we could trigger the change notifier later/async for sending changes back to server...
-                    beanData[key].getStateHolder().setChangeListener(() => {
-                        component.getStateHolder().notifyChangeListener();
-                    });
+                    beanData[key].getStateHolder().setChangeListener(this.getSmartBeanPropertyChangeListenerForNonFSLinkedProps(component, key));
                     // we check for changes anyway in case a property type doesn't do it itself as described in the comment above
                     if (beanData[key].getStateHolder().hasChanges()) component.getStateHolder().notifyChangeListener();
                 }
             } else if (beanConversionInfo && beanConversionInfo[key] !== undefined) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
         }
     }
+
+    // TODO the following code should be refactored to reuse what a normal form does for it's components, similar to how it was done in NG1
+    // + TODO make child components (so this property type) react also to shallow/deep (equivalent to emit on a component's output) on 'dumb' properties that have no change listeners
+    private getSmartBeanPropertyChangeListenerForNonFSLinkedProps(componentValue: ComponentModel, propertyName: string) {
+        return () => {
+            const internalState = componentValue.getStateHolder();
+            const propValue = componentValue.model[propertyName];
+            internalState.requests.push({ propertyChanges : this.getChildPropertyChangesForNonFSLinkedProps(componentValue, propValue, propertyName) });
+            componentValue.getStateHolder().notifyChangeListener();
+        }
+    }
+
+    private getChildPropertyChangesForNonFSLinkedProps(componentValue: ComponentModel, propValue: IChangeAwareValue, propertyName: string) {
+        // all this should be refactored
+        const changes = {};
+        const conversionInfo = componentValue[ConverterService.TYPES_KEY];
+
+        if (conversionInfo && conversionInfo[propertyName]) {
+            changes[propertyName] = this.converterService.convertFromClientToServer(propValue, conversionInfo[propertyName], propValue);
+        } else {
+            changes[propertyName] = this.converterService.convertClientObject(propValue); // not going to happen for smart values anyway (they got 'smart' due to conversions that exist for this prop)
+        }
+        return changes;
+    }
+    // END TODO the previous code should be refactored to reuse what a normal form does for it's components, similar to how it was done in NG1
+
 }
 
 export class ComponentModel extends ComponentCache implements IChangeAwareValue {
