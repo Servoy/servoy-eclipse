@@ -93,12 +93,16 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 			return false;
 		}
-
-		final String[] loginToken = { logIn() };
-		if (loginToken[0] == null)
+		final String loginToken = logIn();
+		if (Utils.stringIsEmpty(loginToken))
 			return false; //no login
 
-		exportSettings.put("login_token", loginToken[0]);
+		exportSettings.put("login_token", loginToken);
+
+
+		exportSettings.put("login_token", loginToken);
+
+
 		final boolean result[] = { false };
 
 		errorMsg.delete(0, errorMsg.length());
