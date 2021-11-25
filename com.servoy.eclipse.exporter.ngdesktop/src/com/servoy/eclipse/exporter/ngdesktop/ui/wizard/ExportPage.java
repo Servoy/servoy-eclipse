@@ -37,7 +37,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -104,11 +103,11 @@ public class ExportPage extends WizardPage
 	@Override
 	public void createControl(Composite parent)
 	{
-		final Composite rootComposite = new Composite(parent, SWT.NONE);
-		rootComposite.setLayout(new FormLayout());
+		//final Composite rootComposite = new Composite(parent, SWT.NONE);
+		//rootComposite.setLayout(new FormLayout());
 
 		final GridLayout gridLayout = new GridLayout(3, false);
-		final Composite composite = new Composite(rootComposite, SWT.NONE);
+		final Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
 		final Label applicationUrlLabel = new Label(composite, SWT.NONE);
@@ -379,7 +378,7 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		setControl(rootComposite);
+		setControl(composite);
 		this.getWizard().getContainer().getShell().pack();
 	}
 
