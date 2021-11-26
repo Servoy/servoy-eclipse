@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 
 /**
  * @author Diana
- * Class that will create a dialog containing radio buttons.
+ * Class that will create a dialog containing radio buttons, also including show/hide advanced settings.
  */
 public class RadioButtonsDialog extends Dialog
 {

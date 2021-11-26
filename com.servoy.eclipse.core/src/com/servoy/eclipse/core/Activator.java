@@ -1180,7 +1180,8 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					final RadioButtonsDialog installPostgreSQLDialog = new RadioButtonsDialog(Display.getDefault().getActiveShell(),
+					Shell activeShell = UIUtils.getActiveShell();
+					final RadioButtonsDialog installPostgreSQLDialog = new RadioButtonsDialog(activeShell,
 						Arrays.asList("Install database (required for first use and tutorials)." +
 							" This will install PostgreSQL in the same folder as Servoy.",
 							"Install database without sample data.", "Don't install database at all." +
@@ -1192,7 +1193,7 @@ public class Activator extends Plugin
 					if (open == 0)
 					{
 						// create database with sample
-						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(activeShell);
 						try
 						{
 							String installFile = "install_postgres.sh";
@@ -1211,7 +1212,7 @@ public class Activator extends Plugin
 					else if (open == 1)
 					{
 						// create database with just repo
-						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(activeShell);
 						try
 						{
 							String installFile = "install_postgres_no_samples.sh";
