@@ -368,7 +368,7 @@ public class SolutionExplorerView extends ViewPart
 	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
-	private AddPackageProjectAction addPackageProjectAction;
+	private AddRemovePackageProjectAction addRemovePackageProjectAction;
 
 	private MoveTextAction moveCode;
 
@@ -2748,7 +2748,7 @@ public class SolutionExplorerView extends ViewPart
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
 		if (removePackageProjectAction.isEnabled()) manager.add(removePackageProjectAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
-		if (addPackageProjectAction.isEnabled()) manager.add(addPackageProjectAction);
+		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
@@ -3402,7 +3402,7 @@ public class SolutionExplorerView extends ViewPart
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
-		addPackageProjectAction = new AddPackageProjectAction(shell);
+		addRemovePackageProjectAction = new AddRemovePackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
 
@@ -3452,7 +3452,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);
-		addTreeSelectionChangedListener(addPackageProjectAction);
+		addTreeSelectionChangedListener(addRemovePackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);
 		addTreeSelectionChangedListener(replaceServerAction);

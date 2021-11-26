@@ -57,17 +57,17 @@ import com.servoy.j2db.persistence.Solution;
  * @author gganea@servoy.com
  *
  */
-public class AddPackageProjectAction extends Action implements ISelectionChangedListener
+public class AddRemovePackageProjectAction extends Action implements ISelectionChangedListener
 {
 
 	private PlatformSimpleUserNode selection;
 	private final Shell shell;
 
-	public AddPackageProjectAction(Shell shell)
+	public AddRemovePackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Add Servoy package project reference");
-		setToolTipText("Add a Servoy Package Project reference to the solution");
+		setText("Change Servoy package project references");
+		setToolTipText("Add or remove a Servoy Package Project references to the solution");
 	}
 
 	@Override
@@ -86,10 +86,10 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 
 		if (realObject instanceof Solution)
 		{
+			List<IProject> selectedProjectsList = new ArrayList<IProject>();
+			IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
 			try
 			{
-				List<IProject> selectedProjectsList = new ArrayList<IProject>();
-				IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
 
 				ArrayList<IProject> selectablePackages = new ArrayList<IProject>();
 				IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
@@ -121,24 +121,34 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
 				TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-					selectionFilter, treeStyle, "Select Servoy Packages", selectablePackages.toArray(), theSelection, true, "Select Servoy Packages", null);
+					selectionFilter, treeStyle, "Add/Remove Servoy Packages", selectablePackages.toArray(), theSelection, true, "Add/Remove Servoy Packages",
+					null);
 
 				dialog.open();
 
 				if (dialog.getReturnCode() == Window.CANCEL) return;
 
 				Iterator< ? > iterator = ((IStructuredSelection)dialog.getSelection()).iterator();
+
 				IProjectDescription solutionProjectDescription = solutionProject.getDescription();
 				while (iterator.hasNext())
 				{
 					Object next = iterator.next();
 					AddAsWebPackageAction.addReferencedProjectToDescription((IProject)next, solutionProjectDescription);
+					if (selectedProjectsList.contains(next)) selectedProjectsList.remove(next);
 				}
 				solutionProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
+			}
+			finally
+			{
+				for (IProject projectToBeRemoved : selectedProjectsList)
+				{
+					RemovePackageProjectReferenceAction.removeProjectReference(solutionProject, projectToBeRemoved);
+				}
 			}
 		}
 
