@@ -1,0 +1,17 @@
+{
+  "name": "@servoy/##packagename##",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "@angular/animations": ">=12",
+    "@angular/cdk": ">=12",
+    "@angular/common": ">=12",
+    "@angular/core": ">=12",
+    "@angular/forms": ">=12"
+  },
+  "dependencies": {
+    "tslib": "*"
+  },
+  "license": "MIT",
+  "repository": {
+  }
+}

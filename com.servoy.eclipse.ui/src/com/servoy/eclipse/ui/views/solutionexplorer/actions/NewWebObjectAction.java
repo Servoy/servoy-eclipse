@@ -19,13 +19,18 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,6 +54,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Create a new component/service in the selected component package.
@@ -61,6 +67,10 @@ public class NewWebObjectAction extends Action
 	private final Shell shell;
 	private final SolutionExplorerView viewer;
 	private final String type;
+
+	private final String COMPONENT_NAME_TAG = "##componentname##";
+	private final String COMPONENT_CLASSNAME_TAG = "##componentclassname##";
+	private final String PACKAGE_NAME_TAG = "##packagename##";
 
 	public NewWebObjectAction(SolutionExplorerView viewer, Shell shell, String type, String text)
 	{
@@ -188,6 +198,7 @@ public class NewWebObjectAction extends Action
 
 			addToManifest(componentOrServiceName, elementType, packageRoot);
 
+			addNG2Code(componentOrServiceName, elementType, packageRoot);
 			if (viewer != null && parentNode != null)
 			{
 				viewer.getSolExNavigator().revealWhenAvailable(parentNode, new String[] { componentOrServiceName }, true); // if in the future this action allows specifying display name, that one should be used here in the array instead
@@ -239,6 +250,138 @@ public class NewWebObjectAction extends Action
 		IFile file = folder.getFile(componentOrServiceName);
 		file.create(in != null ? in : new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
 		EditorUtil.openFileEditor(file);
+	}
+
+	private void addNG2Code(String componentOrServiceName, String elementType, IResource packageRoot)
+	{
+		try
+		{
+			File compDirectory = new File(packageRoot.getLocation().toOSString(), "projects/ng2package/src");
+			String className = componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
+			String charset = "UTF-8";
+			if (elementType.equals("Component"))
+			{
+				compDirectory = new File(compDirectory, componentOrServiceName);
+				FileUtils.forceMkdir(compDirectory);
+
+				URL url = uiActivator.getBundle().getEntry("/component-templates/componentng2.html");
+				String bundleContent = Utils.getURLContent(url);
+				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".html"), bundleContent, charset);
+
+				url = uiActivator.getBundle().getEntry("/component-templates/component.ts");
+				bundleContent = Utils.getURLContent(url);
+				bundleContent = bundleContent.replaceAll(PACKAGE_NAME_TAG, packageRoot.getName());
+				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
+				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG,
+					className);
+				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".ts"), bundleContent, charset);
+
+				url = uiActivator.getBundle().getEntry("/component-templates/component.spec.ts");
+				bundleContent = Utils.getURLContent(url);
+				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
+				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG, className);
+				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".spec.ts"), bundleContent, charset);
+
+				FileUtils.writeStringToFile(new File(compDirectory.getParent(), "public-api.ts"),
+					"\nexport * from './" + componentOrServiceName + "/" + componentOrServiceName + "';", charset, true);
+
+				modifyBuildFile(packageRoot, componentOrServiceName, charset);
+
+				IFile moduleFile = null;
+				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				InputStream is = moduleFile.getContents(true);
+				String moduleFileContent = null;
+				try
+				{
+					moduleFileContent = Utils.getTXTFileContent(is, Charset.forName(charset));
+				}
+				finally
+				{
+					Utils.closeInputStream(is);
+				}
+				if (moduleFileContent != null)
+				{
+					moduleFileContent = "import { " + className + " } from './" + componentOrServiceName + "/" + componentOrServiceName + "';\n" +
+						moduleFileContent;
+					moduleFileContent = addToModuleFileContent(moduleFileContent, "declarations:", className);
+					moduleFileContent = addToModuleFileContent(moduleFileContent, "exports:", className);
+					moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
+				}
+			}
+			if (elementType.equals("Service"))
+			{
+				URL url = uiActivator.getBundle().getEntry("/component-templates/service.ts");
+				String bundleContent = Utils.getURLContent(url);
+				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
+				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".service.ts"), bundleContent, charset);
+
+				FileUtils.writeStringToFile(new File(compDirectory, "public-api.ts"),
+					"\nexport * from './" + componentOrServiceName + ".service';", charset, true);
+
+				modifyBuildFile(packageRoot, componentOrServiceName, charset);
+
+				IFile moduleFile = null;
+				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				InputStream is = moduleFile.getContents(true);
+				String moduleFileContent = null;
+				try
+				{
+					moduleFileContent = Utils.getTXTFileContent(is, Charset.forName(charset));
+				}
+				finally
+				{
+					Utils.closeInputStream(is);
+				}
+				if (moduleFileContent != null)
+				{
+					className = componentOrServiceName + "Service";
+					moduleFileContent = "import { " + className + " } from './" + componentOrServiceName + ".service';\n" +
+						moduleFileContent;
+					moduleFileContent = addToModuleFileContent(moduleFileContent, "providers:", className);
+					moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	private String addToModuleFileContent(String moduleFileContent, String property, String className)
+	{
+		int index = moduleFileContent.indexOf(property);
+		int startIndex = moduleFileContent.indexOf("[", index);
+		return moduleFileContent.substring(0, startIndex + 1) + "\n\t\t" + className + "," + moduleFileContent.substring(startIndex + 1);
+	}
+
+	private void modifyBuildFile(IResource packageRoot, String componentOrServiceName, String charset) throws CoreException, UnsupportedEncodingException
+	{
+		IFile buildFile = null;
+		if (packageRoot instanceof IFolder) buildFile = ((IFolder)packageRoot).getFile("scripts/build.js");
+		if (packageRoot instanceof IProject) buildFile = ((IProject)packageRoot).getFile("scripts/build.js");
+		InputStream is = buildFile.getContents(true);
+		String buildFileContent = null;
+		try
+		{
+			buildFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+		}
+		finally
+		{
+			Utils.closeInputStream(is);
+		}
+		if (buildFileContent != null)
+		{
+			int startAddIndex = buildFileContent.indexOf("zip.addLocalFolder");
+			if (startAddIndex >= 0)
+			{
+				buildFileContent = buildFileContent.replaceFirst("zip.addLocalFolder",
+					"zip.addLocalFolder(\"./" + componentOrServiceName + "/\",\"/" + componentOrServiceName + "/\");\nzip.addLocalFolder");
+			}
+			buildFile.setContents(new ByteArrayInputStream(buildFileContent.getBytes(charset)), true, false, null);
+		}
 	}
 
 	private void addToManifest(String componentOrServiceName, String elementType, IResource packageRoot)

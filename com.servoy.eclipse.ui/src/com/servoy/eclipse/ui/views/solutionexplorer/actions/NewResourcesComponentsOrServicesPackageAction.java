@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -282,6 +283,13 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
 		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Version"), isEmpty(version) ? "1.0.0" : version);
+
+		if (IPackageReader.WEB_COMPONENT.equals(packageType))
+		{
+			manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), "@servoy/" + packageName);
+			manifest.getMainAttributes().put(new Attributes.Name("NG2-Module"), packageName + "Module");
+			manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist/servoy/ng2package");
+		}
 
 		IFolder metainf = pack.getFolder(new Path("META-INF"));
 		metainf.create(true, true, new NullProgressMonitor());

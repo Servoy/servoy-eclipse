@@ -2,10 +2,12 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,6 +44,7 @@ import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
@@ -68,6 +71,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 	private PlatformSimpleUserNode treeNode;
 	private final String packageType;
+	private final String PROJECT_NAME_TAG = "##packagename##";
 
 	public NewPackageProjectWizard()
 	{
@@ -137,6 +141,28 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 				}
 				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, displayName, projectName, version, packageType); // TODO symbolic name here instead of double projectName?
+				try
+				{
+					String location = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().getLocation();
+					File projectFolder = new File(new URI(location.substring(location.indexOf("file:/"))));
+					File templateFolder = new File(projectFolder, "packagetemplate");
+					if (templateFolder.exists())
+					{
+						File packageFile = new File(newProject.getLocation().toOSString());
+						FileUtils.copyDirectory(templateFolder, packageFile);
+						replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "projects/ng2package/package.json"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "projects/ng2package/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "projects/ng2package/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
+						replaceTagInFile(new File(packageFile, "projects/ng2package/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
+					}
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
 
 				if (viewer != null)
 				{
@@ -176,6 +202,21 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			return Status.OK_STATUS;
 		}
 
+	}
+
+	private void replaceTagInFile(File file, String tagName, String tagValue)
+	{
+		try
+		{
+			String encoding = "UTF-8";
+			String content = FileUtils.readFileToString(file, encoding);
+			content = content.replaceAll(tagName, tagValue);
+			FileUtils.writeStringToFile(file, content, encoding);
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
 	}
 
 	private class NewPackageProjectPage extends WizardPage
@@ -346,21 +387,27 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			final GroupLayout groupLayout = new GroupLayout(container);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().add(packageLabel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-					LayoutStyle.RELATED).add(packName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
-						groupLayout.createSequentialGroup().add(packageDisplayLabel, GroupLayout.PREFERRED_SIZE, 150,
-							GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packDisplay, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
-									groupLayout.createSequentialGroup().add(packageVersionLabel, GroupLayout.PREFERRED_SIZE, 150,
-										GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packVersion, GroupLayout.DEFAULT_SIZE,
-											GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(projectLocationComposite, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE,
-													GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+					LayoutStyle.RELATED).add(packName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(
+					groupLayout.createSequentialGroup().add(packageDisplayLabel, GroupLayout.PREFERRED_SIZE, 150,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packDisplay, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(
+					groupLayout.createSequentialGroup().add(packageVersionLabel, GroupLayout.PREFERRED_SIZE, 150,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packVersion, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(projectLocationComposite, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+				.add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
 
 			groupLayout.setVerticalGroup(
 				groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageLabel).add(packName)).add(
 					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageDisplayLabel).add(packDisplay)).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageVersionLabel).add(packVersion)).add(projectLocationComposite).add(
-							selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageVersionLabel).add(packVersion))
+					.add(projectLocationComposite).add(
+						selectSolutionLabel)
+					.add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
 			groupLayout.setAutocreateGaps(true);
 			groupLayout.setAutocreateContainerGaps(true);
 			container.setLayout(groupLayout);
