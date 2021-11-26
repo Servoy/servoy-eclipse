@@ -149,24 +149,36 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     }
 
     switchForm(name: string) {
-        if (this.form1 === this.realContainedForm) {
-            this.form2= name;
-            this.form1_state = 'hide';
-            this.form2_state = this.animation;
-            setTimeout(() =>  {
-                this.form1_visible =   this.form1 === this.realContainedForm;;
-                this.cdRef.detectChanges();
-            }, 750) ;
-            this.form2_visible = true;
+        if (this.animation && this.animation !== 'none') {
+            if (this.form1 === this.realContainedForm) {
+                this.form2 = name;
+                this.form1_state = 'hide';
+                this.form2_state = this.animation;
+                setTimeout(() =>  {
+                    this.form1_visible =   this.form1 === this.realContainedForm;;
+                    this.cdRef.detectChanges();
+                }, 750) ;
+                this.form2_visible = true;
+            } else {
+                this.form1 = name;
+                this.form2_state = 'hide';
+                this.form1_state = this.animation;
+                setTimeout(() =>    {
+                    this.form2_visible =  this.form2 === this.realContainedForm;
+                    this.cdRef.detectChanges();
+                }, 750) ;
+                this.form1_visible = true;
+            }
         } else {
-            this.form1 = name;
-            this.form2_state = 'hide';
-            this.form1_state = this.animation;
-            setTimeout(() =>    {
-                this.form2_visible =  this.form2 === this.realContainedForm;
-                this.cdRef.detectChanges();
-            }, 750) ;
-            this.form1_visible = true;
+            if (this.form1 === this.realContainedForm) {
+                this.form2 = name;
+                this.form2_visible = true;
+                this.form1_visible = false;
+            } else {
+                this.form1 = name;
+                this.form1_visible = true;
+                this.form2_visible =  false;
+            }
         }
         this.realContainedForm = name;
     }
@@ -180,7 +192,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     }
 
     getContainerStyle() {
-        const style = { position: 'relative' };
+        const styl = { position: 'relative' };
         let minHeight = 0;
         if (this.height) {
             minHeight = this.height;
@@ -192,8 +204,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
             }
         }
         if (minHeight > 0) {
-            style['minHeight'] = minHeight + 'px';
+            styl['minHeight'] = minHeight + 'px';
         }
-        return style;
+        return styl;
     }
 }
