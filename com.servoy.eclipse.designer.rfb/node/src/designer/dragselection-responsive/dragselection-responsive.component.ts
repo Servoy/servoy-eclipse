@@ -33,7 +33,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     content.addEventListener('mousemove', (event) => this.onMouseMove(event));
 }
   onMouseDown(event: MouseEvent) {
-    if (this.editorSession.getState().dragging) return; //prevent dnd when dragging from palette
+    if (this.editorSession.getState().dragging || event.buttons !== 1) return; //prevent dnd when dragging from palette
     if (this.editorSession.getSelection() != null && this.editorSession.getSelection().length > 1)
     {
         // do not allow drag of multiple elements in responsive design
@@ -76,7 +76,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   }
 
   onMouseMove(event: MouseEvent) {
-    if (!this.dragStartEvent || event.buttons == 0) return;
+    if (!this.dragStartEvent || event.buttons !== 1 || !this.dragNode) return;
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
@@ -144,10 +144,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   
   onMouseUp(event: MouseEvent) {
     if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging) {
-      this.dragStartEvent = null;
-      this.editorSession.getState().dragging = false;
-      this.glasspane.style.cursor = "default";
-
       //disable mouse events on the autoscroll
       this.editorSession.getState().pointerEvents = 'none'; 
       this.autoscrollAreasEnabled = false;
@@ -185,11 +181,15 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         const frameElem = this.doc.querySelector('iframe');
         frameElem.contentWindow.postMessage({ id: 'destroyElement', existingElement: true }, '*');
       }
-      this.dragNode = null;
-      this.dropHighlight = null;
-      this.dragItem = {};
       this.editorSession.sendState('dropHighlight', null);
     }
+
+    this.dragStartEvent = null;
+    this.editorSession.getState().dragging = false;
+    this.glasspane.style.cursor = "default";
+    this.dragNode = null;
+    this.dropHighlight = null;
+    this.dragItem = {};
   }
 
   private findAncestor(el: HTMLElement, cls: string): HTMLElement {
