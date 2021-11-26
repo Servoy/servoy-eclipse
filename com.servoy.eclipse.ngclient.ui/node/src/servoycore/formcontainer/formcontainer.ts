@@ -3,7 +3,6 @@ import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
 import {
     trigger,
-    state,
     style,
     animate,
     transition,
@@ -20,7 +19,7 @@ import {
                 style({ left: '100%'}),
                 animate('750ms ease-in', style({ left: '0%', })),
             ]),
-            transition('slide-left => void', [
+            transition('slide-left => hide', [
                 style({ right: '0%' }),
                 animate('750ms ease-in', style({ right: '100%'}))
             ]),
@@ -28,7 +27,7 @@ import {
                 style({ right: '100%'}),
                 animate('750ms ease-in', style({ right: '0%', })),
             ]),
-            transition('slide-right => void', [
+            transition('slide-right => hide', [
                 style({ left: '0%' }),
                 animate('750ms ease-in', style({ left: '100%'}))
             ]),
@@ -36,7 +35,7 @@ import {
                 style({ bottom: '100%'}),
                 animate('750ms ease-in', style({ bottom: '0%', })),
             ]),
-            transition('slide-down => void', [
+            transition('slide-down => hide', [
                 style({ top: '0%' }),
                 animate('750ms ease-in', style({ top: '100%'}))
             ]),
@@ -44,7 +43,7 @@ import {
                 style({ top: '100%'}),
                 animate('750ms ease-in', style({ top: '0%', })),
             ]),
-            transition('slide-up => void', [
+            transition('slide-up => hide', [
                 style({ bottom: '0%' }),
                 animate('750ms ease-in', style({ bottom: '100%'}))
             ]),
@@ -52,7 +51,7 @@ import {
               style({transform: 'rotateY(90deg)', opacity: 0}),
               animate('750ms ease-in', style({transform: 'rotateY(0deg)', opacity: 1}))
             ]),
-            transition('rotate-y => void', [
+            transition('rotate-y => hide', [
                style({transform: 'rotateY(0)', opacity: 1}),
                 animate('750ms ease-out', style({transform: 'rotateY(90deg)', opacity: 0}))
             ]),
@@ -60,7 +59,7 @@ import {
               style({transform: 'rotateX(-90deg)', opacity: 0}),
               animate('750ms ease-in', style({transform: 'rotateX(0deg)', opacity: 1}))
             ]),
-            transition('rotate-x => void', [
+            transition('rotate-x => hide', [
                style({transform: 'rotateX(0)', opacity: 1}),
                 animate('750ms ease-out', style({transform: 'rotateX(90deg)', opacity: 0}))
             ])
@@ -81,11 +80,18 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     @ContentChild(TemplateRef, { static: true })
     templateRef: TemplateRef<any>;
 
+    form1_state: string;
+    form2_state: string;
+
+    form1_visible: boolean;
+    form2_visible: boolean;
+
     private realContainedForm: any;
     private formWillShowCalled: any;
 
-    private formA: string;
-    private formB: string;
+    private form1: string;
+    private form2: string;
+
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
         super(renderer, cdRef);
@@ -143,24 +149,34 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     }
 
     switchForm(name: string) {
-        if (this.formA === this.realContainedForm) {
-            this.formB = name;
+        if (this.form1 === this.realContainedForm) {
+            this.form2= name;
+            this.form1_state = 'hide';
+            this.form2_state = this.animation;
+            setTimeout(() =>  {
+                this.form1_visible =   this.form1 === this.realContainedForm;;
+                this.cdRef.detectChanges();
+            }, 750) ;
+            this.form2_visible = true;
         } else {
-            this.formA = name;
+            this.form1 = name;
+            this.form2_state = 'hide';
+            this.form1_state = this.animation;
+            setTimeout(() =>    {
+                this.form2_visible =  this.form2 === this.realContainedForm;
+                this.cdRef.detectChanges();
+            }, 750) ;
+            this.form1_visible = true;
         }
         this.realContainedForm = name;
     }
 
     getForm1() {
-        return this.formA;
+        return this.form1;
     }
 
     getForm2() {
-        return this.formB;
-    }
-
-    getForm() {
-        return this.realContainedForm;
+        return this.form2;
     }
 
     getContainerStyle() {

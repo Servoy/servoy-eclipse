@@ -1,15 +1,15 @@
 <div
-    class='svy-container svy-container-slide-top'
+    class='svy-container'
     [ngStyle]="getContainerStyle()"
     [id]="servoyApi.getMarkupId()"
     [svyTooltip]="toolTipText"
     [sabloTabseq]="tabSeq"
     [sabloTabseqConfig]="{container: true, reservedGap: 50}"
     #element>
-    <div class='tabcontainer left' [@slideAnimation]="animation"  *ngIf="getForm1() == getForm()">
+    <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  *ngIf="form1_visible">
     <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
     </div>
-    <div class='tabcontainer left' [@slideAnimation]="animation" *ngIf="getForm2() == getForm()">
+    <div class='svy-tabcontainer' [@slideAnimation]="form2_state" *ngIf="form2_visible">
     <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}"></ng-template>
     </div>
 </div>
