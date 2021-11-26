@@ -375,8 +375,15 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
+		// add 2 more labels so that the default size is correct
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		Label lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(gd);
+		lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(gd);
+
 		setControl(composite);
-		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private String getLoginUsername()
