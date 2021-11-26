@@ -69,7 +69,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       this.renderer.addClass(this.highlightEl, 'highlight_element');
       this.renderer.removeAttribute(this.highlightEl, 'svy-id');
 
-      this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id") }, '*');
       this.dragItem.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname"));
       this.dragItem.layoutName = this.dragNode.getAttribute("svy-layoutname");
       this.dragItem.componentType = this.dragItem.layoutName ? "layout" : "component";
@@ -81,6 +80,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
+        this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id") }, '*');
         this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds(this.doc);
           if (this.dropHighlight !== this.dragItem.layoutName) {
             const elements = this.dragNode.querySelectorAll('[svy-id]');
@@ -91,8 +91,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             this.dropHighlight = this.dragItem.layoutName;
           }
         this.editorSession.getState().drop_highlight = this.dragItem.componentType;
-        const frameElem = this.doc.querySelector('iframe');
-        this.dragItem.contentItemBeingDragged = frameElem.contentWindow.document.getElementById('svy_draggedelement');;
       } else return;
     }
 
@@ -101,6 +99,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       this.editorSession.startAutoscroll(this);
     }
 
+    if (!this.dragItem.contentItemBeingDragged) {
+      const frameElem = this.doc.querySelector('iframe');
+      this.dragItem.contentItemBeingDragged = frameElem.contentWindow.document.getElementById('svy_draggedelement');
+    }
     if (this.dragItem.contentItemBeingDragged){
       const point = this.adjustPoint(event.pageX + 1, event.pageY + 1);
       this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top',  point.y + 'px');
@@ -130,7 +132,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                   dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
                   insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
               }, '*');
+              if (this.dragItem.contentItemBeingDragged) {
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
+              }
           }
+    }
+    else if (this.dragItem.contentItemBeingDragged) {
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
     }
   }
   
@@ -160,7 +168,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       let key = this.dragNode.getAttribute("svy-id");
       obj[key] = {};
       if ((event.ctrlKey || event.metaKey)) {
-        obj[key].uuid = this.dragNode.getAttribute('cloneuuid');
+        obj[key].uuid = this.dragNode.getAttribute('cloneuuid'); //TODO svy-16659
       }
 
       if (this.canDrop.dropTarget) {
@@ -174,7 +182,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       //force redrawing of the selection decorator to the new position
       this.editorSession.updateSelection(this.editorSession.getSelection());
       if (this.dragItem.contentItemBeingDragged) {
-        this.renderer.removeChild(this.doc.querySelector('iframe').contentWindow.document.body, this.dragItem.contentItemBeingDragged);//TODO rem
         const frameElem = this.doc.querySelector('iframe');
         frameElem.contentWindow.postMessage({ id: 'destroyElement', existingElement: true }, '*');
       }
