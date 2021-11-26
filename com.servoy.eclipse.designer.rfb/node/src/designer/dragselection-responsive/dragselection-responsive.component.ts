@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
+import { DragItem } from '../palette/palette.component';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 
@@ -8,7 +9,6 @@ import { EditorSessionService, ISupportAutoscroll } from '../services/editorsess
   templateUrl: './dragselection-responsive.component.html'
 })
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll {
-  dragCloneDiv: HTMLElement;
   allowedChildren: any;
   dragNode: HTMLElement;
   urlParser: any;
@@ -18,10 +18,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   glasspane: HTMLElement;
   highlightEl: HTMLElement;
   dropHighlight: string;
-  type: string;
-  topContainer: boolean;
   autoscrollElementClientBounds: Array<DOMRect>;
   autoscrollAreasEnabled: any;
+  canDrop: { dropAllowed: boolean; dropTarget?: Element; beforeChild?: Element; append?: boolean; };
+  dragItem: DragItem = {};
   
   constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService) { }
 
@@ -39,7 +39,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         // do not allow drag of multiple elements in responsive design
         return;
     }
-    this.dragNode = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' + this.editorSession.getSelection()[0] + '"]')[0] as HTMLElement;
+    this.dragNode = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;
     if (!this.dragNode) return; 
 
     // do not allow moving elements inside css position container in responsive layout
@@ -50,7 +50,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     if (event.button == 0 && this.dragNode) {
       this.dragStartEvent = event;
       this.initialParent = null;
-
 
       if (this.dragNode.classList.contains("formComponentChild")) {//do not grab if this is a form component element
         this.dragStartEvent = null;
@@ -70,21 +69,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       this.renderer.addClass(this.highlightEl, 'highlight_element');
       this.renderer.removeAttribute(this.highlightEl, 'svy-id');
 
-      this.dragCloneDiv = this.renderer.createElement('div');
-      this.renderer.appendChild(this.doc.querySelector('iframe').contentWindow.document.body, this.dragCloneDiv);
-      this.renderer.appendChild(this.dragCloneDiv, this.highlightEl);
-      this.renderer.setStyle(this.dragCloneDiv, 'display', 'none');
-      const point = this.adjustPoint(event.pageX, event.pageY);
-      this.renderer.setStyle(this.dragCloneDiv, 'position', 'absolute');
-      this.renderer.setStyle(this.dragCloneDiv, 'top', point.y + 'px');
-      this.renderer.setStyle(this.dragCloneDiv, 'left', point.x + 'px');
-      this.renderer.setStyle(this.dragCloneDiv, 'width', '200px');
-      this.renderer.setStyle(this.dragCloneDiv, 'height', '100px');
+      this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id") }, '*');
+      this.dragItem.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname"));
+      this.dragItem.layoutName = this.dragNode.getAttribute("svy-layoutname");
+      this.dragItem.componentType = this.dragItem.layoutName ? "layout" : "component";
     }
-    //TODO needed???
-    //let firstSelectedNode = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  this.dragNode.id + '"]')[0] as Element;
-		//if (firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
-    this.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname"));
   }
 
   onMouseMove(event: MouseEvent) {
@@ -93,22 +82,17 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
         this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds(this.doc);
-        const layoutName = this.dragNode.getAttribute("svy-layoutname");
-        if (layoutName) {
-          if (this.dropHighlight !== layoutName) {
+          if (this.dropHighlight !== this.dragItem.layoutName) {
             const elements = this.dragNode.querySelectorAll('[svy-id]');
             const dropHighlightIgnoredIds = Array.from(elements).map((element) => { 
                 return element.getAttribute('svy-id');
             });
-            this.editorSession.sendState('dropHighlight', { dropHighlight : layoutName, dropHighlightIgnoredIds : dropHighlightIgnoredIds});
-            this.dropHighlight = layoutName;
+            this.editorSession.sendState('dropHighlight', { dropHighlight : this.dragItem.layoutName, dropHighlightIgnoredIds : dropHighlightIgnoredIds});
+            this.dropHighlight = this.dragItem.layoutName;
           }
-          this.type = "layout";
-        }
-        else {
-          this.type = "component";
-        }
-        this.editorSession.getState().drop_highlight = this.type;
+        this.editorSession.getState().drop_highlight = this.dragItem.componentType;
+        const frameElem = this.doc.querySelector('iframe');
+        this.dragItem.contentItemBeingDragged = frameElem.contentWindow.document.getElementById('svy_draggedelement');;
       } else return;
     }
 
@@ -117,35 +101,36 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       this.editorSession.startAutoscroll(this);
     }
 
-    if (this.dragCloneDiv){
+    if (this.dragItem.contentItemBeingDragged){
       const point = this.adjustPoint(event.pageX + 1, event.pageY + 1);
-      this.renderer.setStyle(this.dragCloneDiv, 'top',  point.y + 'px');
-      this.renderer.setStyle(this.dragCloneDiv, 'left',  point.x + 'px');
-      this.renderer.setStyle(this.dragCloneDiv, 'position', 'absolute');
-      this.renderer.setStyle(this.dragCloneDiv, 'display', 'block' );
-      this.renderer.setStyle(this.dragCloneDiv, 'z-index', 4 );
-      this.renderer.setStyle(this.dragCloneDiv, 'transition', 'opacity .5s ease-in-out 0' );
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top',  point.y + 'px');
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left',  point.x + 'px');
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'position', 'absolute');
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'display', 'block' );
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'z-index', 4 );
+      this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'transition', 'opacity .5s ease-in-out 0' );
     }
 
-    const canDrop = this.getDropNode(this.type, this.topContainer, this.dragNode.getAttribute("svy-layoutname"), event, this.dragNode.getAttribute("svy-id"));
-    if (!canDrop.dropAllowed) {
+    this.canDrop = this.getDropNode(this.dragItem.componentType, this.dragItem.topContainer, this.dragNode.getAttribute("svy-layoutname"), event, this.dragNode.getAttribute("svy-id"));
+    if (!this.canDrop.dropAllowed) {
       this.glasspane.style.cursor = "not-allowed";
     } else this.glasspane.style.cursor = "pointer";
 
     this.dragStartEvent = event;
 
-    if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-      canDrop.beforeChild = canDrop.beforeChild.nextElementSibling;
+    if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
+      this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
     }
 
-    if (canDrop.dropTarget) {
-      if (this.glasspane.style.cursor == "pointer" && !this.dragNode.contains(canDrop.dropTarget)) {
-        if (canDrop.beforeChild) {
-          this.renderer.insertBefore(canDrop.dropTarget, this.dragNode, this.type === "component" && canDrop.beforeChild.parentElement !== canDrop.dropTarget ? canDrop.beforeChild.parentElement : canDrop.beforeChild);
-        } else if (this.designerUtilsService.getParent(this.dragNode) != canDrop.dropTarget || canDrop.append) {
-          this.renderer.appendChild(canDrop.dropTarget, this.dragNode);
-        }
-      }
+    if (this.glasspane.style.cursor === "pointer") {
+          if (this.canDrop.dropAllowed) {
+              const frameElem = this.doc.querySelector('iframe');
+              frameElem.contentWindow.postMessage({
+                  id: 'insertDraggedComponent',
+                  dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
+                  insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
+              }, '*');
+          }
     }
   }
   
@@ -163,15 +148,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       let obj = (event.ctrlKey || event.metaKey) ? [] : {};
       const layoutName = this.dragNode.getAttribute("svy-layoutname");
       const type = layoutName ? "layout" : "component";
-      const topContainer = layoutName ? this.designerUtilsService.isTopContainer(layoutName) : false;
      
-      const canDrop = this.designerUtilsService.getDropNode(this.doc, type, topContainer, layoutName, event);
-      if (canDrop.dropAllowed && !canDrop.beforeChild && !canDrop.append) {
-        canDrop.beforeChild = this.dragNode.nextElementSibling;
+      if (this.canDrop.dropAllowed && !this.canDrop.beforeChild && !this.canDrop.append) {
+        this.canDrop.beforeChild = this.dragNode.nextElementSibling;
       }
 
-      if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-        canDrop.beforeChild = canDrop.beforeChild.nextElementSibling;
+      if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
+        this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
       }
 
       let key = this.dragNode.getAttribute("svy-id");
@@ -180,21 +163,24 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         obj[key].uuid = this.dragNode.getAttribute('cloneuuid');
       }
 
-      if (canDrop.dropTarget) {
-        obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
+      if (this.canDrop.dropTarget) {
+        obj[key].dropTargetUUID = this.canDrop.dropTarget.getAttribute("svy-id");
       }
 
-      if (canDrop.beforeChild) {
-        obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
+      if (this.canDrop.beforeChild) {
+        obj[key].rightSibling = this.canDrop.beforeChild.getAttribute("svy-id");
       }
       this.editorSession.getSession().callService('formeditor', 'moveComponent', obj, true);
       //force redrawing of the selection decorator to the new position
       this.editorSession.updateSelection(this.editorSession.getSelection());
-      if (this.dragCloneDiv) {
-        this.renderer.removeChild(this.doc.querySelector('iframe').contentWindow.document.body, this.dragCloneDiv);
+      if (this.dragItem.contentItemBeingDragged) {
+        this.renderer.removeChild(this.doc.querySelector('iframe').contentWindow.document.body, this.dragItem.contentItemBeingDragged);//TODO rem
+        const frameElem = this.doc.querySelector('iframe');
+        frameElem.contentWindow.postMessage({ id: 'destroyElement', existingElement: true }, '*');
       }
       this.dragNode = null;
       this.dropHighlight = null;
+      this.dragItem = {};
       this.editorSession.sendState('dropHighlight', null);
     }
   }

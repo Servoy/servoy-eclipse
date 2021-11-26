@@ -139,6 +139,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
+            if (event.data.id === 'createDraggedComponent') {
+                this.insertedClone =  this.formCache.getLayoutContainer(event.data.uuid);
+                if (!this.insertedClone) {
+                    this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                 }
+                this.insertedCloneParent = this.insertedClone.parent;
+                this.designMode = this.showWireframe;
+                this.showWireframe = true;
+            }
             if (event.data.id === 'insertDraggedComponent') {
                 if (this.insertedCloneParent)   this.insertedCloneParent.removeChild(this.insertedClone);
                 let beforeChild = null;
@@ -159,7 +168,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'destroyElement') {
                 this.draggedElementItem = null;
-                if (this.insertedCloneParent)   this.insertedCloneParent.removeChild(this.insertedClone);
+                if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
                 this.insertedCloneParent = null;
                 this.insertedClone = null;
                 this.showWireframe = this.designMode;
