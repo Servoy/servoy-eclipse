@@ -138,13 +138,37 @@
 					</execution>
 					<execution>
 						<id>archive-products</id>
+						<phase>verify</phase>
 						<goals>
 							<goal>archive-products</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>name.abuchen</groupId>
+				<artifactId>fix-info-plist-maven-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>fix-info-plist</id>
+						<phase>package</phase>
+						<goals>
+							<goal>fix-info-plist</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<productId>servoy.product</productId>
+					<appName>Servoy.app</appName>
+					<properties>
+						<property>
+							<name>NSAppTransportSecurity</name>
+							<value><![CDATA[<dict><key>NSAllowsLocalNetworking</key><true/></dict>]]></value>
+						</property>
+					</properties>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
