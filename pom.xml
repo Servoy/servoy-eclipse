@@ -14,9 +14,22 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.14/repository/</chromium>
+        <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.9/repository/</chromium.cef>
 	</properties>
 
-
+    <repositories>
+        <repository>
+            <id>chromium</id>
+            <url>${chromium}</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>chromium.cef</id>
+            <url>${chromium.cef}</url>
+            <layout>p2</layout>
+        </repository>        
+    </repositories>
 
 	<build>
 		<plugins>
@@ -66,6 +79,11 @@
 							<os>linux</os>
 							<ws>gtk</ws>
 							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>aarch64</arch>
 						</environment>
 					</environments>
 					<filters>
@@ -315,7 +333,12 @@
 			<modules>
 				<module>com.servoy.eclipse.jre.linux.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
+				<module>com.servoy.eclipse.jre.macosx.aarch64</module>
 				<module>com.servoy.eclipse.jre.win32.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>
@@ -377,9 +400,6 @@
 				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
-				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
-				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
-				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 			</modules>
 		</profile>
 		<profile>

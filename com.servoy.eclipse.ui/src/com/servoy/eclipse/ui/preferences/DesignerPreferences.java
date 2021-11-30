@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.swt.graphics.Point;
@@ -862,7 +863,7 @@ public class DesignerPreferences
 
 	public boolean useChromiumBrowser()
 	{
-		return getProperty(USE_CHROMIUM_BROWSER, USE_CHROMIUM_BROWSER_DEFAULT);
+		return getProperty(USE_CHROMIUM_BROWSER, USE_CHROMIUM_BROWSER_DEFAULT) && Platform.getBundle("com.equo.chromium") != null;
 	}
 
 	public void setUseChromiumBrowser(boolean chromium)

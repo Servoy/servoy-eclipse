@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -234,6 +235,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
 		chromiumButton.setSelection(prefs.useChromiumBrowser());
+		chromiumButton.setEnabled(Platform.getBundle("com.equo.chromium") != null);
 		contextMenuTutorialsButton.setSelection(prefs.useContextMenuTutorials());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 		launchNGButton.setSelection(prefs.launchNG2());

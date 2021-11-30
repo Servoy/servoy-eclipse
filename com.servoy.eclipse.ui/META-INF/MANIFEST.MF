@@ -81,7 +81,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.equinox.security,
  com.servoy.eclipse.ngclient.ui,
  org.eclipse.e4.ui.css.swt.theme,
- com.equo.chromium
+ com.equo.chromium;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

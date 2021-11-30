@@ -35,7 +35,7 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.dltk.javascript.rhino,
  slf4j.api,
  com.servoy.eclipse.notification,
- com.equo.chromium
+ com.equo.chromium;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

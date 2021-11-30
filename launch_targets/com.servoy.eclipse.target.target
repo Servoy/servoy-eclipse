@@ -31,11 +31,6 @@
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/80"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="80.0.9.202110280424"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="80.0.11.202110280411"/>
-        </location>
          <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/modeling/emf/emf/builds/release/2.27/"/>
             <unit id="org.eclipse.emf.sdk.feature.group" version="2.27.0.v20210816-1137"/>
