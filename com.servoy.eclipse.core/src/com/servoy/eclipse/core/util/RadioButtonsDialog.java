@@ -128,6 +128,8 @@ public class RadioButtonsDialog extends Dialog
 		topLevel = container;
 
 		Button radioButton = new Button(topLevel, SWT.RADIO);
+		selectedButton = radioButton;
+		radioButton.setSelection(true);
 		radioButton.setText(radioButtonsTexts.get(0));
 		radioButton.addSelectionListener(selectionListener);
 		radioButtons.add(radioButton);
