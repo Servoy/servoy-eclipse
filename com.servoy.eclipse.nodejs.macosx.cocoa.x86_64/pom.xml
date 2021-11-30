@@ -9,7 +9,7 @@
 		<version>2021.12.0.3720_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</artifactId>
-	<version>16.11.1</version>
+	<version>16.13.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -27,6 +27,25 @@
 					</environments>
 				</configuration>
 			</plugin>
+			 <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.4.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz</url>
+                            <outputFileName>node.tar.gz</outputFileName>
+                            <unpack>false</unpack>
+                            <outputDirectory>${basedir}/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 </project>

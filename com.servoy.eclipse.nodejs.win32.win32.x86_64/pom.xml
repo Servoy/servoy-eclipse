@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.servoy</groupId>
@@ -9,7 +10,7 @@
 		<version>2021.12.0.3720_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.win32.win32.x86_64</artifactId>
-	<version>16.11.1</version>
+	<version>16.13.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -26,6 +27,25 @@
 						</environment>
 					</environments>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.4.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<url>https://nodejs.org/dist/v16.13.0/node-v16.13.0-win-x64.zip</url>
+							<outputFileName>node.zip</outputFileName>
+							<unpack>false</unpack>
+							<outputDirectory>${basedir}/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
