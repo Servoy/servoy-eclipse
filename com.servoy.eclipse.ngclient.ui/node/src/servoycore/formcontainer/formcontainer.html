@@ -6,10 +6,10 @@
     [sabloTabseq]="tabSeq"
     [sabloTabseqConfig]="{container: true, reservedGap: 50}"
     #element>
-    <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  *ngIf="form1_visible">
+    <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  *ngIf="form1_visible"  [ngStyle]="getContainerStyle()">
     <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
     </div>
-    <div class='svy-tabcontainer' [@slideAnimation]="form2_state" *ngIf="form2_visible">
-    <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}"></ng-template>
+    <div class='svy-tabcontainer' [@slideAnimation]="form2_state" *ngIf="form2_visible" [ngStyle]="getContainerStyle()">
+    <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
     </div>
 </div>
