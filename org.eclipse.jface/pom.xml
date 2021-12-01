@@ -15,7 +15,7 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2021.12.0.3720_rc</version>
+		<version>2022.3.0.3740_rc</version>
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.jface</artifactId>
