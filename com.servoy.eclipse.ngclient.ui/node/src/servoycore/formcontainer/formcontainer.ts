@@ -127,6 +127,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                         }
                         break;
                     }
+                    case 'animation': {
+                        this.form1_state = this.animation;
+                        this.form2_state = this.animation;
+                    }
                 }
             }
             super.svyOnChanges(changes);
