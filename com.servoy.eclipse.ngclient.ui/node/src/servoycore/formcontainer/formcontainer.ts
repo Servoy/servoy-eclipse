@@ -16,51 +16,51 @@ import {
     animations: [
         trigger('slideAnimation', [
             transition('void => slide-left', [
-                style({ left: '100%'}),
+                style({ left: '100%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ left: '0%', })),
             ]),
             transition('slide-left => hide', [
-                style({ right: '0%' }),
+                style({ right: '0%', position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ right: '100%'}))
             ]),
              transition('void => slide-right', [
-                style({ right: '100%'}),
+                style({ right: '100%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ right: '0%', })),
             ]),
             transition('slide-right => hide', [
-                style({ left: '0%' }),
+                style({ left: '0%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ left: '100%'}))
             ]),
                transition('void => slide-down', [
-                style({ bottom: '100%'}),
+                style({ bottom: '100%',position: 'absolute', width: '100%', height: '100%'}),
                 animate('750ms ease-in', style({ bottom: '0%', })),
             ]),
             transition('slide-down => hide', [
-                style({ top: '0%' }),
+                style({ top: '0%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ top: '100%'}))
             ]),
              transition('void => slide-up', [
-                style({ top: '100%'}),
+                style({ top: '100%',position: 'absolute', width: '100%', height: '100%'}),
                 animate('750ms ease-in', style({ top: '0%', })),
             ]),
             transition('slide-up => hide', [
-                style({ bottom: '0%' }),
+                style({ bottom: '0%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ bottom: '100%'}))
             ]),
              transition('void => rotate-y', [
-              style({transform: 'rotateY(90deg)', opacity: 0}),
+              style({transform: 'rotateY(90deg)', opacity: 0,position: 'absolute', width: '100%', height: '100%'}),
               animate('750ms ease-in', style({transform: 'rotateY(0deg)', opacity: 1}))
             ]),
             transition('rotate-y => hide', [
-               style({transform: 'rotateY(0)', opacity: 1}),
+               style({transform: 'rotateY(0)', opacity: 1,position: 'absolute', width: '100%', height: '100%'}),
                 animate('750ms ease-out', style({transform: 'rotateY(90deg)', opacity: 0}))
             ]),
              transition('void => rotate-x', [
-              style({transform: 'rotateX(-90deg)', opacity: 0}),
+              style({transform: 'rotateX(-90deg)', opacity: 0,position: 'absolute', width: '100%', height: '100%'}),
               animate('750ms ease-in', style({transform: 'rotateX(0deg)', opacity: 1}))
             ]),
             transition('rotate-x => hide', [
-               style({transform: 'rotateX(0)', opacity: 1}),
+               style({transform: 'rotateX(0)', opacity: 1,position: 'absolute', width: '100%', height: '100%'}),
                 animate('750ms ease-out', style({transform: 'rotateX(90deg)', opacity: 0}))
             ])
         ]),
@@ -127,6 +127,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                         }
                         break;
                     }
+                    case 'animation': {
+                        this.form1_state = this.animation;
+                        this.form2_state = this.animation;
+                    }
                 }
             }
             super.svyOnChanges(changes);
@@ -191,14 +195,14 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
         return this.form2;
     }
 
-    getContainerStyle() {
-        const styl = { position: 'relative' };
+    getContainerStyle(name: string) {
+        const styl = {  };
         let minHeight = 0;
         if (this.height) {
             minHeight = this.height;
-        } else if (this.containedForm) {
+        } else if (this.containedForm || name) {
             // for absolute form default height is design height, for responsive form default height is 0
-            const formCache = this.formService.getFormCacheByName(this.containedForm);
+            const formCache = this.formService.getFormCacheByName(name);
             if (formCache && formCache.absolute) {
                 minHeight = formCache.size.height;
             }
