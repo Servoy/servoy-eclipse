@@ -5,6 +5,7 @@ import {
     trigger,
     style,
     animate,
+    state,
     transition,
     // ...
 } from '@angular/animations';
@@ -15,6 +16,9 @@ import {
     styleUrls: ['./formcontainer.scss'],
     animations: [
         trigger('slideAnimation', [
+            state('hide', style({
+                 display:'none'
+            })),
             transition('void => slide-left', [
                 style({ left: '100%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ left: '0%', })),
@@ -161,7 +165,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                 setTimeout(() =>  {
                     this.form1_visible =   this.form1 === this.realContainedForm;;
                     this.cdRef.detectChanges();
-                }, 750) ;
+                }, 850) ;
                 this.form2_visible = true;
             } else {
                 this.form1 = name;
@@ -170,7 +174,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                 setTimeout(() =>    {
                     this.form2_visible =  this.form2 === this.realContainedForm;
                     this.cdRef.detectChanges();
-                }, 750) ;
+                }, 850) ;
                 this.form1_visible = true;
             }
         } else {
