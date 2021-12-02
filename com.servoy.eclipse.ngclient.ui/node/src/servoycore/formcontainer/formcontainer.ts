@@ -7,6 +7,7 @@ import {
     animate,
     state,
     transition,
+    AnimationEvent
     // ...
 } from '@angular/animations';
 
@@ -96,7 +97,6 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     private form1: string;
     private form2: string;
 
-
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
         super(renderer, cdRef);
     }
@@ -162,19 +162,11 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                 this.form2 = name;
                 this.form1_state = 'hide';
                 this.form2_state = this.animation;
-                setTimeout(() =>  {
-                    this.form1_visible =   this.form1 === this.realContainedForm;;
-                    this.cdRef.detectChanges();
-                }, 850) ;
                 this.form2_visible = true;
             } else {
                 this.form1 = name;
                 this.form2_state = 'hide';
                 this.form1_state = this.animation;
-                setTimeout(() =>    {
-                    this.form2_visible =  this.form2 === this.realContainedForm;
-                    this.cdRef.detectChanges();
-                }, 850) ;
                 this.form1_visible = true;
             }
         } else {
@@ -215,5 +207,12 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
             styl['minHeight'] = minHeight + 'px';
         }
         return styl;
+    }
+
+    animationDone(event: AnimationEvent, whichForm: string) {
+        if (event.toState === 'hide') {
+            if (whichForm === 'form1')  this.form1_visible =   this.form1 === this.realContainedForm;
+            else if (whichForm === 'form2')  this.form2_visible =   this.form2 === this.realContainedForm;
+        }
     }
 }
