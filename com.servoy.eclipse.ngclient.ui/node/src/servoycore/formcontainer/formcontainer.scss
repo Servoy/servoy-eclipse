@@ -1,10 +1,9 @@
 .svy-tabcontainer {
-    overflow: hidden;
+    overflow: auto;
+    position: relative;
 }
 
-.svy-wrapper > * > .svy-container {
-    overflow: auto;
-    height: 100%;
-    width: 100%;
-    min-height: 0 !important;
+
+.svy-container {
+    position: relative;
 }
