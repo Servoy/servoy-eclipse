@@ -109,6 +109,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                     case 'containedForm': {
                         if (change.currentValue !== change.previousValue)
                             if (change.previousValue) {
+                                 if (this.realContainedForm) {
+                                    this.form1_state = this.animation;
+                                    this.form2_state = this.animation;
+                                }
                                 this.formWillShowCalled = change.currentValue;
                                 this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
                                     .then(() => {
@@ -132,8 +136,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                         break;
                     }
                     case 'animation': {
-                        this.form1_state = this.animation;
-                        this.form2_state = this.animation;
+                        if (this.realContainedForm) {
+                            this.form1_state = this.animation;
+                            this.form2_state = this.animation;
+                        }
                     }
                 }
             }
@@ -157,7 +163,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     }
 
     switchForm(name: string) {
-        if (this.animation && this.animation !== 'none') {
+        if (this.animation && this.animation !== 'none' && this.realContainedForm) {
             if (this.form1 === this.realContainedForm) {
                 this.form2 = name;
                 this.form1_state = 'hide';
