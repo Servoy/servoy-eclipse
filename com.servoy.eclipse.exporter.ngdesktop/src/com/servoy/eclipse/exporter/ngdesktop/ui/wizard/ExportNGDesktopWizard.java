@@ -16,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -29,6 +30,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -99,10 +101,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 		exportSettings.put("login_token", loginToken);
 
-
-		exportSettings.put("login_token", loginToken);
-
-
 		final boolean result[] = { false };
 
 		errorMsg.delete(0, errorMsg.length());
@@ -113,8 +111,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
 			{
 				final int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
-				final String reasonPhrase = httpResponse.getStatusLine().getReasonPhrase().trim().length() > 0 ? httpResponse.getStatusLine().getReasonPhrase()
-					: getReasonPhrase(httpResponse);
 
 				switch (httpStatusCode)
 				{
@@ -122,10 +118,16 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						result[0] = true; //at least one platform has been delivered succesfully
 						break;
 					default :
+						String reasonPhrase = httpResponse.getStatusLine().getReasonPhrase();
+						if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
 						errorMsg
-							.append(String.format("%s: %d %s", platform, httpStatusCode, reasonPhrase));
+							.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
 						break;
 				}
+			}
+			catch (final HttpHostConnectException e)
+			{
+				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
 			}
 			catch (final IOException e)
 			{
@@ -150,13 +152,22 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
 				sb.append(output);
-			final JSONObject jsonObj = new JSONObject(sb.toString());
-			return jsonObj.optString("statusMessage", "Unexpected error");
+			try
+			{
+				final JSONObject jsonObj = new JSONObject(sb.toString());
+				return jsonObj.optString("statusMessage", "Unexpected error");
+			}
+			catch (final JSONException e)
+			{
+				//Unexpected http response?
+				return "Internal server error: " + response.getStatusLine();
+
+			}
 		}
 		return "Internal server error";//not sure what happen ...
 	}
 
-	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException
+	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
 	{
 		final String srvAddress = System.getProperty("ngclient.service.address");
 		final UrlValidator urlValidator = new UrlValidator();
