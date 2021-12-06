@@ -130,7 +130,7 @@ public class RunNPMCommand extends WorkspaceJob
 			String path = environment.get(pathkey);
 			path = nodePath.getParent() + System.getProperty("path.separator") + path;
 			environment.put(pathkey, path);
-			environment.put("NODE_OPTIONS", "--max-old-space-size=2048");
+			environment.put("NODE_OPTIONS", "--max-old-space-size=4096");
 			environment.put("NG_PERSISTENT_BUILD_CACHE", "1");
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
