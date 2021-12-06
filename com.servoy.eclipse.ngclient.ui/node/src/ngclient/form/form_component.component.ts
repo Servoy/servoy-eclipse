@@ -189,14 +189,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             // Form Instances are reused for tabpanels that have a template reference to this.
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
-            if (styleClasses) {
-                if (!this.formClasses) {
-                    this.formClasses = styleClasses.split(' ');
-                } else {
-                    this.formClasses = this.formClasses.concat(styleClasses.split(' '));
-                }
-            }
-
+            if (styleClasses)
+                this.formClasses = styleClasses.split(' ');
+            else
+                this.formClasses = null;
 
             this._containers = this.formCache.getComponent('').model.containers;
             this._cssstyles = this.formCache.getComponent('').model.cssstyles;
