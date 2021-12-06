@@ -6,11 +6,7 @@
     ],
   "lib": {
     "entryFile": "src/public-api.ts",
-    "umdId": "servoy.##packagename##",
-    "umdModuleIds": {
-      "@servoy/public": "servoy.public",
-      "@angular/core": "angular.core"
-    }
+    "umdId": "servoy.##packagename##"
   },
   "allowedNonPeerDependencies": []
 }
