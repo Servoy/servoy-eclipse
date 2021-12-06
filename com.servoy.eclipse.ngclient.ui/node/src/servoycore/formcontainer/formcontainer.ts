@@ -5,7 +5,9 @@ import {
     trigger,
     style,
     animate,
+    state,
     transition,
+    AnimationEvent
     // ...
 } from '@angular/animations';
 
@@ -15,6 +17,9 @@ import {
     styleUrls: ['./formcontainer.scss'],
     animations: [
         trigger('slideAnimation', [
+            state('hide', style({
+                 display:'none'
+            })),
             transition('void => slide-left', [
                 style({ left: '100%',position: 'absolute', width: '100%', height: '100%' }),
                 animate('750ms ease-in', style({ left: '0%', })),
@@ -92,7 +97,6 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     private form1: string;
     private form2: string;
 
-
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
         super(renderer, cdRef);
     }
@@ -105,6 +109,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                     case 'containedForm': {
                         if (change.currentValue !== change.previousValue)
                             if (change.previousValue) {
+                                 if (this.realContainedForm) {
+                                    this.form1_state = this.animation;
+                                    this.form2_state = this.animation;
+                                }
                                 this.formWillShowCalled = change.currentValue;
                                 this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
                                     .then(() => {
@@ -128,8 +136,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                         break;
                     }
                     case 'animation': {
-                        this.form1_state = this.animation;
-                        this.form2_state = this.animation;
+                        if (this.realContainedForm) {
+                            this.form1_state = this.animation;
+                            this.form2_state = this.animation;
+                        }
                     }
                 }
             }
@@ -153,24 +163,16 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     }
 
     switchForm(name: string) {
-        if (this.animation && this.animation !== 'none') {
+        if (this.animation && this.animation !== 'none' && this.realContainedForm) {
             if (this.form1 === this.realContainedForm) {
                 this.form2 = name;
                 this.form1_state = 'hide';
                 this.form2_state = this.animation;
-                setTimeout(() =>  {
-                    this.form1_visible =   this.form1 === this.realContainedForm;;
-                    this.cdRef.detectChanges();
-                }, 750) ;
                 this.form2_visible = true;
             } else {
                 this.form1 = name;
                 this.form2_state = 'hide';
                 this.form1_state = this.animation;
-                setTimeout(() =>    {
-                    this.form2_visible =  this.form2 === this.realContainedForm;
-                    this.cdRef.detectChanges();
-                }, 750) ;
                 this.form1_visible = true;
             }
         } else {
@@ -211,5 +213,12 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
             styl['minHeight'] = minHeight + 'px';
         }
         return styl;
+    }
+
+    animationDone(event: AnimationEvent, whichForm: string) {
+        if (event.toState === 'hide') {
+            if (whichForm === 'form1')  this.form1_visible =   this.form1 === this.realContainedForm;
+            else if (whichForm === 'form2')  this.form2_visible =   this.form2 === this.realContainedForm;
+        }
     }
 }
