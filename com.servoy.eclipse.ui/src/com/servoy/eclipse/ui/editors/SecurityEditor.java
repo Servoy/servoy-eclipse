@@ -71,6 +71,9 @@ import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
+import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
+import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 public class SecurityEditor extends EditorPart implements IActiveProjectListener
 {
@@ -113,7 +116,9 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		groupText = new Text(container, SWT.BORDER);
 
-		groupText.addVerifyListener(DocumentValidatorVerifyListener.IDENT_JSON_VERIFIER);
+		groupText.addVerifyListener(new DocumentValidatorVerifyListener(
+			new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_JSON), new LengthDocumentValidator(
+				200) }));
 
 		Button newGroupButton;
 		newGroupButton = new Button(container, SWT.NONE);
@@ -269,17 +274,24 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().add(groupText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-					LayoutStyle.RELATED).add(newGroupButton)).add(removeGroupButton).add(tableContainer, GroupLayout.PREFERRED_SIZE, 288,
-						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(userNameText,
-								GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(newUserButton)).add(
-									removeUserButton).add(treeContainer, GroupLayout.PREFERRED_SIZE, 183, Short.MAX_VALUE)).addContainerGap()));
+					LayoutStyle.RELATED).add(newGroupButton))
+				.add(removeGroupButton).add(tableContainer, GroupLayout.PREFERRED_SIZE, 288,
+					GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(userNameText,
+						GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(newUserButton)).add(
+							removeUserButton)
+						.add(treeContainer, GroupLayout.PREFERRED_SIZE, 183, Short.MAX_VALUE))
+				.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(newUserButton).add(userNameText).add(groupText).add(newGroupButton)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(tableContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(
-						treeContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeUserButton).add(removeGroupButton)).addContainerGap()));
+				LayoutStyle.RELATED)
+			.add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(tableContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(
+					treeContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE))
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeUserButton).add(removeGroupButton))
+			.addContainerGap()));
 		container.setLayout(groupLayout);
 
 		initDataBindings();
