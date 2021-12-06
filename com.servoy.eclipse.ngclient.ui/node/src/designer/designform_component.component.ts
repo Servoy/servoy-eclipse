@@ -146,7 +146,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }  else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
-                   this.draggedElementItem = new ComponentCache(this.insertedClone.model.tagname, this.insertedClone.name, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
+                   this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
                 this.designMode = this.showWireframe;
