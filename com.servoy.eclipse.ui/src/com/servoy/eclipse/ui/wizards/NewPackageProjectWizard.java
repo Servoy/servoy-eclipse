@@ -2,9 +2,11 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -143,21 +145,15 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, displayName, projectName, version, packageType); // TODO symbolic name here instead of double projectName?
 				try
 				{
-					String location = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().getLocation();
-					File projectFolder = new File(new URI(location.substring(location.indexOf("file:/"))));
-					File templateFolder = new File(projectFolder, "packagetemplate");
-					if (templateFolder.exists())
-					{
-						File packageFile = new File(newProject.getLocation().toOSString());
-						FileUtils.copyDirectory(templateFolder, packageFile);
-						replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "projects/ng2package/package.json"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "projects/ng2package/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "projects/ng2package/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
-						replaceTagInFile(new File(packageFile, "projects/ng2package/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
-					}
+					File packageFile = new File(newProject.getLocation().toOSString());
+					copyAllEntries("packagetemplate", packageFile);
+					replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "projects/ng2package/package.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "projects/ng2package/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "projects/ng2package/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "projects/ng2package/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
 				}
 				catch (Exception ex)
 				{
@@ -202,6 +198,29 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			return Status.OK_STATUS;
 		}
 
+		private void copyAllEntries(String entryPath, File packageFile)
+		{
+			Enumeration<URL> entries = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().findEntries(entryPath, "*", true);
+			while (entries.hasMoreElements())
+			{
+				URL entry = entries.nextElement();
+				String filename = entry.getFile();
+				try
+				{
+					if (!filename.endsWith("/"))
+					{
+						try (InputStream is = entry.openStream())
+						{
+							FileUtils.copyInputStreamToFile(is, new File(packageFile, filename.substring("/packagetemplate/".length())));
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					Debug.error("Error copy file " + filename + "to node folder " + packageFile, e);
+				}
+			}
+		}
 	}
 
 	private void replaceTagInFile(File file, String tagName, String tagValue)
