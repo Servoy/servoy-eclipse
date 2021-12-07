@@ -17,6 +17,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -40,7 +41,6 @@ import com.servoy.eclipse.exporter.ngdesktop.Activator;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
-import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Utils;
 
@@ -209,12 +209,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				jsonObj.put("updateUrl", settings.get("update_url"));
 			jsonObj.put("loginToken", settings.get("login_token"));
 			jsonObj.put("applicationName", settings.get("application_name"));
-			jsonObj.put("devVersion", ClientVersion.getVersion());
+//			jsonObj.put("devVersion", ClientVersion.getVersion());
 			jsonObj.put("emailAddress", settings.get("email_address"));
 			jsonObj.put("storageTimeout", settings.getBoolean("store_data") ? STORE_TIMEOUT * 24 : 0); //convert to hours
 
-			final StringEntity input = new StringEntity(jsonObj.toString());
-			input.setContentType("application/json");
+			final StringEntity input = new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 			return input;
 		}
 		catch (final IOException e)
