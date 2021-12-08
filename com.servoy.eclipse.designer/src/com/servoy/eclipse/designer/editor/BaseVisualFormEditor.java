@@ -748,6 +748,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						propertySheet.partClosed(this);
 						propertySheet.partActivated(this);
 					}
+					// set up the editor actions, this is normally done in part activation listener
+					getEditorSite().getActionBarContributor().setActiveEditor(this);
 				}
 				setActivePage(0);
 			});
