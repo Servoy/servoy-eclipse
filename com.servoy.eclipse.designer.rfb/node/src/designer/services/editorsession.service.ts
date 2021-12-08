@@ -417,6 +417,7 @@ export class PaletteComp {
     topContainer: boolean;
     layoutName?: string;
     attributes?: { [property: string]: string };
+    children?: [{ [property: string]: string }];
     rightSibling?: string;
 }
 

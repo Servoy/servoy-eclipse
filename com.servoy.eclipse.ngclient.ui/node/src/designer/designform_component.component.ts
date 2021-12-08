@@ -132,6 +132,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     //we are in responsive layout
                     this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
                     this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
+                    if (event.data.children) {
+                        event.data.children.forEach(child =>  {
+                            (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
+                            (this.insertedClone as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
+                        });
+                    }
                 } else {
                     this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], model);
                     this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, event.data.model, [], model_inserted); //TODO only in responsive

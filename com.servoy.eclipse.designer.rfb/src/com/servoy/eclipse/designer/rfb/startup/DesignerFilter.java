@@ -325,6 +325,10 @@ public class DesignerFilter implements Filter
 									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec, false).toString());
 								}
 								layoutJson.put("attributes", getLayoutAttributes(config, spec, false));
+								if (config != null && config.has("children"))
+								{
+									layoutJson.put("children", getChildren(config, spec));
+								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
@@ -512,6 +516,28 @@ public class DesignerFilter implements Filter
 			Debug.error(e);
 			throw e;
 		}
+	}
+
+	private JSONArray getChildren(JSONObject config, WebLayoutSpecification spec)
+	{
+		JSONArray children = config.optJSONArray("children");
+		JSONArray res = new JSONArray();
+		if (children != null)
+		{
+			for (int i = 0; i < children.length(); i++)
+			{
+				JSONObject jsonObject = children.getJSONObject(i);
+				JSONObject childModel = jsonObject.optJSONObject("model");
+				if (childModel != null)
+				{
+					JSONObject c = new JSONObject();
+					c.put("model", childModel);
+					c.put("attributes", getLayoutAttributes(childModel, spec, true));
+					res.put(c);
+				}
+			}
+		}
+		return res;
 	}
 
 

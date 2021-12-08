@@ -79,7 +79,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -112,7 +112,7 @@ export class PaletteComponent {
         this.leftAdjust = frameRect.left;
         if (!ghost) {
             this.editorSession.getState().dragging = true;
-            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes}, '*');
+            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children}, '*');
         }
     }
 
