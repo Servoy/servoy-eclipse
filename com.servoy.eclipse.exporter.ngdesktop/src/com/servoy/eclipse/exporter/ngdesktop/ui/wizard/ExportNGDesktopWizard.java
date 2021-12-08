@@ -16,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -202,8 +203,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			jsonObj.put("emailAddress", settings.get("email_address"));
 			jsonObj.put("storageTimeout", settings.getBoolean("store_data") ? STORE_TIMEOUT * 24 : 0); //convert to hours
 
-			final StringEntity input = new StringEntity(jsonObj.toString());
-			input.setContentType("application/json");
+			final StringEntity input = new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 			return input;
 		}
 		catch (final IOException e)
