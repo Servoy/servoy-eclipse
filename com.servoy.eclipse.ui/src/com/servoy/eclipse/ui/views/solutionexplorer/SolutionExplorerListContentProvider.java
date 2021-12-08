@@ -1765,12 +1765,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 */
 	public static void extractApiDocs(WebObjectSpecification spec)
 	{
-		if (spec.getApiFunctions().size() > 0)
+		URL docFileURL = spec.getDocFileURL();
+		if (docFileURL != null)
+		{
+			extractDocsFromJsFile(spec, docFileURL);
+		}
+		else if (spec.getApiFunctions().size() > 0)
 		{
 			extractDocsFromJsFile(spec, spec.getDefinitionURL());
 			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
 		}
-		extractDocsFromJsFile(spec, spec.getDocFileURL());
 	}
 
 	private static void extractDocsFromJsFile(WebObjectSpecification spec, URL url)
