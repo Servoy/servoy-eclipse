@@ -17,7 +17,11 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -49,6 +53,12 @@ public class CopySourceFolderAction extends Action
 
 		if (choice < 0 || choice == 2) return; // cancel
 
+		if (choice == 1)
+		{
+			Job.createSystem("delete .angular cache", (monitor) -> {
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), ".angular"));
+			}).schedule();
+		}
 		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
