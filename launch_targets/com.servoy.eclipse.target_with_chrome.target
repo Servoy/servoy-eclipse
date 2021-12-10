@@ -52,7 +52,7 @@
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.23.0.v202107101916"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2021.12/"/>
+            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.03/"/>
             <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
             <unit id="com.sun.activation.javax.activation" version="1.2.0"/>
             <unit id="com.sun.mail.javax.mail" version="1.6.2"/>
