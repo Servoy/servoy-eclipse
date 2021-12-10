@@ -11,14 +11,14 @@
 
 	<properties>
 		<tycho.version>2.2.0</tycho.version>
-		 <eclipse.url>http://download.eclipse.org/eclipse/updates/4.17/</eclipse.url>
+		 <eclipse.url>https://download.eclipse.org/eclipse/updates/4.17/</eclipse.url>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>developer_repo</id>
 			<name>developer_repo</name>
-			<url>http://developer.servoy.com/mvn_repository/</url>
+			<url>https://developer.servoy.com/mvn_repository/</url>
 		</repository>
 		<repository>
             <id>servoy</id>
@@ -139,17 +139,17 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j18-impl</artifactId>
-			<version>2.13.3</version>
+			<version>2.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.13.3</version>
+			<version>2.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.13.3</version>
+			<version>2.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.servoy</groupId>
