@@ -364,7 +364,7 @@ export class FormattingService {
                 optionalMantissa: optionalDigitsMantissa !== 0,
                 trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
                 characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
-                optionalCharacteristic: minLenCharacteristic === 0 && minLenCharacteristicAfterZeroFound !== 0 && optionalDigitsCharacteristic!==0
+                optionalCharacteristic: rightDataMantissaLength === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
             } );
         }
         
