@@ -216,7 +216,7 @@ export class FormattingService {
         return sel;
     }
 
-    private formatNumbers(data, servoyFormat: string): string {
+    private formatNumbers(data: any, servoyFormat: string): string {
         if (!servoyFormat)
             return data;
         if (data === '')
@@ -226,8 +226,8 @@ export class FormattingService {
         if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
 
         const initialData = data;
-        let patchedFormat = servoyFormat; // patched format for numeraljs format
-        let i; let j;
+        let patchedFormat = servoyFormat; // patched format for numbro format
+        let i: number;
         let prefix = '';
         let sufix = '';
 
@@ -279,8 +279,7 @@ export class FormattingService {
         }
 
         patchedFormat = patchedFormat.substring(numberStart, numberEnd + 1);
-        let ret;
-
+        let ret: string;
 
         prefix = prefix.replace(new RegExp('\'', 'g'), '');
         sufix = sufix.replace(new RegExp('\'', 'g'), '');
@@ -309,65 +308,66 @@ export class FormattingService {
             }
             ret = Number(data).toExponential(integerDigits + fractionalDigits);
         } else {
-            // get min digits
-            let minLen = 0;
-            let optionalDigits = 0;
-            for (i = 0; i < patchedFormat.length; i++) {
-                if (patchedFormat[i] === '0') {
-                    minLen++;
-                } else if (patchedFormat[i] === '#' && minLen === 0) {
-                    optionalDigits++;
-                } else if (patchedFormat[i] === '.') {
+
+            let leftFormat = '';
+            let rightFormat = '';
+
+            if ( servoyFormat.indexOf( '.' ) >= 0 ) {
+                leftFormat = servoyFormat.split( '.' )[0];
+                rightFormat = servoyFormat.split( '.' )[1];
+            } else {
+                leftFormat = servoyFormat;
+            }
+
+            let minLenCharacteristic = 0;
+            let minLenCharacteristicAfterZeroFound = 0;
+            let optionalDigitsCharacteristic = 0;
+            let zeroFound = false;
+            for ( i = 0; i < leftFormat.length; i++ ) {
+                if ( leftFormat[i] === '0' ) {
+                    zeroFound = true;
+                    minLenCharacteristic++;
+                } else if ( leftFormat[i] === '#' ) {
+                    optionalDigitsCharacteristic++;
+                }
+                if ( leftFormat[i] === '#' && zeroFound ) {
+                    minLenCharacteristicAfterZeroFound++;
+                }
+            }
+
+            let minLenMantissa = 0;
+            let optionalDigitsMantissa = 0;
+            
+            for ( i = 0; i < rightFormat.length; i++ ) {
+                if ( rightFormat[i] === '0' ) {
+                    minLenMantissa++;
+                } else if ( rightFormat[i] === '#' ) {
+                    optionalDigitsMantissa++;
+                } else if ( rightFormat[i] === '.' ) {
                     break;
                 }
             }
 
-            patchedFormat = patchedFormat.replace(new RegExp('(#+)', 'g'), '[$1]');
-            patchedFormat = patchedFormat.replace(new RegExp('#', 'g'), '0');
+            let dataAsString = data + '';
+            
+            let rightData = '';
 
-            ret = numbro(data).format(patchedFormat);
+            if ( dataAsString.indexOf( '.' ) >= 0 ) {
+                rightData = dataAsString.split( '.' )[1];
+            }
+            
+            let rightDataMantissaLength = rightData.length;
 
-            // set min digits
-            if (minLen > 0) {
-                const retSplit = ret.split(numbro.languageData().delimiters.decimal);
-                for (i = 0; i < retSplit[0].length; i++) {
-                    if (retSplit[0][i] < '0' || retSplit[0][i] > '9') continue;
-                    for (j = i; j < retSplit[0].length; j++) {
-                        if (retSplit[0][j] >= '0' && retSplit[0][j] <= '9') continue;
-                        break;
-                    }
-                    const nrMissing0 = minLen - (j - i);
-                    if (nrMissing0 > 0) {
-                        ret = retSplit[0].substring(0, i);
-                        for (j = 0; j < nrMissing0; j++) ret += '0';
-                        ret += retSplit[0].substring(i);
-                        if (retSplit.length > 1) ret += (numbro.languageData().delimiters.decimal + retSplit[1]);
-                    }
-                    break;
-                }
-            }
-            // fix the optional digits
-            if (patchedFormat.indexOf(',') === -1 && optionalDigits > 0) {
-                let toEliminate = 0;
-                for (i = 0; i < ret.length; i++) {
-                    if (ret.charAt(i) === '0') {
-                        toEliminate++;
-                    } else {
-                        break;
-                    }
-                }
-                if (toEliminate > 0) {
-                    if (toEliminate > optionalDigits) {
-                        toEliminate = optionalDigits;
-                    }
-                    ret = ret.substring(toEliminate);
-                    if (ret.indexOf(numbro.languageData().delimiters.decimal) === 0) {
-                        // we eliminated too much
-                        ret = '0' + ret;
-                    }
-                }
-            }
+            ret = numbro( data ).format( {
+                thousandSeparated: data > 999 && servoyFormat.includes( ',' ) ? true : false,
+                mantissa: ( rightDataMantissaLength < minLenMantissa + optionalDigitsMantissa ) && optionalDigitsMantissa > 0 ? rightDataMantissaLength : minLenMantissa !== 0 ? minLenMantissa : optionalDigitsMantissa,
+                optionalMantissa: optionalDigitsMantissa !== 0,
+                trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
+                characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
+                optionalCharacteristic: minLenCharacteristic === 0 && minLenCharacteristicAfterZeroFound !== 0 && optionalDigitsCharacteristic!==0
+            } );
         }
+        
         return prefix + ret + sufix;
     }
 
