@@ -32,19 +32,38 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
       content.addEventListener('mousedown', (event) => this.onMouseDown(event));
       content.addEventListener('mouseup', (event) => this.onMouseUp(event));
       content.addEventListener('mousemove', (event) => this.onMouseMove(event));
+      content.addEventListener('keyup', (event) => this.onKeyup(event));
       
       this.glasspane = this.doc.querySelector('.contentframe-overlay');
       const computedStyle = window.getComputedStyle(content, null)
       this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
       this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
   }
+
+  private onKeyup(event: KeyboardEvent) {
+    //if control is released during drag, the copy is deleted and the original element must be moved
+	if (this.dragCopy && this.dragStartEvent && this.dragStartEvent.ctrlKey && (event.code.startsWith('Control') || event.code.startsWith('Meta'))) {
+	    const contentDocument = this.doc.querySelector('iframe').contentWindow.document;
+        for (let i = 0; i < this.selectionToDrag.length; i++) {
+            const cloneInfo = this.currentElementInfo.get(this.selectionToDrag[i]);
+		    const node = this.getSvyWrapper(contentDocument.querySelectorAll('[svy-id="' +  cloneInfo.element.getAttribute('cloneuuid')  + '"]')[0] as HTMLElement);
+            node.style.top = cloneInfo.element.style.top;
+            node.style.left = cloneInfo.element.style.left;
+            this.currentElementInfo.delete(this.selectionToDrag[i]);
+            this.selectionToDrag[i] = cloneInfo.element.getAttribute('cloneuuid');
+            this.currentElementInfo.set(this.selectionToDrag[i], new ElementInfo(node));
+            this.renderer.removeChild(cloneInfo.element.parentElement, cloneInfo.element);
+	    }
+        this.dragCopy = false;
+	}
+  }
   
   private onMouseDown(event: MouseEvent) {
-      this.dragNode = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' + this.editorSession.getSelection()[0] + '"]')[0] as HTMLElement
+      this.dragNode = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;
       if(!this.currentElementInfo) {
           this.currentElementInfo = new Map<string, ElementInfo>();
       }
-      // skip dragging if it is a child element of a form reference
+      //TODO skip dragging if it is a child element of a form reference
       if (event.button == 0 && this.dragNode) {
           this.dragStartEvent = event; 
       }
@@ -52,12 +71,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
   
   onMouseUp(event: MouseEvent) {
       if (this.dragStartEvent != null) {
-          this.sendChanges(this.currentElementInfo);
-         
+          this.sendChanges(this.currentElementInfo, event);
           this.dragStartEvent = null;
-          this.selectionToDrag = null;
-          this.editorSession.getState().dragging = false;
-          this.currentElementInfo = null;
           
           //disable mouse events on the autoscroll
           this.editorSession.getState().pointerEvents = 'none'; 
@@ -67,19 +82,36 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           //force redrawing of the selection decorator to the new position
           this.editorSession.updateSelection(this.editorSession.getSelection());
       }
+      this.selectionToDrag = null;
+      this.editorSession.getState().dragging = false;
+      this.currentElementInfo = null;
+      this.dragCopy = false;
   }
 
-  private sendChanges(elementInfos: Map<string, ElementInfo>) {
+  private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
       if(elementInfos) {
-          const changes = {};
-          for(const nodeId of elementInfos.keys()) {
+          const changes = (event.ctrlKey||event.metaKey) ? [] : {};
+          let i = 0;
+          for (const nodeId of elementInfos.keys()) {
               const elementInfo = elementInfos.get(nodeId);
-              changes[nodeId] = {
+              const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
+              changes[id] = {
                   x: elementInfo.x,
                   y: elementInfo.y
+              };
+
+              if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
+                  changes[id].uuid = elementInfo.element.getAttribute('cloneuuid');
+                  this.renderer.removeChild(elementInfo.element.parentElement, elementInfo.element);
               }
           }
-          this.editorSession.sendChanges(changes);
+          if(event.ctrlKey||event.metaKey){
+            this.editorSession.createComponents({
+                "components": changes
+            });
+        } else {
+            this.editorSession.sendChanges(changes);
+        }
       }
   }
   
@@ -98,40 +130,35 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                     this.editorSession.startAutoscroll(this);
 				}
 
-              if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
-                  this.dragCopy = true;
+              if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null || !this.selectionToDrag || this.selectionToDrag.length == 0) {
+                  if (event.ctrlKey || event.metaKey) this.dragCopy = true;
                   this.selectionToDrag = [];
                   const selection = this.editorSession.getSelection();
-                
-                  const elements = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id]');
-                  const point = this.designerUtilsService.convertToContentPoint(this.glasspane, { x: this.dragStartEvent.pageX, y: this.dragStartEvent.pageY });
-                  const elementAtMousePos = Array.from(elements).reverse().find((node) => {
-                      const position = node.getBoundingClientRect();
-                      this.designerUtilsService.adjustElementRect(node, position);
-                      if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
-                          return node;
-                      }
-                  });
-                  if (elementAtMousePos && !selection.includes(elementAtMousePos.getAttribute('svy-id'))){
-                        selection.push(elementAtMousePos.getAttribute('svy-id'));
+                  if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id'))){
+                    selection.push(this.dragNode.getAttribute('svy-id'));
                   }
 
                   for (let i = 0; i < selection.length; i++) {
                       let node = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  selection[i]  + '"]')[0] as HTMLElement;
+                      if (node === undefined) {
+                          console.log('Node with uuid '+selection[i]+' was not found');
+                          continue;
+                      }
                       node = this.getSvyWrapper(node);
-                      this.selectionToDrag[i] = selection[i]; 
-                      this.currentElementInfo.set( selection[i], new ElementInfo(node));
-                  }    
-              }
+                      if (this.dragCopy) {  
+                        const clone = node.cloneNode(true) as HTMLElement;
+                        this.renderer.setAttribute(clone, 'id', 'dragNode' + i);
+                        this.renderer.setAttribute(clone, 'cloneuuid', selection[i]);
+                        this.renderer.appendChild(this.doc.querySelector('iframe').contentWindow.document.body, clone);
 
-              if (!this.selectionToDrag) {
-                  this.selectionToDrag = this.editorSession.getSelection();
-                  if (!this.selectionToDrag || this.selectionToDrag.length == 0)
-                  {
-                      this.selectionToDrag = [this.dragNode.getAttribute('svy-id')];
-                      let node = this.getSvyWrapper(this.dragNode);
-                      this.currentElementInfo.set(this.editorSession.getSelection()[0], new ElementInfo(node));
-                  }
+                        this.selectionToDrag.push('dragNode' + i);
+						this.currentElementInfo.set(this.selectionToDrag[i], new ElementInfo(clone));
+                      }
+                      else {
+                        this.selectionToDrag.push(selection[i]); 
+                        this.currentElementInfo.set( selection[i], new ElementInfo(node));
+                      }
+                  }    
               }
 
               if (this.selectionToDrag.length > 0) {
