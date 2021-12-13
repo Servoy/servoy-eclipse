@@ -46,9 +46,9 @@
 		    <unit id="org.apache.commons.commons-text" version="1.8.0"/>
 		    <unit id="org.apache.commons.lang3" version="3.9.0"/>
 		    <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
-		    <unit id="org.apache.logging.log4j.api" version="2.12.1"/>
-		    <unit id="org.apache.logging.log4j.core" version="2.12.1"/>
-		    <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.12.1"/>
+		    <unit id="org.apache.logging.log4j.api" version="2.15.0"/>
+		    <unit id="org.apache.logging.log4j.core" version="2.15.0"/>
+		    <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.15.0"/>
 		    <unit id="org.freemarker.freemarker" version="2.3.29.stable"/>
 		    <unit id="org.jsoup" version="1.12.1"/>
 		    <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
