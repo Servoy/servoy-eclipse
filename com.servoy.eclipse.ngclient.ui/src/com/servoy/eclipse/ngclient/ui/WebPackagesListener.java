@@ -695,8 +695,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									if (!packageJsonChanged)
 									{
 										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
-										packageJsonChanged = file.getFile("package.json").getLocation().toFile().lastModified() > packageJson
-											.lastModified();
+										packageJsonChanged = file.getFile("package.json").getLocation().toFile().lastModified() -
+											packageJson.lastModified() > 1000;
 									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()) || !packageFolder.exists() ||
