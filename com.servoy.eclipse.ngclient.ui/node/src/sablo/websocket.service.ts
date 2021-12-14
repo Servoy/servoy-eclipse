@@ -218,6 +218,7 @@ export class WebsocketSession {
             for (const handler of Object.keys( this.onOpenHandlers)) {
                 this.onOpenHandlers[handler](evt);
             }
+            this.ngZone.run( () => this.websocketService.reconnectingEmitter.next(false) );
         };
         this.websocket.onerror = (evt) => {
             this.stopHeartbeat();
@@ -229,7 +230,7 @@ export class WebsocketSession {
             this.stopHeartbeat();
             if (this.connected !== 'CLOSED') {
                 this.connected = 'RECONNECTING';
-                this.websocketService.reconnectingEmitter.next(true);
+                this.ngZone.run( () => this.websocketService.reconnectingEmitter.next(true) );
                 this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (' + new Date().getTime() + ')')));
             }
             for (const handler of Object.keys(this.onCloseHandlers)) {
@@ -237,21 +238,16 @@ export class WebsocketSession {
             }
         };
         this.websocket.onconnecting = (evt) => {
-            // this event indicates we are trying to reconnect, the event has the close code and reason from the disconnect.
-            if (evt.code && evt.code !== WsCloseCodes.CLOSED_ABNORMALLY && evt.code !== WsCloseCodes.SERVICE_RESTART) {
-
-                this.websocket.close();
-
                 if (evt.reason === 'CLIENT-OUT-OF-SYNC') {
                     // Server detected that we are out-of-sync, reload completely
                     this.windowRef.nativeWindow.location.reload();
-                    return;
-                }
-
-                // server disconnected, do not try to reconnect
-                this.connected = 'CLOSED';
-                this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onconnecting got a server disconnect/close with reason '
-                    + evt.reason + '): ... CLOSED (' + new Date().getTime() + ')')));
+                } else if (evt.reason === 'CLIENT-SHUTDOWN') {
+                    // client is shutdown just force close the websocket and set the connected state toe CLOSED so no reconnecting is shown
+                    this.websocket.close();
+                    // server disconnected, do not try to reconnect
+                    this.connected = 'CLOSED';
+                    this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onconnecting got a server disconnect/close with reason '
+                        + evt.reason + '): ... CLOSED (' + new Date().getTime() + ')')));
             }
         };
         this.websocket.onmessage = (message) => this.handleHeartbeat(message) || this.ngZone.run(() => this.handleMessage(message));
