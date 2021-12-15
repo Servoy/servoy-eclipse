@@ -312,11 +312,11 @@ export class FormattingService {
             let leftFormat = '';
             let rightFormat = '';
 
-            if ( servoyFormat.indexOf( '.' ) >= 0 ) {
-                leftFormat = servoyFormat.split( '.' )[0];
-                rightFormat = servoyFormat.split( '.' )[1];
+            if ( patchedFormat.indexOf( '.' ) >= 0 ) {
+                leftFormat = patchedFormat.split( '.' )[0];
+                rightFormat = patchedFormat.split( '.' )[1];
             } else {
-                leftFormat = servoyFormat;
+                leftFormat = patchedFormat;
             }
 
             let minLenCharacteristic = 0;
@@ -359,12 +359,12 @@ export class FormattingService {
             let rightDataMantissaLength = rightData.length;
 
             ret = numbro( data ).format( {
-                thousandSeparated: data > 999 && servoyFormat.includes( ',' ) ? true : false,
+                thousandSeparated: data > 999 && patchedFormat.includes( ',' ) ? true : false,
                 mantissa: ( rightDataMantissaLength < minLenMantissa + optionalDigitsMantissa ) && optionalDigitsMantissa > 0 ? rightDataMantissaLength : minLenMantissa !== 0 ? minLenMantissa : optionalDigitsMantissa,
                 optionalMantissa: optionalDigitsMantissa !== 0,
                 trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
                 characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
-                optionalCharacteristic: rightDataMantissaLength === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
+                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0 
             } );
         }
         

@@ -56,6 +56,18 @@ describe('FormattingService', () => {
         myformat.display = '$ #.###-';
         expect(service.format(-10.49, myformat, false)).toEqual('$ 10.49-');
 
+        myformat.display = '#,######.00000';
+        expect(service.format(0, myformat, false)).toEqual('0.00000');
+
+        myformat.display = '#,######.00000';
+        expect(service.format(1000000, myformat, false)).toEqual('1,000,000.00000');
+        
+        myformat.display = '#,######.00000';
+        expect(service.format(125.5, myformat, false)).toEqual('125.50000');
+
+        myformat.display = '#,######.00000';
+        expect(service.format(1125.5, myformat, false)).toEqual('1,125.50000');
+
         myformat.display = '#.###-$';
         expect(service.format(-10.49, myformat, false)).toEqual('10.49-$');
 
