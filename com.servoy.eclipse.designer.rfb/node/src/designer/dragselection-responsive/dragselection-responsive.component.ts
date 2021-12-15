@@ -22,6 +22,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   autoscrollAreasEnabled: any;
   canDrop: { dropAllowed: boolean; dropTarget?: Element; beforeChild?: Element; append?: boolean; };
   dragItem: DragItem = {};
+  dragCopy: boolean;
   
   constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService) { }
 
@@ -31,7 +32,18 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     content.addEventListener('mousedown', (event) => this.onMouseDown(event));
     content.addEventListener('mouseup', (event) => this.onMouseUp(event));
     content.addEventListener('mousemove', (event) => this.onMouseMove(event));
+    content.addEventListener('keyup', (event) => this.onKeyup(event));
 }
+
+  onKeyup(event: KeyboardEvent) {
+    //if control is released during drag, the copy is deleted and the original element must be moved
+    if (this.dragCopy && this.dragStartEvent && this.dragStartEvent.ctrlKey && (event.code.startsWith('Control') || event.code.startsWith('Meta'))) {
+      this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'removeDragCopy', uuid: this.dragNode.getAttribute("svy-id"),
+        insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null}, '*');
+      this.dragCopy = false;
+    }
+  }
+
   onMouseDown(event: MouseEvent) {
     if (this.editorSession.getState().dragging || event.buttons !== 1) return; //prevent dnd when dragging from palette
     if (this.editorSession.getSelection() != null && this.editorSession.getSelection().length > 1)
@@ -80,7 +92,8 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     if (!this.editorSession.getState().dragging) {
       if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
         this.editorSession.getState().dragging = true;
-        this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id") }, '*');
+        this.dragCopy = event.ctrlKey || event.metaKey;
+        this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id"), dragCopy: this.dragCopy }, '*');
         this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds(this.doc);
           if (this.dropHighlight !== this.dragItem.layoutName) {
             const elements = this.dragNode.querySelectorAll('[svy-id]');
@@ -157,10 +170,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
       }
 
-      let key = this.dragNode.getAttribute("svy-id");
+      let key = (event.ctrlKey || event.metaKey) && this.dragCopy ? 0 : this.dragNode.getAttribute("svy-id");
       obj[key] = {};
-      if ((event.ctrlKey || event.metaKey)) {
-        obj[key].uuid = this.dragNode.getAttribute('cloneuuid'); //TODO svy-16659
+      if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
+        obj[key].uuid = this.dragNode.getAttribute('svy-id');
       }
 
       if (this.canDrop.dropTarget) {
@@ -170,7 +183,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
       if (this.canDrop.beforeChild) {
         obj[key].rightSibling = this.canDrop.beforeChild.getAttribute("svy-id");
       }
-      this.editorSession.getSession().callService('formeditor', 'moveComponent', obj, true);
+      if (event.ctrlKey || event.metaKey) {
+        this.editorSession.createComponents({
+          "components": obj
+        });
+      } else {
+        this.editorSession.getSession().callService('formeditor', 'moveComponent', obj, true);
+      }
     }
 
     this.dragStartEvent = null;
@@ -180,12 +199,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     this.dropHighlight = null;
     if (this.dragItem && this.dragItem.contentItemBeingDragged) {
       const frameElem = this.doc.querySelector('iframe');
-      frameElem.contentWindow.postMessage({ id: 'destroyElement', existingElement: true }, '*');
+      frameElem.contentWindow.postMessage({ id: 'destroyElement', existingElement: !this.dragCopy }, '*');
     }
     //force redrawing of the selection decorator to the new position
     //this.editorSession.updateSelection(this.editorSession.getSelection());
      this.editorSession.sendState('dropHighlight', null);
     this.dragItem = {};
+    this.dragCopy = false;
   }
 
   private findAncestor(el: HTMLElement, cls: string): HTMLElement {

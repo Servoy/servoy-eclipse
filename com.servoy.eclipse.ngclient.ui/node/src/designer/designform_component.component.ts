@@ -148,10 +148,21 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createDraggedComponent') {
                 this.insertedClone =  this.formCache.getLayoutContainer(event.data.uuid);
                 if (this.insertedClone) {
+                    if (event.data.dragCopy) {
+                        const parent = this.insertedClone.parent;
+                        this.insertedClone = new  StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
+                        parent.addChild(this.insertedClone);
+                    }
                   this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
                 }  else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                    if (event.data.dragCopy) {
+                        const parent = this.insertedClone.parent;
+                        this.insertedClone =  new ComponentCache(this.insertedClone.name+'clone', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers,
+                                this.insertedClone.layout);
+                        parent.addChild(this.insertedClone);
+                    }
                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
@@ -175,6 +186,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     }
                 }
                 this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+            }
+            if (event.data.id === 'removeDragCopy') {
+                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
+                if (!this.insertedClone) {
+                    this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                }
+                this.insertedCloneParent.addChild(this.insertedClone, event.data.insertBefore);
             }
             if (event.data.id === 'destroyElement') {
                 this.draggedElementItem = null;
