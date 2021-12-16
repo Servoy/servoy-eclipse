@@ -6,10 +6,9 @@ import {PopupMenuService, MenuItem, Popup} from './window_service/popupmenu.serv
 import { ServoyPublicModule, PopupForm, SpecTypesService } from '@servoy/public';
 
 @NgModule({
-   declarations: [],
-   imports: [CommonModule, ServoyPublicModule],
-   providers: [WindowPluginService, ShortcutService, PopupMenuService],
-   entryComponents: []
+    declarations: [],
+    imports: [CommonModule, ServoyPublicModule],
+    providers: [WindowPluginService, ShortcutService, PopupMenuService]
 })
 export class WindowServiceModule {
      constructor( specTypesService: SpecTypesService ) {
