@@ -356,10 +356,7 @@ export class FormService {
                formCache.addLayoutContainer(structure);
             } else
                 if (elem.formComponent) {
-                    const classes: Array<string> = new Array();
-                    if (elem.model.styleClass) {
-                        classes.push(elem.model.styleClass);
-                    }
+                    const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
                     const layout: { [property: string]: string } = {};
                     if (!elem.responsive) {
                         let height = elem.model.height;

@@ -62,7 +62,7 @@ export class JSONArrayConverter implements IConverter {
                 }
             } else if (serverJSONValue && serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
                 // granular updates received;
-
+                this.specTypesService.enhanceArrayType(currentClientValue, this.iterableDiffers);
                 state = currentClientValue.getStateHolder();
 
                 if (serverJSONValue[JSONArrayConverter.INITIALIZE])
@@ -170,6 +170,7 @@ export class JSONArrayConverter implements IConverter {
             } else if (serverJSONValue && serverJSONValue[JSONArrayConverter.INITIALIZE]) {
                 // only content version update - this happens when a full array value is set on this property client side; it goes to server
                 // and then server sends back the version and we initialize / prepare the existing newValue for being watched/handle child conversions
+                this.specTypesService.enhanceArrayType(currentClientValue, this.iterableDiffers);
                 state = currentClientValue.getStateHolder();
                 state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION]; // here we can count on not having any 'smart' values cause if we had
                 // updates would have been received with this initialize as well (to initialize child elements as well to have the setChangeNotifier and internal things)
@@ -178,7 +179,7 @@ export class JSONArrayConverter implements IConverter {
                 // if null is on server and something is set on client or the other way around?
                 newValue = null;
         } finally {
-            state.clearChanges();
+            if (state) state.clearChanges();
         }
 
         return newValue;

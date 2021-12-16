@@ -7,7 +7,7 @@ import { StructureCache } from '../ngclient/types';
 export class AddAttributeDirective implements OnChanges {
     @Input() svyContainerStyle: any;
     @Input() svyContainerLayout;
-    @Input() svyContainerClasses;
+    @Input() svyContainerClasses : Array<string>;
     @Input() svyContainerAttributes;
 
     parent: AbstractFormComponent;
