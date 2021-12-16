@@ -1,10 +1,10 @@
 <label class='svy-check-radio' 
 	 style="width:100%;	height:100%;"
 	 sablo-tabseq='tabSeq'
+     [svyTooltip]="toolTipText"
 	 #element>
 	<input type="radio"
 	     ngModel	
-         [svyTooltip]="toolTipText"
     	 [id]="servoyApi.getMarkupId()"
 		 [disabled]="!enabled || !editable"
 		 [sabloTabseq]="tabSeq"
