@@ -46,12 +46,11 @@ import {MainRoutingModule} from './main-routing.module';
         ServoyCoreComponentsModule
     ],
     providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
-					ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
-					ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
+        ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
+        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],
     schemas: [
-              CUSTOM_ELEMENTS_SCHEMA
+        CUSTOM_ELEMENTS_SCHEMA
     ]
 } )
 export class ServoyModule { }

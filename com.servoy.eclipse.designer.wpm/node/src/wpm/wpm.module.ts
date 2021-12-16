@@ -24,33 +24,32 @@ import { FormsModule } from '@angular/forms'
 import { UpdatePackagesDialogComponent } from './update-dialog/update-dialog.component';
 
 @NgModule({
-  declarations: [
-    MainComponent,
-    HeaderComponent,
-    ContentComponent,
-    PackagesComponent,
-    UpdatePackagesDialogComponent,
-    AddRepositoryDialogComponent,
-    ErrorDialogComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatButtonModule,
-    MatTabsModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    MatInputModule,
-    MatCheckboxModule,
-    FormsModule
-  ],
-  providers: [WebsocketService, WpmService],
-  bootstrap: [MainComponent],
-  entryComponents: [AddRepositoryDialogComponent, ErrorDialogComponent]
+    declarations: [
+        MainComponent,
+        HeaderComponent,
+        ContentComponent,
+        PackagesComponent,
+        UpdatePackagesDialogComponent,
+        AddRepositoryDialogComponent,
+        ErrorDialogComponent
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatTabsModule,
+        MatSelectModule,
+        MatOptionModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatCardModule,
+        MatProgressBarModule,
+        MatDialogModule,
+        MatInputModule,
+        MatCheckboxModule,
+        FormsModule
+    ],
+    providers: [WebsocketService, WpmService],
+    bootstrap: [MainComponent]
 })
 export class WpmModule { }
