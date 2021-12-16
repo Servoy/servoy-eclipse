@@ -57,7 +57,11 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'activated')
     }
 
-    keyPressed(event: {ctrlKey?: string; shiftKey?: string; altKey?: string; metaKey?: string; keyCode?: number}) {
+    keyPressed(event: {ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number}) {
+        // remove selection if backspace or delete key was pressed
+        if (event.keyCode == 8 || event.keyCode == 46) {
+            this.updateSelection([]);
+        }
         void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,
             shift: event.shiftKey,
@@ -172,7 +176,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     executeAction(action: string, params?) {
-        void this.wsSession.callService('formeditor', action, params, true)
+        void this.wsSession.callService('formeditor', action, params, true);
     }
 
     updateSelection(ids: Array<string>, redrawDecorators?: boolean) {
@@ -367,6 +371,16 @@ export class EditorSessionService implements ServiceProvider {
 
     stopAutoscroll(){
         this.autoscrollBehavior.next(null);
+    }
+
+    getFixedKeyEvent(event: KeyboardEvent) {
+        return {
+            keyCode: event.keyCode,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            metaKey: event.metaKey
+        }
     }
 }
 

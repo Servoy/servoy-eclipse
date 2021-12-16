@@ -1,9 +1,10 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
+import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
     selector: 'designer-editorcontent',
@@ -25,7 +26,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
 
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService) {
+        protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService,
+        private editorSession: EditorSessionService) {
         designSize.setEditor(this);
     }
 
@@ -63,6 +65,11 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
                 this.renderer.setStyle(glassPane, 'height', formHeight + 'px');
             }
         }
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    onKeyDown(event: KeyboardEvent) {
+        this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
     }
 
     adjustFromContentSize() {

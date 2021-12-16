@@ -27,6 +27,7 @@ import { ResizeKnobDirective } from './directives/resizeknob.directive';
 import {DesignerUtilsService} from './services/designerutils.service';
 import { DragselectionComponent } from './dragselection/dragselection.component';
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
+import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { DragselectionResponsiveComponent } from './dragselection-responsive/dra
     SearchTextPipe,
     SearchTextDeepPipe,
     ResizeKnobDirective,
+    KeyboardLayoutDirective,
     PositionMenuDirective,
     DragselectionComponent,
     DragselectionResponsiveComponent
