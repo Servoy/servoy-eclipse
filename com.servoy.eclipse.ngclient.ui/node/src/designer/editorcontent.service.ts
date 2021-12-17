@@ -22,6 +22,56 @@ export class EditorContentService {
         let refresh = false;
         let reorderPartComponents: boolean;
         let reorderLayoutContainers: Array<StructureCache> = new Array();
+        if (data.ng2containers) {
+            data.ng2containers.forEach((elem) => {
+                let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
+                if (container) {
+                    container.classes = elem.styleclass;
+                    container.attributes = elem.attributes;
+                    const parentUUID = data.childParentMap[container.id].uuid;
+                    let newParent = container.parent;
+                    if (parentUUID) {
+                        newParent = formCache.getLayoutContainer(parentUUID);
+                    }
+                    else{
+                        newParent = formCache.mainStructure
+                    }
+                    if (container.parent.id !=  newParent.id){
+                        // we moved it to another parent
+                        container.parent.removeChild(container);
+                        newParent.addChild(container);
+                    }
+                    if (reorderLayoutContainers.indexOf(newParent) < 0) {
+                        // existing layout container in parent layout container , make sure is inserted in correct position
+                        reorderLayoutContainers.push(newParent);
+                    }
+                }
+                else {
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
+                    formCache.addLayoutContainer(container);
+                    const parentUUID = data.childParentMap[container.id].uuid;
+                    if (parentUUID) {
+                        let parent = formCache.getLayoutContainer(parentUUID);
+                        if (parent) {
+                            parent.addChild(container);
+                            if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                // new layout container in parent layout container , make sure is inserted in correct position
+                                reorderLayoutContainers.push(parent);
+                            }
+                        }
+                    }
+                    else {
+                        // dropped directly on form
+                        formCache.mainStructure.addChild(container);
+                        if (reorderLayoutContainers.indexOf(formCache.mainStructure) < 0) {
+                            // new layout container in parent form , make sure is inserted in correct position
+                            reorderLayoutContainers.push(formCache.mainStructure);
+                        }
+                    }
+                }
+            });
+            refresh = true;
+        }
         if (data.ng2components) {
             data.ng2components.forEach((elem) => {
                 let component = formCache.getComponent(elem.name);
@@ -69,56 +119,6 @@ export class EditorContentService {
                     else {
                         formCache.partComponentsCache.push(comp);
                         reorderPartComponents = true;
-                    }
-                }
-            });
-            refresh = true;
-        }
-        if (data.ng2containers) {
-            data.ng2containers.forEach((elem) => {
-                let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
-                if (container) {
-                    container.classes = elem.styleclass;
-                    container.attributes = elem.attributes;
-                    const parentUUID = data.childParentMap[container.id].uuid;
-                    let newParent = container.parent;
-                    if (parentUUID) {
-                        newParent = formCache.getLayoutContainer(parentUUID);
-                    }
-                    else{
-                        newParent = formCache.mainStructure
-                    }
-                    if (container.parent.id !=  newParent.id){
-                        // we moved it to another parent
-                        container.parent.removeChild(container);
-                        newParent.addChild(container);
-                    }
-                    if (reorderLayoutContainers.indexOf(newParent) < 0) {
-                        // existing layout container in parent layout container , make sure is inserted in correct position
-                        reorderLayoutContainers.push(newParent);
-                    }
-                }
-                else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
-                    formCache.addLayoutContainer(container);
-                    const parentUUID = data.childParentMap[container.id].uuid;
-                    if (parentUUID) {
-                        let parent = formCache.getLayoutContainer(parentUUID);
-                        if (parent) {
-                            parent.addChild(container);
-                            if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                // new layout container in parent layout container , make sure is inserted in correct position
-                                reorderLayoutContainers.push(parent);
-                            }
-                        }
-                    }
-                    else {
-                        // dropped directly on form
-                        formCache.mainStructure.addChild(container);
-                        if (reorderLayoutContainers.indexOf(formCache.mainStructure) < 0) {
-                            // new layout container in parent form , make sure is inserted in correct position
-                            reorderLayoutContainers.push(formCache.mainStructure);
-                        }
                     }
                 }
             });
