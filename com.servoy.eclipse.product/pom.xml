@@ -114,6 +114,15 @@
 						<macosx-bundled>true</macosx-bundled>
 					</profileProperties>
 				</configuration>
+                <executions>
+                <execution>
+                        <id>default-archive-repository</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>archive-repository</goal>
+                        </goals>
+                </execution>
+                </executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
