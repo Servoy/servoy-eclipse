@@ -874,6 +874,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		checkPackages(false);
 	}
 
+	public static boolean isBuildRunning()
+	{
+		return scheduled.get() > 1;
+	}
+
 	/**
 	 * returns true if the given package is enabled, will return falso only when the given package is a ng1 default package mapping
 	 * and the preference says it is disabled
