@@ -33,7 +33,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -219,8 +218,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		Composite composite = new Composite(sc, SWT.NONE);
 		sc.setContent(composite);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		Color backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		composite.setBackground(backgroundColor);
 		composite.setLayout(gridLayout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridData gd = new GridData(SWT.LEFT, SWT.BEGINNING, true, false);
@@ -234,7 +231,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		checkAll = new Button(composite, SWT.CHECK);
 		checkAll.setText("Select/Deselect All");
 		checkAll.setFont(font);
-		checkAll.setBackground(backgroundColor);
 		checkAll.addListener(SWT.Selection, e -> {
 			checks.stream().forEach(check -> check.setSelection(checkAll.getSelection()));
 			handleEvent(null);
@@ -243,7 +239,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		Label versionLabel = new Label(composite, SWT.NONE);
 		versionLabel.setText("Version");
 		versionLabel.setFont(font);
-		versionLabel.setBackground(backgroundColor);
 		versionLabel.setLayoutData(gd);
 		new Label(composite, SWT.NONE);
 
@@ -260,7 +255,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 				continue;
 			}
 			Button moduleCheck = new Button(composite, SWT.CHECK);
-			moduleCheck.setBackground(backgroundColor);
 			moduleCheck.setText(module);
 			moduleCheck.setSelection(exportSolutionWizard.getModel().getModulesToExport() == null ? true
 				: Arrays.stream(exportSolutionWizard.getModel().getModulesToExport()).anyMatch(name -> module.equals(name)));
@@ -287,7 +281,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			label.setImage(warn);
 			label.setVisible(Strings.isEmpty(v));
 			label.setToolTipText("Please set a version for  module '" + module + "'.");
-			label.setBackground(backgroundColor);
 			label.setLayoutData(gd);
 			warnLabels.add(label);
 		}
