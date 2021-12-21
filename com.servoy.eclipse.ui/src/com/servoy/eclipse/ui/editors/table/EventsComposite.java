@@ -194,7 +194,6 @@ public class EventsComposite extends Composite
 		treeViewer.setComparator(comparator);
 
 		tree.setSortColumn(nameColumn);
-		tree.setSortDirection(comparator.isAscending() ? SWT.UP : SWT.DOWN);
 		nameColumn.addSelectionListener(new TreeColumnsSorter(comparator, treeViewer));
 
 		TreeColumn methodColumn = new TreeColumn(tree, SWT.LEFT, CI_METHOD);
