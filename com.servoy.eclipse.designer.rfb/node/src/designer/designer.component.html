@@ -3,8 +3,9 @@
 <div class="fill-area">
     <designer-palette></designer-palette>
     <designer-resizer></designer-resizer> 
-    <div #contentArea class="content-area" tabindex="0" >
+    <div #contentArea class="content-area" tabindex="0">
         <div #glasspane class="contentframe-overlay">
+            <designer-inline-edit></designer-inline-edit>
             <selection-decorators></selection-decorators>
             <designer-highlight></designer-highlight>
             <designer-ghostscontainer></designer-ghostscontainer>
@@ -17,7 +18,5 @@
 	<div #rightAutoscroll class="rightAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
 	<div #topAutoscroll class="topAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
 	<div #leftAutoscroll class="leftAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-</div>
-<designer-status-bar></designer-status-bar>
-</div>
+</div> <designer-status-bar></designer-status-bar> </div>
 <designer-contextmenu></designer-contextmenu>

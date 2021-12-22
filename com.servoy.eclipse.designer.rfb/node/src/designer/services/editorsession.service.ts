@@ -4,6 +4,11 @@ import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } 
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
 
+interface CallbackFunction {
+    event: string,
+    function: (event: any) => boolean | void
+}
+
 @Injectable()
 export class EditorSessionService implements ServiceProvider {
 
@@ -15,6 +20,7 @@ export class EditorSessionService implements ServiceProvider {
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
+    public registerCallback = new BehaviorSubject<CallbackFunction>(null);
     private allowedChildren: unknown;
 
     private bIsDirty = false;

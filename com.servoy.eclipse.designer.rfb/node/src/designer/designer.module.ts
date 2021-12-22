@@ -27,6 +27,7 @@ import { ResizeKnobDirective } from './directives/resizeknob.directive';
 import {DesignerUtilsService} from './services/designerutils.service';
 import { DragselectionComponent } from './dragselection/dragselection.component';
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
+import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
 
 @NgModule({
@@ -50,7 +51,8 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     KeyboardLayoutDirective,
     PositionMenuDirective,
     DragselectionComponent,
-    DragselectionResponsiveComponent
+    DragselectionResponsiveComponent,
+    InlineEditComponent
   ],
   imports: [
     BrowserModule,
