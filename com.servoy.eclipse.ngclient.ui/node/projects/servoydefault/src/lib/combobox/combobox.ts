@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject } from '@angular/core';
-import { NgbDropdownItem, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownItem, NgbTooltip, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -13,6 +13,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
 
     @ViewChildren(NgbDropdownItem) menuItems: QueryList<NgbDropdownItem>;
     @ViewChild('input') input: ElementRef<HTMLButtonElement>;
+    @ViewChild( NgbDropdown ) comboboxDropdown: NgbDropdown;
     @ViewChild('tooltip') tooltip: NgbTooltip;
     
     formattedValue: any;
@@ -36,6 +37,9 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.lastSelectValue = null;
         this.firstItemFound = false;
         if (this.isPrintableChar(event.key)) {
+            if(document.activeElement === this.getFocusElement() && !this.comboboxDropdown.isOpen()){
+                this.comboboxDropdown.open();
+            }
             if(event.key !== 'Backspace') this.keyboardSelectValue = (this.keyboardSelectValue ? this.keyboardSelectValue : '') + event.key;
             else this.keyboardSelectValue = this.keyboardSelectValue ? this.keyboardSelectValue.slice(0, -1) : '';
             this.lastSelectValue = this.keyboardSelectValue.slice();
