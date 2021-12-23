@@ -62,7 +62,8 @@ public class IndexPageFilter implements Filter
 		request.getSession();
 		String requestURI = request.getRequestURI();
 
-		if (requestURI.toLowerCase().endsWith("/index.html") && WebPackagesListener.isBuildRunning())
+		if (requestURI.toLowerCase().endsWith("/index.html") &&
+			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
 			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/loadingclient.html"));
 			response.setCharacterEncoding("UTF-8");
