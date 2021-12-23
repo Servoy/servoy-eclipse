@@ -76,12 +76,15 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         const nonPrintableValue = [
             'Alt', 'AltGraph', 'CapsLock', 'Fn', 'Meta', 'NumLock', 'ScrollLock', 'Shift',
             'Enter', 'Tab', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home',
-            'PageUp', 'PageDown', 'Delete', 'Control', 'Insert', 'Del', 'Escape'
+            'PageUp', 'PageDown', 'Delete', 'Control', 'Insert', 'Del', 'Escape',
+            'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12' 
         ];
         if ( nonPrintableValue.includes( key ) ) {
-            if ( key === 'Delete' || key === 'ArrowDown' || key === 'ArrowUp' || key === 'ArrowLeft' || key === 'ArrowRight') {
-                this.closeTooltip();
-            }
+            const keysThatCloseTooltip = [
+                'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home',
+                'PageUp', 'PageDown', 'Delete', 'Del', 'Tab'
+            ];
+            if ( keysThatCloseTooltip.includes( key ) ) this.closeTooltip();
             return false;
         }
         return true;
