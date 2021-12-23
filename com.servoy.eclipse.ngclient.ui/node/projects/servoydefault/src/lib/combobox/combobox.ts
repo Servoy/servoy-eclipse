@@ -68,14 +68,18 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         }
     }
 
-    isPrintableChar(key: string): boolean {
+    isPrintableChar( key: string ): boolean {
         const nonPrintableValue = [
             'Alt', 'AltGraph', 'CapsLock', 'Fn', 'Meta', 'NumLock', 'ScrollLock', 'Shift',
             'Enter', 'Tab', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home',
             'PageUp', 'PageDown', 'Delete', 'Control', 'Insert', 'Del', 'Escape'
         ];
-        if (nonPrintableValue.includes(key))
+        if ( nonPrintableValue.includes( key ) ) {
+            if ( key === 'Delete' || key === 'ArrowDown' || key === 'ArrowUp' || key === 'ArrowLeft' || key === 'ArrowRight') {
+                this.closeTooltip();
+            }
             return false;
+        }
         return true;
     }
     
