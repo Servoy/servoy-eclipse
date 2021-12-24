@@ -33,8 +33,7 @@ export class InlineEditComponent implements AfterViewInit {
                 for (let i = 0; i < selection.length; i++) {
                     const node = selection[i];
                     if (eventNode.getAttribute("svy-id") === node) {
-                        // const directEditProperty = eventNode.getAttribute("directEditPropertyName");
-                        const directEditProperty = 'text';
+                        const directEditProperty = eventNode.getAttribute("directEditPropertyName");
                         if (directEditProperty) {
                             this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: string) => {
                                 if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild) {
