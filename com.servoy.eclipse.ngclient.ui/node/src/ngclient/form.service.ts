@@ -253,7 +253,7 @@ export class FormService {
 
         const conversionInfo = formState.getConversionInfo(beanname);
         let fslRowID = null;
-        if (conversionInfo && conversionInfo[property]) {
+        if (conversionInfo && conversionInfo[property] && !formState.getComponent(beanname)?.model?.findmode) {
             changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
         } else {
             // foundset linked stuff.
@@ -304,7 +304,10 @@ export class FormService {
             }
         }
         for (const beanname of Object.keys(formData)) {
-            if (beanname === '') continue; // skip form properties
+             if (beanname === '') {
+                servoyService.setFindMode(formname, formData[beanname]['findmode']);
+                continue;
+            }
             let comp: IComponentCache = formCache.getComponent(beanname);
             if (!comp) { // is it a form component?
                 comp = formCache.getFormComponent(beanname);
@@ -328,14 +331,11 @@ export class FormService {
                         formComponent.propertyChanged(beanname, property, value);
                     }
                 }
-                if (property == 'cssPosition'){
+                if (property === 'cssPosition'){
                     comp.layout = value;
                 } else{
                     comp.model[property] = value;
                 }
-            }
-            if (beanname === '') {
-                servoyService.setFindMode(formname, formData[beanname]['findmode']);
             }
         }
         formComponent.detectChanges();
