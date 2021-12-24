@@ -29,6 +29,9 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         if (changes['hostComponent']) {
             this.hostComponent.addViewStateListener(this);
         }
+        if (changes['media']) {
+             this.setImageStyle();
+        }
     }
 
     ngOnDestroy(): void {
