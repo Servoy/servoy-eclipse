@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import com.servoy.base.query.IJoinConstants;
+import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -116,7 +116,7 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 			Relation relation = editingSolution.getRelation(relationName);
 			if (relation == null)
 			{
-				relation = editingSolution.createNewRelation(validator, relationName, IJoinConstants.LEFT_OUTER_JOIN);
+				relation = editingSolution.createNewRelation(validator, relationName, IQueryConstants.LEFT_OUTER_JOIN);
 				// this should be probably changed in content spec
 				relation.setAllowCreationRelatedRecords(true);
 			}

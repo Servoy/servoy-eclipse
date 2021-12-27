@@ -219,14 +219,18 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 498,
 				Short.MAX_VALUE).add(GroupLayout.LEADING, optionsComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
-					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
-						groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
-							Short.MAX_VALUE))).addContainerGap()));
+					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE)
+				.add(GroupLayout.LEADING,
+					groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
+						Short.MAX_VALUE)))
+			.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					datasourceSelectComposite).addPreferredGap(LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(optionsComposite).addContainerGap()));
+					datasourceSelectComposite)
+				.addPreferredGap(LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					Short.MAX_VALUE)
+				.addPreferredGap(LayoutStyle.RELATED).add(optionsComposite).addContainerGap()));
 		comp.setLayout(groupLayout);
 
 		createTableColumns();
@@ -1021,15 +1025,19 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 
 	public void unregisterListeners()
 	{
-		ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
-		if (primaryTable != null)
+		Relation relation = getRelation();
+		if (relation != null)
 		{
-			primaryTable.removeIColumnListener(this);
-		}
-		ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
-		if (foreignTable != null)
-		{
-			foreignTable.removeIColumnListener(this);
+			ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getPrimaryDataSource());
+			if (primaryTable != null)
+			{
+				primaryTable.removeIColumnListener(this);
+			}
+			ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+			if (foreignTable != null)
+			{
+				foreignTable.removeIColumnListener(this);
+			}
 		}
 	}
 

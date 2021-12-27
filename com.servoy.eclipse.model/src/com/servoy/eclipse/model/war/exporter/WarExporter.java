@@ -268,7 +268,7 @@ public class WarExporter
 		}
 		try
 		{
-			// just always copy the nglibs to it even if it is just puur smart client
+			// just always copy the nglibs to it even if it is just pure smart client
 			// the log4j libs are always needed.
 			copyNGLibs(targetLibDir, exportModel.isNGExport());
 		}

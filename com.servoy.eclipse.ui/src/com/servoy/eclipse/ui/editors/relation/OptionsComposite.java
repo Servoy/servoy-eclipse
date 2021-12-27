@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.base.query.IJoinConstants;
+import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
@@ -88,7 +88,7 @@ public class OptionsComposite extends Group
 		joinTypeLabel.setText("Join type");
 
 		joinCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
-		joinCombo.setItems(new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] });
+		joinCombo.setItems(new String[] { ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.LEFT_OUTER_JOIN] });
 
 		Label initialSortLabel;
 		initialSortLabel = new Label(this, SWT.NONE);
@@ -139,26 +139,37 @@ public class OptionsComposite extends Group
 		final GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(7, 7, 7).add(
 			groupLayout.createParallelGroup(GroupLayout.LEADING).add(initialSortLabel).add(joinTypeLabel).add(deprecatedLabel).add(
-				encapsulationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(initalSort, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
-						joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
-							GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-								LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
-									groupLayout.createParallelGroup(GroupLayout.LEADING).add(allowCreationOfButton).add(allowParentDeleteButton).add(
-										deleteRelatedRecordsButton)).addContainerGap()));
+				encapsulationLabel))
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(initalSort, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
+					joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
+						GroupLayout.PREFERRED_SIZE)
+					.add(encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE))
+			.addPreferredGap(
+				LayoutStyle.RELATED)
+			.add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(allowCreationOfButton).add(allowParentDeleteButton).add(
+					deleteRelatedRecordsButton))
+			.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().add(9, 9, 9).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(joinTypeLabel).add(joinCombo,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(initialSortLabel).add(initalSort).add(button)).addPreferredGap(
-							LayoutStyle.RELATED).add(
-								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated)).addPreferredGap(
-									LayoutStyle.RELATED).add(
-										groupLayout.createParallelGroup(GroupLayout.LEADING).add(encapsulationLabel).add(encapsulation))).add(
-											groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(
-												LayoutStyle.RELATED).add(
-													groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(
-														deleteRelatedRecordsButton)))).addContainerGap(41, Short.MAX_VALUE)));
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(initialSortLabel).add(initalSort).add(button))
+					.addPreferredGap(
+						LayoutStyle.RELATED)
+					.add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated))
+					.addPreferredGap(
+						LayoutStyle.RELATED)
+					.add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(encapsulationLabel).add(encapsulation)))
+				.add(
+					groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(
+						LayoutStyle.RELATED).add(
+							groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(
+								deleteRelatedRecordsButton))))
+				.addContainerGap(41, Short.MAX_VALUE)));
 		setLayout(groupLayout);
 	}
 
