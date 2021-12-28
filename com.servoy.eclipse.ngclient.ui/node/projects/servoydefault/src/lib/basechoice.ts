@@ -38,6 +38,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
                 case 'valuelistID':
                     if (this.valuelistID && this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0]))
                         this.allowNullinc = 1;
+                    else this.allowNullinc = 0;
                     this.setSelectionFromDataprovider();
                     break;
             }
