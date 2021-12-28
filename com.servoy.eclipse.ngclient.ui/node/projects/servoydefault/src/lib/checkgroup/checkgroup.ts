@@ -40,26 +40,33 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
         this.selection = [];
         if (this.dataProviderID === null || this.dataProviderID === undefined) return;
         const arr = (typeof this.dataProviderID === 'string') ? this.dataProviderID.split('\n') : [this.dataProviderID];
-        arr.forEach((element, index, array) => {
-            for (let i = 0; i < this.valuelistID.length; i++) {
-                const item = this.valuelistID[i];
-                if (item.realValue + '' === element + '' && !this.isValueListNull(item)) this.selection[i - this.allowNullinc] = true;
+        for (let i = 0; i < this.valuelistID.length; i++) {
+            const item = this.valuelistID[i];
+            if (!this.isValueListNull(item)) {
+                this.selection[i - this.allowNullinc] = arr.find(value => item.realValue + '' === value + '') !== undefined;
             }
-        });
+        }
     }
 
-    itemClicked(event, index) {
-        const checkedTotal = this.selection.filter(a => a === true).length;
-        let changed = true;
-        if (event.target.checked) {
-            if (!(!this.format || this.format.type === 'TEXT') && checkedTotal > 1) {
-                this.selection.map(() => false);
+    itemClicked(event: Event, index: number) {
+        const allowMultiselect = !this.format || this.format.type === 'TEXT';
+        const prevValue = this.selection[index];
+        const element = event.target as HTMLInputElement;
+        if (allowMultiselect || this.findmode) {
+            this.selection[index] = element.checked;
+            if(!this.findmode && this.allowNullinc === 0 &&  this.selection.filter(a => a === true).length === 0) {
+                this.selection[index] = true;
+                element.checked = true;
             }
-            this.selection[index] = true;
         } else {
-            event.target.checked = this.selection[index] = this.allowNullinc === 0 && checkedTotal <= 1 && !this.findmode;
-            changed = !event.target.checked;
+            this.selection.fill(false);
+            this.selection[index] = element.checked;
+            if (!this.selection[index] && this.allowNullinc === 0) {
+                 this.selection[index] = true;
+                 element.checked = true;
+            }
         }
+        const changed = prevValue !== this.selection[index];
         super.baseItemClicked(event, changed, this.getDataproviderFromSelection());
     }
 
