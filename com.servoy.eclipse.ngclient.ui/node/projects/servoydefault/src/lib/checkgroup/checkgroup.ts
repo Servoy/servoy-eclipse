@@ -17,6 +17,12 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
         super(renderer, cdRef, formattingService, doc);
     }
 
+    getFocusElement(): HTMLElement {
+        let focusElement = super.getFocusElement();
+        if (focusElement === null) focusElement = this.getNativeElement();
+        return focusElement;
+    }
+
     getDataproviderFromSelection() {
         const allowMultiselect = !this.format || this.format.type === 'TEXT';
         let ret = allowMultiselect ? '' : null;

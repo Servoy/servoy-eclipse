@@ -16,6 +16,12 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
         super(renderer, cdRef, formattingService, doc);
     }
 
+    getFocusElement(): HTMLElement {
+        let focusElement = super.getFocusElement();
+        if (focusElement === null) focusElement = this.getNativeElement();
+        return focusElement;
+    }
+
     setSelectionFromDataprovider() {
         this.value = this.dataProviderID;
         if (this.valuelistID) {

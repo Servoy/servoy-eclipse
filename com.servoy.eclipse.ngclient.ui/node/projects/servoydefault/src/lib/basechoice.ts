@@ -26,7 +26,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     }
 
     getFocusElement(): HTMLElement {
-        return this.input.nativeElement;
+        return this.input != null?this.input.nativeElement:null;
     }
 
     svyOnChanges(changes: SimpleChanges) {
