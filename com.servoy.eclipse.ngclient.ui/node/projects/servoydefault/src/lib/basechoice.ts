@@ -98,6 +98,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
         return this.selection
             .map((item, index) => {
                 if (item === true) return this.valuelistID[index + this.allowNullinc].realValue;
+                return null;
             })
             .filter(item => item !== null);
     }
