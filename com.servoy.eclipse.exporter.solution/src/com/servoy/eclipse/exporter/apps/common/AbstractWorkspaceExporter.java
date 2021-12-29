@@ -416,8 +416,10 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		List<IProject> existingClosedProjects)
 	{
 		boolean useLinks = !workspaceRoot.getLocation().toFile().equals(sourceFolder);
-
-		for (File f : sourceFolder.listFiles())
+		File[] files = sourceFolder.listFiles();
+		outputExtra("getting the dir contents of " + sourceFolder + ":  " + files);
+		if (files == null) return;
+		for (File f : files)
 		{
 			// this assumes that the name defined in ".project" matches the name of the parent folder;
 			// if needed in the future, Workspace.loadProjectDescription(<.project>) can be used before we create the Project instance
