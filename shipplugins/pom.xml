@@ -11,6 +11,7 @@
 
 	<properties>
 		<tycho.version>2.2.0</tycho.version>
+		<log4j-version>2.17.1</log4j-version>
 		 <eclipse.url>https://download.eclipse.org/eclipse/updates/4.17/</eclipse.url>
 	</properties>
 
@@ -139,17 +140,17 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j18-impl</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.servoy</groupId>
