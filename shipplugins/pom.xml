@@ -12,6 +12,7 @@
 	<properties>
 		<tycho.version>1.5.1</tycho.version>
 		<tycho.extra.version>1.5.1</tycho.extra.version>
+		<log4j-version>2.17.1</log4j-version>
 		<eclipse.url>https://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
 		<emf.url>https://download.eclipse.org/modeling/emf/emf/builds/release/2.16</emf.url>
 		<gef.url>https://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
@@ -152,17 +153,17 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j18-impl</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.17.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.servoy</groupId>
