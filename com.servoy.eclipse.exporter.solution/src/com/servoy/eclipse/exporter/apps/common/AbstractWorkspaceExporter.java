@@ -417,7 +417,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	{
 		boolean useLinks = !workspaceRoot.getLocation().toFile().equals(sourceFolder);
 		File[] files = sourceFolder.listFiles();
-		outputExtra("getting the dir contents of " + sourceFolder + ":  " + files);
 		if (files == null) return;
 		for (File f : files)
 		{
