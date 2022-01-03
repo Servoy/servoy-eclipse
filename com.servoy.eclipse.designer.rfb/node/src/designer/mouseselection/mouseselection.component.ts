@@ -266,6 +266,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.editorSession.setSelection(newSelection, this);
         }
         this.lassostarted = false;
+        this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
         this.applyWireframe();
     }
 
@@ -302,6 +303,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
             if (event.pageY < this.mousedownpoint.y) {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
+            }
+            if (this.lassoRef.nativeElement.style.display === 'none') {
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
             }
             const currentWidth = event.pageX - this.mousedownpoint.x;
             const currentHeight = event.pageY - this.mousedownpoint.y;
