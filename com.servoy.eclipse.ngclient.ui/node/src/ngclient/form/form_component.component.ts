@@ -160,7 +160,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     public detectChanges() {
-        this.changeHandler.markForCheck();
+        this.changeHandler.detectChanges();
     }
 
     public formCacheChanged(cache: FormCache): void {
