@@ -105,7 +105,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                   this.renderer.removeChild(elementInfo.element.parentElement, elementInfo.element);
               }
           }
-          if((event.ctrlKey||event.metaKey) && changes.length){
+          if((event.ctrlKey||event.metaKey) && (changes as Array<any>).length){
             this.editorSession.createComponents({
                 "components": changes
             });
