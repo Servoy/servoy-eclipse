@@ -82,7 +82,7 @@ public class CreateComponentsHandler extends CreateComponentHandler
 									}
 								}
 							}
-							if (newPersists != null)
+							if (newPersists != null && newPersists.size() > 0)
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 								IStructuredSelection structuredSelection = new StructuredSelection(newPersists);
