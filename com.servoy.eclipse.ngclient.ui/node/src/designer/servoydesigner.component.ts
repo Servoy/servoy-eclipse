@@ -99,6 +99,10 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         this.windowRef.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
     }
     
+    redrawDecorators() {
+        this.windowRef.nativeWindow.parent.postMessage({ id: 'redrawDecorators' }, '*');
+    }
+    
     updateForm(width :number, height : number) : void{
          this.windowRef.nativeWindow.parent.postMessage({ id: 'updateFormSize', width : width, height : height }, '*');
     }
@@ -116,4 +120,5 @@ export declare interface IDesignFormComponent {
     refresh() : void;
     renderGhosts() : void;
     updateForm(width :number, height : number) : void;
+    redrawDecorators(): void;
 }

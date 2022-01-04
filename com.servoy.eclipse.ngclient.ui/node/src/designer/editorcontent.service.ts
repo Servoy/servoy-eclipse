@@ -20,6 +20,7 @@ export class EditorContentService {
         let data = JSON.parse(updates);
         let formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
         let refresh = false;
+        let redrawDecorators = false;
         let reorderPartComponents: boolean;
         let reorderLayoutContainers: Array<StructureCache> = new Array();
         if (data.ng2containers) {
@@ -83,6 +84,10 @@ export class EditorContentService {
                         if (beanConversion && beanConversion[property]) {
                             value = this.converterService.convertFromServerToClient(value, beanConversion[property], component.model[property],
                                 (prop: string) => component.model ? component.model[prop] : component.model);
+                        }
+                        if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
+                                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y)) {
+                            redrawDecorators = true;
                         }
                         component.model[property] = value;
                     }
@@ -160,7 +165,9 @@ export class EditorContentService {
         if (refresh) {
             this.designFormCallback.refresh();
         }
-
+        if (redrawDecorators) {
+            this.designFormCallback.redrawDecorators();
+        }
     }
 
     updateForm(uuid: string, parentUuid: string, width: number, height: number) {

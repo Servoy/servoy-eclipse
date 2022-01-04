@@ -4,6 +4,7 @@ import { EditorSessionService, ISelectionChangedListener } from '../services/edi
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { Subscription } from 'rxjs';
+import { WindowRefService } from '@servoy/public';
 
 @Component({
     selector: 'selection-decorators',
@@ -29,7 +30,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     removeSelectionChangedListener: () => void;
 
     constructor(public readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService) {
+        protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService, private windowRefService: WindowRefService) {
+        this.windowRefService.nativeWindow.addEventListener('message', (event) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (event.data.id === 'redrawDecorators') {
+                this.redrawDecorators();
+            }
+        });
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
