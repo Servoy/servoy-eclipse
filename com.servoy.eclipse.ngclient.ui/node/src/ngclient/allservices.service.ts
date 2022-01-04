@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 
 import { ApplicationService } from './services/application.service';
+import { ClientDesignService } from './services/clientdesign.service';
 import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import {PopupFormService} from './services/popupform.service';
@@ -25,6 +26,7 @@ import { SabloService } from '../sablo/sablo.service';
 export class AllServiceService implements ServiceProvider {
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
+        private clientdesign: ClientDesignService,
         private $windowService: WindowService,
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
@@ -46,7 +48,7 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SessionService, PopupFormService,
+    providers: [AllServiceService, ApplicationService, ClientDesignService, WindowService, SessionService, PopupFormService,
                 // generated providers start
                 // generated providers end
                 ],
