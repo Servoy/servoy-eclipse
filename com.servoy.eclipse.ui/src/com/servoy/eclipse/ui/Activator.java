@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
@@ -69,8 +68,6 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
-import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -86,7 +83,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -153,9 +149,6 @@ public class Activator extends AbstractUIPlugin
 		com.servoy.eclipse.core.Activator.getDefault();
 		com.servoy.eclipse.ngclient.ui.Activator.getInstance().extractNode();
 		com.servoy.eclipse.ngclient.ui.Activator.getInstance().copyNodeFolder(true, false);
-
-		// warn if incompatible extensions are found
-//		doExtensionRelatedChecks(); disabled for now as marketplace/extensions are not currently in production
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
 		{
@@ -464,32 +457,6 @@ public class Activator extends AbstractUIPlugin
 
 		plugin = null;
 		super.stop(context);
-	}
-
-	private void doExtensionRelatedChecks()
-	{
-		// see if installed extensions are not out of sync with Servoy version
-		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
-
-		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
-		if (needsExtensionUpdateCheckBecauseOfNewRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
-			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
-		{
-			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
-				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates."));
-			updateCheckJob.setRule(InstalledExtensionsDialog.SERIAL_RULE);
-			updateCheckJob.setUser(false);
-			updateCheckJob.setSystem(false);
-			updateCheckJob.schedule();
-			updateCheckJob.setPriority(applicationServer.hadIncompatibleExtensionsWhenStarted() ? Job.INTERACTIVE : Job.LONG);
-		}
-	}
-
-	private boolean needsExtensionUpdateCheckBecauseOfNewRelease()
-	{
-		String servoyRelease = getPreferenceStore().getString(SERVOY_VERSION);
-		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion()); // shouldn't we do this only if the update check is successful?
-		return servoyRelease == null || "".equals(servoyRelease) || !servoyRelease.equals(ClientVersion.getBundleVersion());
 	}
 
 	/**
