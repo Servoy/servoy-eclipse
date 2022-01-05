@@ -22,7 +22,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 /**
- * Input for the Marketplace browser editor.
+ * Input for the Main Concepts browser editor.
  *
  * @author pbakker
  *
