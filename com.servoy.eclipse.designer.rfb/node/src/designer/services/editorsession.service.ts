@@ -447,7 +447,7 @@ export class Package {
     packageDisplayname : string;
     components: Array<PaletteComp>;
     propertyValues?: Array<PaletteComp>;
-    categories?: {property : PaletteComp};
+    categories?: {property :  Array<PaletteComp>};
 }
 
 export interface ISupportAutoscroll {

@@ -18,7 +18,16 @@
                         <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, component.propertyValue)" *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
                     </ul>
                 </li>
-                
+            </ul>
+             <ul *ngIf="package.categories">
+                <li *ngFor="let categoryObject of package.categories | keyvalue" >
+                    <div>{{categoryObject.key}}</div>
+                    <ul>
+                         <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
+                             <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                         </li>
+                    </ul>
+                </li>
             </ul>
         </ng-template>
         </ngb-panel>
