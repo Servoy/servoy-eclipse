@@ -762,7 +762,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						if (WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()))
 						{
-							DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
+							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageReader.getPackageName());
 							if (directorySync != null) directorySync.destroy();
 							if (packageFolder.exists()) FileUtils.deleteQuietly(packageFolder);
 
