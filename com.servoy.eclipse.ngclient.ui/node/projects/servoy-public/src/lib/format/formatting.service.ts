@@ -442,7 +442,8 @@ export class FormattingService {
         // adjust to luxon js formatting (from java simple date format)
         dateFormat = dateFormat.replace(new RegExp('Y', 'g'), 'y');
         dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
-        dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
+        if (dateFormat.indexOf('EE') === -1)
+            dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
         dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
         dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
         // no equivalent for K, just put h for now
