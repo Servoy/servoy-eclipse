@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -29,6 +30,7 @@ public class Activator extends Plugin
 {
 	private final String PLUGIN_ID = "com.servoy.eclipse.ngclient.ui";
 	private final String NODEJS_EXTENSION = "nodejs";
+	private final static String NG2_FOLDER = "target";
 
 	private final CountDownLatch nodeReady = new CountDownLatch(2);
 
@@ -53,7 +55,7 @@ public class Activator extends Plugin
 		plugin = this;
 		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(WebPackagesListener::exportNG2ToWar);
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
-		this.projectFolder = new File(stateLocation, "target");
+		this.projectFolder = new File(stateLocation, NG2_FOLDER);
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
 //		extractNode();
 	}
@@ -128,9 +130,9 @@ public class Activator extends Plugin
 					File npm = null;
 					if (cf.length > 0)
 					{
-						node = extractPath(cf[0], "nodePath");
+						node = extractPath(cf[0], "nodePath", true);
 						node.setExecutable(true);
-						npm = extractPath(cf[0], "npmPath");
+						npm = extractPath(cf[0], "npmPath", false);
 					}
 					nodePath = node;
 					npmPath = npm;
@@ -150,7 +152,7 @@ public class Activator extends Plugin
 		return projectFolder;
 	}
 
-	private static File extractPath(IConfigurationElement element, String attribute)
+	private static File extractPath(IConfigurationElement element, String attribute, boolean deletePreviousPaths)
 	{
 		String pluginId = element.getNamespaceIdentifier();
 		String path = element.getAttribute(attribute);
@@ -163,6 +165,24 @@ public class Activator extends Plugin
 			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
+				if (deletePreviousPaths)
+				{
+					File[] dirs = baseDir.listFiles(oldFile -> oldFile.isDirectory() && !oldFile.getName().equals(NG2_FOLDER));
+					if (dirs != null)
+					{
+						for (File oldDir : dirs)
+						{
+							try
+							{
+								FileUtils.deleteDirectory(oldDir);
+							}
+							catch (IOException e)
+							{
+								getInstance().getLog().error("Error deleting old node install path:" + oldDir.getAbsolutePath(), e);
+							}
+						}
+					}
+				}
 				try
 				{
 					if (ZipUtils.isZipFile(archiveUrl))
