@@ -145,7 +145,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 				}
 
-				TreeMap<PackageSpecification<WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
+				TreeMap<PackageSpecification< ? extends WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
 					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
@@ -174,6 +174,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
 					{
 						continue;
+					}
+
+					String module = entry.getNg2Module();
+					String packageName = entry.getNpmPackageName();
+					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
+					{
+						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
+						componentPackageSpecToReader.put(entry, packageReader);
 					}
 
 					List<String> libs = entry.getNg2CssLibrary();
@@ -226,7 +234,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 
 						componentPackageSpecToReader.entrySet().forEach(entry -> {
-							PackageSpecification<WebObjectSpecification> spec = entry.getKey();
+							PackageSpecification< ? extends WebObjectSpecification> spec = entry.getKey();
 							String packageName = spec.getNpmPackageName();
 							IPackageReader packageReader = entry.getValue();
 							String entryPoint = spec.getEntryPoint();
