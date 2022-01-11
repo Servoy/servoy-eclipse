@@ -118,7 +118,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// modules and css of the components those are based on the Packages itself
 				TreeSet<String> cssLibs = new TreeSet<>();
 				Set<String> packageToInstall = new HashSet<>();
-				Set<String> structureTagNames = new TreeSet<>();
+				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
 				// service are based just on all service specifications
 				Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
 				SpecProviderState serviceProviderState = WebServiceSpecProvider.getSpecProviderState();
@@ -184,10 +184,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
 					specifications.values().forEach(spec -> {
+						String tagName = null;
 						PropertyDescription tagType = spec.getProperty("tagType");
 						if (tagType != null && tagType.getDefaultValue() != null && !"div".equals(tagType.getDefaultValue()))
 						{
-							structureTagNames.add((String)tagType.getDefaultValue());
+							tagName = (String)tagType.getDefaultValue();
+							structureTagNames.put(tagName, new Pair<WebLayoutSpecification, String>(spec, tagName));
+						}
+						List<String> directives = spec.getDirectives();
+						if (directives.size() > 0)
+						{
+							if (tagName == null) tagName = "div";
+							else structureTagNames.remove(tagName);
+							structureTagNames.put(spec.getName(), new Pair<WebLayoutSpecification, String>(spec, tagName));
 						}
 					});
 				}
@@ -526,7 +535,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 		}
 
-		private LayoutTemplates generateStructureTemplate(Set<String> tags)
+		/*
+		 * map<templateName , Pair<spec, tagName>>
+		 */
+		private LayoutTemplates generateStructureTemplate(Map<String, Pair<WebLayoutSpecification, String>> tags)
 		{
 			StringBuilder template = new StringBuilder();
 			StringBuilder viewChild = new StringBuilder();
@@ -536,31 +548,33 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			templateLFC.append("<!-- structure template generate start -->\n");
 			viewChild.append("// structure viewchild template generate start\n");
 
-			tags.forEach(tag -> {
+			tags.forEach((templateName, pair) -> {
 				template.append("<ng-template  #svyResponsive");
-				template.append(tag);
+				template.append(templateName);
 				template.append("  let-state=\"state\" >\n<");
-				template.append(tag);
+				template.append(pair.getRight());
+				pair.getLeft().getDirectives().forEach(directive -> template.append(' ').append(directive));
 				template.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
 				template.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
-				template.append(tag);
+				template.append(pair.getRight());
 				template.append(">\n</ng-template>\n");
 
 				templateLFC.append("<ng-template  #svyResponsive");
-				templateLFC.append(tag);
+				templateLFC.append(templateName);
 				templateLFC.append("  let-state=\"state\" let-row=\"row\" let-i=\"i\">\n<");
-				templateLFC.append(tag);
+				templateLFC.append(pair.getRight());
+				pair.getLeft().getDirectives().forEach(directive -> template.append(' ').append(directive));
 				templateLFC.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
-				templateLFC.append(tag);
+				templateLFC.append(pair.getRight());
 				templateLFC.append(">\n</ng-template>\n");
 
 				viewChild.append("@ViewChild('svyResponsive");
-				viewChild.append(tag);
+				viewChild.append(templateName);
 				viewChild.append("', { static: true }) readonly svyResponsive");
-				viewChild.append(tag);
+				viewChild.append(templateName);
 				viewChild.append(": TemplateRef<any>;\n");
 			});
 			template.append("<!-- structure template generate end -->");
