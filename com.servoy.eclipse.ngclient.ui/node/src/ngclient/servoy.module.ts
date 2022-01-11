@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MainComponent } from './main.component';
 
-import { FormComponent, AbstractFormComponent } from './form/form_component.component';
+import { FormComponent } from './form/form_component.component';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
@@ -21,7 +21,6 @@ import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loadi
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
 import { ServerDataService } from './services/serverdata.service';
-import { BSWindow } from './services/bootstrap-window/bswindow';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import {MainRoutingModule} from './main-routing.module';
