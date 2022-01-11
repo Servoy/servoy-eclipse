@@ -153,7 +153,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedClone = new  StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
                         parent.addChild(this.insertedClone);
                     }
-                  this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
+                  this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, Object.assign({}, this.insertedClone.attributes), this.insertedClone.items);
+                  this.draggedElementItem.attributes['svy-id'] = 'clone';
+                  
                 }  else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
