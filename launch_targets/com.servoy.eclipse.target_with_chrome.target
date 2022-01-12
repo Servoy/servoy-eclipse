@@ -65,6 +65,11 @@
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
         </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/80"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="80.0.11.202112130128"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="80.0.15.202112130135"/>
+        </location>
          <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/modeling/emf/emf/builds/release/2.27/"/>
             <unit id="org.eclipse.emf.sdk.feature.group" version="2.27.0.v20210816-1137"/>
@@ -79,11 +84,6 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/webtools/downloads/drops/R3.23.0/R-3.23.0-20210822084517/repository/"/>
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.23.0.v202107101916"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/88"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="88.0.0.202201110523"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="88.0.0.202201110608"/>
         </location>
     </locations>
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
