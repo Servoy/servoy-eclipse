@@ -572,7 +572,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append(templateName);
 				templateLFC.append("  let-state=\"state\" let-row=\"row\" let-i=\"i\">\n<");
 				templateLFC.append(pair.getRight());
-				pair.getLeft().getDirectives().forEach(directive -> template.append(' ').append(directive));
+				pair.getLeft().getDirectives().forEach(directive -> templateLFC.append(' ').append(directive));
 				templateLFC.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
