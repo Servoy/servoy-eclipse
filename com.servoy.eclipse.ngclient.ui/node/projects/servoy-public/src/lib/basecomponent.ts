@@ -61,6 +61,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
+        this.elementRef.nativeElement['svyHostComponent'] = null;
     }
 
     // our init event that is called when dom is ready
@@ -68,6 +69,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.addAttributes();
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
+        this.elementRef.nativeElement['svyHostComponent'] = this;
     }
 
     // our change event that is called when dom is ready
