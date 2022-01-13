@@ -69,7 +69,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.addAttributes();
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
-        this.elementRef.nativeElement['svyHostComponent'] = this;
+        if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
     }
 
     // our change event that is called when dom is ready
