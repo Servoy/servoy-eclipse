@@ -141,6 +141,11 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             }
         }
         delete changes['editable']; // ignore the editable property
+        if (this.formattedValue === "" || this.formattedValue === null || this.formattedValue === undefined) {
+            if (changes['placeholderText']) {
+                this.formattedValue = this.placeholderText;
+            }
+        }
         super.svyOnChanges(changes);
     }
 
