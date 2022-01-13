@@ -26,14 +26,15 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will create a column.
@@ -78,8 +79,8 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 	@Override
 	public void run(TableDifference difference)
 	{
-		ColumnType columnType = difference.getDbiFileDefinition().columnType;
-		IColumn c;
+		ColumnInfoDef dbiFileDefinition = difference.getDbiFileDefinition();
+		ColumnType columnType = dbiFileDefinition.columnType;
 		try
 		{
 			IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -113,15 +114,16 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 						}
 					};
 					// create the new column in memory
-					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
-					c.setDatabasePK((difference.getDbiFileDefinition().flags & IBaseColumn.PK_COLUMN) != 0);
-					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
-					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
+					Column c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					c.setDatabasePK((dbiFileDefinition.flags & IBaseColumn.PK_COLUMN) != 0);
+					c.setFlags(dbiFileDefinition.flags);
+					c.setAllowNull(dbiFileDefinition.allowNull);
+					if (dbiFileDefinition.autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
 					{
 						// Set the sequence type (new table, or override).
 						try
 						{
-							int sequenceType = difference.getDbiFileDefinition().autoEnterSubType;
+							int sequenceType = dbiFileDefinition.autoEnterSubType;
 							if (!s.supportsSequenceType(sequenceType, null))
 							{
 								// Database does not support the import sequence type, default to servoy sequence.
