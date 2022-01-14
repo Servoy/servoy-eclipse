@@ -44,6 +44,9 @@
 	<bundle id="org.jboss.logging.jboss-logging" version="3.4.2.Final">
 		<category name="bundles" />
 	</bundle>
+	<bundle id="net.bytebuddy.byte-buddy" version="1.11.22">
+		<category name="bundles" />
+	</bundle>
 	<bundle id="org.apache.commons.lang3">
 		<category name="bundles" />
 	</bundle>
