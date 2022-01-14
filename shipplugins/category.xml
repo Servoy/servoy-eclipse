@@ -29,22 +29,22 @@
 	<bundle id="jabsorb">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="javax.websocket" version="1.1.0">
+	<bundle id="javax.websocket">
 		<category name="bundles" />
 	</bundle>
     <bundle id="javax.servlet.jsp-api">
         <category name="bundles" />
     </bundle>
-	<bundle id="javax.transaction" version="1.1.0">
+	<bundle id="javax.transaction">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="javax.persistence-api" version="2.2.0">
+	<bundle id="javax.persistence-api">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="org.jboss.logging.jboss-logging" version="3.4.2.Final">
+	<bundle id="org.jboss.logging.jboss-logging">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="net.bytebuddy.byte-buddy" version="1.11.22">
+	<bundle id="net.bytebuddy.byte-buddy">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.commons.lang3">

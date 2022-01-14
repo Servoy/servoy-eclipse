@@ -36,6 +36,7 @@
             <unit id="sj.jsonschemavalidation" version="2.0.1"/>
             <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
             <unit id="tus-java-server" version="2.0.0.s2"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.11.22"/>            
         </location>    
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
