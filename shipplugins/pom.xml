@@ -188,6 +188,13 @@
 			<version>3.4.2.Final</version>
 		</dependency>
 
+		<!-- Needed for Hibernate -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.11.22</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.servoy</groupId>
 			<artifactId>javax.websocket</artifactId>

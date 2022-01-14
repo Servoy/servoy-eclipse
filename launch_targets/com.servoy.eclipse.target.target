@@ -27,6 +27,7 @@
             <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.17.1"/>
             <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
             <unit id="org.jboss.logging.jboss-logging" version="3.4.2.Final"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.11.22"/>
             <unit id="org.jsoup" version="1.14.3"/>
             <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
             <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
@@ -35,7 +36,8 @@
             <unit id="sj.jsonschemavalidation" version="2.0.1"/>
             <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
             <unit id="tus-java-server" version="2.0.0.s2"/>
-        </location>
+                <unit id="net.bytebuddy.byte-buddy" version="1.11.22"/>
+            </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
 		    <repository location="http://developer.servoy.com/sqlexplorer/"/>
