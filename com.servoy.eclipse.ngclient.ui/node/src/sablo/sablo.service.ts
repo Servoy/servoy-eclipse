@@ -171,12 +171,16 @@ export class SabloService {
         this.currentServiceCallDone = false;
         this.currentServiceCallWaiting = times.length;
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
-        return promise.then((arg) => {
+        return Object.defineProperty(promise.then((arg) => {
             this.currentServiceCallDone = true;
             return arg;
         }, (arg) => {
             this.currentServiceCallDone = true;
             return Promise.reject(arg);
+        }), 'requestInfo', {
+			set : (value: any) => {
+				promise['requestInfo'] = value;
+			}
         });
     }
 

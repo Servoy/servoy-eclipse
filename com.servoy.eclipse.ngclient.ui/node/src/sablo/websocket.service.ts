@@ -127,7 +127,11 @@ export class WebsocketService {
     public disconnect(){
         this.wsSession.disconnect();
     }
-    
+
+    public getCurrentRequestInfo(): any {
+        return this.wsSession.getCurrentRequestInfo();
+    }
+
     private generateURL(context, args, queryArgs?, websocketUri?) {
         let new_uri: string;
         if (this.windowRef.nativeWindow.location.protocol === 'https:') {
@@ -201,6 +205,7 @@ export class WebsocketSession {
     private nextMessageId = 1;
     private log: LoggerService;
 
+    private currentRequestInfo = undefined;
 
     constructor(private websocket: ReconnectingWebSocket,
         private websocketService: WebsocketService,
@@ -350,6 +355,10 @@ export class WebsocketSession {
                      // the task can execute right away then (maybe it was called due to a change detected in a watch instead of property listener)
     }
 
+    public getCurrentRequestInfo(): any {
+        return this.currentRequestInfo;
+    }
+
     private setConnected() {
         this.connected = 'CONNECTED';
         this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode: ... CONNECTED (' + new Date().getTime() + ')')));
@@ -429,6 +438,10 @@ export class WebsocketSession {
 
             obj = JSON.parse(message_data);
 
+			if(obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
+				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
+			}
+
             if (obj.services) {
                 // services call, first process the once with the flag 'apply_first'
                 if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].services) {
@@ -448,28 +461,6 @@ export class WebsocketSession {
             hideIndicator = obj && obj.smsgid && this.loadingIndicatorService.isShowing();
             // if a request to a service is being done then this could be a blocking
             if (hideIndicator) {
-                this.loadingIndicatorService.hideLoading();
-            }
-
-            // data got back from the server
-            if (obj.cmsgid) { // response to event
-                const deferredEvent = this.deferredEvents[obj.cmsgid];
-                if (deferredEvent !== null) {
-                    if (obj.exception) {
-                        // something went wrong
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception) {
-                            obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
-                        }
-                        deferredEvent.reject(obj.exception);
-                    } else {
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret) {
-                            obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
-                        }
-                        deferredEvent.resolve(obj.ret);
-                    }
-                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
-                delete this.deferredEvents[obj.cmsgid];
-                this.testability.testEvents();
                 this.loadingIndicatorService.hideLoading();
             }
 
@@ -548,6 +539,28 @@ export class WebsocketSession {
                     this.sendMessageObject(response);
                 });
             }
+
+            // data got back from the server
+            if (obj.cmsgid) { // response to event
+                const deferredEvent = this.deferredEvents[obj.cmsgid];
+                if (deferredEvent !== null) {
+                    if (obj.exception) {
+                        // something went wrong
+                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception) {
+                            obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
+                        }
+                        deferredEvent.reject(obj.exception);
+                    } else {
+                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret) {
+                            obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
+                        }
+                        deferredEvent.resolve(obj.ret);
+                    }
+                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
+                delete this.deferredEvents[obj.cmsgid];
+                this.testability.testEvents();
+                this.loadingIndicatorService.hideLoading();
+            }
         } catch (e) {
             this.log.error(this.log.buildMessage(() => ('Error (follows below) in parsing/processing this message: ' + message_data)));
             this.log.error(e);
@@ -563,6 +576,7 @@ export class WebsocketSession {
                 this.sendMessageObject(response);
             }
         } finally {
+            this.currentRequestInfo = undefined;
             let err;
             for (const i of Object.keys(this.functionsToExecuteAfterIncommingMessageWasHandled)) {
                 try {

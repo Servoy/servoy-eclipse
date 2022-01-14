@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
+import { WebsocketService } from '../../sablo/websocket.service';
 import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
 import { ServoyService } from '../servoy.service';
@@ -18,7 +19,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         private applicationService: ApplicationService,
         private servoyService: ServoyService,
         private formService: FormService,
-        private popupFormService: PopupFormService) {
+        private popupFormService: PopupFormService,
+        private websocketService: WebsocketService) {
         super();
     }
 
@@ -79,6 +81,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
 
     setFormStyleClasses(styleclasses: { property: string }): void {
         this.formService.setFormStyleClasses(styleclasses);
+    }
+
+    getCurrentRequestInfo(): any {
+        return this.websocketService.getCurrentRequestInfo();
     }
 }
 

@@ -25,6 +25,7 @@ export abstract class ServoyPublicService {
     public abstract showForm(popup: PopupForm) : void;
     public abstract cancelFormPopup(disableClearPopupFormCallToServer: boolean): void;
     public abstract setFormStyleClasses(styleclasses: {property : string}): void;
+    public abstract getCurrentRequestInfo(): any;
 }
 
 export interface IFormCache {

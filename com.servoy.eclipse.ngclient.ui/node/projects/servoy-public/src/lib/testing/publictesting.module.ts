@@ -118,6 +118,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public setFormStyleClasses(styleclasses: {property : string}): void{
         
     }
+
+    public getCurrentRequestInfo() {
+        throw new Error('Method not implemented.');
+    }
 }
 @NgModule({
     declarations: [
