@@ -471,6 +471,7 @@ export interface FoundsetChangeEvent extends ViewportChangeEvent {
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
     serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
+    foundsetDefinitionChanged?: boolean;
     hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
     multiSelectChanged?: { oldValue: boolean; newValue: boolean };
     columnFormatsChanged?: { oldValue: Record<string, object>; newValue: Record<string, object> };

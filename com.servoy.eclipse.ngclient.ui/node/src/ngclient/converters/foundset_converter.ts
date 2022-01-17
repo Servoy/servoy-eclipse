@@ -13,6 +13,7 @@ export class FoundsetConverter implements IConverter {
     static readonly UPDATE_PREFIX = 'upd_'; // prefixes keys when only partial updates are send for them
     static readonly SERVER_SIZE = 'serverSize';
     static readonly FOUNDSET_ID = 'foundsetId';
+    static readonly FOUNDSET_DEFINITION_CHANGE = 'foundsetDefinition';
     static readonly SORT_COLUMNS = 'sortColumns';
     static readonly SELECTED_ROW_INDEXES = 'selectedRowIndexes';
     static readonly USER_SET_SELECTION = 'userSetSelection';
@@ -62,6 +63,10 @@ export class FoundsetConverter implements IConverter {
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE]
                 };
                 currentClientValue.serverSize = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE]; // currentClientValue should always be defined in this case
+                updates = true;
+            }
+            if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.FOUNDSET_DEFINITION_CHANGE] !== undefined) {
+                if (hasListeners) notificationParamForListeners.foundsetDefinitionChanged = true;
                 updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.PUSH_TO_SERVER] !== undefined) {
