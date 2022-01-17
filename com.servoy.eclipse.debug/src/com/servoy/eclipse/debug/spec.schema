@@ -72,6 +72,9 @@
                 "dynamicDataproviders": {
                     "type": "boolean"
                 },
+                "foundsetDefinitionListener": {
+                    "type": "boolean"
+                },
                 "initialPreferredViewPortSize": {
                     "type": "number"
                 },
@@ -353,6 +356,9 @@
 								"initialPreferredViewPortSize": {
 									"type": "number"
 								},
+                                "foundsetDefinitionListener": {
+                                    "type": "boolean"
+                                },
 								"sendSelectionViewportInitially": {
 									"type": "boolean"
 								},
@@ -772,6 +778,9 @@
                                         },
                                         "initialPreferredViewPortSize": {
                                             "type": "number"
+                                        },
+                                        "foundsetDefinitionListener": {
+                                            "type": "boolean"
                                         },
                                         "sendSelectionViewportInitially": {
                                             "type": "boolean"
