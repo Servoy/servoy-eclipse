@@ -8,7 +8,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
     @Input() servoyApi: ServoyApi;
     @Input() servoyAttributes: {  [property: string]: string };
 
-    @ViewChild('element', { static: false }) elementRef: ElementRef<T>;
+    @ViewChild('element', { static: false, read: ElementRef}) elementRef: ElementRef<T>;
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
