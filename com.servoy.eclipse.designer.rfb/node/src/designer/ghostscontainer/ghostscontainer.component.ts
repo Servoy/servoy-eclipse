@@ -27,12 +27,20 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
     draggingGhostComponent: HTMLElement;
-
+    formWidth : number;
+    formHeight : number;
+    
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private windowRefService: WindowRefService) {
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'renderGhosts') {
+                this.renderGhosts();
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (event.data.id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
+                this.formWidth = event.data.width as number;
+                this.formHeight = event.data.height as number;
                 this.renderGhosts();
             }
         });
@@ -57,6 +65,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     private renderGhostsInternal(ghostContainers: Array<GhostContainer>) {
+        if (!this.formWidth){
+            this.formWidth = this.urlParser.getFormWidth();
+        }
+        if (!this.formHeight){
+            this.formHeight = this.urlParser.getFormHeight();
+        }
         if (ghostContainers) {
             // set the ghosts
             for (const ghostContainer of ghostContainers) {
@@ -82,8 +96,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 else if (this.urlParser.isAbsoluteFormLayout()) {
                     ghostContainer.style.left = '20px';
                     ghostContainer.style.top = '20px';
-                    ghostContainer.style.width = this.urlParser.getFormWidth() + 'px';
-                    ghostContainer.style.height = this.urlParser.getFormHeight() + 'px';
+                    ghostContainer.style.width = this.formWidth + 'px';
+                    ghostContainer.style.height = this.formHeight + 'px';
                 }
 
                 for (const ghost of ghostContainer.ghosts) {
@@ -103,7 +117,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             marginTop: '-1px',
                             borderTop: '1px dashed #000',
                             height: '0px',
-                            width: (this.urlParser.getFormWidth() + 90) + 'px',
+                            width: (this.formWidth + 90) + 'px',
                             float: 'right'
                         } as CSSStyleDeclaration;
                     } else if (ghost.type == GHOST_TYPES.GHOST_TYPE_FORM) { // the form
