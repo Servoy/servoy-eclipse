@@ -154,8 +154,58 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseDown(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
-        this.lassostarted = false;
-        const point = { x: event.pageX, y: event.pageY };
+        const found = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;        
+        if (!found) {
+            this.nodes = [];
+            this.editorSession.setSelection([], this);
+
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
+
+            this.lassostarted = true;
+            this.mousedownpoint = { x: event.pageX, y: event.pageY };
+        }
+    }
+
+    private onMouseUp(event: MouseEvent) {
+        if (this.editorSession.getState().dragging) return;
+        if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
+            const frameElem = this.doc.querySelector('iframe');
+            const frameRect = frameElem.getBoundingClientRect();
+            const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+            const newNodes = new Array<SelectionNode>();
+            const newSelection = new Array<string>();
+            Array.from(elements).forEach((node) => {
+                const position = node.getBoundingClientRect();
+                this.designerUtilsService.adjustElementRect(node, position);
+                if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y }) ||
+                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
+                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
+                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y + position.height })) {
+                    const newNode: SelectionNode = {
+                        style: {
+                            height: position.height + 'px',
+                            width: position.width + 'px',
+                            top: position.top + this.topAdjust + 'px',
+                            left: position.left + this.leftAdjust + 'px',
+                            display: 'block'
+                        } as CSSStyleDeclaration,
+                        svyid: node.getAttribute('svy-id'),
+                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        isContainer: node.getAttribute('svy-layoutname') != null,
+                        maxLevelDesign: node.classList.contains('maxLevelDesign')
+                    };
+                    newNodes.push(newNode);
+                    newSelection.push(node.getAttribute('svy-id'))
+                }
+            });
+            this.nodes = newNodes;
+            this.editorSession.setSelection(newSelection, this);
+        }
+        else {
+            const point = { x: event.pageX, y: event.pageY };
         const frameElem = this.doc.querySelector('iframe');
         const frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
@@ -223,54 +273,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 return node;
             }
         });
-        if (!found) {
-            this.nodes = [];
-            this.editorSession.setSelection([], this);
-
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
-
-            this.lassostarted = true;
-            this.mousedownpoint = { x: event.pageX, y: event.pageY };
-        }
-    }
-
-    private onMouseUp(event: MouseEvent) {
-        if (this.editorSession.getState().dragging) return;
-        if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
-            const frameElem = this.doc.querySelector('iframe');
-            const frameRect = frameElem.getBoundingClientRect();
-            const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-            const newNodes = new Array<SelectionNode>();
-            const newSelection = new Array<string>();
-            Array.from(elements).forEach((node) => {
-                const position = node.getBoundingClientRect();
-                this.designerUtilsService.adjustElementRect(node, position);
-                if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y + position.height })) {
-                    const newNode: SelectionNode = {
-                        style: {
-                            height: position.height + 'px',
-                            width: position.width + 'px',
-                            top: position.top + this.topAdjust + 'px',
-                            left: position.left + this.leftAdjust + 'px',
-                            display: 'block'
-                        } as CSSStyleDeclaration,
-                        svyid: node.getAttribute('svy-id'),
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: node.getAttribute('svy-layoutname') != null,
-                        maxLevelDesign: node.classList.contains('maxLevelDesign')
-                    };
-                    newNodes.push(newNode);
-                    newSelection.push(node.getAttribute('svy-id'))
-                }
-            });
-            this.nodes = newNodes;
-            this.editorSession.setSelection(newSelection, this);
         }
         this.lassostarted = false;
         this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
