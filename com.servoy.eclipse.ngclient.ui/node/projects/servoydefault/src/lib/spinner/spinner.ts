@@ -63,7 +63,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
 
             if (this.onFocusGainedMethodID)
                 this.renderer.listen(spinnerButtons[i], 'focus', ( e ) => {
-                    if(this.mustExecuteOnFocus === true) {
+                    if(this.mustExecuteOnFocus !== false) {
                         this.onFocusGainedMethodID(e);
                     }
                     this.mustExecuteOnFocus = true;

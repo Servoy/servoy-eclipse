@@ -66,7 +66,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
             element = this.getNativeElement();
         if (this.onFocusGainedMethodID) {
             this.renderer.listen(element, 'focus', (event) => {
-                if ( this.mustExecuteOnFocus === true ) {
+                if ( this.mustExecuteOnFocus !== false ) {
                     this.onFocusGainedMethodID( event );
                 }
                 this.mustExecuteOnFocus = true;
