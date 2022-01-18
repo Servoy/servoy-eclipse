@@ -213,7 +213,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.calculateAdjustToMainRelativeLocation();
 
         const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        const found = Array.from(elements).reverse().find((node) => {
+         Array.from(elements).reverse().find((node) => {
             const position = node.getBoundingClientRect();
             this.designerUtilsService.adjustElementRect(node, position);
             let addToSelection = false;
