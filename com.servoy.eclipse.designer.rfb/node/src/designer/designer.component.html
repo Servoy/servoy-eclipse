@@ -5,7 +5,6 @@
     <designer-resizer></designer-resizer> 
     <div #contentArea class="content-area" tabindex="0">
         <div #glasspane class="contentframe-overlay">
-            <designer-inline-edit></designer-inline-edit>
             <selection-decorators></selection-decorators>
             <designer-highlight></designer-highlight>
             <designer-ghostscontainer></designer-ghostscontainer>
@@ -20,3 +19,4 @@
 	<div #leftAutoscroll class="leftAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
 </div> <designer-status-bar></designer-status-bar> </div>
 <designer-contextmenu></designer-contextmenu>
+<designer-inline-edit></designer-inline-edit>

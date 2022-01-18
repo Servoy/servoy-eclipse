@@ -176,7 +176,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseDown(event: MouseEvent, ghost: Ghost, ghostContainer: GhostContainer) {
-        event.stopPropagation();
         this.editorSession.setSelection([ghost.uuid]);
         this.editorSession.getState().dragging = true;
         if (event.button == 0) {
@@ -196,7 +195,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
             }
         }
-        return false
     }
 
     private onMouseUp(event: MouseEvent) {
