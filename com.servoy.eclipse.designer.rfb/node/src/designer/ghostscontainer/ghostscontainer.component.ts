@@ -27,9 +27,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
     draggingGhostComponent: HTMLElement;
-    formWidth : number;
-    formHeight : number;
-    
+    formWidth: number;
+    formHeight: number;
+
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private windowRefService: WindowRefService) {
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
@@ -43,14 +43,26 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.formHeight = event.data.height as number;
                 this.renderGhosts();
             }
+            if (event.data.id === 'redrawDecorators') {
+                if (this.ghosts) {
+                    for (const ghostContainer of this.ghosts) {
+                        for (const ghost of ghostContainer.ghosts) {
+                            if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
+                                this.renderGhosts();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
         });
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
     ngOnInit(): void {
         this.renderGhosts();
-        const content = this.doc.querySelector('.content-area') ;
-        content.addEventListener('mouseup', (event: MouseEvent ) => this.onMouseUp(event));
+        const content = this.doc.querySelector('.content-area');
+        content.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
         content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
     }
 
@@ -59,16 +71,16 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     renderGhosts() {
-        void this.editorSession.getGhostComponents<{ghostContainers: Array<GhostContainer>}>().then((result: {ghostContainers: Array<GhostContainer>}) => {
+        void this.editorSession.getGhostComponents<{ ghostContainers: Array<GhostContainer> }>().then((result: { ghostContainers: Array<GhostContainer> }) => {
             this.renderGhostsInternal(result.ghostContainers);
         });
     }
 
     private renderGhostsInternal(ghostContainers: Array<GhostContainer>) {
-        if (!this.formWidth){
+        if (!this.formWidth) {
             this.formWidth = this.urlParser.getFormWidth();
         }
-        if (!this.formHeight){
+        if (!this.formHeight) {
             this.formHeight = this.urlParser.getFormHeight();
         }
         if (ghostContainers) {
@@ -186,7 +198,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
                 this.containerLeftOffset = parentRect.left;
                 this.containerTopOffset = parentRect.top;
-                const rect =(event.currentTarget as Element).getBoundingClientRect();
+                const rect = (event.currentTarget as Element).getBoundingClientRect();
                 this.leftOffsetRelativeToSelectedGhost = event.clientX - rect.left; //x position within the element.
                 this.topOffsetRelativeToSelectedGhost = event.clientY - rect.top;  //y position within the element.
             }
@@ -211,11 +223,11 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.editorSession.sendChanges(obj);
             }
-             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+            if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 const frameElem = this.doc.querySelector('iframe');
                 const frameRect = frameElem.getBoundingClientRect();
                 const obj = {};
-                obj[this.draggingGhost.uuid] = { 'x': event.pageX - frameRect.x -  this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - frameRect.y -  this.topOffsetRelativeToSelectedGhost };
+                obj[this.draggingGhost.uuid] = { 'x': event.pageX - frameRect.x - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - frameRect.y - this.topOffsetRelativeToSelectedGhost };
                 this.editorSession.sendChanges(obj);
                 this.renderGhosts();
             }
@@ -245,7 +257,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 const ghostStart = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset;
                 const ghostEnd = ghostStart + ghostWidth;
                 const currentPosition = event.pageX - this.containerLeftOffset;
-                if (currentPosition == ghostStart || currentPosition == ghostEnd){
+                if (currentPosition == ghostStart || currentPosition == ghostEnd) {
                     // on the border, do nothing
                     break;
                 }
@@ -281,7 +293,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
             if (this.draggingGhostComponent === null) {
-                this.draggingGhostComponent = this.doc.querySelector('.contentframe-overlay').querySelectorAll('[svy-id="' +  this.draggingGhost.uuid  + '"]')[0] as HTMLElement;
+                this.draggingGhostComponent = this.doc.querySelector('.contentframe-overlay').querySelectorAll('[svy-id="' + this.draggingGhost.uuid + '"]')[0] as HTMLElement;
             }
             this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
             this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
@@ -291,7 +303,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     selectionChanged(): void {
         // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
         // not sure how to detect when we really need to redraw
-         this.renderGhosts();
+        this.renderGhosts();
         //this.renderGhostsInternal(this.ghosts);
     }
 }
@@ -300,7 +312,7 @@ class GhostContainer {
     propertyName: string;
     class: string;
     style: CSSStyleDeclaration;
-    parentCompBounds: {left?:number,top?:number;width?:number;height?:number};
+    parentCompBounds: { left?: number, top?: number; width?: number; height?: number };
     containerPositionInComp: number;
     totalGhostContainersOfComp: number;;
     ghosts: Array<Ghost>;
@@ -312,7 +324,7 @@ class Ghost {
     type: string;
     class: string;
     propertyType: string;
-    style: {left?:string,top?:string;right?:string;width?:string;height?:string};
+    style: { left?: string, top?: string; right?: string; width?: string; height?: string };
     hrstyle: CSSStyleDeclaration;
     location: { x: number, y: number };
     size: { width: number, height: number };
