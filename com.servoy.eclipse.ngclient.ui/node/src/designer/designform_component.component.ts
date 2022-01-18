@@ -183,6 +183,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
                 }
                 else {
+                    if (this.formCache.mainStructure == null) {
+                        this.formCache.mainStructure = new StructureCache(null, null);
+                    }
                     if (this.insertedCloneParent !==  this.formCache.mainStructure) {
                         this.insertedCloneParent =  this.formCache.mainStructure;
                     }

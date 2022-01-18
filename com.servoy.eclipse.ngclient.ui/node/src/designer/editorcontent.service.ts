@@ -63,6 +63,9 @@ export class EditorContentService {
                     }
                     else {
                         // dropped directly on form
+                        if (formCache.mainStructure == null) {
+                            formCache.mainStructure = new StructureCache(null, null);
+                         }
                         formCache.mainStructure.addChild(container);
                         if (reorderLayoutContainers.indexOf(formCache.mainStructure) < 0) {
                             // new layout container in parent form , make sure is inserted in correct position
