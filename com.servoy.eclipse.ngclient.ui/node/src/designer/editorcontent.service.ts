@@ -105,6 +105,7 @@ export class EditorContentService {
                     }
                 }
                 else {
+                    redrawDecorators = true;
                     if (elem.model[ConverterService.TYPES_KEY] != null) {
                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
                             (property: string) => elem.model ? elem.model[property] : elem.model);

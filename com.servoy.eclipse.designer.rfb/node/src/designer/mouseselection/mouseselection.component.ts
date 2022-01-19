@@ -34,7 +34,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'redrawDecorators') {
-                this.redrawDecorators();
+                this.selectionChanged(this.editorSession.getSelection(), true);
             }
         });
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
