@@ -63,6 +63,7 @@ import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 
 /**
  *
@@ -377,7 +378,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		{
 			try
 			{
-				final int max = 1000;
+				final int max = 2000;
 				String contents;
 				try
 				{
@@ -385,11 +386,15 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 				catch (TooManyRowsException e)
 				{
-					if (!UIUtils.askQuestion(shell, "Big table", "Table " + table.getName() + " in server " + table.getServerName() + " contains more than " +
-						max + " rows, are you sure you want to copy this table data in the workspace?"))
+					if (Boolean.valueOf(Settings.getInstance().getProperty(Settings.ASK_BIG_METADATA_TABLE_WARNING, Boolean.TRUE.toString())))
 					{
-						// phew
-						continue;
+						if (!UIUtils.askQuestion(shell, "Big table",
+							"Table " + table.getName() + " in server " + table.getServerName() + " contains more than " +
+								max + " rows, are you sure you want to copy this table data in the workspace?"))
+						{
+							// phew
+							continue;
+						}
 					}
 
 					// ok you've been warned...
