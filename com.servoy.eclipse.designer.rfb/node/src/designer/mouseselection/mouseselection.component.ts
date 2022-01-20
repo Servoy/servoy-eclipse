@@ -28,6 +28,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     selectedRefSubscription: Subscription;
     editorStateSubscription: Subscription;
     removeSelectionChangedListener: () => void;
+    content: HTMLElement;
 
     constructor(public readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService, private windowRefService: WindowRefService) {
@@ -42,10 +43,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     ngOnInit(): void {
         void this.editorSession.requestSelection();
-        const content: HTMLElement = this.doc.querySelector('.content-area');
-        content.addEventListener('mousedown', (event) => this.onMouseDown(event));
-        content.addEventListener('mouseup', (event) => this.onMouseUp(event));
-        content.addEventListener('mousemove', (event) => this.onMouseMove(event));
+        this.content = this.doc.querySelector('.content-area');
+        this.content.addEventListener('mousedown', (event) => this.onMouseDown(event));
+        this.content.addEventListener('mouseup', (event) => this.onMouseUp(event));
+        this.content.addEventListener('mousemove', (event) => this.onMouseMove(event));
     }
 
     ngOnDestroy(): void {
@@ -159,8 +160,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.nodes = [];
             this.editorSession.setSelection([], this);
 
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left',event.pageX + this.content.scrollLeft - this.contentRect.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.content.scrollTop - this.contentRect.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
@@ -308,10 +309,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (this.editorSession.getState().dragging) return;
         if (this.lassostarted) {
             if (event.pageX < this.mousedownpoint.x) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX - this.contentRect.left + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.content.scrollLeft - this.contentRect.left + 'px');
             }
             if (event.pageY < this.mousedownpoint.y) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY - this.contentRect.top + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.content.scrollTop - this.contentRect.top + 'px');
             }
             if (this.lassoRef.nativeElement.style.display === 'none') {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
