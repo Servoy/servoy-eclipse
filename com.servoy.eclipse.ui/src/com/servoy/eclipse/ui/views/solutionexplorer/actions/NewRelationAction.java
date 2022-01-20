@@ -116,7 +116,7 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 			Relation relation = editingSolution.getRelation(relationName);
 			if (relation == null)
 			{
-				relation = editingSolution.createNewRelation(validator, relationName, IQueryConstants.LEFT_OUTER_JOIN);
+				relation = editingSolution.createNewRelation(validator, relationName, null, null, IQueryConstants.LEFT_OUTER_JOIN);
 				// this should be probably changed in content spec
 				relation.setAllowCreationRelatedRecords(true);
 			}
