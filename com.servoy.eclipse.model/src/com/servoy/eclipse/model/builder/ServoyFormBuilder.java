@@ -1797,7 +1797,7 @@ public class ServoyFormBuilder
 										continue;
 									}
 								}
-								if (val.has("dataproviders"))
+								if (val.opt("dataproviders") instanceof JSONObject)
 								{
 									JSONObject dataproviders = val.getJSONObject("dataproviders");
 									for (String dp : dataproviders.keySet())
