@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,7 +127,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						break;
 				}
 			}
-			catch (final HttpHostConnectException e)
+			catch (final HttpHostConnectException | UnknownHostException e)
 			{
 				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
 			}
