@@ -12,6 +12,7 @@ import { ServoyDefaultTextArea } from './textarea/textarea';
 import { ServoyDefaultButton } from './button/button';
 import { ServoyDefaultLabel } from './label/label';
 import { ServoyDefaultTabpanel } from './tabpanel/tabpanel';
+import { ServoyDefaultAccordion } from './accordion/accordion';
 import { ServoyDefaultTablesspanel } from './tabpanel/tablesspanel';
 import { ServoyDefaultSplitpane } from './splitpane/splitpane';
 import { ServoyDefaultCalendar } from './calendar/calendar';
@@ -47,6 +48,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     ServoyDefaultTabpanel,
     ServoyDefaultTablesspanel,
     ServoyDefaultSplitpane,
+    ServoyDefaultAccordion,
     ServoyDefaultCalendar,
     ServoyDefaultCombobox,
     ServoyDefaultTypeahead,
@@ -80,6 +82,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
             ServoyDefaultButton,
             ServoyDefaultLabel,
             ServoyDefaultTabpanel,
+            ServoyDefaultAccordion,
             ServoyDefaultTablesspanel,
             ServoyDefaultSplitpane,
             ServoyDefaultCalendar,

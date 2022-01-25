@@ -78,6 +78,7 @@ public class ComponentTemplateGenerator
 				{
 					// also generate the tabless
 					genereateSpec(template, viewChild, spec, "servoydefault-tablesspanel");
+					genereateSpec(template, viewChild, spec, "servoydefault-accordion");
 				}
 			}
 

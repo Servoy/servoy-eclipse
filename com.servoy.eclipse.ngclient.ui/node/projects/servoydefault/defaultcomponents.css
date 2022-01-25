@@ -88,3 +88,20 @@ ngb-typeahead-window.dropdown-menu {
 body > .dropdown{
     z-index: 9999 !important;
 }
+
+.svy-wrapper > * > .svy-accordion {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+.svy-accordion .card-body
+{
+    padding:0px;
+}
+
+.svy-accordion .card-header
+{
+    padding:0px;
+}
+
