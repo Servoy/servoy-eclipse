@@ -44,39 +44,44 @@ export class WindowPluginService {
                         if (e.target) targetEl = e.target;
                         else if (e.srcElement) targetEl = e.srcElement;
                         let retValue = true;
-                        const callback = newvalue.callback;
-                        let contextFilter = null;
-                        let contextFilterElement = null;
-                        if (newvalue.contextFilter) {
-                            const contextFilterParts = newvalue.contextFilter.split('.');
-                            contextFilter = contextFilterParts[0];
-                            if (contextFilterParts.length > 1) {
-                                contextFilterElement = contextFilterParts[1];
+                        
+                        for (var j = 0; j < this._shortcuts.length; j++) {
+                            if (translatedShortcut == this.translateSwingShortcut(this._shortcuts[j].shortcut)) {
+                                const callback = this._shortcuts[j].callback;
+                                let contextFilter = null;
+                                let contextFilterElement = null;
+                                if (this._shortcuts[j].contextFilter) {
+                                    const contextFilterParts = this._shortcuts[j].contextFilter.split('.');
+                                    contextFilter = contextFilterParts[0];
+                                    if (contextFilterParts.length > 1) {
+                                        contextFilterElement = contextFilterParts[1];
+                                    }
+                                }
+
+                                const jsEvent = this.servoyService.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
+
+                                if (!jsEvent) continue;
+
+                                const args = this._shortcuts[j].arguments;
+                                let argsWithEvent: Array<any> = [jsEvent];// append args
+                                if (args != null) {
+                                    if (args.length) {
+                                        argsWithEvent = argsWithEvent.concat(args);
+                                    } else {
+                                        argsWithEvent.push(args);
+                                    }
+                                }
+                                targetEl.dispatchEvent(new CustomEvent('change'));
+                                //$sabloTestability.block(true);
+                                setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
+                                    let formName = clbArgs[0].formName;
+                                    if (!formName) formName = clb.formname;
+                                    this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
+                                    //$sabloTestability.block(false);
+                                }, 10, callback, argsWithEvent);
+                                if (retValue && newvalue.consumeEvent) retValue = false;
                             }
                         }
-
-                        const jsEvent = this.servoyService.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
-
-                        if (!jsEvent) return retValue;
-
-                        const args = newvalue.arguments;
-                        let argsWithEvent: Array<any> = [jsEvent];// append args
-                        if (args != null) {
-                            if (args.length) {
-                                argsWithEvent = argsWithEvent.concat(args);
-                            } else {
-                                argsWithEvent.push(args);
-                            }
-                        }
-                        targetEl.dispatchEvent(new CustomEvent('change'));
-                        //$sabloTestability.block(true);
-                        setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
-                            let formName = clbArgs[0].formName;
-                            if (!formName) formName = clb.formname;
-                            this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
-                            //$sabloTestability.block(false);
-                        }, 10, callback, argsWithEvent);
-                        if (retValue && newvalue.consumeEvent) retValue = false;
                         return retValue;
 
                     }
