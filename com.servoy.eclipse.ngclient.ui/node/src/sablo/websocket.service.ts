@@ -87,7 +87,7 @@ export class WebsocketService {
     }
 
     public getURLParameter(name: string): string {
-        return decodeURIComponent((new RegExp('[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
+        return decodeURIComponent((new RegExp('[&]?\\b' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
     }
 
     public setPathname(name: string) {
