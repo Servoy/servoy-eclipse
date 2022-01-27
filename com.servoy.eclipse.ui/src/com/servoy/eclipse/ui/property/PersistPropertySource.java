@@ -2287,16 +2287,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				boolean hasInheritedValue = isDefaultValue && (beanPropertyPersist instanceof ISupportInheritedPropertyCheck
 					? ((ISupportInheritedPropertyCheck)beanPropertyPersist).isInheritedProperty(id.toString()) : hasInheritedValue(id, beanPropertyPersist));
 
-				if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) && isDefaultValue && !hasInheritedValue)
-				{
-					// just clear the property because we do not need to store null in order to override a value
-					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
-					changed |= (defaultSpecValue == null ? persistValue != null
-						: !Utils.areJSONEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
-
-					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
-				}
-				else if ("name".equals(id) && beanPropertyPersist instanceof ISupportUpdateableName)
+				if ("name".equals(id) && beanPropertyPersist instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
@@ -2313,6 +2304,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						// value not a string
 						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyPersist + " with type " + value.getClass(), null);
 					}
+				}
+				else if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) && isDefaultValue &&
+					!hasInheritedValue)
+				{
+					// just clear the property because we do not need to store null in order to override a value
+					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
+					changed |= (defaultSpecValue == null ? persistValue != null
+						: !Utils.areJSONEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
+
+					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
 				else
 				{
