@@ -81,6 +81,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     @Input() tabSeq: number;
     @Input() toolTipText: string;
     @Input() animation: string;
+    @Input() styleClass: string;
 
     @ContentChild(TemplateRef, { static: true })
     templateRef: TemplateRef<any>;
@@ -140,7 +141,18 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                             this.form1_state = this.animation;
                             this.form2_state = this.animation;
                         }
+                        break;
                     }
+                    case 'styleClass':
+                        if (change.previousValue) {
+                            const array = change.previousValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(this.getNativeElement(), element));
+                        }
+                        if (change.currentValue) {
+                            const array = change.currentValue.trim().split(' ');
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(this.getNativeElement(), element));
+                        }
+                    break;
                 }
             }
             super.svyOnChanges(changes);
