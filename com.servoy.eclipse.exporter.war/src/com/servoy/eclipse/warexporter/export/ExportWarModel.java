@@ -73,7 +73,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String startRMIPort = "1099";
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
-	private boolean exportNG2;
+	private String exportNG2;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -167,7 +167,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
-		exportNG2 = Utils.getAsBoolean(settings.get("export.ng2"));
+		exportNG2 = settings.get("export.ng2");
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -362,7 +362,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		settings.put("export.warfilename", warFileName);
-		settings.put("export.ng2", isExportNG2());
+		settings.put("export.ng2", exportNG2Mode());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -583,12 +583,12 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	@Override
-	public boolean isExportNG2()
+	public String exportNG2Mode()
 	{
 		return exportNG2;
 	}
 
-	public void setExportNG2(boolean exportNG2)
+	public void setExportNG2Mode(String exportNG2)
 	{
 		this.exportNG2 = exportNG2;
 	}

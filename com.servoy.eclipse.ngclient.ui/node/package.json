@@ -7,6 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --configuration production --subresourceIntegrity=true",
+    "build_sourcemap": "ng build --configuration production --subresourceIntegrity=true  --source-map",
     "build_lib": "ng build @servoy/public --configuration production",
     "build_lib_debug_nowatch": "ng build @servoy/public --watch=false",
     "build_debug": "ng build --watch",
@@ -20,10 +21,6 @@
     "test_edge_nowatch": "ng test --watch=false --browsers Edge",
     "test_public_edge_nowatch": "ng test @servoy/public --watch --browsers Edge",
     "test_headless": "ng test --browsers headlessChrome --watch=false",
-    "lint": "ng lint",
-    "webdriver-manager-start-edge": "cd ./node_modules/protractor && npm i webdriver-manager@latest && webdriver-manager update --gecko=false && webdriver-manager start --edge ../../e2e/msedgedriver.exe",
-    "e2e-chrome": "ng e2e --protractorConfig=protractor-chrome.conf.js",
-    "e2e-edge": "ng e2e --protractorConfig=protractor-edge.conf.js",
     "update": "ng update"
   },
   "private": true,

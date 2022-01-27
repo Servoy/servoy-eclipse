@@ -137,5 +137,5 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public Set<String> getExportedPackages();
 
-	public boolean isExportNG2();
+	public String exportNG2Mode();
 }

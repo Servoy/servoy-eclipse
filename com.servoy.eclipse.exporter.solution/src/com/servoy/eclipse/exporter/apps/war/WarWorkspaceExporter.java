@@ -317,9 +317,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isExportNG2()
+		public String exportNG2Mode()
 		{
-			return configuration.isNG2Export();
+			return configuration.exportNG2Mode();
 		}
 
 		@Override
@@ -593,7 +593,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void checkAndExportSolutions(WarArgumentChest configuration)
 	{
-		if (configuration.isNG2Export())
+		if (configuration.exportNG2Mode() != null)
 		{
 			WebPackagesListener.setIgnore(true);
 			Activator.getInstance().setConsole(() -> new StringOutputStream()

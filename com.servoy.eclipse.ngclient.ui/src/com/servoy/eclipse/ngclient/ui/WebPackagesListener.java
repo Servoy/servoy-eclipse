@@ -503,7 +503,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run", warExportModel != null ? "build" : "build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run",
+							warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build" : "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);

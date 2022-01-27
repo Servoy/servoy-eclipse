@@ -121,13 +121,13 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportNG2 = new Button(composite, SWT.CHECK);
 		exportNG2.setText("Export NG2 resources");
 		exportNG2.setEnabled(exportModel.isNGExport());
-		exportNG2.setSelection(exportModel.isExportNG2());
+		exportNG2.setSelection(exportModel.exportNG2Mode() != null);
 		exportNG2.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setExportNG2(exportNG2.getSelection());
+				exportModel.setExportNG2Mode(exportNG2.getSelection() ? "true" : null);
 			}
 		});
 

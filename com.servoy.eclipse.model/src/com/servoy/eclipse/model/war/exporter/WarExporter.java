@@ -252,7 +252,7 @@ public class WarExporter
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
 			monitor.worked(1);
-			if (exportModel.isExportNG2())
+			if (exportModel.exportNG2Mode() != null)
 			{
 				monitor.subTask("Copy NGClient2 resources");
 				try
