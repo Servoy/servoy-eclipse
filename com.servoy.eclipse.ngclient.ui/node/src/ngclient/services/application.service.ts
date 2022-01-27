@@ -263,6 +263,10 @@ export class ApplicationService {
     public getClipboardContent(): Promise<string> {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
+    
+    public replaceUrlState() {
+        history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
+    }
 
     private showDefaultLoginWindow() {
         const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DefaultLoginWindowComponent);
