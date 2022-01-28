@@ -43,11 +43,18 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             if(event.key !== 'Backspace') this.keyboardSelectValue = (this.keyboardSelectValue ? this.keyboardSelectValue : '') + event.key;
             else this.keyboardSelectValue = this.keyboardSelectValue ? this.keyboardSelectValue.slice(0, -1) : '';
             this.lastSelectValue = this.keyboardSelectValue.slice();
-             if (!this.lastSelectValue)  this.closeTooltip();
+            if (!this.lastSelectValue) this.closeTooltip();
             else this.refreshTooltip();
 
             this.cdRef.detectChanges();
             this.scrollToFirstMatchingItem();
+       } else {
+           if(this.keyboardSelectValue) this.lastSelectValue = this.keyboardSelectValue.slice();
+           if (!this.lastSelectValue) this.closeTooltip();
+           else this.refreshTooltip();
+           
+           this.cdRef.detectChanges();
+           this.scrollToFirstMatchingItem();
        }
     }
     
@@ -74,7 +81,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
 
     isPrintableChar( key: string ): boolean {
         const nonPrintableValue = [
-            'Alt', 'AltGraph', 'CapsLock', 'Fn', 'Meta', 'NumLock', 'ScrollLock', 'Shift',
+            'Alt', 'AltGraph', 'CapsLock', 'Fn', 'Meta', 'NumLock', 'ScrollLock', 'Command', 'Shift',
             'Enter', 'Tab', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home',
             'PageUp', 'PageDown', 'Delete', 'Control', 'Insert', 'Del', 'Escape',
             'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12' 
