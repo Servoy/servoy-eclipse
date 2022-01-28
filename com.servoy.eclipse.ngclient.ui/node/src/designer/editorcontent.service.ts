@@ -3,6 +3,7 @@ import { FormService } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
 import { ComponentCache, StructureCache, FormComponentCache } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
+import { IComponentCache } from '@servoy/public';
 
 @Injectable()
 export class EditorContentService {
@@ -78,7 +79,25 @@ export class EditorContentService {
         }
         if (data.ng2components) {
             data.ng2components.forEach((elem) => {
-                let component = formCache.getComponent(elem.name);
+                let component : IComponentCache = formCache.getComponent(elem.name);
+                if (!component) {
+                    component = formCache.getFormComponent(elem.name);
+                    if(component && data.updatedFormComponentsDesignId) {
+                        var fixedName = elem.name.replace(/-/g, "_");
+                        if(!isNaN(fixedName[0])) {
+                            fixedName = "_" + fixedName;
+                        }
+                        if((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1 && (component.model.containedForm != elem.model.containedForm)) {
+                            refresh = true;
+                            const formComponent = component as FormComponentCache;
+                            data.formComponentsComponents.forEach((child:string) =>{
+                                if (child.lastIndexOf(fixedName + '$', 0) === 0) {
+                                    formComponent.addChild(formCache.getComponent(child));
+                                }
+                            });
+                        }
+                    }
+                }
                 if (component) {
                     component.layout = elem.position;
                     const beanConversion = elem.model[ConverterService.TYPES_KEY];
@@ -95,7 +114,7 @@ export class EditorContentService {
                         component.model[property] = value;
                     }
                     // existing component updated, make sure it is in correct position relative to its sibblings
-                    if (component.parent) {
+                    if (component instanceof ComponentCache && component.parent) {
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
                             reorderLayoutContainers.push(component.parent);
                         }
@@ -133,8 +152,24 @@ export class EditorContentService {
             });
             refresh = true;
         }
-        if (data.deleted) {
-            data.deleted.forEach((elem) => {
+        let toDelete =[];
+        if(data.updatedFormComponentsDesignId) {
+            for (var index in data.updatedFormComponentsDesignId) {
+                const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
+                const fc = formCache.getFormComponent(fcname.replace(/_/g, "-"));
+                //delete components of the old form component
+                const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) == -1));
+                if (found){
+                  found.forEach(comp =>fc.removeChild(formCache.getComponent(comp)));
+                  toDelete.push(found);
+                }
+            }
+        }
+        if (data.deleted){
+            toDelete = toDelete.concat(data.deleted);
+        }
+        if (toDelete.length > 0) {
+            toDelete.forEach((elem) => {
                 const comp = formCache.getComponent(elem);
                 if (comp) {
                     formCache.removeComponent(elem);

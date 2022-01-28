@@ -228,6 +228,18 @@ export class FormComponentCache implements IComponentCache {
         if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
             this.items.push(child);
     }
+    
+    removeChild(child: StructureCache | ComponentCache | FormComponentCache): boolean {
+        const index = this.items.indexOf(child);
+        if (index >= 0) {
+            this.items.splice(index, 1);
+            return true;
+        }
+        if (child instanceof StructureCache) {
+            child.parent = undefined;
+        }
+    }
+
 }
 
 export class FormComponentProperties {
