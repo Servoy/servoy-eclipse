@@ -85,7 +85,7 @@
 			<plugin>
 				<groupId>net.jsign</groupId>
 				<artifactId>jsign-maven-plugin</artifactId>
-				<version>3.0</version>
+				<version>4.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -99,7 +99,7 @@
 							<keystore>${jarsigner.keystore}</keystore>
 							<alias>${jarsigner.alias}</alias>
 							<storepass>${jarsigner.storepass}</storepass>
-							<tsaurl>${jarsigner.tsa}</tsaurl>
+							<tsaurl>http://timestamp.sectigo.com,http://timestamp.digicert.com,${jarsigner.tsa}</tsaurl>
 						</configuration>
 					</execution>
 				</executions>
