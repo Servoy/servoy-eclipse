@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -65,7 +64,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private ComboViewer encapsulationTypeCombo;
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 	private Button useDarkIconsButton;
-	private Button chromiumButton;
 	private Button contextMenuTutorialsButton;
 	private Button launchNGButton;
 	private Button showNGDesignerButton;
@@ -164,16 +162,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		useDarkIconsButton = new Button(appearanceOptionsContainer, SWT.CHECK);
 		useDarkIconsButton.setText("Use dark theme icons (restart required)");
 
-		// use chromium
-		Group chromiumContainer = new Group(rootContainer, SWT.NONE);
-		chromiumContainer.setText("Chromium browser (Form Editor/Servoy Package Mananager)");
-		chromiumContainer.setLayout(new GridLayout(1, false));
-		chromiumContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		chromiumButton = new Button(chromiumContainer, SWT.CHECK);
-		chromiumButton.setText("Use the chromium browser instead of the system one");
-		chromiumButton.setToolTipText("Use the shipped chromium browser instead of the system installed browser, for windows IE");
-
 		// Context menu tutorials
 		Group contextMenuTutorialsContainer = new Group(rootContainer, SWT.NONE);
 		contextMenuTutorialsContainer.setText("Tutorials directly into the context menu");
@@ -234,8 +222,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
-		chromiumButton.setSelection(prefs.useChromiumBrowser());
-		chromiumButton.setEnabled(Platform.getBundle("com.equo.chromium") != null);
 		contextMenuTutorialsButton.setSelection(prefs.useContextMenuTutorials());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 		launchNGButton.setSelection(prefs.launchNG2());
@@ -256,7 +242,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
-		chromiumButton.setSelection(DesignerPreferences.USE_CHROMIUM_BROWSER_DEFAULT);
 		contextMenuTutorialsButton.setSelection(DesignerPreferences.USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
 		launchNGButton.setSelection(DesignerPreferences.LAUNCH_NG2_DEFAULT);
 		showNGDesignerButton.setSelection(DesignerPreferences.NG2_DESIGNER_DEFAULT);
@@ -287,7 +272,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
 		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, Integer.valueOf(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
-		prefs.setUseChromiumBrowser(chromiumButton.getSelection());
 		prefs.setContextMenuTutorials(contextMenuTutorialsButton.getSelection());
 		prefs.setLaunchNG2(launchNGButton.getSelection());
 		prefs.setShowNG2Designer(showNGDesignerButton.getSelection());

@@ -109,7 +109,7 @@ public class DesignerPreferences
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
-	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
+	//public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 	public static final String LAUNCH_NG2 = "launchNG2";
@@ -170,8 +170,6 @@ public class DesignerPreferences
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
-
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true; // Utils.isWindowsOS();
 
 	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
@@ -863,12 +861,7 @@ public class DesignerPreferences
 
 	public boolean useChromiumBrowser()
 	{
-		return getProperty(USE_CHROMIUM_BROWSER, USE_CHROMIUM_BROWSER_DEFAULT) && Platform.getBundle("com.equo.chromium") != null;
-	}
-
-	public void setUseChromiumBrowser(boolean chromium)
-	{
-		setProperty(USE_CHROMIUM_BROWSER, chromium);
+		return Platform.getBundle("com.equo.chromium") != null;
 	}
 
 	public boolean useContextMenuTutorials()
