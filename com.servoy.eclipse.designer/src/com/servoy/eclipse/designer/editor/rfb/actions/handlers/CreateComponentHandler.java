@@ -582,6 +582,10 @@ public class CreateComponentHandler implements IServerService
 							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
 								((JSONObject)description.getDefaultValue()).optInt("height", 80));
 						}
+						else if (w == 0 && h == 0)
+						{
+							CSSPositionUtils.setSize(webComponent, 200, 100);
+						}
 						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 						for (String string : allPropertiesNames)
 						{
