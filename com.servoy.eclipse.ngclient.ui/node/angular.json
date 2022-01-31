@@ -104,8 +104,7 @@
             ],
             "assets": [
               "src/assets",
-              "src/favicon.ico",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
+              "src/favicon.ico"
             ]
           }
         },

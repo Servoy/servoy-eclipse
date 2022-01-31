@@ -118,6 +118,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// modules and css of the components those are based on the Packages itself
 				TreeSet<String> cssLibs = new TreeSet<>();
 				Set<String> packageToInstall = new HashSet<>();
+				Set<String> assetsToAdd = new HashSet<>();
 				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
 				// service are based just on all service specifications
 				Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
@@ -133,6 +134,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
+					}
+					List<String> assets = webObjectSpecification.getNG2Config().getAssets().getAssetsList();
+					if (assets != null)
+					{
+						assetsToAdd.addAll(assets);
 					}
 					if (webObjectSpecification.getNG2Config().getPackageName() != null)
 					{
@@ -329,6 +335,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							cssLibs.addAll(libs);
 						}
+						List<String> assets = spec.getNG2Config().getAssets().getAssetsList();
+						if (assets != null)
+						{
+							assetsToAdd.addAll(assets);
+						}
 					}
 				}
 
@@ -466,6 +477,40 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					ServoyLog.logError(e);
 				}
+				try
+				{
+					if (assetsToAdd.size() > 0)
+					{
+						File angularJSON = new File(projectFolder, "angular.json");
+						String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
+						JSONObject json = new JSONObject(angularJSONContents);
+						JSONArray assets = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
+							.getJSONObject("options").getJSONArray("assets");
+						boolean[] assetsChanged = new boolean[] { false };
+						assetsToAdd.forEach((asset) -> {
+							boolean[] assetFound = new boolean[] { false };
+							assets.forEach(existingAsset -> {
+								if (existingAsset.toString().equals(asset))
+								{
+									assetFound[0] = true;
+								}
+							});
+							if (!assetFound[0])
+							{
+								assetsChanged[0] = true;
+								assets.put(asset);
+							}
+						});
+						if (assetsChanged[0])
+						{
+							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
+						}
+					}
+				}
+				catch (IOException e)
+				{
+					ServoyLog.logError(e);
+				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || warExportModel != null)
 				{
 					// first exeuted npm install with all the packages.
@@ -504,7 +549,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					else
 					{
 						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run",
-							warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build" : "build_debug_nowatch"));
+							warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
+								: "build_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
