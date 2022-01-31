@@ -88,7 +88,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 					@Override
 					public String isValid(Object value)
 					{
-						if (value != null && !"".equals(value))
+						if (value != null && !"".equals(value) && !"not set".equals(value))
 						{
 							String position = value.toString().trim();
 							if (position.startsWith("calc"))
@@ -244,7 +244,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 	{
 		CSSPosition position = (getEditableValue() == null) ? new CSSPosition("0", "0", "0", "0", "0", "0") : getEditableValue();
 		String str = (String)v;
-		if (Utils.stringIsEmpty(str))
+		if (Utils.stringIsEmpty(str) || "not set".equals(str))
 		{
 			str = "-1";
 		}
