@@ -144,7 +144,7 @@ export class EditorContentService {
                             }
                         }
                     }
-                    else {
+                    else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
                         formCache.partComponentsCache.push(comp);
                         reorderPartComponents = true;
                     }
@@ -161,7 +161,7 @@ export class EditorContentService {
                 const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) == -1));
                 if (found){
                   found.forEach(comp =>fc.removeChild(formCache.getComponent(comp)));
-                  toDelete.push(found);
+                  toDelete.push(...found);
                 }
             }
         }
