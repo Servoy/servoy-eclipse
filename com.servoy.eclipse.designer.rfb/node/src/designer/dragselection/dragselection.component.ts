@@ -89,7 +89,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
   }
 
   private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
-      if(elementInfos) {
+      if(elementInfos && elementInfos.size) {
           const changes = (event.ctrlKey||event.metaKey) ? [] : {};
           let i = 0;
           for (const nodeId of elementInfos.keys()) {
