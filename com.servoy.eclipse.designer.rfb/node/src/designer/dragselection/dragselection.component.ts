@@ -130,35 +130,22 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                     this.editorSession.startAutoscroll(this);
 				}
 
-              if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null || !this.selectionToDrag || this.selectionToDrag.length == 0) {
-                  if (event.ctrlKey || event.metaKey) this.dragCopy = true;
-                  this.selectionToDrag = [];
+              if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
+                  this.dragCopy = true;
                   const selection = this.editorSession.getSelection();
                   if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id'))){
                     selection.push(this.dragNode.getAttribute('svy-id'));
                   }
+                  this.initSelectionToDrag(selection);
+              }
 
-                  for (let i = 0; i < selection.length; i++) {
-                      let node = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' +  selection[i]  + '"]')[0] as HTMLElement;
-                      if (node === undefined) {
-                          console.log('Node with uuid '+selection[i]+' was not found');
-                          continue;
-                      }
-                      node = this.getSvyWrapper(node);
-                      if (this.dragCopy) {  
-                        const clone = node.cloneNode(true) as HTMLElement;
-                        this.renderer.setAttribute(clone, 'id', 'dragNode' + i);
-                        this.renderer.setAttribute(clone, 'cloneuuid', selection[i]);
-                        this.renderer.appendChild(this.doc.querySelector('iframe').contentWindow.document.body, clone);
-
-                        this.selectionToDrag.push('dragNode' + i);
-						this.currentElementInfo.set(this.selectionToDrag[i], new ElementInfo(clone));
-                      }
-                      else {
-                        this.selectionToDrag.push(selection[i]); 
-                        this.currentElementInfo.set( selection[i], new ElementInfo(node));
-                      }
-                  }    
+              if (!this.selectionToDrag) {
+                let selection = this.editorSession.getSelection();
+                if (!selection || selection.length == 0)
+                {
+                    selection = [this.dragNode.getAttribute('svy-id')];
+                }
+                this.initSelectionToDrag(selection);
               }
 
               if (this.selectionToDrag.length > 0) {
@@ -191,6 +178,31 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                       this.dragStartEvent = event;
               }
       }
+    
+    private initSelectionToDrag(selection: string[]) {
+        this.selectionToDrag = [];
+        for (let i = 0; i < selection.length; i++) {
+            let node = this.doc.querySelector('iframe').contentWindow.document.querySelectorAll('[svy-id="' + selection[i] + '"]')[0] as HTMLElement;
+            if (node === undefined) {
+                console.log('Node with uuid ' + selection[i] + ' was not found');
+                continue;
+            }
+            node = this.getSvyWrapper(node);
+            if (this.dragCopy) {
+                const clone = node.cloneNode(true) as HTMLElement;
+                this.renderer.setAttribute(clone, 'id', 'dragNode' + i);
+                this.renderer.setAttribute(clone, 'cloneuuid', selection[i]);
+                this.renderer.appendChild(this.doc.querySelector('iframe').contentWindow.document.body, clone);
+
+                this.selectionToDrag.push('dragNode' + i);
+                this.currentElementInfo.set(this.selectionToDrag[i], new ElementInfo(clone));
+            }
+            else {
+                this.selectionToDrag.push(selection[i]);
+                this.currentElementInfo.set(selection[i], new ElementInfo(node));
+            }
+        }
+    }
     
     private getSvyWrapper(node: HTMLElement) {
         while (node && !node.classList.contains('svy-wrapper')) {

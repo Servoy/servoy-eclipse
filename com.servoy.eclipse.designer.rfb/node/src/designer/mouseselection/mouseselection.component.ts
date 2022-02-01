@@ -155,8 +155,17 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseDown(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
-        const found = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;        
-        if (!found) {
+        const found = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;    
+        if (found) {
+            if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id'))!== -1) {
+                return;  //already selected
+            }
+            else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+                this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+            }
+        }  
+        else {
+            //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
 
