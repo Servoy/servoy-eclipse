@@ -138,8 +138,11 @@ export class ContextMenuComponent implements OnInit {
             event.preventDefault();
             event.stopPropagation();
         });
-        this.doc.body.addEventListener('click', () => {
-            this.hide();
+        // for some reason click event is not always triggered
+        this.doc.body.addEventListener('mouseup', (event: MouseEvent) => {
+            if (event.button == 0) {
+                setTimeout(() => this.hide(), 200);
+            }
         });
         this.doc.body.addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
