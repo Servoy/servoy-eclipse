@@ -113,6 +113,11 @@ export class EditorContentService {
                         }
                         component.model[property] = value;
                     }
+                    for (const property of Object.keys(component.model)) {
+                        if (elem.model[property] == undefined){
+                             component.model[property] = null;
+                        }
+                    }
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
