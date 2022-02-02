@@ -140,11 +140,14 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             // eslint-disable-next-line eqeqeq
             const valueListElem = this.valuelistID.find(this.valueComparator);
             if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format, false);
+            if (!this.valuelistID.hasRealValues())
+                this.formattedValue = this.formatService.format(this.dataProviderID, this.format, false);
             else {
-                if (!this.valuelistID.hasRealValues())
-                    this.formattedValue = this.formatService.format(this.dataProviderID, this.format, false);
-                else
-                    this.formattedValue = this.dataProviderID;
+                this.formattedValue = this.dataProviderID;
+                this.valuelistID.getDisplayValue(this.dataProviderID).subscribe(val => {
+                    this.formattedValue = val
+                    this.cdRef.detectChanges();
+                });
             }
         }
         delete changes['editable']; // ignore the editable property
