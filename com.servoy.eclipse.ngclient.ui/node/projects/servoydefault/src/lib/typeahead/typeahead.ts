@@ -92,6 +92,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         return this.formattingService.format(result.displayValue, this.format, false);
     };
 
+    private realToDisplay: Map<any, string> = new Map();
     inputFormatter = (result: any) => {
         if (result === null) return '';
         if (result.displayValue !== undefined) result = result.displayValue;
@@ -101,6 +102,19 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
             const value = this.valuelistID.find((item) => item.realValue == result);
             if (value) {
                 result = value.displayValue;
+            } else {
+                const display = this.realToDisplay.get(result);
+                if ( display === null || display === undefined ) {
+                    this.valuelistID.getDisplayValue( result ).subscribe( val => {
+                        if ( val ) {
+                            this.realToDisplay.set( result, val );
+                            this.instance.writeValue( result );
+                        }
+                    } );
+                    return '';
+                } else {
+                    result = display;
+                }
             }
         }
         return this.formattingService.format(result, this.format, false);
