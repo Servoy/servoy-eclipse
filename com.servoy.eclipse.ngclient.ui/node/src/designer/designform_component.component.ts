@@ -357,7 +357,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     getServoyApi(item: ComponentCache) {
         let api = this.servoyApiCache[item.name];
         if (api == null) {
-            api = new FormComponentServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService, this);
+            api = new FormComponentDesignServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService, this);
             this.servoyApiCache[item.name] = api;
         }
         return api;
@@ -405,7 +405,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 }
 
-class FormComponentServoyApi extends ServoyApi {
+class FormComponentDesignServoyApi extends ServoyApi {
     constructor(item: ComponentCache,
         formname: string,
         absolute: boolean,
@@ -421,6 +421,24 @@ class FormComponentServoyApi extends ServoyApi {
 
     unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
+    }
+    
+    public formWillShow( formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
+        return new Promise<any>(resolve => {
+            resolve(true);
+        })
+    }
+    
+    public hideForm( formname: string, relationname?: string, formIndex?: number,
+                        formNameThatWillShow?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number ): Promise<boolean> {
+        return new Promise<any>(resolve => {
+            resolve(true);
+        });
+    }
+
+
+    public apply( propertyName: string, value: any ) {
+        // noop
     }
 }
 
