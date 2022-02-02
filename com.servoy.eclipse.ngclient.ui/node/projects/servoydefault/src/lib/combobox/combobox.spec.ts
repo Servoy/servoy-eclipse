@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
 import { ServoyPublicTestingModule, Format, ServoyApi, IValuelist } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -89,11 +89,11 @@ describe('ComboboxComponent', () => {
  class DummyValuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist
 {
     filterList(filterString: string): Observable<any>{
-        return null;
+        return of('');
     }
     
     getDisplayValue(realValue: any): Observable<any>{
-        return null;
+        return of('');
     }
     hasRealValues(): boolean{
         return true;   
