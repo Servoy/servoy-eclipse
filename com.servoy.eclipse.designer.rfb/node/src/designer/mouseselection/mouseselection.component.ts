@@ -181,6 +181,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
+        if (event.button == 2 && this.editorSession.getSelection().length > 1) {
+            //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
+            const node = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;    
+            if (node && this.editorSession.getSelection().indexOf(node.getAttribute('svy-id'))!== -1) {
+                return;
+            }
+        }
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
             const frameElem = this.doc.querySelector('iframe');
             const frameRect = frameElem.getBoundingClientRect();
