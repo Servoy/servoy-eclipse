@@ -61,6 +61,16 @@ export class EditorContentService {
                                 reorderLayoutContainers.push(parent);
                             }
                         }
+                        else {
+                            let fc  = formCache.getFormComponent(parentUUID);
+                            if (fc) {
+                                fc.addChild(container);
+                                if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                    // new layout container in parent layout container , make sure is inserted in correct position
+                                    reorderLayoutContainers.push(parent);
+                                }
+                            }
+                        }
                     }
                     else {
                         // dropped directly on form
@@ -90,6 +100,14 @@ export class EditorContentService {
                         if((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1 && (component.model.containedForm != elem.model.containedForm)) {
                             refresh = true;
                             const formComponent = component as FormComponentCache;
+                            if (formComponent.responsive) {
+                               formComponent.items.forEach((item) => {
+                                   if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
+                                       formCache.removeLayoutContainer(item['id']);
+                                       this.removeChildRecursively(item, formComponent);
+                                   }
+                               });
+                            }
                             data.formComponentsComponents.forEach((child:string) =>{
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     formComponent.addChild(formCache.getComponent(child));
@@ -137,7 +155,7 @@ export class EditorContentService {
                     const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                     formCache.add(comp);
                     if (!formCache.absolute) {
-                        let parentUUID = data.childParentMap[elem.name].uuid;
+                        let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
                             let parent = formCache.getLayoutContainer(parentUUID);
                             if (parent) {
@@ -233,7 +251,7 @@ export class EditorContentService {
 
     }
 
-    private removeChildRecursively(child: ComponentCache | StructureCache, parent: StructureCache) {
+    private removeChildRecursively(child: ComponentCache | StructureCache|FormComponentCache, parent: StructureCache|FormComponentCache) {
         if (!parent.removeChild(child)) {
             if (parent.items) {
                 parent.items.forEach((elem) => {
