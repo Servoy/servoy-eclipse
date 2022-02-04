@@ -70,17 +70,17 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
                 const change = changes[property];
                 switch (property) {
                     case 'borderType':
-                        PropertyUtils.setBorder(this.getNativeElement(), this.renderer, change.currentValue);
+                        PropertyUtils.setBorder(this.getNativeChild(), this.renderer, change.currentValue);
                         break;
                     case 'background':
                     case 'transparent':
-                        this.renderer.setStyle(this.getNativeElement(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue);
+                        this.renderer.setStyle(this.getNativeChild(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue);
                         break;
                     case 'foreground':
-                        this.renderer.setStyle(this.getNativeElement(), 'color', change.currentValue);
+                        this.renderer.setStyle(this.getNativeChild(), 'color', change.currentValue);
                         break;
                     case 'fontType':
-                        PropertyUtils.setFont(this.getNativeElement(), this.renderer, change.currentValue);
+                        PropertyUtils.setFont(this.getNativeChild(), this.renderer, change.currentValue);
                         break;
                     case 'horizontalAlignment':
                         PropertyUtils.setHorizontalAlignment(this.getNativeChild(), this.renderer, change.currentValue);
@@ -106,11 +106,11 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
                     case 'styleClass':
                         if (change.previousValue) {
                             const array = change.previousValue.trim().split(' ');
-                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(this.getNativeElement(), element));
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.removeClass(this.getNativeChild(), element));
                         }
                         if (change.currentValue) {
                             const array = change.currentValue.trim().split(' ');
-                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(this.getNativeElement(), element));
+                            array.filter((element: string) => element !== '').forEach((element: string) => this.renderer.addClass(this.getNativeChild(), element));
                         }
                         break;
                 }
