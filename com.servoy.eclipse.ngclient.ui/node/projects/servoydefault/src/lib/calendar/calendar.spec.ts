@@ -4,7 +4,6 @@ import { Format, ServoyPublicTestingModule } from '@servoy/public';
 
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from './calendar';
-import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -19,9 +18,8 @@ describe('ServoyDefaultCalendar', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
-            imports: [ServoyPublicTestingModule, BrowserModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
-            providers: [Renderer2, FormsModule,
-                OwlDateTimeIntl]
+            imports: [ServoyPublicTestingModule, BrowserModule,  FormsModule],
+            providers: [Renderer2, FormsModule]
         }).compileComponents();
     });
 

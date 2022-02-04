@@ -2,14 +2,15 @@
   "name": "@servoy/servoydefault",
   "version": "2021.12.0",
   "peerDependencies": {
-    "@servoy/public": "*",
     "@angular/common": "^13",
-    "@angular/core": "^13"
+    "@angular/core": "^13",
+    "@servoy/public": "*"
   },
   "dependencies": {
-     "@angular/cdk": "^13",
-    "@danielmoncada/angular-datetime-picker": "^12",
+    "@angular/cdk": "^13",
+    "@eonasdan/tempus-dominus": "*",
     "@ng-bootstrap/ng-bootstrap": "^10",
+    "@popperjs/core": "^2",
     "@tinymce/tinymce-angular": "^4",
     "bootstrap": "^5",
     "tinymce": "^5",
