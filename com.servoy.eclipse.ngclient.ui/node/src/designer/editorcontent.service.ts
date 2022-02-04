@@ -65,10 +65,7 @@ export class EditorContentService {
                             let fc  = formCache.getFormComponent(parentUUID);
                             if (fc) {
                                 fc.addChild(container);
-                                if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                    // new layout container in parent layout container , make sure is inserted in correct position
-                                    reorderLayoutContainers.push(parent);
-                                }
+                                formCache.addLayoutContainer(container);
                             }
                         }
                     }
@@ -110,7 +107,15 @@ export class EditorContentService {
                             }
                             data.formComponentsComponents.forEach((child:string) =>{
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
-                                    formComponent.addChild(formCache.getComponent(child));
+                                    const formComponentComponent = formCache.getComponent(child);
+                                    if (formComponent.responsive) {
+                                        const container = formCache.getLayoutContainer(data.childParentMap[child]);
+                                        if (container) {
+                                            container.addChild(formComponentComponent);
+                                        }
+                                    } else {
+                                        formComponent.addChild(formComponentComponent);
+                                    }
                                 }
                             });
                         }
