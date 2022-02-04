@@ -2,7 +2,7 @@ import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChil
 import { ServoyDefaultBaseField } from '../basefield';
 import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
-import tinymce from 'tinymce';
+import tinymce, { RawEditorSettings } from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
@@ -12,13 +12,13 @@ import tinymce from 'tinymce';
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
     tinyValue: any;
-    tinyConfig = {
+    tinyConfig: RawEditorSettings = {
         base_url: '/tinymce',
         suffix: '.min',
         height: '100%',
         menubar: false,
         statusbar: false,
-        readonly: 0,
+        readonly: false,
         plugins: 'tabfocus',
         tabfocus_elements: ':prev,:next',
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
