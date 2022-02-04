@@ -95,6 +95,9 @@ export class FormattingService {
     }
 
     // unformatting stuff
+    public parse(data: any, format: Format, useEditFormat: boolean,  currentValue?: any): any {
+        return this.unformat(data, useEditFormat ? format.edit : format.display, format.type, currentValue);
+    }
 
     public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
