@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,6 +48,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.sablo.specification.CssLib;
+import org.sablo.specification.CssLibSet;
 import org.sablo.specification.NG2Config;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
@@ -116,7 +117,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
 				// modules and css of the components those are based on the Packages itself
-				TreeSet<String> cssLibs = new TreeSet<>();
+				CssLibSet cssLibs = new CssLibSet();
 				Set<String> packageToInstall = new HashSet<>();
 				Set<String> assetsToAdd = new HashSet<>();
 				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
@@ -130,7 +131,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						continue;
 					}
-					List<String> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
+					Set<CssLib> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
@@ -169,7 +170,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						componentPackageSpecToReader.put(entry, packageReader);
 					}
 
-					List<String> libs = entry.getNg2CssLibrary();
+					Set<CssLib> libs = entry.getNg2CssLibrary();
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
@@ -190,7 +191,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						componentPackageSpecToReader.put(entry, packageReader);
 					}
 
-					List<String> libs = entry.getNg2CssLibrary();
+					Set<CssLib> libs = entry.getNg2CssLibrary();
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
@@ -330,7 +331,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					if (warExportModel == null || warExportModel.getExportedComponents().contains(spec.getName()))
 					{
-						List<String> libs = spec.getNG2Config().getDependencies().getCssLibrary();
+						Set<CssLib> libs = spec.getNG2Config().getDependencies().getCssLibrary();
 						if (libs != null)
 						{
 							cssLibs.addAll(libs);
@@ -458,7 +459,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						String content = FileUtils.readFileToString(new File(projectFolder, "src/styles.css"), "UTF-8");
 						int index = content.indexOf("/* component/services imports end */");
 						StringBuilder sb = new StringBuilder();
-						cssLibs.forEach(lib -> sb.append("@import \"").append(lib).append("\";\n"));
+						cssLibs.forEach(lib -> sb.append("@import \"").append(lib.getUrl()).append("\";\n"));
 						String imports = sb.toString();
 						if (!imports.equals(content.substring(0, index)))
 						{
