@@ -247,6 +247,12 @@ export class FoundsetConverter implements IConverter {
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
 
+				const currentRequestInfo = this.sabloService.getCurrentRequestInfo();
+				if(currentRequestInfo) {
+					if (!requestInfos) requestInfos = [];
+					requestInfos.push(currentRequestInfo);
+				}
+
                 if (requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway

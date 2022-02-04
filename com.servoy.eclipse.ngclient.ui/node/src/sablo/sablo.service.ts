@@ -150,6 +150,10 @@ export class SabloService {
         this.wsSession.addIncomingMessageHandlingDoneTask(func);
     }
 
+    public getCurrentRequestInfo(): any {
+        return this.websocketService.getCurrentRequestInfo();
+    }
+
     private callServiceCallbacksWhenDone() {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
             this.currentServiceCallWaiting = 0;
