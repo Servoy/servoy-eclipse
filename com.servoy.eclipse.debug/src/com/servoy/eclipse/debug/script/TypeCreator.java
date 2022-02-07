@@ -2693,7 +2693,8 @@ public class TypeCreator extends TypeCache
 					if (!form.isFormComponent())
 					{
 						Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
-							getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());
+							getDescription(form.getDataSource(), form.getComment()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null,
+							form.getDeprecated());
 						formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 						if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
 						{
@@ -2710,16 +2711,18 @@ public class TypeCreator extends TypeCache
 		 * @param dataSource
 		 * @return
 		 */
-		private String getDescription(String ds)
+		private String getDescription(String ds, String comment)
 		{
 			String datasource = ds;
 			if (datasource == null) datasource = "<no datasource>";
-			String description = descriptions.get(datasource);
+			String description = null;
+			descriptions.get(datasource);
 			if (description == null)
 			{
 				description = "Form based on datasource: " + datasource;
 				descriptions.putIfAbsent(datasource, description);
 			}
+			if (comment != null) description += "<br/> Comment: " + comment;
 			return description;
 		}
 
@@ -5028,6 +5031,10 @@ public class TypeCreator extends TypeCache
 				sb.append((foreignColumns[i] != null) ? foreignColumns[i].getDataProviderID() : "unresolved");
 				sb.append("<br/>");
 			}
+		}
+		if (relation.getComment() != null)
+		{
+			sb.append("Comment: " + relation.getComment());
 		}
 		str = sb.toString();
 		relationCache.put(relation, str);

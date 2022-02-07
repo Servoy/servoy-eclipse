@@ -227,6 +227,7 @@ import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -734,6 +735,17 @@ public class SolutionExplorerView extends ViewPart
 					deprecatedText = "@deprecated " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
+				Object nodeObject = ((SimpleUserNode)element).getRealObject();
+				if (nodeObject instanceof AbstractBase)
+				{
+					String comment = ((AbstractBase)nodeObject).getComment();
+					if (comment != null)
+					{
+						comment = "Comment: " + comment;
+						result = (result != null) ? result += ("\n" + comment) : comment;
+					}
+				}
+
 			}
 			return result;
 		}

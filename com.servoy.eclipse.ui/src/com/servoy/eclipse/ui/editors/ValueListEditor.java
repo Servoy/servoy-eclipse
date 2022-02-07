@@ -157,6 +157,7 @@ public class ValueListEditor extends PersistEditor
 
 	private Text deprecated;
 	private Combo encapsulation;
+	private Text commentText;
 
 	private int databaseValuesTypeOverride = -1; // used when the user clicks the related values button but realtionName has not been set yet
 
@@ -486,6 +487,10 @@ public class ValueListEditor extends PersistEditor
 		realType = new Combo(typeDefinitionGroup, SWT.READ_ONLY);
 		realType.setItems(Type2StringConverter.INSTANCE.getAllTypes());
 
+		Label commentLabel = new Label(valueListEditorComposite, SWT.NONE);
+		commentLabel.setText("Comment");
+		commentText = new Text(valueListEditorComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+
 		final GroupLayout groupLayout_0 = new GroupLayout(typeDefinitionGroup);
 		groupLayout_0.setHorizontalGroup(
 			groupLayout_0.createSequentialGroup().addContainerGap().add(displayTypeLabel).addPreferredGap(LayoutStyle.RELATED).add(displayType,
@@ -539,6 +544,10 @@ public class ValueListEditor extends PersistEditor
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
 							GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228,
 								GroupLayout.PREFERRED_SIZE))
+					.add(10, 10, 10).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(commentLabel)).addPreferredGap(
+						LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(commentText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						Short.MAX_VALUE))
 					.addContainerGap())
 			.add(groupLayout.createSequentialGroup().add(36,
 				36, 36).add(applyValuelistNameButton).addContainerGap())
@@ -604,14 +613,16 @@ public class ValueListEditor extends PersistEditor
 						relationSelectControl))
 				.addPreferredGap(LayoutStyle.RELATED).add(definitionGroup, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-				.add(9, 9, 9).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel)).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecated)))
-				.add(9, 9, 9).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel)).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulation)))
+				.add(9, 9, 9).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+					groupLayout.createSequentialGroup().add(
+						deprecatedLabel).add(9, 9, 9).add(
+							encapsulationLabel))
+					.add(
+						groupLayout.createSequentialGroup().add(
+							deprecated).add(9, 9, 9).add(
+								encapsulation))
+					.add(commentLabel).add(commentText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						Short.MAX_VALUE))
 				.add(9, 9,
 					9)
 				.add(
@@ -931,6 +942,8 @@ public class ValueListEditor extends PersistEditor
 		IObservableValue deprecatedObserveValue = PojoObservables.observeValue(getValueList(), "deprecated");
 		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
 		IObservableValue encapsulationObserveValue = PojoObservables.observeValue(getValueList(), "encapsulation");
+		IObservableValue commentObserveWidget = SWTObservables.observeText(commentText, SWT.Modify);
+		IObservableValue commentObserveValue = PojoObservables.observeValue(getValueList(), "comment");
 
 		IObservableValue displayTypeObserveWidget = SWTObservables.observeSelection(displayType);
 		IObservableValue displayTypeObserveValue = PojoObservables.observeValue(getValueList(), "displayValueType");
@@ -1030,6 +1043,7 @@ public class ValueListEditor extends PersistEditor
 		m_bindingContext.bindValue(applyNameFilterSelectionObserveWidget, getApplyNameFilterSelectionObserveValue, null, null);
 		m_bindingContext.bindValue(separatorFieldTextObserveWidget, getValueListSeparatorObserveValue, null, null);
 		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
+		m_bindingContext.bindValue(commentObserveWidget, commentObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
 		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
 			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(Encapsulation2StringConverter.INSTANCE));
