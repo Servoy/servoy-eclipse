@@ -601,6 +601,10 @@ public class ProfilerView extends ViewPart
 			if (aggregateView)
 			{
 				argsColumn.setText("Arguments");
+				if (averageAggregateView)
+				{
+					toggleAverageAggregateView.run();
+				}
 			}
 			else
 			{
