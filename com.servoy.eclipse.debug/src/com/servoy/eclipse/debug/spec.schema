@@ -171,6 +171,11 @@
                 "entryPoint":  {
                      "description": "The entry point of the distribution",
                      "type": "string"
+                },
+                "assets": 
+                {
+                    "description": "Assets for NG2",
+                    "type": "object"
                 }
         	},
         	"additionalProperties": false
