@@ -8,7 +8,7 @@ import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
-import { TempusDominus, DateTime, Namespace, } from '@eonasdan/tempus-dominus';
+import { TempusDominus, DateTime, Namespace, Options, } from '@eonasdan/tempus-dominus';
 import { ChangeEvent } from '@eonasdan/tempus-dominus/types/event-types';
 
 @Component({
@@ -26,8 +26,9 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     private hasFocus = false;
     private isBlur = false;
 
-    private readonly config = {
+    private readonly config: Options  = {
         allowInputToggle: false,
+        useCurrent: false,
         display: {
             components: {
                 useTwentyfourHour: true,
@@ -45,6 +46,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 close: true,
                 clear: true,
             }
+        },
+        restrictions: {
         },
         localization: {
             startOfTheWeek: 1,
@@ -95,48 +98,45 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
-        for (const property of Object.keys(changes)) {
-            const change = changes[property];
-            switch (property) {
-                case 'format':
-                    if (change.currentValue) {
-                        if (change.currentValue.type === 'DATETIME' && change.currentValue.display) {
-                            const format = change.currentValue.display;
-                            const showCalendar = format.indexOf('y') >= 0 || format.indexOf('M') >= 0;
-                            const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
-                            const showSecondsTimer = format.indexOf('s') >= 0;
-                            this.config.display.components.useTwentyfourHour = !(format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0);
-                            this.config.display.components.decades = showCalendar;
-                            this.config.display.components.year = showCalendar;
-                            this.config.display.components.month = showCalendar;
-                            this.config.display.components.date = showCalendar;
-                            this.config.display.components.hours = showTime;
-                            this.config.display.components.minutes = showTime;
-                            this.config.display.components.seconds = showTime;
-                            this.config.display.components.seconds = showSecondsTimer;
-                            if (this.picker !== null) this.picker.updateOptions(this.config);
-                        } else {
-                            this.log.warn('wrong format or type given into the calendar field ' + JSON.stringify(change.currentValue));
-                        }
-                    }
-                    break;
-                case 'size':
-                    this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', change.currentValue['height'] + 'px');
-                    break;
-                case 'findmode':
-                    if (change.currentValue) {
-                        this.picker.dispose();
-                        this.picker = null;
-                    } else {
-                        this.initializePicker();
-                    }
-                    break;
-            }
+         if (changes.dataProviderID) {
+            this.picker.dates.set(this.dataProviderID);
+            this.config.viewDate =this.dataProviderID;
         }
+        if (changes.format)
+            if (changes.format.currentValue) {
+                if (changes.format.currentValue.type === 'DATETIME' && changes.format.currentValue.display) {
+                    const format = changes.format.currentValue.display;
+                    const showCalendar = format.indexOf('y') >= 0 || format.indexOf('M') >= 0;
+                    const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
+                    const showSecondsTimer = format.indexOf('s') >= 0;
+                    this.config.display.components.useTwentyfourHour = !(format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0);
+                    this.config.display.components.decades = showCalendar;
+                    this.config.display.components.year = showCalendar;
+                    this.config.display.components.month = showCalendar;
+                    this.config.display.components.date = showCalendar;
+                    this.config.display.components.hours = showTime;
+                    this.config.display.components.minutes = showTime;
+                    this.config.display.components.seconds = showTime;
+                    this.config.display.components.seconds = showSecondsTimer;
+                    if (this.picker !== null) this.picker.updateOptions(this.config);
+                } else {
+                    this.log.warn('wrong format or type given into the calendar field ' + JSON.stringify(changes.format.currentValue));
+                }
+            }
+        if (changes.size)
+            this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
+        if (changes.findmode)
+            if (changes.findmode.currentValue) {
+                this.picker.dispose();
+                this.picker = null;
+            } else {
+                this.initializePicker();
+            }
     }
 
     public dateChanged(event: ChangeEvent) {
         if (event.type === 'change.td') {
+            if (event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) return;
             this.dataProviderID = event.date;
         } else this.dataProviderID = null;
         super.pushUpdate();
@@ -149,23 +149,12 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         }
     }
 
-     public getNativeChild(): any {
+    public getNativeChild(): any {
         return this.inputElementRef.nativeElement;
     }
 
     getFocusElement(): any {
         return this.inputElementRef.nativeElement;
-    }
-
-    private checkOnBlur() {
-        this.isBlur = true;
-        setTimeout(() => {
-            if (this.hasFocus && this.isBlur && (this.doc.activeElement.parentElement !== this.getNativeElement())) {
-                this.hasFocus = false;
-                this.isBlur = false;
-                this.onFocusLostMethodID(new CustomEvent('blur'));
-            }
-        });
     }
 
     private initializePicker() {
@@ -186,6 +175,17 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         }
     }
 
+    private checkOnBlur() {
+        this.isBlur = true;
+        setTimeout(() => {
+            if (this.hasFocus && this.isBlur && (this.doc.activeElement.parentElement !== this.getNativeElement())) {
+                this.hasFocus = false;
+                this.isBlur = false;
+                this.onFocusLostMethodID(new CustomEvent('blur'));
+            }
+        });
+    }
+
     private checkOnFocus() {
         this.isBlur = false;
         if (!this.hasFocus) {
@@ -202,15 +202,15 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         }
         language = language.toLowerCase();
         import(`./${language}.js`).then(
-                (module: {default: { [key: string]: string}}) => {
-                   Object.entries(module.default).forEach( ([key, value]) => {
-                        this.config.localization[key] = value;
-                    });
-                    if (this.picker !== null) this.picker.updateOptions(this.config);
-                },
-                () => {
-                    this.log.info('Locale ' + locale + ' for calendar not found, default to english');
+            (module: { default: { [key: string]: string } }) => {
+                Object.entries(module.default).forEach(([key, value]) => {
+                    this.config.localization[key] = value;
                 });
+                if (this.picker !== null) this.picker.updateOptions(this.config);
+            },
+            () => {
+                this.log.info('Locale ' + locale + ' for calendar not found, default to english');
+            });
     }
 
 }
