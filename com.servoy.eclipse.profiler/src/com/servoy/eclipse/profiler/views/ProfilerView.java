@@ -253,9 +253,10 @@ public class ProfilerView extends ViewPart
 					}
 				}
 
-				if (pd.getParent() != null)
+				ProfileData[] children = pd.getChildren();
+				for (ProfileData profileData : children)
 				{
-					AggregateData parent = new AggregateData(pd.getParent());
+					AggregateData parent = new AggregateData(profileData);
 					int index = callees.indexOf(parent);
 					if (index == -1)
 					{
@@ -264,7 +265,7 @@ public class ProfilerView extends ViewPart
 					else
 					{
 						parent = callees.get(index);
-						parent.increaseCount();
+						parent.add(profileData);
 					}
 				}
 
@@ -273,11 +274,6 @@ public class ProfilerView extends ViewPart
 			{
 				throw new IllegalArgumentException("ProfileData should have the right method and/or sourcename");
 			}
-		}
-
-		public void increaseCount()
-		{
-			count++;
 		}
 
 		public AggregateData[] getChildren()
@@ -389,30 +385,30 @@ public class ProfilerView extends ViewPart
 			else return null;
 		}
 
-		public long getDataQueriesTime()
+		public long getOwnDataQueriesAggregatedTime()
 		{
-			long time = 0;
+			long ownSqlAggregatedTime = 0;
 			if (dataCallProfileDataMap.size() > 0)
 			{
 				for (DataCallProfileData profile : dataCallProfileDataMap.values())
 				{
-					time += profile.getTime();
+					ownSqlAggregatedTime += profile.getTime();
 				}
 			}
-			return time;
+			return ownSqlAggregatedTime;
 		}
 
-		public long getTotalDataQueriesTime()
+		public long getTotalDataQueriesAggregatedTime()
 		{
-			long totalTime = this.getDataQueriesTime();
+			long totalSqlAggregatedTime = this.getOwnDataQueriesAggregatedTime();
 			if (this.callees.size() > 0)
 			{
 				for (AggregateData ad : callees)
 				{
-					totalTime += ad.getTotalDataQueriesTime();
+					totalSqlAggregatedTime += ad.getTotalDataQueriesAggregatedTime();
 				}
 			}
-			return totalTime;
+			return totalSqlAggregatedTime;
 		}
 	}
 
@@ -478,6 +474,8 @@ public class ProfilerView extends ViewPart
 
 		private final List<AggregateData> aggregateData = new ArrayList<AggregateData>();
 
+		private final List<AggregateData> aggregateRoots = new ArrayList<AggregateData>();
+
 		private boolean aggregateView = false;
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput)
@@ -494,7 +492,7 @@ public class ProfilerView extends ViewPart
 			{
 				if (aggregateView)
 				{
-					return aggregateData.toArray();
+					return aggregateRoots.toArray();
 				}
 				return invisibleRoot.toArray();
 			}
@@ -545,8 +543,9 @@ public class ProfilerView extends ViewPart
 				invisibleRoot.remove(invisibleRoot.size() - 1);
 			}
 
-			calculateAggregateData(profileData);
-			Collections.sort(aggregateData, AggregateDataComparator.INSTANCE);
+			calculateAggregateData(profileData, true);
+			//Collections.sort(aggregateData, AggregateDataComparator.INSTANCE);
+			Collections.sort(aggregateRoots, AggregateDataComparator.INSTANCE);
 
 			Display.getDefault().asyncExec(new Runnable()
 			{
@@ -562,7 +561,7 @@ public class ProfilerView extends ViewPart
 		/**
 		 * @param profileData
 		 */
-		private void calculateAggregateData(ProfileData profileData)
+		private void calculateAggregateData(ProfileData profileData, boolean first)
 		{
 			AggregateData ad = new AggregateData(profileData);
 			int index = aggregateData.indexOf(ad);
@@ -575,10 +574,9 @@ public class ProfilerView extends ViewPart
 			{
 				aggregateData.add(ad);
 			}
-			ProfileData[] children = profileData.getChildren();
-			for (ProfileData pd : children)
+			if (first && !aggregateRoots.contains(ad))
 			{
-				calculateAggregateData(pd);
+				aggregateRoots.add(ad);
 			}
 		}
 
@@ -851,9 +849,9 @@ public class ProfilerView extends ViewPart
 					case 3 :
 						return Integer.toString(pd.getCount());
 					case 4 :
-						return Long.toString(pd.getDataQueriesTime());
+						return Long.toString(pd.getOwnDataQueriesAggregatedTime());
 					case 5 :
-						return Long.toString(pd.getTotalDataQueriesTime());
+						return Long.toString(pd.getTotalDataQueriesAggregatedTime());
 					case 6 :
 						return pd.getSourceName();
 				}
@@ -1144,8 +1142,8 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getDataQueriesTime() : ((AggregateData)o1).getDataQueriesTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getDataQueriesTime() : ((AggregateData)o2).getDataQueriesTime();
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getDataQueriesTime() : ((AggregateData)o1).getOwnDataQueriesAggregatedTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getDataQueriesTime() : ((AggregateData)o2).getOwnDataQueriesAggregatedTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			}, new Comparator()
@@ -1153,8 +1151,8 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getTotalDataQueriesTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getTotalDataQueriesTime();
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getTotalDataQueriesAggregatedTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getTotalDataQueriesAggregatedTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			} }));
@@ -1562,6 +1560,7 @@ public class ProfilerView extends ViewPart
 				{
 					methodCallContentProvider.aggregateData.clear();
 					dataCallContentProvider.aggregateData.clear();
+					methodCallContentProvider.aggregateRoots.clear();
 				}
 				methodCallViewer.refresh();
 			}
