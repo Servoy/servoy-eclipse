@@ -326,6 +326,22 @@ public class ProfilerView extends ViewPart
 		/**
 		 * @return
 		 */
+		public long getAverageOwnTime()
+		{
+			return ownTime / count;
+		}
+
+		/**
+		 * @return
+		 */
+		public long getAverageTime()
+		{
+			return time / count;
+		}
+
+		/**
+		 * @return
+		 */
 		public int getCount()
 		{
 			return count;
@@ -449,6 +465,8 @@ public class ProfilerView extends ViewPart
 
 	private Action toggleAggregateView;
 
+	private Action toggleAverageAggregateView;
+
 	private Action toggleProfile;
 
 	private Action openCallPostion;
@@ -473,6 +491,8 @@ public class ProfilerView extends ViewPart
 		private final List<AggregateData> aggregateRoots = new ArrayList<AggregateData>();
 
 		private boolean aggregateView = false;
+
+		private boolean averageAggregateView = false;
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput)
 		{
@@ -593,6 +613,34 @@ public class ProfilerView extends ViewPart
 
 				public void run()
 				{
+
+					toggleAverageAggregateView.setEnabled(!toggleAverageAggregateView.isEnabled());
+					methodCallViewer.refresh();
+				}
+			});
+		}
+
+		/**
+		 *
+		 */
+		public void toggleAverageAggregateView()
+		{
+			if (averageAggregateView)
+			{
+				ownTimeColumn.setText("Own Time (ms)");
+				timeColumn.setText("Total Time (ms)");
+			}
+			else
+			{
+				ownTimeColumn.setText("Own Time Average (ms)");
+				timeColumn.setText("Total Time Average (ms)");
+			}
+			averageAggregateView = !averageAggregateView;
+			Display.getDefault().asyncExec(new Runnable()
+			{
+
+				public void run()
+				{
 					methodCallViewer.refresh();
 				}
 			});
@@ -691,10 +739,12 @@ public class ProfilerView extends ViewPart
 			if (aggregateView)
 			{
 				arguments.getColumn().setText("Arguments");
+				toggleAverageAggregateView.setEnabled(true);
 			}
 			else
 			{
 				arguments.getColumn().setText("Count");
+				toggleAverageAggregateView.setEnabled(false);
 
 			}
 			aggregateView = !aggregateView;
@@ -755,51 +805,52 @@ public class ProfilerView extends ViewPart
 		{
 			if (element instanceof ProfileData)
 			{
-				ProfileData pd = (ProfileData)element;
+				ProfileData profileData = (ProfileData)element;
 				String sourceName;
 				IFile file;
 				switch (columnIndex)
 				{
 					case 0 :
 						String lineStart = "";
-						int[] lineNumbers = pd.getLineNumbers();
+						int[] lineNumbers = profileData.getLineNumbers();
 						if (lineNumbers != null && lineNumbers.length > 0)
 						{
 							lineStart = "#" + lineNumbers[0];
 						}
 
 						String printedMethodName;
-						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
+						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(profileData.getSourceName()));
 						if (file != null)
 						{
 							if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
 							{
-								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + profileData.getMethodName() +
+									'[' +
 									file.getProject().getName() + ']';
 							}
 							else
 							{
-								printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+								printedMethodName = profileData.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
 							}
 						}
 						else
 						{
-							printedMethodName = pd.getMethodName();
+							printedMethodName = profileData.getMethodName();
 						}
-						return pd.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ')' : printedMethodName;
+						return profileData.isInnerFunction() ? printedMethodName + " (innerfunction" + lineStart + ')' : printedMethodName;
 					case 1 :
-						return Long.toString(pd.getOwnTime());
+						return Long.toString(profileData.getOwnTime());
 					case 2 :
-						return Long.toString(pd.getTime());
+						return Long.toString(profileData.getTime());
 					case 3 :
-						return pd.getArgs();
+						return profileData.getArgs();
 					case 4 :
-						return Long.toString(pd.getDataQueriesTime());
+						return Long.toString(profileData.getDataQueriesTime());
 					case 5 :
-						return Long.toString(pd.getTotalDataQueriesTime());
+						return Long.toString(profileData.getTotalDataQueriesTime());
 					case 6 :
 					{
-						sourceName = pd.getSourceName();
+						sourceName = profileData.getSourceName();
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
 						if (file != null)
 						{
@@ -811,41 +862,44 @@ public class ProfilerView extends ViewPart
 			}
 			else if (element instanceof AggregateData)
 			{
-				AggregateData pd = (AggregateData)element;
+				final boolean isAverageToggleButtonPressed = methodCallContentProvider.averageAggregateView;
+				AggregateData aggregatedData = (AggregateData)element;
 				switch (columnIndex)
 				{
 					case 0 :
 						String printedMethodName;
-						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(pd.getSourceName()));
+						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(aggregatedData.getSourceName()));
 						if (file != null)
 						{
 							if (file.getProjectRelativePath().segmentCount() == 1) // Global scope file
 							{
-								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' + pd.getMethodName() + '[' +
+								printedMethodName = ScriptVariable.SCOPES_DOT_PREFIX + file.getName().replace(".js", "") + '.' +
+									aggregatedData.getMethodName() + '[' +
 									file.getProject().getName() + ']';
 							}
 							else
 							{
-								printedMethodName = pd.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
+								printedMethodName = aggregatedData.getMethodName() + '[' + file.getName().replace(".js", "") + ']';
 							}
 						}
 						else
 						{
-							printedMethodName = pd.getMethodName();
+							printedMethodName = aggregatedData.getMethodName();
 						}
-						return pd.getInnerFunctionLineStart() == -1 ? printedMethodName : printedMethodName + '#' + pd.getInnerFunctionLineStart();
+						return aggregatedData.getInnerFunctionLineStart() == -1 ? printedMethodName
+							: printedMethodName + '#' + aggregatedData.getInnerFunctionLineStart();
 					case 1 :
-						return Long.toString(pd.getOwnTime());
+						return Long.toString(!isAverageToggleButtonPressed ? aggregatedData.getOwnTime() : aggregatedData.getAverageOwnTime());
 					case 2 :
-						return Long.toString(pd.getTime());
+						return Long.toString(!isAverageToggleButtonPressed ? aggregatedData.getTime() : aggregatedData.getAverageTime());
 					case 3 :
-						return Integer.toString(pd.getCount());
+						return Integer.toString(aggregatedData.getCount());
 					case 4 :
-						return Long.toString(pd.getOwnDataQueriesAggregatedTime());
+						return Long.toString(aggregatedData.getOwnDataQueriesAggregatedTime());
 					case 5 :
-						return Long.toString(pd.getTotalDataQueriesAggregatedTime());
+						return Long.toString(aggregatedData.getTotalDataQueriesAggregatedTime());
 					case 6 :
-						return pd.getSourceName();
+						return aggregatedData.getSourceName();
 				}
 			}
 			return null;
@@ -1093,8 +1147,11 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTime() : ((AggregateData)o1).getTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTime() : ((AggregateData)o2).getTime();
+					final boolean isAverageToggleButtonPressed = methodCallContentProvider.averageAggregateView;
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTime()
+						: !isAverageToggleButtonPressed ? ((AggregateData)o1).getTime() : ((AggregateData)o1).getAverageTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTime()
+						: !isAverageToggleButtonPressed ? ((AggregateData)o2).getTime() : ((AggregateData)o1).getAverageTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			}, new Comparator()
@@ -1102,8 +1159,11 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getOwnTime() : ((AggregateData)o1).getOwnTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getOwnTime() : ((AggregateData)o2).getOwnTime();
+					final boolean isAverageToggleButtonPressed = methodCallContentProvider.averageAggregateView;
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getOwnTime()
+						: !isAverageToggleButtonPressed ? ((AggregateData)o1).getOwnTime() : ((AggregateData)o1).getAverageOwnTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getOwnTime()
+						: !isAverageToggleButtonPressed ? ((AggregateData)o2).getOwnTime() : ((AggregateData)o1).getAverageOwnTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			}, new Comparator()
@@ -1459,6 +1519,7 @@ public class ProfilerView extends ViewPart
 		manager.add(toggleProfile);
 		manager.add(new Separator());
 		manager.add(toggleAggregateView);
+		manager.add(toggleAverageAggregateView);
 		manager.add(new Separator());
 		manager.add(clearData);
 		manager.add(new Separator());
@@ -1477,6 +1538,7 @@ public class ProfilerView extends ViewPart
 		}
 		manager.add(new Separator());
 		manager.add(toggleAggregateView);
+		manager.add(toggleAverageAggregateView);
 		manager.add(clearData);
 		manager.add(exportData);
 		manager.add(new Separator());
@@ -1536,6 +1598,7 @@ public class ProfilerView extends ViewPart
 		});
 		manager.add(toggleProfile);
 		manager.add(toggleAggregateView);
+		manager.add(toggleAverageAggregateView);
 		manager.add(clearData);
 		manager.add(exportData);
 		manager.add(new Separator());
@@ -1587,6 +1650,20 @@ public class ProfilerView extends ViewPart
 		toggleAggregateView.setText("Aggregate View");
 		toggleAggregateView.setToolTipText("Aggregate View");
 		toggleAggregateView.setImageDescriptor(Activator.getImageDescriptor("icons/aggregates.png"));
+
+		toggleAverageAggregateView = new Action("Show Average Times", IAction.AS_CHECK_BOX)
+		{
+			@Override
+			public void run()
+			{
+				methodCallContentProvider.toggleAverageAggregateView();
+			}
+		};
+		toggleAverageAggregateView.setText("Show Average Times");
+		toggleAverageAggregateView.setToolTipText("Show Average Times");
+		toggleAverageAggregateView.setImageDescriptor(Activator.getImageDescriptor("icons/average_aggregates.png"));
+		//start the profile view with this button being disabled
+		toggleAverageAggregateView.setEnabled(false);
 
 		toggleProfile = new Action("Start profiling", IAction.AS_CHECK_BOX)
 		{
