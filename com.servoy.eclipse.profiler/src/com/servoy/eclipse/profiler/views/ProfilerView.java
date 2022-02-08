@@ -196,14 +196,10 @@ public class ProfilerView extends ViewPart
 
 		private final HashMap<String, DataCallProfileData> dataCallProfileDataMap = new HashMap<String, DataCallProfileData>();
 
-		private Long queryTime;
-
-		private Integer queryCount;
-
 		private int innerFunctionLineStart = -1;
 
 		/**
-		 * @param aggregateData
+		 * @param pd
 		 */
 		public AggregateData(ProfileData pd)
 		{
@@ -543,7 +539,7 @@ public class ProfilerView extends ViewPart
 				invisibleRoot.remove(invisibleRoot.size() - 1);
 			}
 
-			calculateAggregateData(profileData, true);
+			calculateAggregateData(profileData);
 			//Collections.sort(aggregateData, AggregateDataComparator.INSTANCE);
 			Collections.sort(aggregateRoots, AggregateDataComparator.INSTANCE);
 
@@ -561,7 +557,7 @@ public class ProfilerView extends ViewPart
 		/**
 		 * @param profileData
 		 */
-		private void calculateAggregateData(ProfileData profileData, boolean first)
+		private void calculateAggregateData(ProfileData profileData)
 		{
 			AggregateData ad = new AggregateData(profileData);
 			int index = aggregateData.indexOf(ad);
@@ -574,7 +570,7 @@ public class ProfilerView extends ViewPart
 			{
 				aggregateData.add(ad);
 			}
-			if (first && !aggregateRoots.contains(ad))
+			if (!aggregateRoots.contains(ad))
 			{
 				aggregateRoots.add(ad);
 			}
@@ -669,24 +665,20 @@ public class ProfilerView extends ViewPart
 				if (aggregateView)
 				{
 					AggregateData ad = (AggregateData)inputElement;
-					int adIndex = aggregateData.indexOf(ad);
-					if (adIndex >= 0)
+					Collection<DataCallProfileData> dataCallProfilecollection = ad.getDataCallProfileDataMap();
+					if (dataCallProfilecollection != null)
 					{
-						Collection<DataCallProfileData> dataCallProfilecollection = aggregateData.get(adIndex).getDataCallProfileDataMap();
-						if (dataCallProfilecollection != null)
+						DataCallProfileDataAggregate[] dataCallArray = new DataCallProfileDataAggregate[dataCallProfilecollection.size()];
+						int index = 0;
+						for (DataCallProfileData dataCallProfileData : dataCallProfilecollection)
 						{
-							DataCallProfileDataAggregate[] dataCallArray = new DataCallProfileDataAggregate[dataCallProfilecollection.size()];
-							int index = 0;
-							for (DataCallProfileData dataCallProfileData : dataCallProfilecollection)
-							{
-								dataCallArray[index] = new DataCallProfileDataAggregate(dataCallProfileData.getName(), dataCallProfileData.getDatasource(),
-									dataCallProfileData.getTransactionId(), 0, dataCallProfileData.getTime(), dataCallProfileData.getQuery(),
-									dataCallProfileData.getArgumentString(), dataCallProfileData.getCount());
-								index++;
-							}
-
-							return dataCallArray;
+							dataCallArray[index] = new DataCallProfileDataAggregate(dataCallProfileData.getName(), dataCallProfileData.getDatasource(),
+								dataCallProfileData.getTransactionId(), 0, dataCallProfileData.getTime(), dataCallProfileData.getQuery(),
+								dataCallProfileData.getArgumentString(), dataCallProfileData.getCount());
+							index++;
 						}
+
+						return dataCallArray;
 					}
 				}
 			}
@@ -1151,8 +1143,10 @@ public class ProfilerView extends ViewPart
 				@Override
 				public int compare(Object o1, Object o2)
 				{
-					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime() : ((AggregateData)o1).getTotalDataQueriesAggregatedTime();
-					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime() : ((AggregateData)o2).getTotalDataQueriesAggregatedTime();
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTotalDataQueriesTime()
+						: ((AggregateData)o1).getTotalDataQueriesAggregatedTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTotalDataQueriesTime()
+						: ((AggregateData)o2).getTotalDataQueriesAggregatedTime();
 					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
 				}
 			} }));
@@ -1753,7 +1747,7 @@ public class ProfilerView extends ViewPart
 				final StringBuilder sb = new StringBuilder(200);
 				if (exportAggregate)
 				{
-					List<AggregateData> aggregateData = methodCallContentProvider.aggregateData;
+					List<AggregateData> aggregateData = methodCallContentProvider.aggregateRoots;
 					for (AggregateData ad : aggregateData)
 					{
 						ad.toXML(sb);
