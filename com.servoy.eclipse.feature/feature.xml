@@ -116,6 +116,10 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="0.0.0"
          arch="x86_64"/>
 
+   <includes
+         id="com.equo.chromium.cef.arm.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
