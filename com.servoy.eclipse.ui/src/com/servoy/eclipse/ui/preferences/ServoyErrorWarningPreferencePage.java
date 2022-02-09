@@ -512,6 +512,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FORMAT_INVALID, Messages.ErrorWarningPreferencePage_formFormatInvalid, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INCOMPATIBLE_ELEMENT_TYPE,
 				Messages.ErrorWarningPreferencePage_formIncompatibleElementType, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_COMPONENT_INVALID_LAYOUT_COMBINATION,
+				Messages.ErrorWarningPreferencePage_formComponentInvalidLayoutCombination, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_LABEL_FOR_ELEMENT_NOT_FOUND,
 				Messages.ErrorWarningPreferencePage_formLabelForElementNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE,

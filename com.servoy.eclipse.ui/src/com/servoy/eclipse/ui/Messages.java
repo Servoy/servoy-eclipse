@@ -244,6 +244,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formFileNameInconsistent;
 	public static String ErrorWarningPreferencePage_formFormatInvalid;
 	public static String ErrorWarningPreferencePage_formIncompatibleElementType;
+	public static String ErrorWarningPreferencePage_formComponentInvalidLayoutCombination;
 	public static String ErrorWarningPreferencePage_formLabelForElementNotFound;
 	public static String ErrorWarningPreferencePage_formElementDuplicateTabSequence;
 	public static String ErrorWarningPreferencePage_formElementExtendsDeletedElement;
