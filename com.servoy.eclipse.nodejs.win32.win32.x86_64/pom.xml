@@ -10,7 +10,7 @@
 		<version>2022.3.0.3740_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.win32.win32.x86_64</artifactId>
-	<version>16.13.1</version>
+	<version>16.14.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -39,7 +39,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://nodejs.org/dist/v16.13.1/node-v16.13.1-win-x64.zip</url>
+							<url>https://nodejs.org/dist/v16.14.0/node-v16.14.0-win-x64.zip</url>
 							<outputFileName>node.zip</outputFileName>
                             <overwrite>true</overwrite>
 							<unpack>false</unpack>
