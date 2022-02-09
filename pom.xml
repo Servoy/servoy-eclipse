@@ -14,10 +14,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
+<!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
+-->
 	</properties>
 
+<!--
     <repositories>
         <repository>
             <id>chromium</id>
@@ -30,6 +32,7 @@
             <layout>p2</layout>
         </repository>        
     </repositories>
+-->
 
 	<build>
 		<plugins>
