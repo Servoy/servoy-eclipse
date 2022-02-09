@@ -98,7 +98,15 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
-         if (changes.dataProviderID) {
+        if (changes.findmode)
+            if (changes.findmode.currentValue) {
+                this.picker.dispose();
+                this.picker = null;
+            } else {
+                this.initializePicker();
+            }
+
+         if (changes.dataProviderID && this.picker) {
             this.picker.dates.set(this.dataProviderID);
             this.config.viewDate =this.dataProviderID;
         }
@@ -125,13 +133,6 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             }
         if (changes.size)
             this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
-        if (changes.findmode)
-            if (changes.findmode.currentValue) {
-                this.picker.dispose();
-                this.picker = null;
-            } else {
-                this.initializePicker();
-            }
     }
 
     public dateChanged(event: ChangeEvent) {
