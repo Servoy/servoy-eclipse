@@ -595,7 +595,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.1"/>
+         version="17.0.2"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -603,7 +603,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.1"/>
+         version="17.0.2"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -611,7 +611,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.1"/>
+         version="17.0.2"/>
 
    <plugin
          id="jakarta.servlet-api"
@@ -633,7 +633,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="17.0.1"/>
+         version="17.0.2"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
