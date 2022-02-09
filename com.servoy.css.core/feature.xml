@@ -80,7 +80,7 @@
          id="org.eclipse.wst.common.project.facet.core"
          download-size="0"
          install-size="0"
-         version="1.4.401.v202007142017"
+         version="1.4.402.v202111212041"
          unpack="false"/>
 
    <plugin
@@ -150,7 +150,7 @@
          id="org.eclipse.wst.sse.ui"
          download-size="0"
          install-size="0"
-         version="1.7.200.v202103232331"
+         version="1.7.300.v202111190506"
          unpack="false"/>
 
    <plugin
