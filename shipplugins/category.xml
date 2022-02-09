@@ -62,6 +62,9 @@
 	<bundle id="org.apache.commons.commons-text">
 		<category name="bundles" />
 	</bundle>
+    <bundle id="org.apache.commons.commons-codec">
+        <category name="bundles" />
+    </bundle>
 	<bundle id="org.freemarker.freemarker">
 		<category name="bundles" />
 	</bundle>
@@ -103,4 +106,7 @@
     <bundle id='tus-java-server'>
         <category name="bundles" />
     </bundle>	
+    <bundle id='org.objectweb.asm.commons'>
+        <category name="bundles" />
+    </bundle>   
 </site>
