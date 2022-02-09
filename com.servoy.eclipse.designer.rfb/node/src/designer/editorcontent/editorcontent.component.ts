@@ -70,6 +70,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
         this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
+        return false;
     }
 
     adjustFromContentSize() {
