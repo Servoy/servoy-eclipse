@@ -150,6 +150,9 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
                 });
             }
         }
+        else if (changes['dataProviderID'] && !this.valuelistID) {
+          this.formattedValue = this.dataProviderID;
+        }
         delete changes['editable']; // ignore the editable property
         if (this.formattedValue === "" || this.formattedValue === null || this.formattedValue === undefined) {
             if (changes['placeholderText']) {
