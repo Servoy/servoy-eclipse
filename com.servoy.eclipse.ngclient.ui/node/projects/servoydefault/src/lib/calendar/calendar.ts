@@ -55,7 +55,11 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         },
         hooks: {
             inputFormat: (_context: TempusDominus, date: DateTime) => this.formattingService.format(date, this.format, false),
-            inputParse: (_context: TempusDominus, date: DateTime) => new DateTime(this.formattingService.parse(date, this.format, false, this.dataProviderID))
+            inputParse: (_context: TempusDominus, date: DateTime) => {
+                const parsed  = this.formattingService.parse(date, this.format, false, this.dataProviderID);
+                if (parsed instanceof Date) return  new DateTime(parsed);
+                return null;
+            }
         }
     };
 
@@ -107,8 +111,10 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             }
 
          if (changes.dataProviderID && this.picker) {
-            this.picker.dates.set(this.dataProviderID);
-            this.config.viewDate =this.dataProviderID;
+            const value = (this.dataProviderID instanceof Date) ? this.dataProviderID: null;
+            if (value) this.picker.dates.set(value);
+            else this.picker.dates.clear();
+            if (value) this.config.viewDate = value as DateTime;;
         }
         if (changes.format)
             if (changes.format.currentValue) {
