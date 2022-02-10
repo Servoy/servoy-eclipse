@@ -26,7 +26,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     private hasFocus = false;
     private isBlur = false;
 
-    private readonly config: Options  = {
+    private readonly config: Options = {
         allowInputToggle: false,
         useCurrent: false,
         display: {
@@ -56,8 +56,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         hooks: {
             inputFormat: (_context: TempusDominus, date: DateTime) => this.formattingService.format(date, this.format, false),
             inputParse: (_context: TempusDominus, date: DateTime) => {
-                const parsed  = this.formattingService.parse(date, this.format, false, this.dataProviderID);
-                if (parsed instanceof Date) return  new DateTime(parsed);
+                const parsed = this.formattingService.parse(date, this.format, false, this.dataProviderID);
+                if (parsed instanceof Date) return new DateTime(parsed);
                 return null;
             }
         }
@@ -110,8 +110,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 this.initializePicker();
             }
 
-         if (changes.dataProviderID && this.picker) {
-            const value = (this.dataProviderID instanceof Date) ? this.dataProviderID: null;
+        if (changes.dataProviderID && this.picker) {
+            const value = (this.dataProviderID instanceof Date) ? this.dataProviderID : null;
             if (value) this.picker.dates.set(value);
             else this.picker.dates.clear();
             if (value) this.config.viewDate = value as DateTime;;
@@ -143,7 +143,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     public dateChanged(event: ChangeEvent) {
         if (event.type === 'change.td') {
-            if (event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) return;
+            if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
+                (!event.date && !this.dataProviderID)) return;
             this.dataProviderID = event.date;
         } else this.dataProviderID = null;
         super.pushUpdate();
