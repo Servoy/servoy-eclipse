@@ -89,6 +89,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -346,7 +347,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							try
 							{
 								ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-								ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+								ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig, ServerSettings.DEFAULT);
 							}
 							catch (Exception ex)
 							{

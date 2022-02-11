@@ -27,7 +27,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 
 public class OpenServerAction extends Action implements ISelectionChangedListener
 {
@@ -69,8 +69,8 @@ public class OpenServerAction extends Action implements ISelectionChangedListene
 			if (server != null)
 			{
 				// re-lookup the server config here, when the server is a duplicate the server is actually the other server object.
-				ServerConfig serverConfig = server.getServerManager().getServerConfig(node.getName());
-				EditorUtil.openServerEditor(serverConfig);
+				IServerManagerInternal serverManager = server.getServerManager();
+				EditorUtil.openServerEditor(serverManager.getServerConfig(node.getName()), serverManager.getServerSettings(node.getName()));
 			}
 		}
 	}

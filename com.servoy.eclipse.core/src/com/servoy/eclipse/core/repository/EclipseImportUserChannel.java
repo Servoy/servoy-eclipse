@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ILogLevel;
@@ -380,8 +381,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			else
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(false, true, true, false);
-				ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(name);
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+				String[] serverNames = serverManager.getServerNames(false, true, true, false);
+				ServerConfig serverConfig = serverManager.getServerConfig(name);
 				if (serverConfig != null)
 				{
 					if (!serverConfig.isEnabled())
@@ -398,9 +400,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						try
 						{
 							serverConfig = serverConfig.getEnabledCopy(true);
-							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 							serverManager.testServerConfigConnection(serverConfig, 0);
-							serverManager.saveServerConfig(name, serverConfig);
+							serverManager.saveServerConfig(name, serverConfig, serverManager.getServerSettings(name));
 							// return retry so importer picks up the enabled server
 							return RETRY_ACTION;
 						}
@@ -415,12 +416,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				else
 				{
 					IServerInternal serverPrototype = null;
-					ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
+					ServerConfig[] serverConfigs = serverManager.getServerConfigs();
 					for (ServerConfig sc : serverConfigs)
 					{
 						if (sc.isEnabled() && sc.isPostgresDriver())
 						{
-							serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
+							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
 								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
@@ -428,7 +429,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
 									sc.getQuoteList(), sc.isClientOnlyConnections());
-								if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
+								if (serverManager.validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
 									serverConfig = null;
@@ -476,8 +477,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						}
 						try
 						{
-							ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-							ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+							serverManager.testServerConfigConnection(serverConfig, 0);
+							serverManager.saveServerConfig(null, serverConfig, ServerSettings.DEFAULT /* RAGTEST */);
 						}
 						catch (Exception ex)
 						{

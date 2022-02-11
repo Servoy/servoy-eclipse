@@ -3607,8 +3607,9 @@ public class SolutionExplorerView extends ViewPart
 					if (server != null)
 					{
 						// re-lookup the server config here, when the server is a duplicate the server is actually the other server object.
-						ServerConfig serverConfig = server.getServerManager().getServerConfig(doubleClickedItem.getName());
-						EditorUtil.openServerEditor(serverConfig);
+						IServerManagerInternal serverManager = server.getServerManager();
+						EditorUtil.openServerEditor(serverManager.getServerConfig(doubleClickedItem.getName()),
+							serverManager.getServerSettings(doubleClickedItem.getName()));
 					}
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||

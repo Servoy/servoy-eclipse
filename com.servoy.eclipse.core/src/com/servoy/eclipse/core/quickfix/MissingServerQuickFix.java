@@ -23,7 +23,9 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class MissingServerQuickFix implements IMarkerResolution
@@ -45,13 +47,16 @@ public class MissingServerQuickFix implements IMarkerResolution
 		try
 		{
 			boolean isNew = false;
-			ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(serverName);
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			ServerConfig serverConfig = serverManager.getServerConfig(serverName);
 			if (serverConfig == null)
 			{
 				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.POSTGRESQL_TEMPLATE_NAME).getTemplate().getNamedCopy(serverName);
 				isNew = true;
 			}
-			ServerEditorInput serverConfigEditorInput = new ServerEditorInput(serverConfig);
+			ServerSettings serverSettings = serverManager.getServerSettings(serverName);
+
+			ServerEditorInput serverConfigEditorInput = new ServerEditorInput(serverConfig, serverSettings);
 			serverConfigEditorInput.setIsNew(isNew);
 
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(serverConfigEditorInput,

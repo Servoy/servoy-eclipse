@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -261,13 +262,13 @@ public abstract class AbstractNewDbAction extends Action
 			{
 				try
 				{
-					serverManager.saveServerConfig(null, serverConfig);
+					serverManager.saveServerConfig(null, serverConfig, ServerSettings.DEFAULT);
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logError(e);
 				}
-				EditorUtil.openServerEditor(serverConfig);
+				EditorUtil.openServerEditor(serverConfig, ServerSettings.DEFAULT);
 			}
 		});
 	}

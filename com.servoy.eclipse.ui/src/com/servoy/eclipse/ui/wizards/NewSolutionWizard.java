@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
@@ -589,7 +590,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			try
 			{
 				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig, server.getSettings());
 			}
 			catch (Exception ex)
 			{
@@ -802,7 +803,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
 						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 
-					EditorUtil.openServerEditor(config, true);
+					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}
 			}
 		}

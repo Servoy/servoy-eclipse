@@ -73,12 +73,15 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerSettings;
+import com.servoy.j2db.persistence.SortingNullprecedence;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableMetaInfo;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -527,6 +530,44 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
+	@Override
+	public void updateServerSettings(String serverName, ServerSettings serverSettings)
+	{
+		if (serverName == null || !writeDBIFiles)
+		{
+			return;
+		}
+
+		IFile dbiFile = getServerDBIFile(serverName);
+		if (serverSettings == null)
+		{
+			if (dbiFile.exists())
+			{
+				try
+				{
+					dbiFile.delete(false, null);
+				}
+				catch (CoreException e)
+				{
+					Debug.error(e);
+				}
+			}
+		}
+		else // RAGTEST gebruik settinsg in FSM
+		{
+			String json = serializeServerSettings(serverSettings);
+			try
+			{
+				ResourcesUtils.createOrWriteFileUTF8(dbiFile, json, true);
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
+			}
+		}
+	}
+
+
 	public void testTableAndCreateDBIFile(ITable table)
 	{
 		if (table == null) return;
@@ -970,6 +1011,45 @@ public class DataModelManager implements IColumnInfoManager
 		return tobj.toString(true);
 	}
 
+	/** RAGTEST Doc
+	 * Creates a .dbi (JSON format) file like structured String from the given table information.
+	 *
+	 * @param tableInfo the information about the table to be transformed into a JSON String.
+	 * @return the JSON representation of tableInfo.
+	 * @throws JSONException if something goes wrong with the serialize.
+	 */
+	public String serializeServerSettings(ServerSettings serverSettings) throws JSONException
+	{
+		ServoyJSONObject json = new ServoyJSONObject();
+		json.put("sortIgnorecase", serverSettings.isSortIgnorecase());
+		json.put("sortingNullprecedence", serverSettings.getSortingNullprecedence().name());
+		return json.toString(true);
+	}
+
+	/** RAGTEST doc
+	 * Gets the table information from a .dbi (JSON format) file like structured String.
+	 *
+	 * @param stringDBIContent the table information in .dbi format
+	 * @return the deserialized table information.
+	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
+	 */
+	public ServerSettings deserializeServerSettings(String stringDBIContent)
+	{
+		try
+		{
+			ServoyJSONObject json = new ServoyJSONObject(stringDBIContent, true);
+			return new ServerSettings( //
+				json.getBoolean("sortIgnorecase"), //
+				SortingNullprecedence.valueOf(json.getString("sortingNullprecedence")) //
+			);
+		}
+		catch (Exception e)
+		{
+			Debug.warn(e);
+			return ServerSettings.DEFAULT;
+		}
+	}
+
 
 	public static String getFileName(String tableName)
 	{
@@ -979,7 +1059,7 @@ public class DataModelManager implements IColumnInfoManager
 	public static String getRelativeServerPath(String serverName)
 	{
 		if (serverName == null) return "";
-		return SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + serverName + IPath.SEPARATOR;
+		return SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + serverName;
 	}
 
 	public IFile getDBIFile(String dataSource)
@@ -995,6 +1075,12 @@ public class DataModelManager implements IColumnInfoManager
 	public IFile getDBIFile(String serverName, String tableName)
 	{
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getServerDBIFile(String serverName)
+	{
+		IPath path = new Path(getRelativeServerPath(serverName) + COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
 		return resourceProject.getFile(path);
 	}
 
@@ -1785,14 +1871,13 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	/** Get the DataModelManager installe as ColumnInfoManager in the servermanager.
-	 * @param serverManager
+	/** Get the DataModelManager installed as ColumnInfoManager in the servermanager.
 	 * @param serverName
 	 * @return
 	 */
-	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager, String serverName)
+	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager)
 	{
-		IColumnInfoManager[] cims = serverManager.getColumnInfoManagers(serverName);
+		IColumnInfoManager[] cims = serverManager.getColumnInfoManagers();
 		if (cims != null)
 		{
 			for (IColumnInfoManager cim : cims)

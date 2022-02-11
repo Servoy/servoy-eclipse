@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableChangeHandler;
@@ -91,6 +92,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	private final Map<String, T> tables = new HashMap<>();
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
+	private final ServerSettings serverSettings = ServerSettings.DEFAULT; // RAGTEST
 	private final ServoyProject servoyProject;
 	private final String datasource;
 	private final String scheme;
@@ -310,6 +312,12 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public ServerConfig getConfig()
 	{
 		return serverConfig;
+	}
+
+	@Override
+	public ServerSettings getSettings()
+	{
+		return serverSettings;
 	}
 
 	@Override

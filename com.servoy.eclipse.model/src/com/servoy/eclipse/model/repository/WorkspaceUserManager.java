@@ -535,15 +535,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							writingResources = true;
 							try
 							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
+								ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 							}
 							catch (CoreException e)
 							{
@@ -559,15 +551,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 
@@ -689,15 +673,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							writingResources = true;
 							try
 							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
+								ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 							}
 							catch (CoreException e)
 							{
@@ -713,15 +689,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 		}
@@ -814,15 +782,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							writingResources = true;
 							try
 							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
+								ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 							}
 							catch (CoreException e)
 							{
@@ -838,15 +798,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 		}

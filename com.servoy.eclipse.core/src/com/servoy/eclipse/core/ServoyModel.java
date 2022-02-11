@@ -2588,21 +2588,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 										}
 										if (file.exists() && (element.getKind() == IResourceDelta.ADDED || element.getKind() == IResourceDelta.CHANGED))
 										{
-											InputStream is = file.getContents();
-											try
+											try (InputStream is = file.getContents())
 											{
-												if (cloneFile.exists())
-												{
-													cloneFile.setContents(is, true, false, null);
-												}
-												else
-												{
-													ResourcesUtils.createFileAndParentContainers(cloneFile, is, true);
-												}
-											}
-											finally
-											{
-												Utils.closeInputStream(is);
+												ResourcesUtils.createOrWriteFile(cloneFile, is, true);
 											}
 										}
 									}

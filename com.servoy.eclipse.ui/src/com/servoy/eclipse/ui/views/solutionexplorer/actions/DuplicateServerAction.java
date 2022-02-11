@@ -79,7 +79,7 @@ public class DuplicateServerAction extends Action implements ISelectionChangedLi
 						break;
 					}
 				}
-				EditorUtil.openServerEditor(s.getConfig().getNamedCopy(name), true);
+				EditorUtil.openServerEditor(s.getConfig().getNamedCopy(name), s.getSettings(), true);
 			}
 			catch (Exception e)
 			{
