@@ -1,6 +1,6 @@
 {
   "name": "@servoy/servoydefault",
-  "version": "2021.12.0",
+  "version": "2022.3.0",
   "peerDependencies": {
     "@angular/common": "^13",
     "@angular/core": "^13",
@@ -9,9 +9,9 @@
   "dependencies": {
     "@angular/cdk": "^13",
     "@eonasdan/tempus-dominus": "*",
-    "@ng-bootstrap/ng-bootstrap": "^10",
+    "@ng-bootstrap/ng-bootstrap": "^11",
     "@popperjs/core": "^2",
-    "@tinymce/tinymce-angular": "^4",
+    "@tinymce/tinymce-angular": "^5",
     "bootstrap": "^5",
     "tinymce": "^5",
     "tinymce-i18n": ">=20",
