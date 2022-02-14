@@ -14,7 +14,7 @@
     "@tinymce/tinymce-angular": "^5",
     "bootstrap": "^5",
     "tinymce": "^5",
-    "tinymce-i18n": ">=20",
+    "tinymce-i18n": ">=22",
     "tslib": "*"
   },
   "license": "MIT",
