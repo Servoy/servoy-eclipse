@@ -9,7 +9,7 @@
   "dependencies": {
     "@angular/cdk": "^13",
     "@eonasdan/tempus-dominus": "*",
-    "@ng-bootstrap/ng-bootstrap": "^11",
+    "@ng-bootstrap/ng-bootstrap": "^12",
     "@popperjs/core": "^2",
     "@tinymce/tinymce-angular": "^5",
     "bootstrap": "^5",
