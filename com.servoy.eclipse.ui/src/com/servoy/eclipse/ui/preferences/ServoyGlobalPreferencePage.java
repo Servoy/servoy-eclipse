@@ -195,11 +195,11 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		// launch NG
 		launchNGButton = new Button(rootContainer, SWT.CHECK);
-		launchNGButton.setText("Start NG Client should launch NG2");
+		launchNGButton.setText("Start NG Client should launch Titanium NGClient");
 
 		// form designer version
 		showNGDesignerButton = new Button(rootContainer, SWT.CHECK);
-		showNGDesignerButton.setText("Open forms with the NG2 Form Designer");
+		showNGDesignerButton.setText("Open forms with the Titanium NGClient Form Designer");
 
 		// forum notifications
 		showForumNotificationsButton = new Button(rootContainer, SWT.CHECK);

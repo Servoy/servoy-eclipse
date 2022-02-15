@@ -2817,7 +2817,8 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(menuManager);
 		}
 
-		manager.add(new CopySourceFolderAction());
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+			manager.add(new CopySourceFolderAction());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
