@@ -40,6 +40,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -150,7 +151,7 @@ public class Startup implements IStartup
 										{
 											String version = latestRelease.optString("version");
 											String projectVersion = projectPackages.get(name).getRight();
-											if (version != null && version.compareTo(projectVersion) > 0)
+											if (version != null && SemVerComparator.compare(version, projectVersion) > 0)
 											{
 												String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
 												if (alreadyNotifiedVersion == null || !alreadyNotifiedVersion.equals(version))
