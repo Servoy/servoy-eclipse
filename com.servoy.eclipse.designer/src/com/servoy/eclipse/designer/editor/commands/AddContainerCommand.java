@@ -195,7 +195,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
 										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
-											-1);
+											-1, null);
 										persist = parentBean;
 									}
 								}
@@ -474,7 +474,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return i;
 	}
 
-	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
+	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex, WebCustomType template)
 	{
 		int index = arrayIndex;
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentBean.getTypeName());
@@ -504,7 +504,12 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				for (String string : allPropertiesNames)
 				{
 					PropertyDescription property = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getProperty(string);
-					if (property != null && property.getInitialValue() != null)
+					if (template != null && template.hasProperty(string))
+					{
+						customType.setProperty(string, template.getProperty(string));
+					}
+					else
+						if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
 						if (initialValue != null) customType.setProperty(string, initialValue);
