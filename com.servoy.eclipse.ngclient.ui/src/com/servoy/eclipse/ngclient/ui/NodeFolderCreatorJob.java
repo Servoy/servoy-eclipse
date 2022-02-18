@@ -68,7 +68,7 @@ public class NodeFolderCreatorJob extends Job
 		{
 			long startTime = System.currentTimeMillis();
 			long time = startTime;
-			writeConsole(console, "---- Start to copy the NG2 sources");
+			writeConsole(console, "---- Start to copy the Titanium NG sources");
 			if (!nodeFolder.exists())
 			{
 				createFolder(nodeFolder);
@@ -120,7 +120,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 		catch (RuntimeException e)
 		{
-			writeConsole(console, "Exception when creating node/ng2 folder: " + e.getMessage());
+			writeConsole(console, "Exception when creating node/ng folder: " + e.getMessage());
 			e.printStackTrace();
 		}
 		finally

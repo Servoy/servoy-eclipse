@@ -65,7 +65,7 @@ public class RunNPMCommand extends WorkspaceJob
 
 	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
-		super("Executing NPM command: " + commandArgsToString(commands) + ". (for more info open 'NG2 Build Console' in 'Console' view)");
+		super("Executing NPM command: " + commandArgsToString(commands) + ". (for more info open 'NG Build Console' in 'Console' view)");
 		this.commandArguments = commands;
 		this.nodePath = nodePath;
 		this.npmPath = npmPath;

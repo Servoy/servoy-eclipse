@@ -114,7 +114,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				scheduled.incrementAndGet();
 				long time = System.currentTimeMillis();
-				writeConsole(console, "---- Starting ngclient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
+				writeConsole(console, "---- Starting Titanium NGClient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				File projectFolder = Activator.getInstance().getProjectFolder();
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
@@ -562,7 +562,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 					}
 				}
-				writeConsole(console, "Total time to check/install NG2 target folder: " + projectFolder + " is " +
+				writeConsole(console, "Total time to check/install Titanium NG target folder: " + projectFolder + " is " +
 					Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 				return Status.OK_STATUS;
 			}

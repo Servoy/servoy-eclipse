@@ -222,7 +222,12 @@ public class InstallWebPackageHandler implements IDeveloperService
 			File dataFile = null;
 			try
 			{
+
 				dataFile = Utils.downloadUrlPackage(urlString);
+				if (dataFile == null)
+				{
+					throw new IOException("Download error: " + urlString.substring(urlString.lastIndexOf("/") + 1));
+				}
 			}
 			catch (IOException e)
 			{

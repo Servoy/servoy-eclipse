@@ -52,7 +52,6 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
         this.renderer.listen( this.getFocusElement(), 'click', (e) => {
             if (!this.readOnly && this.enabled) {
                 this.itemClicked(e);
-                if (this.onActionMethodID) this.onActionMethodID(e);
             }
         });
         super.attachHandlers();
@@ -69,7 +68,10 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
             this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
         else
             this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
-        this.pushUpdate();
+        setTimeout(() => {
+            this.pushUpdate();
+            if (this.onActionMethodID) this.onActionMethodID(event);
+        }, 0);
     }
 
     getSelectionFromDataprovider() {

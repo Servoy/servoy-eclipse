@@ -130,6 +130,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
+				// if null is coming from parent, return it
+				if (webObject.getParentComponent().getExtendsID() > 0) return value;
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{

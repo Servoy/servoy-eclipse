@@ -2222,7 +2222,8 @@ public class SolutionDeserializer
 			IProjectNature nature = f.getProject().getNature(ServoyProject.NATURE_ID);
 			if (nature instanceof ServoyProject)
 			{
-				if (!f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT) && !SolutionSerializer.isJSONFile(f.getName()))
+				if (f.getFileExtension() != null && !f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT) &&
+					!SolutionSerializer.isJSONFile(f.getName()))
 				{
 					String[] segments = f.getProjectRelativePath().segments();
 					if (segments.length == 2 && SolutionSerializer.MEDIAS_DIR.equals(segments[0]))
@@ -2231,7 +2232,7 @@ public class SolutionDeserializer
 					}
 				}
 				File file = f.getLocation().toFile();
-				if (f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+				if (f.getFileExtension() != null && f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 				{
 					try
 					{

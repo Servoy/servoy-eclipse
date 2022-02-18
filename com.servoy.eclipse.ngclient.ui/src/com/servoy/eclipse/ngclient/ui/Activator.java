@@ -75,7 +75,7 @@ public class Activator extends Plugin
 		if (console == null)
 		{
 			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
-			EclipseIOConsole eclipseConsole = new EclipseIOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+			EclipseIOConsole eclipseConsole = new EclipseIOConsole("Titanium NG Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
 			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
 			consoleManager.addConsoles(new IOConsole[] { eclipseConsole });
 			consoleManager.showConsoleView(eclipseConsole);

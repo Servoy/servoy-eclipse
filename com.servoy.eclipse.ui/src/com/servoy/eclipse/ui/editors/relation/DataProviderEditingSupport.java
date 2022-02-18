@@ -20,15 +20,19 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -49,6 +53,7 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
+import com.servoy.eclipse.ui.views.solutionexplorer.StatusBarUpdater;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -73,6 +78,8 @@ public class DataProviderEditingSupport extends EditingSupport
 		super(tv);
 		relationEditor = re;
 		index = i;
+		IStatusLineManager slManager = re.getEditorSite().getActionBars().getStatusLineManager();
+		StatusBarUpdater statusBarUpdater = new StatusBarUpdater(slManager);
 		if (editable)
 		{
 			editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY)
@@ -152,8 +159,23 @@ public class DataProviderEditingSupport extends EditingSupport
 					}
 				}
 			});
-		}
+			((CCombo)editor.getControl()).addFocusListener(new FocusListener()
+			{
 
+				@Override
+				public void focusLost(FocusEvent e)
+				{
+					statusBarUpdater.selectionChanged(new SelectionChangedEvent(tv, new StructuredSelection("")));
+				}
+
+				@Override
+				public void focusGained(FocusEvent e)
+				{
+					statusBarUpdater
+						.selectionChanged(new SelectionChangedEvent(tv, new StructuredSelection("Ctrl+click in a cell to open data provider dialog")));
+				}
+			});
+		}
 	}
 
 	private void setDataProvider(final TableViewer tv, final TableItem item, final RelationEditor re)

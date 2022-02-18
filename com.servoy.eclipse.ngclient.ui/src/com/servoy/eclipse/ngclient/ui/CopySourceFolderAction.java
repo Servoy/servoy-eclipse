@@ -36,27 +36,28 @@ public class CopySourceFolderAction extends Action
 {
 	public CopySourceFolderAction()
 	{
-		setText("Copy the NGClient2 sources");
+		setText("Copy the Titanium NGClient sources");
 		setToolTipText("Copies the ngclient sources to the workspace/.metadata/.plugins/com.servoy.eclipse.ngclient.ui/target/ folder");
 	}
 
 	@Override
 	public void run()
 	{
-		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the NGClient2 sources",
+		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
 
 				"Choosing 'Copy && Build' will copy sources and run a normal ng build.\n" +
-				"Choosing 'Copy && Clean build' will clean out the 'node_modules' dir and do a full npm -ci. (do this if there are problems when building (see 'NG2 Build Console' in the 'Console' view).",
+				"Choosing 'Copy && Clean build' will clean out the 'node_modules' dir and do a full npm -ci. (do this if there are problems when building (see 'Titanium NG Build Console' in the 'Console' view).",
 			SWT.NONE, new String[] { "Copy && Build", "Copy && Clean build", "Cancel" });
 
 		if (choice < 0 || choice == 2) return; // cancel
 
 		if (choice == 1)
 		{
-			Job.createSystem("delete .angular cache", (monitor) -> {
+			Job.createSystem("delete .angular and packages cache", (monitor) -> {
 				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), ".angular"));
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), "packages"));
 			}).schedule();
 		}
 		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
@@ -69,6 +70,5 @@ public class CopySourceFolderAction extends Action
 			}
 		});
 		copySources.schedule();
-
 	}
 }

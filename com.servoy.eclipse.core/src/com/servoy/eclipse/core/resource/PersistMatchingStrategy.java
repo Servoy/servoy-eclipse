@@ -61,7 +61,8 @@ public class PersistMatchingStrategy implements IEditorMatchingStrategy
 			// open a file, see if it matches a persist editor
 			FileEditorInput fileInput = (FileEditorInput)input;
 			// FUTURE: remove this if when form methods are edited in form editor
-			if (!fileInput.getFile().getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+			final String fileExtension = fileInput.getFile().getFileExtension();
+			if (fileExtension != null && !fileExtension.equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 			{
 				File projectFile = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getProjectFile(fileInput.getFile().getProject().getName());
 				if (projectFile != null)

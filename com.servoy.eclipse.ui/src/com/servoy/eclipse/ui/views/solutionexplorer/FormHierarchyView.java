@@ -1338,7 +1338,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						if (r instanceof IFile)
 						{
 							IFile resource = (IFile)r;
-							if (SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
+							if (resource.getFileExtension() != null && SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
 							{
 								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
 									resource.getProject().getName());

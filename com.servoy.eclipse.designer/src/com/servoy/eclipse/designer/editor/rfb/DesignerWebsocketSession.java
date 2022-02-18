@@ -56,6 +56,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -70,6 +71,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -127,8 +129,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			Collections.reverse(styleSheets);
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
+				String stylesheetName = styleSheets.get(i);
+				if (new DesignerPreferences().showNG2Designer())
+				{
+					int lastPoint = stylesheetName.lastIndexOf('.');
+					String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
+					Media media = fs.getMedia(ng2StylesheetName);
+					if (media != null)
+					{
+						stylesheetName = ng2StylesheetName;
+					}
+				}
 				styleSheets.set(i, "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" +
-					styleSheets.get(i) + "?t=" + Long.toHexString(System.currentTimeMillis()));
+					stylesheetName + "?t=" + Long.toHexString(System.currentTimeMillis()));
 			}
 		}
 		return styleSheets.toArray(new String[0]);
