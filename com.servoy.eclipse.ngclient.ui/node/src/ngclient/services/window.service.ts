@@ -1,4 +1,4 @@
-import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject, Renderer2, RendererFactory2 } from '@angular/core';
+import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -160,6 +160,7 @@ export class WindowService {
             const dialogWindowComponent = componentFactory.create(this._injector);
             dialogWindowComponent.instance.setWindow(instance);
             this._applicationRef.attachView(dialogWindowComponent.hostView);
+            instance.componentRef = dialogWindowComponent;
 
             const opt: BSWindowOptions = {
                 id: instance.name,
@@ -478,9 +479,10 @@ export class SvyWindow {
     transparent = false;
     storeBounds = false;
     renderer2: Renderer2;
-    bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
 
+    bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;
+    componentRef: ComponentRef<DialogWindowComponent>;
 
     constructor(name: string, type: number, windowService: WindowService, renderer2: Renderer2) {
         this.name = name;
@@ -491,6 +493,7 @@ export class SvyWindow {
 
     hide() {
         if (this.bsWindowInstance) this.bsWindowInstance.close();
+        if (this.componentRef) this.componentRef.destroy();
         if (!this.storeBounds) {
             delete this.location;
             delete this.size;
