@@ -9,9 +9,9 @@
 	<properties>
 		<tycho.version>1.5.1</tycho.version>
 		<tycho.extra.version>1.5.1</tycho.extra.version>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
-		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16</emf.url>
-		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
+		<eclipse.url>https://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
+		<emf.url>https://download.eclipse.org/modeling/emf/emf/builds/release/2.16</emf.url>
+		<gef.url>https://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
 	</properties>
 
 	<repositories>
@@ -33,7 +33,7 @@
 		<repository>
 			<id>developer_repo</id>
 			<name>developer_repo</name>
-			<url>http://developer.servoy.com/mvn_repository/</url>
+			<url>https://developer.servoy.com/mvn_repository/</url>
 		</repository>
 	</repositories>
 
