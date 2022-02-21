@@ -1,3 +1,7 @@
+@import "~@ag-grid-community/core/dist/styles/ag-grid.css";
+@import "~@ag-grid-community/core/dist/styles/agGridClassicFont.css";
+@import "~@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
+
 /* Default buttons (used in login, file upload)
 -------------------------------------------------- */
 body {

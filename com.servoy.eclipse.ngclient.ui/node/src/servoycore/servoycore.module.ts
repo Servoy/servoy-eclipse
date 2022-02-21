@@ -10,6 +10,9 @@ import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import {AddAttributeDirective} from './addattribute.directive';
 import { ListFormComponent } from './listformcomponent/listformcomponent';
 import { ServoyPublicModule } from '@servoy/public';
+import { LicenseManager, ModuleRegistry, ServerSideRowModelModule, ClientSideRowModelModule } from '@ag-grid-enterprise/all-modules';
+import { AgGridModule } from '@ag-grid-community/angular';
+import { RowRenderer } from './listformcomponent/row-renderer.component';
 
 @NgModule( {
     declarations: [
@@ -19,11 +22,13 @@ import { ServoyPublicModule } from '@servoy/public';
         ServoyCoreSlider,
         ServoyCoreFormContainer,
         ListFormComponent,
-        AddAttributeDirective
+        AddAttributeDirective,
+        RowRenderer
     ],
     imports: [CommonModule,
         FormsModule,
-        ServoyPublicModule
+        ServoyPublicModule,
+        AgGridModule.withComponents([])
     ],
     providers: [],
     bootstrap: [],
@@ -37,4 +42,10 @@ import { ServoyPublicModule } from '@servoy/public';
         AddAttributeDirective
     ]
 } )
-export class ServoyCoreComponentsModule { }
+export class ServoyCoreComponentsModule {
+    constructor() {
+        // eslint-disable-next-line max-len
+        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=10000,AssetReference=AG-018380,ExpiryDate=11_October_2022_[v2]_MTY2NTQ0MjgwMDAwMA==a725c314c19f2c87b1f6a2f4836eec3e');
+        ModuleRegistry.registerModules([ServerSideRowModelModule, ClientSideRowModelModule]);
+    }
+}
