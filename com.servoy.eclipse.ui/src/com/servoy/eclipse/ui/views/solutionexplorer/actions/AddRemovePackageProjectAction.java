@@ -88,6 +88,7 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 		{
 			List<IProject> selectedProjectsList = new ArrayList<IProject>();
 			IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
+			TreeSelectDialog dialog = null;
 			try
 			{
 
@@ -120,7 +121,7 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
-				TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
+				dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
 					selectionFilter, treeStyle, "Add/Remove Servoy Packages", selectablePackages.toArray(), theSelection, true, "Add/Remove Servoy Packages",
 					null);
 
@@ -145,9 +146,12 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 			}
 			finally
 			{
-				for (IProject projectToBeRemoved : selectedProjectsList)
+				if (dialog != null && !(dialog.getReturnCode() == Window.CANCEL))
 				{
-					RemovePackageProjectReferenceAction.removeProjectReference(solutionProject, projectToBeRemoved);
+					for (IProject projectToBeRemoved : selectedProjectsList)
+					{
+						RemovePackageProjectReferenceAction.removeProjectReference(solutionProject, projectToBeRemoved);
+					}
 				}
 			}
 		}
