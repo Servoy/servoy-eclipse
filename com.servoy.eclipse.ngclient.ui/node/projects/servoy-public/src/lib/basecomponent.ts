@@ -32,6 +32,11 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
             this.svyOnChanges(this.changes);
             this.changes = null;
         }
+        if (!this.elementRef) {
+                // using logger would be better, but that would break all extends..
+                console.log('component should have #element it its template for correct initalization for targetting the main div');
+                console.log(this);
+        }
         this.cdRef.detectChanges();
     }
 
@@ -61,7 +66,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
-        this.elementRef.nativeElement['svyHostComponent'] = null;
+         if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
     }
 
     // our init event that is called when dom is ready
