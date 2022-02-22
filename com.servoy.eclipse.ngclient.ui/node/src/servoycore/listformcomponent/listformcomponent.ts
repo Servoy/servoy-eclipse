@@ -229,7 +229,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
                 getRowHeight: (params) => this.getRowHeight(),
-                navigateToNextCell: (params) => {
+                navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
 
