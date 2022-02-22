@@ -190,10 +190,12 @@ export class FormService {
         if (!formname) {
             throw new Error('formname is undefined');
         }
-        return this.sabloService.callService('formService', 'formvisibility', {
-            formname, visible: false, parentForm,
-            bean: beanName, relation: relationname, formIndex, show: { formname: formnameThatWillBeShown, relation: relationnameThatWillBeShown, formIndex: formIndexThatWillBeShown }
-        });
+        let formShow = {};
+        if (formnameThatWillBeShown) {
+            formShow = { formname: formnameThatWillBeShown, relation: relationnameThatWillBeShown, formIndex: formIndexThatWillBeShown };
+        }
+        const formDetails = { formname, visible: false, parentForm, bean: beanName, relation: relationname, formIndex, show: formShow }
+        return this.sabloService.callService('formService', 'formvisibility', formDetails);
     }
 
     public pushEditingStarted(formname: string, beanname: string, propertyname: string) {

@@ -116,7 +116,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                                 }
                                 this.formWillShowCalled = change.currentValue;
                                 this.servoyApi.hideForm(change.previousValue, null, null, change.currentValue, this.relationName, null)
-                                    .then(() => {
+                                    .finally(() => {
                                         this.switchForm(this.containedForm);
                                         this.cdRef.detectChanges();
                                     });
