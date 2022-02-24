@@ -151,7 +151,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
-
+					solution.setVersion("1.0");
 
 					monitor.setTaskName("Setting up resource project and reference");
 					IProject resourceProject;
