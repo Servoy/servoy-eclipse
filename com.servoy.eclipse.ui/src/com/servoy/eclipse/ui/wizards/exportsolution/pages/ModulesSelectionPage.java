@@ -78,6 +78,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 	private final ArrayList<Label> warnLabels = new ArrayList<Label>();
 	private final EclipseRepository repository;
 	private String[] referencedModules;
+	private final HashMap<String, Text> versionFields = new HashMap<>();
 
 	public ModulesSelectionPage(ExportSolutionWizard exportSolutionWizard)
 	{
@@ -224,6 +225,38 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		gd.horizontalIndent = 10;
 		gd.widthHint = 200;
 
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+
+
+		Label l = new Label(composite, SWT.NONE);
+		l.setText("Set version to all modules: ");
+		Text t = new Text(composite, SWT.BORDER);
+		t.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		t.setText(exportSolutionWizard.getActiveSolution().getVersion());
+		Button b = new Button(composite, SWT.NONE);
+		b.setText("Update version");
+		b.addListener(SWT.Selection, e -> {
+			for (String module : getEntries())
+			{
+				ServoyProject moduleProject = servoyModel.getServoyProject(module);
+				if (moduleProject == null)
+				{
+					Debug.error("Module '" + module + "' project was not found, cannot export it.");
+					continue;
+				}
+				String v = checkVersion(t.getText().trim(), moduleProject);
+				setSolutionVersion(servoyModel, module, v, false);
+				versionFields.get(module).setText(v);
+			}
+		});
+		b.setEnabled(!"".equals(t.getText().trim()));
+		t.addModifyListener(e -> {
+			b.setEnabled(!"".equals(t.getText().trim()));
+		});
+		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+
+
 		FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
 		descriptor = descriptor.setStyle(SWT.BOLD);
 		Font font = descriptor.createFont(getShell().getDisplay());
@@ -242,7 +275,6 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		versionLabel.setLayoutData(gd);
 		new Label(composite, SWT.NONE);
 
-		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		Image warn = Activator.getDefault().loadImageFromBundle("warning.png");
 
 		checks = new ArrayList<Button>();
@@ -264,19 +296,24 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			Text version = new Text(composite, SWT.BORDER);
 			Label label = new Label(composite, SWT.ICON);
 			String v = moduleProject.getSolution().getVersion();
-			if (v == null)
+			if (v == null || "".equals(v))
 			{
 				//if it's a module installed via WPM we can get the version from there
 				v = getSPMVersion(moduleProject);
-				if (v != null) setSolutionVersion(servoyModel, module, v, false);
+				if (v == null)
+				{
+					v = "1.0"; //default version
+				}
+				setSolutionVersion(servoyModel, module, v, false);
 			}
-			version.setText(v == null ? "" : v);
+			version.setText(v);
 			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			version.addModifyListener(event -> {
 				setSolutionVersion(servoyModel, module, version.getText(), true);
 				handleEvent(null);
 				label.setVisible(Strings.isEmpty(version.getText()));
 			});
+			versionFields.put(module, version);
 
 			label.setImage(warn);
 			label.setVisible(Strings.isEmpty(v));
@@ -292,6 +329,20 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		composite.layout();
 		sc.layout();
+	}
+
+	private String checkVersion(String v, ServoyProject moduleProject)
+	{
+		if (v == null || "".equals(v))
+		{
+			//if it's a module installed via WPM we can get the version from there
+			v = getSPMVersion(moduleProject);
+			if (v == null)
+			{
+				v = "1.0"; //default version
+			}
+		}
+		return v;
 	}
 
 	protected boolean setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)
