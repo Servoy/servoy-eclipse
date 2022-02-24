@@ -15,7 +15,7 @@
                     <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
                     </ul>
                     <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
-                        <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, component.propertyValue)" *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
+                        <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, comp.propertyValue)" *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
                     </ul>
                 </li>
             </ul>
