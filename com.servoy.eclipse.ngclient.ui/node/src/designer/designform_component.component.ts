@@ -55,10 +55,12 @@ import {AbstractFormComponent} from '../ngclient/form/form_component.component';
                <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                </div>
+               <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
           </div>
       </ng-template>
       <ng-template  #formComponentResponsiveDiv  let-state="state" >
           <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
+          <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
       </ng-template>
       <!-- component template generate start -->
 <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>

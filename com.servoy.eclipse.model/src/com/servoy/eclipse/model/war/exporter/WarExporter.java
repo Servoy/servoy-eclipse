@@ -1351,6 +1351,15 @@ public class WarExporter
 						String pluginLibDir = pluginName.substring(0, pluginName.length() - 4);
 						File pluginLibDirFile = new File(appServerDir, pluginLibDir);
 						copyDir(pluginLibDir, pluginLibDirFile, tmpWarDir, fw, writtenFiles, false);
+
+						if (pluginName.toLowerCase().endsWith(".jar"))
+						{
+							List<String> classPath = JarManager.getManifestClassPath(pluginFile.toURI().toURL());
+							if (!classPath.isEmpty())
+							{
+								copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, classPath);
+							}
+						}
 					}
 				}
 			}
@@ -1777,22 +1786,7 @@ public class WarExporter
 				List<String> jarNames = new ArrayList<String>();
 				List<String> jnlpNames = new ArrayList<String>();
 				parseJarNames(document.getChildNodes(), jarNames, jnlpNames);
-
-				for (String jarName : jarNames)
-				{
-					// ignore everything copied from lib, those are moved to WEB-INF/lib later on
-					if (jarName.startsWith("/lib/")) continue;
-					File jarFile = new File(appServerDir, jarName);
-					File jarTargetFile = new File(tmpWarDir, jarName);
-					jarTargetFile.getParentFile().mkdirs();
-					copyFile(jarFile, jarTargetFile);
-					int index = jarName.indexOf("plugins/");
-					if (index != -1)
-					{
-						jarName = jarName.substring(index + "plugins/".length());
-					}
-					writeFileEntry(fw, jarFile, jarName, writtenFiles);
-				}
+				copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, jarNames);
 
 				for (String jnlpName : jnlpNames)
 				{
@@ -1803,6 +1797,25 @@ public class WarExporter
 			{
 				ServoyLog.logError("Plugin jnlp file " + pluginJarJnlpFile + " couldn't be parsed; nothing copied", new RuntimeException());
 			}
+		}
+	}
+
+	private void copyPluginJars(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, List<String> jarNames) throws ExportException, IOException
+	{
+		for (String jarName : jarNames)
+		{
+			// ignore everything copied from lib, those are moved to WEB-INF/lib later on
+			if (jarName.startsWith("/lib/")) continue;
+			File jarFile = new File(appServerDir, jarName);
+			File jarTargetFile = new File(tmpWarDir, jarName);
+			jarTargetFile.getParentFile().mkdirs();
+			copyFile(jarFile, jarTargetFile);
+			int index = jarName.indexOf("plugins/");
+			if (index != -1)
+			{
+				jarName = jarName.substring(index + "plugins/".length());
+			}
+			writeFileEntry(fw, jarFile, jarName, writtenFiles);
 		}
 	}
 

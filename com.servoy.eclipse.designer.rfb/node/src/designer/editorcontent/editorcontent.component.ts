@@ -69,10 +69,23 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
-        this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
-        return false;
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+            this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
+            return false;
+        }
+        return true;
     }
 
+    @HostListener('document:keyup', ['$event'])
+    onKeyUp(event: KeyboardEvent) {
+        // delete , f4 (open form hierarchy) and f5
+        if (event.keyCode == 46 || event.keyCode == 115 ||  event.keyCode == 116 ){
+             this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
+             return false;
+        }
+        return true;
+    }
+    
     adjustFromContentSize() {
         let paletteHeight = '100%';
         if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {

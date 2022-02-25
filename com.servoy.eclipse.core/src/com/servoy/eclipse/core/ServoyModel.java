@@ -2147,6 +2147,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		}
 		else
 		{
+			FormElementHelper.INSTANCE.flush(changes);
 			firePersistsChangedEx(false, changes);
 		}
 	}

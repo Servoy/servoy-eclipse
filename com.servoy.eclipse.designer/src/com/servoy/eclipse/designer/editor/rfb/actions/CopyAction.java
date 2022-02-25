@@ -84,9 +84,9 @@ public class CopyAction extends SelectionAction
 			{
 				toCopy.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
 			}
-			else if (modelObject instanceof PersistContext)
+			else if (modelObject instanceof PersistContext || modelObject instanceof IPersist)
 			{
-				IPersist persist = ((PersistContext)modelObject).getPersist();
+				IPersist persist = modelObject instanceof PersistContext ? ((PersistContext)modelObject).getPersist() : (IPersist)modelObject;
 				toCopy.add(persist);
 				if (persist instanceof ISupportChilds && !(persist instanceof LayoutContainer))
 				{
