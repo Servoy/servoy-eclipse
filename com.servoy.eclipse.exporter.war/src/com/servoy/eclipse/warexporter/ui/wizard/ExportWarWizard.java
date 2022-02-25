@@ -52,6 +52,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
@@ -275,6 +276,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			{
 				try
 				{
+					exportModel.setUserChannel(new EclipseExportUserChannel(exportModel, monitor));
 					final WarExporter exporter = new WarExporter(exportModel);
 					final boolean[] cancel = new boolean[] { false };
 					Display.getDefault().syncExec(new Runnable()

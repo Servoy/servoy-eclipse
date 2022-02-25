@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -79,6 +80,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
+import org.osgi.framework.Version;
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
@@ -166,10 +168,24 @@ public class WarExporter
 		EXCLUDED_RESOURCES_BY_NAME.add("tsconfig.json");
 	}
 
+	public static class VersionComparator implements Comparator<String>
+	{
+		public static final VersionComparator INSTANCE = new VersionComparator();
+
+		@Override
+		public int compare(String o1, String o2)
+		{
+			Version v1 = new Version(o1);
+			Version v2 = new Version(o2);
+			return v1.compareTo(v2);
+		}
+	}
+
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
 	private SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
+	private Map<String, TreeMap<String, File>> dependenciesVersions;
 
 	public WarExporter(IWarExportModel exportModel)
 	{
@@ -1329,6 +1345,7 @@ public class WarExporter
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
+			dependenciesVersions = new HashMap<>();
 			for (String plugin : plugins)
 			{
 				String pluginName = "plugins/" + plugin;
@@ -1359,6 +1376,31 @@ public class WarExporter
 							{
 								copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, classPath);
 							}
+						}
+					}
+				}
+			}
+			for (String jar : dependenciesVersions.keySet())
+			{
+				if (dependenciesVersions.get(jar).size() > 1)
+				{
+					ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
+					String latest = dependenciesVersions.get(jar).lastKey();
+					for (String version : dependenciesVersions.get(jar).keySet())
+					{
+						if (latest.equals(version)) continue;
+						File file = dependenciesVersions.get(jar).get(version);
+						String path = file.getPath().substring(file.getPath().indexOf("plugins"));
+						String message = "Dependency '" + path + "' is not exported because another " + jar + ".jar with a higher version (" + latest +
+							") is already present as part of a different plugin: " + dependenciesVersions.get(jar).get(latest).getPath() +
+							".\n If you use a smartclient the the jnlp's files version could be needed to also have a version update.";
+						exportModel.displayWarningMessage("Plugin dependencies problem", message);
+						File toDelete = new File(tmpWarDir, path);
+						File parent = toDelete.getParentFile();
+						toDelete.delete();
+						if (parent.list().length == 0)
+						{
+							parent.delete();
 						}
 					}
 				}
@@ -1800,7 +1842,8 @@ public class WarExporter
 		}
 	}
 
-	private void copyPluginJars(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, List<String> jarNames) throws ExportException, IOException
+	private void copyPluginJars(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, List<String> jarNames)
+		throws ExportException, IOException
 	{
 		for (String jarName : jarNames)
 		{
@@ -1814,6 +1857,46 @@ public class WarExporter
 			if (index != -1)
 			{
 				jarName = jarName.substring(index + "plugins/".length());
+			}
+			String normalizedJarName = "";
+			String version = null;
+			String[] jarNameParts = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).split("-");
+			for (String part : jarNameParts)
+			{
+				if (part.contains(".") && Character.isDigit(part.charAt(0)))
+				{
+					//it is the version number
+					version = part;
+					break;
+				}
+				else
+				{
+					normalizedJarName += !normalizedJarName.isEmpty() ? "-" + part : part;
+				}
+			}
+			if (version == null)
+			{
+				version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
+			}
+			if (version == null)
+			{
+				ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
+				version = "0";
+			}
+
+			if (!dependenciesVersions.containsKey(normalizedJarName))
+			{
+				dependenciesVersions.put(normalizedJarName, new TreeMap<>(VersionComparator.INSTANCE));
+			}
+
+			TreeMap<String, File> vFiles = dependenciesVersions.get(normalizedJarName);
+			if (!vFiles.containsKey(version))
+			{
+				vFiles.put(version, jarFile);
+			}
+			else
+			{
+				continue;
 			}
 			writeFileEntry(fw, jarFile, jarName, writtenFiles);
 		}

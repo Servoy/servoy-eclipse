@@ -138,4 +138,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public Set<String> getExportedPackages();
 
 	public String exportNG2Mode();
+
+	public void displayWarningMessage(String string, String message);
 }
