@@ -20,10 +20,24 @@ export class DesignerUtilsService {
             }
             if (position.width == 0) position.width = correctWidth;
             if (position.height == 0) position.height = correctHeight;
+        } else if (node.getAttribute('svy-id') != null) {
+            let currentNode = null;
+            if (node.parentElement.classList.contains('svy-wrapper')) {
+                currentNode = node.parentElement;
+            }
+            if (!currentNode && node.parentElement.parentElement.classList.contains('svy-wrapper')) {
+                currentNode = node.parentElement.parentElement;
+            }
+            if (currentNode){
+                // take position from wrapper div if available, is more accurate
+                 const parentPosition = currentNode.getBoundingClientRect();
+                 position.width = parentPosition.width;
+                 position.height = parentPosition.height;
+            }
         }
     }
-    
-    convertToContentPoint(glasspane: HTMLElement, point: {x?:number; y?:number; top?:number; left?:number}): {x?:number; y?:number; top?:number; left?:number} {
+
+    convertToContentPoint(glasspane: HTMLElement, point: { x?: number; y?: number; top?: number; left?: number }): { x?: number; y?: number; top?: number; left?: number } {
         const frameRect = glasspane.getBoundingClientRect();
         if (point.x && point.y) {
             point.x = point.x - frameRect.left;
@@ -35,7 +49,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?): {dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean} {
+    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget = null;
         if (type == "layout" || type == "component") {
             const realName = layoutName ? layoutName : "component";
@@ -100,7 +114,7 @@ export class DesignerUtilsService {
                         // the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
 
                         dropTarget = dropTarget.nextElementSibling;
-						//realDropTarget = this.getParent(dropTarget, realName);
+                        //realDropTarget = this.getParent(dropTarget, realName);
 
                         // if there is no nextElementSibling then force it to append so that it is moved to the last position.
                         if (!dropTarget) {
@@ -230,7 +244,7 @@ export class DesignerUtilsService {
 
     isTopContainer(layoutName: any) {
         const packages = this.editorSession.getState().packages;
-        for (var i = 0; i< packages.length; i++) {
+        for (var i = 0; i < packages.length; i++) {
             if (packages[i].components[0] && packages[i].components[0].componentType === "layout") {
                 for (var j = 0; j < packages[i].components.length; j++) {
                     if (packages[i].components[j].topContainer && packages[i].packageName + "." + packages[i].components[j].layoutName === layoutName) {

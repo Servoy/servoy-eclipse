@@ -86,6 +86,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + selected.svyid + '"]')[0];
                 if (node === undefined) return;
                 const position = node.getBoundingClientRect();
+                this.designerUtilsService.adjustElementRect(node, position);
                 selected.style = {
                     height: position.height + 'px',
                     width: position.width + 'px',
