@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -121,7 +122,7 @@ public class TableDefinitionUtils
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 						tableDefs.add(tableInfo);
 						if (exportMetaData && tableInfo.isMetaData != null && tableInfo.isMetaData.booleanValue())
 						{
@@ -201,7 +202,7 @@ public class TableDefinitionUtils
 		return getTableDefinitionsFromDBI(neededServersTables, exportAllTablesFromReferencedServers, exportMetaData);
 	}
 
-	private static List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
+	public static List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
 	{
 		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer(serverName);
 		final List<IFile> dbiz = new ArrayList<IFile>();

@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.model.repository;
 
+import static com.servoy.j2db.util.DatabaseUtils.deserializeServerSettings;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +76,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerSettings;
-import com.servoy.j2db.persistence.SortingNullprecedence;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableMetaInfo;
 import com.servoy.j2db.query.ColumnType;
@@ -232,10 +233,8 @@ public class DataModelManager implements IColumnInfoManager
 		IFile file = getDBIFile(t.getServerName(), t.getName());
 		if (file.exists())
 		{
-			InputStream is = null;
-			try
+			try (InputStream is = file.getContents(true))
 			{
-				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
@@ -243,31 +242,11 @@ public class DataModelManager implements IColumnInfoManager
 					deserializeTable(s, t, json_table);
 				}
 			}
-			catch (JSONException e)
+			catch (Exception e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
 				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw new RepositoryException(e);
-			}
-			catch (CoreException e)
-			{
-				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw new RepositoryException(e);
-			}
-			catch (RepositoryException e)
-			{
-				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw e;
-			}
-			finally
-			{
-				if (is != null)
-				{
-					Utils.closeInputStream(is);
-					is = null;
-				}
+				throw e instanceof RepositoryException ? (RepositoryException)e : new RepositoryException(e);
 			}
 		}
 		else
@@ -307,7 +286,7 @@ public class DataModelManager implements IColumnInfoManager
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 				if (json_table != null)
 				{
-					TableDef tableInfo = deserializeTableInfo(json_table);
+					TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 					if (tableName.equals(tableInfo.name))
 					{
 						return new TableMetaInfo(tableInfo.hiddenInDeveloper, Boolean.TRUE.equals(tableInfo.isMetaData));
@@ -553,7 +532,7 @@ public class DataModelManager implements IColumnInfoManager
 				}
 			}
 		}
-		else // RAGTEST gebruik settinsg in FSM
+		else
 		{
 			String json = serializeServerSettings(serverSettings);
 			try
@@ -565,6 +544,27 @@ public class DataModelManager implements IColumnInfoManager
 				Debug.error(e);
 			}
 		}
+	}
+
+	@Override
+	public ServerSettings loadServerSettings(String serverName) throws RepositoryException
+	{
+		IFile dbiFile = getServerDBIFile(serverName);
+		if (dbiFile.exists())
+		{
+			try (InputStream is = dbiFile.getContents(true))
+			{
+				String json = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				return deserializeServerSettings(json);
+			}
+			catch (Exception e)
+			{
+				// RAGTEST 	addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw new RepositoryException(e);
+			}
+		}
+
+		return ServerSettings.DEFAULT;
 	}
 
 
@@ -603,7 +603,7 @@ public class DataModelManager implements IColumnInfoManager
 					try
 					{
 						t.acquireReadLock();
-						TableDef tableInfo = deserializeTableInfo(json_table);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 						tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
 						tObj = serializeTableInfo(tableInfo);
 					}
@@ -724,7 +724,7 @@ public class DataModelManager implements IColumnInfoManager
 	private void deserializeTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
-		TableDef tableInfo = deserializeTableInfo(json_table);
+		TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 		if (!t.getName().equals(tableInfo.name))
 		{
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
@@ -838,20 +838,6 @@ public class DataModelManager implements IColumnInfoManager
 			addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid));
 		}
 	}
-
-	/**
-	 * Gets the table information from a .dbi (JSON format) file like structured String.
-	 *
-	 * @param stringDBIContent the table information in .dbi format
-	 * @return the deserialized table information.
-	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
-	 */
-	public TableDef deserializeTableInfo(String stringDBIContent) throws JSONException
-	{
-		ServoyJSONObject dbiContents = new ServoyJSONObject(stringDBIContent, true);
-		return DatabaseUtils.deserializeTableInfo(dbiContents);
-	}
-
 
 	public String serializeTable(ITable t) throws JSONException
 	{
@@ -1025,31 +1011,6 @@ public class DataModelManager implements IColumnInfoManager
 		json.put("sortingNullprecedence", serverSettings.getSortingNullprecedence().name());
 		return json.toString(true);
 	}
-
-	/** RAGTEST doc
-	 * Gets the table information from a .dbi (JSON format) file like structured String.
-	 *
-	 * @param stringDBIContent the table information in .dbi format
-	 * @return the deserialized table information.
-	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
-	 */
-	public ServerSettings deserializeServerSettings(String stringDBIContent)
-	{
-		try
-		{
-			ServoyJSONObject json = new ServoyJSONObject(stringDBIContent, true);
-			return new ServerSettings( //
-				json.getBoolean("sortIgnorecase"), //
-				SortingNullprecedence.valueOf(json.getString("sortingNullprecedence")) //
-			);
-		}
-		catch (Exception e)
-		{
-			Debug.warn(e);
-			return ServerSettings.DEFAULT;
-		}
-	}
-
 
 	public static String getFileName(String tableName)
 	{
@@ -1839,7 +1800,7 @@ public class DataModelManager implements IColumnInfoManager
 
 				if (dbiFileContent != null)
 				{
-					TableDef tableInfo = deserializeTableInfo(dbiFileContent);
+					TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 					if (!c.getTable().getName().equals(tableInfo.name))
 					{
 						throw new RepositoryException("Table name does not match dbi file name for " + c.getTable().getName());

@@ -72,8 +72,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -102,6 +104,7 @@ import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -189,7 +192,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 40);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 44);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -229,6 +232,8 @@ public class WarExporter
 		monitor.worked(2);
 		addServoyProperties(tmpWarDir);
 		monitor.worked(2);
+		copyDBIFiles(tmpWarDir);
+		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
 			monitor.subTask("Copy the active solution");
@@ -286,7 +291,6 @@ public class WarExporter
 		deleteDirectory(tmpWarDir);
 		monitor.worked(1);
 		monitor.done();
-		return;
 	}
 
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
@@ -1029,6 +1033,56 @@ public class WarExporter
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
+			}
+		}
+	}
+
+
+	/**
+	 * @param tmpWarDir
+	 */
+	private void copyDBIFiles(File tmpWarDir)
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		Map<String, List<String>> neededServerTables = TableDefinitionUtils.getNeededServerTables(activeProject == null ? null : activeProject.getSolution(),
+			exportModel.isExportReferencedModules(), exportModel.isExportI18NData());
+
+		DataModelManager dataModelManager = servoyModel.getDataModelManager();
+		File dbDir = new File(tmpWarDir, "WEB-INF/db");
+		dbDir.mkdirs();
+
+		neededServerTables.entrySet().forEach(entry -> {
+			String serverName = entry.getKey();
+			List<String> tablesNeeded = entry.getValue();
+
+			try
+			{
+				IFile serverDBIFile = dataModelManager.getServerDBIFile(serverName);
+				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()));
+
+				File serverDir = new File(dbDir, serverName);
+				serverDir.mkdirs();
+
+				for (IFile tableDBIfile : TableDefinitionUtils.getTablesDBIList(serverName, tablesNeeded, exportModel.isExportAllTablesFromReferencedServers()))
+				{
+					copyFileIfExists(tableDBIfile, new File(serverDir, tableDBIfile.getName()));
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		});
+	}
+
+	private static void copyFileIfExists(IFile src, File dest) throws FileNotFoundException, IOException, CoreException
+	{
+		if (src.exists())
+		{
+			try (FileOutputStream fos = new FileOutputStream(dest))
+			{
+				IOUtils.copy(src.getContents(true), fos);
 			}
 		}
 	}
@@ -1800,7 +1854,8 @@ public class WarExporter
 		}
 	}
 
-	private void copyPluginJars(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, List<String> jarNames) throws ExportException, IOException
+	private void copyPluginJars(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, List<String> jarNames)
+		throws ExportException, IOException
 	{
 		for (String jarName : jarNames)
 		{
@@ -1985,6 +2040,7 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
+		if (true) return null; // RAGTEST
 		pluginFiles = new HashSet<File>();
 		List<String> pluginLocations = new ArrayList<String>();
 		File eclipseParent = null;

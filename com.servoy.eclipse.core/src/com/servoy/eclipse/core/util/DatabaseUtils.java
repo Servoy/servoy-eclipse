@@ -84,7 +84,7 @@ public final class DatabaseUtils
 		TableDef tableInfo;
 		try
 		{
-			tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+			tableInfo = com.servoy.j2db.util.DatabaseUtils.deserializeTableInfo(dbiFileContent);
 		}
 		catch (JSONException e)
 		{
