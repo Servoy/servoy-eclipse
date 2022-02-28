@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,6 +32,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -85,7 +87,8 @@ public class CreateComponentsHandler extends CreateComponentHandler
 							if (newPersists != null && newPersists.size() > 0)
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
-								IStructuredSelection structuredSelection = new StructuredSelection(newPersists);
+								IStructuredSelection structuredSelection = new StructuredSelection(
+									newPersists.stream().map(persist -> PersistContext.create(persist, editorPart.getForm())).collect(Collectors.toList()));
 								selectionProvider.setSelection(structuredSelection);
 							}
 						}
