@@ -113,10 +113,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             }
 
         if (changes.dataProviderID && this.picker) {
-            const value = (this.dataProviderID instanceof Date) ? this.dataProviderID : null;
-            if (value) this.picker.dates.setValue(DateTime.convert(value));
-            else this.picker.dates.clear();
-//            if (value) this.config.viewDate = value as DateTime;;
+            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
+            this.picker.dates.setValue(value);
         }
         if (changes.format)
             if (changes.format.currentValue) {
@@ -147,7 +145,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         if (event.type === 'change.td') {
             if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
                 (!event.date && !this.dataProviderID)) return;
-            this.dataProviderID = event.date;
+            this.dataProviderID = !event.date?null:event.date;
         } else this.dataProviderID = null;
         super.pushUpdate();
     }
