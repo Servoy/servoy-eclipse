@@ -271,7 +271,7 @@ export class FormService {
                 dpValue = get(formState.getComponent(beanname).model, property);
 
                 // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
+                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname).model);
                 if (foundsetLinkedDPInfo) {
                     fslRowID = foundsetLinkedDPInfo.rowId;
                     property = foundsetLinkedDPInfo.propertyNameForServer;
