@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -44,6 +46,7 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -78,7 +81,26 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 			@Override
 			public String getText(Object element)
 			{
-				if (element instanceof IProject) return ((IProject)element).getName();
+				if (element instanceof IProject)
+				{
+					try
+					{
+						IProject iProject = (IProject)element;
+						if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+						{
+							if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+							{
+								return new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageDisplayname();
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+					return ((IProject)element).getName();
+				}
 				return super.getText(element);
 			}
 		};
