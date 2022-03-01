@@ -567,6 +567,7 @@ public class CreateComponentHandler implements IServerService
 							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
 								IRepository.WEBCOMPONENTS);
 							webComponent.setProperty("text", compName);
+							webComponent.setTypeName(name);
 							portal.addChild(webComponent);
 						}
 						else if (parentSupportingElements instanceof AbstractContainer)
@@ -574,7 +575,6 @@ public class CreateComponentHandler implements IServerService
 							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
 
 						}
-						webComponent.setTypeName(name);
 						CSSPositionUtils.setLocation(webComponent, x, y);
 						CSSPositionUtils.setSize(webComponent, w, h);
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
