@@ -543,6 +543,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							ServoyLog.logError(e);
 						}
 					}
+					else
+					{
+						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("update", "--legacy-peer-deps"));
+						try
+						{
+							npmCommand.runCommand(monitor);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("dedup"));
+					try
+					{
+						npmCommand.runCommand(monitor);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 					if (SOURCE_DEBUG)
 					{
 						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
