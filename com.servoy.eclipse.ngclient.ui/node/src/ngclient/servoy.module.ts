@@ -24,6 +24,7 @@ import { ServerDataService } from './services/serverdata.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import {MainRoutingModule} from './main-routing.module';
+import { DeveloperService } from './developer.service';
 
 @NgModule( {
     declarations: [
@@ -52,4 +53,8 @@ import {MainRoutingModule} from './main-routing.module';
         CUSTOM_ELEMENTS_SCHEMA
     ]
 } )
-export class ServoyModule { }
+export class ServoyModule {
+    constructor(_developerService: DeveloperService) {
+        // the above developer service must just be loaded..
+    }
+ }
