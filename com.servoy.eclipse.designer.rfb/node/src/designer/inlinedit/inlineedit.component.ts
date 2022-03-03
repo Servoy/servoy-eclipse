@@ -28,7 +28,7 @@ export class InlineEditComponent implements AfterViewInit {
     ngAfterViewInit(): void {
         // if time between mouseup and mousedown is too much, browser won't trigger click/dblclick event; so we have to fake a double click
         this.editorSession.registerCallback.next({ event: 'mouseup', function: (event: MouseEvent) => { 
-                if (event.timeStamp - this.lastTimestamp < 350 && ! this.editorSession.isInlineEditMode()){
+                if (event.timeStamp - this.lastTimestamp < 350 && !this.editorSession.isInlineEditMode()){
                     this.enterInlineEdit(event);
                 }
                 this.lastTimestamp = event.timeStamp;
