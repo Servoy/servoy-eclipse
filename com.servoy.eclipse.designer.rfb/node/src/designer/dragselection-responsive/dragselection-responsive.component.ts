@@ -155,10 +155,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
   
   onMouseUp(event: MouseEvent) {
     if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
-      //disable mouse events on the autoscroll
-      this.editorSession.getState().pointerEvents = 'none'; 
-      this.autoscrollAreasEnabled = false;
-      this.editorSession.stopAutoscroll();
 
       let obj = (event.ctrlKey || event.metaKey) ? [] : {};
      
@@ -191,7 +187,12 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         this.editorSession.getSession().callService('formeditor', 'moveComponent', obj, true);
       }
     }
-
+    
+    //disable mouse events on the autoscroll
+    this.editorSession.getState().pointerEvents = 'none'; 
+    this.autoscrollAreasEnabled = false;
+    this.editorSession.stopAutoscroll();
+    
     this.dragStartEvent = null;
     this.editorSession.getState().dragging = false;
     this.glasspane.style.cursor = "default";

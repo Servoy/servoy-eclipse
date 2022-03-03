@@ -23,6 +23,7 @@ import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
 import { ClientFunctionConverter } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
+import { DeveloperService } from './developer.service';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
