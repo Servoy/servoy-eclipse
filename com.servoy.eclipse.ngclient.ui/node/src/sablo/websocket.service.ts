@@ -540,7 +540,7 @@ export class WebsocketSession {
                 });
             }
 
-            // data got back from the server
+            // got the return value for a client-to-server call (that has a defer/waiting promise) back from the server
             if (obj.cmsgid) { // response to event
                 const deferredEvent = this.deferredEvents[obj.cmsgid];
                 if (deferredEvent !== null) {
