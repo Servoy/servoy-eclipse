@@ -109,7 +109,7 @@ export class KeyboardLayoutDirective {
 
 					}
 				}
-                this.editorSession.updateSelection(this.editorSession.getSelection(), true);
+                this.editorSession.updateSelection(this.editorSession.getSelection(), true, true);
                 this.isSendChanges = true; 
                 return false; 
             } else {
