@@ -19,16 +19,24 @@ export class InlineEditComponent implements AfterViewInit {
     keyupListener: () => void;
     keydownListener: () => void;
     blurListener: () => void;
-
+    lastTimestamp: number;
+    
     constructor(protected readonly editorSession: EditorSessionService, private readonly designerUtilsService: DesignerUtilsService,
         @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly cdRef: ChangeDetectorRef) {
     }
 
     ngAfterViewInit(): void {
-        this.editorSession.registerCallback.next({ event: 'dblclick', function: this.onDoubleClick });
+        // if time between mouseup and mousedown is too much, browser won't trigger click/dblclick event; so we have to fake a double click
+        this.editorSession.registerCallback.next({ event: 'mouseup', function: (event: MouseEvent) => { 
+                if (event.timeStamp - this.lastTimestamp < 350 && ! this.editorSession.isInlineEditMode()){
+                    this.enterInlineEdit(event);
+                }
+                this.lastTimestamp = event.timeStamp;
+            } 
+        });
     }
 
-    onDoubleClick = (event: MouseEvent) => {
+    enterInlineEdit(event: MouseEvent){
         const selection = this.editorSession.getSelection();
         if (selection && selection.length > 0) {
             let eventNode = this.designerUtilsService.getNode(this.doc, event);
@@ -62,6 +70,7 @@ export class InlineEditComponent implements AfterViewInit {
             }
         }
     }
+    
     applyValue(node: string, directEditProperty: string, propertyValue: string) {
         const changes = {};
         const newValue = this.elementRef.nativeElement.textContent;
