@@ -66,7 +66,7 @@ export class EditorSessionService implements ServiceProvider {
     keyPressed(event: {ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number}) {
         // remove selection if backspace or delete key was pressed
         if (event.keyCode == 8 || event.keyCode == 46) {
-            this.updateSelection([]);
+            this.updateSelection([], true, true);
         }
         void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,
@@ -185,9 +185,9 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', action, params, true);
     }
 
-    updateSelection(ids: Array<string>, redrawDecorators?: boolean) {
+    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean) {
         this.selection = ids;
-        this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators));
+        this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
 
     addSelectionChangedListener(listener: ISelectionChangedListener): () => void {
@@ -392,7 +392,7 @@ export class EditorSessionService implements ServiceProvider {
 
 export interface ISelectionChangedListener {
 
-    selectionChanged(selection: Array<string>, redrawDecorators?:boolean): void;
+    selectionChanged(selection: Array<string>, redrawDecorators?:boolean, designerChange?:boolean): void;
 
 }
 
