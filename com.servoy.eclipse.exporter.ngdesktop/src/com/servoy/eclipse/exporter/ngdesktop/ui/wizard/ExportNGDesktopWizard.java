@@ -270,7 +270,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			}
 
 			final Dimension iconSize = ImageLoader.getSize(myFile);
-			if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
+			if (iconSize.getWidth() < 512 || iconSize.getHeight() < 512)
 			{
 				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")\n");
 				return errorMsg;
