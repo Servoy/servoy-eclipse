@@ -185,8 +185,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.name) {
-            // really make sure all form state is reverted to default
-            // Form Instances are reused for tabpanels that have a template reference to this.
+            //
+            // Form Instances are reused for tabpanels that have a template reference to this make sure to clean up the old reference/name to this instance
+            if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue);
+            // really make sure all form state is reverted to default for this new name
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass;
             if (styleClasses)
@@ -208,7 +210,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     ngOnDestroy() {
-        this.formservice.destroy(this);
+        this.formservice.destroy(this.name);
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {

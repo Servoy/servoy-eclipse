@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2022.3.0.3740_rc" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2022.6.0.3780_rc" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -10,7 +10,7 @@
 
 Version: 2021.6.0.3680_rc
 
-Copyright © 1997-2021 Servoy BV. All rights reserved.
+Copyright © 1997-2022 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.
@@ -29,9 +29,9 @@ and will be prosecuted to the maximum extent possible under law.
 -Xmx2G
 --add-modules=ALL-SYSTEM
       </vmArgs>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED
       </vmArgsMac>
-      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu
       </vmArgsWin>
    </launcherArgs>
 
@@ -100,7 +100,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2022.3.0.3740_rc"/>
+      <feature id="com.servoy.eclipse.feature" version="2022.6.0.3780_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>

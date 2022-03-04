@@ -8,8 +8,9 @@ import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
-import { TempusDominus, DateTime, Namespace, Options, } from '@eonasdan/tempus-dominus';
-import { ChangeEvent } from '@eonasdan/tempus-dominus/types/event-types';
+import { TempusDominus, DateTime, Namespace, Options} from '@servoy/tempus-dominus';
+import { ChangeEvent } from '@servoy/tempus-dominus/types/utilities/event-types';
+import Dates from '@servoy/tempus-dominus/types/dates';
 
 @Component({
     selector: 'servoydefault-calendar',
@@ -54,13 +55,14 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             locale: 'nl'
         },
         hooks: {
-            inputFormat: (_context: TempusDominus, date: DateTime) => this.formattingService.format(date, this.format, false),
-            inputParse: (_context: TempusDominus, value: string) => {
+            inputFormat: (date: DateTime) => this.formattingService.format(date, this.format, false),
+            inputParse: (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID);
                 if (parsed instanceof Date) return new DateTime(parsed);
                 return null;
             }
         }
+
     };
 
     constructor(renderer: Renderer2,
@@ -111,10 +113,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             }
 
         if (changes.dataProviderID && this.picker) {
-            const value = (this.dataProviderID instanceof Date) ? this.dataProviderID : null;
-            if (value) this.picker.dates.set(value);
-            else this.picker.dates.clear();
-            if (value) this.config.viewDate = value as DateTime;;
+            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
+            this.picker.dates.setValue(value);
         }
         if (changes.format)
             if (changes.format.currentValue) {
@@ -145,7 +145,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         if (event.type === 'change.td') {
             if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
                 (!event.date && !this.dataProviderID)) return;
-            this.dataProviderID = event.date;
+            this.dataProviderID = !event.date?null:event.date;
         } else this.dataProviderID = null;
         super.pushUpdate();
     }
@@ -209,11 +209,9 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             language = locale.substring(0, index);
         }
         language = language.toLowerCase();
-        import(`./${language}.js`).then(
-            (module: { default: { [key: string]: string } }) => {
-                Object.entries(module.default).forEach(([key, value]) => {
-                    this.config.localization[key] = value;
-                });
+        import(`@servoy/tempus-dominus/dist/locales/${language}.js`).then(
+            (module: { localization: { [key: string]: string } }) => {
+                this.config.localization = module.localization;
                 if (this.picker !== null) this.picker.updateOptions(this.config);
             },
             () => {

@@ -63,7 +63,7 @@ export class FormService {
                         this.formComponentCache.set(msg.call.form, new Deferred<any>());
                     }
                     const deferred = this.formComponentCache.get(msg.call.form) as Deferred<any>;
-                    deferred.promise.then(function() {
+                    deferred.promise.then(() => {
                         const formComponent = this.formComponentCache.get(msg.call.form) as IFormComponent;
                         formComponent.callApi(msg.call.bean, msg.call.api, msg.call.args);
                         formComponent.detectChanges();
@@ -104,8 +104,8 @@ export class FormService {
 
     }
 
-    public destroy(form: IFormComponent) {
-        this.formComponentCache.delete(form.name);
+    public destroy(formName: string) {
+        this.formComponentCache.delete(formName);
     }
 
     public hasFormCacheEntry(name: string): boolean {
@@ -271,7 +271,7 @@ export class FormService {
                 dpValue = get(formState.getComponent(beanname).model, property);
 
                 // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
+                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname).model);
                 if (foundsetLinkedDPInfo) {
                     fslRowID = foundsetLinkedDPInfo.rowId;
                     property = foundsetLinkedDPInfo.propertyNameForServer;

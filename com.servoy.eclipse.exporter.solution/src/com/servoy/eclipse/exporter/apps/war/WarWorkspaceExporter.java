@@ -535,6 +535,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 			return exportedPackages;
 		}
+
+		@Override
+		public void displayWarningMessage(String title, String message)
+		{
+			System.out.println(title + ": " + message);
+		}
 	}
 
 	@Override

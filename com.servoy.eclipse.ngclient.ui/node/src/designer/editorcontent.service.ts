@@ -86,61 +86,9 @@ export class EditorContentService {
         }
         if (data.ng2components) {
             data.ng2components.forEach((elem) => {
-                let component : IComponentCache = formCache.getComponent(elem.name);
-                if (!component) {
-                    component = formCache.getFormComponent(elem.name);
-                    if(component && data.updatedFormComponentsDesignId) {
-                        var fixedName = elem.name.replace(/-/g, "_");
-                        if(!isNaN(fixedName[0])) {
-                            fixedName = "_" + fixedName;
-                        }
-                        if((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1 && (component.model.containedForm != elem.model.containedForm)) {
-                            refresh = true;
-                            const formComponent = component as FormComponentCache;
-                            if (formComponent.responsive) {
-                               formComponent.items.forEach((item) => {
-                                   if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
-                                       formCache.removeLayoutContainer(item['id']);
-                                       this.removeChildRecursively(item, formComponent);
-                                   }
-                               });
-                            }
-                            data.formComponentsComponents.forEach((child:string) =>{
-                                if (child.lastIndexOf(fixedName + '$', 0) === 0) {
-                                    const formComponentComponent = formCache.getComponent(child);
-                                    if (formComponent.responsive) {
-                                        const container = formCache.getLayoutContainer(data.childParentMap[child]);
-                                        if (container) {
-                                            container.addChild(formComponentComponent);
-                                        }
-                                    } else {
-                                        formComponent.addChild(formComponentComponent);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
+                let component = formCache.getComponent(elem.name);
                 if (component) {
-                    component.layout = elem.position;
-                    const beanConversion = elem.model[ConverterService.TYPES_KEY];
-                    for (const property of Object.keys(elem.model)) {
-                        let value = elem.model[property];
-                        if (beanConversion && beanConversion[property]) {
-                            value = this.converterService.convertFromServerToClient(value, beanConversion[property], component.model[property],
-                                (prop: string) => component.model ? component.model[prop] : component.model);
-                        }
-                        if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
-                                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y)) {
-                            redrawDecorators = true;
-                        }
-                        component.model[property] = value;
-                    }
-                    for (const property of Object.keys(component.model)) {
-                        if (elem.model[property] == undefined){
-                             component.model[property] = null;
-                        }
-                    }
+                   redrawDecorators = redrawDecorators ||  this.updateComponentProperties(component, elem );
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
@@ -177,6 +125,43 @@ export class EditorContentService {
                         reorderPartComponents = true;
                     }
                 }
+            });
+            data.ng2components.forEach((elem) => {
+                //FORM COMPONENTS
+               let  component = formCache.getFormComponent(elem.name);
+                if(component && data.updatedFormComponentsDesignId) {
+                    var fixedName = elem.name.replace(/-/g, "_");
+                    if(!isNaN(fixedName[0])) {
+                        fixedName = "_" + fixedName;
+                    }
+                    if((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1 && (component.model.containedForm != elem.model.containedForm)) {
+                        refresh = true;
+                        const formComponent = component as FormComponentCache;
+                        if (formComponent.responsive) {
+                           formComponent.items.forEach((item) => {
+                               if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
+                                   formCache.removeLayoutContainer(item['id']);
+                                   this.removeChildRecursively(item, formComponent);
+                               }
+                           });
+                        }
+                        data.formComponentsComponents.forEach((child:string) =>{
+                            if (child.lastIndexOf(fixedName + '$', 0) === 0) {
+                                const formComponentComponent = formCache.getComponent(child);
+                                if (formComponent.responsive) {
+                                    const container = formCache.getLayoutContainer(data.childParentMap[child]);
+                                    if (container) {
+                                        container.addChild(formComponentComponent);
+                                    }
+                                } else {
+                                    formComponent.addChild(formComponentComponent);
+                                }
+                            }
+                        });
+                    }
+                    redrawDecorators = redrawDecorators || this.updateComponentProperties(component, elem);
+                }
+                // TODO else create FC SVY-16912
             });
             refresh = true;
         }
@@ -235,6 +220,30 @@ export class EditorContentService {
         if (redrawDecorators) {
             this.designFormCallback.redrawDecorators();
         }
+    }
+    
+    updateComponentProperties(component: IComponentCache, elem: any) : boolean {
+        let redrawDecorators = false;
+        component.layout = elem.position;
+        const beanConversion = elem.model[ConverterService.TYPES_KEY];
+        for (const property of Object.keys(elem.model)) {
+            let value = elem.model[property];
+            if (beanConversion && beanConversion[property]) {
+                value = this.converterService.convertFromServerToClient(value, beanConversion[property], component.model[property],
+                    (prop: string) => component.model ? component.model[prop] : component.model);
+            }
+            if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
+                    property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y)) {
+                redrawDecorators = true;
+            }
+            component.model[property] = value;
+        }
+        for (const property of Object.keys(component.model)) {
+            if (elem.model[property] == undefined){
+                 component.model[property] = null;
+            }
+        }
+        return redrawDecorators;
     }
 
     updateForm(uuid: string, parentUuid: string, width: number, height: number) {

@@ -210,7 +210,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = this.designMode;
             }
             if (event.data.id === 'showWireframe') {
-                this.showWireframe = event.data.value; 
+                const changed = this.showWireframe != event.data.value;
+                this.showWireframe = event.data.value;
+                if (changed){
+                     this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                } 
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value);
@@ -271,7 +275,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     ngOnDestroy() {
-        this.formservice.destroy(this);
+        this.formservice.destroy(this.name);
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {

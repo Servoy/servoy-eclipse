@@ -60,7 +60,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     ngOnInit(): void {
-        this.renderGhosts();
+        if (this.urlParser.isAbsoluteFormLayout()) {
+            // for responsive this is way too early we need the real content size to show the ghosts
+            this.renderGhosts()
+        }
         const content = this.doc.querySelector('.content-area');
         content.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
         content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
@@ -93,6 +96,13 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     ghostContainer.style['color'] = odd ? 'rgb(150, 150, 150)' : 'rgb(0, 100, 80)';
                     if (odd) {
                         ghostContainer.style['border-top'] = ghostContainer.style['border-bottom'] = 'dashed 1px';
+                    }
+                }
+                if (!this.urlParser.isAbsoluteFormLayout()) {
+                    const iframe = this.doc.querySelector('iframe');
+                    const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + ghostContainer.uuid + '"]')[0];
+                    if (node !== undefined) {
+                        ghostContainer.parentCompBounds = node.getBoundingClientRect();
                     }
                 }
                 if (ghostContainer.parentCompBounds) {
@@ -231,6 +241,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.editorSession.sendChanges(obj);
                 this.renderGhosts();
             }
+            // this is just to re-render the decorators
+            this.editorSession.updateSelection(this.editorSession.getSelection(), true);
         }
         if (this.draggingClone) {
             this.draggingClone.remove();
@@ -239,7 +251,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
-        this.editorSession.updateSelection(this.editorSession.getSelection(), true);
         this.editorSession.getState().dragging = false;
     }
 
@@ -300,16 +311,17 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
     }
 
-    selectionChanged(): void {
+    selectionChanged(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean): void {
         // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
         // not sure how to detect when we really need to redraw
-        this.renderGhosts();
+        if (designerChange) this.renderGhosts();
         //this.renderGhostsInternal(this.ghosts);
     }
 }
 
 class GhostContainer {
     propertyName: string;
+    uuid: string;
     class: string;
     style: CSSStyleDeclaration;
     parentCompBounds: { left?: number, top?: number; width?: number; height?: number };

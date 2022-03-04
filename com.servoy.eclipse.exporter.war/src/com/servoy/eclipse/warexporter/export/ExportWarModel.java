@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -116,6 +117,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private Set<String> exportedComponentPackages = new HashSet<>();
 	private Set<String> exportedServicePackages = new HashSet<>();
 	private String contextFileName;
+	private EclipseExportUserChannel userChannel;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
@@ -1061,4 +1063,14 @@ public class ExportWarModel extends AbstractWarExportModel
 			.collect(Collectors.toSet());
 	}
 
+	public void setUserChannel(EclipseExportUserChannel eclipseExportUserChannel)
+	{
+		this.userChannel = eclipseExportUserChannel;
+	}
+
+	@Override
+	public void displayWarningMessage(String title, String message)
+	{
+		this.userChannel.displayWarningMessage(title, message);
+	}
 }

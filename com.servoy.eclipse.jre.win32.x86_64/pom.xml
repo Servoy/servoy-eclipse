@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.0.3740_rc</version>
+		<version>2022.6.0.3780_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.win32.x86_64</artifactId>
