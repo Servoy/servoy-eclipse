@@ -1218,7 +1218,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				settings.save();
 			}
 
-			serverManager.saveServerConfig(oldServerName, serverConfig, serverSettings);
+			serverManager.saveServerConfig(oldServerName, serverConfig);
+			serverManager.saveServerSettings(serverConfig.getServerName(), serverSettings);
 
 			//"refresh" the log table creation button
 			enableButtons();

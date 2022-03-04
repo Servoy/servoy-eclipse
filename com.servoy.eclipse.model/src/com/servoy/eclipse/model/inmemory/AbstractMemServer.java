@@ -92,7 +92,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	private final Map<String, T> tables = new HashMap<>();
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
-	private final ServerSettings serverSettings = ServerSettings.DEFAULT; // RAGTEST
 	private final ServoyProject servoyProject;
 	private final String datasource;
 	private final String scheme;
@@ -317,7 +316,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	@Override
 	public ServerSettings getSettings()
 	{
-		return serverSettings;
+		return ServerSettings.DEFAULT; // RAGTEST
 	}
 
 	@Override
@@ -791,18 +790,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 */
 	@Override
 	public IRepository createRepositoryTables() throws RepositoryException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#getRepository()
-	 */
-	@Override
-	public IRepository getRepository() throws RepositoryException
 	{
 		// TODO Auto-generated method stub
 		return null;

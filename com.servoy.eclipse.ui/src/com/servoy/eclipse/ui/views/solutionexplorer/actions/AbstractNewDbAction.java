@@ -262,7 +262,7 @@ public abstract class AbstractNewDbAction extends Action
 			{
 				try
 				{
-					serverManager.saveServerConfig(null, serverConfig, ServerSettings.DEFAULT);
+					serverManager.saveServerConfig(null, serverConfig);
 				}
 				catch (Exception e)
 				{

@@ -64,7 +64,7 @@ public class DeleteServerAction extends Action implements ISelectionChangedListe
 				while (it.hasNext())
 				{
 					IServerInternal server = (IServerInternal)it.next().getRealObject();
-					serverManager.saveServerConfig(server.getName(), null, null);
+					serverManager.saveServerConfig(server.getName(), null);
 					EditorUtil.closeEditor(server);
 				}
 			}

@@ -1895,13 +1895,13 @@ public class DataModelManager implements IColumnInfoManager
 	@Override
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
-		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository(), c, createMissingServoySequence);
+		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, createMissingServoySequence);
 	}
 
 	@Override
 	public void setTableColumnInfos(ITable t, HashMap<String, ColumnInfoDef> columnInfoDefinitions) throws RepositoryException
 	{
-		DatabaseUtils.updateTableColumnInfos(ApplicationServerRegistry.get().getDeveloperRepository(), t, columnInfoDefinitions);
+		DatabaseUtils.updateTableColumnInfos(() -> ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), t, columnInfoDefinitions);
 	}
 
 	/**

@@ -97,7 +97,7 @@ public class EnableServerAction extends Action implements ISelectionChangedListe
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0);
 			}
-			serverManager.saveServerConfig(server.getName(), serverConfig, server.getSettings());
+			serverManager.saveServerConfig(server.getName(), serverConfig);
 		}
 		catch (Exception e)
 		{

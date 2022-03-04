@@ -46,7 +46,6 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ServerConfig;
-import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ILogLevel;
@@ -401,7 +400,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						{
 							serverConfig = serverConfig.getEnabledCopy(true);
 							serverManager.testServerConfigConnection(serverConfig, 0);
-							serverManager.saveServerConfig(name, serverConfig, serverManager.getServerSettings(name));
+							serverManager.saveServerConfig(name, serverConfig);
 							// return retry so importer picks up the enabled server
 							return RETRY_ACTION;
 						}
@@ -478,7 +477,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						try
 						{
 							serverManager.testServerConfigConnection(serverConfig, 0);
-							serverManager.saveServerConfig(null, serverConfig, ServerSettings.DEFAULT /* RAGTEST */);
+							serverManager.saveServerConfig(null, serverConfig);
 						}
 						catch (Exception ex)
 						{

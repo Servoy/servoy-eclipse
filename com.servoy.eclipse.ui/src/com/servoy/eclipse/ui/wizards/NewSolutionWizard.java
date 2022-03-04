@@ -562,7 +562,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected static void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
-		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+
+		ServerConfig origConfig = Arrays.stream(serverManager.getServerConfigs())
 			.filter(
 				s -> s.isPostgresDriver() && s.isEnabled())
 			.findAny()
@@ -573,7 +575,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return;
 		}
 
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(origConfig.getServerName());
+		IServerInternal server = (IServerInternal)serverManager.getServer(origConfig.getServerName());
 		if (server == null || !server.isValid())
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
@@ -592,8 +594,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 			try
 			{
-				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig, server.getSettings());
+				serverManager.testServerConfigConnection(serverConfig, 0);
+				serverManager.saveServerConfig(null, serverConfig);
+				serverManager.saveServerSettings(serverConfig.getServerName(), serverManager.getServerSettings(origConfig.getServerName()));
 			}
 			catch (Exception ex)
 			{

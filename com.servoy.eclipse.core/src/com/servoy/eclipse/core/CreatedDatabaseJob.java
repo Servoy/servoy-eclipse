@@ -26,7 +26,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
-import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.serverconfigtemplates.PostgresTemplate;
 import com.servoy.j2db.util.Settings;
@@ -154,7 +153,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 				sc.getSelectINValueCountLimit(), sc.getDialectClass(), sc.getQuoteList(), sc.isClientOnlyConnections());
 			try
 			{
-				serverManager.saveServerConfig(null, newServerConfig, ServerSettings.DEFAULT);
+				serverManager.saveServerConfig(null, newServerConfig);
 			}
 			catch (Exception e)
 			{
