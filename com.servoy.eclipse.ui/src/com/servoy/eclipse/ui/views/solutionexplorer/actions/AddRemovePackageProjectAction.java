@@ -69,8 +69,8 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 	public AddRemovePackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Change Servoy package project references");
-		setToolTipText("Add or remove a Servoy Package Project references to the solution");
+		setText("Change Servoy project packages references");
+		setToolTipText("Add or remove Servoy Project Packages references to the solution");
 	}
 
 	@Override
@@ -144,7 +144,8 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
 				dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-					selectionFilter, treeStyle, "Add/Remove Servoy Packages", selectablePackages.toArray(), theSelection, true, "Add/Remove Servoy Packages",
+					selectionFilter, treeStyle, "Add/Remove Servoy Project Packages", selectablePackages.toArray(), theSelection, true,
+					"Add/Remove Servoy Project Packages",
 					null);
 
 				dialog.open();

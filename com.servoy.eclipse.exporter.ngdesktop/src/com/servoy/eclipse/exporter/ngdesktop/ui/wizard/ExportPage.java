@@ -177,7 +177,7 @@ public class ExportPage extends WizardPage
 		iconLabel.setText("Icon path:");
 		iconLabel
 			.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size (KB): " + ExportNGDesktopWizard.LOGO_SIZE +
-				"\nMinimum logo size: 256 x 256 px");
+				"\nMinimum logo size: 512 x 512 px");
 
 		iconPath = new Text(composite, SWT.BORDER);
 		iconPath
