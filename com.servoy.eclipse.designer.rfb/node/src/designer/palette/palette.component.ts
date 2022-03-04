@@ -110,6 +110,7 @@ export class PaletteComponent {
 
         this.topAdjust = frameRect.top;
         this.leftAdjust = frameRect.left;
+        this.canDrop = {dropAllowed : false};
         if (!ghost) {
             this.editorSession.getState().dragging = true;
             frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children}, '*');
