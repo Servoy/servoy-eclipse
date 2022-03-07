@@ -858,6 +858,18 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	/*
 	 * (non-Javadoc)
 	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#isTableListLoaded()
+	 */
+	@Override
+	public boolean isTableListLoadedAsync()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#isTableLoaded(java.lang.String)
 	 */
 	@Override
