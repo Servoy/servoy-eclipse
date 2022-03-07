@@ -364,7 +364,7 @@ public class CreateComponentHandler implements IServerService
 					gc.setOnActionMethodID(-1);
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					CSSPositionUtils.setLocation(gc, x, y);
-					CSSPositionUtils.setSize(gc, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-label".equals(name))
@@ -372,7 +372,7 @@ public class CreateComponentHandler implements IServerService
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
 					gc.setText(args.has("text") ? args.getString("text") : "label");
 					CSSPositionUtils.setLocation(gc, x, y);
-					CSSPositionUtils.setSize(gc, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-combobox".equals(name))
@@ -380,7 +380,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.COMBOBOX);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textfield".equals(name))
@@ -388,7 +388,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_FIELD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textarea".equals(name))
@@ -396,7 +396,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_AREA);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-password".equals(name))
@@ -404,7 +404,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.PASSWORD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-calendar".equals(name))
@@ -412,7 +412,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CALENDAR);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-typeahead".equals(name))
@@ -420,7 +420,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TYPE_AHEAD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-spinner".equals(name))
@@ -428,7 +428,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.SPINNER);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
@@ -436,7 +436,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CHECKS);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
@@ -444,7 +444,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.RADIOS);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-imagemedia".equals(name))
@@ -452,7 +452,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.IMAGE_MEDIA);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-listbox".equals(name))
@@ -460,7 +460,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.LIST_BOX);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-htmlarea".equals(name))
@@ -469,7 +469,7 @@ public class CreateComponentHandler implements IServerService
 					field.setDisplayType(Field.HTML_AREA);
 					field.setEditable(true);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-tabpanel".equals(name))
@@ -489,7 +489,7 @@ public class CreateComponentHandler implements IServerService
 						tabPanel = editorPart.getForm().createNewTabPanel(compName);
 					}
 					CSSPositionUtils.setLocation(tabPanel, x, y);
-					CSSPositionUtils.setSize(tabPanel, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoydefault-splitpane".equals(name))
@@ -510,7 +510,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 					CSSPositionUtils.setLocation(tabPanel, x, y);
-					CSSPositionUtils.setSize(tabPanel, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoycore-portal".equals(name))
@@ -530,7 +530,7 @@ public class CreateComponentHandler implements IServerService
 						portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 					}
 					CSSPositionUtils.setLocation(portal, x, y);
-					CSSPositionUtils.setSize(portal, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(portal, w, h);
 					return new IPersist[] { portal };
 				}
 				else if ("servoydefault-rectangle".equals(name))
@@ -538,7 +538,7 @@ public class CreateComponentHandler implements IServerService
 					RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 					shape.setLineSize(1);
 					CSSPositionUtils.setLocation(shape, x, y);
-					CSSPositionUtils.setSize(shape, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(shape, w, h);
 					return new IPersist[] { shape };
 				}
 				else
