@@ -199,8 +199,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
     onMouseDown(event: MouseEvent, ghost: Ghost, ghostContainer: GhostContainer) {
         this.editorSession.setSelection([ghost.uuid]);
-        this.editorSession.getState().dragging = true;
         if (event.button == 0) {
+            this.editorSession.getState().dragging = true;
             this.mousedownpoint = { x: event.pageX, y: event.pageY };
             this.draggingGhost = ghost;
             this.draggingInGhostContainer = ghostContainer;
@@ -243,6 +243,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             }
             // this is just to re-render the decorators
             this.editorSession.updateSelection(this.editorSession.getSelection(), true);
+            this.editorSession.getState().dragging = false;
         }
         if (this.draggingClone) {
             this.draggingClone.remove();
@@ -251,7 +252,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
-        this.editorSession.getState().dragging = false;
     }
 
     private onMouseMove(event: MouseEvent) {
