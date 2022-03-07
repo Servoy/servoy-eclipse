@@ -1342,10 +1342,10 @@ public class WarExporter
 			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
 		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
+		dependenciesVersions = new HashMap<>();
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
-			dependenciesVersions = new HashMap<>();
 			for (String plugin : plugins)
 			{
 				String pluginName = "plugins/" + plugin;
@@ -1380,35 +1380,60 @@ public class WarExporter
 					}
 				}
 			}
-			for (String jar : dependenciesVersions.keySet())
-			{
-				if (dependenciesVersions.get(jar).size() > 1)
-				{
-					ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
-					String latest = dependenciesVersions.get(jar).lastKey();
-					for (String version : dependenciesVersions.get(jar).keySet())
-					{
-						if (latest.equals(version)) continue;
-						File file = dependenciesVersions.get(jar).get(version);
-						String path = file.getPath().substring(file.getPath().indexOf("plugins"));
-						String message = "Dependency '" + path + "' is not exported because another " + jar + ".jar with a higher version (" + latest +
-							") is already present as part of a different plugin: " + dependenciesVersions.get(jar).get(latest).getPath() +
-							".\n If you use a smartclient the the jnlp's files version could be needed to also have a version update.";
-						exportModel.displayWarningMessage("Plugin dependencies problem", message);
-						File toDelete = new File(tmpWarDir, path);
-						File parent = toDelete.getParentFile();
-						toDelete.delete();
-						if (parent.list().length == 0)
-						{
-							parent.delete();
-						}
-					}
-				}
-			}
 		}
 		catch (IOException e1)
 		{
 			throw new ExportException("Error creating plugins dir", e1);
+		}
+
+		for (String jar : dependenciesVersions.keySet())
+		{
+			Properties properties = new Properties();
+			try (FileInputStream fis = new FileInputStream(pluginProperties))
+			{
+				properties.load(fis);
+			}
+			catch (IOException e)
+			{
+				throw new ExportException("Error creating plugins dir", e);
+			}
+
+			boolean removedJar = false;
+			if (dependenciesVersions.get(jar).size() > 1)
+			{
+				ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
+				String latest = dependenciesVersions.get(jar).lastKey();
+				for (String version : dependenciesVersions.get(jar).keySet())
+				{
+					if (latest.equals(version)) continue;
+					File file = dependenciesVersions.get(jar).get(version);
+					String path = file.getPath().substring(file.getPath().indexOf("plugins") + +"plugins/".length()).replace('\\', '/');
+					properties.remove(path);
+					removedJar = true;
+					String message = "Dependency '" + path + "' is not exported because another " + jar + ".jar with a higher version (" + latest +
+						") is already present as part of a different plugin: " + dependenciesVersions.get(jar).get(latest).getPath() +
+						".\n If you use a smartclient the the jnlp's files version could be needed to also have a version update.";
+					exportModel.displayWarningMessage("Plugin dependencies problem", message);
+					File toDelete = new File(tmpWarDir, file.getPath().substring(file.getPath().indexOf("plugins")));
+					File parent = toDelete.getParentFile();
+					toDelete.delete();
+					if (parent.list().length == 0)
+					{
+						parent.delete();
+					}
+				}
+			}
+			if (removedJar)
+			{
+				try (FileOutputStream fos = new FileOutputStream(pluginProperties))
+				{
+					properties.store(fos, "");
+				}
+				catch (IOException e)
+				{
+					throw new ExportException("Error creating plugins dir", e);
+				}
+			}
 		}
 	}
 
