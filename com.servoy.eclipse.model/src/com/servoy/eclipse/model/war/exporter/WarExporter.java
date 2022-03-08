@@ -1908,7 +1908,10 @@ public class WarExporter
 				ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
 				version = "0";
 			}
-
+			if (version.contains("-"))
+			{
+				version = version.split("-")[0];
+			}
 			if (!dependenciesVersions.containsKey(normalizedJarName))
 			{
 				dependenciesVersions.put(normalizedJarName, new TreeMap<>(VersionComparator.INSTANCE));
