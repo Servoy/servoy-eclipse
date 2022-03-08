@@ -91,6 +91,7 @@ export class EditorContentService {
                    redrawDecorators = redrawDecorators ||  this.updateComponentProperties(component, elem );
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
+                        redrawDecorators = true;
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
                             reorderLayoutContainers.push(component.parent);
                         }
