@@ -37,7 +37,7 @@ import com.servoy.eclipse.ui.util.IControlFactory;
  * <p>
  * This class may be instantiated; it is may be subclassed.
  * </p>
- * 
+ *
  * @author rgansevles
  */
 public class ListSelectCellEditor extends DialogCellEditor
@@ -56,7 +56,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor for selecting from a list of values
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public ListSelectCellEditor(Composite parent, String title, ILabelProvider labelProvider, IValueEditor< ? > valueEditor, boolean readOnly, Object[] values,
@@ -68,7 +68,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor when the content provider builds the list from the input (in
 	 * getElements)
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public ListSelectCellEditor(Composite parent, String title, ITreeContentProvider contentProvider, ILabelProvider labelProvider,
@@ -93,7 +93,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor when the content provider builds the list from the input (in
 	 * getElements)
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public ListSelectCellEditor(Composite parent, String title, ITreeContentProvider contentProvider, ILabelProvider labelProvider,
@@ -123,7 +123,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 		this.optionalMessage = optionalMessage;
 		this.dialogLabelProvider = dialogLabelProvider;
 	}
-	
+
 	public void setInput(Object input)
 	{
 		this.input = input;
@@ -164,7 +164,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 		ILabelProvider labelProvider = dialogLabelProvider != null ? dialogLabelProvider : getLabelProvider();
 
 		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, contentProvider,
-			labelProvider, null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
+			labelProvider, null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null, false);
 
 
 		dialog.setOptionalMessage(optionalMessage);

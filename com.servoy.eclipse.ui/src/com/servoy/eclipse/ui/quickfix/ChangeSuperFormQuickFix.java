@@ -72,7 +72,7 @@ public class ChangeSuperFormQuickFix implements IMarkerResolution
 			new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()), null,
 			new LeafnodesSelectionFilter(contentProvider), SWT.SINGLE, "Select parent form",
 			new FormContentProvider.FormListOptions(FormContentProvider.FormListOptions.FormListType.HIERARCHY, null, true, false, false, false, null),
-			StructuredSelection.EMPTY, true, null, null);
+			StructuredSelection.EMPTY, true, null, null, false);
 
 		if (dlg.open() == Window.OK)
 		{

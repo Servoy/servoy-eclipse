@@ -143,7 +143,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 					final TreeSelectDialog dialog = new TreeSelectDialog(UIUtils.getActiveShell(), true, false, TreePatternFilter.FILTER_LEAFS,
 						tableContentProvider, DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY, null, new LeafnodesSelectionFilter(tableContentProvider),
 						SWT.NONE, "Select I18N table", new TableContentProvider.TableListOptions(TableListOptions.TableListType.I18N, true), null, false,
-						"serverTableDialog", null);
+						"serverTableDialog", null, false);
 					dialog.setOptionsAreaFactory(new IControlFactory()
 					{
 						public Control createControl(Composite composite)
