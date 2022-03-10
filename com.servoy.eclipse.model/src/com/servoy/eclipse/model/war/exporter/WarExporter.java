@@ -1374,6 +1374,7 @@ public class WarExporter
 							List<String> classPath = JarManager.getManifestClassPath(pluginFile.toURI().toURL());
 							if (!classPath.isEmpty())
 							{
+								ServoyLog.logInfo("Plugin " + pluginName + ", Copy classpath " + classPath);
 								copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, classPath);
 							}
 						}
@@ -1853,6 +1854,7 @@ public class WarExporter
 				List<String> jarNames = new ArrayList<String>();
 				List<String> jnlpNames = new ArrayList<String>();
 				parseJarNames(document.getChildNodes(), jarNames, jnlpNames);
+				ServoyLog.logInfo("Plugin jnlp " + pluginJnlpName + ", Copy jars " + jarNames);
 				copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, jarNames);
 
 				for (String jnlpName : jnlpNames)
