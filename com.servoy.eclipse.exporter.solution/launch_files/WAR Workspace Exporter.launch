@@ -385,15 +385,12 @@
         <setEntry value="com.servoy.eclipse.profiler@default:default"/>
         <setEntry value="com.servoy.eclipse.ui.tweaks@default:default"/>
         <setEntry value="com.servoy.eclipse.ui@default:default"/>
-        <setEntry value="de.inetsoftware.jlessc@default:default"/>
         <setEntry value="j2db_documentation@default:default"/>
         <setEntry value="j2db_log4j@default:true"/>
-        <setEntry value="j2db_runtime@default:default"/>
         <setEntry value="j2db_server@default:default"/>
         <setEntry value="j2db_tunnel@default:default"/>
         <setEntry value="org.apache.tomcat@default:default"/>
         <setEntry value="org.eclipse.dltk.javascript.rhino@default:default"/>
-        <setEntry value="org.eclipse.dltk@default:default"/>
         <setEntry value="sablo@default:default"/>
         <setEntry value="servoy_base@default:default"/>
         <setEntry value="servoy_debug@default:default"/>

@@ -1653,7 +1653,10 @@ public class SolutionExplorerTreeContentProvider
 				{
 					try
 					{
-						return ((IServerInternal)un.getRealObject()).getTableNames(true).size() > 0;
+						IServerInternal server = ((IServerInternal)un.getRealObject());
+						// if tables are not loaded yet, do not load them here
+						if (!server.isTableListLoadedAsync()) return true;
+						return server.getTableNames(true).size() > 0;
 					}
 					catch (RepositoryException e)
 					{

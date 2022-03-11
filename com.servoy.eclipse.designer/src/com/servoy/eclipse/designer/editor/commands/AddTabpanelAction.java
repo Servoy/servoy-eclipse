@@ -36,7 +36,7 @@ import com.servoy.j2db.persistence.IRepository;
 
 /**
  * Action to add a tab pabel in form designer, show form selection dialog
- * 
+ *
  * @author rgansevles
  *
  */
@@ -76,7 +76,7 @@ public class AddTabpanelAction extends DesignerToolbarAction
 		};
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, true, TreePatternFilter.FILTER_LEAFS, contentProvider,
 			new SolutionContextDelegateLabelProvider(RelatedFormsLabelProvider.INSTANCE, form), null, new LeafnodesSelectionFilter(contentProvider),
-			SWT.MULTI, getDialogTitle(), form, null, false, TreeSelectDialog.TAB_DIALOG, null);
+			SWT.MULTI, getDialogTitle(), form, null, false, TreeSelectDialog.TAB_DIALOG, null, false);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

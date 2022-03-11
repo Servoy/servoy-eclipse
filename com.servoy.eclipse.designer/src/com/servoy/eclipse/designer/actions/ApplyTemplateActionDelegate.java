@@ -106,7 +106,8 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 					}
 					else return element.toString();
 				}
-			}, null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false, TreeSelectDialog.TEMPLATE_DIALOG, null);
+			}, null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false, TreeSelectDialog.TEMPLATE_DIALOG, null,
+				false);
 			dialog.open();
 
 			if (dialog.getReturnCode() == Window.CANCEL)

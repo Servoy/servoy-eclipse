@@ -119,7 +119,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										return ((TemplateElementHolder)element).template.getName();
 									};
 								}, null, null, SWT.NONE, "Select template",
-								DesignerUtil.getResponsiveLayoutTemplates((AbstractContainer)persistContext.getPersist()), null, false, "TemplateDialog", null);
+								DesignerUtil.getResponsiveLayoutTemplates((AbstractContainer)persistContext.getPersist()), null, false, "TemplateDialog", null,
+								false);
 							if (dialog.open() == Window.CANCEL)
 							{
 								return null;
@@ -170,7 +171,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 						});
 						TreeSelectDialog dialog = new TreeSelectDialog(activeEditor.getEditorSite().getShell(), true, true, TreePatternFilter.FILTER_LEAFS,
 							FlatTreeContentProvider.INSTANCE, labelProvider, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]),
-							null, false, "SpecDialog", null);
+							null, false, "SpecDialog", null, false);
 						if (dialog.open() == Window.CANCEL)
 						{
 							return null;
