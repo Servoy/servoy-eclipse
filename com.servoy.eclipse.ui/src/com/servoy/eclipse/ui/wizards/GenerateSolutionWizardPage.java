@@ -66,6 +66,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -474,11 +475,16 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			Label solutionTypeLabel = new Label(this, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
-			String[] solutionTypeNames = new String[SolutionMetaData.solutionTypeNames.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypeNames, 1, solutionTypeNames, 0, solutionTypeNames.length);
+			boolean showLegacyTypes = new DesignerPreferences().getShowLegacySolutionTypes();
+
+			String[] solutionTypeNames = new String[showLegacyTypes ? SolutionMetaData.solutionTypeNames.length - 1
+				: SolutionMetaData.currentSolutionTypeNames.length - 1];
+			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypeNames : SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
+				solutionTypeNames.length);
+			solutionTypeComboValues = new int[showLegacyTypes ? SolutionMetaData.solutionTypes.length - 1 : SolutionMetaData.currentSolutionTypes.length - 1];
+			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypes : SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
+				solutionTypeComboValues.length);
 			solutionTypeCombo.setItems(solutionTypeNames);
-			solutionTypeComboValues = new int[SolutionMetaData.solutionTypes.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypes, 1, solutionTypeComboValues, 0, solutionTypeComboValues.length);
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
 				? getDialogSettings().getInt(wizard.getSettingsPrefix() + SOLUTION_TYPE) : SolutionMetaData.NG_CLIENT_ONLY;
 			solutionTypeCombo.select(
