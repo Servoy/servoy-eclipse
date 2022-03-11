@@ -2715,14 +2715,13 @@ public class TypeCreator extends TypeCache
 		{
 			String datasource = ds;
 			if (datasource == null) datasource = "<no datasource>";
-			String description = null;
-			descriptions.get(datasource);
+			String description = descriptions.get(datasource);
 			if (description == null)
 			{
 				description = "Form based on datasource: " + datasource;
 				descriptions.putIfAbsent(datasource, description);
 			}
-			if (comment != null) description += "<br/> Comment: " + comment;
+			if (comment != null) return description + "<br/> Comment: " + comment;
 			return description;
 		}
 
