@@ -16,8 +16,11 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import static com.servoy.j2db.persistence.SortingNullprecedence.ragtestDefault;
+
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.SortingNullprecedence;
 
 /**
  *
@@ -334,5 +337,28 @@ public class ColumnInfoBean
 		columnInfo.flagChanged();
 	}
 
+	public boolean getSortIgnorecase()
+	{
+		return columnInfo.isSortIgnorecase();
+	}
+
+	public void setSortIgnorecase(boolean sortIgnorecase)
+	{
+		columnInfo.setSortIgnorecase(sortIgnorecase);
+		columnInfo.flagChanged();
+	}
+
+	public String getSortingNullprecedence()
+	{
+		SortingNullprecedence sortingNullprecedence = columnInfo.getSortingNullprecedence();
+		return (sortingNullprecedence == null ? ragtestDefault : sortingNullprecedence).display();
+	}
+
+	public void setSortingNullprecedence(String sortingNullprecedenceDisplay)
+	{
+		SortingNullprecedence sortingNullprecedence = SortingNullprecedence.fromDisplay(sortingNullprecedenceDisplay).orElse(null);
+		columnInfo.setSortingNullprecedence(sortingNullprecedence == ragtestDefault ? null : sortingNullprecedence);
+		columnInfo.flagChanged();
+	}
 
 }

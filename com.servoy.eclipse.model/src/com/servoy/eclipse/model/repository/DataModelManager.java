@@ -233,8 +233,10 @@ public class DataModelManager implements IColumnInfoManager
 		IFile file = getDBIFile(t.getServerName(), t.getName());
 		if (file.exists())
 		{
-			try (InputStream is = file.getContents(true))
+			InputStream is = null;
+			try
 			{
+				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
@@ -242,11 +244,31 @@ public class DataModelManager implements IColumnInfoManager
 					deserializeTable(s, t, json_table);
 				}
 			}
-			catch (Exception e)
+			catch (JSONException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw e instanceof RepositoryException ? (RepositoryException)e : new RepositoryException(e);
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw new RepositoryException(e);
+			}
+			catch (CoreException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw new RepositoryException(e);
+			}
+			catch (RepositoryException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw e;
+			}
+			finally
+			{
+				if (is != null)
+				{
+					Utils.closeInputStream(is);
+					is = null;
+				}
 			}
 		}
 		else
@@ -309,7 +331,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (errMsg != null)
 				{
 					removeErrorMarker(server.getName(), tableName);
-					addDeserializeErrorMarker(server.getName(), tableName, errMsg);
+					addTableDeserializeErrorMarker(server.getName(), tableName, errMsg);
 				}
 				if (is != null)
 				{
@@ -559,7 +581,7 @@ public class DataModelManager implements IColumnInfoManager
 			}
 			catch (Exception e)
 			{
-				// RAGTEST 	addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				addServerDeserializeErrorMarker(serverName, e.getMessage());
 				throw new RepositoryException(e);
 			}
 		}
@@ -638,13 +660,13 @@ public class DataModelManager implements IColumnInfoManager
 		catch (JSONException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+			addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (CoreException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+			addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (UnsupportedEncodingException e)
@@ -743,31 +765,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (c != null)
 				{
 					existingColumnInfo++;
-					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
-					ColumnInfo ci = new ColumnInfo(element_id, true);
-					ci.setAutoEnterType(cid.autoEnterType);
-					ci.setAutoEnterSubType(cid.autoEnterSubType);
-					ci.setSequenceStepSize(cid.sequenceStepSize);
-					ci.setPreSequenceChars(cid.preSequenceChars);
-					ci.setPostSequenceChars(cid.postSequenceChars);
-					ci.setDefaultValue(cid.defaultValue);
-					ci.setLookupValue(cid.lookupValue);
-					ci.setDatabaseSequenceName(cid.databaseSequenceName);
-					ci.setTitleText(cid.titleText);
-					ci.setDescription(cid.description);
-					ci.setForeignType(cid.foreignType);
-					ci.setConverterName(cid.converterName);
-					ci.setConverterProperties(cid.converterProperties);
-					ci.setValidatorProperties(cid.validatorProperties);
-					ci.setValidatorName(cid.validatorName);
-					ci.setDefaultFormat(cid.defaultFormat);
-					ci.setElementTemplateProperties(cid.elementTemplateProperties);
-					ci.setDataProviderID(cid.dataProviderID);
-					ci.setContainsMetaData(cid.containsMetaData);
-					ci.setConfiguredColumnType(cid.columnType);
-					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
-					ci.setFlags(cid.flags);
-					c.setColumnInfo(ci);
+					DatabaseUtils.updateColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, cid);
 					changedColumns.add(c);
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
@@ -921,6 +919,8 @@ public class DataModelManager implements IColumnInfoManager
 			cid.dataProviderID = ci.getDataProviderID();
 			cid.containsMetaData = ci.getContainsMetaData();
 			cid.elementTemplateProperties = ci.getElementTemplateProperties();
+			cid.sortIgnorecase = ci.isSortIgnorecase();
+			cid.sortingNullprecedence = ci.getSortingNullprecedence();
 		}
 		else if (!onlyStoredColumns)
 		{
@@ -991,6 +991,11 @@ public class DataModelManager implements IColumnInfoManager
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
 			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
 			obj.putOpt(ColumnInfoDef.CONTAINS_META_DATA, cid.containsMetaData);
+			obj.put(ColumnInfoDef.SORT_IGNORECASE, cid.sortIgnorecase);
+			if (cid.sortingNullprecedence != null)
+			{
+				obj.put(ColumnInfoDef.SORTING_NULLPRECEDENCE, cid.sortingNullprecedence.name());
+			}
 			carray.put(obj);
 		}
 		tobj.put(TableDef.PROP_COLUMNS, carray);
@@ -1206,49 +1211,53 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
-	private void addDeserializeErrorMarker(String serverName, String tableName, final String message)
+	private void addTableDeserializeErrorMarker(String serverName, String tableName, String message)
 	{
-		addDeserializeErrorMarker(serverName, tableName, message, false);
+		addTableDeserializeErrorMarker(serverName, tableName, message, false);
 	}
 
-	private void addDeserializeErrorMarker(String serverName, String tableName, final String message, boolean onlyRestoreMarker)
+	private void addTableDeserializeErrorMarker(String serverName, String tableName, String message, boolean onlyRestoreMarker)
 	{
 		if (!onlyRestoreMarker) differences.addDifference(new TableDifference(serverName, tableName, message));
-		final IFile file = getDBIFile(serverName, tableName);
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
-			{
-				if (file.exists())
-				{
-					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-					// the project might have disappeared before this job was started... (delete)
-					// find out where the error occurred if possible...
-					int charNo = -1;
-					int idx = message.indexOf("character");
-					if (idx >= 0)
-					{
-						StringTokenizer st = new StringTokenizer(message.substring(idx + 9), " ");
-						if (st.hasMoreTokens())
-						{
-							String charNoString = st.nextToken();
-							try
-							{
-								charNo = Integer.parseInt(charNoString);
-							}
-							catch (NumberFormatException e)
-							{
-								// cannot fine character number... this is not a tragedy
-							}
-						}
-					}
+		updateProblemMarkers(() -> addDBIBadDBInfoMarker(getDBIFile(serverName, tableName), message));
+	}
 
-					// we have an active solution with a resources project but with invalid security info; add problem marker
-					ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
-					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file");
+	private void addServerDeserializeErrorMarker(String serverName, String message)
+	{
+		updateProblemMarkers(() -> addDBIBadDBInfoMarker(getServerDBIFile(serverName), message));
+	}
+
+
+	private static void addDBIBadDBInfoMarker(IFile file, String message)
+	{
+		if (file.exists())
+		{
+			// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+			// the project might have disappeared before this job was started... (delete)
+			// find out where the error occurred if possible...
+			int charNo = -1;
+			int idx = message.indexOf("character");
+			if (idx >= 0)
+			{
+				StringTokenizer st = new StringTokenizer(message.substring(idx + 9), " ");
+				if (st.hasMoreTokens())
+				{
+					String charNoString = st.nextToken();
+					try
+					{
+						charNo = Integer.parseInt(charNoString);
+					}
+					catch (NumberFormatException e)
+					{
+						// cannot fine character number... this is not a tragedy
+					}
 				}
 			}
-		});
+
+			// we have an active solution with a resources project but with invalid security info; add problem marker
+			ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
+			ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file");
+		}
 	}
 
 	private static int getErrorSeverity(String name)
@@ -1901,7 +1910,7 @@ public class DataModelManager implements IColumnInfoManager
 	@Override
 	public void setTableColumnInfos(ITable t, HashMap<String, ColumnInfoDef> columnInfoDefinitions) throws RepositoryException
 	{
-		DatabaseUtils.updateTableColumnInfos(() -> ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), t, columnInfoDefinitions);
+		DatabaseUtils.updateTableColumnInfos(ApplicationServerRegistry.get().getDeveloperRepository(), t, columnInfoDefinitions);
 	}
 
 	/**
@@ -1927,7 +1936,7 @@ public class DataModelManager implements IColumnInfoManager
 		for (TableDifference difference : differences.getDifferences())
 		{
 			if (difference.getType() == TableDifference.DESERIALIZE_PROBLEM)
-				addDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
+				addTableDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
 			else addDifferenceMarker(difference, true);
 		}
 	}

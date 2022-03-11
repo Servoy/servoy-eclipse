@@ -22,8 +22,6 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoObservables;
 import org.eclipse.core.databinding.conversion.Converter;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -35,8 +33,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -46,9 +45,7 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
@@ -79,6 +76,7 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SortingNullprecedence;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -97,6 +95,8 @@ public class ColumnDetailsComposite extends Composite
 	private final Text titleText;
 	private final Text descriptionText;
 	private final Button suggestForeignTypeButton;
+	private final Button sortIgnoringcaseCheckBox;
+	private final CCombo sortNullprecedenceCombo;
 	private final Button excludedCheckBox;
 	private final Button uuidCheckBox;
 	private final Button tenantCheckBox;
@@ -121,21 +121,12 @@ public class ColumnDetailsComposite extends Composite
 		super(parent, style);
 		this.isViewFoundsetTable = isViewFoundsetTable;
 
-		Label titleLabel;
-		titleLabel = new Label(this, SWT.NONE);
-		titleLabel.setText("Title");
-
-		Label defaultFormatLabel;
-		defaultFormatLabel = new Label(this, SWT.NONE);
-		defaultFormatLabel.setText("Default format");
-
-		Label foreignTypeLabel;
-		foreignTypeLabel = new Label(this, SWT.NONE);
-		foreignTypeLabel.setText("Foreign type");
-
-		Label descriptionLabel;
-		descriptionLabel = new Label(this, SWT.NONE);
-		descriptionLabel.setText("Description");
+		Label titleLabel = label(this, "Title");
+		Label defaultFormatLabel = label(this, "Default format");
+		Label foreignTypeLabel = label(this, "Foreign type");
+		Label sortingLabel = label(this, "Sorting");
+		Label flagsLabel = label(this, "Flags");
+		Label descriptionLabel = label(this, "Description");
 
 		descriptionText = new Text(this, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 
@@ -149,20 +140,16 @@ public class ColumnDetailsComposite extends Composite
 		Button titleButton = new Button(titleComposite, SWT.PUSH);
 		titleButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 		titleButton.setText("...");
-		titleButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
+		titleButton.addListener(SWT.Selection, event -> {
+			if (column != null)
 			{
-				if (column != null)
+				TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, null, column.getTable(), titleText.getText(), "Edit title",
+					Activator.getDefault().getDesignClient(), false);
+				dialog.open();
+				if (dialog.getReturnCode() != Window.CANCEL)
 				{
-					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getShell(), null, null, column.getTable(), titleText.getText(), "Edit title",
-						Activator.getDefault().getDesignClient(), false);
-					dialog.open();
-					if (dialog.getReturnCode() != Window.CANCEL)
-					{
-						String value = (String)dialog.getValue();
-						titleText.setText(value == null ? "" : value); // TODO: use label provider to hide json format
-					}
+					String value = (String)dialog.getValue();
+					titleText.setText(value == null ? "" : value); // TODO: use label provider to hide json format
 				}
 			}
 		});
@@ -177,21 +164,17 @@ public class ColumnDetailsComposite extends Composite
 		Button formatButton = new Button(formatComposite, SWT.PUSH);
 		formatButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 		formatButton.setText("...");
-		formatButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
+		formatButton.addListener(SWT.Selection, event -> {
+			if (column != null)
 			{
-				if (column != null)
+				// base the format dialog on the type of the default converter
+				ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, column, Activator.getDefault().getDesignClient());
+				FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), componentFormat.dpType);
+				fd.open();
+				if (fd.getReturnCode() != Window.CANCEL)
 				{
-					// base the format dialog on the type of the default converter
-					ComponentFormat componentFormat = ComponentFormat.getComponentFormat(null, column, Activator.getDefault().getDesignClient());
-					FormatDialog fd = new FormatDialog(getShell(), defaultFormat.getText(), componentFormat.dpType);
-					fd.open();
-					if (fd.getReturnCode() != Window.CANCEL)
-					{
-						String property = fd.getFormatString();
-						defaultFormat.setText(property == null ? "" : property); // TODO: use label provider to hide json format
-					}
+					String property = fd.getFormatString();
+					defaultFormat.setText(property == null ? "" : property); // TODO: use label provider to hide json format
 				}
 			}
 		});
@@ -209,16 +192,12 @@ public class ColumnDetailsComposite extends Composite
 
 
 			suggestForeignTypeButton.setText("Suggest...");
-			suggestForeignTypeButton.addListener(SWT.Selection, new Listener()
-			{
-				public void handleEvent(Event event)
-				{
-					IStructuredSelection selection = StructuredSelection.EMPTY;
-					suggestForeignTypesWizard.init(PlatformUI.getWorkbench(), selection);
-					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), suggestForeignTypesWizard);
-					dialog.create();
-					dialog.open();
-				}
+			suggestForeignTypeButton.addListener(SWT.Selection, event -> {
+				IStructuredSelection selection = StructuredSelection.EMPTY;
+				suggestForeignTypesWizard.init(PlatformUI.getWorkbench(), selection);
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), suggestForeignTypesWizard);
+				dialog.create();
+				dialog.open();
 			});
 		}
 		else
@@ -228,19 +207,23 @@ public class ColumnDetailsComposite extends Composite
 			suggestForeignTypeButton.setVisible(false);
 		}
 
-		Label flagsLabel;
-		flagsLabel = new Label(this, SWT.NONE);
-		flagsLabel.setText("Flags");
+		sortIgnoringcaseCheckBox = checkbox(this, "ignoring case");
+		Label sortNullprecedenceLabel = label(this, "null-precedence");
 
-		excludedCheckBox = new Button(this, SWT.CHECK);
-		uuidCheckBox = new Button(this, SWT.CHECK);
-		tenantCheckBox = new Button(this, SWT.CHECK);
+		sortNullprecedenceCombo = new CCombo(this, SWT.BORDER | SWT.READ_ONLY);
+		sortNullprecedenceCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		sortNullprecedenceCombo.add(SortingNullprecedence.ragtestDefault.display());
+		sortNullprecedenceCombo.add(SortingNullprecedence.ascNullsFirst.display());
+		sortNullprecedenceCombo.add(SortingNullprecedence.ascNullsLast.display());
+
+		excludedCheckBox = checkbox(this, "excluded");
+		uuidCheckBox = checkbox(this, "UUID");
+		tenantCheckBox = checkbox(this, "Tenant");
 
 		if (!isViewFoundsetTable)
 		{
-			tenantCheckBox.addSelectionListener(new SelectionListener()
+			tenantCheckBox.addSelectionListener(new SelectionAdapter()
 			{
-
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
@@ -256,12 +239,6 @@ public class ColumnDetailsComposite extends Composite
 						}
 					}
 				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e)
-				{
-
-				}
 			});
 		}
 		else
@@ -270,58 +247,62 @@ public class ColumnDetailsComposite extends Composite
 			tenantCheckBox.setVisible(false);
 		}
 
-		uuidCheckBox.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
+		uuidCheckBox.addListener(SWT.Selection, event -> {
+			if (uuidCheckBox.getSelection())
 			{
-				if (uuidCheckBox.getSelection())
+				int length = column.getConfiguredColumnType().getLength();
+				int datatype = column.getConfiguredColumnType().getSqlType();
+				// use converted type if available
+				ITypedColumnConverter columnConverter = getColumnConverter(column);
+				if (columnConverter != null)
 				{
-					int length = column.getConfiguredColumnType().getLength();
-					int datatype = column.getConfiguredColumnType().getSqlType();
-					// use converted type if available
-					ITypedColumnConverter columnConverter = getColumnConverter(column);
-					if (columnConverter != null)
+					try
 					{
-						try
+						int convType = columnConverter.getToObjectType(
+							ComponentFactory.parseJSonProperties(column.getColumnInfo().getConverterProperties()));
+						if (convType != Integer.MAX_VALUE)
 						{
-							int convType = columnConverter.getToObjectType(
-								ComponentFactory.<String> parseJSonProperties(column.getColumnInfo().getConverterProperties()));
-							if (convType != Integer.MAX_VALUE)
-							{
-								length = 0;
-								datatype = convType;
-							}
-						}
-						catch (IOException e)
-						{
-							Debug.error(e);
+							length = 0;
+							datatype = convType;
 						}
 					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
+				}
 
-					boolean compatibleForUUID = false;
-					switch (Column.mapToDefaultType(datatype))
-					{
-						case IColumnTypes.MEDIA :
-							compatibleForUUID = length == 0 || length >= 16;
-							break;
-						case IColumnTypes.TEXT :
-							compatibleForUUID = length == 0 || length >= 36;
-							break;
-					}
-					if (!compatibleForUUID)
-					{
-						UIUtils.reportWarning("Warning", "The column type and/or length are not compatible with UUID (MEDIA:16 or TEXT:36).");
-						uuidCheckBox.setSelection(false);
-					}
+				boolean compatibleForUUID = false;
+				switch (Column.mapToDefaultType(datatype))
+				{
+					case IColumnTypes.MEDIA :
+						compatibleForUUID = length == 0 || length >= 16;
+						break;
+					case IColumnTypes.TEXT :
+						compatibleForUUID = length == 0 || length >= 36;
+						break;
+				}
+				if (!compatibleForUUID)
+				{
+					UIUtils.reportWarning("Warning", "The column type and/or length are not compatible with UUID (MEDIA:16 or TEXT:36).");
+					uuidCheckBox.setSelection(false);
 				}
 			}
 		});
 
-		excludedCheckBox.setText("excluded");
-		uuidCheckBox.setText("UUID");
-		tenantCheckBox.setText("Tenant");
+		GroupLayout groupLayout = new GroupLayout(this);
 
-		final GroupLayout groupLayout = new GroupLayout(this);
+		SequentialGroup foreignTypeHorizontalGroup = isViewFoundsetTable ? groupLayout.createSequentialGroup().addContainerGap()
+			: groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).addPreferredGap(
+				LayoutStyle.RELATED).add(suggestForeignTypeButton);
+
+		SequentialGroup sortingHorizontalGroup = groupLayout.createSequentialGroup()
+			.add(sortIgnoringcaseCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.UNRELATED)
+			.add(sortNullprecedenceCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED)
+			.add(sortNullprecedenceLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED);
 
 		SequentialGroup flagsHorizontalGroup = groupLayout.createSequentialGroup();
 		if (!isViewFoundsetTable)
@@ -336,21 +317,20 @@ public class ColumnDetailsComposite extends Composite
 			flagsHorizontalGroup.add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
 		}
 
-		SequentialGroup foreignTypeHorizontalGroup = isViewFoundsetTable ? groupLayout.createSequentialGroup().addContainerGap()
-			: groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(suggestForeignTypeButton);
 
 		ParallelGroup labelsHorizontalGroup = groupLayout.createParallelGroup(GroupLayout.LEADING).
-		//add default format label;
+		// Title
 			add(titleLabel).
-			//add title label;
+			// Default format
 			add(defaultFormatLabel);
 		if (!isViewFoundsetTable)
 		{
-			//add foreign type label;
+			// Foreign type
 			labelsHorizontalGroup.add(foreignTypeLabel);
 		}
-		//add flags label
+		// Sorting
+		labelsHorizontalGroup.add(sortingLabel);
+		// Flags
 		labelsHorizontalGroup.add(flagsLabel);
 
 		groupLayout.setHorizontalGroup(
@@ -372,21 +352,18 @@ public class ColumnDetailsComposite extends Composite
 							add(
 								//start parallel group
 								groupLayout.createParallelGroup(GroupLayout.LEADING).
-								//add the title text-box;
+								// Title
 									add(titleComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-									//add the default format combo-box;
+									// Default format
 									add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-									//add the foreign-type combo-box
+									// Foreign type
 									add(foreignTypeHorizontalGroup).
-									//add other flags combo-box
-									add(
-										//add the flags
-										flagsHorizontalGroup
-
-								//end adding the flags
-								)
-						//-- end group layout
-						)
+									// Sorting
+									add(sortingHorizontalGroup).
+									// Flags
+									add(flagsHorizontalGroup)
+							//-- end group layout
+							)
 					//-- end group
 					).add(
 						//create a sequential group
@@ -395,8 +372,8 @@ public class ColumnDetailsComposite extends Composite
 							add(descriptionLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).
 							// add
 							add(450, 450, 450)
-				//end sequential step
-				)).
+					//end sequential step
+					)).
 				//add a container gap
 				addContainerGap());
 
@@ -415,14 +392,60 @@ public class ColumnDetailsComposite extends Composite
 				//suggest button for foreign type
 				add(suggestForeignTypeButton, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE);
 		}
-		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
-			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(titleLabel).add(titleComposite)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(defaultFormatLabel).add(formatComposite)).addPreferredGap(
-					LayoutStyle.RELATED).add(foreignTypeVerticalGroup).addPreferredGap(LayoutStyle.RELATED).add(flagsVerticalGroup).addPreferredGap(
-						LayoutStyle.UNRELATED).add(descriptionLabel).addPreferredGap(LayoutStyle.RELATED).add(descriptionText, 100, GroupLayout.PREFERRED_SIZE,
-							Integer.MAX_VALUE).addContainerGap());
+
+		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap()
+			// Title
+			.add(groupLayout.createParallelGroup(GroupLayout.CENTER, false)
+				.add(titleLabel).add(titleComposite))
+
+			.addPreferredGap(LayoutStyle.RELATED)
+
+			// Default format
+			.add(groupLayout.createParallelGroup(GroupLayout.CENTER, false)
+				.add(defaultFormatLabel).add(formatComposite))
+
+			.addPreferredGap(LayoutStyle.RELATED)
+
+			// Foreign type
+			.add(foreignTypeVerticalGroup)
+
+			.addPreferredGap(LayoutStyle.RELATED)
+
+			// Sorting
+			.add(groupLayout.createParallelGroup(GroupLayout.CENTER, false)
+				.add(sortingLabel)
+				.add(sortIgnoringcaseCheckBox, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
+				.add(sortNullprecedenceCombo, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
+				.add(sortNullprecedenceLabel, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE))
+
+			.addPreferredGap(LayoutStyle.RELATED)
+
+			// Flags
+			.add(flagsVerticalGroup)
+
+			.addPreferredGap(LayoutStyle.UNRELATED)
+
+			// Description
+			.add(descriptionLabel).addPreferredGap(LayoutStyle.RELATED)
+			.add(descriptionText, 100, GroupLayout.PREFERRED_SIZE, Integer.MAX_VALUE)
+
+			.addContainerGap());
 
 		setLayout(groupLayout);
+	}
+
+	private static Label label(Composite parent, String text)
+	{
+		Label label = new Label(parent, SWT.NONE);
+		label.setText(text);
+		return label;
+	}
+
+	private static Button checkbox(Composite parent, String text)
+	{
+		Button button = new Button(parent, SWT.CHECK);
+		button.setText(text);
+		return button;
 	}
 
 	private static ITypedColumnConverter getColumnConverter(Column column)
@@ -450,10 +473,10 @@ public class ColumnDetailsComposite extends Composite
 		bindingContext.updateTargets();
 	}
 
-	void initDataBindings(final Column c)
+	void initDataBindings(Column col)
 	{
-		this.column = c;
-		dataSource = c.getTable().getDataSource();
+		this.column = col;
+		dataSource = column.getTable().getDataSource();
 
 		bindingContext = BindingHelper.dispose(bindingContext);
 
@@ -463,18 +486,14 @@ public class ColumnDetailsComposite extends Composite
 			if (!isViewFoundsetTable)
 			{
 				foreignTypeTreeSelect.setInput(
-					new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true, c.getTable().getServerName()));
+					new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true, column.getTable().getServerName()));
 			}
 
-			excludedCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.EXCLUDED_COLUMN));
-			uuidCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN));
-			tenantCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN));
-
-			if (c.getColumnInfo() != null && (c.getColumnInfo().getDefaultFormat() == null || c.getColumnInfo().getDefaultFormat().equals("")))
+			if (column.getColumnInfo() != null && (column.getColumnInfo().getDefaultFormat() == null || column.getColumnInfo().getDefaultFormat().equals("")))
 			{
 				this.defaultFormat.setText("");
 			}
-			else if (c.getColumnInfo() == null)
+			else if (column.getColumnInfo() == null)
 			{
 				this.defaultFormat.setText("");
 			}
@@ -484,7 +503,7 @@ public class ColumnDetailsComposite extends Composite
 			ServoyLog.logError(e);
 		}
 
-		ColumnInfoBean columnInfoBean = new ColumnInfoBean(c.getColumnInfo());
+		ColumnInfoBean columnInfoBean = new ColumnInfoBean(column.getColumnInfo());
 
 		IObservableValue getCIDescriptionObserveValue = PojoObservables.observeValue(columnInfoBean, "description");
 		IObservableValue descriptionTextObserveWidget = SWTObservables.observeText(descriptionText, SWT.Modify);
@@ -499,17 +518,21 @@ public class ColumnDetailsComposite extends Composite
 		IObservableValue foreignTypeTextObserveWidget = new TreeSelectObservableValue(foreignTypeTreeSelect, IDataSourceWrapper.class);
 
 		//TODO: put the hardcoded strings in a list;
-		IObservableValue getCIOtherFlagsObserveValue1 = PojoObservables.observeValue(columnInfoBean, "excludedFlag");
-		IObservableValue getCIOtherFlagsObserveValue2 = PojoObservables.observeValue(columnInfoBean, "uuidFlag");
-		IObservableValue getCIOtherFlagsObserveValue3 = PojoObservables.observeValue(columnInfoBean, "tenantFlag");
+		IObservableValue getCISortIgnorecaseObservableValue = PojoObservables.observeValue(columnInfoBean, "sortIgnorecase");
+		IObservableValue getCISortingNullprecedenceObservableValue = PojoObservables.observeValue(columnInfoBean, "sortingNullprecedence");
+		IObservableValue getCIFlagsExcludedObserveValue = PojoObservables.observeValue(columnInfoBean, "excludedFlag");
+		IObservableValue getCIFlagsUuidObserveValue = PojoObservables.observeValue(columnInfoBean, "uuidFlag");
+		IObservableValue getCIFlagsTenantObserveValue = PojoObservables.observeValue(columnInfoBean, "tenantFlag");
 
+		IObservableValue sortIgnoringcaseCheckBoxObserveWidget = SWTObservables.observeSelection(sortIgnoringcaseCheckBox);
+		IObservableValue sortingNullprecedenceComboObserveWidget = SWTObservables.observeSelection(sortNullprecedenceCombo);
 		IObservableValue uuidOtherFlagsTextObserveWidget = SWTObservables.observeSelection(uuidCheckBox);
 		IObservableValue excludedOtherFlagsTextObserveWidget = SWTObservables.observeSelection(excludedCheckBox);
 		IObservableValue tenantOtherFlagsTextObserveWidget = SWTObservables.observeSelection(tenantCheckBox);
 
 		if (listener != null)
 		{
-			getCIOtherFlagsObserveValue1.addValueChangeListener(listener);
+			getCIFlagsExcludedObserveValue.addValueChangeListener(listener);
 		}
 		bindingContext = new DataBindingContext();
 
@@ -521,34 +544,29 @@ public class ColumnDetailsComposite extends Composite
 			new UpdateValueStrategy().setAfterGetValidator(new NotSameValidator(getCIDefaultFormatObserveValue)), null);
 		bindingContext.bindValue(foreignTypeTextObserveWidget, getCIForeignTypeObserveValue,
 			new UpdateValueStrategy().setConverter(TableWrapper2ForeignTypeConverter.INSTANCE), new UpdateValueStrategy().setConverter(
-				new ForeignType2TableWrapperConverter(c.getTable().getServerName(), c.getTable().getTableType() == ITable.VIEW)));
+				new ForeignType2TableWrapperConverter(column.getTable().getServerName(), column.getTable().getTableType() == ITable.VIEW)));
 
-		//bind the 'excluded' checkbox;
-		bindingContext.bindValue(excludedOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue1, null, null);
+		// bind the 'sortIgnorecase' checkbox;
+		bindingContext.bindValue(sortIgnoringcaseCheckBoxObserveWidget, getCISortIgnorecaseObservableValue, null, null);
 
-		//bind the 'UUID' checkbox
-		bindingContext.bindValue(uuidOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue2, null, null);
+		// bind the 'sortingNullprecedence' combo;
+		bindingContext.bindValue(sortingNullprecedenceComboObserveWidget, getCISortingNullprecedenceObservableValue, null, null);
 
-		//bind the 'TENANT' checkbox
-		bindingContext.bindValue(tenantOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue3, null, null);
+		// bind the 'excluded' checkbox;
+		bindingContext.bindValue(excludedOtherFlagsTextObserveWidget, getCIFlagsExcludedObserveValue, null, null);
+
+		// bind the 'UUID' checkbox
+		bindingContext.bindValue(uuidOtherFlagsTextObserveWidget, getCIFlagsUuidObserveValue, null, null);
+
+		// bind the 'TENANT' checkbox
+		bindingContext.bindValue(tenantOtherFlagsTextObserveWidget, getCIFlagsTenantObserveValue, null, null);
 
 		suggestForeignTypesWizard = new SuggestForeignTypesWizard(dataSource);
-		IObservableValue foreignTypeInWizard = suggestForeignTypesWizard.setColumnToTrace(c.getTable().getName(), c.getName(), columnInfoBean.getForeignType());
+		IObservableValue foreignTypeInWizard = suggestForeignTypesWizard.setColumnToTrace(column.getTable().getName(), column.getName(),
+			columnInfoBean.getForeignType());
 		bindingContext.bindValue(foreignTypeInWizard, getCIForeignTypeObserveValue, null, null);
 
-		BindingHelper.addGlobalChangeListener(bindingContext, new IChangeListener()
-		{
-			public void handleChange(ChangeEvent event)
-			{
-				getShell().getDisplay().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						c.flagColumnInfoChanged();
-					}
-				});
-			}
-		});
+		BindingHelper.addGlobalChangeListener(bindingContext, event -> getShell().getDisplay().asyncExec(column::flagColumnInfoChanged));
 	}
 
 	private IValueChangeListener listener;

@@ -258,7 +258,8 @@ public final class DatabaseUtils
 				columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
 				columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
 				columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
-
+				columnInfo.setSortIgnorecase(columnInfoDef.sortIgnorecase);
+				columnInfo.setSortingNullprecedence(columnInfoDef.sortingNullprecedence);
 
 				if (newColumnInfoObj) column.setColumnInfo(columnInfo); // it was null before so set it in column now
 				column.setFlags(columnInfoDef.flags);

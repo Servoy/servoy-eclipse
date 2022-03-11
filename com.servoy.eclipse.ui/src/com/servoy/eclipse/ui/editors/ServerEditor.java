@@ -1494,8 +1494,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		};
 
-		// RAGTEST
-
 		IObservableValue validationTypeSelectionObserveWidget = SWTObservables.observeSelection(validationTypeField);
 		IObservableValue getValidationQueryObserveValue = serverConfigObservable.observePropertyValue("validationQuery");
 		IObservableValue validationQueryTextObserveWidget = SWTObservables.observeText(validationQueryField, SWT.Modify);
@@ -1513,7 +1511,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		IObservableValue sortIgnoreCaseButtonObserveValue = serverSettingsObservable.observePropertyValue("sortIgnorecase");
 		IObservableValue sortIgnoreCaseButtonSelectionObserveWidget = SWTObservables.observeSelection(sortIgnoreCaseButton);
 		IObservableValue sortNullprecedenceSelectionObserveWidget = SWTObservables.observeSelection(sortNullprecedenceField);
-
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);
