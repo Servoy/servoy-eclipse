@@ -270,14 +270,14 @@ public class WarExporter
 			monitor.worked(1);
 			if (exportModel.exportNG2Mode() != null)
 			{
-				monitor.subTask("Copy NGClient2 resources");
+				monitor.subTask("Copy Titanium NGClient resources");
 				try
 				{
 					copyNGClient2(tmpWarDir, monitor);
 				}
 				catch (RuntimeException e)
 				{
-					throw new ExportException("could not create/copy NGClient2 resources", e);
+					throw new ExportException("could not create/copy Titanium NGClient resources", e);
 				}
 			}
 			monitor.worked(1);
@@ -1886,14 +1886,12 @@ public class WarExporter
 				jarName = jarName.substring(index + "plugins/".length());
 			}
 			String normalizedJarName = "";
-			String version = null;
 			String[] jarNameParts = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).split("-");
 			for (String part : jarNameParts)
 			{
 				if (part.contains(".") && Character.isDigit(part.charAt(0)))
 				{
 					//it is the version number
-					version = part;
 					break;
 				}
 				else
@@ -1901,10 +1899,7 @@ public class WarExporter
 					normalizedJarName += !normalizedJarName.isEmpty() ? "-" + part : part;
 				}
 			}
-			if (version == null)
-			{
-				version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
-			}
+			String version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
 			if (version == null)
 			{
 				ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
