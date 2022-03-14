@@ -270,14 +270,14 @@ public class WarExporter
 			monitor.worked(1);
 			if (exportModel.exportNG2Mode() != null)
 			{
-				monitor.subTask("Copy NGClient2 resources");
+				monitor.subTask("Copy Titanium NGClient resources");
 				try
 				{
 					copyNGClient2(tmpWarDir, monitor);
 				}
 				catch (RuntimeException e)
 				{
-					throw new ExportException("could not create/copy NGClient2 resources", e);
+					throw new ExportException("could not create/copy Titanium NGClient resources", e);
 				}
 			}
 			monitor.worked(1);
