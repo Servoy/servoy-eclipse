@@ -88,7 +88,7 @@ export class EditorContentService {
             data.ng2components.forEach((elem) => {
                 let component = formCache.getComponent(elem.name);
                 if (component) {
-                   redrawDecorators = redrawDecorators ||  this.updateComponentProperties(component, elem );
+                   redrawDecorators = this.updateComponentProperties(component, elem ) || redrawDecorators;
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
                         redrawDecorators = true;
