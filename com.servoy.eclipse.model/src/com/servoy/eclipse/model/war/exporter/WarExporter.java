@@ -33,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -1343,6 +1344,7 @@ public class WarExporter
 		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		dependenciesVersions = new HashMap<>();
+		checkJarVersions(new File(exportModel.getServoyApplicationServerDir(), "lib"));
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
@@ -1354,6 +1356,7 @@ public class WarExporter
 				if (pluginFile.isDirectory())
 				{
 					copyDir(pluginName, pluginFile, tmpWarDir, fw, writtenFiles, true);
+					checkJarVersions(pluginFile);
 				}
 				else
 				{
@@ -1436,6 +1439,15 @@ public class WarExporter
 				}
 			}
 		}
+	}
+
+	private void checkJarVersions(File dir)
+	{
+		Set<File> libs = new HashSet<>();
+		Collections.addAll(libs, dir.listFiles((file) -> {
+			return "jar".equals(FilenameUtils.getExtension(file.getName()));
+		}));
+		libs.forEach(jar -> checkDuplicateJar(jar));
 	}
 
 	private static void copyDir(String dirName, File dirFile, File tmpWarDir, Writer propertiesWriter, Set<File> writtenFiles, boolean recursive)
@@ -1877,6 +1889,7 @@ public class WarExporter
 			// ignore everything copied from lib, those are moved to WEB-INF/lib later on
 			if (jarName.startsWith("/lib/")) continue;
 			File jarFile = new File(appServerDir, jarName);
+			if (checkDuplicateJar(jarFile)) continue;
 			File jarTargetFile = new File(tmpWarDir, jarName);
 			jarTargetFile.getParentFile().mkdirs();
 			copyFile(jarFile, jarTargetFile);
@@ -1885,46 +1898,59 @@ public class WarExporter
 			{
 				jarName = jarName.substring(index + "plugins/".length());
 			}
-			String normalizedJarName = "";
-			String[] jarNameParts = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).split("-");
-			for (String part : jarNameParts)
-			{
-				if (part.contains(".") && Character.isDigit(part.charAt(0)))
-				{
-					//it is the version number
-					break;
-				}
-				else
-				{
-					normalizedJarName += !normalizedJarName.isEmpty() ? "-" + part : part;
-				}
-			}
-			String version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
-			if (version == null)
-			{
-				ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
-				version = "0";
-			}
-			if (version.contains("-"))
-			{
-				version = version.split("-")[0];
-			}
-			if (!dependenciesVersions.containsKey(normalizedJarName))
-			{
-				dependenciesVersions.put(normalizedJarName, new TreeMap<>(VersionComparator.INSTANCE));
-			}
+			writeFileEntry(fw, jarFile, jarName, writtenFiles);
+		}
+	}
 
-			TreeMap<String, File> vFiles = dependenciesVersions.get(normalizedJarName);
-			if (!vFiles.containsKey(version))
+	private boolean checkDuplicateJar(File jarFile)
+	{
+		String jarName = "";
+		String[] jarNameParts = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).split("-");
+		for (String part : jarNameParts)
+		{
+			if (part.contains(".") && Character.isDigit(part.charAt(0)))
 			{
-				vFiles.put(version, jarFile);
+				//it is the version number
+				break;
 			}
 			else
 			{
-				continue;
+				jarName += !jarName.isEmpty() ? "-" + part : part;
 			}
-			writeFileEntry(fw, jarFile, jarName, writtenFiles);
 		}
+		String version = null;
+		try
+		{
+			version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
+		}
+		catch (MalformedURLException e)
+		{
+			ServoyLog.logError("Cannot check jar version: " + jarName, e);
+		}
+		if (version == null)
+		{
+			ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
+			version = "0";
+		}
+		if (version.contains("-"))
+		{
+			version = version.split("-")[0];
+		}
+		if (!dependenciesVersions.containsKey(jarName))
+		{
+			dependenciesVersions.put(jarName, new TreeMap<>(VersionComparator.INSTANCE));
+		}
+
+		TreeMap<String, File> vFiles = dependenciesVersions.get(jarName);
+		if (!vFiles.containsKey(version))
+		{
+			vFiles.put(version, jarFile);
+		}
+		else
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private void parseJarNames(NodeList childNodes, List<String> jarNames, List<String> jnlpNames)
