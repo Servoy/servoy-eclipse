@@ -1921,7 +1921,7 @@ public class WarExporter
 		String version = null;
 		try
 		{
-			version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
+			version = JarManager.getVersion(jarFile.toURI().toURL());
 		}
 		catch (MalformedURLException e)
 		{
@@ -1929,7 +1929,7 @@ public class WarExporter
 		}
 		if (version == null)
 		{
-			ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
+			ServoyLog.logWarning("No version number found in the manifest for plugin dependency " + jarFile.getAbsolutePath(), null);
 			version = "0";
 		}
 		if (version.contains("-"))
