@@ -7,10 +7,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.0.3740_rc</version>
+		<version>2022.3.0.3741_rc2</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2022.3.0.3740_rc</version>
+	<version>2022.3.0.3741_rc2</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>
