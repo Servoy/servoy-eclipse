@@ -375,7 +375,7 @@ public class WarExporter
 							removedJar = true;
 						}
 
-						if (messageBuilder.isEmpty())
+						if (messageBuilder.length() == 0)
 						{
 							messageBuilder.append(
 								"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
@@ -408,7 +408,7 @@ public class WarExporter
 				throw new ExportException("Error creating plugins dir", e);
 			}
 		}
-		if (!messageBuilder.isEmpty())
+		if (messageBuilder.length() > 0)
 		{
 			messageBuilder.append(
 				"\n If you use a smartclient, then the jnlp's files version could be needed to also have a version update.");
