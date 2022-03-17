@@ -679,7 +679,20 @@ public class ConfluenceGenerator
 								String description = paramDoc.getDescription();
 								description = description == null ? " ;" : description;
 								String paramType = getPublicName(paramDoc.getType());
-								if ("void".equals(paramType)) paramType = "Object";
+								if ("void".equals(paramType))
+								{
+									if (paramDoc.getJSType() != null)
+									{
+										paramType = paramDoc.getJSType();
+										start = start.e(MCR).a(NM, "tr").e(RTB).e(MCR).a(NM, "td").e(MCR).a(NM, "div").e(RTB).t(paramType).up(3).e(
+											MCR).a(NM, "td").e(RTB).t(paramDoc.getName()).up(2).e(MCR).a(NM, "td").e(RTB).t(description).up(4);
+										continue;
+									}
+									else
+									{
+										paramType = "Object";
+									}
+								}
 								start = start.e(MCR).a(NM, "tr").e(RTB).e(MCR).a(NM, "td").e(MCR).a(NM, "div").e(RTB).e(LNK).e(PG).a(CT, paramType).up(5).e(
 									MCR).a(NM, "td").e(RTB).t(paramDoc.getName()).up(2).e(MCR).a(NM, "td").e(RTB).t(description).up(4);
 							}
