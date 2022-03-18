@@ -144,10 +144,6 @@ public class OpenAdapter implements IOpenDelegate
 				ServoyLog.logError(e);
 			}
 		}
-//	RAGTEST	else if (resource instanceof ServerConfig)
-//		{
-//			EditorUtil.openServerEditor((ServerConfig)resource);
-//		}
 		else if (resource instanceof ITable)
 		{
 			EditorUtil.openTableEditor((ITable)resource);

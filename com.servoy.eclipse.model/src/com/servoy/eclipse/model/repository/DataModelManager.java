@@ -919,7 +919,7 @@ public class DataModelManager implements IColumnInfoManager
 			cid.dataProviderID = ci.getDataProviderID();
 			cid.containsMetaData = ci.getContainsMetaData();
 			cid.elementTemplateProperties = ci.getElementTemplateProperties();
-			cid.sortIgnorecase = ci.isSortIgnorecase();
+			cid.sortIgnorecase = ci.getSortIgnorecase();
 			cid.sortingNullprecedence = ci.getSortingNullprecedence();
 		}
 		else if (!onlyStoredColumns)
@@ -991,7 +991,10 @@ public class DataModelManager implements IColumnInfoManager
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
 			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
 			obj.putOpt(ColumnInfoDef.CONTAINS_META_DATA, cid.containsMetaData);
-			obj.put(ColumnInfoDef.SORT_IGNORECASE, cid.sortIgnorecase);
+			if (cid.sortIgnorecase != null)
+			{
+				obj.put(ColumnInfoDef.SORT_IGNORECASE, cid.sortIgnorecase);
+			}
 			if (cid.sortingNullprecedence != null)
 			{
 				obj.put(ColumnInfoDef.SORTING_NULLPRECEDENCE, cid.sortingNullprecedence.name());

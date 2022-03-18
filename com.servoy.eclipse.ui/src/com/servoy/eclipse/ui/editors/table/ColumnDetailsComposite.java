@@ -16,6 +16,11 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import static com.servoy.j2db.persistence.SortingNullprecedence.ascNullsFirst;
+import static com.servoy.j2db.persistence.SortingNullprecedence.ascNullsLast;
+import static com.servoy.j2db.persistence.SortingNullprecedence.ragtestDefault;
+import static java.util.Arrays.stream;
+
 import java.io.IOException;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -61,6 +66,7 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
 import com.servoy.eclipse.ui.editors.FormatDialog;
+import com.servoy.eclipse.ui.editors.table.ColumnInfoBean.BooleanTristate;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.util.BindingHelper;
@@ -76,7 +82,6 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.SortingNullprecedence;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -95,7 +100,7 @@ public class ColumnDetailsComposite extends Composite
 	private final Text titleText;
 	private final Text descriptionText;
 	private final Button suggestForeignTypeButton;
-	private final Button sortIgnoringcaseCheckBox;
+	private final CCombo sortIgnoringcaseCombo;
 	private final CCombo sortNullprecedenceCombo;
 	private final Button excludedCheckBox;
 	private final Button uuidCheckBox;
@@ -207,16 +212,13 @@ public class ColumnDetailsComposite extends Composite
 			suggestForeignTypeButton.setVisible(false);
 		}
 
-		sortIgnoringcaseCheckBox = checkbox(this, "ignoring case");
-		Label sortNullprecedenceLabel = label(this, "null-precedence");
+		Label sortIgnoringcaseComboLabel = label(this, "Ignoring case");
+		sortIgnoringcaseCombo = combo(this, (Object[])BooleanTristate.values());
+		sortIgnoringcaseCombo.setEnabled(false);
+		Label sortNullprecedenceLabel = label(this, "Null precedence");
+		sortNullprecedenceCombo = combo(this, ragtestDefault.display(), ascNullsFirst.display(), ascNullsLast.display());
 
-		sortNullprecedenceCombo = new CCombo(this, SWT.BORDER | SWT.READ_ONLY);
-		sortNullprecedenceCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
-		sortNullprecedenceCombo.add(SortingNullprecedence.ragtestDefault.display());
-		sortNullprecedenceCombo.add(SortingNullprecedence.ascNullsFirst.display());
-		sortNullprecedenceCombo.add(SortingNullprecedence.ascNullsLast.display());
-
-		excludedCheckBox = checkbox(this, "excluded");
+		excludedCheckBox = checkbox(this, "Excluded");
 		uuidCheckBox = checkbox(this, "UUID");
 		tenantCheckBox = checkbox(this, "Tenant");
 
@@ -297,7 +299,9 @@ public class ColumnDetailsComposite extends Composite
 				LayoutStyle.RELATED).add(suggestForeignTypeButton);
 
 		SequentialGroup sortingHorizontalGroup = groupLayout.createSequentialGroup()
-			.add(sortIgnoringcaseCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+			.add(sortIgnoringcaseCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED)
+			.add(sortIgnoringcaseComboLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 				LayoutStyle.UNRELATED)
 			.add(sortNullprecedenceCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
 				LayoutStyle.RELATED)
@@ -414,7 +418,8 @@ public class ColumnDetailsComposite extends Composite
 			// Sorting
 			.add(groupLayout.createParallelGroup(GroupLayout.CENTER, false)
 				.add(sortingLabel)
-				.add(sortIgnoringcaseCheckBox, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
+				.add(sortIgnoringcaseCombo, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
+				.add(sortIgnoringcaseComboLabel, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
 				.add(sortNullprecedenceCombo, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)
 				.add(sortNullprecedenceLabel, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE))
 
@@ -432,6 +437,14 @@ public class ColumnDetailsComposite extends Composite
 			.addContainerGap());
 
 		setLayout(groupLayout);
+	}
+
+	private static CCombo combo(Composite parent, Object... values)
+	{
+		CCombo combo = new CCombo(parent, SWT.BORDER | SWT.READ_ONLY);
+		combo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		stream(values).map(String::valueOf).forEach(combo::add);
+		return combo;
 	}
 
 	private static Label label(Composite parent, String text)
@@ -503,6 +516,8 @@ public class ColumnDetailsComposite extends Composite
 			ServoyLog.logError(e);
 		}
 
+		sortIgnoringcaseCombo.setEnabled(column.getDataProviderType() == IColumnTypes.TEXT);
+
 		ColumnInfoBean columnInfoBean = new ColumnInfoBean(column.getColumnInfo());
 
 		IObservableValue getCIDescriptionObserveValue = PojoObservables.observeValue(columnInfoBean, "description");
@@ -524,7 +539,7 @@ public class ColumnDetailsComposite extends Composite
 		IObservableValue getCIFlagsUuidObserveValue = PojoObservables.observeValue(columnInfoBean, "uuidFlag");
 		IObservableValue getCIFlagsTenantObserveValue = PojoObservables.observeValue(columnInfoBean, "tenantFlag");
 
-		IObservableValue sortIgnoringcaseCheckBoxObserveWidget = SWTObservables.observeSelection(sortIgnoringcaseCheckBox);
+		IObservableValue sortIgnoringcaseComboObserveWidget = SWTObservables.observeSelection(sortIgnoringcaseCombo);
 		IObservableValue sortingNullprecedenceComboObserveWidget = SWTObservables.observeSelection(sortNullprecedenceCombo);
 		IObservableValue uuidOtherFlagsTextObserveWidget = SWTObservables.observeSelection(uuidCheckBox);
 		IObservableValue excludedOtherFlagsTextObserveWidget = SWTObservables.observeSelection(excludedCheckBox);
@@ -546,8 +561,8 @@ public class ColumnDetailsComposite extends Composite
 			new UpdateValueStrategy().setConverter(TableWrapper2ForeignTypeConverter.INSTANCE), new UpdateValueStrategy().setConverter(
 				new ForeignType2TableWrapperConverter(column.getTable().getServerName(), column.getTable().getTableType() == ITable.VIEW)));
 
-		// bind the 'sortIgnorecase' checkbox;
-		bindingContext.bindValue(sortIgnoringcaseCheckBoxObserveWidget, getCISortIgnorecaseObservableValue, null, null);
+		// bind the 'sortIgnorecase' combo;
+		bindingContext.bindValue(sortIgnoringcaseComboObserveWidget, getCISortIgnorecaseObservableValue, null, null);
 
 		// bind the 'sortingNullprecedence' combo;
 		bindingContext.bindValue(sortingNullprecedenceComboObserveWidget, getCISortingNullprecedenceObservableValue, null, null);

@@ -313,11 +313,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 	}
 
 
-//	RAGTEST public IColumnInfoManager getColumnInfoManager()
-//	{
-//		return ServoyModelFinder.getServoyModel().getDataModelManager();
-//	}
-
 	@Override
 	public IRootObject createNewRootObject(String name, int objectTypeId, int newElementID, UUID uuid) throws RepositoryException
 	{

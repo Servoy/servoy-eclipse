@@ -16,10 +16,12 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +79,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
-import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -450,6 +451,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		catalogField = new CCombo(advancedSettingsComposite, SWT.BORDER);
 		catalogField.setToolTipText(toolTip);
 		catalogField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		catalogField.add(ServerConfig.NONE);
+		catalogField.add(ServerConfig.EMPTY);
 
 		toolTip = "The specific schema to connect to; not all databases support this option.";
 		Label schemaLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -459,6 +462,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		schemaField = new CCombo(advancedSettingsComposite, SWT.BORDER);
 		schemaField.setToolTipText(toolTip);
 		schemaField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		schemaField.add(ServerConfig.NONE);
+		schemaField.add(ServerConfig.EMPTY);
 
 		toolTip = "Determines the maximum number of connections that will be made to the database simultaneously.";
 		Label maxActiveLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -511,6 +516,10 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		validationTypeField.setToolTipText(toolTip);
 		validationTypeField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION));
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION));
 
 		toolTip = "If validation type is set to \"" + ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
 			"\", then this is the query that must run successfully in order for the connection to be considered valid.";
@@ -623,6 +632,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		sortNullprecedenceField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		sortNullprecedenceField.setToolTipText(toolTip);
 		sortNullprecedenceField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		sortNullprecedenceField.add(SortingNullprecedence.ragtestDefault.display());
+		sortNullprecedenceField.add(SortingNullprecedence.ascNullsFirst.display());
+		sortNullprecedenceField.add(SortingNullprecedence.ascNullsLast.display());
 
 		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new EnableServerListener());
 
@@ -1297,37 +1309,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		serverNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 		driverField.removeAll();
-		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		for (String name : ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames())
-		{
-			driverField.add(name);
-		}
-
+		stream(ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames()).forEach(driverField::add);
 		driverField.add("sun.jdbc.odbc.JdbcOdbcDriver");
-
-		catalogField.removeAll();
-		catalogField.add(ServerConfig.NONE);
-		catalogField.add(ServerConfig.EMPTY);
-
-		schemaField.removeAll();
-		schemaField.add(ServerConfig.NONE);
-		schemaField.add(ServerConfig.EMPTY);
 
 		maxActiveField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		idleTimoutField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxPreparedStatementsIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
-
-		validationTypeField.removeAll();
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION));
-
-		sortNullprecedenceField.removeAll();
-		sortNullprecedenceField.add(SortingNullprecedence.ragtestDefault.display());
-		sortNullprecedenceField.add(SortingNullprecedence.ascNullsFirst.display());
-		sortNullprecedenceField.add(SortingNullprecedence.ascNullsLast.display());
 
 		dataModel_cloneFromField.removeAll();
 		dataModel_cloneFromField.add(ServerConfig.NONE);
@@ -1356,8 +1344,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			protected Object doGetValue()
 			{
 				String dataModelCloneFrom = serverConfigObservable.getObject().getDataModelCloneFrom();
-				if (Arrays.asList(dataModel_cloneFromField.getItems()).contains(dataModelCloneFrom)) return dataModelCloneFrom;
-				else return ServerConfig.NONE;
+				if (asList(dataModel_cloneFromField.getItems()).contains(dataModelCloneFrom)) return dataModelCloneFrom;
+				return ServerConfig.NONE;
 			}
 
 			public Object getValueType()

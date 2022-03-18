@@ -17,6 +17,9 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import static com.servoy.j2db.persistence.SortingNullprecedence.ragtestDefault;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.stream;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -35,7 +38,6 @@ public class ColumnInfoBean
 	{
 		this.columnInfo = columnInfo;
 	}
-
 
 	public void setColumnInfo(ColumnInfo columnInfo)
 	{
@@ -337,14 +339,14 @@ public class ColumnInfoBean
 		columnInfo.flagChanged();
 	}
 
-	public boolean getSortIgnorecase()
+	public String getSortIgnorecase()
 	{
-		return columnInfo.isSortIgnorecase();
+		return BooleanTristate.valueOf(columnInfo.getSortIgnorecase()).name();
 	}
 
-	public void setSortIgnorecase(boolean sortIgnorecase)
+	public void setSortIgnorecase(String sortIgnorecaseDisplay)
 	{
-		columnInfo.setSortIgnorecase(sortIgnorecase);
+		columnInfo.setSortIgnorecase(BooleanTristate.valueOf(sortIgnorecaseDisplay).value);
 		columnInfo.flagChanged();
 	}
 
@@ -359,6 +361,24 @@ public class ColumnInfoBean
 		SortingNullprecedence sortingNullprecedence = SortingNullprecedence.fromDisplay(sortingNullprecedenceDisplay).orElse(null);
 		columnInfo.setSortingNullprecedence(sortingNullprecedence == ragtestDefault ? null : sortingNullprecedence);
 		columnInfo.flagChanged();
+	}
+
+	public static enum BooleanTristate
+	{
+		Default(null), True(TRUE), False(FALSE);
+
+		final Boolean value;
+
+		BooleanTristate(Boolean value)
+		{
+			this.value = value;
+		}
+
+		static BooleanTristate valueOf(Boolean b)
+		{
+			return stream(values()).filter(triState -> triState.value == b).findAny().get();
+		}
+
 	}
 
 }
