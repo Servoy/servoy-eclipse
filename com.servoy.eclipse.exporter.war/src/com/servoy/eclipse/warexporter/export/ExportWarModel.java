@@ -37,8 +37,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
@@ -1071,6 +1074,12 @@ public class ExportWarModel extends AbstractWarExportModel
 	@Override
 	public void displayWarningMessage(String title, String message)
 	{
-		this.userChannel.displayWarningMessage(title, message);
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title, message);
+			}
+		});
 	}
 }
