@@ -343,10 +343,6 @@ public class WarExporter
 		{
 			for (String jar : dependenciesVersions.keySet())
 			{
-				if (dependenciesVersions.get(jar).size() > 1)
-				{
-					ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
-				}
 				String latest = dependenciesVersions.get(jar).lastKey();
 				File latestJar = dependenciesVersions.get(jar).get(latest).get(0);
 				String latestJarPath = latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
@@ -354,10 +350,7 @@ public class WarExporter
 				{
 					if ("0".equals(version) && dependenciesVersions.get(jar).get(version).size() > 1)
 					{
-						for (File jarFile : dependenciesVersions.get(jar).get(version))
-						{
-							ServoyLog.logWarning("No version number found in the manifest for dependency " + jarFile.getAbsolutePath(), null);
-						}
+						ServoyLog.logWarning("Duplicate '" + jar + "' jars with unknown versions " + dependenciesVersions.get(jar).values(), null);
 					}
 					List<File> listToRemove = dependenciesVersions.get(jar).get(version);
 					String reason = "a higher";
@@ -1916,7 +1909,6 @@ public class WarExporter
 				List<String> jarNames = new ArrayList<String>();
 				List<String> jnlpNames = new ArrayList<String>();
 				parseJarNames(document.getChildNodes(), jarNames, jnlpNames);
-				ServoyLog.logInfo("Plugin jnlp " + pluginJnlpName + ", Copy jars " + jarNames);
 				copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, jarNames);
 
 				for (String jnlpName : jnlpNames)
@@ -1985,24 +1977,7 @@ public class WarExporter
 				}
 			}
 		}
-		if (version == null)
-		{
-			version = "0";
-		}
-		version = version.contains(" ") ? version.split(" ")[0] : version;
-		if (version.contains("-"))
-		{
-			version = version.split("-")[0];
-		}
-		try
-		{
-			Version.parseVersion(version);
-		}
-		catch (IllegalArgumentException e)
-		{
-			ServoyLog.logWarning("Could not parse jar version for jar " + jarFile.getName(), e);
-			version = version.replaceAll("[^\\d.]", "");
-		}
+		version = checkVersionString(version);
 		if (!dependenciesVersions.containsKey(jarName))
 		{
 			dependenciesVersions.put(jarName, new TreeMap<>(VersionComparator.INSTANCE));
@@ -2014,6 +1989,49 @@ public class WarExporter
 			vFiles.put(version, new ArrayList<File>());
 		}
 		vFiles.get(version).add(jarFile);
+	}
+
+	private String checkVersionString(String v)
+	{
+		if (v == null)
+		{
+			return "0";
+		}
+		String version = v.contains(" ") ? v.split(" ")[0] : v;
+		if (version.contains("-"))
+		{
+			version = version.split("-")[0];
+		}
+		if (version.split("\\.").length > 4)
+		{
+			String[] parts = version.split("\\.");
+			version = parts[0] + "." + parts[1] + "." + parts[2] + "." + parts[3];
+		}
+		try
+		{
+			Version.parseVersion(version);
+		}
+		catch (IllegalArgumentException e)
+		{
+			version = version.replaceAll("[^\\d.]", "").replaceAll("\\s", "");
+			if ("".equals(version))
+			{
+				return "0";
+			}
+			else
+			{
+				try
+				{
+					//make sure we can parse it
+					Version.parseVersion(version);
+				}
+				catch (IllegalArgumentException ex)
+				{
+					return "0";
+				}
+			}
+		}
+		return version;
 	}
 
 	private void parseJarNames(NodeList childNodes, List<String> jarNames, List<String> jnlpNames)
