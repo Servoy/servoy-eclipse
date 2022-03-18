@@ -25,6 +25,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     lassostarted= false;
 
     mousedownpoint: Point;
+    fieldLocation: Point;
     selectedRefSubscription: Subscription;
     editorStateSubscription: Subscription;
     removeSelectionChangedListener: () => void;
@@ -155,6 +156,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseDown(event: MouseEvent) {
+        this.fieldLocation = { x: event.pageX, y: event.pageY };
         if (this.editorSession.getState().dragging) return;
         const found = this.designerUtilsService.getNode(this.doc, event) as HTMLElement;    
         if (found) {
@@ -181,6 +183,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseUp(event: MouseEvent) {
+        if (this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY){
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.content.scrollLeft - this.contentRect.left - this.leftAdjust, y: event.pageY + this.content.scrollTop - this.contentRect.top - this.topAdjust });
+        }
         if (this.editorSession.getState().dragging) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
