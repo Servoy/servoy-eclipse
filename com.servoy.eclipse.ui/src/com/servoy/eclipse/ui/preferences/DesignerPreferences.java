@@ -94,6 +94,7 @@ public class DesignerPreferences
 	public static final String CLOSE_EDITORS_ON_EXIT_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
+	public static final String SHOW_LEGACY_SOLUTION_TYPES_SETTING = "showLegacySolutionTypes";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -142,6 +143,7 @@ public class DesignerPreferences
 	public static final boolean CLOSE_EDITORS_ON_EXIT_DEFAULT = false;
 	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
 	public static final boolean SHOW_COLUMNS_IN_DB_ORDER_DEFAULT = false;
+	public static final boolean SHOW_LEGACY_SOLUTION_TYPES_DEFAULT = false;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
 	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
@@ -529,6 +531,16 @@ public class DesignerPreferences
 	public void setShowColumnsInDbOrder(boolean showColumnsInDbOrder)
 	{
 		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
+	}
+
+	public boolean getShowLegacySolutionTypes()
+	{
+		return getProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
+	}
+
+	public void setShowLegacySolutionTypes(boolean showLegacySolutionTypes)
+	{
+		setProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, showLegacySolutionTypes);
 	}
 
 	public boolean getShowSameSizeFeedback()

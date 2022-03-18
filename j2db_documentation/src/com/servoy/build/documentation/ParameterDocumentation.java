@@ -32,6 +32,7 @@ public class ParameterDocumentation implements IParameterDocumentation
 	private static final String ATTR_OPTIONAL = "optional";
 	private static final String ATTR_NAME = "name";
 	private static final String ATTR_TYPE = "type";
+	private static final String ATTR_JSTYPE = "jstype";
 	private static final String ATTR_TYPECODE = "typecode";
 
 	private static final String TAG_DESCRIPTION = "description";
@@ -41,10 +42,13 @@ public class ParameterDocumentation implements IParameterDocumentation
 	private final String description;
 	private final boolean optional;
 
-	public ParameterDocumentation(String name, Class< ? > type, String description, boolean optional)
+	private final String jsType;
+
+	public ParameterDocumentation(String name, Class< ? > type, String jsType, String description, boolean optional)
 	{
 		this.name = name;
 		this.type = type;
+		this.jsType = jsType;
 		this.description = description;
 		this.optional = optional;
 	}
@@ -57,6 +61,12 @@ public class ParameterDocumentation implements IParameterDocumentation
 	public Class< ? > getType()
 	{
 		return type;
+	}
+
+	@Override
+	public String getJSType()
+	{
+		return jsType;
 	}
 
 	public String getDescription()
@@ -108,6 +118,7 @@ public class ParameterDocumentation implements IParameterDocumentation
 
 		String name = argumentElement.attributeValue(ATTR_NAME);
 		String typeCode = argumentElement.attributeValue(ATTR_TYPECODE);
+		String jsType = argumentElement.attributeValue(ATTR_JSTYPE);
 		Class< ? > type = null;
 		try
 		{
@@ -121,7 +132,7 @@ public class ParameterDocumentation implements IParameterDocumentation
 
 		String description = argumentElement.elementText(TAG_DESCRIPTION);
 
-		ParameterDocumentation pd = new ParameterDocumentation(DocumentationManager.getInternedText(name), type,
+		ParameterDocumentation pd = new ParameterDocumentation(DocumentationManager.getInternedText(name), type, jsType,
 			DocumentationManager.getInternedText(description), optional);
 		return pd;
 	}

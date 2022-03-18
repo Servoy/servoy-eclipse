@@ -338,8 +338,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final UrlValidator urlValidator = new UrlValidator();
 			if (!urlValidator.isValid(strValue))
 			{
-				errorMsg.append("Invalid URL: " + strValue + "\n");
-				return errorMsg;
+				final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
+					"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);
+				if (!result)
+				{
+					errorMsg.append("Invalid URL: " + strValue + "\n");
+					return errorMsg;
+				}
 			}
 		}
 

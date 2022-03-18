@@ -33,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -55,6 +56,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -132,6 +134,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
@@ -151,7 +154,7 @@ public class WarExporter
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar", "tus-java-server_*.jar" };
+		"tus-java-server_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
@@ -188,7 +191,6 @@ public class WarExporter
 	private SpecProviderState componentsSpecProviderState;
 	private SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
-	private Map<String, TreeMap<String, File>> dependenciesVersions;
 
 	public WarExporter(IWarExportModel exportModel)
 	{
@@ -208,7 +210,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 44);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 45);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -275,14 +277,14 @@ public class WarExporter
 			monitor.worked(1);
 			if (exportModel.exportNG2Mode() != null)
 			{
-				monitor.subTask("Copy NGClient2 resources");
+				monitor.subTask("Copy Titanium NGClient resources");
 				try
 				{
 					copyNGClient2(tmpWarDir, monitor);
 				}
 				catch (RuntimeException e)
 				{
-					throw new ExportException("could not create/copy NGClient2 resources", e);
+					throw new ExportException("could not create/copy Titanium NGClient resources", e);
 				}
 			}
 			monitor.worked(1);
@@ -301,12 +303,123 @@ public class WarExporter
 		monitor.subTask("Creating deploy properties");
 		createDeployPropertiesFile(tmpWarDir);
 		monitor.worked(1);
+		monitor.subTask("Checking war for duplicate jars");
+		checkDuplicateJars(tmpWarDir);
+		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
 		deleteDirectory(tmpWarDir);
 		monitor.worked(1);
 		monitor.done();
+	}
+
+	private void checkDuplicateJars(File tmpWarDir) throws ExportException
+	{
+		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
+		Set<File> libs;
+		try
+		{
+			libs = Files.walk(tmpWarDir.toPath()).filter(path -> path.toString().endsWith(".jar"))//
+				.map(path -> path.toFile()).collect(Collectors.toSet());
+			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions));
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Error checking duplicate jars.", e);
+		}
+
+
+		Properties properties = new Properties();
+		File pluginProperties = new File(tmpWarDir, "plugins/plugins.properties");
+		try (FileInputStream fis = new FileInputStream(pluginProperties))
+		{
+			properties.load(fis);
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Error creating plugins dir", e);
+		}
+
+		boolean removedJar = false;
+		StringBuilder messageBuilder = new StringBuilder();
+		try
+		{
+			for (String jar : dependenciesVersions.keySet())
+			{
+				if (dependenciesVersions.get(jar).size() > 1)
+				{
+					ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
+				}
+				String latest = dependenciesVersions.get(jar).lastKey();
+				File latestJar = dependenciesVersions.get(jar).get(latest).get(0);
+				String latestJarPath = latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
+				for (String version : dependenciesVersions.get(jar).keySet())
+				{
+					if ("0".equals(version) && dependenciesVersions.get(jar).get(version).size() > 1)
+					{
+						for (File jarFile : dependenciesVersions.get(jar).get(version))
+						{
+							ServoyLog.logWarning("No version number found in the manifest for dependency " + jarFile.getAbsolutePath(), null);
+						}
+					}
+					List<File> listToRemove = dependenciesVersions.get(jar).get(version);
+					String reason = "a higher";
+					if (latest.equals(version))
+					{
+						listToRemove.remove(0);
+						reason = "the same";
+					}
+					for (File file : listToRemove)
+					{
+						String path = file.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
+						if (path.contains("plugins"))
+						{
+							properties.remove(file.getPath().substring(file.getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
+							removedJar = true;
+						}
+
+						if (messageBuilder.length() == 0)
+						{
+							messageBuilder.append(
+								"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
+						}
+						messageBuilder.append("\nDependency '" + path +
+							"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
+							") is already present in '" + latestJarPath + "'. \n");
+						File parent = file.getParentFile();
+						file.delete();
+						if (parent.list().length == 0)
+						{
+							parent.delete();
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		if (removedJar)
+		{
+			try (FileOutputStream fos = new FileOutputStream(pluginProperties))
+			{
+				properties.store(fos, "");
+			}
+			catch (IOException e)
+			{
+				throw new ExportException("Error creating plugins dir", e);
+			}
+		}
+		if (messageBuilder.length() > 0)
+		{
+			messageBuilder.append(
+				"\n If you use a smartclient, then the jnlp's files version could be needed to also have a version update.");
+			messageBuilder.append(
+				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
+			exportModel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString());
+		}
 	}
 
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
@@ -1396,7 +1509,6 @@ public class WarExporter
 			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
 		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
-		dependenciesVersions = new HashMap<>();
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
@@ -1439,56 +1551,6 @@ public class WarExporter
 		catch (IOException e1)
 		{
 			throw new ExportException("Error creating plugins dir", e1);
-		}
-
-		for (String jar : dependenciesVersions.keySet())
-		{
-			Properties properties = new Properties();
-			try (FileInputStream fis = new FileInputStream(pluginProperties))
-			{
-				properties.load(fis);
-			}
-			catch (IOException e)
-			{
-				throw new ExportException("Error creating plugins dir", e);
-			}
-
-			boolean removedJar = false;
-			if (dependenciesVersions.get(jar).size() > 1)
-			{
-				ServoyLog.logWarning("Conflict " + jar + " versions " + dependenciesVersions.get(jar).values(), null);
-				String latest = dependenciesVersions.get(jar).lastKey();
-				for (String version : dependenciesVersions.get(jar).keySet())
-				{
-					if (latest.equals(version)) continue;
-					File file = dependenciesVersions.get(jar).get(version);
-					String path = file.getPath().substring(file.getPath().indexOf("plugins") + +"plugins/".length()).replace('\\', '/');
-					properties.remove(path);
-					removedJar = true;
-					String message = "Dependency '" + path + "' is not exported because another " + jar + ".jar with a higher version (" + latest +
-						") is already present as part of a different plugin: " + dependenciesVersions.get(jar).get(latest).getPath() +
-						".\n If you use a smartclient the the jnlp's files version could be needed to also have a version update.";
-					exportModel.displayWarningMessage("Plugin dependencies problem", message);
-					File toDelete = new File(tmpWarDir, file.getPath().substring(file.getPath().indexOf("plugins")));
-					File parent = toDelete.getParentFile();
-					toDelete.delete();
-					if (parent.list().length == 0)
-					{
-						parent.delete();
-					}
-				}
-			}
-			if (removedJar)
-			{
-				try (FileOutputStream fos = new FileOutputStream(pluginProperties))
-				{
-					properties.store(fos, "");
-				}
-				catch (IOException e)
-				{
-					throw new ExportException("Error creating plugins dir", e);
-				}
-			}
 		}
 	}
 
@@ -1939,51 +2001,73 @@ public class WarExporter
 			{
 				jarName = jarName.substring(index + "plugins/".length());
 			}
-			String normalizedJarName = "";
-			String version = null;
+			writeFileEntry(fw, jarFile, jarName, writtenFiles);
+		}
+	}
+
+	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions)
+	{
+		String jarName = null;
+		String version = null;
+		try
+		{
+			Pair<String, String> pair = JarManager.getNameAndVersion(jarFile.toURI().toURL());
+			if (pair != null)
+			{
+				jarName = pair.getLeft();
+				version = pair.getRight();
+			}
+		}
+		catch (MalformedURLException e)
+		{
+			ServoyLog.logError("Cannot check jar name and version in the manifest: " + jarName, e);
+		}
+		if (jarName == null)
+		{
+			jarName = "";
 			String[] jarNameParts = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).split("-");
 			for (String part : jarNameParts)
 			{
 				if (part.contains(".") && Character.isDigit(part.charAt(0)))
 				{
 					//it is the version number
-					version = part;
 					break;
 				}
 				else
 				{
-					normalizedJarName += !normalizedJarName.isEmpty() ? "-" + part : part;
+					jarName += !jarName.isEmpty() ? "-" + part : part;
 				}
 			}
-			if (version == null)
-			{
-				version = JarManager.getImplementationVersion(jarFile.toURI().toURL());
-			}
-			if (version == null)
-			{
-				ServoyLog.logWarning("No version number found in the manifest or jar name for plugin dependency " + jarFile.getAbsolutePath(), null);
-				version = "0";
-			}
-			if (version.contains("-"))
-			{
-				version = version.split("-")[0];
-			}
-			if (!dependenciesVersions.containsKey(normalizedJarName))
-			{
-				dependenciesVersions.put(normalizedJarName, new TreeMap<>(VersionComparator.INSTANCE));
-			}
-
-			TreeMap<String, File> vFiles = dependenciesVersions.get(normalizedJarName);
-			if (!vFiles.containsKey(version))
-			{
-				vFiles.put(version, jarFile);
-			}
-			else
-			{
-				continue;
-			}
-			writeFileEntry(fw, jarFile, jarName, writtenFiles);
 		}
+		if (version == null)
+		{
+			version = "0";
+		}
+		version = version.contains(" ") ? version.split(" ")[0] : version;
+		if (version.contains("-"))
+		{
+			version = version.split("-")[0];
+		}
+		try
+		{
+			Version.parseVersion(version);
+		}
+		catch (IllegalArgumentException e)
+		{
+			ServoyLog.logWarning("Could not parse jar version for jar " + jarFile.getName(), e);
+			version = version.replaceAll("[^\\d.]", "");
+		}
+		if (!dependenciesVersions.containsKey(jarName))
+		{
+			dependenciesVersions.put(jarName, new TreeMap<>(VersionComparator.INSTANCE));
+		}
+
+		TreeMap<String, List<File>> vFiles = dependenciesVersions.get(jarName);
+		if (!vFiles.containsKey(version))
+		{
+			vFiles.put(version, new ArrayList<File>());
+		}
+		vFiles.get(version).add(jarFile);
 	}
 
 	private void parseJarNames(NodeList childNodes, List<String> jarNames, List<String> jnlpNames)
