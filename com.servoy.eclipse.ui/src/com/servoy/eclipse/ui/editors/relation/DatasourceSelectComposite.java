@@ -74,7 +74,7 @@ public class DatasourceSelectComposite extends Composite
 		sourceTable.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		sourceTable.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelSelect, false, true));
 
-		sourceTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false, false));
+		sourceTable.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false, true));
 		sourceTable.setEditable(true);
 
 		destinationTable = new TreeSelectViewer(this, SWT.NONE, TableValueEditor.INSTANCE);
