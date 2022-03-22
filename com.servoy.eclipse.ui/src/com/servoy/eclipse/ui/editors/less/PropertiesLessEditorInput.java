@@ -144,31 +144,38 @@ public class PropertiesLessEditorInput extends FileEditorInput
 				current.put(categoryName, new LinkedHashMap<String, LessPropertyEntry>());
 				props = current.get(categoryName);
 			}
-			String content = category.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
-			Matcher m = lessVariablePattern.matcher(content);
-			while (m.find())
+			try
 			{
-				String name = m.group(1);
-				String value = m.group(2);
-				String storedDefaultValue = m.group(3);
-				LessPropertyType type = inferType(name, value);
-				if (previousValues == null)
+				String content = category.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
+				Matcher m = lessVariablePattern.matcher(content);
+				while (m.find())
 				{
-					typesToProperties.get(type).add("@" + name);
+					String name = m.group(1);
+					String value = m.group(2);
+					String storedDefaultValue = m.group(3);
+					LessPropertyType type = inferType(name, value);
+					if (previousValues == null)
+					{
+						typesToProperties.get(type).add("@" + name);
+					}
+					if (previousValues != null && previousValues.containsKey(name))
+					{
+						LessPropertyEntry lessProp = previousValues.get(name);
+						lessProp.setValue(value);
+						lessProp.resetLastTxtValue();
+						props.put(name, lessProp);
+					}
+					else
+					{
+						LessPropertyEntry lessProp = new LessPropertyEntry(name, value, type, storedDefaultValue);
+						LessPropertyEntry overwrittenValue = props.put(name, lessProp);
+						if (overwrittenValue != null) lessProp.setDefaultValue(overwrittenValue.getValue());
+					}
 				}
-				if (previousValues != null && previousValues.containsKey(name))
-				{
-					LessPropertyEntry lessProp = previousValues.get(name);
-					lessProp.setValue(value);
-					lessProp.resetLastTxtValue();
-					props.put(name, lessProp);
-				}
-				else
-				{
-					LessPropertyEntry lessProp = new LessPropertyEntry(name, value, type, storedDefaultValue);
-					LessPropertyEntry overwrittenValue = props.put(name, lessProp);
-					if (overwrittenValue != null) lessProp.setDefaultValue(overwrittenValue.getValue());
-				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("error while parsing: " + category, ex);
 			}
 		}
 	}
