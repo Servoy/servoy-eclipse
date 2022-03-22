@@ -54,8 +54,6 @@ export class HeaderComponent implements OnInit {
               }  
               arr[i].hasLatestVersion = arr[i].selected === p.releases[0].version;    
               arr[i].markedAsRemoved = false;
-            } else if (p.name === pack.name && !pack.installedIsWPA) {
-              arr.splice(i, 1);
             }   
           }); 
         });
