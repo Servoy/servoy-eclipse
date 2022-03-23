@@ -53,7 +53,7 @@ export class ContentComponent implements OnInit {
     let count = 0;
       for (let i = 0; i < packages.length; i++) {
           const pckg = packages[i];
-          if (pckg?.installed && pckg?.installed < pckg?.releases[0]?.version) {
+          if (pckg?.installed && pckg?.releases[0]?.version && this.wpmService.versionCompare(pckg?.installed, pckg?.releases[0]?.version) < 0) {
             count++;
           }
       }
