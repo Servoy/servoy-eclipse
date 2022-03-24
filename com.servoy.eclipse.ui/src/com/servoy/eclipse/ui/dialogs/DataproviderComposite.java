@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -52,12 +53,14 @@ public class DataproviderComposite extends Composite
 	private final WizardConfigurationViewer tableViewer;
 	private final List<Pair<IDataProvider, Object>> input = new ArrayList<>();
 	private final IDialogSettings settings;
+	private final List<PropertyDescription> dataproviderProperties;
 
 	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		DataProviderOptions dataproviderOptions, final IDialogSettings settings)
+		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties)
 	{
 		super(parent, SWT.None);
 		this.settings = settings;
+		this.dataproviderProperties = dataproviderProperties;
 
 		this.setLayout(new FillLayout());
 		SashForm form = new SashForm(this, SWT.HORIZONTAL);

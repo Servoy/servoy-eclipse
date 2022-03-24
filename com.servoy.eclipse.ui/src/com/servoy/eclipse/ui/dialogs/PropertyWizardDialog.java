@@ -18,6 +18,8 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -48,6 +50,7 @@ public class PropertyWizardDialog extends Dialog
 	private final IDialogSettings settings;
 	private final Collection<PropertyDescription> wizardProperties;
 	private final PropertyDescription property;
+	private DataproviderComposite dataproviderComposite;
 
 	/**
 	 * @param parentShell
@@ -74,13 +77,23 @@ public class PropertyWizardDialog extends Dialog
 
 		Composite area = (Composite)super.createDialogArea(parent);
 		// first check what the main thing must be (dataprovders, forms, relations?)
-		boolean isDataprovider = wizardProperties.stream().anyMatch(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
-			DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()));
-		if (isDataprovider)
+		List<PropertyDescription> dataproviderProperties = wizardProperties.stream()
+			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
+				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
+			.collect(Collectors.toList());
+		if (dataproviderProperties.size() > 0)
 		{
-			new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings);
+			dataproviderComposite = new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
+				dataproviderProperties);
 		}
 		return area;
+	}
+
+	@Override
+	protected void okPressed()
+	{
+
+		super.okPressed();
 	}
 
 }
