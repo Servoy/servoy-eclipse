@@ -36,7 +36,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.NotEnabledException;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -72,9 +71,14 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.PropertyWizardDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -99,6 +103,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
@@ -633,10 +638,15 @@ public class CreateComponentHandler implements IServerService
 											Display current = Display.getCurrent();
 											if (current == null) current = Display.getDefault();
 
-											MessageDialog dialog = new MessageDialog(current.getActiveShell(), "A wizard dialog for " + property.getName(),
-												null,
-												"Do make some columns.",
-												MessageDialog.WARNING, new String[] { "OK" }, 0);
+											PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+											PropertyWizardDialog dialog = new PropertyWizardDialog(current.getActiveShell(), context, flattenedSolution, table,
+												new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
+													INCLUDE_RELATIONS.NESTED, true, true, null),
+												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties);
 											dialog.open();
 										}
 										else

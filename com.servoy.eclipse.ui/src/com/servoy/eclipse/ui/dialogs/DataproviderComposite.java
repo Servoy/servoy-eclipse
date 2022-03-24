@@ -116,7 +116,7 @@ public class DataproviderComposite extends Composite
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
-//		gridData.minimumWidth = 400;
+		gridData.minimumWidth = 400;
 		gridData.heightHint = 600;
 
 		Composite parent = new Composite(form, SWT.NONE);
