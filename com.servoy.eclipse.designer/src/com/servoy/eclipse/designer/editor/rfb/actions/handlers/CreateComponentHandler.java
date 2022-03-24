@@ -596,18 +596,18 @@ public class CreateComponentHandler implements IServerService
 							CSSPositionUtils.setSize(webComponent, 200, 100);
 						}
 						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-						for (String string : allPropertiesNames)
+						for (String propertyName : allPropertiesNames)
 						{
-							PropertyDescription property = spec.getProperty(string);
+							PropertyDescription property = spec.getProperty(propertyName);
 							if (property != null)
 							{
-								if (args.has(string) && webComponent.getProperty(string) == null)
+								if (args.has(propertyName) && webComponent.getProperty(propertyName) == null)
 								{
-									webComponent.setProperty(string, args.opt(string));
+									webComponent.setProperty(propertyName, args.opt(propertyName));
 									if (property.getType() == FormComponentPropertyType.INSTANCE)
 									{
 										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
+										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(propertyName), flattenedSolution);
 										if (form != null)
 										{
 											Dimension size = form.getSize();
@@ -618,7 +618,7 @@ public class CreateComponentHandler implements IServerService
 								else if (property.getInitialValue() != null)
 								{
 									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(string, initialValue);
+									if (initialValue != null) webComponent.setProperty(propertyName, initialValue);
 								}
 								if ("autoshow".equals(property.getTag("wizard")))
 								{
@@ -648,6 +648,14 @@ public class CreateComponentHandler implements IServerService
 													INCLUDE_RELATIONS.NESTED, true, true, null),
 												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties);
 											dialog.open();
+											List<Map<String, Object>> result = dialog.getResult();
+											for (int i = 0; i < result.size(); i++)
+											{
+												Map<String, Object> row = result.get(i);
+												WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, compName, i, null);
+												row.forEach((key, value) -> bean.setProperty(key, value));
+											}
+
 										}
 										else
 										{

@@ -18,7 +18,9 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -173,7 +175,18 @@ public class DataproviderComposite extends Composite
 
 	public PlaceDataProviderConfiguration getDataProviderConfiguration()
 	{
-		// TODO rem
 		return null;
+	}
+
+	public List<Map<String, Object>> getResult()
+	{
+		List<Map<String, Object>> lst = new ArrayList<>();
+		Map<String, Object> row1 = new HashMap<String, Object>();
+		row1.put("dataprovider", "customerid");
+		lst.add(row1);
+		Map<String, Object> row2 = new HashMap<String, Object>();
+		row2.put("styleClassDataprovider", "country");
+		lst.add(row2);
+		return lst;
 	}
 }

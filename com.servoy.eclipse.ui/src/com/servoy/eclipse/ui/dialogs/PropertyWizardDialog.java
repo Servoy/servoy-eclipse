@@ -18,7 +18,9 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -89,11 +91,13 @@ public class PropertyWizardDialog extends Dialog
 		return area;
 	}
 
-	@Override
-	protected void okPressed()
+	public List<Map<String, Object>> getResult()
 	{
-
-		super.okPressed();
+		if (dataproviderComposite != null)
+		{
+			return dataproviderComposite.getResult();
+		}
+		return Collections.emptyList();
 	}
 
 }
