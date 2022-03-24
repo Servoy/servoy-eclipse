@@ -263,7 +263,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			private void addComponentVariantsFile(EclipseRepository repository, Solution solution) throws RepositoryException
 			{
-				addMediaFile(solution, " ".getBytes(), "component_variants_ng2.less");
+				addMediaFile(solution, " ".getBytes(), "styles_wizard.less");
 				repository.updateRootObject(solution);
 			}
 

@@ -109,7 +109,7 @@ public class ComponentVariantsEditor extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/svyStyleWizard?nodebug=true&";
+		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/svyStyleWizard?nodebug=true&";
 		if (getEditorInput() instanceof ComponentVariantsEditorInput)
 		{
 			url = url + ((ComponentVariantsEditorInput)getEditorInput()).getDeepLinkArgs();

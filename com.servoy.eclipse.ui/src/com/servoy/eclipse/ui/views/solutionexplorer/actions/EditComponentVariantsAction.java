@@ -67,7 +67,7 @@ public class EditComponentVariantsAction extends Action implements ISelectionCha
 		if (ok)
 		{
 			SimpleUserNode un = (SimpleUserNode)sel.getFirstElement();
-			if (un.getType() == UserNodeType.MEDIA_IMAGE && un.getName().startsWith("component_variants"))
+			if (un.getType() == UserNodeType.MEDIA_IMAGE && un.getName().startsWith("styles_wizard"))
 			{
 
 				ok = true;
