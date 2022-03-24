@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -41,7 +42,6 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.Pair;
@@ -53,7 +53,7 @@ public class DataproviderComposite extends Composite
 {
 	private final DataProviderTreeViewer dataproviderTreeViewer;
 	private final WizardConfigurationViewer tableViewer;
-	private final List<Pair<IDataProvider, Object>> input = new ArrayList<>();
+	private final List<Pair<String, Map<String, Object>>> input = new ArrayList<>();
 	private final IDialogSettings settings;
 	private final List<PropertyDescription> dataproviderProperties;
 
@@ -91,7 +91,7 @@ public class DataproviderComposite extends Composite
 
 		container.setLayoutData(gridData);
 
-		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container,
+		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, dataproviderProperties,
 			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}
@@ -156,15 +156,22 @@ public class DataproviderComposite extends Composite
 		IDataProvider dataprovider = (IDataProvider)((StructuredSelection)dataproviderTreeViewer.getSelection()).getFirstElement();
 		if (dataprovider != null)
 		{
-			Pair<IDataProvider, Object> row = new Pair<>(dataprovider, Column.getDisplayTypeString(dataprovider.getDataProviderType()));
-			input.add(row);
-//			for (IReadyListener rl : readyListeners)
-//			{
-//				rl.isReady(true);
-//			}
+			input.add(new Pair<String, Map<String, Object>>(dataprovider.getDataProviderID(), getDefaultRow()));
+			tableViewer.setInput(input);
 			tableViewer.refresh();
 		}
 	}
+
+	private Map<String, Object> getDefaultRow()
+	{
+		Map<String, Object> row = new HashMap<>();
+		for (PropertyDescription pd : dataproviderProperties)
+		{
+			row.put(pd.getName(), pd.getDefaultValue());
+		}
+		return row;
+	}
+
 
 	public void setTable(ITable table, PersistContext context)
 	{
@@ -172,21 +179,8 @@ public class DataproviderComposite extends Composite
 		dataproviderTreeViewer.refreshTree();
 	}
 
-
-	public PlaceDataProviderConfiguration getDataProviderConfiguration()
-	{
-		return null;
-	}
-
 	public List<Map<String, Object>> getResult()
 	{
-		List<Map<String, Object>> lst = new ArrayList<>();
-		Map<String, Object> row1 = new HashMap<String, Object>();
-		row1.put("dataprovider", "customerid");
-		lst.add(row1);
-		Map<String, Object> row2 = new HashMap<String, Object>();
-		row2.put("styleClassDataprovider", "country");
-		lst.add(row2);
-		return lst;
+		return input.stream().map(pair -> pair.getRight()).collect(Collectors.toList());
 	}
 }

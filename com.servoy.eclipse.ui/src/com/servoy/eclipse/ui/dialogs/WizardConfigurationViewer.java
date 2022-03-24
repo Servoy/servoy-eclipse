@@ -17,26 +17,82 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
+import org.sablo.specification.PropertyDescription;
 
-import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
  */
 public class WizardConfigurationViewer extends TableViewer
 {
+	private final class PropertyCellEditor extends EditingSupport
+	{
 
-	public WizardConfigurationViewer(Composite parent, int style)
+		private final PropertyDescription dp;
+		private final CheckboxCellEditor checkboxCellEditor;
+
+		private PropertyCellEditor(ColumnViewer viewer, Composite parent, int style, PropertyDescription dp)
+		{
+			super(viewer);
+			this.dp = dp;
+			checkboxCellEditor = new CheckboxCellEditor(parent, style);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element)
+		{
+			return checkboxCellEditor;
+		}
+
+		@Override
+		protected boolean canEdit(Object element)
+		{
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element)
+		{
+			Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+			return row.getRight().get(dp.getName()) != null; //TODO check equals pd.getDefaultValue()?
+		}
+
+		@Override
+		protected void setValue(Object element, Object value)
+		{
+			Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+			if (Utils.getAsBoolean(value))
+			{
+				row.getRight().put(dp.getName(), row.getLeft());
+			}
+			else
+			{
+				row.getRight().put(dp.getName(), dp.getDefaultValue());
+			}
+			getViewer().update(element, null);
+		}
+	}
+
+	public WizardConfigurationViewer(Composite parent, List<PropertyDescription> dataproviderProperties, int style)
 	{
 		super(parent, style);
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
@@ -56,27 +112,34 @@ public class WizardConfigurationViewer extends TableViewer
 			@Override
 			public String getText(Object element)
 			{
-				Pair<IDataProvider, Object> array = (Pair<IDataProvider, Object>)element;
-				return array.getLeft().toString();
+				Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+				return row.getLeft();
 			}
 		});
 		tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
 
-		String[] dps = new String[] { "dataprovider1", "dataprovider2" }; //TODO PropertyDescription[]
-		for (String dp : dps)
+		for (PropertyDescription dp : dataproviderProperties)
 		{
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp); //TODO pd.getPropertyName ?
-			col.setToolTipText("The dataprovider for which a column is created"); //TODO pd.getDescription()
+			col.setText(dp.getName());
+			col.setToolTipText(dp.getDocumentation());
 
-			TableViewerColumn colViewer = new TableViewerColumn(this, dataproviderColumn);
-			//TODO RADIO CELL EDITOR
+			TableViewerColumn colViewer = new TableViewerColumn(this, col);
+			colViewer.setEditingSupport(new PropertyCellEditor(this, parent, style, dp));
 			colViewer.setLabelProvider(new ColumnLabelProvider()
 			{
 				@Override
 				public String getText(Object element)
 				{
-					return dp;
+					return "";
+				}
+
+				@Override
+				public Image getImage(Object element)
+				{
+					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+					return row.getRight().get(dp.getName()) != null ? com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.TRUE_RADIO
+						: com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.FALSE_RADIO;
 				}
 			});
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
