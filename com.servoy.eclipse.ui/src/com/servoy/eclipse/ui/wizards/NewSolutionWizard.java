@@ -213,6 +213,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						//disable must authenticate for now, until we include login form generation, users creation
 						//solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
+
+						//hackaton
+						addComponentVariantsFile(repository, solution);
 					}
 					monitor.worked(1);
 
@@ -256,6 +259,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					solution.setStyleSheetID(defaultTheme.getID());
 					repository.updateRootObject(solution);
 				}
+			}
+
+			private void addComponentVariantsFile(EclipseRepository repository, Solution solution) throws RepositoryException
+			{
+				addMediaFile(solution, " ".getBytes(), "component_variants.less");
+				addMediaFile(solution, " ".getBytes(), "component_variants_ng2.less");
+				repository.updateRootObject(solution);
 			}
 
 			private Media addMediaFile(Solution solution, byte[] content, String fileName) throws RepositoryException
