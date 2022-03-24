@@ -36,6 +36,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.NotEnabledException;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -55,6 +56,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -611,6 +614,43 @@ public class CreateComponentHandler implements IServerService
 								{
 									Object initialValue = property.getInitialValue();
 									if (initialValue != null) webComponent.setProperty(string, initialValue);
+								}
+								if ("autoshow".equals(property.getTag("wizard")))
+								{
+									// prop type should be an array of a custom type..
+									IPropertyType< ? > propType = property.getType();
+									if (propType instanceof CustomJSONArrayType< ? , ? >)
+									{
+
+										CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+											.getCustomJSONTypeDefinition().getType();
+										PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+										Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+										if (wizardProperties.size() > 0)
+										{
+											// feed this wizardProperties into the wizard
+											System.err.println(wizardProperties);
+											Display current = Display.getCurrent();
+											if (current == null) current = Display.getDefault();
+
+											MessageDialog dialog = new MessageDialog(current.getActiveShell(), "A wizard dialog for " + property.getName(),
+												null,
+												"Do make some columns.",
+												MessageDialog.WARNING, new String[] { "OK" }, 0);
+											dialog.open();
+										}
+										else
+										{
+											ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+												"\nhas no wizard properties\n" + propType, null);
+										}
+									}
+									else
+									{
+										ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+											" that is not an custom array type " + propType, null);
+									}
+
 								}
 							}
 						}
