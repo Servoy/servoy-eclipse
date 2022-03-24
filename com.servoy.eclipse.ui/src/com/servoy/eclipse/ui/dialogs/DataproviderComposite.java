@@ -21,22 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -54,7 +49,7 @@ import com.servoy.j2db.util.Pair;
 public class DataproviderComposite extends Composite
 {
 	private final DataProviderTreeViewer dataproviderTreeViewer;
-	private final TableViewer tableViewer;
+	private final WizardConfigurationViewer tableViewer;
 	private final List<Pair<IDataProvider, Object>> input = new ArrayList<>();
 	private final IDialogSettings settings;
 
@@ -75,7 +70,7 @@ public class DataproviderComposite extends Composite
 	}
 
 
-	private TableViewer createTableViewer(SashForm form)
+	private WizardConfigurationViewer createTableViewer(SashForm form)
 	{
 		final Composite container = new Composite(form, SWT.NONE);
 		// define layout for the viewer
@@ -91,18 +86,8 @@ public class DataproviderComposite extends Composite
 
 		container.setLayoutData(gridData);
 
-		TableColumnLayout tableColumnLayout = new TableColumnLayout();
-		container.setLayout(tableColumnLayout);
-		final TableViewer viewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		viewer.getTable().setLinesVisible(true);
-		viewer.getTable().setHeaderVisible(true);
-		viewer.getTable().setToolTipText("The selected columns");
-		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		TableColumn dataproviderColumn = new TableColumn(viewer.getTable(), SWT.LEFT);
-		dataproviderColumn.setText("Columns");
-		dataproviderColumn.setToolTipText("The dataprovider for which a column is created");
-
-		tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
+		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container,
+			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}
 
