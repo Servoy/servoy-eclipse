@@ -21,6 +21,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.ui.util.EditorUtil;
+
 /**
  * @author acostescu
  */
@@ -33,7 +35,8 @@ public class StyleVariantsHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
-		System.out.println(methodName + " - " + args.optString("p"));
+		if ("addStyleVariantFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("addVariantFor=" + args.optString("p"));
+		else if ("editStyleVariantsFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("editVariantsFor=" + args.optString("p"));
 
 		return null;
 	}

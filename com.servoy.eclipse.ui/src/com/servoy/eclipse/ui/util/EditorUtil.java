@@ -675,11 +675,11 @@ public class EditorUtil
 		}
 	}
 
-	public static void openComponentVariantsEditor(String url)
+	public static void openComponentVariantsEditor(String deepLinkArgs)
 	{
 		try
 		{
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(url),
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
 				"com.servoy.eclipse..designer.editor.componentvariantseditor");
 		}
 		catch (PartInitException e)
