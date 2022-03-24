@@ -49,11 +49,13 @@ public class WizardConfigurationViewer extends TableViewer
 
 		private final PropertyDescription dp;
 		private final CheckboxCellEditor checkboxCellEditor;
+		private final List<PropertyDescription> dataproviderProperties;
 
-		private PropertyCellEditor(ColumnViewer viewer, Composite parent, int style, PropertyDescription dp)
+		private PropertyCellEditor(ColumnViewer viewer, Composite parent, int style, PropertyDescription dp, List<PropertyDescription> dataproviderProperties)
 		{
 			super(viewer);
 			this.dp = dp;
+			this.dataproviderProperties = dataproviderProperties;
 			checkboxCellEditor = new CheckboxCellEditor(parent, style);
 		}
 
@@ -80,13 +82,21 @@ public class WizardConfigurationViewer extends TableViewer
 		protected void setValue(Object element, Object value)
 		{
 			Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+			Map<String, Object> rowValue = row.getRight();
 			if (Utils.getAsBoolean(value))
 			{
-				row.getRight().put(dp.getName(), row.getLeft());
-			}
-			else
-			{
-				row.getRight().put(dp.getName(), dp.getDefaultValue());
+				for (PropertyDescription pd : dataproviderProperties)
+				{
+					if (!pd.getName().equals(dp.getName()))
+					{
+						rowValue.put(pd.getName(), pd.getDefaultValue());
+					}
+					else
+					{
+						String dpValue = row.getLeft();
+						rowValue.put(dp.getName(), dpValue);
+					}
+				}
 			}
 			getViewer().update(element, null);
 		}
@@ -125,7 +135,7 @@ public class WizardConfigurationViewer extends TableViewer
 			col.setToolTipText(dp.getDocumentation());
 
 			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new PropertyCellEditor(this, parent, style, dp));
+			colViewer.setEditingSupport(new PropertyCellEditor(this, parent, style, dp, dataproviderProperties));
 			colViewer.setLabelProvider(new ColumnLabelProvider()
 			{
 				@Override

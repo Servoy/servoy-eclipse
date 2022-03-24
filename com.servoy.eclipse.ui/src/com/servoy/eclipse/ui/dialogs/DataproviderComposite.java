@@ -156,19 +156,20 @@ public class DataproviderComposite extends Composite
 		IDataProvider dataprovider = (IDataProvider)((StructuredSelection)dataproviderTreeViewer.getSelection()).getFirstElement();
 		if (dataprovider != null)
 		{
-			input.add(new Pair<String, Map<String, Object>>(dataprovider.getDataProviderID(), getDefaultRow()));
+			input.add(new Pair<String, Map<String, Object>>(dataprovider.getDataProviderID(), getDefaultRow(dataprovider.getDataProviderID())));
 			tableViewer.setInput(input);
 			tableViewer.refresh();
 		}
 	}
 
-	private Map<String, Object> getDefaultRow()
+	private Map<String, Object> getDefaultRow(String val)
 	{
 		Map<String, Object> row = new HashMap<>();
 		for (PropertyDescription pd : dataproviderProperties)
 		{
 			row.put(pd.getName(), pd.getDefaultValue());
 		}
+		row.put(dataproviderProperties.get(0).getName(), val);
 		return row;
 	}
 
