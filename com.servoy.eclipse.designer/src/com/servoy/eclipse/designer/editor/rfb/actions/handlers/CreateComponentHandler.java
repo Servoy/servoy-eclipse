@@ -222,6 +222,7 @@ public class CreateComponentHandler implements IServerService
 						catch (Exception ex)
 						{
 							Debug.error(ex);
+							ex.printStackTrace();
 						}
 					}
 
