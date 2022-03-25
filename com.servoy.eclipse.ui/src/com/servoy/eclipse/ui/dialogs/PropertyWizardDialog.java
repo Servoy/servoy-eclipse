@@ -37,6 +37,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 
 /**
  * @author jcompagner
@@ -94,14 +96,20 @@ public class PropertyWizardDialog extends Dialog
 				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
 			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
 			.collect(Collectors.toList());
+		// should be only 1 (or only 1 with values)
 		List<PropertyDescription> styleProperties = wizardProperties.stream()
 			.filter(prop -> StyleClassPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
+			.collect(Collectors.toList());
+		List<PropertyDescription> i18nProperties = wizardProperties.stream()
+			.filter(prop -> TitleStringPropertyType.class.isAssignableFrom(prop.getType().getClass()))
+			.collect(Collectors.toList());
+		List<PropertyDescription> stringProperties = wizardProperties.stream()
+			.filter(prop -> ServoyStringPropertyType.class.isAssignableFrom(prop.getType().getClass()))
 			.collect(Collectors.toList());
 		if (dataproviderProperties.size() > 0 || styleProperties.size() > 0)
 		{
 			dataproviderComposite = new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
-				dataproviderProperties, styleProperties, input);
+				dataproviderProperties, styleProperties, i18nProperties, stringProperties, input);
 		}
 		return area;
 	}

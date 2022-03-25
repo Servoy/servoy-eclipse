@@ -79,17 +79,25 @@ public class DataproviderComposite extends Composite
 	private final PersistContext persistContext;
 	private final FoundsetDesignToChooserConverter converter;
 	private IDataSourceWrapper lastDatasourceValue;
+	private final List<PropertyDescription> i18nProperties;
+	private final List<PropertyDescription> stringProperties;
+	private final FlattenedSolution flattenedSolution;
 
 
 	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties,
-		List<PropertyDescription> styleProperties, List<Map<String, Object>> childrenProperties)
+		List<PropertyDescription> styleProperties, List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties,
+		List<Map<String, Object>> childrenProperties)
 	{
 		super(parent, SWT.None);
+		this.flattenedSolution = flattenedSolution;
 		this.settings = settings;
 		this.dataproviderProperties = dataproviderProperties;
 		this.styleProperties = styleProperties;
 		this.persistContext = persistContext;
+		this.i18nProperties = i18nProperties;
+		this.stringProperties = stringProperties;
+
 		converter = new FoundsetDesignToChooserConverter(flattenedSolution);
 
 		this.setLayout(new FillLayout());
@@ -97,7 +105,7 @@ public class DataproviderComposite extends Composite
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 
 		if (dataproviderProperties.size() > 0)
-			dataproviderTreeViewer = createDataproviderTree(form2, persistContext, flattenedSolution, table, dataproviderOptions);
+			dataproviderTreeViewer = createDataproviderTree(form2, table, dataproviderOptions);
 		else dataproviderTreeViewer = null;
 
 		if (styleProperties.size() > 0) // should really be alway 1 size..
@@ -149,9 +157,9 @@ public class DataproviderComposite extends Composite
 		if (dataproviderTreeViewer != null && stylePropertiesViewer != null)
 			form2.setWeights(70, 30);
 
-		tableViewer = createTableViewer(form);
-		if (childrenProperties != null) setInputProperties(childrenProperties);
+		tableViewer = createTableViewer(form, table);
 		tableViewer.setInput(input);
+		if (childrenProperties != null) setInputProperties(childrenProperties);
 	}
 
 	private void setInputProperties(List<Map<String, Object>> childrenProperties)
@@ -173,7 +181,8 @@ public class DataproviderComposite extends Composite
 		return null;
 	}
 
-	private WizardConfigurationViewer createTableViewer(SashForm form)
+
+	private WizardConfigurationViewer createTableViewer(SashForm form, ITable table)
 	{
 		final Composite container = new Composite(form, SWT.NONE);
 		// define layout for the viewer
@@ -189,13 +198,12 @@ public class DataproviderComposite extends Composite
 
 		container.setLayoutData(gridData);
 
-		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, dataproviderProperties, styleProperties,
-			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, persistContext, flattenedSolution, table, dataproviderProperties,
+			styleProperties, i18nProperties, stringProperties, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}
 
-	private DataProviderTreeViewer createDataproviderTree(SashForm form, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		DataProviderOptions dataproviderOptions)
+	private DataProviderTreeViewer createDataproviderTree(SashForm form, ITable table, DataProviderOptions dataproviderOptions)
 	{
 
 		Composite parent = new Composite(form, SWT.NONE);
@@ -374,7 +382,30 @@ public class DataproviderComposite extends Composite
 
 	public List<Map<String, Object>> getResult()
 	{
-		return input.stream().map(pair -> pair.getRight()).collect(Collectors.toList());
+		Map<String, String> prefillProperties = new HashMap<>();
+		for (PropertyDescription dp : stringProperties)
+		{
+			Object tag = dp.getTag("wizard");
+			if (tag instanceof JSONObject)
+			{
+				String prefillProperty = ((JSONObject)tag).getString("prefill");
+				if (prefillProperty != null)
+				{
+					prefillProperties.put(prefillProperty, dp.getName());
+					continue;
+				}
+			}
+		}
+		List<Map<String, Object>> returnValue = input.stream().map(pair -> pair.getRight()).collect(Collectors.toList());
+		if (prefillProperties.size() > 0)
+		{
+			returnValue.forEach(row -> {
+				prefillProperties.forEach((key, value) -> {
+					row.put(value, row.get(key));
+				});
+			});
+		}
+		return returnValue;
 	}
 
 	private static class JSONContentProvider implements IStructuredContentProvider

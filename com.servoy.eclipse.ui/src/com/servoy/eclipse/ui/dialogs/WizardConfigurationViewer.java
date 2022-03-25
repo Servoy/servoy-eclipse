@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +41,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
+import com.servoy.eclipse.ui.labelproviders.DefaultValueDelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -50,6 +59,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class WizardConfigurationViewer extends TableViewer
 {
+	private ITable table;
+
 	public abstract class CentredImageCellLabelProvider extends OwnerDrawLabelProvider
 	{
 		public CentredImageCellLabelProvider()
@@ -155,13 +166,13 @@ public class WizardConfigurationViewer extends TableViewer
 	{
 
 		private final PropertyDescription dp;
-		private final TextCellEditor textCellEditor;
+		private TextCellEditor textCellEditor;
 
-		private TextCellEditorSupport(ColumnViewer viewer, Composite parent, int style, PropertyDescription dp)
+		private TextCellEditorSupport(ColumnViewer viewer, PropertyDescription dp, TextCellEditor editor)
 		{
 			super(viewer);
 			this.dp = dp;
-			textCellEditor = new TextCellEditor(getTable());
+			textCellEditor = editor;
 		}
 
 		@Override
@@ -225,10 +236,19 @@ public class WizardConfigurationViewer extends TableViewer
 		}
 	}
 
-	public WizardConfigurationViewer(Composite parent, List<PropertyDescription> dataproviderProperties, List<PropertyDescription> styleClassProperties,
-		int style)
+	private final List<TextCellEditorSupport> i18nColumns = new ArrayList<>();
+	private final PersistContext persistContext;
+	private final FlattenedSolution fs;
+
+	public WizardConfigurationViewer(Composite parent, PersistContext persistContext, FlattenedSolution fs, ITable table,
+		List<PropertyDescription> dataproviderProperties,
+		List<PropertyDescription> styleClassProperties,
+		List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties, int style)
 	{
 		super(parent, style);
+		this.persistContext = persistContext;
+		this.fs = fs;
+		this.table = table;
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
 		parent.setLayout(tableColumnLayout);
 		getTable().setLinesVisible(true);
@@ -280,9 +300,57 @@ public class WizardConfigurationViewer extends TableViewer
 			col.setToolTipText(dp.getDocumentation());
 
 			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new TextCellEditorSupport(this, parent, style, dp));
+			colViewer.setEditingSupport(new TextCellEditorSupport(this, dp, new TextCellEditor(getTable())));
 			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
 		}
+
+		for (PropertyDescription dp : i18nProperties)
+		{
+			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
+			col.setText(dp.getName());
+			col.setToolTipText(dp.getDocumentation());
+
+			TableViewerColumn colViewer = new TableViewerColumn(this, col);
+			TextCellEditorSupport editingSupport = new TextCellEditorSupport(this, dp,
+				new TagsAndI18NTextCellEditor(getTable(), persistContext, fs, new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT), table,
+					"Edit title/text property", Activator.getDefault().getDesignClient(), false));
+			colViewer.setEditingSupport(editingSupport);
+			i18nColumns.add(editingSupport);
+			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
+			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
+		}
+
+		for (PropertyDescription dp : stringProperties)
+		{
+			Object tag = dp.getTag("wizard");
+			if (tag instanceof JSONObject)
+			{
+				String prefillProperty = ((JSONObject)tag).getString("prefill");
+				if (prefillProperty != null)
+				{
+					continue;
+				}
+			}
+			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
+			col.setText(dp.getName());
+			col.setToolTipText(dp.getDocumentation());
+
+			TableViewerColumn colViewer = new TableViewerColumn(this, col);
+			colViewer.setEditingSupport(new TextCellEditorSupport(this, dp, new TextCellEditor(getTable())));
+			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
+			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
+		}
+	}
+
+	/**
+	 * @param table
+	 */
+	public void setTable(ITable table)
+	{
+		this.table = table;
+		i18nColumns.forEach(editingSupport -> editingSupport.textCellEditor = new TagsAndI18NTextCellEditor(getTable(), persistContext, fs,
+			new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT), table,
+			"Edit title/text property", Activator.getDefault().getDesignClient(), false));
 	}
 }
