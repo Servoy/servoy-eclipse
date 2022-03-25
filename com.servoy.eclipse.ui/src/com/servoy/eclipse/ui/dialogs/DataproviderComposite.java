@@ -25,10 +25,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -45,14 +47,12 @@ import org.sablo.specification.PropertyDescription;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
-import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
-import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.types.FoundsetDesignToChooserConverter;
+import com.servoy.eclipse.ui.property.types.FoundsetPropertyEditor;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -205,14 +205,35 @@ public class DataproviderComposite extends Composite
 			}
 		};
 
-		dataSourceViewer.setContentProvider(new TableContentProvider());
-		dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-		dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
-		dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
-		if (((Form)persistContext.getContext()).getDataSource() != null)
+		dataSourceViewer.setContentProvider(FoundsetPropertyEditor.getFoundsetContentProvider(persistContext));
+		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter));
+		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), converter));
+		dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
-			lastDatasourceValue = DataSourceWrapperFactory.getWrapper(((Form)persistContext.getContext()).getDataSource());
-			dataSourceViewer.setSelection(new StructuredSelection(lastDatasourceValue));
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				handleDataSourceSelected();
+			}
+		});
+		ITable formTable = ((Form)persistContext.getContext()).getDataSource() != null
+			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Form)persistContext.getContext()).getDataSource()) : null;
+		dataSourceViewer.setInput(FoundsetPropertyEditor.getFoundsetInputOptions(formTable, null, false));
+		GridData data = new GridData(SWT.FILL, SWT.NONE, true, false);
+		data.horizontalAlignment = GridData.FILL;
+		dataSourceViewer.getControl().setLayoutData(data);
+		IPersist persist = persistContext.getPersist();
+		if (persist instanceof WebComponent)
+		{
+			WebComponent component = (WebComponent)persist;
+			String fsProperty = ((FoundsetLinkedConfig)dataproviderProperties.get(0).getConfig()).getForFoundsetName();
+			Object fsValue = component.getProperty(fsProperty);
+			if (fsValue == null)
+			{
+				fsValue = component.getPropertyDefaultValueClone(fsProperty);
+			}
+			dataSourceViewer.setSelection(new StructuredSelection(converter.convertJSONValueToChooserValue(fsValue)));
+			dataSourceViewer.setValid(true);
+			lastDatasourceValue = getTableWrapper();
 		}
 		DataProviderTreeViewer treeviewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
 			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
@@ -244,10 +265,10 @@ public class DataproviderComposite extends Composite
 		if (!selection.isEmpty())
 		{
 			IDataSourceWrapper tw = getTableWrapper();
-			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tw.getDataSource());
+			if (tw == null && lastDatasourceValue == null || tw.equals(lastDatasourceValue)) return;
+			ITable table = tw != null ? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tw.getDataSource()) : null;
 			if (table != null)
 			{
-				if (tw.equals(lastDatasourceValue)) return;
 				if (!input.isEmpty() && !MessageDialog.openConfirm(getShell(), "Change datasource",
 					"Changing the datasource will remove existing columns. Are you sure that you want to change it?"))
 				{
@@ -279,6 +300,11 @@ public class DataproviderComposite extends Composite
 	private IDataSourceWrapper getTableWrapper()
 	{
 		IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
+		if (selection.getFirstElement() == FormFoundsetEntryContentProvider.FORM_FOUNDSET)
+		{
+			String dataSource = ((Form)persistContext.getContext()).getDataSource();
+			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
+		}
 		return (IDataSourceWrapper)selection.getFirstElement();
 	}
 
