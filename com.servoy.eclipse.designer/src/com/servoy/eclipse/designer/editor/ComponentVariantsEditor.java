@@ -17,14 +17,13 @@
 
 package com.servoy.eclipse.designer.editor;
 
-import java.awt.Composite;
-
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.xhtmlrenderer.css.parser.property.PrimitivePropertyBuilders.Display;
 
 import com.servoy.eclipse.core.resource.ComponentVariantsEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -110,7 +109,7 @@ public class ComponentVariantsEditor extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/svyStyleWizard?";
+		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/svyStyleWizard?nodebug=true&";
 		if (getEditorInput() instanceof ComponentVariantsEditorInput)
 		{
 			url = url + ((ComponentVariantsEditorInput)getEditorInput()).getDeepLinkArgs();
