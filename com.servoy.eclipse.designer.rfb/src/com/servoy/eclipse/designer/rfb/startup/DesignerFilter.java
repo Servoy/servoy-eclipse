@@ -372,6 +372,7 @@ public class DesignerFilter implements Filter
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
+									componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());
 
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())

@@ -11,6 +11,39 @@
                 <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    <button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
+                        [popoverTitle]="popTitle" triggers="manual" #popOv="ngbPopover" (click)="onVariantsClick($event, popOv, component)">
+                        <i name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
+                    </button>
+
+                        <ng-template #popTitle>Available styling variants:</ng-template>
+
+                        <ng-template #popContent let-c="c">
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group">
+                                        <label for="dateOfBirth">
+                                            1 2 3 4 5
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
+                                <button name="variants" type="button" 
+                                    class="btn btn-outline-dark btn-sm" 
+                                    (click)="doAddVariant($event, c)">
+                                    <i name="variants" class="fa fa-plus" aria-hidden="true"></i>
+                                    Add
+                                </button>
+                                <button name="variants" type="button" 
+                                    class="btn btn-outline-dark btn-sm" 
+                                    (click)="doEditVariants($event, c)">
+                                    <i name="variants" class="fa fa-pen" aria-hidden="true"></i>
+                                    Edit
+                                </button>
+                            </div>
+                        </ng-template>
+
                     <ul>
                     <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
                     </ul>

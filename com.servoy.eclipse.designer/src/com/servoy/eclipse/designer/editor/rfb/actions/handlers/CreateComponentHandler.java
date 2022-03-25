@@ -55,6 +55,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -69,9 +71,14 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
+import com.servoy.eclipse.ui.dialogs.PropertyWizardDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -96,6 +103,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
@@ -588,18 +596,18 @@ public class CreateComponentHandler implements IServerService
 							CSSPositionUtils.setSize(webComponent, 200, 100);
 						}
 						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-						for (String string : allPropertiesNames)
+						for (String propertyName : allPropertiesNames)
 						{
-							PropertyDescription property = spec.getProperty(string);
+							PropertyDescription property = spec.getProperty(propertyName);
 							if (property != null)
 							{
-								if (args.has(string) && webComponent.getProperty(string) == null)
+								if (args.has(propertyName) && webComponent.getProperty(propertyName) == null)
 								{
-									webComponent.setProperty(string, args.opt(string));
+									webComponent.setProperty(propertyName, args.opt(propertyName));
 									if (property.getType() == FormComponentPropertyType.INSTANCE)
 									{
 										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
+										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(propertyName), flattenedSolution);
 										if (form != null)
 										{
 											Dimension size = form.getSize();
@@ -610,7 +618,57 @@ public class CreateComponentHandler implements IServerService
 								else if (property.getInitialValue() != null)
 								{
 									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(string, initialValue);
+									if (initialValue != null) webComponent.setProperty(propertyName, initialValue);
+								}
+								if ("autoshow".equals(property.getTag("wizard")))
+								{
+									// prop type should be an array of a custom type..
+									IPropertyType< ? > propType = property.getType();
+									if (propType instanceof CustomJSONArrayType< ? , ? >)
+									{
+
+										CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+											.getCustomJSONTypeDefinition().getType();
+										PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+										Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+										if (wizardProperties.size() > 0)
+										{
+											// feed this wizardProperties into the wizard
+											System.err.println(wizardProperties);
+											Display current = Display.getCurrent();
+											if (current == null) current = Display.getDefault();
+
+											PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+											PropertyWizardDialog dialog = new PropertyWizardDialog(current.getActiveShell(), context, flattenedSolution, table,
+												new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
+													INCLUDE_RELATIONS.NESTED, true, true, null),
+												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties);
+											dialog.open();
+											List<Map<String, Object>> result = dialog.getResult();
+											for (int i = 0; i < result.size(); i++)
+											{
+												Map<String, Object> row = result.get(i);
+												WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, compName, i, null);
+												row.forEach((key, value) -> bean.setProperty(key, value));
+											}
+
+										}
+										else
+										{
+											ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+												"\nhas no wizard properties\n" + propType, null);
+										}
+									}
+									else
+									{
+										ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+											" that is not an custom array type " + propType, null);
+									}
+
 								}
 							}
 						}
