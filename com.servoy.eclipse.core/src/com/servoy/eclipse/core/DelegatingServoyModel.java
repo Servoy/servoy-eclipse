@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.json.JSONArray;
 
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.model.IFormComponentListener;
@@ -648,5 +649,29 @@ public class DelegatingServoyModel implements IDeveloperServoyModel
 	public void removeResourceChangeListener(IResourceChangeListener resourceChangeListener)
 	{
 		realModel.removeResourceChangeListener(resourceChangeListener);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#setVariantsFor(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setVariantsFor(String variantCategoryName, String jsonArrayString)
+	{
+		realModel.setVariantsFor(variantCategoryName, jsonArrayString);
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#getExistingVariants(java.lang.String)
+	 */
+	@Override
+	public JSONArray getExistingVariants(String variantCategoryName)
+	{
+		// TODO Auto-generated method stub
+		return realModel.getExistingVariants(variantCategoryName);
 	}
 }
