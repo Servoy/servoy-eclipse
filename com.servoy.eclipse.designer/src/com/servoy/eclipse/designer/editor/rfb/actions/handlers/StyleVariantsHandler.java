@@ -35,8 +35,12 @@ public class StyleVariantsHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
-		if ("addStyleVariantFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("addVariantFor=" + args.optString("p"));
-		else if ("editStyleVariantsFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("editVariantsFor=" + args.optString("p"));
+		String variantCategory = args.optString("p");
+		if ("addStyleVariantFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("addVariantFor=" + variantCategory);
+		else if ("editStyleVariantsFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("editVariantsFor=" + variantCategory);
+		else if ("getStyleVariantsFor".equals(methodName))
+			return new String[] { variantCategory + "1", variantCategory + "2", variantCategory + "3", "btn-primary" };
+		// TODO use the manager
 
 		return null;
 	}

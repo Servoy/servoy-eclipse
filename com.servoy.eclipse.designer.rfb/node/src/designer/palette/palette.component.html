@@ -8,7 +8,7 @@
         </ng-template>
          <ng-template ngbPanelContent>
             <ul>
-                <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
+                <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children, component.lastChosenVariant)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
                     <button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
@@ -16,17 +16,13 @@
                         <i name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
                     </button>
 
-                        <ng-template #popTitle>Available styling variants:</ng-template>
+                        <ng-template #popTitle>Available styling variants (drag one of them to the form):</ng-template>
 
-                        <ng-template #popContent let-c="c">
+                        <ng-template #popContent let-c="c" let-po="po">
                             <div class="modal-body">
-                                <form>
-                                    <div class="form-group">
-                                        <label for="dateOfBirth">
-                                            1 2 3 4 5
-                                        </label>
-                                    </div>
-                                </form>
+                                <p *ngFor="let variant of c.styleVariants" (mousedown)="variantChosen(po, component, variant)">
+                                    Sample <i>{{c.styleVariantCategory}}</i> - <b>{{variant}}</b>
+                                </p><br/>
                             </div>
                             <div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
                                 <button name="variants" type="button" 

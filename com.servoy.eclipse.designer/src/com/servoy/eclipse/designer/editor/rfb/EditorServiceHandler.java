@@ -118,6 +118,7 @@ public class EditorServiceHandler implements IServerService
 		StyleVariantsHandler styleVariantsHandler = new StyleVariantsHandler();
 		configuredHandlers.put("addStyleVariantFor", styleVariantsHandler);
 		configuredHandlers.put("editStyleVariantsFor", styleVariantsHandler);
+		configuredHandlers.put("getStyleVariantsFor", styleVariantsHandler);
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));
