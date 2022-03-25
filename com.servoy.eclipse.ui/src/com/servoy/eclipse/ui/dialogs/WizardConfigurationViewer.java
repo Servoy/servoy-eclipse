@@ -36,9 +36,11 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.json.JSONObject;
@@ -341,6 +343,57 @@ public class WizardConfigurationViewer extends TableViewer
 			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
 		}
+
+		TableColumn delete = new TableColumn(getTable(), SWT.CENTER);
+		delete.setText("");
+		delete.setToolTipText("Delete the column");
+		delete.setData("delete", "true");
+		TableViewerColumn deleteViewerColumn = new TableViewerColumn(this, delete);
+		deleteViewerColumn.setLabelProvider(new CentredImageCellLabelProvider()
+		{
+			@Override
+			public Image getImage(Object element)
+			{
+				return com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png");
+			}
+		});
+		getTable().addListener(SWT.MouseDown, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				Rectangle clientArea = getTable().getClientArea();
+				Point pt = new Point(event.x, event.y);
+				int index = getTable().getTopIndex();
+				while (index < getTable().getItemCount())
+				{
+					boolean visible = false;
+					TableItem item = getTable().getItem(index);
+					for (int i = 0; i < getTable().getColumnCount(); i++)
+					{
+						Rectangle rect = item.getBounds(i);
+						if (rect.contains(pt))
+						{
+							if (i == getTable().getColumnCount() - 1)
+							{
+								List<Pair<String, Map<String, Object>>> input = (List<Pair<String, Map<String, Object>>>)getInput();
+								input.remove(index);
+								refresh();
+							}
+						}
+						if (!visible && rect.intersects(clientArea))
+						{
+							visible = true;
+						}
+					}
+					if (!visible)
+						return;
+					index++;
+				}
+			}
+		});
+		tableColumnLayout.setColumnData(delete, new ColumnWeightData(40, 100, true));
+
+
 	}
 
 	/**
