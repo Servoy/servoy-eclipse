@@ -90,13 +90,43 @@ import com.servoy.j2db.util.Utils;
 public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 {
 
+//	class MyJSonObject
+//	{
+//		public String type;
+//		public JSONObject jsonObj;
+//	}
+
 	private final IDebugClient state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
-
+//	private final IFile styles_wizard;
+//	private final List<MyJSonObject> list_style_wizard = new ArrayList<>();
 
 	public JSDeveloperSolutionModel(IDebugClient state)
 	{
 		this.state = state;
+//		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile("styles_wizard.less");
+//		try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
+//		{
+//			String line;
+//			MyJSonObject jsonObj = null;
+//			boolean jsonObjectStart = false;
+//			boolean nameFound = false;
+//			boolean typeFound = false;
+//			while ((line = br.readLine()) != null)
+//			{
+//				int typePos = line.indexOf("@type");
+//				if (typePos > 0)
+//				{
+//					jsonObj = new MyJSonObject();
+//					jsonObj.type = line.substring(typePos + 5).trim();
+//				}
+//			}
+//		}
+//		catch (IOException | CoreException e)
+//		{
+//			e.printStackTrace();
+//		}
+
 	}
 
 	/*
@@ -560,6 +590,10 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 
 	public JSONArray js_getExistingVariants(String variantCategoryName)
 	{
+//
+//		IFile stylesVariant = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile("stylesVarian");
+//		stles
+//		JSONArray myFileArray = new JSONArray()
 
 		JSONArray myArray = new JSONArray();
 
@@ -590,13 +624,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		return myArray;
 	}
 
-	public void js_setVariantsFor(String variantCategoryName, JSONArray components)
+	public void js_setVariantsFor(String variantCategoryName, String jsonArrayString)
 	{
-		System.out.println(variantCategoryName + " : " + components.toString());
-	}
 
-	public void js_setVariants(JSONArray variants)
-	{
-		System.out.println(variants.toString());
+		System.out.println(variantCategoryName + " : " + jsonArrayString);
 	}
 }
