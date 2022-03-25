@@ -24,8 +24,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -35,15 +37,30 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
+import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.types.FoundsetDesignToChooserConverter;
+import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -53,9 +70,14 @@ public class DataproviderComposite extends Composite
 {
 	private final DataProviderTreeViewer dataproviderTreeViewer;
 	private final WizardConfigurationViewer tableViewer;
-	private final List<Pair<String, Map<String, Object>>> input = new ArrayList<>();
+	private List<Pair<String, Map<String, Object>>> input = new ArrayList<>();
 	private final IDialogSettings settings;
 	private final List<PropertyDescription> dataproviderProperties;
+	private TreeSelectViewer dataSourceViewer;
+	private final PersistContext persistContext;
+	private final FoundsetDesignToChooserConverter converter;
+	private IDataSourceWrapper lastDatasourceValue;
+
 
 	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties)
@@ -63,12 +85,14 @@ public class DataproviderComposite extends Composite
 		super(parent, SWT.None);
 		this.settings = settings;
 		this.dataproviderProperties = dataproviderProperties;
+		this.persistContext = persistContext;
+		converter = new FoundsetDesignToChooserConverter(flattenedSolution);
 
 		this.setLayout(new FillLayout());
 		SashForm form = new SashForm(this, SWT.HORIZONTAL);
 		form.setLayout(new FillLayout());
 
-		dataproviderTreeViewer = createDataproviderTree(form, persistContext, flattenedSolution, table, dataproviderOptions);
+		dataproviderTreeViewer = createDataproviderTree(form, flattenedSolution, table, dataproviderOptions);
 
 		tableViewer = createTableViewer(form);
 		tableViewer.setInput(input);
@@ -96,7 +120,7 @@ public class DataproviderComposite extends Composite
 		return viewer;
 	}
 
-	private DataProviderTreeViewer createDataproviderTree(SashForm form, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+	private DataProviderTreeViewer createDataproviderTree(SashForm form, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions)
 	{
 		GridData gridData = new GridData();
@@ -117,13 +141,42 @@ public class DataproviderComposite extends Composite
 		parent.setLayout(layout);
 		parent.setLayoutData(gridData);
 
-		Composite confAndDelete = new Composite(parent, SWT.NONE);
-		GridLayout confAndDeleteLayout = new GridLayout(3, false);
-		confAndDeleteLayout.marginHeight = 0;
-		confAndDeleteLayout.marginWidth = 0;
-		confAndDelete.setLayout(confAndDeleteLayout);
-		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		Composite datasourceComposite = new Composite(parent, SWT.NONE);
+		GridLayout datasourceLayout = new GridLayout(2, false);
+		datasourceLayout.marginHeight = 0;
+		datasourceLayout.marginWidth = 0;
+		datasourceComposite.setLayout(datasourceLayout);
+		datasourceComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 
+		Label datasourceLabel = new Label(datasourceComposite, SWT.NONE);
+		datasourceLabel.setText("&Datasource");
+
+		dataSourceViewer = new TreeSelectViewer(datasourceComposite, SWT.NONE)
+		{
+			@Override
+			protected IStructuredSelection openDialogBox(Control control)
+			{
+
+				return super.openDialogBox(control);
+			}
+		};
+
+		dataSourceViewer.setContentProvider(new TableContentProvider());
+		dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
+		dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
+		dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				handleDataSourceSelected();
+			}
+		});
+		dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
+		if (((Form)persistContext.getContext()).getDataSource() != null)
+		{
+			lastDatasourceValue = DataSourceWrapperFactory.getWrapper(((Form)persistContext.getContext()).getDataSource());
+			dataSourceViewer.setSelection(new StructuredSelection(lastDatasourceValue));
+		}
 		DataProviderTreeViewer treeviewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
 			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
 			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
@@ -149,6 +202,51 @@ public class DataproviderComposite extends Composite
 		});
 
 		return treeviewer;
+	}
+
+	protected void handleDataSourceSelected()
+	{
+		if (dataproviderTreeViewer == null) return;
+		IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
+		if (!selection.isEmpty())
+		{
+			IDataSourceWrapper tw = getTableWrapper();
+			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tw.getDataSource());
+			if (table != null)
+			{
+				if (tw.equals(lastDatasourceValue)) return;
+				if (!input.isEmpty() && !MessageDialog.openConfirm(getShell(), "Change datasource",
+					"Changing the datasource will remove existing columns. Are you sure that you want to change it?"))
+				{
+					dataSourceViewer.setSelection(new StructuredSelection(lastDatasourceValue));
+					return;
+				}
+				lastDatasourceValue = tw;
+				input = new ArrayList<>();
+				tableViewer.setInput(input);
+				tableViewer.refresh();
+				setTable(table, persistContext);
+				IPersist persist = persistContext.getPersist();
+				if (persist instanceof WebComponent)
+				{
+					WebComponent component = (WebComponent)persist;
+					String fsProperty = ((FoundsetLinkedConfig)dataproviderProperties.get(0).getConfig()).getForFoundsetName();
+
+					JSONObject value = converter.convertFromChooserValueToJSONValue(tw, null);
+					component.setProperty(fsProperty, value);
+				}
+			}
+			else
+			{
+				MessageDialog.openError(getShell(), "Datasource not found", "The datasource '" + tw.getDataSource() + "' was not found.");
+			}
+		}
+	}
+
+	private IDataSourceWrapper getTableWrapper()
+	{
+		IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
+		return (IDataSourceWrapper)selection.getFirstElement();
 	}
 
 	private void moveDataproviderSelection()
