@@ -36,6 +36,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -123,6 +125,7 @@ import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
@@ -132,6 +135,7 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
@@ -1181,14 +1185,14 @@ public class WarExporter
 			try
 			{
 				IFile serverDBIFile = dataModelManager.getServerDBIFile(serverName);
-				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()));
+				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()), () -> DatabaseUtils.serializeServerSettings(ServerSettings.DEFAULT));
 
 				File serverDir = new File(dbDir, serverName);
 				serverDir.mkdirs();
 
 				for (IFile tableDBIfile : TableDefinitionUtils.getTablesDBIList(serverName, tablesNeeded, exportModel.isExportAllTablesFromReferencedServers()))
 				{
-					copyFileIfExists(tableDBIfile, new File(serverDir, tableDBIfile.getName()));
+					copyFileIfExists(tableDBIfile, new File(serverDir, tableDBIfile.getName()), null);
 				}
 			}
 			catch (Exception e)
@@ -1198,13 +1202,20 @@ public class WarExporter
 		});
 	}
 
-	private static void copyFileIfExists(IFile src, File dest) throws FileNotFoundException, IOException, CoreException
+	private static void copyFileIfExists(IFile src, File dest, Supplier<String> defaultContents) throws IOException, CoreException
 	{
 		if (src.exists())
 		{
 			try (FileOutputStream fos = new FileOutputStream(dest))
 			{
 				IOUtils.copy(src.getContents(true), fos);
+			}
+		}
+		else if (defaultContents != null)
+		{
+			try (FileOutputStream fos = new FileOutputStream(dest))
+			{
+				IOUtils.write(defaultContents.get(), fos, Charset.forName("UTF-8"));
 			}
 		}
 	}
@@ -2254,7 +2265,6 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
-		if (true) return null; // RAGTEST
 		pluginFiles = new HashSet<File>();
 		List<String> pluginLocations = new ArrayList<String>();
 		File eclipseParent = null;

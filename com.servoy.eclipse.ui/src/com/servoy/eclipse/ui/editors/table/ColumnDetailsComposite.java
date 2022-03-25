@@ -516,7 +516,7 @@ public class ColumnDetailsComposite extends Composite
 			ServoyLog.logError(e);
 		}
 
-		sortIgnoringcaseCombo.setEnabled(column.getDataProviderType() == IColumnTypes.TEXT);
+		sortIgnoringcaseCombo.setEnabled(column.getDataProviderType() == IColumnTypes.TEXT && !column.isUUID());
 
 		ColumnInfoBean columnInfoBean = new ColumnInfoBean(column.getColumnInfo());
 

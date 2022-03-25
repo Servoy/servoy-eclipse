@@ -556,7 +556,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		else
 		{
-			String json = serializeServerSettings(serverSettings);
+			String json = DatabaseUtils.serializeServerSettings(serverSettings);
 			try
 			{
 				ResourcesUtils.createOrWriteFileUTF8(dbiFile, json, true);
@@ -1003,21 +1003,6 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		tobj.put(TableDef.PROP_COLUMNS, carray);
 		return tobj.toString(true);
-	}
-
-	/** RAGTEST Doc
-	 * Creates a .dbi (JSON format) file like structured String from the given table information.
-	 *
-	 * @param tableInfo the information about the table to be transformed into a JSON String.
-	 * @return the JSON representation of tableInfo.
-	 * @throws JSONException if something goes wrong with the serialize.
-	 */
-	public String serializeServerSettings(ServerSettings serverSettings) throws JSONException
-	{
-		ServoyJSONObject json = new ServoyJSONObject();
-		json.put("sortIgnorecase", serverSettings.isSortIgnorecase());
-		json.put("sortingNullprecedence", serverSettings.getSortingNullprecedence().name());
-		return json.toString(true);
 	}
 
 	public static String getFileName(String tableName)
