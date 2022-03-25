@@ -54,12 +54,15 @@ public class PropertyWizardDialog extends Dialog
 	private final Collection<PropertyDescription> wizardProperties;
 	private final PropertyDescription property;
 	private DataproviderComposite dataproviderComposite;
+	private final List<Map<String, Object>> input;
 
 	/**
 	 * @param parentShell
+	 * @param input
 	 */
 	public PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		DataProviderOptions dataproviderOptions, final IDialogSettings settings, PropertyDescription property, Collection<PropertyDescription> wizardProperties)
+		DataProviderOptions dataproviderOptions, final IDialogSettings settings, PropertyDescription property, Collection<PropertyDescription> wizardProperties,
+		List<Map<String, Object>> input)
 	{
 		super(parentShell);
 		this.parentShell = parentShell;
@@ -70,6 +73,7 @@ public class PropertyWizardDialog extends Dialog
 		this.settings = settings;
 		this.property = property;
 		this.wizardProperties = wizardProperties;
+		this.input = input;
 	}
 
 	@Override
@@ -97,7 +101,7 @@ public class PropertyWizardDialog extends Dialog
 		if (dataproviderProperties.size() > 0 || styleProperties.size() > 0)
 		{
 			dataproviderComposite = new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
-				dataproviderProperties, styleProperties);
+				dataproviderProperties, styleProperties, input);
 		}
 		return area;
 	}

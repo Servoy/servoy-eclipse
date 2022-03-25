@@ -493,6 +493,8 @@ public class EditorServiceHandler implements IServerService
 			}
 
 		});
+
+		configuredHandlers.put("openConfigurator", new OpenPropertiesWizard(editorPart, selectionProvider));
 	}
 
 	@Override

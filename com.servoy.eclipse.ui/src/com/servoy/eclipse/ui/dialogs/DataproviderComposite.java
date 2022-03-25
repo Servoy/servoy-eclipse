@@ -83,7 +83,7 @@ public class DataproviderComposite extends Composite
 
 	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties,
-		List<PropertyDescription> styleProperties)
+		List<PropertyDescription> styleProperties, List<Map<String, Object>> childrenProperties)
 	{
 		super(parent, SWT.None);
 		this.settings = settings;
@@ -150,9 +150,28 @@ public class DataproviderComposite extends Composite
 			form2.setWeights(70, 30);
 
 		tableViewer = createTableViewer(form);
+		if (childrenProperties != null) setInputProperties(childrenProperties);
 		tableViewer.setInput(input);
 	}
 
+	private void setInputProperties(List<Map<String, Object>> childrenProperties)
+	{
+		input = new ArrayList<>();
+		for (Map<String, Object> map : childrenProperties)
+		{
+			String dpValue = findDPValue(map);
+			input.add(new Pair<>(dpValue, map));
+		}
+	}
+
+	private String findDPValue(Map<String, Object> map)
+	{
+		for (PropertyDescription dp : dataproviderProperties)
+		{
+			if (map.get(dp.getName()) != null) return map.get(dp.getName()).toString();
+		}
+		return null;
+	}
 
 	private WizardConfigurationViewer createTableViewer(SashForm form)
 	{

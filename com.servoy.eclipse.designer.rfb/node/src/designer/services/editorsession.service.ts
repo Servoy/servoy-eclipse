@@ -11,7 +11,7 @@ interface CallbackFunction {
 
 @Injectable()
 export class EditorSessionService implements ServiceProvider {
-
+ 
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
     private state = new State();
@@ -111,6 +111,10 @@ export class EditorSessionService implements ServiceProvider {
 
     requestSelection() {
         return this.wsSession.callService('formeditor', 'requestSelection', null, true)
+    }
+
+    openConfigurator(property: string) {
+        return this.wsSession.callService('formeditor', 'openConfigurator', property, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {

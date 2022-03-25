@@ -667,6 +667,15 @@ export class ContextMenuComponent implements OnInit {
         this.menuItems.push(entry);
 
         entry = new ContextmenuItem(
+            'Configure columns', //TODO make it dynamic
+            () => {
+                this.hide();
+                this.editorSession.openConfigurator("columns");
+            }
+        );
+        this.menuItems.push(entry);
+
+        entry = new ContextmenuItem(
             'Delete',
             () => {
                 this.hide();
