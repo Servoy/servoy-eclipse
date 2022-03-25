@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -69,7 +70,12 @@ public class PropertyWizardDialog extends Dialog
 		this.settings = settings;
 		this.property = property;
 		this.wizardProperties = wizardProperties;
+	}
 
+	@Override
+	protected boolean isResizable()
+	{
+		return true;
 	}
 
 	@Override
@@ -82,11 +88,16 @@ public class PropertyWizardDialog extends Dialog
 		List<PropertyDescription> dataproviderProperties = wizardProperties.stream()
 			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
 				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
+			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
 			.collect(Collectors.toList());
-		if (dataproviderProperties.size() > 0)
+		List<PropertyDescription> styleProperties = wizardProperties.stream()
+			.filter(prop -> StyleClassPropertyType.class.isAssignableFrom(prop.getType().getClass()))
+			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
+			.collect(Collectors.toList());
+		if (dataproviderProperties.size() > 0 || styleProperties.size() > 0)
 		{
 			dataproviderComposite = new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
-				dataproviderProperties);
+				dataproviderProperties, styleProperties);
 		}
 		return area;
 	}

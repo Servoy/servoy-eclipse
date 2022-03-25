@@ -25,11 +25,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -39,6 +38,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
@@ -69,10 +69,12 @@ import com.servoy.j2db.util.Pair;
 public class DataproviderComposite extends Composite
 {
 	private final DataProviderTreeViewer dataproviderTreeViewer;
+	private ListViewer stylePropertiesViewer;
 	private final WizardConfigurationViewer tableViewer;
 	private List<Pair<String, Map<String, Object>>> input = new ArrayList<>();
 	private final IDialogSettings settings;
 	private final List<PropertyDescription> dataproviderProperties;
+	private final List<PropertyDescription> styleProperties;
 	private TreeSelectViewer dataSourceViewer;
 	private final PersistContext persistContext;
 	private final FoundsetDesignToChooserConverter converter;
@@ -80,19 +82,72 @@ public class DataproviderComposite extends Composite
 
 
 	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties)
+		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties,
+		List<PropertyDescription> styleProperties)
 	{
 		super(parent, SWT.None);
 		this.settings = settings;
 		this.dataproviderProperties = dataproviderProperties;
+		this.styleProperties = styleProperties;
 		this.persistContext = persistContext;
 		converter = new FoundsetDesignToChooserConverter(flattenedSolution);
 
 		this.setLayout(new FillLayout());
 		SashForm form = new SashForm(this, SWT.HORIZONTAL);
-		form.setLayout(new FillLayout());
+		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 
-		dataproviderTreeViewer = createDataproviderTree(form, flattenedSolution, table, dataproviderOptions);
+		if (dataproviderProperties.size() > 0)
+			dataproviderTreeViewer = createDataproviderTree(form2, persistContext, flattenedSolution, table, dataproviderOptions);
+		else dataproviderTreeViewer = null;
+
+		if (styleProperties.size() > 0) // should really be alway 1 size..
+		{
+			Object tag = styleProperties.get(0).getTag("wizard");
+			if (tag instanceof JSONArray)
+			{
+				GridLayout layout = new GridLayout(1, false);
+				layout.marginHeight = 0;
+				layout.marginWidth = 0;
+				layout.marginRight = 5;
+				Composite listParent = new Composite(form2, SWT.NONE);
+				listParent.setLayout(layout);
+
+				GridData gridData = new GridData();
+				gridData.verticalAlignment = GridData.FILL;
+				gridData.horizontalSpan = 1;
+				gridData.verticalSpan = 1;
+				gridData.grabExcessHorizontalSpace = true;
+				gridData.grabExcessVerticalSpace = true;
+				gridData.horizontalAlignment = GridData.FILL;
+				gridData.minimumWidth = 300;
+				gridData.heightHint = 250;
+
+				stylePropertiesViewer = new ListViewer(listParent);
+				stylePropertiesViewer.getControl().setLayoutData(gridData);
+				stylePropertiesViewer.setContentProvider(JSONContentProvider.INSTANCE);
+				stylePropertiesViewer.setLabelProvider(new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						if (element instanceof JSONObject)
+						{
+							return ((JSONObject)element).getString("name");
+						}
+						return "";
+					}
+				});
+				stylePropertiesViewer.setInput(tag);
+
+				stylePropertiesViewer.addOpenListener(event -> moveStyleSelection());
+				stylePropertiesViewer.addSelectionChangedListener(event -> moveStyleSelection());
+
+			}
+		}
+		else stylePropertiesViewer = null;
+
+		if (dataproviderTreeViewer != null && stylePropertiesViewer != null)
+			form2.setWeights(70, 30);
 
 		tableViewer = createTableViewer(form);
 		tableViewer.setInput(input);
@@ -115,23 +170,14 @@ public class DataproviderComposite extends Composite
 
 		container.setLayoutData(gridData);
 
-		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, dataproviderProperties,
+		final WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, dataproviderProperties, styleProperties,
 			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}
 
-	private DataProviderTreeViewer createDataproviderTree(SashForm form, FlattenedSolution flattenedSolution, ITable table,
+	private DataProviderTreeViewer createDataproviderTree(SashForm form, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions)
 	{
-		GridData gridData = new GridData();
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 1;
-		gridData.verticalSpan = 1;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.minimumWidth = 400;
-		gridData.heightHint = 600;
 
 		Composite parent = new Composite(form, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
@@ -139,7 +185,6 @@ public class DataproviderComposite extends Composite
 		layout.marginWidth = 0;
 		layout.marginRight = 5;
 		parent.setLayout(layout);
-		parent.setLayoutData(gridData);
 
 		Composite datasourceComposite = new Composite(parent, SWT.NONE);
 		GridLayout datasourceLayout = new GridLayout(2, false);
@@ -156,7 +201,6 @@ public class DataproviderComposite extends Composite
 			@Override
 			protected IStructuredSelection openDialogBox(Control control)
 			{
-
 				return super.openDialogBox(control);
 			}
 		};
@@ -164,13 +208,6 @@ public class DataproviderComposite extends Composite
 		dataSourceViewer.setContentProvider(new TableContentProvider());
 		dataSourceViewer.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
 		dataSourceViewer.setTextLabelProvider(new DatasourceLabelProvider(Messages.LabelNone, false, true));
-		dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				handleDataSourceSelected();
-			}
-		});
 		dataSourceViewer.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true));
 		if (((Form)persistContext.getContext()).getDataSource() != null)
 		{
@@ -180,26 +217,22 @@ public class DataproviderComposite extends Composite
 		DataProviderTreeViewer treeviewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
 			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
 			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
+		GridData gridData = new GridData();
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.horizontalSpan = 1;
+		gridData.verticalSpan = 1;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.minimumWidth = 400;
+		gridData.heightHint = 450;
+
 		treeviewer.setLayoutData(gridData);
-		treeviewer.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-			@Override
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				moveDataproviderSelection();
-			}
-		});
+		treeviewer.addSelectionChangedListener(event -> moveDataproviderSelection());
+		treeviewer.addOpenListener(event -> moveDataproviderSelection());
 
 		treeviewer.getViewer().getTree().setToolTipText("Select the dataprovders for which you want to place fields");
 
-		treeviewer.addOpenListener(new IOpenListener()
-		{
-			@Override
-			public void open(OpenEvent event)
-			{
-				moveDataproviderSelection();
-			}
-		});
 
 		return treeviewer;
 	}
@@ -260,6 +293,22 @@ public class DataproviderComposite extends Composite
 		}
 	}
 
+	private void moveStyleSelection()
+	{
+		Object style = ((StructuredSelection)stylePropertiesViewer.getSelection()).getFirstElement();
+		if (style instanceof JSONObject)
+		{
+			String name = ((JSONObject)style).getString("name");
+			String styleClass = ((JSONObject)style).getString("cls");
+			Map<String, Object> map = new HashMap<>();
+			PropertyDescription propertyDescription = styleProperties.get(0);
+			map.put(propertyDescription.getName(), styleClass);
+			input.add(new Pair<String, Map<String, Object>>(name, map));
+			tableViewer.setInput(input);
+			tableViewer.refresh();
+		}
+	}
+
 	private Map<String, Object> getDefaultRow(String val)
 	{
 		Map<String, Object> row = new HashMap<>();
@@ -281,5 +330,27 @@ public class DataproviderComposite extends Composite
 	public List<Map<String, Object>> getResult()
 	{
 		return input.stream().map(pair -> pair.getRight()).collect(Collectors.toList());
+	}
+
+	private static class JSONContentProvider implements IStructuredContentProvider
+	{
+		private static final IStructuredContentProvider INSTANCE = new JSONContentProvider();
+
+		@Override
+		public Object[] getElements(Object inputElement)
+		{
+			if (inputElement instanceof JSONArray)
+			{
+				JSONArray array = (JSONArray)inputElement;
+				JSONObject[] objects = new JSONObject[array.length()];
+				for (int i = 0; i < objects.length; i++)
+				{
+					objects[i] = array.getJSONObject(i);
+				}
+				return objects;
+			}
+			return null;
+		}
+
 	}
 }
