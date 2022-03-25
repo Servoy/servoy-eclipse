@@ -122,7 +122,7 @@ class OpenPropertiesWizard implements IServerService
 											JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
 											for (String key : object.keySet())
 											{
-												map.put(key, object.get(key));
+												map.put(key, JSONObject.NULL.equals(object.get(key)) ? null : object.get(key));
 											}
 											input.add(map);
 										}
