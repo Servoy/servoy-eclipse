@@ -158,8 +158,8 @@ public class DataproviderComposite extends Composite
 			form2.setWeights(70, 30);
 
 		tableViewer = createTableViewer(form, table);
-		tableViewer.setInput(input);
 		if (childrenProperties != null) setInputProperties(childrenProperties);
+		tableViewer.setInput(input);
 	}
 
 	private void setInputProperties(List<Map<String, Object>> childrenProperties)
