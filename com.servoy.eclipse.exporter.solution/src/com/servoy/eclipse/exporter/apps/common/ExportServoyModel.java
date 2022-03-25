@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.apps.common;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.CoreException;
+import org.json.JSONArray;
 
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
@@ -147,6 +148,30 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	public void removeResourceChangeListener(IResourceChangeListener postChangeResourceChangeListener)
 	{
 		// changes are not relevant for command line exports as after a solution is activated everything is refreshed anyway and no-one changes the workspace
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#setVariantsFor(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setVariantsFor(String variantCategoryName, String jsonArrayString)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#getExistingVariants(java.lang.String)
+	 */
+	@Override
+	public JSONArray getExistingVariants(String variantCategoryName)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

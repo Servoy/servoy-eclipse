@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -90,42 +89,12 @@ import com.servoy.j2db.util.Utils;
 public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 {
 
-//	class MyJSonObject
-//	{
-//		public String type;
-//		public JSONObject jsonObj;
-//	}
-
 	private final IDebugClient state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
-//	private final IFile styles_wizard;
-//	private final List<MyJSonObject> list_style_wizard = new ArrayList<>();
 
 	public JSDeveloperSolutionModel(IDebugClient state)
 	{
 		this.state = state;
-//		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile("styles_wizard.less");
-//		try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
-//		{
-//			String line;
-//			MyJSonObject jsonObj = null;
-//			boolean jsonObjectStart = false;
-//			boolean nameFound = false;
-//			boolean typeFound = false;
-//			while ((line = br.readLine()) != null)
-//			{
-//				int typePos = line.indexOf("@type");
-//				if (typePos > 0)
-//				{
-//					jsonObj = new MyJSonObject();
-//					jsonObj.type = line.substring(typePos + 5).trim();
-//				}
-//			}
-//		}
-//		catch (IOException | CoreException e)
-//		{
-//			e.printStackTrace();
-//		}
 
 	}
 
@@ -590,43 +559,13 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 
 	public JSONArray js_getExistingVariants(String variantCategoryName)
 	{
-//
-//		IFile stylesVariant = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile("stylesVarian");
-//		stles
-//		JSONArray myFileArray = new JSONArray()
-
-		JSONArray myArray = new JSONArray();
-
-		JSONObject myComp_1 = new JSONObject();
-		myComp_1.put("name", "button_1");
-
-		List<String> classes_1 = new ArrayList<String>();
-		classes_1.add("btn");
-		classes_1.add("btn-primary");
-		classes_1.add("margin-20");
-		classes_1.add("font-weight-bold");
-		myComp_1.put("classes", classes_1);
-
-		myArray.put(myComp_1);
-
-		JSONObject myComp_2 = new JSONObject();
-		myComp_2.put("name", "button_2");
-
-		List<String> classes_2 = new ArrayList<String>();
-		classes_2.add("btn");
-		classes_2.add("btn-default");
-		classes_2.add("margin-10");
-		classes_2.add("font-weight-bold");
-		myComp_2.put("classes", classes_2);
-
-		myArray.put(myComp_2);
-
-		return myArray;
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getExistingVariants(variantCategoryName);
 	}
 
 	public void js_setVariantsFor(String variantCategoryName, String jsonArrayString)
 	{
-
-		System.out.println(variantCategoryName + " : " + jsonArrayString);
+		ServoyModelManager.getServoyModelManager().getServoyModel().setVariantsFor(variantCategoryName, jsonArrayString);
 	}
+
+
 }
