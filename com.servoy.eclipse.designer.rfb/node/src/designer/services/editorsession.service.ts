@@ -94,7 +94,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     addStyleVariantFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'addStyleVariantsFor', { p: variantCategory }, true);
+        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true);
     }
 
     editStyleVariantsFor(variantCategory: string) {
