@@ -87,18 +87,9 @@ export class PaletteComponent {
         if (popover.isOpen()) {
           popover.close();
         } else {
-          this.editorSession.getStyleVariantFor(component.styleVariantCategory)
-            .then(
-                r => (component.styleVariants = r)
-            );
-          popover.open({ c: component, po: popover });
+          popover.open({ c: component });
         }
                     
-    }
-    
-    variantChosen(popover: NgbPopover, component: PaletteComp, variant: string) {
-        component.lastChosenVariant = variant;
-        popover.close();
     }
     
     doAddVariant(event: MouseEvent, component: PaletteComp) {
@@ -111,7 +102,7 @@ export class PaletteComponent {
         this.editorSession.editStyleVariantsFor(component.styleVariantCategory);
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: Record<string, any>, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }], styleVariant?: string) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         if (event.target && (event.target as Element).getAttribute("name") === "variants") return; // it has a separate click handler in a more nested elem
 
         event.stopPropagation();
@@ -137,13 +128,6 @@ export class PaletteComponent {
         this.dragItem.componentType = componentType;
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
-        
-        if (styleVariant) {
-            this.dragItem.propertyName = "styleClass";
-            this.dragItem.propertyValue = styleVariant;
-            if (!model) model = {};
-            model.styleClass = styleVariant;
-        }
   
         this.glasspane = this.doc.querySelector('.contentframe-overlay');
         const frameElem = this.doc.querySelector('iframe');
@@ -354,7 +338,7 @@ export class DragItem {
     packageName?: string;
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName? :string;
-    propertyValue? : any;
+    propertyValue? : {property : string};
     componentType?: string;
     topContainer? : boolean = false;
     layoutName? :string;

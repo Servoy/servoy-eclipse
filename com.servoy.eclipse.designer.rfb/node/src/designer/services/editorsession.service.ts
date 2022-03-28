@@ -89,16 +89,12 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    getStyleVariantFor(variantCategory: string): Promise<string[]> {
-        return this.wsSession.callService('formeditor', 'getStyleVariantsFor', { p: variantCategory }, false);
-    }
-
     addStyleVariantFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true);
+        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true)
     }
 
     editStyleVariantsFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true);
+        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true)
     }
 
     getGhostComponents<T>() {
@@ -439,8 +435,6 @@ export class PaletteComp {
     type: string;
     ghostPropertyName: string;
     styleVariantCategory: string;
-    styleVariants: Array<string>;
-    lastChosenVariant: string;
     dropTargetUUID?: string; 
     isOpen: boolean;
     propertyName: string; // ghost
@@ -458,7 +452,6 @@ export class PaletteComp {
     attributes?: { [property: string]: string };
     children?: [{ [property: string]: string }];
     rightSibling?: string;
-    styleClass?: string;
 }
 
 export class Package {

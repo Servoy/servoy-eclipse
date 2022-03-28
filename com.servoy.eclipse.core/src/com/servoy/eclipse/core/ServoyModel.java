@@ -1418,7 +1418,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void initStylesWizard()
 	{
-		list_style_wizard.clear();
 		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
 			.getFile(new Path("medias/styles_wizard.less"));
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
