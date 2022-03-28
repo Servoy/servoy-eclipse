@@ -65,7 +65,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
         this.hasFocus = false;
-        if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
+        if (this.format.display && this.format.edit && this.format.edit !== this.format.display && !this.format.isMask) {
             this.writeValue(this.realValue);
         }
     }
