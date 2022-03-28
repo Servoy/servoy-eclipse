@@ -60,7 +60,6 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHand
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.StyleVariantsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
@@ -114,10 +113,6 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back_one_step"));
 		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front"));
 		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back"));
-
-		StyleVariantsHandler styleVariantsHandler = new StyleVariantsHandler();
-		configuredHandlers.put("addStyleVariantFor", styleVariantsHandler);
-		configuredHandlers.put("editStyleVariantsFor", styleVariantsHandler);
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));

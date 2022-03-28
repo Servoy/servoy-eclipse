@@ -89,14 +89,6 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    addStyleVariantFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true)
-    }
-
-    editStyleVariantsFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true)
-    }
-
     getGhostComponents<T>() {
         return this.wsSession.callService<T>('formeditor', 'getGhostComponents', null, false)
     }
@@ -434,7 +426,6 @@ export class PaletteComp {
     y: number;
     type: string;
     ghostPropertyName: string;
-    styleVariantCategory: string;
     dropTargetUUID?: string; 
     isOpen: boolean;
     propertyName: string; // ghost

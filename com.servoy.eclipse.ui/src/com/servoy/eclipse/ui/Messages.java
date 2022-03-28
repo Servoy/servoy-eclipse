@@ -287,7 +287,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_methodOverrideProblem;
 	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 	public static String ErrorWarningPreferencePage_methodNoReturn;
-	public static String EditComponentVariantsAction_editVariants;
 
 	static
 	{
