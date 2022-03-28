@@ -92,10 +92,10 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	private final IDebugClient state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
+
 	public JSDeveloperSolutionModel(IDebugClient state)
 	{
 		this.state = state;
-
 	}
 
 	/*
@@ -559,13 +559,43 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 
 	public JSONArray js_getExistingVariants(String variantCategoryName)
 	{
-		return ServoyModelManager.getServoyModelManager().getServoyModel().getExistingVariants(variantCategoryName);
+
+		JSONArray myArray = new JSONArray();
+
+		JSONObject myComp_1 = new JSONObject();
+		myComp_1.put("name", "button_1");
+
+		List<String> classes_1 = new ArrayList<String>();
+		classes_1.add("btn");
+		classes_1.add("btn-primary");
+		classes_1.add("margin-20");
+		classes_1.add("font-weight-bold");
+		myComp_1.put("classes", classes_1);
+
+		myArray.put(myComp_1);
+
+		JSONObject myComp_2 = new JSONObject();
+		myComp_2.put("name", "button_2");
+
+		List<String> classes_2 = new ArrayList<String>();
+		classes_2.add("btn");
+		classes_2.add("btn-default");
+		classes_2.add("margin-10");
+		classes_2.add("font-weight-bold");
+		myComp_2.put("classes", classes_2);
+
+		myArray.put(myComp_2);
+
+		return myArray;
 	}
 
-	public void js_setVariantsFor(String variantCategoryName, String jsonArrayString)
+	public void js_setVariantsFor(String variantCategoryName, JSONArray components)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().setVariantsFor(variantCategoryName, jsonArrayString);
+		System.out.println(variantCategoryName + " : " + components.toString());
 	}
 
-
+	public void js_setVariants(JSONArray variants)
+	{
+		System.out.println(variants.toString());
+	}
 }
