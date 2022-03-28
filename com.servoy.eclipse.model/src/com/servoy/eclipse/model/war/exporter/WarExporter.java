@@ -452,30 +452,6 @@ public class WarExporter
 		return latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
 	}
 
-	/**
-	 * @param tmpWarDir
-	 * @param dependenciesVersions
-	 * @param jar
-	 * @param list
-	 * @param latestJarPath
-	 * @return
-	 */
-	private String getLatestJarStartingWithLib(File tmpWarDir, Map<String, TreeMap<String, List<File>>> dependenciesVersions, String jar, List<File> list,
-		String latestJarPath)
-	{
-		for (File file : list)
-		{
-			String p = getRelativePath(tmpWarDir, file);
-			if (p.startsWith("\\lib"))
-			{
-				latestJarPath = p;
-				dependenciesVersions.get(jar).remove(file);
-				break;
-			}
-		}
-		return latestJarPath;
-	}
-
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
 	{
 		Activator.getDefault().exportNG2ToWar(new ING2WarExportModel()
