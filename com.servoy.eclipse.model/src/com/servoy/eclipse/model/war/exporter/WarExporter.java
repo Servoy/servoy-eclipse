@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -344,43 +345,73 @@ public class WarExporter
 			for (String jar : dependenciesVersions.keySet())
 			{
 				String latest = dependenciesVersions.get(jar).lastKey();
-				File latestJar = dependenciesVersions.get(jar).get(latest).get(0);
-				String latestJarPath = latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
-				for (String version : dependenciesVersions.get(jar).keySet())
+				List<File> list = dependenciesVersions.get(jar).get(latest);
+				File latestJar = list.get(0);
+				String latestJarPath = getRelativePath(tmpWarDir, latestJar);
+				if (list.size() > 1 || dependenciesVersions.get(jar).size() > 1)
 				{
-					if ("0".equals(version) && dependenciesVersions.get(jar).get(version).size() > 1)
+					Optional<File> lib = dependenciesVersions.get(jar).values().stream()
+						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith("\\lib")).findAny(); //there should be max one in lib anyway
+					if (lib.isPresent())
 					{
-						ServoyLog.logWarning("Duplicate '" + jar + "' jars with unknown versions " + dependenciesVersions.get(jar).values(), null);
-					}
-					List<File> listToRemove = dependenciesVersions.get(jar).get(version);
-					String reason = "a higher";
-					if (latest.equals(version))
-					{
-						listToRemove.remove(0);
-						reason = "the same";
-					}
-					for (File file : listToRemove)
-					{
-						String path = file.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
-						if (path.contains("plugins"))
+						if (!latestJarPath.startsWith("\\lib"))
 						{
-							properties.remove(file.getPath().substring(file.getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
-							removedJar = true;
+							if (dependenciesVersions.get(jar).get(latest).contains(lib.get()))
+							{
+								//is exactly the same version, keep the one in the lib folder
+								latestJarPath = getRelativePath(tmpWarDir, lib.get());
+								latestJar = lib.get();
+							}
+							else
+							{
+								//copy the latest to the lib folder
+								lib.get().delete();
+								File dest = new File(tmpWarDir, "lib/" + latestJar.getName());
+								copyFile(latestJar, dest);
+								properties
+									.remove(lib.get().getPath().substring(lib.get().getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
+								removedJar = true;
+								latestJar = dest;
+							}
 						}
+					}
 
-						if (messageBuilder.length() == 0)
+					for (String version : dependenciesVersions.get(jar).keySet())
+					{
+						if ("0".equals(version) && dependenciesVersions.get(jar).get(version).size() > 1)
 						{
-							messageBuilder.append(
-								"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
+							ServoyLog.logWarning("Duplicate '" + jar + "' jars with unknown versions " + dependenciesVersions.get(jar).values(), null);
 						}
-						messageBuilder.append("\nDependency '" + path +
-							"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
-							") is already present in '" + latestJarPath + "'. \n");
-						File parent = file.getParentFile();
-						file.delete();
-						if (parent.list().length == 0)
+						List<File> listToRemove = dependenciesVersions.get(jar).get(version);
+						String reason = "a higher";
+						if (latest.equals(version))
 						{
-							parent.delete();
+							reason = "the same";
+						}
+						for (File file : listToRemove)
+						{
+							if (latestJar.equals(file)) continue;
+							String path = getRelativePath(tmpWarDir, file);
+							if (path.contains("plugins"))
+							{
+								properties.remove(file.getPath().substring(file.getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
+								removedJar = true;
+							}
+
+							if (messageBuilder.length() == 0)
+							{
+								messageBuilder.append(
+									"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
+							}
+							messageBuilder.append("\nDependency '" + path +
+								"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
+								") is already present in '" + latestJarPath + "'. \n");
+							File parent = file.getParentFile();
+							file.delete();
+							if (parent.list().length == 0)
+							{
+								parent.delete();
+							}
 						}
 					}
 				}
@@ -409,6 +440,40 @@ public class WarExporter
 				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
 			exportModel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString());
 		}
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param latestJar
+	 * @return
+	 */
+	private String getRelativePath(File tmpWarDir, File latestJar)
+	{
+		return latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
+	}
+
+	/**
+	 * @param tmpWarDir
+	 * @param dependenciesVersions
+	 * @param jar
+	 * @param list
+	 * @param latestJarPath
+	 * @return
+	 */
+	private String getLatestJarStartingWithLib(File tmpWarDir, Map<String, TreeMap<String, List<File>>> dependenciesVersions, String jar, List<File> list,
+		String latestJarPath)
+	{
+		for (File file : list)
+		{
+			String p = getRelativePath(tmpWarDir, file);
+			if (p.startsWith("\\lib"))
+			{
+				latestJarPath = p;
+				dependenciesVersions.get(jar).remove(file);
+				break;
+			}
+		}
+		return latestJarPath;
 	}
 
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
