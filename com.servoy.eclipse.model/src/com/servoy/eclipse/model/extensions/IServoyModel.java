@@ -19,7 +19,6 @@ package com.servoy.eclipse.model.extensions;
 
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
-import org.json.JSONArray;
 
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -139,9 +138,5 @@ public interface IServoyModel
 	void addResourceChangeListener(IResourceChangeListener resourceChangeListener, int eventMask);
 
 	void removeResourceChangeListener(IResourceChangeListener resourceChangeListener);
-
-	public void setVariantsFor(String variantCategoryName, String jsonArrayString);
-
-	public JSONArray getExistingVariants(String variantCategoryName);
 
 }

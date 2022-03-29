@@ -16,13 +16,11 @@
  */
 package com.servoy.eclipse.core;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
@@ -106,7 +104,6 @@ import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
 import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
 import org.webbitserver.HttpControl;
@@ -212,18 +209,6 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  */
 public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
-
-	// Johan - don't be astonished by this crappy code. Didn't have time to do another way for hackaton.
-	// Afterall maybe we can beat tou??
-	class MyJSonObject
-	{
-		public String type;
-		public JSONObject jsonObj;
-	}
-
-	private IFile styles_wizard;
-	private List<MyJSonObject> list_style_wizard = new ArrayList<MyJSonObject>();
-
 
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
@@ -1358,18 +1343,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 						fireLoadingDone();
 					}
-					initStylesWizard();
-
 				}
 				finally
 				{
 					activatingProject.set(false);
 					iProgressMonitor.done(); // "progress" according to javadoc doesn't need done, but the IProgressMonitor it's converted from does need it...
 				}
-
-
 			}
-
 		};
 
 		if (Display.getCurrent() != null)
@@ -1414,60 +1394,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 			});
 		}
-	}
-
-	private void initStylesWizard()
-	{
-		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-			.getFile(new Path("medias/styles_wizard.less"));
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
-		{
-			String line;
-			MyJSonObject myJsonObj = null;
-			boolean nameFound = false;
-			boolean typeFound = false;
-			JSONObject jsonObj = null;
-			List<String> myClasses = null;
-			;
-			while ((line = br.readLine()) != null)
-			{
-				int typePos = line.indexOf("@type:");
-				if (typePos > 0)
-				{
-					typeFound = true;
-					myJsonObj = new MyJSonObject();
-					myJsonObj.type = line.substring(typePos + 6).trim();
-				}
-				int startBracketPos = line.indexOf("{");
-				if (typeFound && (line.startsWith(".") && startBracketPos > 0))
-				{
-					nameFound = true;
-					jsonObj = new JSONObject();
-					String name = line.substring(1, startBracketPos).trim();
-					jsonObj.put("name", name);
-					myClasses = new ArrayList<String>();
-				}
-				int semicolonPos = line.indexOf("();");
-				if (nameFound && (line.trim().startsWith(".") && semicolonPos > 0))
-				{
-					myClasses.add(line.substring(0, semicolonPos).trim().substring(1));
-				}
-				if (line.startsWith("}"))
-				{//end of the object detected
-					jsonObj.put("classes", myClasses);
-					myJsonObj.jsonObj = jsonObj;
-					list_style_wizard.add(myJsonObj);
-					typeFound = false;
-					nameFound = false;
-
-				}
-			}
-		}
-		catch (IOException | CoreException e)
-		{
-			e.printStackTrace();
-		}
-
 	}
 
 	public void fireLoadingDone()
@@ -4213,76 +4139,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	public void removeSolutionImportInProgressListener(ISolutionImportListener l)
 	{
 		solutionImportListeners.remove(l);
-	}
-
-	public void setVariantsFor(String variantCategoryName, String jsonArrayString)
-	{
-		JSONArray myJsonArray = new JSONArray(jsonArrayString);
-		List<MyJSonObject> tmp_list_style_wizard = new ArrayList<MyJSonObject>();
-
-		for (MyJSonObject myObject : list_style_wizard)
-		{
-			if (!myObject.type.equals(variantCategoryName))
-			{
-				tmp_list_style_wizard.add(myObject);
-			}
-		}
-		for (int index = 0; index < myJsonArray.length(); index++)
-		{
-			JSONObject myObject = myJsonArray.getJSONObject(index);
-			MyJSonObject myJson = new MyJSonObject();
-			myJson.type = variantCategoryName;
-			myJson.jsonObj = myObject;
-			tmp_list_style_wizard.add(myJson);
-		}
-		list_style_wizard = tmp_list_style_wizard;
-
-		String myStyleString = getStyleString();
-
-		//write list style wizard to the file
-		InputStream source = new ByteArrayInputStream(myStyleString.getBytes());
-		try
-		{
-			styles_wizard.setContents(source, true, false, null);
-		}
-		catch (CoreException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	private String getStyleString()
-	{
-		String result = "";
-		for (MyJSonObject myObject : list_style_wizard)
-		{
-			result += "/*\n* @type:" + myObject.type + "\n*/\n." + myObject.jsonObj.getString("name") + " {\n";
-			JSONArray myArray = myObject.jsonObj.getJSONArray("classes");
-			for (int arrIndex = 0; arrIndex < myArray.length(); arrIndex++)
-			{
-				result += "   ." + myArray.getString(arrIndex) + "();\n";
-			}
-			result += "}\n";
-
-		}
-		return result;
-	}
-
-	public JSONArray getExistingVariants(String variantCategoryName)
-	{
-
-		JSONArray myArray = new JSONArray();
-
-		for (MyJSonObject myObject : list_style_wizard)
-		{
-			if (myObject.type.equals(variantCategoryName))
-			{
-				myArray.put(myObject.jsonObj);
-			}
-		}
-
-		return myArray;
 	}
 
 }
