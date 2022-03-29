@@ -20,8 +20,10 @@ package com.servoy.eclipse.designer.editor.rfb;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -110,6 +112,7 @@ class OpenPropertiesWizard implements IServerService
 
 								List<Map<String, Object>> input = new ArrayList<>();
 								Object prop = webComponent.getProperty(propertyName);
+								Set<Object> previousColumns = new HashSet<>();
 								if (prop instanceof IChildWebObject[])
 								{
 									IChildWebObject[] arr = (IChildWebObject[])prop;
@@ -124,6 +127,7 @@ class OpenPropertiesWizard implements IServerService
 											{
 												map.put(key, JSONObject.NULL.equals(object.get(key)) ? null : object.get(key));
 											}
+											previousColumns.add(object.get("svyUUID"));
 											input.add(map);
 										}
 									}
@@ -148,8 +152,18 @@ class OpenPropertiesWizard implements IServerService
 									else
 									{
 										bean = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+										previousColumns.remove(uuid); //it was updated, remove it from the set
 									}
 									row.forEach((key, value) -> bean.setProperty(key, value));
+								}
+
+								if (!previousColumns.isEmpty())
+								{
+									//didn't get an update for some columns, which means they are deleted
+									for (Object uuid : previousColumns)
+									{
+										webComponent.removeChild(webComponent.getChild(Utils.getAsUUID(uuid, false)));
+									}
 								}
 							}
 							else
