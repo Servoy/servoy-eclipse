@@ -177,23 +177,22 @@
                     "description": "Assets for NG2",
                     "type": "array",
                     "items": {
-                            "type": "object",
-                            "properties": {
-                                "glob": {
-                                    "description": "the pattern what to include",
-                                    "type": "string"
-                                },
-                                "input": {
-                                    "description": "the source assets",
-                                    "type": "string"
-                                },
-                                "output": {
-                                    "description": "the output where it needs to go",
-                                    "type": "string"
-                                },
+                        "type": "object",
+                        "properties": {
+                            "glob": {
+                                "description": "the pattern what to include",
+                                "type": "string"
+                            },
+                            "input": {
+                                "description": "the source assets",
+                                "type": "string"
+                            },
+                            "output": {
+                                "description": "the output where it needs to go",
+                                "type": "string"
                             }
+                        }
                     }
-                    
                 }
         	},
         	"additionalProperties": false
