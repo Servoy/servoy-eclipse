@@ -356,23 +356,9 @@ public class WarExporter
 					{
 						if (!latestJarPath.startsWith("\\lib"))
 						{
-							if (dependenciesVersions.get(jar).get(latest).contains(lib.get()))
-							{
-								//is exactly the same version, keep the one in the lib folder
-								latestJarPath = getRelativePath(tmpWarDir, lib.get());
-								latestJar = lib.get();
-							}
-							else
-							{
-								//copy the latest to the lib folder
-								lib.get().delete();
-								File dest = new File(tmpWarDir, "lib/" + latestJar.getName());
-								copyFile(latestJar, dest);
-								properties
-									.remove(lib.get().getPath().substring(lib.get().getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
-								removedJar = true;
-								latestJar = dest;
-							}
+							//keep the one in the lib folder, doesn't matter if it's older
+							latestJarPath = getRelativePath(tmpWarDir, lib.get());
+							latestJar = lib.get();
 						}
 					}
 
@@ -403,9 +389,17 @@ public class WarExporter
 								messageBuilder.append(
 									"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
 							}
-							messageBuilder.append("\nDependency '" + path +
-								"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
-								") is already present in '" + latestJarPath + "'. \n");
+							if (latestJarPath.startsWith("\\lib"))
+							{
+								messageBuilder.append("\nDependency '" + path +
+									"' is not exported because '" + latestJar.getName() + "' is already present in the lib folder. \n");
+							}
+							else
+							{
+								messageBuilder.append("\nDependency '" + path +
+									"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
+									") is already present in '" + latestJarPath + "'. \n");
+							}
 							File parent = file.getParentFile();
 							file.delete();
 							if (parent.list().length == 0)
