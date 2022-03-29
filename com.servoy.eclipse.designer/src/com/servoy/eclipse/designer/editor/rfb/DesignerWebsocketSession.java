@@ -553,8 +553,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			if (persist instanceof IFormElement)
 			{
-				renderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
+				boolean newRenderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild,
+					refreshTemplate,
 					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, containers, childParentMap);
+				renderGhosts = renderGhosts || newRenderGhosts;
 			}
 			else if (persist instanceof Part)
 			{
@@ -569,8 +571,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					renderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, compAttributes, deletedComponents, formComponentChild,
+					boolean newRenderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, compAttributes, deletedComponents,
+						formComponentChild,
 						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, false);
+					renderGhosts = renderGhosts || newRenderGhosts;
 				}
 				else
 				{
