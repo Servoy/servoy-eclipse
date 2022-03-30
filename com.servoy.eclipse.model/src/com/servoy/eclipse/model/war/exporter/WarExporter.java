@@ -352,14 +352,11 @@ public class WarExporter
 				{
 					Optional<File> lib = dependenciesVersions.get(jar).values().stream()
 						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith("\\lib")).findAny(); //there should be max one in lib anyway
-					if (lib.isPresent())
+					if (lib.isPresent() && !latestJarPath.startsWith("\\lib"))
 					{
-						if (!latestJarPath.startsWith("\\lib"))
-						{
-							//keep the one in the lib folder, doesn't matter if it's older
-							latestJarPath = getRelativePath(tmpWarDir, lib.get());
-							latestJar = lib.get();
-						}
+						//keep the one in the lib folder, doesn't matter if it's older
+						latestJarPath = getRelativePath(tmpWarDir, lib.get());
+						latestJar = lib.get();
 					}
 
 					for (String version : dependenciesVersions.get(jar).keySet())
