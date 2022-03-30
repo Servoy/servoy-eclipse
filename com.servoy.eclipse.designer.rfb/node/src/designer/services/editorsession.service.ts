@@ -386,10 +386,9 @@ export class EditorSessionService implements ServiceProvider {
 
     getFixedKeyEvent(event: KeyboardEvent) {
         let keyCode = event.keyCode;
-        const isMeta = event.metaKey;
         if ((event.target as Element).className == 'inlineEdit') {
-            if (isMeta) {
-                //on Mac several Meta + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
+            if (event.metaKey || event.ctrlKey) {
+                //several Meta/Ctrl + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
                 keyCode = 0;
             } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') { 
                 //avoid sending the specials key codes by themselfs - they always must be part of a combination
@@ -401,7 +400,7 @@ export class EditorSessionService implements ServiceProvider {
             ctrlKey: event.ctrlKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
-            metaKey: isMeta
+            metaKey: event.metaKey
         }
     }
 }
