@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.CssLib;
 import org.sablo.specification.CssLibSet;
@@ -499,7 +500,22 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							if (!assetFound[0])
 							{
 								assetsChanged[0] = true;
-								assets.put(asset);
+								if (asset.startsWith("{") && asset.endsWith("}"))
+								{
+									try
+									{
+										JSONObject assetJSONObject = new JSONObject(asset);
+										assets.put(assetJSONObject);
+									}
+									catch (JSONException ex)
+									{
+										ServoyLog.logError("Can't add asset object to angular.json: " + asset, ex);
+									}
+								}
+								else
+								{
+									assets.put(asset);
+								}
 							}
 						});
 						if (assetsChanged[0])

@@ -28,6 +28,9 @@ export class DesignerUtilsService {
             if (!currentNode && node.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement;
             }
+            if (!currentNode && node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
+                currentNode = node.parentElement.parentElement.parentElement;
+            }
             if (currentNode){
                 // take position from wrapper div if available, is more accurate
                  const parentPosition = currentNode.getBoundingClientRect();
