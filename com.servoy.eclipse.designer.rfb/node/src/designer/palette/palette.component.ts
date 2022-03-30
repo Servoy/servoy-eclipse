@@ -157,6 +157,7 @@ export class PaletteComponent {
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 const found = Array.from(elements).find((node) => {
                     const position = node.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(node, position);
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
                         if (node.getAttribute('svy-types').split(',').indexOf(this.dragItem.ghost.type) >= 0) {
                             return node;
