@@ -1,5 +1,6 @@
+import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, ElementRef } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -384,12 +385,23 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
+        let keyCode = event.keyCode;
+        const isMeta = event.metaKey;
+        if ((event.target as Element).className == 'inlineEdit') {
+            if (isMeta) {
+                //on Mac several Meta + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
+                keyCode = 0;
+            } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') { 
+                //avoid sending the specials key codes by themselfs - they always must be part of a combination
+                keyCode = 0;
+            }
+        }
         return {
-            keyCode: event.keyCode,
+            keyCode: keyCode,
             ctrlKey: event.ctrlKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
-            metaKey: event.metaKey
+            metaKey: isMeta
         }
     }
 }

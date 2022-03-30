@@ -592,6 +592,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					isMeta = event.metaKey ? true : false;
 				}
 
+				if (event.target.id != null && event.target.id == 'directEdit') {//get when double clicking on editable elements like label, buttons, ...
+					if (isMeta) {
+						//on Mac several Meta + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
+						keyCode = 0;
+					} else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') { 
+						//avoid sending the specials key codes by themselfs - they always must be part of a combination
+						keyCode = 0;
+					}
+				}
+
 				return {
 					keyCode: keyCode,
 					isCtrl: isCtrl,
@@ -1141,8 +1151,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					});
 					$(document).keydown(function(objEvent) {
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
-
 						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt) {
+							objEvent.keyCode = fixedKeyEvent.keyCode;
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
