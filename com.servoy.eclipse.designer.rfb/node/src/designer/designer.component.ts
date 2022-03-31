@@ -19,8 +19,8 @@ export class DesignerComponent implements OnInit, AfterViewInit {
 
     autoscrollAreasEnabled: boolean;
     autoscrollElementClientBounds: Array<DOMRect>;
-    autoscrollEnter:  { [key: string]: (event: MouseEvent) => void; } = {};
-    autoscrollStop: { [key: string]: ReturnType<typeof setInterval>} = {};
+    autoscrollEnter: { [key: string]: (event: MouseEvent) => void; } = {};
+    autoscrollStop: { [key: string]: ReturnType<typeof setInterval> } = {};
     autoscrollLeave: { [key: string]: (event: MouseEvent) => void; } = {};
 
     constructor(public readonly editorSession: EditorSessionService, public urlParser: URLParserService, protected readonly renderer: Renderer2) {
@@ -37,16 +37,16 @@ export class DesignerComponent implements OnInit, AfterViewInit {
         this.editorSession.autoscrollBehavior.subscribe((autoscroll: ISupportAutoscroll) => {
             if (autoscroll) {
                 this.addAutoscrollListeners('BOTTOM_AUTOSCROLL', autoscroll);
-				this.addAutoscrollListeners('RIGHT_AUTOSCROLL', autoscroll);
-				this.addAutoscrollListeners('TOP_AUTOSCROLL', autoscroll);
-				this.addAutoscrollListeners('LEFT_AUTOSCROLL', autoscroll);
+                this.addAutoscrollListeners('RIGHT_AUTOSCROLL', autoscroll);
+                this.addAutoscrollListeners('TOP_AUTOSCROLL', autoscroll);
+                this.addAutoscrollListeners('LEFT_AUTOSCROLL', autoscroll);
             }
             else if (Object.keys(this.autoscrollStop).length > 0) {
                 for (const direction in this.autoscrollEnter) {
-                    if(this.autoscrollEnter[direction]) this.unregisterDOMEvent('mouseenter', direction, this.autoscrollEnter[direction]);
+                    if (this.autoscrollEnter[direction]) this.unregisterDOMEvent('mouseenter', direction, this.autoscrollEnter[direction]);
                 }
                 for (const direction in this.autoscrollLeave) {
-                    if(this.autoscrollLeave[direction]) {
+                    if (this.autoscrollLeave[direction]) {
                         this.unregisterDOMEvent('mouseleave', direction, this.autoscrollLeave[direction]);
                         this.unregisterDOMEvent('mouseup', direction, this.autoscrollLeave[direction]);
                     }
@@ -57,11 +57,11 @@ export class DesignerComponent implements OnInit, AfterViewInit {
 
     addAutoscrollListeners(direction: string, scrollComponent: ISupportAutoscroll) {
         this.editorSession.getState().pointerEvents = 'all';
-       
+
         this.autoscrollEnter[direction] = this.registerDOMEvent('mouseenter', direction, () => {
             this.autoscrollStop[direction] = this.startAutoScroll(direction, scrollComponent);
         }) as () => void;
-    
+
         this.autoscrollLeave[direction] = (event: MouseEvent) => {
             if (this.autoscrollStop[direction]) {
                 clearInterval(this.autoscrollStop[direction]);
@@ -70,65 +70,70 @@ export class DesignerComponent implements OnInit, AfterViewInit {
             if (event.type == 'mouseup')
                 scrollComponent.onMouseUp(event);
         }
-    
+
         this.registerDOMEvent('mouseleave', direction, this.autoscrollLeave[direction]);
         this.registerDOMEvent('mouseup', direction, this.autoscrollLeave[direction]);
-       }
-    
-        startAutoScroll(direction: string, scrollComponent: ISupportAutoscroll): ReturnType<typeof setInterval> {
-            let autoScrollPixelSpeed = 2;
-            return setInterval(() => {
-                autoScrollPixelSpeed = this.autoScroll(direction, autoScrollPixelSpeed, scrollComponent);
-            }, 50);
+    }
+
+    startAutoScroll(direction: string, scrollComponent: ISupportAutoscroll): ReturnType<typeof setInterval> {
+        let autoScrollPixelSpeed = 2;
+        return setInterval(() => {
+            autoScrollPixelSpeed = this.autoScroll(direction, autoScrollPixelSpeed, scrollComponent);
+        }, 50);
+    }
+
+    private autoScroll(direction: string, autoScrollPixelSpeed: number, scrollComponent: ISupportAutoscroll) {
+        let changeX = 0;
+        let changeY = 0;
+        const scrollElement = this.contentArea.nativeElement;
+        switch (direction) {
+            case 'BOTTOM_AUTOSCROLL':
+                //if ((scrollElement.scrollTop + scrollElement.offsetHeight) === scrollElement.scrollHeight) {
+                    let height = this.glasspane.nativeElement.style.height;
+                    if (!height) height = this.glasspane.nativeElement.offsetHeight + 'px';
+                    this.glasspane.nativeElement.style.height = parseInt(height.replace('px', '')) + autoScrollPixelSpeed + 'px';
+                //}
+                scrollElement.scrollTop += autoScrollPixelSpeed;
+                changeY = autoScrollPixelSpeed;
+                break;
+            case 'RIGHT_AUTOSCROLL':
+                if ((scrollElement.scrollLeft + scrollElement.offsetWidth) === scrollElement.scrollWidth) {
+                    let width = this.glasspane.nativeElement.style.width;
+                    if (!width) width = this.glasspane.nativeElement.offsetWidth + 'px';
+                    this.glasspane.nativeElement.style.width = parseInt(width.replace('px', '')) + autoScrollPixelSpeed + 'px';
+                }
+                scrollElement.scrollLeft += autoScrollPixelSpeed;
+                changeX = autoScrollPixelSpeed;
+                break;
+            case 'LEFT_AUTOSCROLL':
+                if (scrollElement.scrollLeft >= autoScrollPixelSpeed) {
+                    scrollElement.scrollLeft -= autoScrollPixelSpeed;
+                    changeX = -autoScrollPixelSpeed;
+                } else {
+                    changeX = -scrollElement.scrollLeft;
+                    scrollElement.scrollLeft = 0;
+                }
+                break;
+            case 'TOP_AUTOSCROLL':
+                if (scrollElement.scrollTop >= autoScrollPixelSpeed) {
+                    scrollElement.scrollTop -= autoScrollPixelSpeed;
+                    changeY = -autoScrollPixelSpeed;
+                } else {
+                    changeY = -scrollElement.scrollTop;
+                    scrollElement.scrollTop -= 0;
+                }
+                break;
         }
-    
-        private autoScroll(direction: string, autoScrollPixelSpeed: number, scrollComponent: ISupportAutoscroll) {
-            let changeX = 0;
-            let changeY = 0;
-            const scrollElement = this.contentArea.nativeElement;
-            switch (direction) {
-                case 'BOTTOM_AUTOSCROLL':
-                    if ((scrollElement.scrollTop + scrollElement.offsetHeight) === scrollElement.scrollHeight)
-                        this.glasspane.nativeElement.style.height = parseInt(this.glasspane.nativeElement.style.height.replace('px', '')) + autoScrollPixelSpeed + 'px';
-                    scrollElement.scrollTop += autoScrollPixelSpeed;
-                    changeY = autoScrollPixelSpeed;
-                    break;
-                case 'RIGHT_AUTOSCROLL':
-                    if ((scrollElement.scrollLeft + scrollElement.offsetWidth) === scrollElement.scrollWidth)
-                        this.glasspane.nativeElement.style.width = parseInt(this.glasspane.nativeElement.style.width.replace('px', '')) + autoScrollPixelSpeed + 'px';
-                    scrollElement.scrollLeft += autoScrollPixelSpeed;
-                    changeX = autoScrollPixelSpeed;
-                    break;
-                case 'LEFT_AUTOSCROLL':
-                    if (scrollElement.scrollLeft >= autoScrollPixelSpeed) {
-                        scrollElement.scrollLeft -= autoScrollPixelSpeed;
-                        changeX = -autoScrollPixelSpeed;
-                    } else {
-                        changeX = -scrollElement.scrollLeft;
-                        scrollElement.scrollLeft = 0;
-                    }
-                    break;
-                case 'TOP_AUTOSCROLL':
-                    if (scrollElement.scrollTop >= autoScrollPixelSpeed) {
-                        scrollElement.scrollTop -= autoScrollPixelSpeed;
-                        changeY = -autoScrollPixelSpeed;
-                    } else {
-                        changeY = -scrollElement.scrollTop;
-                        scrollElement.scrollTop -= 0;
-                    }
-                    break;
-            }
-    
-            if (autoScrollPixelSpeed < 15)
-                autoScrollPixelSpeed++;
-    
-            if (scrollComponent.getUpdateLocationCallback() != null)
-            {
-                scrollComponent.getUpdateLocationCallback()(changeX, changeY, 0, 0);
-            }
-            return autoScrollPixelSpeed;
-        } 
-    
+
+        if (autoScrollPixelSpeed < 15)
+            autoScrollPixelSpeed++;
+
+        if (scrollComponent.getUpdateLocationCallback() != null) {
+            scrollComponent.getUpdateLocationCallback()(changeX, changeY, 0, 0);
+        }
+        return autoScrollPixelSpeed;
+    }
+
     registerDOMEvent(eventType: string, target: string, callback: (event: MouseEvent) => void): (event: MouseEvent) => void {
         const element: HTMLElement = this.getAutoscrollElement(target);
         if (element) element.addEventListener(eventType, callback)
