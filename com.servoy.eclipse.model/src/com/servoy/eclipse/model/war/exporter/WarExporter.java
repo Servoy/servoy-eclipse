@@ -351,8 +351,8 @@ public class WarExporter
 				if (list.size() > 1 || dependenciesVersions.get(jar).size() > 1)
 				{
 					Optional<File> lib = dependenciesVersions.get(jar).values().stream()
-						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith("\\lib")).findAny(); //there should be max one in lib anyway
-					if (lib.isPresent() && !latestJarPath.startsWith("\\lib"))
+						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith(File.separator +"lib")).findAny(); //there should be max one in lib anyway
+					if (lib.isPresent() && !latestJarPath.startsWith(File.separator +"lib"))
 					{
 						//keep the one in the lib folder, doesn't matter if it's older
 						latestJarPath = getRelativePath(tmpWarDir, lib.get());
@@ -386,7 +386,7 @@ public class WarExporter
 								messageBuilder.append(
 									"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
 							}
-							if (latestJarPath.startsWith("\\lib"))
+							if (latestJarPath.startsWith(File.separator +"lib"))
 							{
 								messageBuilder.append("\nDependency '" + path +
 									"' is not exported because '" + latestJar.getName() + "' is already present in the lib folder. \n");
@@ -433,14 +433,9 @@ public class WarExporter
 		}
 	}
 
-	/**
-	 * @param tmpWarDir
-	 * @param latestJar
-	 * @return
-	 */
 	private String getRelativePath(File tmpWarDir, File latestJar)
 	{
-		return latestJar.getPath().replace(tmpWarDir.getPath(), "").replace("\\WEB-INF", "");
+		return latestJar.getPath().replace(tmpWarDir.getPath(), "").replace(File.separator + "WEB-INF", "");
 	}
 
 	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
