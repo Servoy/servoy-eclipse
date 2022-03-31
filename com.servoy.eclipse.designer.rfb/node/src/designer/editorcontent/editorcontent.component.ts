@@ -69,6 +69,14 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
+    
+        	if ((event.target as Element).className != 'inlineEdit') {
+            if (event.metaKey || event.ctrlKey) {
+                return false;
+            }
+            return true;
+        }
+        
         if (event.ctrlKey || event.metaKey || event.altKey) {
             this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
             return false;
