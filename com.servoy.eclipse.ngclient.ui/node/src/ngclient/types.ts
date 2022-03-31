@@ -15,9 +15,11 @@ export class FormCache implements IFormCache {
     public formComponents: Map<string, FormComponentCache>;
     private _parts: Array<PartCache>;
     private conversionInfo = {};
+    private responsive: boolean;
 
-    constructor(readonly formname: string, size: Dimension, public readonly url: string) {
+    constructor(readonly formname: string, size: Dimension, responsive: boolean, public readonly url: string) {
         this.size = size;
+        this.responsive = responsive;
         this.componentCache = new Map();
         this.partComponentsCache = new Array();
         this._parts = [];
@@ -54,7 +56,7 @@ export class FormCache implements IFormCache {
     }
 
     get absolute(): boolean {
-        return this._mainStructure == null;
+        return !this.responsive;
     }
     get parts(): Array<PartCache> {
         return this._parts;
