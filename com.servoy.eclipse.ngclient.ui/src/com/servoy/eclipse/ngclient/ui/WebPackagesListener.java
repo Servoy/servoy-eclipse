@@ -520,6 +520,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						if (assetsChanged[0])
 						{
+							writeConsole(console, "Assets source changed");
+							sourceChanged = true;
 							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
 						}
 					}
