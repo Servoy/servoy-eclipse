@@ -282,21 +282,19 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		if (uuidToPersist.containsKey(persist.getUUID().toString()))
 		{
 			IPersist existingPersist = uuidToPersist.get(persist.getUUID().toString());
-			if (!Utils.equalObjects(persist, existingPersist))
+			if (persist != existingPersist)
 			{
 				List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
 				if (duplicates == null)
 				{
 					duplicates = new ArrayList<IPersist>();
 					duplicatesUUIDs.put(persist.getUUID(), duplicates);
+					duplicates.add(persist);
+					duplicates.add(existingPersist);
 				}
-				if (!duplicates.contains(persist))
+				else
 				{
 					duplicates.add(persist);
-				}
-				if (!duplicates.contains(existingPersist))
-				{
-					duplicates.add(existingPersist);
 				}
 			}
 		}

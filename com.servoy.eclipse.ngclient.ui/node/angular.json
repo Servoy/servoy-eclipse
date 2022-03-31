@@ -24,10 +24,7 @@
             "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
-              "src/favicon.ico",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" },
-              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs", "output": "/tinymce/langs" },
-              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs5", "output": "/tinymce/langs5" }
+              "src/favicon.ico"
             ],
             "styles": [
               "src/styles.css"
