@@ -82,7 +82,8 @@ public class MarkerMessages
 	public static ServoyMarker ReferencesToMultipleResources = new ServoyMarker(
 		"Solution project \"{0}\" has references to more than one Servoy Resources Projects.", ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
 	// It seems that elements with duplicate UUIDs are not loaded at all.
-	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" in {1}.", ServoyBuilder.DUPLICATE_UUID);
+	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" of {1} in {2}, duplicates: {3} in {4}.",
+		ServoyBuilder.DUPLICATE_UUID);
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.
 	public static ServoyMarker PropertyFormCannotBeInstantiated = new ServoyMarker("Property \"{0}\" refers to a form that cannot be instantiated.",
 		ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE);
