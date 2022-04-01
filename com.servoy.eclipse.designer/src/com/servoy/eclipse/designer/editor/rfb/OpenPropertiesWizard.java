@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -37,6 +38,7 @@ import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -138,7 +140,7 @@ class OpenPropertiesWizard implements IServerService
 									new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
 										INCLUDE_RELATIONS.NESTED, true, true, null),
 									EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, input);
-								dialog.open();
+								if (dialog.open() != Window.OK) return null;
 								List<Map<String, Object>> result = dialog.getResult();
 								for (int i = 0; i < result.size(); i++)
 								{
@@ -165,6 +167,7 @@ class OpenPropertiesWizard implements IServerService
 										webComponent.removeChild(webComponent.getChild(Utils.getAsUUID(uuid, false)));
 									}
 								}
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
 							}
 							else
 							{
