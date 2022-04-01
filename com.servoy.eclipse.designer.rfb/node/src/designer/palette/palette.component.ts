@@ -4,7 +4,6 @@ import { EditorSessionService, Package, PaletteComp } from '../services/editorse
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import {DesignerUtilsService} from '../services/designerutils.service';
-import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'designer-palette',
@@ -77,34 +76,10 @@ export class PaletteComponent {
     }
 
     onClick(component: PaletteComp) {
-        if (event.target && (event.target as Element).getAttribute("name") === "variants") return; // it has a separate click handler in a more nested elem
         component.isOpen = !component.isOpen;
     }
 
-    onVariantsClick(event: MouseEvent, popover: NgbPopover, component: PaletteComp) {
-        event.stopPropagation();
-
-        if (popover.isOpen()) {
-          popover.close();
-        } else {
-          popover.open({ c: component });
-        }
-                    
-    }
-    
-    doAddVariant(event: MouseEvent, component: PaletteComp) {
-        event.stopPropagation();
-        this.editorSession.addStyleVariantFor(component.styleVariantCategory);
-    }
-
-    doEditVariants(event: MouseEvent, component: PaletteComp) {
-        event.stopPropagation();
-        this.editorSession.editStyleVariantsFor(component.styleVariantCategory);
-    }
-
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        if (event.target && (event.target as Element).getAttribute("name") === "variants") return; // it has a separate click handler in a more nested elem
-
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -182,6 +157,7 @@ export class PaletteComponent {
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 const found = Array.from(elements).find((node) => {
                     const position = node.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(node, position);
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
                         if (node.getAttribute('svy-types').split(',').indexOf(this.dragItem.ghost.type) >= 0) {
                             return node;

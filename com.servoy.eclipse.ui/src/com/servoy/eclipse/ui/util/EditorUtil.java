@@ -72,7 +72,6 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.resource.ComponentVariantsEditorInput;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
@@ -669,19 +668,6 @@ public class EditorUtil
 		{
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new WebPackageManagerEditorInput(solutionName),
 				"com.servoy.eclipse.ui.webpackagemanager");
-		}
-		catch (PartInitException e)
-		{
-			Debug.log(e);
-		}
-	}
-
-	public static void openComponentVariantsEditor(String deepLinkArgs)
-	{
-		try
-		{
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
-				"com.servoy.eclipse..designer.editor.componentvariantseditor");
 		}
 		catch (PartInitException e)
 		{

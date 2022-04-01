@@ -646,7 +646,7 @@ public class CreateComponentHandler implements IServerService
 											PropertyWizardDialog dialog = new PropertyWizardDialog(current.getActiveShell(), context, flattenedSolution, table,
 												new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
 													INCLUDE_RELATIONS.NESTED, true, true, null),
-												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties);
+												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, null);
 											dialog.open();
 											List<Map<String, Object>> result = dialog.getResult();
 											for (int i = 0; i < result.size(); i++)

@@ -113,7 +113,7 @@ export class FormService {
     }
 
     public createFormCache(formName: string, jsonData,  url: string) {
-        const formCache = new FormCache(formName, jsonData.size, url);
+        const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url);
         this.walkOverChildren(jsonData.children, formCache);
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
@@ -369,7 +369,9 @@ export class FormService {
                             layout.height = height + 'px';
                         }
                         if (width) {
-                            layout.width = width + 'px';
+                            const continingFormIsResponsive = !formCache.absolute;
+                            if (continingFormIsResponsive) layout['min-width'] = width + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
+                            else layout.width = width + 'px';
                         }
                     }
                     if (elem.model[ConverterService.TYPES_KEY] != null) {

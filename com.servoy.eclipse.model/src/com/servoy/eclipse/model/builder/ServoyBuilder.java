@@ -1194,15 +1194,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						IPersist p = lst.get(0);
 						IPersist other = lst.get(1);
-						// for now only add it on both if there is 1, just skip the rest.
-						if (lst.size() == 1)
-						{
-							ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
-								SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
-							addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-								IMarker.PRIORITY_HIGH, null, other);
-						}
-						ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
+						ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
+							SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+						addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
+							IMarker.PRIORITY_HIGH, null, other);
+						mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
 							SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
 						addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE, IMarker.PRIORITY_HIGH,
 							null, p);

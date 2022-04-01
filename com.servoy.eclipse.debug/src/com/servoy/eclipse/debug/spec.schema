@@ -177,23 +177,22 @@
                     "description": "Assets for NG2",
                     "type": "array",
                     "items": {
-                            "type": "object",
-                            "properties": {
-                                "glob": {
-                                    "description": "the pattern what to include",
-                                    "type": "string"
-                                },
-                                "input": {
-                                    "description": "the source assets",
-                                    "type": "string"
-                                },
-                                "output": {
-                                    "description": "the output where it needs to go",
-                                    "type": "string"
-                                },
+                        "type": "object",
+                        "properties": {
+                            "glob": {
+                                "description": "the pattern what to include",
+                                "type": "string"
+                            },
+                            "input": {
+                                "description": "the source assets",
+                                "type": "string"
+                            },
+                            "output": {
+                                "description": "the output where it needs to go",
+                                "type": "string"
                             }
+                        }
                     }
-                    
                 }
         	},
         	"additionalProperties": false
@@ -243,16 +242,11 @@
 			"description": "The javascript definition",
 			"type": "string"
 		},
-        "categoryName" : 
-        {
-            "description": "The category name which is a sub node in the palette",
-            "type": "string"
-        },
-        "styleVariantCategory" : 
-        {
-            "description": "The category name which is a sub node in the palette",
-            "enum" : ["label", "button", "input"]
-        },
+		"categoryName" : 
+		{
+			"description": "The category name which is a sub node in the palette",
+			"type": "string"
+		},
 		"designStyleClass" :
 		{
 			"description": "A style class that is being used for a layout container purely in the designer",

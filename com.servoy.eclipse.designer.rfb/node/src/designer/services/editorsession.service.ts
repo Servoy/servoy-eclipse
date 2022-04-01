@@ -1,5 +1,6 @@
+import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, ElementRef } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -11,7 +12,7 @@ interface CallbackFunction {
 
 @Injectable()
 export class EditorSessionService implements ServiceProvider {
-
+ 
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
     private state = new State();
@@ -89,14 +90,6 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    addStyleVariantFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true)
-    }
-
-    editStyleVariantsFor(variantCategory: string) {
-        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true)
-    }
-
     getGhostComponents<T>() {
         return this.wsSession.callService<T>('formeditor', 'getGhostComponents', null, false)
     }
@@ -111,6 +104,10 @@ export class EditorSessionService implements ServiceProvider {
 
     requestSelection() {
         return this.wsSession.callService('formeditor', 'requestSelection', null, true)
+    }
+
+    openConfigurator(property: string) {
+        return this.wsSession.callService('formeditor', 'openConfigurator', property, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -388,8 +385,18 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
+        let keyCode = event.keyCode;
+        if ((event.target as Element).className == 'inlineEdit') {
+            if (event.metaKey || event.ctrlKey) {
+                //several Meta/Ctrl + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
+                keyCode = 0;
+            } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') { 
+                //avoid sending the specials key codes by themselfs - they always must be part of a combination
+                keyCode = 0;
+            }
+        }
         return {
-            keyCode: event.keyCode,
+            keyCode: keyCode,
             ctrlKey: event.ctrlKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
@@ -430,7 +437,6 @@ export class PaletteComp {
     y: number;
     type: string;
     ghostPropertyName: string;
-    styleVariantCategory: string;
     dropTargetUUID?: string; 
     isOpen: boolean;
     propertyName: string; // ghost

@@ -55,6 +55,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.dataprocessing.datasource.JSConnectionDefinition;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -79,6 +80,7 @@ import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.util.SQLKeywords;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
@@ -827,12 +829,21 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		T table = createTable(tableName);
 		tables.put(tableName, table);
 
+		DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager(),
+			DataSourceUtils.getDataSourceServerName(selectedTable.getDataSource()));
 		Iterator<Column> it = selectedTable.getColumns().iterator();
 		while (it.hasNext())
 		{
 			Column c = it.next();
-			table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
+			ColumnInfo columnInfo = c.getColumnInfo();
+			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
 				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
+			if (columnInfo != null)
+			{
+				dmm.createNewColumnInfo(newColumn, false);
+				newColumn.getColumnInfo().copyFrom(columnInfo);
+				newColumn.setColumnInfo(newColumn.getColumnInfo()); // update some members of the Column if they were changed in column info
+			}
 		}
 		updateAllColumnInfo(table);
 		return table;

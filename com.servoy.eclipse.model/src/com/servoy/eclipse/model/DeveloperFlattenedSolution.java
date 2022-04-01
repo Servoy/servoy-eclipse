@@ -87,7 +87,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 				solutions.add(mod);
 			}
 		}
-		return new DeveloperPersistIndex(solutions);
+		return (ISolutionModelPersistIndex)new DeveloperPersistIndex(solutions).createIndex();
 	}
 
 	/*
