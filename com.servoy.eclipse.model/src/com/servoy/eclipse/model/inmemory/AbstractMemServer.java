@@ -80,7 +80,6 @@ import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.util.SQLKeywords;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
@@ -829,8 +828,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		T table = createTable(tableName);
 		tables.put(tableName, table);
 
-		DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager(),
-			DataSourceUtils.getDataSourceServerName(selectedTable.getDataSource()));
+		DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager());
 		Iterator<Column> it = selectedTable.getColumns().iterator();
 		while (it.hasNext())
 		{
