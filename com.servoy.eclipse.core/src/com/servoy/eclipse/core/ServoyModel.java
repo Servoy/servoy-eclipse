@@ -1566,7 +1566,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 															InputStream is = file.getContents(true);
 															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 															Utils.closeInputStream(is);
-															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, true);
 														}
 														catch (CoreException e)
 														{
