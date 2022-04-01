@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -332,6 +333,24 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 
 	public Map<UUID, List<IPersist>> getDuplicateUUIDList()
 	{
+		// check if the uuids where not changed in the mean time..
+		Iterator<Entry<UUID, List<IPersist>>> mapIterator = duplicatesUUIDs.entrySet().iterator();
+		while (mapIterator.hasNext())
+		{
+			Entry<UUID, List<IPersist>> entry = mapIterator.next();
+			Iterator<IPersist> listIterator = entry.getValue().iterator();
+			while (listIterator.hasNext())
+			{
+				if (!listIterator.next().getUUID().equals(entry.getKey()))
+				{
+					listIterator.remove();
+				}
+			}
+			if (entry.getValue().size() <= 1)
+			{
+				mapIterator.remove();
+			}
+		}
 		return duplicatesUUIDs;
 	}
 
