@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
+import { createPopper } from '@popperjs/core';
 
 @Injectable()
 export class PopupMenuService {
@@ -47,6 +48,21 @@ export class PopupMenuService {
         this.menu.style.display = 'block';
 
         this.doc.body.appendChild(this.menu);
+    }
+
+    public showMenuAt(element: HTMLElement) {
+        this.menu.style.visibility = 'visible';
+        createPopper(element, this.menu, {
+            modifiers: [
+                {
+                  name: 'preventOverflow',
+                  options: {
+                    padding: 8,
+                    rootBoundary: 'document'
+                  },
+                },
+              ],
+          });
     }
 
     public showMenu(x: number, y: number) {
