@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +39,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.table.ColumnComposite;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.Utils;
 
 public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
@@ -49,16 +52,17 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		setHideOnMouseDown(false);
 	}
 
-
 	@Override
 	protected Composite createToolTipContentArea(Event event, Composite parent)
 	{
 		setShift(new Point(1, 1));
-		return createBrowserTooltipContentArea(this, getText(event), parent, true, 600, 450);
+		// we can't we just use SWT.DEFAULT below to determine preferred height unfortunately (don't think Browser.compute... can detect that - from what I tested)
+		// so, instead, we give these 4 sizing hints
+		return createBrowserTooltipContentArea(this, getText(event), parent, true, 600, 450, 150, 50);
 	}
 
 	public static Composite createBrowserTooltipContentArea(ToolTip toolTip, String toolTipText, Composite parent, boolean hideIfMouseOnRightSide,
-		int preferredWidthIfMultipleLines, int preferredWidthIfSingleLine)
+		int preferredWidthIfMultipleLines, int preferredWidthIfSingleLine, int preferredHeightIfMultipleLines, int preferredHeightIfSingleLine)
 	{
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout l = new GridLayout(1, false);
@@ -106,15 +110,30 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 		float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
 		int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
-		browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
-			"px;font-weight:500'>" + text + "</body></html>");
-		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(preferredWidthIfMultipleLines, 150)
-			: new GridData(preferredWidthIfSingleLine, 50);
+
+
+		String bgColor = "#fffff6";
+		String fgColor = null;
+		if (IconPreferences.getInstance().getUseDarkThemeIcons())
+		{
+			// TODO handle dark theme fg/bg colors here better? Take them from Eclipse UI instead?
+			RGB backgroundColorRGB = ColumnComposite.getServoyGrayBackground().getRGB();
+			bgColor = "rgb(" + backgroundColorRGB.red + "," + backgroundColorRGB.green + "," + backgroundColorRGB.blue + ")";
+			fgColor = "lightgray";
+		}
+
+		browser.setText("<html><body style='background-color:" + bgColor + ";" + (fgColor != null ? "color:" + fgColor + ";" : "") + "font-family:\"" +
+			f.getFontData()[0].getName() + "\";font-size:" + pxHeight +
+			"px;font-weight:normal'>" + text + "</body></html>");
+		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n") || text.contains("<li>"))
+			? new GridData(preferredWidthIfMultipleLines, preferredHeightIfMultipleLines)
+			: new GridData(preferredWidthIfSingleLine, preferredHeightIfSingleLine);
 		data.horizontalAlignment = GridData.FILL;
 		data.verticalAlignment = GridData.FILL;
 		data.grabExcessHorizontalSpace = true;
 		data.grabExcessVerticalSpace = true;
 		browser.setLayoutData(data);
+
 		return comp;
 	}
 
