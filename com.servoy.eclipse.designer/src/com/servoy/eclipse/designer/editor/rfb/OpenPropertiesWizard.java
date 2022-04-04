@@ -39,6 +39,7 @@ import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -50,10 +51,12 @@ import com.servoy.eclipse.ui.dialogs.PropertyWizardDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -123,12 +126,8 @@ class OpenPropertiesWizard implements IServerService
 										if (obj instanceof WebCustomType)
 										{
 											WebCustomType wct = (WebCustomType)obj;
-											Map<String, Object> map = new HashMap<String, Object>();
 											JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
-											for (String key : object.keySet())
-											{
-												map.put(key, JSONObject.NULL.equals(object.get(key)) ? null : object.get(key));
-											}
+											Map<String, Object> map = getAsMap(object);
 											previousColumns.add(object.get("svyUUID"));
 											input.add(map);
 										}
@@ -142,32 +141,76 @@ class OpenPropertiesWizard implements IServerService
 									EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, input);
 								if (dialog.open() != Window.OK) return null;
 								List<Map<String, Object>> result = dialog.getResult();
-								for (int i = 0; i < result.size(); i++)
-								{
-									Map<String, Object> row = result.get(i);
-									WebCustomType bean;
-									Object uuid = row.get("svyUUID");
-									if (uuid == null)
-									{
-										bean = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
-									}
-									else
-									{
-										bean = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-										previousColumns.remove(uuid); //it was updated, remove it from the set
-									}
-									row.forEach((key, value) -> bean.setProperty(key, value));
-								}
 
-								if (!previousColumns.isEmpty())
-								{
-									//didn't get an update for some columns, which means they are deleted
-									for (Object uuid : previousColumns)
+								Display.getDefault().asyncExec(() -> {
+									editorPart.getCommandStack().execute(new BaseRestorableCommand("setCustomArrayProperties")
 									{
-										webComponent.removeChild(webComponent.getChild(Utils.getAsUUID(uuid, false)));
-									}
-								}
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
+										private List<UUID> addedChildren;
+										private List<Map<String, Object>> oldProperties;
+
+										@Override
+										public void execute()
+										{
+											addedChildren = new ArrayList<>();
+											oldProperties = new ArrayList<>();
+											for (int i = 0; i < result.size(); i++)
+											{
+												Map<String, Object> row = result.get(i);
+												WebCustomType customType;
+												Object uuid = row.get("svyUUID");
+												if (uuid == null)
+												{
+													customType = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
+													addedChildren.add(customType.getUUID());
+												}
+												else
+												{
+													customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+													previousColumns.remove(uuid); //it was updated, remove it from the set
+													oldProperties.add(getAsMap((JSONObject)customType.getPropertiesMap().get("json")));
+												}
+												row.forEach((key, value) -> customType.setProperty(key, value));
+											}
+
+											if (!previousColumns.isEmpty())
+											{
+												//didn't get an update for some columns, which means they are deleted
+												for (Object uuid : previousColumns)
+												{
+													WebCustomType customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+													oldProperties.add(getAsMap((JSONObject)customType.getPropertiesMap().get("json")));
+													webComponent.removeChild(customType);
+												}
+											}
+											ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
+										}
+
+										@Override
+										public void undo()
+										{
+											for (UUID uuid : addedChildren)
+											{
+												webComponent.removeChild(webComponent.getChild(uuid));
+											}
+
+											for (int i = 0; i < oldProperties.size(); i++)
+											{
+												Map<String, Object> row = oldProperties.get(i);
+												Object uuid = row.get("svyUUID");
+												if (uuid == null) continue;
+												WebCustomType bean = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+												if (bean == null)
+												{
+													bean = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
+												}
+												IBasicWebObject iBasicWebObject = (IBasicWebObject)webComponent.getChild(Utils.getAsUUID(uuid, false));
+												row.forEach((key, value) -> iBasicWebObject.setProperty(key, value));
+											}
+
+											ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
+										}
+									});
+								});
 							}
 							else
 							{
@@ -186,5 +229,19 @@ class OpenPropertiesWizard implements IServerService
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @param object
+	 * @return
+	 */
+	private Map<String, Object> getAsMap(JSONObject object)
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		for (String key : object.keySet())
+		{
+			map.put(key, JSONObject.NULL.equals(object.get(key)) ? null : object.get(key));
+		}
+		return map;
 	}
 }
