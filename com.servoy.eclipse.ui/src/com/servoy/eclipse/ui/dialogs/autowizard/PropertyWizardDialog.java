@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.ui.dialogs;
+package com.servoy.eclipse.ui.dialogs.autowizard;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +47,6 @@ import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
  */
 public class PropertyWizardDialog extends Dialog
 {
-	private final Shell parentShell;
 	private final PersistContext persistContext;
 	private final FlattenedSolution flattenedSolution;
 	private final ITable table;
@@ -55,7 +54,7 @@ public class PropertyWizardDialog extends Dialog
 	private final IDialogSettings settings;
 	private final Collection<PropertyDescription> wizardProperties;
 	private final PropertyDescription property;
-	private DataproviderComposite dataproviderComposite;
+	private AutoWizardPropertiesComposite autoWizardPropertiesComposite;
 	private final List<Map<String, Object>> input;
 
 	/**
@@ -67,7 +66,6 @@ public class PropertyWizardDialog extends Dialog
 		List<Map<String, Object>> input)
 	{
 		super(parentShell);
-		this.parentShell = parentShell;
 		this.persistContext = persistContext;
 		this.flattenedSolution = flattenedSolution;
 		this.table = table;
@@ -90,37 +88,37 @@ public class PropertyWizardDialog extends Dialog
 		getShell().setText("Property configurator for " + property.getName());
 
 		Composite area = (Composite)super.createDialogArea(parent);
-		// first check what the main thing must be (dataprovders, forms, relations?)
+		// first check what the main thing must be (dataproviders, forms, relations?)
 		List<PropertyDescription> dataproviderProperties = wizardProperties.stream()
 			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
 				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
 			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
 			.collect(Collectors.toList());
 		// should be only 1 (or only 1 with values)
-		List<PropertyDescription> styleProperties = wizardProperties.stream()
-			.filter(prop -> StyleClassPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.collect(Collectors.toList());
-		List<PropertyDescription> i18nProperties = wizardProperties.stream()
-			.filter(prop -> TitleStringPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.collect(Collectors.toList());
-		List<PropertyDescription> stringProperties = wizardProperties.stream()
-			.filter(prop -> ServoyStringPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.collect(Collectors.toList());
+		List<PropertyDescription> styleProperties = filterProperties(StyleClassPropertyType.class);
+		List<PropertyDescription> i18nProperties = filterProperties(TitleStringPropertyType.class);
+		List<PropertyDescription> stringProperties = filterProperties(ServoyStringPropertyType.class);
 		if (dataproviderProperties.size() > 0 || styleProperties.size() > 0)
 		{
-			dataproviderComposite = new DataproviderComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
+			autoWizardPropertiesComposite = new AutoWizardPropertiesComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
 				dataproviderProperties, styleProperties, i18nProperties, stringProperties, input);
 		}
 		return area;
 	}
 
+	private List<PropertyDescription> filterProperties(Class< ? > cls)
+	{
+		return wizardProperties.stream()
+			.filter(prop -> cls.isAssignableFrom(prop.getType().getClass()))
+			.collect(Collectors.toList());
+	}
+
 	public List<Map<String, Object>> getResult()
 	{
-		if (dataproviderComposite != null)
+		if (autoWizardPropertiesComposite != null)
 		{
-			return dataproviderComposite.getResult();
+			return autoWizardPropertiesComposite.getResult();
 		}
 		return Collections.emptyList();
 	}
-
 }

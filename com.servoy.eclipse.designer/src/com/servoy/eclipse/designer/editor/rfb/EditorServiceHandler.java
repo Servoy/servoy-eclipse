@@ -53,6 +53,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveL
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenPropertiesWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RevertFormCommand;
@@ -489,7 +490,7 @@ public class EditorServiceHandler implements IServerService
 
 		});
 
-		configuredHandlers.put("openConfigurator", new OpenPropertiesWizard(editorPart, selectionProvider));
+		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(editorPart, selectionProvider));
 	}
 
 	@Override

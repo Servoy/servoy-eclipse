@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.ui.dialogs;
+package com.servoy.eclipse.ui.dialogs.autowizard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +47,9 @@ import org.sablo.specification.PropertyDescription;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -66,11 +69,11 @@ import com.servoy.j2db.util.Pair;
 /**
  * @author emera
  */
-public class DataproviderComposite extends Composite
+public class AutoWizardPropertiesComposite extends Composite
 {
 	private final DataProviderTreeViewer dataproviderTreeViewer;
 	private ListViewer stylePropertiesViewer;
-	private final WizardConfigurationViewer tableViewer;
+	private final AutoWizardConfigurationViewer tableViewer;
 	private List<Pair<String, Map<String, Object>>> input = new ArrayList<>();
 	private final IDialogSettings settings;
 	private final List<PropertyDescription> dataproviderProperties;
@@ -84,7 +87,7 @@ public class DataproviderComposite extends Composite
 	private final FlattenedSolution flattenedSolution;
 
 
-	public DataproviderComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+	public AutoWizardPropertiesComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings, List<PropertyDescription> dataproviderProperties,
 		List<PropertyDescription> styleProperties, List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties,
 		List<Map<String, Object>> childrenProperties)
@@ -182,7 +185,7 @@ public class DataproviderComposite extends Composite
 	}
 
 
-	private WizardConfigurationViewer createTableViewer(SashForm form, ITable table)
+	private AutoWizardConfigurationViewer createTableViewer(SashForm form, ITable table)
 	{
 		final Composite container = new Composite(form, SWT.NONE);
 		// define layout for the viewer
@@ -198,7 +201,7 @@ public class DataproviderComposite extends Composite
 
 		container.setLayoutData(gridData);
 
-		WizardConfigurationViewer viewer = new WizardConfigurationViewer(container, persistContext, flattenedSolution, table, dataproviderProperties,
+		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table, dataproviderProperties,
 			styleProperties, i18nProperties, stringProperties, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}

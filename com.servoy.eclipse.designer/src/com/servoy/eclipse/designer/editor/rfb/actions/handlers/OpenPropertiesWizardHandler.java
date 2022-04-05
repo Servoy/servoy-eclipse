@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.designer.editor.rfb;
+package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,16 +38,13 @@ import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.PropertyWizardDialog;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -55,17 +52,16 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
  */
-class OpenPropertiesWizard implements IServerService
+public class OpenPropertiesWizardHandler implements IServerService
 {
 	private final ISelectionProvider selectionProvider;
 	private final BaseVisualFormEditor editorPart;
 
-	public OpenPropertiesWizard(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public OpenPropertiesWizardHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
@@ -138,45 +134,11 @@ class OpenPropertiesWizard implements IServerService
 										INCLUDE_RELATIONS.NESTED, true, true, null),
 									EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, input);
 								if (dialog.open() != Window.OK) return null;
-								List<Map<String, Object>> result = dialog.getResult();
+								List<Map<String, Object>> newProperties = dialog.getResult();
 
 								Display.getDefault().asyncExec(() -> {
-									editorPart.getCommandStack().execute(new BaseRestorableCommand("setCustomArrayProperties")
-									{
-										@Override
-										public void execute()
-										{
-											saveState(persistContext.getPersist());
-											for (int i = 0; i < result.size(); i++)
-											{
-												Map<String, Object> row = result.get(i);
-												WebCustomType customType;
-												Object uuid = row.get("svyUUID");
-												if (uuid == null)
-												{
-													customType = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
-												}
-												else
-												{
-													customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-													previousColumns.remove(uuid); //it was updated, remove it from the set
-												}
-												row.forEach((key, value) -> customType.setProperty(key, value));
-											}
-
-											if (!previousColumns.isEmpty())
-											{
-												//didn't get an update for some columns, which means they are deleted
-												for (Object uuid : previousColumns)
-												{
-													WebCustomType customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-													webComponent.removeChild(customType);
-												}
-											}
-											ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
-										}
-
-									});
+									editorPart.getCommandStack()
+										.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns));
 								});
 							}
 							else
