@@ -51,12 +51,10 @@ import com.servoy.eclipse.ui.dialogs.PropertyWizardDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -145,14 +143,10 @@ class OpenPropertiesWizard implements IServerService
 								Display.getDefault().asyncExec(() -> {
 									editorPart.getCommandStack().execute(new BaseRestorableCommand("setCustomArrayProperties")
 									{
-										private List<UUID> addedChildren;
-										private List<Map<String, Object>> oldProperties;
-
 										@Override
 										public void execute()
 										{
-											addedChildren = new ArrayList<>();
-											oldProperties = new ArrayList<>();
+											saveState(persistContext.getPersist());
 											for (int i = 0; i < result.size(); i++)
 											{
 												Map<String, Object> row = result.get(i);
@@ -161,13 +155,11 @@ class OpenPropertiesWizard implements IServerService
 												if (uuid == null)
 												{
 													customType = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
-													addedChildren.add(customType.getUUID());
 												}
 												else
 												{
 													customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
 													previousColumns.remove(uuid); //it was updated, remove it from the set
-													oldProperties.add(getAsMap((JSONObject)customType.getPropertiesMap().get("json")));
 												}
 												row.forEach((key, value) -> customType.setProperty(key, value));
 											}
@@ -178,37 +170,12 @@ class OpenPropertiesWizard implements IServerService
 												for (Object uuid : previousColumns)
 												{
 													WebCustomType customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-													oldProperties.add(getAsMap((JSONObject)customType.getPropertiesMap().get("json")));
 													webComponent.removeChild(customType);
 												}
 											}
 											ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
 										}
 
-										@Override
-										public void undo()
-										{
-											for (UUID uuid : addedChildren)
-											{
-												webComponent.removeChild(webComponent.getChild(uuid));
-											}
-
-											for (int i = 0; i < oldProperties.size(); i++)
-											{
-												Map<String, Object> row = oldProperties.get(i);
-												Object uuid = row.get("svyUUID");
-												if (uuid == null) continue;
-												WebCustomType bean = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-												if (bean == null)
-												{
-													bean = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
-												}
-												IBasicWebObject iBasicWebObject = (IBasicWebObject)webComponent.getChild(Utils.getAsUUID(uuid, false));
-												row.forEach((key, value) -> iBasicWebObject.setProperty(key, value));
-											}
-
-											ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, webComponent, true);
-										}
 									});
 								});
 							}
