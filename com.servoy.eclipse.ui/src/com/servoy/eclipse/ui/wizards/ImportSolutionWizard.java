@@ -78,7 +78,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -380,7 +380,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					protected ServerConfig createServer(String name, ServerConfig sc)
 					{
 						ServerConfig serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(),
-							DatabaseUtils.getPostgresServerUrl(sc, name),
+							EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),

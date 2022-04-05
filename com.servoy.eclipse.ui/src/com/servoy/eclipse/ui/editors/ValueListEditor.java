@@ -60,7 +60,7 @@ import org.eclipse.ui.IEditorPart;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder.Problem;
 import com.servoy.eclipse.model.builder.ServoyValuelistBuilder;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
@@ -1168,7 +1168,7 @@ public class ValueListEditor extends PersistEditor
 		else
 		{
 			handleRelatedValuesButtonSelected();
-			getValueList().setRelationName(DatabaseUtils.getRelationsString(relationsWrapper.relations));
+			getValueList().setRelationName(EclipseDatabaseUtils.getRelationsString(relationsWrapper.relations));
 		}
 	}
 
