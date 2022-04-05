@@ -226,7 +226,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 obj[this.draggingGhost.uuid] = { 'y': event.pageY - this.elementRef.nativeElement.getBoundingClientRect().top };
                 this.editorSession.sendChanges(obj);
             }
-            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+            if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                 const obj = {};
                 for (const ghost of this.draggingInGhostContainer.ghosts) {
                     obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
