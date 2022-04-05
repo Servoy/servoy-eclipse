@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
 import { EditorContentService } from './editorcontent.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
-import {DesignFormComponent} from './designform_component.component';
+import { DesignFormComponent } from './designform_component.component';
 
 import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
@@ -16,31 +16,29 @@ import { DOCUMENT } from '@angular/common';
 export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {
 
     @ViewChild(DesignFormComponent) designFormComponent: DesignFormComponent;
-    @ViewChild('element', { static: false }) set elementRef(elementRef: ElementRef) 
-    { 
-        if(elementRef) 
-        { 
-            this.elementRefInit = elementRef;  
+    @ViewChild('element', { static: false }) set elementRef(elementRef: ElementRef) {
+        if (elementRef) {
+            this.elementRefInit = elementRef;
             this.resizeObserver.observe(this.elementRefInit.nativeElement);
         }
     }
     elementRefInit: ElementRef;
-    
+
     private resizeObserver: ResizeObserver;
     mainForm: string;
     solutionName: string;
     private wsSession: WebsocketSession;
-    
-    constructor(private windowRef: WindowRefService, 
-                        private websocketService: WebsocketService, 
-                        private formService: FormService,
-                        private services: ServicesService,
-                        private editorContentService: EditorContentService,
-                        protected renderer: Renderer2,
-                        @Inject(DOCUMENT) private doc: Document) { }
+
+    constructor(private windowRef: WindowRefService,
+        private websocketService: WebsocketService,
+        private formService: FormService,
+        private services: ServicesService,
+        private editorContentService: EditorContentService,
+        protected renderer: Renderer2,
+        @Inject(DOCUMENT) private doc: Document) { }
 
     ngOnInit() {
-        this.renderer.setStyle(this.doc.body,"overflow", "hidden");
+        this.renderer.setStyle(this.doc.body, "overflow", "hidden");
         let path: string = this.windowRef.nativeWindow.location.pathname;
         let formStart = path.indexOf('/form/') + 6;
         let formName = path.substring(formStart, path.indexOf('/', formStart));
@@ -82,43 +80,46 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
                 return null;
             }
         } as ServiceProvider);
-         this.resizeObserver = new ResizeObserver(() => {
-             this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
+        this.resizeObserver = new ResizeObserver(() => {
+            this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
         });
     }
 
     getFormName() {
         return this.mainForm;
     }
-    
-    refresh(){
+
+    refresh() {
         this.designFormComponent.formCacheChanged();
     }
-    
-    renderGhosts(){
+
+    renderGhosts() {
         this.windowRef.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
     }
-    
+
     redrawDecorators() {
         this.windowRef.nativeWindow.parent.postMessage({ id: 'redrawDecorators' }, '*');
     }
-    
-    updateForm(width :number, height : number) : void{
-         this.windowRef.nativeWindow.parent.postMessage({ id: 'updateFormSize', width : width, height : height }, '*');
+
+    updateForm(width: number, height: number): void {
+        // not sure how to fix that sometimes wrong calls come from server; for example when deleting a component from css position container
+        if (width != 0 && height != 0) {
+            this.windowRef.nativeWindow.parent.postMessage({ id: 'updateFormSize', width: width, height: height }, '*');
+        }
     }
-    
-    ngAfterViewInit(){
+
+    ngAfterViewInit() {
         this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
     }
-    
-    ngOnDestroy(){
+
+    ngOnDestroy() {
         if (this.resizeObserver) this.resizeObserver.unobserve(this.elementRefInit.nativeElement);
     }
 }
 export declare interface IDesignFormComponent {
     getFormName(): string;
-    refresh() : void;
-    renderGhosts() : void;
-    updateForm(width :number, height : number) : void;
+    refresh(): void;
+    renderGhosts(): void;
+    updateForm(width: number, height: number): void;
     redrawDecorators(): void;
 }
