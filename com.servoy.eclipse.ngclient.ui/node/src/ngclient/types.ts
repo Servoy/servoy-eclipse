@@ -151,7 +151,7 @@ export class StructureCache {
     public parent : StructureCache;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
-        public readonly id?: string) {
+        public readonly id?: string, public readonly cssPositionContainer? : boolean) {
         if (!this.items) this.items = [];
     }
 

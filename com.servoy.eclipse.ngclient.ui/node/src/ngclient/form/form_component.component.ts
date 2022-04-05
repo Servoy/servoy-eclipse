@@ -96,6 +96,15 @@ export abstract class AbstractFormComponent {
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
+      
+      <ng-template  #cssPositionContainer  let-state="state" >
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+            <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            </div>
+          </div>
+      </ng-template>
+      
       <!-- structure template generate start -->
       <!-- structure template generate end -->
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
@@ -122,6 +131,7 @@ export abstract class AbstractFormComponent {
 })
 export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
+    @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
@@ -215,7 +225,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv;
+            return item.tagname ? this[item.tagname] : ( item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
         } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;

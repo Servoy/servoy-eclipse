@@ -388,6 +388,10 @@ export class EditorSessionService implements ServiceProvider {
             metaKey: event.metaKey
         }
     }
+    
+    isAbsoluteFormLayout() : boolean{
+        return this.urlParser.isAbsoluteFormLayout();
+    }
 }
 
 export interface ISelectionChangedListener {

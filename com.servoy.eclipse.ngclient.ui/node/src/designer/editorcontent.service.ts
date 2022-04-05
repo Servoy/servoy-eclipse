@@ -49,7 +49,7 @@ export class EditorContentService {
                     }
                 }
                 else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null);
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
                     formCache.addLayoutContainer(container);
                     const parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
