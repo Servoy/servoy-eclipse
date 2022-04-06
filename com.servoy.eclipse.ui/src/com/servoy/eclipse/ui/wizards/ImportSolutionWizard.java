@@ -83,6 +83,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -417,6 +418,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						return serverConfig;
 					}
 				};
+				WebPackagesListener.setIgnore(true);
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				String title = "Solution imported";
 				String description = null;
@@ -477,6 +479,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + mymsg, ex);
 				}
 				showDetailsDialog(title, description, status);
+				WebPackagesListener.setIgnore(false);
 			}
 		};
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
