@@ -1142,14 +1142,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$(document).keydown(function(objEvent) {
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
 						
-						if (objEvent.target.id != null && objEvent.target.id == 'directEdit') {
-							if (fixedKeyEvent.isMeta || fixedKeyEvent.isCtrl) {
-								return false;
-							}
-							return true;
-						}
-						
-						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt) {
+						if ( objEvent.target.id != 'directEdit' && (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt)) {
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
