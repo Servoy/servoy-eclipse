@@ -70,7 +70,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
     
-        	if ((event.target as Element).className != 'inlineEdit') {
+        	if ((event.target as Element).className === 'inlineEdit') {
             if (event.metaKey || event.ctrlKey) {
                 return false;
             }
