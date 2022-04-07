@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -285,17 +286,24 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			IPersist existingPersist = uuidToPersist.get(persist.getUUID().toString());
 			if (persist != existingPersist)
 			{
-				List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
-				if (duplicates == null)
+				// if this is a WebCustomType this can be created multiply times for the same thing
+				// we should check if it is the same parent and the same index then assume this is the same thing
+				if (!((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
+					(existingPersist.getParent() == persist.getParent()) &&
+					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex())))
 				{
-					duplicates = new ArrayList<IPersist>();
-					duplicatesUUIDs.put(persist.getUUID(), duplicates);
-					duplicates.add(persist);
-					duplicates.add(existingPersist);
-				}
-				else
-				{
-					duplicates.add(persist);
+					List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
+					if (duplicates == null)
+					{
+						duplicates = new ArrayList<IPersist>();
+						duplicatesUUIDs.put(persist.getUUID(), duplicates);
+						duplicates.add(persist);
+						duplicates.add(existingPersist);
+					}
+					else
+					{
+						duplicates.add(persist);
+					}
 				}
 			}
 		}
