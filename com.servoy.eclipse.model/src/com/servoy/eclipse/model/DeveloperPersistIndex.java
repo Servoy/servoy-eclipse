@@ -32,9 +32,11 @@ import java.util.concurrent.ConcurrentMap;
 import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.Media;
@@ -43,7 +45,9 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -288,9 +292,25 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			{
 				// if this is a WebCustomType this can be created multiply times for the same thing
 				// we should check if it is the same parent and the same index then assume this is the same thing
-				if (!((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
+				boolean isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
 					(existingPersist.getParent() == persist.getParent()) &&
-					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex())))
+					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex()));
+				if (isDifferent)
+				{
+					ISupportChilds parent = persist.getParent();
+					while (isDifferent && parent instanceof WebComponent)
+					{
+						isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+						parent = parent.getParent();
+					}
+					parent = existingPersist.getParent();
+					while (isDifferent && parent instanceof WebComponent)
+					{
+						isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+						parent = parent.getParent();
+					}
+				}
+				if (isDifferent)
 				{
 					List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
 					if (duplicates == null)
@@ -308,6 +328,12 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			}
 		}
 		super.putInCache(persist);
+
+		if (persist instanceof WebComponent)
+		{
+			List<IChildWebObject> children = ((WebComponent)persist).getImplementation().getAllPersistMappedProperties();
+			children.forEach(child -> putInCache(child));
+		}
 
 	}
 
