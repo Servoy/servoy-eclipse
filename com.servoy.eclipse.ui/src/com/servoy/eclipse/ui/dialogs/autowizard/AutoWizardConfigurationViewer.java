@@ -54,7 +54,7 @@ import com.servoy.j2db.util.Pair;
  */
 public class AutoWizardConfigurationViewer extends TableViewer
 {
-	private ITable table;
+	ITable table;
 
 	private final List<TextCellEditorSupport> i18nColumns = new ArrayList<>();
 	private final PersistContext persistContext;

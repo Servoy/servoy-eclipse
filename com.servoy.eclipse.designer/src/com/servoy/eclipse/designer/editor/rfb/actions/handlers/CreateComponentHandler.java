@@ -39,6 +39,7 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.IEditorPart;
@@ -74,11 +75,8 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialog;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogBuilder;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -643,19 +641,19 @@ public class CreateComponentHandler implements IServerService
 											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
 
-											PropertyWizardDialog dialog = new PropertyWizardDialog(current.getActiveShell(), context, flattenedSolution, table,
-												new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
-													INCLUDE_RELATIONS.NESTED, true, true, null),
-												EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, null);
-											dialog.open();
-											List<Map<String, Object>> result = dialog.getResult();
-											for (int i = 0; i < result.size(); i++)
+											PropertyWizardDialogBuilder dialogBuilder = new PropertyWizardDialogBuilder(current.getActiveShell(),
+												context,
+												flattenedSolution, property).withTable(table).withProperties(wizardProperties);
+											if (dialogBuilder.open() == Window.OK)
 											{
-												Map<String, Object> row = result.get(i);
-												WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, compName, i, null);
-												row.forEach((key, value) -> bean.setProperty(key, value));
+												List<Map<String, Object>> result = dialogBuilder.getResult();
+												for (int i = 0; i < result.size(); i++)
+												{
+													Map<String, Object> row = result.get(i);
+													WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, compName, i, null);
+													row.forEach((key, value) -> bean.setProperty(key, value));
+												}
 											}
-
 										}
 										else
 										{

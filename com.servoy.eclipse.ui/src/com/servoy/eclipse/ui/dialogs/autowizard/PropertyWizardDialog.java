@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -39,6 +42,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -54,14 +58,12 @@ public class PropertyWizardDialog extends Dialog
 	private final IDialogSettings settings;
 	private final Collection<PropertyDescription> wizardProperties;
 	private final PropertyDescription property;
-	private AutoWizardPropertiesComposite autoWizardPropertiesComposite;
 	private final List<Map<String, Object>> input;
+	private DataproviderPropertiesSelector dataprovidersSelector;
+	private AutoWizardPropertiesComposite tableComposite;
+	private StylePropertiesSelector stylePropertiesSelector;
 
-	/**
-	 * @param parentShell
-	 * @param input
-	 */
-	public PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+	PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings, PropertyDescription property, Collection<PropertyDescription> wizardProperties,
 		List<Map<String, Object>> input)
 	{
@@ -89,6 +91,8 @@ public class PropertyWizardDialog extends Dialog
 
 		Composite area = (Composite)super.createDialogArea(parent);
 		// first check what the main thing must be (dataproviders, forms, relations?)
+
+		//TODO move to the builder
 		List<PropertyDescription> dataproviderProperties = wizardProperties.stream()
 			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
 				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
@@ -98,13 +102,31 @@ public class PropertyWizardDialog extends Dialog
 		List<PropertyDescription> styleProperties = filterProperties(StyleClassPropertyType.class);
 		List<PropertyDescription> i18nProperties = filterProperties(TitleStringPropertyType.class);
 		List<PropertyDescription> stringProperties = filterProperties(ServoyStringPropertyType.class);
-		if (dataproviderProperties.size() > 0 || styleProperties.size() > 0)
+
+		Composite c = new Composite(area, SWT.NONE);
+		c.setLayout(new FillLayout());
+		SashForm form = new SashForm(c, SWT.HORIZONTAL);
+		SashForm form2 = new SashForm(form, SWT.VERTICAL);
+
+		if (dataproviderProperties.size() > 0)
 		{
-			autoWizardPropertiesComposite = new AutoWizardPropertiesComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, settings,
-				dataproviderProperties, styleProperties, i18nProperties, stringProperties, input);
+			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, dataproviderProperties, flattenedSolution,
+				dataproviderOptions, table, settings, getShell());
 		}
+
+		if (styleProperties.size() > 0) // should really be always 1 size..
+		{
+			stylePropertiesSelector = new StylePropertiesSelector(this, form2, styleProperties);
+		}
+
+		if (dataprovidersSelector != null && stylePropertiesSelector.stylePropertiesViewer != null)
+			form2.setWeights(70, 30);
+
+		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution, table,
+			dataproviderProperties, styleProperties, i18nProperties, stringProperties, input);
 		return area;
 	}
+
 
 	private List<PropertyDescription> filterProperties(Class< ? > cls)
 	{
@@ -115,10 +137,26 @@ public class PropertyWizardDialog extends Dialog
 
 	public List<Map<String, Object>> getResult()
 	{
-		if (autoWizardPropertiesComposite != null)
+		if (tableComposite != null)
 		{
-			return autoWizardPropertiesComposite.getResult();
+			return tableComposite.getResult();
 		}
 		return Collections.emptyList();
+	}
+
+	void setTreeInput(List<Pair<String, Map<String, Object>>> list)
+	{
+		tableComposite.setInput(list);
+
+	}
+
+	void addNewRow(String id, Map<String, Object> row)
+	{
+		tableComposite.addNewRow(new Pair<String, Map<String, Object>>(id, row));
+	}
+
+	public List<Pair<String, Map<String, Object>>> getInput()
+	{
+		return tableComposite.getInput();
 	}
 }

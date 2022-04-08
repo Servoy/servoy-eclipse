@@ -42,11 +42,8 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialog;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogBuilder;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.ITable;
@@ -128,13 +125,10 @@ public class OpenPropertiesWizardHandler implements IServerService
 									}
 								}
 
-								PropertyWizardDialog dialog = new PropertyWizardDialog(current.getActiveShell(), persistContext, flattenedSolution,
-									table,
-									new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true,
-										INCLUDE_RELATIONS.NESTED, true, true, null),
-									EditorUtil.getDialogSettings("PropertyWizard"), property, wizardProperties, input);
-								if (dialog.open() != Window.OK) return null;
-								List<Map<String, Object>> newProperties = dialog.getResult();
+								PropertyWizardDialogBuilder dialogBuilder = new PropertyWizardDialogBuilder(current.getActiveShell(), persistContext,
+									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
+								if (dialogBuilder.open() != Window.OK) return null;
+								List<Map<String, Object>> newProperties = dialogBuilder.getResult();
 
 								Display.getDefault().asyncExec(() -> {
 									editorPart.getCommandStack()
