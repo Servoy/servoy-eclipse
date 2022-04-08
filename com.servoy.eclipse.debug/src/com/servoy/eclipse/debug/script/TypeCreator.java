@@ -425,7 +425,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType(JSSolutionModel.class);
 		addAnonymousClassType(JSDatabaseManager.class);
-		addAnonymousClassType(JSDeveloperSolutionModel.class);
+		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 		addAnonymousClassType(JSSecurity.class);
 		addAnonymousClassType("servoyApi", ServoyApiObject.class);
 		addAnonymousClassType("console", ConsoleObject.class);
