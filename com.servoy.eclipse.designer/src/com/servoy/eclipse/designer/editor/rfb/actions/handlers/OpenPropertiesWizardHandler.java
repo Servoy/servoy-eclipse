@@ -42,7 +42,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogBuilder;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -125,10 +125,11 @@ public class OpenPropertiesWizardHandler implements IServerService
 									}
 								}
 
-								PropertyWizardDialogBuilder dialogBuilder = new PropertyWizardDialogBuilder(current.getActiveShell(), persistContext,
+								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+									persistContext,
 									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
-								if (dialogBuilder.open() != Window.OK) return null;
-								List<Map<String, Object>> newProperties = dialogBuilder.getResult();
+								if (dialogConfigurator.open() != Window.OK) return null;
+								List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
 
 								Display.getDefault().asyncExec(() -> {
 									editorPart.getCommandStack()

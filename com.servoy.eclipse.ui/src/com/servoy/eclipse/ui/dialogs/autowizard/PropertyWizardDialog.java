@@ -17,11 +17,9 @@
 
 package com.servoy.eclipse.ui.dialogs.autowizard;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -32,16 +30,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.types.StyleClassPropertyType;
 
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -54,28 +46,23 @@ public class PropertyWizardDialog extends Dialog
 	private final PersistContext persistContext;
 	private final FlattenedSolution flattenedSolution;
 	private final ITable table;
-	private final DataProviderOptions dataproviderOptions;
 	private final IDialogSettings settings;
-	private final Collection<PropertyDescription> wizardProperties;
 	private final PropertyDescription property;
-	private final List<Map<String, Object>> input;
 	private DataproviderPropertiesSelector dataprovidersSelector;
 	private AutoWizardPropertiesComposite tableComposite;
 	private StylePropertiesSelector stylePropertiesSelector;
+	private final PropertyWizardDialogConfigurator configurator;
 
-	PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		DataProviderOptions dataproviderOptions, final IDialogSettings settings, PropertyDescription property, Collection<PropertyDescription> wizardProperties,
-		List<Map<String, Object>> input)
+	PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table, final IDialogSettings settings,
+		PropertyDescription property, PropertyWizardDialogConfigurator configurator)
 	{
 		super(parentShell);
 		this.persistContext = persistContext;
 		this.flattenedSolution = flattenedSolution;
 		this.table = table;
-		this.dataproviderOptions = dataproviderOptions;
 		this.settings = settings;
 		this.property = property;
-		this.wizardProperties = wizardProperties;
-		this.input = input;
+		this.configurator = configurator;
 	}
 
 	@Override
@@ -92,47 +79,29 @@ public class PropertyWizardDialog extends Dialog
 		Composite area = (Composite)super.createDialogArea(parent);
 		// first check what the main thing must be (dataproviders, forms, relations?)
 
-		//TODO move to the builder
-		List<PropertyDescription> dataproviderProperties = wizardProperties.stream()
-			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
-				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
-			.collect(Collectors.toList());
-		// should be only 1 (or only 1 with values)
-		List<PropertyDescription> styleProperties = filterProperties(StyleClassPropertyType.class);
-		List<PropertyDescription> i18nProperties = filterProperties(TitleStringPropertyType.class);
-		List<PropertyDescription> stringProperties = filterProperties(ServoyStringPropertyType.class);
-
 		Composite c = new Composite(area, SWT.NONE);
 		c.setLayout(new FillLayout());
 		SashForm form = new SashForm(c, SWT.HORIZONTAL);
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 
-		if (dataproviderProperties.size() > 0)
+		if (configurator.getDataproviderProperties().size() > 0)
 		{
-			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, dataproviderProperties, flattenedSolution,
-				dataproviderOptions, table, settings, getShell());
+			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, configurator.getDataproviderProperties(), flattenedSolution,
+				configurator.getDataproviderOptions(),
+				table, settings, getShell());
 		}
 
-		if (styleProperties.size() > 0) // should really be always 1 size..
+		if (configurator.getStyleProperties().size() > 0) // should really be always 1 size..
 		{
-			stylePropertiesSelector = new StylePropertiesSelector(this, form2, styleProperties);
+			stylePropertiesSelector = new StylePropertiesSelector(this, form2, configurator.getStyleProperties());
 		}
 
 		if (dataprovidersSelector != null && stylePropertiesSelector.stylePropertiesViewer != null)
 			form2.setWeights(70, 30);
 
-		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution, table,
-			dataproviderProperties, styleProperties, i18nProperties, stringProperties, input);
+		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution,
+			configurator);
 		return area;
-	}
-
-
-	private List<PropertyDescription> filterProperties(Class< ? > cls)
-	{
-		return wizardProperties.stream()
-			.filter(prop -> cls.isAssignableFrom(prop.getType().getClass()))
-			.collect(Collectors.toList());
 	}
 
 	public List<Map<String, Object>> getResult()

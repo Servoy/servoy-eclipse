@@ -75,7 +75,7 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogBuilder;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -641,12 +641,12 @@ public class CreateComponentHandler implements IServerService
 											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
 
-											PropertyWizardDialogBuilder dialogBuilder = new PropertyWizardDialogBuilder(current.getActiveShell(),
+											PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
 												context,
 												flattenedSolution, property).withTable(table).withProperties(wizardProperties);
-											if (dialogBuilder.open() == Window.OK)
+											if (dialogConfigurator.open() == Window.OK)
 											{
-												List<Map<String, Object>> result = dialogBuilder.getResult();
+												List<Map<String, Object>> result = dialogConfigurator.getResult();
 												for (int i = 0; i < result.size(); i++)
 												{
 													Map<String, Object> row = result.get(i);

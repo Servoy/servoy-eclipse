@@ -42,29 +42,20 @@ public class AutoWizardPropertiesComposite
 	private final AutoWizardConfigurationViewer tableViewer;
 	private List<Pair<String, Map<String, Object>>> treeInput = new ArrayList<>();
 
-	private final List<PropertyDescription> dataproviderProperties;
-	private final List<PropertyDescription> styleProperties;
 	private final PersistContext persistContext;
-	private final List<PropertyDescription> i18nProperties;
-	private final List<PropertyDescription> stringProperties;
 	private final FlattenedSolution flattenedSolution;
+	private final PropertyWizardDialogConfigurator propertiesConfigurator;
 
 
-	public AutoWizardPropertiesComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
-		List<PropertyDescription> dataproviderProperties,
-		List<PropertyDescription> styleProperties, List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties,
-		List<Map<String, Object>> childrenProperties)
+	public AutoWizardPropertiesComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
+		PropertyWizardDialogConfigurator configurator)
 	{
 		this.flattenedSolution = flattenedSolution;
-		this.dataproviderProperties = dataproviderProperties;
-		this.styleProperties = styleProperties;
 		this.persistContext = persistContext;
-		this.i18nProperties = i18nProperties;
-		this.stringProperties = stringProperties;
+		this.propertiesConfigurator = configurator;
 
-
-		tableViewer = createTableViewer(parent, table);
-		if (childrenProperties != null) setInputProperties(childrenProperties);
+		tableViewer = createTableViewer(parent, configurator.getTable());
+		if (configurator.getInput() != null) setInputProperties(configurator.getInput());
 		tableViewer.setInput(treeInput);
 	}
 
@@ -80,7 +71,7 @@ public class AutoWizardPropertiesComposite
 
 	private String findDPValue(Map<String, Object> map)
 	{
-		for (PropertyDescription dp : dataproviderProperties)
+		for (PropertyDescription dp : propertiesConfigurator.getDataproviderProperties())
 		{
 			if (map.get(dp.getName()) != null) return map.get(dp.getName()).toString();
 		}
@@ -104,15 +95,17 @@ public class AutoWizardPropertiesComposite
 
 		container.setLayoutData(gridData);
 
-		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table, dataproviderProperties,
-			styleProperties, i18nProperties, stringProperties, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table,
+			propertiesConfigurator.getDataproviderProperties(),
+			propertiesConfigurator.getStyleProperties(), propertiesConfigurator.getI18nProperties(), propertiesConfigurator.getStringProperties(),
+			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		return viewer;
 	}
 
 	public List<Map<String, Object>> getResult()
 	{
 		Map<String, String> prefillProperties = new HashMap<>();
-		for (PropertyDescription dp : stringProperties)
+		for (PropertyDescription dp : propertiesConfigurator.getStringProperties())
 		{
 			Object tag = dp.getTag("wizard");
 			if (tag instanceof JSONObject)
