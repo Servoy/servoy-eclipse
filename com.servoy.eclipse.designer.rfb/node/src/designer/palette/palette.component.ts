@@ -129,14 +129,15 @@ export class PaletteComponent {
             const component = {} as PaletteComp;
             component.name = this.dragItem.elementName;
             component.packageName = this.dragItem.packageName;
+
+            component.x = event.pageX;
+            component.y = event.pageY;
+
+            // do we also need to set size here ?
+            component.x = component.x - this.leftAdjust;
+            component.y = component.y - this.topAdjust;
+
             if (this.urlParser.isAbsoluteFormLayout()) {
-                component.x = event.pageX;
-                component.y = event.pageY;
-
-                // do we also need to set size here ?
-                component.x = component.x - this.leftAdjust;
-                component.y = component.y - this.topAdjust;
-
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
                     component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                 }
@@ -177,7 +178,7 @@ export class PaletteComponent {
                 component[this.dragItem.propertyName] = this.dragItem.propertyValue;
             }
 
-            if (component.x >= 0 && component.y >= 0 || !this.urlParser.isAbsoluteFormLayout() && this.canDrop.dropAllowed) {
+            if (component.x >= 0 && component.y >= 0) {
                 this.editorSession.createComponent(component);
             }
 
