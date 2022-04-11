@@ -90,6 +90,10 @@ export class FormCache implements IFormCache {
         this.layoutContainersCache.delete(id);
     }
 
+    public removeFormComponent(name: string) {
+         this.formComponents.delete(name);
+    }
+    
     public getConversionInfo(beanname: string) {
         return this.conversionInfo[beanname];
     }
