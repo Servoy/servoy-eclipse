@@ -7,13 +7,13 @@
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@angular/cdk": "^13",
-    "@ng-bootstrap/ng-bootstrap": "^12",
-    "@popperjs/core": "^2",
+    "@angular/cdk": "<14",
+    "@ng-bootstrap/ng-bootstrap": "<13",
+    "@popperjs/core": "<3",
     "@servoy/tempus-dominus": "6.0.0-beta4",
-    "@tinymce/tinymce-angular": "^5",
-    "bootstrap": "^5",
-    "tinymce": "^5",
+    "@tinymce/tinymce-angular": "<7",
+    "bootstrap": "<6",
+    "tinymce": "<7",
     "tinymce-i18n": ">=22",
     "tslib": "*"
   },

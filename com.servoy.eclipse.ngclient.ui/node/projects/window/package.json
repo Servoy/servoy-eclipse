@@ -7,7 +7,7 @@
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@popperjs/core": "^2",
+    "@popperjs/core": "<3",
     "tslib": "*"
   },
   "license": "MIT",
