@@ -491,6 +491,7 @@ public class EditorServiceHandler implements IServerService
 		});
 
 		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(editorPart, selectionProvider));
+		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
 	}
 
 	@Override

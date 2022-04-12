@@ -72,83 +72,80 @@ public class OpenPropertiesWizardHandler implements IServerService
 		{
 			selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
 		}
-		if (selection.length >= 1)
+		if (selection.length >= 1 && args.has("name"))
 		{
 			PersistContext persistContext = selection[0];
 			WebComponent webComponent = (WebComponent)persistContext.getPersist();
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
 				.getWebComponentSpecification(webComponent.getTypeName());
-			Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-			for (String propertyName : allPropertiesNames)
+			String propertyName = args.getString("name");
+			PropertyDescription property = spec.getProperty(propertyName);
+			if (property != null)
 			{
-				PropertyDescription property = spec.getProperty(propertyName);
-				if (property != null)
+				if ("autoshow".equals(property.getTag("wizard")))
 				{
-					if ("autoshow".equals(property.getTag("wizard")))
+					// prop type should be an array of a custom type..
+					IPropertyType< ? > propType = property.getType();
+					if (propType instanceof CustomJSONArrayType< ? , ? >)
 					{
-						// prop type should be an array of a custom type..
-						IPropertyType< ? > propType = property.getType();
-						if (propType instanceof CustomJSONArrayType< ? , ? >)
+
+						CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+							.getCustomJSONTypeDefinition().getType();
+						PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+						Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+						if (wizardProperties.size() > 0)
 						{
+							// feed this wizardProperties into the wizard
+							System.err.println(wizardProperties);
+							Display current = Display.getCurrent();
+							if (current == null) current = Display.getDefault();
 
-							CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
-								.getCustomJSONTypeDefinition().getType();
-							PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
-							Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
-							if (wizardProperties.size() > 0)
+							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+							ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+								.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+							List<Map<String, Object>> input = new ArrayList<>();
+							Object prop = webComponent.getProperty(propertyName);
+							Set<Object> previousColumns = new HashSet<>();
+							if (prop instanceof IChildWebObject[])
 							{
-								// feed this wizardProperties into the wizard
-								System.err.println(wizardProperties);
-								Display current = Display.getCurrent();
-								if (current == null) current = Display.getDefault();
-
-								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-								ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-									.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
-
-								List<Map<String, Object>> input = new ArrayList<>();
-								Object prop = webComponent.getProperty(propertyName);
-								Set<Object> previousColumns = new HashSet<>();
-								if (prop instanceof IChildWebObject[])
+								IChildWebObject[] arr = (IChildWebObject[])prop;
+								for (IChildWebObject obj : arr)
 								{
-									IChildWebObject[] arr = (IChildWebObject[])prop;
-									for (IChildWebObject obj : arr)
+									if (obj instanceof WebCustomType)
 									{
-										if (obj instanceof WebCustomType)
-										{
-											WebCustomType wct = (WebCustomType)obj;
-											JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
-											Map<String, Object> map = getAsMap(object);
-											previousColumns.add(object.get("svyUUID"));
-											input.add(map);
-										}
+										WebCustomType wct = (WebCustomType)obj;
+										JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
+										Map<String, Object> map = getAsMap(object);
+										previousColumns.add(object.get("svyUUID"));
+										input.add(map);
 									}
 								}
-
-								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
-									persistContext,
-									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
-								if (dialogConfigurator.open() != Window.OK) return null;
-								List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
-
-								Display.getDefault().asyncExec(() -> {
-									editorPart.getCommandStack()
-										.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns));
-								});
 							}
-							else
-							{
-								ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
-									"\nhas no wizard properties\n" + propType, null);
-							}
+
+							PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+								persistContext,
+								flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
+							if (dialogConfigurator.open() != Window.OK) return null;
+							List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
+
+							Display.getDefault().asyncExec(() -> {
+								editorPart.getCommandStack()
+									.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns));
+							});
 						}
 						else
 						{
-							ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
-								" that is not an custom array type " + propType, null);
+							ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+								"\nhas no wizard properties\n" + propType, null);
 						}
-
 					}
+					else
+					{
+						ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+							" that is not an custom array type " + propType, null);
+					}
+
 				}
 			}
 		}

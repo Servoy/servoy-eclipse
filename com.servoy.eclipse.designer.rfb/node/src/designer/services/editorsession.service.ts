@@ -23,6 +23,7 @@ export class EditorSessionService implements ServiceProvider {
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
     private allowedChildren: unknown;
+    private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
 
@@ -58,6 +59,9 @@ export class EditorSessionService implements ServiceProvider {
 				this.sendState('allowedChildren', this.allowedChildren);
             }).catch(e => console.log(e));
         }
+        this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
+            this.wizardProperties = result;
+        }).catch(e => console.log(e));
     }
 
     activated() {
@@ -107,7 +111,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     openConfigurator(property: string) {
-        return this.wsSession.callService('formeditor', 'openConfigurator', property, false);
+        return this.wsSession.callService('formeditor', 'openConfigurator', {name: property}, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -279,6 +283,13 @@ export class EditorSessionService implements ServiceProvider {
     getAllowedChildrenForContainer(container:string): string[] {
         if (this.allowedChildren) {
             return this.allowedChildren[container ? container : 'topContainer'];
+        }
+        return null;
+    }
+
+    getWizardProperties(spec:string): string[] {
+        if (this.wizardProperties) {
+            return this.wizardProperties[spec];
         }
         return null;
     }
