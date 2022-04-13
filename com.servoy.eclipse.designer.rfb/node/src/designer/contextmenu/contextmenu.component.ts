@@ -81,9 +81,8 @@ export class ContextMenuComponent implements OnInit {
                             const typesArray: Array<{ type: string; property: string }> = [];
 
                             if (types) {
-                                const typesA = types.slice(1, -1).split(',');
-                                const propertiesA = node.getAttribute('svy-types-properties').slice(1, -1).split(',');
-
+                                const typesA = types.trim().split(',');
+                                const propertiesA = node.getAttribute('svy-types-properties').trim().split(',');
                                 for (let x = 0; x < typesA.length; x++) {
                                     typesArray.push({ type: typesA[x], property: propertiesA[x] });
                                 }
