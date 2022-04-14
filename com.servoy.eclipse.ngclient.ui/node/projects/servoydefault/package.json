@@ -13,7 +13,7 @@
     "@servoy/tempus-dominus": "6.0.0-beta4",
     "@tinymce/tinymce-angular": "<7",
     "bootstrap": "<6",
-    "tinymce": "<7",
+    "tinymce": "^6",
     "tinymce-i18n": ">=22",
     "tslib": "*"
   },
