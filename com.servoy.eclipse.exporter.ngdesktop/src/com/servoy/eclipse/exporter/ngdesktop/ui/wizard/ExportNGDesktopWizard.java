@@ -139,7 +139,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 		else
 		{
-			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be send to the provided address ...";
+			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
 			MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
 		}
 		return result[0];
