@@ -23,7 +23,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFieldConstants;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComboboxPropertyController;
 import com.servoy.eclipse.ui.property.ComboboxPropertyModel;
@@ -87,7 +87,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 		if (propertyDescriptor.propertyDescriptor.getName().equals(StaticContentSpecLoader.PROPERTY_FORMAT.getPropertyName()))
 		{
-			int dataproviderType = DatabaseUtils.getDataproviderType(persist, persist instanceof Field ? ((Field)persist).getFormat() : null,
+			int dataproviderType = EclipseDatabaseUtils.getDataproviderType(persist, persist instanceof Field ? ((Field)persist).getFormat() : null,
 				persist instanceof ISupportDataProviderID ? ((ISupportDataProviderID)persist).getDataProviderID() : null);
 			if (dataproviderType == IColumnTypeConstants.INTEGER || dataproviderType == IColumnTypeConstants.NUMBER ||
 				dataproviderType == IColumnTypeConstants.DATETIME)

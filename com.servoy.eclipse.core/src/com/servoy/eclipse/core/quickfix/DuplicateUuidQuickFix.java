@@ -58,9 +58,9 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 		String fileName = SolutionSerializer.getFileName(persist, false);
 		if (fileName != null)
 		{
-			return "Generate new uuid for '" + SolutionSerializer.getRelativePath(persist, false) + fileName + "'.";
+			return "Generate new uuid for '" + SolutionSerializer.getRelativePath(persist, false) + fileName + "' (" + persist + ").";
 		}
-		return "Generate new uuid for persist with id '" + persist.getID() + "'.";
+		return "Generate new uuid for persist with id '" + persist.getID() + "' (" + persist + ").";
 	}
 
 	public void run(IMarker marker)
@@ -100,7 +100,8 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 					Object content = null;
 					if (persist instanceof IScriptElement)
 					{
-						content = SolutionSerializer.generateScriptFile(persist.getParent(), SolutionSerializer.getScriptPath(persist, false), repository, null);
+						content = SolutionSerializer.generateScriptFile(persist.getParent(), SolutionSerializer.getScriptPath(persist, false), repository,
+							null);
 					}
 					else
 					{

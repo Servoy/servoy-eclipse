@@ -149,7 +149,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
         if (this.onActionMethodID) {
             this.renderer.listen(this.getFocusElement(), 'keyup', (e) => {
                 if (this.formattingService.testKeyPressed(e, 13)) {
-                    this.onActionMethodID(e);
+                     setTimeout(() => this.onActionMethodID(e), 100);
                 }
             });
         }

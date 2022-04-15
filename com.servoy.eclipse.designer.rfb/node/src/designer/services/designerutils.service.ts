@@ -54,7 +54,7 @@ export class DesignerUtilsService {
 
     getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget = null;
-        if (type == "layout" || type == "component") {
+        if (type == "layout" || (type == "component" && !this.editorSession.isAbsoluteFormLayout())) {
             const realName = layoutName ? layoutName : "component";
 
             dropTarget = this.getNode(doc, event, true, skipNodeId);

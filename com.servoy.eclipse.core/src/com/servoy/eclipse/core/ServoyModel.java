@@ -117,7 +117,7 @@ import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
@@ -193,6 +193,7 @@ import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -1565,7 +1566,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 															InputStream is = file.getContents(true);
 															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 															Utils.closeInputStream(is);
-															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+															EclipseDatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent,
+																DatabaseUtils.NO_UPDATE);
 														}
 														catch (CoreException e)
 														{

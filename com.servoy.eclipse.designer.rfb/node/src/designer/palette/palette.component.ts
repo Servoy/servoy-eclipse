@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, Package, PaletteComp } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
-import {DesignerUtilsService} from '../services/designerutils.service';
+import { DesignerUtilsService } from '../services/designerutils.service';
 
 @Component({
     selector: 'designer-palette',
@@ -20,10 +20,10 @@ export class PaletteComponent {
     leftAdjust: number;
     glasspane: HTMLElement;
     timeoutId: ReturnType<typeof setTimeout>;
-    canDrop: {dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean};
+    canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
 
-    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document, 
-        protected readonly renderer: Renderer2, protected designerUtilsService : DesignerUtilsService) {
+    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document,
+        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService) {
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = 'Absolute-Layout';
@@ -50,7 +50,7 @@ export class PaletteComponent {
                             //we still need to have the components with properties on the component for filtering
 
                             if (propertyValues && propertyValues.length && packages[i].components[j].name == 'servoycore-formcomponent') {
-                                const newPropertyValues : Array<PaletteComp> = [];
+                                const newPropertyValues: Array<PaletteComp> = [];
                                 for (let n = 0; n < propertyValues.length; n++) {
                                     if (!propertyValues[n].isAbsoluteCSSPositionMix) {
                                         newPropertyValues.push(propertyValues[n]);
@@ -79,7 +79,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: {property : any}, ghost: PaletteComp, propertyName? :string, propertyValue? : {property : string}, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { property: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: { property: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -103,17 +103,17 @@ export class PaletteComponent {
         this.dragItem.componentType = componentType;
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
-  
+
         this.glasspane = this.doc.querySelector('.contentframe-overlay');
         const frameElem = this.doc.querySelector('iframe');
         const frameRect = frameElem.getBoundingClientRect();
 
         this.topAdjust = frameRect.top;
         this.leftAdjust = frameRect.left;
-        this.canDrop = {dropAllowed : false};
+        this.canDrop = { dropAllowed: false };
         if (!ghost) {
             this.editorSession.getState().dragging = true;
-            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children}, '*');
+            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children }, '*');
         }
     }
 
@@ -129,20 +129,25 @@ export class PaletteComponent {
             const component = {} as PaletteComp;
             component.name = this.dragItem.elementName;
             component.packageName = this.dragItem.packageName;
-            if (this.urlParser.isAbsoluteFormLayout()) {
-                component.x = event.pageX;
-                component.y = event.pageY;
 
-                 // do we also need to set size here ?
-                component.x = component.x - this.leftAdjust;
-                component.y = component.y - this.topAdjust;
+            component.x = event.pageX;
+            component.y = event.pageY;
+
+            // do we also need to set size here ?
+            component.x = component.x - this.leftAdjust;
+            component.y = component.y - this.topAdjust;
+
+            if (this.urlParser.isAbsoluteFormLayout()) {
+                if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
+                    component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
+                }
             }
             else {
                 if (this.canDrop.dropAllowed) {
                     if (this.canDrop.dropTarget) {
                         component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                     }
-                    
+
                     if (this.canDrop.beforeChild) {
                         component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
                     }
@@ -152,7 +157,7 @@ export class PaletteComponent {
                     return;
                 }
             }
-           
+
             if (this.dragItem.ghost) {
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 const found = Array.from(elements).find((node) => {
@@ -169,11 +174,11 @@ export class PaletteComponent {
                 component.ghostPropertyName = this.dragItem.ghost.propertyName;
                 component.dropTargetUUID = found.getAttribute('svy-id');
             }
-            if (this.dragItem.propertyName){
+            if (this.dragItem.propertyName) {
                 component[this.dragItem.propertyName] = this.dragItem.propertyValue;
             }
-            
-            if (component.x >= 0 && component.y >= 0 || !this.urlParser.isAbsoluteFormLayout() && this.canDrop.dropAllowed) {
+
+            if (component.x >= 0 && component.y >= 0) {
                 this.editorSession.createComponent(component);
             }
 
@@ -193,8 +198,8 @@ export class PaletteComponent {
             if (this.dragItem.contentItemBeingDragged) {
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.leftAdjust + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.topAdjust + 'px');
-                
-                if (!this.urlParser.isAbsoluteFormLayout()) {
+
+                if (!this.urlParser.isAbsoluteFormLayout() || this.urlParser.isShowingContainer()) {
                     this.canDrop = this.designerUtilsService.getDropNode(this.doc, this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
                     if (!this.canDrop.dropAllowed) {
                         this.glasspane.style.cursor = 'not-allowed';
@@ -208,14 +213,14 @@ export class PaletteComponent {
                             //TODO do we need to optimize the calls to insert the dragged component?
                             //if (this.timeoutId) clearTimeout(this.timeoutId);
                             //this.timeoutId = setTimeout(() => {
-                                if (this.canDrop.dropAllowed) {
-                                    const frameElem = this.doc.querySelector('iframe');
-                                    frameElem.contentWindow.postMessage({
-                                        id: 'insertDraggedComponent',
-                                        dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
-                                        insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
-                                    }, '*');
-                                }
+                            if (this.canDrop.dropAllowed) {
+                                const frameElem = this.doc.querySelector('iframe');
+                                frameElem.contentWindow.postMessage({
+                                    id: 'insertDraggedComponent',
+                                    dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
+                                    insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
+                                }, '*');
+                            }
                             //}, 200);
                             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         } else {
@@ -272,15 +277,15 @@ export class PaletteComponent {
         }
         return name;
     }
-    
-    getPackages() : Array<Package>{
-        return  this.editorSession.getState().packages;  
+
+    getPackages(): Array<Package> {
+        return this.editorSession.getState().packages;
     }
 }
 
 @Pipe({ name: 'searchTextFilter' })
 export class SearchTextPipe implements PipeTransform {
-    transform(items: Array<PaletteComp>, text: string):  Array<PaletteComp> {
+    transform(items: Array<PaletteComp>, text: string): Array<PaletteComp> {
         let sortedItems = items;
         if (items && text)
             sortedItems = items.filter(item => {
@@ -313,10 +318,10 @@ export class DragItem {
     elementName?: string;
     packageName?: string;
     ghost?: PaletteComp; // should this be Ghost object or are they they same
-    propertyName? :string;
-    propertyValue? : {property : string};
+    propertyName?: string;
+    propertyValue?: { property: string };
     componentType?: string;
-    topContainer? : boolean = false;
-    layoutName? :string;
+    topContainer?: boolean = false;
+    layoutName?: string;
     attributes?: { [property: string]: string };
 }

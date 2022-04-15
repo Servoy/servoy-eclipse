@@ -420,7 +420,9 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			IResource[] resources = folder.members();
 			for (IResource res : resources)
 			{
-				if (res instanceof IFile && res.getName().equals(t.getName() + ".tbl"))
+				if (res instanceof IFile && res.getName().equals(t.getName() + ".tbl") ||
+					res instanceof IFile && res.getName().equals(t.getName() + "_calculations.js") ||
+					res instanceof IFile && res.getName().equals(t.getName() + "_entity.js"))
 				{
 					IFile file = (IFile)res;
 					InputStream is = file.getContents();

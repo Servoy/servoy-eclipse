@@ -397,12 +397,14 @@ public class WarExporter
 							if (latestJarPath.startsWith(File.separator + "lib"))
 							{
 								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because '" + latestJar.getName() + "' is already present in the lib folder. \n");
+									"' is not exported because '" + latestJar.getName().replace("-" + version, "") +
+									"' is already present in the lib folder. \n");
 							}
 							else
 							{
 								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because another " + file.getName() + " with " + reason + " version (" + latest +
+									"' is not exported because another " + latestJar.getName().replace("-" + version, "") + " with " + reason + " version (" +
+									latest +
 									") is already present in '" + latestJarPath + "'. \n");
 							}
 							File parent = file.getParentFile();

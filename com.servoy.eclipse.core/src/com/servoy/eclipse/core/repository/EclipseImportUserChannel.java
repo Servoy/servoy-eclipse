@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -431,7 +431,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
-								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
+								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),

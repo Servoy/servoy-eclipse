@@ -46,6 +46,10 @@ export class AddAttributeDirective implements OnChanges {
                 if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }
+        if (changes.svyContainerStyle && this.svyContainerStyle && this.svyContainerStyle.cssPositionContainer){
+            this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
+            this.renderer.setStyle(this.el.nativeElement, 'height', JSON.parse(this.svyContainerAttributes.size).height + 'px');
+        }
     }
 
     private restoreCss() {

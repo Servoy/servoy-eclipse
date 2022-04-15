@@ -18,7 +18,7 @@ package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
@@ -65,7 +65,7 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 			{
 				return ((Relation[])value)[((Relation[])value).length - 1].getName();
 			}
-			return DatabaseUtils.getRelationsString((Relation[])value);
+			return EclipseDatabaseUtils.getRelationsString((Relation[])value);
 		}
 		if (value instanceof RelationsWrapper)
 		{

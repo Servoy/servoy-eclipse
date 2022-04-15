@@ -90,7 +90,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -107,6 +107,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.TableChangeHandler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -557,8 +558,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									InputStream is = file.getContents(true);
 									String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 									Utils.closeInputStream(is);
-									String problems = DatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
-										dbiFileContent, false, false);
+									String problems = EclipseDatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
+										dbiFileContent, DatabaseUtils.UPDATE_NOW, false);
 									if (problems != null)
 									{
 										StringTokenizer st = new StringTokenizer(problems, "\n");

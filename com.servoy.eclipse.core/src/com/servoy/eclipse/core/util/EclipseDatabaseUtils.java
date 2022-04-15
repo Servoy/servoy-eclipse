@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -54,17 +55,17 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  *
  * @author acostescu
  */
-public final class DatabaseUtils
+public final class EclipseDatabaseUtils
 {
 
-	private DatabaseUtils()
+	private EclipseDatabaseUtils()
 	{
 		// not meant to be instantiated
 	}
 
-	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, boolean writeBackLater)
+	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, int updateContent)
 	{
-		return createNewTableFromColumnInfo(server, tableName, dbiFileContent, writeBackLater, true);
+		return createNewTableFromColumnInfo(server, tableName, dbiFileContent, updateContent, true);
 	}
 
 	/**
@@ -76,7 +77,7 @@ public final class DatabaseUtils
 	 * @param writeBackLater if true, the new table's info will be written to it's dbi file later. Otherwise the write will occur during this call.
 	 * @return null if all is OK; if any problems are encountered, they will be added to this String, separated by "\n"
 	 */
-	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, boolean writeBackLater,
+	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, int updateContent,
 		boolean fireTableCreated)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
@@ -84,7 +85,7 @@ public final class DatabaseUtils
 		TableDef tableInfo;
 		try
 		{
-			tableInfo = com.servoy.j2db.util.DatabaseUtils.deserializeTableInfo(dbiFileContent);
+			tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 		}
 		catch (JSONException e)
 		{
@@ -283,7 +284,7 @@ public final class DatabaseUtils
 				throw new RepositoryException("Could not create db sequences for table " + table, e);
 			}
 
-			dmm.updateAllColumnInfo(table, writeBackLater);
+			dmm.updateAllColumnInfo(table, updateContent);
 		}
 		catch (RepositoryException e)
 		{

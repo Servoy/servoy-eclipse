@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject, uiSelect } from '@angular/core';
 import { NgbDropdownItem, NgbTooltip, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -118,6 +118,11 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             });
     }
     
+    requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
+		super.requestFocus(mustExecuteOnFocusGainedMethod);
+        this.comboboxDropdown.open();
+	}
+    
     openChange(state: boolean) {
         this.openState = state;
         if (state) {
@@ -130,7 +135,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             });
         } else {
             this.closeTooltip();
-            this.requestFocus(this.mustExecuteOnFocus);
+            super.requestFocus(this.mustExecuteOnFocus);
         }
     }
 

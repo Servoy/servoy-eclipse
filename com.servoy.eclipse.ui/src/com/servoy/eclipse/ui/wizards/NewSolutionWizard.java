@@ -67,7 +67,7 @@ import org.w3c.dom.NodeList;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -587,7 +587,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		{
 			action.createDatabase(server, server_name, monitor);
 			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-				DatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
+				EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
 				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
 				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
 				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),

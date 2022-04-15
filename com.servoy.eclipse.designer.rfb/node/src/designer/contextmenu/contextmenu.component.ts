@@ -54,6 +54,7 @@ export class ContextMenuComponent implements OnInit {
         contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
             const frameElem = this.doc.querySelector('iframe');
+            const selectionChanged = this.selection !== this.editorSession.getSelection();
             this.selection = this.editorSession.getSelection();
             if (this.selection && this.selection.length == 1) {
                 node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
@@ -81,9 +82,8 @@ export class ContextMenuComponent implements OnInit {
                             const typesArray: Array<{ type: string; property: string }> = [];
 
                             if (types) {
-                                const typesA = types.slice(1, -1).split(',');
-                                const propertiesA = node.getAttribute('svy-types-properties').slice(1, -1).split(',');
-
+                                const typesA = types.trim().split(',');
+                                const propertiesA = node.getAttribute('svy-types-properties').trim().split(',');
                                 for (let x = 0; x < typesA.length; x++) {
                                     typesArray.push({ type: typesA[x], property: propertiesA[x] });
                                 }
@@ -128,6 +128,35 @@ export class ContextMenuComponent implements OnInit {
                         }
                         else {
                             this.menuItems[i].getItemClass = function() { return 'invisible' };
+                        }
+                    }
+                }
+                if (selectionChanged) {
+                    const existingItem = this.menuItems.findIndex(item => item.text.startsWith("Configure"));
+                    if (existingItem >= 0) this.menuItems.splice(existingItem, 1);
+                    const wizardProperties = this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'));
+                    if (wizardProperties) {
+                        const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
+                        if (wizardProperties.length == 1) {
+                            this.menuItems.splice(insertIndex, 0, new ContextmenuItem(
+                                "Configure " + wizardProperties[0],
+                                () => {
+                                    this.hide();
+                                    this.editorSession.openConfigurator(wizardProperties[0]);
+                                }
+                            ));
+                        }
+                        else if (wizardProperties.length > 1) {
+                            let menuItem = new ContextmenuItem("Configure", null);
+                            menuItem.subMenu = [];
+                            wizardProperties.forEach((value) => {
+                                menuItem.subMenu.push(new ContextmenuItem("Configure " + value,
+                                    () => {
+                                        this.hide();
+                                        this.editorSession.openConfigurator(value);
+                                    }));
+                            });
+                            this.menuItems.splice(insertIndex, 0, menuItem);
                         }
                     }
                 }
@@ -664,15 +693,6 @@ export class ContextMenuComponent implements OnInit {
                 return 'dropdown-submenu';
             };
         }
-        this.menuItems.push(entry);
-
-        entry = new ContextmenuItem(
-            'Configure columns', //TODO make it dynamic
-            () => {
-                this.hide();
-                this.editorSession.openConfigurator("columns");
-            }
-        );
         this.menuItems.push(entry);
 
         entry = new ContextmenuItem(

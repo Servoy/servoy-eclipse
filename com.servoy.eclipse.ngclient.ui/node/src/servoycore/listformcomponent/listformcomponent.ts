@@ -213,7 +213,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 context: {
                     componentParent: this
                 },
-                frameworkComponents: {
+                components: {
                     'row-renderer': RowRenderer
                 },
                 headerHeight: 0,
