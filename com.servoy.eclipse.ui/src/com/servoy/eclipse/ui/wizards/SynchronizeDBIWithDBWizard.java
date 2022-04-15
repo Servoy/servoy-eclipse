@@ -318,7 +318,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		final List<Pair<IServerInternal, String>> foundMissingTables = new ArrayList<Pair<IServerInternal, String>>();
 		for (final IServerInternal s : servers)
 		{
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(s.getName());
+			IFolder serverInformationFolder = dmm.getServerInformationFolder(s.getName());
 			if (serverInformationFolder.exists())
 			{
 				try
@@ -375,7 +375,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		List<Pair<IServerInternal, String>> foundSupplementalTables = new ArrayList<Pair<IServerInternal, String>>();
 		for (IServerInternal s : servers)
 		{
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(s.getName());
+			IFolder serverInformationFolder = dmm.getServerInformationFolder(s.getName());
 			try
 			{
 				for (String tableName : s.getTableAndViewNames(true))

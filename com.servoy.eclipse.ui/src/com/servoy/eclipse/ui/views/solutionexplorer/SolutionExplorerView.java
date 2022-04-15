@@ -188,7 +188,6 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -4110,7 +4109,7 @@ public class SolutionExplorerView extends ViewPart
 							{
 								return new SimpleUserNode[] { cp.getServers() };
 							}
-							else if (segments[1].equals(WorkspaceUserManager.SECURITY_DIR))
+							else if (segments[1].equals(DataModelManager.SECURITY_DIRECTORY))
 							{
 								return new SimpleUserNode[] { cp.getUserGroupSecurityNode() };
 							}

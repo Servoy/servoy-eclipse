@@ -258,9 +258,7 @@ public class NewSolutionWizardDefaultPackages
 					{
 						if ("export/database_info.xml".equals(ze.getName()))
 						{
-							Document doc = builder.parse(zis);
-							zis.close();
-							return doc;
+							return builder.parse(zis);
 						}
 					}
 					return null;

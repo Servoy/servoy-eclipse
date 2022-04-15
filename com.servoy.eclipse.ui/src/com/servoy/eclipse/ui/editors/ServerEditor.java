@@ -1248,8 +1248,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					MessageDialog.openQuestion(getSite().getShell(), "Copy files", "Server '" + currentServerName + "' was marked as clone of '" +
 						serverConfig.getDataModelCloneFrom() + "'. Do you want to copy(overwrite) all table related files from parent server?"))
 				{
-					IFolder sourceFolder = dataModelManager.getDBIFileContainer(serverConfig.getDataModelCloneFrom());
-					IFolder cloneFolder = dataModelManager.getDBIFileContainer(currentServerName);
+					IFolder sourceFolder = dataModelManager.getServerInformationFolder(serverConfig.getDataModelCloneFrom());
+					IFolder cloneFolder = dataModelManager.getServerInformationFolder(currentServerName);
 					if (cloneFolder.exists())
 					{
 						cloneFolder.delete(true, null);

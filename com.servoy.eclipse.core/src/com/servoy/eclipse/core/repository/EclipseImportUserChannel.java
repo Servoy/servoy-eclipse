@@ -189,6 +189,14 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		return UIUtils.askQuestion(shell, "Sample Data", "Do you want to import the sample data contained in the import?") ? OK_ACTION : CANCEL_ACTION;
 	}
 
+	@Override
+	public int askImportDatasources()
+	{
+		return UIUtils.askQuestion(shell, "Datasources", "Do you want to overwrite the DBI files in the workspace with those contained in the import?")
+			? OK_ACTION : CANCEL_ACTION;
+	}
+
+
 	public int askMediaChangedAction(String name)
 	{
 		return CANCEL_ACTION;

@@ -220,8 +220,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 					{
 						for (ITable table : tables)
 						{
-							IPath path = new Path(DataModelManager.getRelativeServerPath(server.getName()) + IPath.SEPARATOR + getFileName(table.getName()));
-							IFile file = resourcesProject.getFile(path);
+							IFile file = dataModelManager.getSecurityFile(server.getName(), table.getName());
 							if (file.exists())
 							{
 								file.delete(true, null);
@@ -304,8 +303,9 @@ public class EclipseUserManager extends WorkspaceUserManager
 					{
 						if (((Solution)persist.getRootObject()).getForm(persist.getID()) == null)
 						{
-							// this means the form was deleted; delete dbi file as well
-							IPath path = new Path(SolutionSerializer.getRelativePath(persist, false) + IPath.SEPARATOR + getFileName((Form)persist));
+							// this means the form was deleted; delete security file as well
+							IPath path = new Path(SolutionSerializer.getRelativePath(persist, false) + IPath.SEPARATOR +
+								DataModelManager.getSecurityFileName(((Form)persist).getName()));
 							// the path is relative to the solution project; so get the solution's project
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(path);
 							if (file.exists())
@@ -365,7 +365,8 @@ public class EclipseUserManager extends WorkspaceUserManager
 								synchronized (EclipseUserManager.this)
 								{
 									// element of form was deleted; delete security entries for it as well
-									IPath path = new Path(SolutionSerializer.getRelativePath(parent, false) + IPath.SEPARATOR + getFileName((Form)parent));
+									IPath path = new Path(SolutionSerializer.getRelativePath(parent, false) + IPath.SEPARATOR +
+										DataModelManager.getSecurityFileName(((Form)parent).getName()));
 									IFile file = ServoyModel.getWorkspace().getRoot().getFile(path);
 
 									RemoveAccessMaskForMissingElement quickFix = RemoveAccessMaskForMissingElement.getInstance();

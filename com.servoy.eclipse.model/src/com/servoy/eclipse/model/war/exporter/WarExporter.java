@@ -255,7 +255,7 @@ public class WarExporter
 		monitor.worked(2);
 		addServoyProperties(tmpWarDir);
 		monitor.worked(2);
-		copyDBIFiles(tmpWarDir);
+		copySecAndDBIFiles(tmpWarDir);
 		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
@@ -359,8 +359,8 @@ public class WarExporter
 				if (list.size() > 1 || dependenciesVersions.get(jar).size() > 1)
 				{
 					Optional<File> lib = dependenciesVersions.get(jar).values().stream()
-						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith(File.separator +"lib")).findAny(); //there should be max one in lib anyway
-					if (lib.isPresent() && !latestJarPath.startsWith(File.separator +"lib"))
+						.flatMap(Collection::stream).filter(f -> getRelativePath(tmpWarDir, f).startsWith(File.separator + "lib")).findAny(); //there should be max one in lib anyway
+					if (lib.isPresent() && !latestJarPath.startsWith(File.separator + "lib"))
 					{
 						//keep the one in the lib folder, doesn't matter if it's older
 						latestJarPath = getRelativePath(tmpWarDir, lib.get());
@@ -394,7 +394,7 @@ public class WarExporter
 								messageBuilder.append(
 									"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
 							}
-							if (latestJarPath.startsWith(File.separator +"lib"))
+							if (latestJarPath.startsWith(File.separator + "lib"))
 							{
 								messageBuilder.append("\nDependency '" + path +
 									"' is not exported because '" + latestJar.getName() + "' is already present in the lib folder. \n");
@@ -1190,11 +1190,10 @@ public class WarExporter
 		}
 	}
 
-
 	/**
 	 * @param tmpWarDir
 	 */
-	private void copyDBIFiles(File tmpWarDir)
+	private void copySecAndDBIFiles(File tmpWarDir)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
@@ -1202,24 +1201,41 @@ public class WarExporter
 			exportModel.isExportReferencedModules(), exportModel.isExportI18NData());
 
 		DataModelManager dataModelManager = servoyModel.getDataModelManager();
+		File secDir = new File(tmpWarDir, "WEB-INF/security");
+		secDir.mkdirs();
 		File dbDir = new File(tmpWarDir, "WEB-INF/db");
 		dbDir.mkdirs();
+
+		try
+		{
+			copyFileIfExists(dataModelManager.getSecurityFile(), new File(secDir, DataModelManager.SECURITY_FILENAME));
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 
 		neededServerTables.entrySet().forEach(entry -> {
 			String serverName = entry.getKey();
 			List<String> tablesNeeded = entry.getValue();
-
 			try
 			{
+				for (IFile tableSecfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.SECURITY_FILE_EXTENSION, tablesNeeded,
+					exportModel.isExportAllTablesFromReferencedServers()))
+				{
+					File serverSecDir = new File(secDir, serverName);
+					serverSecDir.mkdirs();
+					copyFileIfExists(tableSecfile, new File(serverSecDir, tableSecfile.getName()));
+				}
+
 				IFile serverDBIFile = dataModelManager.getServerDBIFile(serverName);
 				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()), () -> DatabaseUtils.serializeServerSettings(ServerSettings.DEFAULT));
-
-				File serverDir = new File(dbDir, serverName);
-				serverDir.mkdirs();
-
-				for (IFile tableDBIfile : TableDefinitionUtils.getTablesDBIList(serverName, tablesNeeded, exportModel.isExportAllTablesFromReferencedServers()))
+				File serverDbDir = new File(dbDir, serverName);
+				serverDbDir.mkdirs();
+				for (IFile tableDBIfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, tablesNeeded,
+					exportModel.isExportAllTablesFromReferencedServers()))
 				{
-					copyFileIfExists(tableDBIfile, new File(serverDir, tableDBIfile.getName()), null);
+					copyFileIfExists(tableDBIfile, new File(serverDbDir, tableDBIfile.getName()));
 				}
 			}
 			catch (Exception e)
@@ -1227,6 +1243,11 @@ public class WarExporter
 				ServoyLog.logError(e);
 			}
 		});
+	}
+
+	private static void copyFileIfExists(IFile src, File dest) throws IOException, CoreException
+	{
+		copyFileIfExists(src, dest, null);
 	}
 
 	private static void copyFileIfExists(IFile src, File dest, Supplier<String> defaultContents) throws IOException, CoreException

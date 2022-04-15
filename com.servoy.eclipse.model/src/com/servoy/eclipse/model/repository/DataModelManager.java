@@ -99,8 +99,14 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class DataModelManager implements IColumnInfoManager
 {
+	public static final String SECURITY_FILE_EXTENSION = "sec";
+	public static final String SECURITY_FILE_EXTENSION_WITH_DOT = '.' + SECURITY_FILE_EXTENSION;
+	public static final String SECURITY_DIRECTORY = "security";
+	public static final String SECURITY_FILENAME = "security" + SECURITY_FILE_EXTENSION_WITH_DOT;
+
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
+
 	public static final String TABLE_DATA_FILE_EXTENSION_WITH_DOT = ".data";
 	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
 
@@ -403,7 +409,7 @@ public class DataModelManager implements IColumnInfoManager
 		try
 		{
 			String out = serializeTable(t);
-			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getFileName(t.getName()), out);
+			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getDBIFileName(t.getName()), out);
 		}
 		catch (JSONException e)
 		{
@@ -1005,9 +1011,14 @@ public class DataModelManager implements IColumnInfoManager
 		return tobj.toString(true);
 	}
 
-	public static String getFileName(String tableName)
+	public static String getDBIFileName(String tableName)
 	{
 		return tableName + COLUMN_INFO_FILE_EXTENSION_WITH_DOT;
+	}
+
+	public static String getSecurityFileName(String name)
+	{
+		return name + SECURITY_FILE_EXTENSION_WITH_DOT;
 	}
 
 	public static String getRelativeServerPath(String serverName)
@@ -1028,13 +1039,25 @@ public class DataModelManager implements IColumnInfoManager
 
 	public IFile getDBIFile(String serverName, String tableName)
 	{
-		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
+		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getDBIFileName(tableName));
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getSecurityFile(String serverName, String tableName)
+	{
+		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getSecurityFileName(tableName));
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getServerDBIFile(String serverName)
 	{
 		IPath path = new Path(getRelativeServerPath(serverName) + COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getSecurityFile()
+	{
+		IPath path = new Path(SECURITY_DIRECTORY + IPath.SEPARATOR + SECURITY_FILENAME);
 		return resourceProject.getFile(path);
 	}
 
@@ -1049,7 +1072,7 @@ public class DataModelManager implements IColumnInfoManager
 		return resourceProject.getFile(path);
 	}
 
-	public IFolder getDBIFileContainer(String serverName)
+	public IFolder getServerInformationFolder(String serverName)
 	{
 		IPath path = new Path(getRelativeServerPath(serverName));
 		return resourceProject.getFolder(path);
@@ -1349,7 +1372,7 @@ public class DataModelManager implements IColumnInfoManager
 	private void removeErrorMarkers(final String serverName)
 	{
 		differences.removeDifferences(serverName);
-		final IFolder folder = getDBIFileContainer(serverName);
+		final IFolder folder = getServerInformationFolder(serverName);
 		updateProblemMarkers(new Runnable()
 		{
 			public void run()
@@ -1871,7 +1894,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (server != null)
 				{
 					List<String> tableNames = serversTables.get(serverName);
-					IFolder serverInformationFolder = getDBIFileContainer(server.getName());
+					IFolder serverInformationFolder = getServerInformationFolder(server.getName());
 					for (String tableName : server.getTableAndViewNames(true))
 					{
 						if (!tableNames.contains(tableName)) continue;

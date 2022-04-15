@@ -748,12 +748,12 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 							if (o.getTypeID() == IRepository.FORMS) // move form security file
 							{
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
-									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + WorkspaceUserManager.SECURITY_FILE_EXTENSION;
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
 									wsa.move(oldSecFileRelativePath,
 										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-											WorkspaceUserManager.SECURITY_FILE_EXTENSION);
+											DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT);
 								}
 							}
 						}

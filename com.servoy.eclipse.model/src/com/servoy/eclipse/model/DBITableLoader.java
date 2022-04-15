@@ -38,6 +38,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
+import com.servoy.j2db.util.xmlxport.ServerDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
@@ -55,7 +56,7 @@ public class DBITableLoader implements ITableLoader
 			Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils
 				.getTableDefinitionsFromDBI(server);
 
-			for (Entry<String, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
+			for (Entry<ServerDef, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
 			{
 				if (server.getConfig().getServerName().equals(entry.getKey()))
 				{

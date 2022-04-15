@@ -56,6 +56,7 @@ import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
 import com.servoy.j2db.util.xmlxport.MetadataDef;
+import com.servoy.j2db.util.xmlxport.ServerDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
@@ -74,19 +75,19 @@ public class TableDefinitionUtils
 	}
 
 	private static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(
-		Map<String, List<String>> neededServersTables,
-		final boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
+		Map<String, List<String>> neededServersTables, boolean exportAllTablesFromReferencedServers, boolean exportMetaData)
+		throws CoreException, JSONException, IOException
 	{
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 
 		if (dmm == null) return null;
 		// B. for needed tables, get dbi files (db is down)
-		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<String, List<IFile>>();
+		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<>();
 		for (Entry<String, List<String>> neededServersTableEntry : neededServersTables.entrySet())
 		{
 			final String serverName = neededServersTableEntry.getKey();
 			final List<String> tables = neededServersTableEntry.getValue();
-			final List<IFile> dbiz = getTablesDBIList(serverName, tables, exportAllTablesFromReferencedServers);
+			final List<IFile> dbiz = getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, tables, exportAllTablesFromReferencedServers);
 
 			// minimum requirement for dbi files based export: all needed dbi files must be found
 			List<String> notFoundDBIFileTableNames = allNeededDbiFilesExist(tables, dbiz);
@@ -99,27 +100,34 @@ public class TableDefinitionUtils
 			server_tableDbiFiles.put(serverName, dbiz);
 		}
 
-		// C. deserialize table dbis to get tabledefs and metadata info
-		Map<String, List<TableDef>> serverTableDefs = new HashMap<String, List<TableDef>>();
+		// C. deserialize server and table dbis to get tabledefs and metadata info
+		Map<ServerDef, List<TableDef>> serverTableDefs = new HashMap<>();
 		List<MetadataDef> metadataDefs = new ArrayList<MetadataDef>();
 		for (Entry<String, List<IFile>> server_tableDbiFile : server_tableDbiFiles.entrySet())
 		{
 			String serverName = server_tableDbiFile.getKey();
-			List<TableDef> tableDefs = new ArrayList<TableDef>();
+			ServerDef serverDef = new ServerDef(serverName);
+
+			IFile serverDBIFile = ServoyModelFinder.getServoyModel().getDataModelManager().getServerDBIFile(serverName);
+			if (serverDBIFile.exists())
+			{
+				try (InputStream is = serverDBIFile.getContents(true))
+				{
+					serverDef.dbiFileContents = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
+				}
+			}
+
+			List<TableDef> tableDefs = new ArrayList<>();
 			for (IFile file : server_tableDbiFile.getValue())
 			{
 				if (file.exists())
 				{
-					InputStream is = file.getContents(true);
 					String dbiFileContent = null;
-					try
+					try (InputStream is = file.getContents(true))
 					{
 						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
 					}
-					finally
-					{
-						is = Utils.closeInputStream(is);
-					}
+
 					if (dbiFileContent != null)
 					{
 						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
@@ -142,7 +150,7 @@ public class TableDefinitionUtils
 					}
 				}
 			}
-			serverTableDefs.put(serverName, tableDefs);
+			serverTableDefs.put(serverDef, tableDefs);
 		}
 
 		ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
@@ -151,17 +159,11 @@ public class TableDefinitionUtils
 		// D. make use of tabledef info and metadata for the managers
 		tableDefManager = new ITableDefinitionsAndSecurityBasedOnWorkspaceFiles()
 		{
-			private Map<String, List<TableDef>> serverTableDefsMap = new HashMap<String, List<TableDef>>();
 			private DBSecurityDefinitionsBasedOnFiles dBSecurityDefinitionsBasedOnFiles;
 
-			public void setServerTableDefs(Map<String, List<TableDef>> serverTableDefsMap)
+			public Map<ServerDef, List<TableDef>> getServerTableDefs()
 			{
-				this.serverTableDefsMap = serverTableDefsMap;
-			}
-
-			public Map<String, List<TableDef>> getServerTableDefs()
-			{
-				return this.serverTableDefsMap;
+				return serverTableDefs;
 			}
 
 			@Override
@@ -170,9 +172,7 @@ public class TableDefinitionUtils
 				if (dBSecurityDefinitionsBasedOnFiles == null) dBSecurityDefinitionsBasedOnFiles = new DBSecurityDefinitionsBasedOnFiles(this);
 				return dBSecurityDefinitionsBasedOnFiles.getDatabaseSecurityInfoByGroup(groupName);
 			}
-
 		};
-		tableDefManager.setServerTableDefs(serverTableDefs);
 
 		metadataDefManager = new IMetadataDefManager()
 		{
@@ -194,18 +194,18 @@ public class TableDefinitionUtils
 	}
 
 	public static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(Solution activeSolution,
-		boolean exportReferencedModules,
-		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
+		boolean exportReferencedModules, boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData)
+		throws CoreException, JSONException, IOException
 	{
 		// A. get only the needed servers (and tables)
 		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
 		return getTableDefinitionsFromDBI(neededServersTables, exportAllTablesFromReferencedServers, exportMetaData);
 	}
 
-	public static List<IFile> getTablesDBIList(String serverName, final List<String> tablesNeeded, final boolean exportAll)
+	public static List<IFile> getServerTableinfo(String serverName, String fileExtension, List<String> tablesNeeded, boolean exportAll)
 	{
-		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer(serverName);
-		final List<IFile> dbiz = new ArrayList<IFile>();
+		IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getServerInformationFolder(serverName);
+		List<IFile> files = new ArrayList<>();
 
 		if (serverInformationFolder.exists())
 		{
@@ -216,14 +216,13 @@ public class TableDefinitionUtils
 					public boolean visit(IResource resource) throws CoreException
 					{
 						String extension = resource.getFileExtension();
-						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+						if (resource instanceof IFile && fileExtension.equalsIgnoreCase(extension))
 						{
-							//we found a dbi file
-							String tableName = resource.getName().substring(0,
-								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+							// we found a table file
+							String tableName = resource.getName().substring(0, resource.getName().length() - (fileExtension.length() + 1));
 							if ((tablesNeeded != null && tablesNeeded.contains(tableName)) || exportAll)
 							{
-								dbiz.add((IFile)resource);
+								files.add((IFile)resource);
 							}
 						}
 						return true;
@@ -236,8 +235,7 @@ public class TableDefinitionUtils
 				Debug.error(e);
 			}
 		}
-		return dbiz;
-
+		return files;
 	}
 
 	private static List<String> allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
@@ -296,7 +294,7 @@ public class TableDefinitionUtils
 			{
 				for (String serverName : serverNames)
 				{
-					for (IFile tableDbiFile : getTablesDBIList(serverName, null, true))
+					for (IFile tableDbiFile : getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, null, true))
 					{
 						String name = tableDbiFile.getName();
 						String tableName = name.substring(0, name.indexOf(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT)).toLowerCase();
