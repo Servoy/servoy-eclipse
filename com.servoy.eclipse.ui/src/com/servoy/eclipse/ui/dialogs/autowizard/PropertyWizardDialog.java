@@ -52,6 +52,7 @@ public class PropertyWizardDialog extends Dialog
 	private AutoWizardPropertiesComposite tableComposite;
 	private StylePropertiesSelector stylePropertiesSelector;
 	private final PropertyWizardDialogConfigurator configurator;
+	private FormPropertiesSelector formPropertiesSelector;
 
 	PropertyWizardDialog(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table, final IDialogSettings settings,
 		PropertyDescription property, PropertyWizardDialogConfigurator configurator)
@@ -98,6 +99,11 @@ public class PropertyWizardDialog extends Dialog
 
 		if (dataprovidersSelector != null && stylePropertiesSelector.stylePropertiesViewer != null)
 			form2.setWeights(70, 30);
+
+		if (configurator.getFormProperties().size() > 0)
+		{
+			formPropertiesSelector = new FormPropertiesSelector(this, form2, configurator.getFormProperties(), flattenedSolution, persistContext, settings);
+		}
 
 		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution,
 			configurator);

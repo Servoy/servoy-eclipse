@@ -63,7 +63,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 	public AutoWizardConfigurationViewer(Composite parent, PersistContext persistContext, FlattenedSolution fs, ITable table,
 		List<PropertyDescription> dataproviderProperties,
 		List<PropertyDescription> styleClassProperties,
-		List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties, int style)
+		List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties, int style, String propertyName)
 	{
 		super(parent, style);
 		this.persistContext = persistContext;
@@ -73,11 +73,11 @@ public class AutoWizardConfigurationViewer extends TableViewer
 		parent.setLayout(tableColumnLayout);
 		getTable().setLinesVisible(true);
 		getTable().setHeaderVisible(true);
-		getTable().setToolTipText("The selected columns");
+		getTable().setToolTipText("The selected " + propertyName);
 		setContentProvider(ArrayContentProvider.getInstance());
 
 		TableColumn dataproviderColumn = new TableColumn(getTable(), SWT.LEFT);
-		dataproviderColumn.setText("Columns");
+		dataproviderColumn.setText(propertyName);
 		dataproviderColumn.setToolTipText("The dataprovider for which a column is created");
 
 		TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(this, dataproviderColumn);

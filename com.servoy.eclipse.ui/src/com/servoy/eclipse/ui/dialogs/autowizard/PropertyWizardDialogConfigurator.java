@@ -35,6 +35,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 
@@ -55,6 +56,7 @@ public class PropertyWizardDialogConfigurator
 	private List<PropertyDescription> styleProperties;
 	private List<PropertyDescription> i18nProperties;
 	private List<PropertyDescription> stringProperties;
+	private List<PropertyDescription> formProperties;
 
 
 	public PropertyWizardDialogConfigurator(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, PropertyDescription property)
@@ -77,6 +79,7 @@ public class PropertyWizardDialogConfigurator
 		styleProperties = filterProperties(StyleClassPropertyType.class);
 		i18nProperties = filterProperties(TitleStringPropertyType.class);
 		stringProperties = filterProperties(ServoyStringPropertyType.class);
+		formProperties = filterProperties(FormPropertyType.class);
 		return this;
 	}
 
@@ -139,6 +142,11 @@ public class PropertyWizardDialogConfigurator
 		return stringProperties;
 	}
 
+	public List<PropertyDescription> getFormProperties()
+	{
+		return formProperties;
+	}
+
 	public List<Map<String, Object>> getInput()
 	{
 		return input;
@@ -147,5 +155,10 @@ public class PropertyWizardDialogConfigurator
 	public ITable getTable()
 	{
 		return table;
+	}
+
+	public String getAutoPropertyName()
+	{
+		return mainProperty.getName();
 	}
 }
