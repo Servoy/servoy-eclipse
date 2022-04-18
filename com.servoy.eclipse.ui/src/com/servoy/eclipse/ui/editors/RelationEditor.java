@@ -81,6 +81,7 @@ import com.servoy.eclipse.ui.editors.relation.RelationRow;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.SWTFakeTableTooltipSupport;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -188,7 +189,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					return event.keyCode == '\r';
 				}
 			}, ColumnViewerEditor.KEYBOARD_ACTIVATION | ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR);
-		table.setToolTipText("Ctrl+click in a cell to open data provider dialog");
+		//table.setToolTipText("Ctrl+click in a cell to open data provider dialog");
 
 		table.addMouseListener(new MouseAdapter()
 		{
@@ -516,7 +517,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		toViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_TO, false));
 
 		TableColumn delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
-		delColumn.setToolTipText("Clear row");
+		//delColumn.setToolTipText("Clear row");
 
 		TableColumnLayout layout = new TableColumnLayout();
 		tableContainer.setLayout(layout);
@@ -525,6 +526,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		layout.setColumnData(toColumn, new ColumnWeightData(10, 50, true));
 		layout.setColumnData(delColumn, new ColumnPixelData(20, true));
 
+		SWTFakeTableTooltipSupport.enableTooltipFor(tableViewer.getTable(), null,
+			new String[] { "Ctrl+click in a cell to open data provider dialog", "Special modifiers:\n\n# - case insensitive condition\n^|| - is null condition\n\nExample:\n\n#= - case insensitive equals\n^||= - equals or null\n^||#!= - case insensitive not equals or null", "Ctrl+click in a cell to open data provider dialog", "Clear row" });
 		tableViewer.setLabelProvider(new RelationItemLabelProvider(this));
 	}
 
