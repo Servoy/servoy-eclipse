@@ -22,7 +22,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -73,7 +72,7 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 			column.getColumnInfo().addCompatibleColumnType(difference.getTableDefinition().columnType);
 			try
 			{
-				dmm.updateAllColumnInfo(difference.getTable(), DatabaseUtils.UPDATE_NOW, false);
+				dmm.updateAllColumnInfo(difference.getTable(), false, false);
 			}
 			catch (RepositoryException e)
 			{

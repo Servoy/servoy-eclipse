@@ -107,7 +107,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.TableChangeHandler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -559,7 +558,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 									Utils.closeInputStream(is);
 									String problems = EclipseDatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
-										dbiFileContent, DatabaseUtils.UPDATE_NOW, false);
+										dbiFileContent, EclipseDatabaseUtils.UPDATE_NOW, false);
 									if (problems != null)
 									{
 										StringTokenizer st = new StringTokenizer(problems, "\n");
