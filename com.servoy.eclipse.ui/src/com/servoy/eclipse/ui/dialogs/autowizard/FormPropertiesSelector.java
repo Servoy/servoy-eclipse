@@ -109,7 +109,7 @@ public class FormPropertiesSelector
 			Form form = relForm.form;
 			Map<String, Object> map = new HashMap<>();
 			PropertyDescription propertyDescription = formProperties.get(0);
-			map.put(propertyDescription.getName(), form.getUUID());
+			map.put(propertyDescription.getName(), form.getUUID().toString());
 
 			if (hasRelationProperty)
 			{
