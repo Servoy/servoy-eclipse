@@ -107,8 +107,7 @@ public class AutoWizardPropertiesComposite
 		container.setLayoutData(gridData);
 
 		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table,
-			propertiesConfigurator.getDataproviderProperties(),
-			propertiesConfigurator.getStyleProperties(), propertiesConfigurator.getI18nProperties(), propertiesConfigurator.getStringProperties(),
+			propertiesConfigurator,
 			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION, propertiesConfigurator.getAutoPropertyName());
 		return viewer;
 	}

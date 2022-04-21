@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.SWT;
@@ -32,19 +31,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
-import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
-import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
-import com.servoy.eclipse.ui.labelproviders.CombinedTreeLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.j2db.FlattenedSolution;
+import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 
 /**
@@ -55,12 +50,17 @@ public class FormPropertiesSelector
 	private final PropertyWizardDialog propertyWizardDialog;
 	private final List<PropertyDescription> formProperties;
 	private final FilteredTreeViewer formPicker;
+	private final boolean hasRelationProperty;
 
 	public FormPropertiesSelector(PropertyWizardDialog propertyWizardDialog, SashForm form, List<PropertyDescription> formProperties,
-		FlattenedSolution flattenedSolution, PersistContext persistContext, IDialogSettings settings)
+		List<PropertyDescription> relationProperties, PersistContext persistContext, IDialogSettings settings)
 	{
 		this.propertyWizardDialog = propertyWizardDialog;
 		this.formProperties = formProperties;
+
+		Object relatedProperty = formProperties.get(0).getTag("wizardRelated");
+		this.hasRelationProperty = relatedProperty != null &&
+			relationProperties.stream().filter(pd -> relatedProperty.equals(pd.getName())).findAny().isPresent();
 
 		Composite parent = new Composite(form, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
@@ -69,14 +69,12 @@ public class FormPropertiesSelector
 		layout.marginRight = 5;
 		parent.setLayout(layout);
 
-		ILabelProvider labelProvider = new CombinedTreeLabelProvider(1,
-			new ILabelProvider[] { new RelationLabelProvider("", true, true), new FormLabelProvider(flattenedSolution, true) });
-		ITreeContentProvider contentProvider = new RelatedFormsContentProvider(flattenedSolution, persistContext.getContext());
+		ITreeContentProvider contentProvider = new RelatedFormsContentProvider((Form)persistContext.getContext());
 		formPicker = new FilteredTreeViewer(parent, true, true,
 			// contentProvider
 			contentProvider,
 			//labelProvider
-			labelProvider,
+			new SolutionContextDelegateLabelProvider(RelatedFormsLabelProvider.INSTANCE, persistContext.getContext()),
 			// comparator
 			null,
 			// treeStyle
@@ -85,10 +83,7 @@ public class FormPropertiesSelector
 			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS)),
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
-		ITable formTable = ((Form)persistContext.getContext()).getDataSource() != null
-			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Form)persistContext.getContext()).getDataSource()) : null;
-		formPicker.setInput(new RelationContentProvider.RelationListOptions(formTable, null, false,
-			true));
+		formPicker.setInput(persistContext.getContext());
 
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
@@ -108,19 +103,18 @@ public class FormPropertiesSelector
 	private void moveFormSelection()
 	{
 		IStructuredSelection selection = (IStructuredSelection)formPicker.getSelection();
-		if (selection.getFirstElement() instanceof Form)
+		if (selection.getFirstElement() instanceof RelatedForm)
 		{
-			Form form = (Form)selection.getFirstElement();
+			RelatedForm relForm = (RelatedForm)selection.getFirstElement();
+			Form form = relForm.form;
 			Map<String, Object> map = new HashMap<>();
 			PropertyDescription propertyDescription = formProperties.get(0);
 			map.put(propertyDescription.getName(), form.getUUID());
-			//TODO this is kind of hardcoded, can we improve it?
-			Object parent = formPicker.getViewer().getTree().getSelection()[0].getParentItem().getData();
-			if (parent instanceof RelationsWrapper)
+
+			if (hasRelationProperty)
 			{
-				RelationsWrapper relationsWrapper = (RelationsWrapper)parent;
-				Relation relation = relationsWrapper.relations[relationsWrapper.relations.length - 1];
-				map.put(propertyDescription.getTag("wizardRelated").toString(), relation.getName());
+				Relation relation = relForm.relations != null ? relForm.relations[relForm.relations.length - 1] : null;
+				map.put(propertyDescription.getTag("wizardRelated").toString(), relation != null ? relation.getName() : null);
 			}
 			propertyWizardDialog.addNewRow(form.getName(), map);
 		}
