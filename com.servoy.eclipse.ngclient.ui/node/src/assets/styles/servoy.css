@@ -102,8 +102,13 @@ body {
 }
 .svy-reconnecting
 {
+  color: red;
   background:lightgray;
   opacity: 0.75;
+  z-index: 200000;
+  width: 100%;
+  height: 100%;
+  position:absolute;
 }
 
 #mktipmsg {
