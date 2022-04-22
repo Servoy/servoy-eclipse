@@ -193,7 +193,6 @@ import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -1567,7 +1566,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 															Utils.closeInputStream(is);
 															EclipseDatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent,
-																DatabaseUtils.NO_UPDATE);
+																EclipseDatabaseUtils.NO_UPDATE);
 														}
 														catch (CoreException e)
 														{

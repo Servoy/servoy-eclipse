@@ -25,10 +25,10 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 
+import com.servoy.base.query.IBaseSQLCondition;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.RelationItem;
-import com.servoy.j2db.query.ISQLCondition;
 import com.servoy.j2db.util.Utils;
 
 public class OperatorEditingSupport extends EditingSupport
@@ -44,7 +44,7 @@ public class OperatorEditingSupport extends EditingSupport
 		items = new ArrayList<String>();
 		for (int element : RelationItem.RELATION_OPERATORS)
 		{
-			if ((element & ISQLCondition.OPERATOR_MASK) != ISQLCondition.IN_OPERATOR)
+			if ((element & IBaseSQLCondition.OPERATOR_MASK) != IBaseSQLCondition.IN_OPERATOR)
 			{
 				items.add(RelationItem.getOperatorAsString(element));
 			}
@@ -52,7 +52,7 @@ public class OperatorEditingSupport extends EditingSupport
 		editor = new FixedComboBoxCellEditor(tv.getTable(), items.toArray(new String[] { }), SWT.READ_ONLY);
 		if (editor.getControl() instanceof CCombo)
 		{
-			((CCombo)editor.getControl()).setToolTipText("Special modifiers:\n\n# - case insensitive condition\n^|| - is null condition\n\nExample:\n\n#= - case insensitive equals\n^||= - equals or null\n^||#!= - case insensitive not equals or null");
+			//((CCombo)editor.getControl()).setToolTipText("Special modifiers:\n\n# - case insensitive condition\n^|| - is null condition\n\nExample:\n\n#= - case insensitive equals\n^||= - equals or null\n^||#!= - case insensitive not equals or null");
 		}
 	}
 
@@ -70,7 +70,8 @@ public class OperatorEditingSupport extends EditingSupport
 				Integer previousValue = pi.getOperator();
 				Integer currentValue = Integer.valueOf(validOperator);
 				pi.setOperator(currentValue);
-				if (!Utils.equalObjects(previousValue, currentValue) && !(previousValue == null && currentValue.intValue() == 0)) relationEditor.flagModified(true);
+				if (!Utils.equalObjects(previousValue, currentValue) && !(previousValue == null && currentValue.intValue() == 0))
+					relationEditor.flagModified(true);
 			}
 			getViewer().update(element, null);
 		}

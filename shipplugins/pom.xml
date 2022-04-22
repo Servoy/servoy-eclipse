@@ -9,8 +9,8 @@
 
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.17.1</log4j-version>
-        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.22/</eclipse.url>
+        <log4j-version>2.17.2</log4j-version>
+        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.23/</eclipse.url>
     </properties>
 
     <repositories>
@@ -190,7 +190,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.7</version>
+            <version>1.12.9</version>
         </dependency>
 
         <dependency>

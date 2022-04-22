@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormService } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
-import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties } from '../ngclient/types';
+import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
 
@@ -181,7 +181,7 @@ export class EditorContentService {
                                 formComponent.items.forEach((item) => {
                                     if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
                                         formCache.removeLayoutContainer(item['id']);
-                                        this.removeChildRecursively(item, formComponent);
+                                        this.removeChildFromParentRecursively(item, formComponent);
                                     }
                                 });
                             }
@@ -232,7 +232,7 @@ export class EditorContentService {
                 if (comp) {
                     formCache.removeComponent(elem);
                     if (!formCache.absolute) {
-                        this.removeChildRecursively(comp, formCache.mainStructure);
+                        this.removeChildFromParentRecursively(comp, formCache.mainStructure);
                     }
                 }
                 else {
@@ -249,7 +249,8 @@ export class EditorContentService {
                 const container = formCache.getLayoutContainer(elem);
                 if (container) {
                     formCache.removeLayoutContainer(elem);
-                    this.removeChildRecursively(container, formCache.mainStructure);
+                    this.removeChildFromParentRecursively(container, formCache.mainStructure);
+                    this.removeChildrenRecursively(container, formCache)
                 }
             });
             refresh = true;
@@ -316,15 +317,32 @@ export class EditorContentService {
 
     }
 
-    private removeChildRecursively(child: ComponentCache | StructureCache | FormComponentCache, parent: StructureCache | FormComponentCache) {
+    private removeChildFromParentRecursively(child: ComponentCache | StructureCache | FormComponentCache, parent: StructureCache | FormComponentCache) {
         if (!parent.removeChild(child)) {
             if (parent.items) {
                 parent.items.forEach((elem) => {
                     if (elem instanceof StructureCache) {
-                        this.removeChildRecursively(child, elem);
+                        this.removeChildFromParentRecursively(child, elem);
                     }
                 });
             }
+        }
+    }
+
+    private removeChildrenRecursively(parent: StructureCache, formCache: FormCache) {
+        if (parent.items) {
+            parent.items.forEach((elem) => {
+                if (elem instanceof StructureCache) {
+                    formCache.removeLayoutContainer(elem.id);
+                    this.removeChildrenRecursively(elem, formCache);
+                }
+                else if (elem instanceof ComponentCache){
+                    formCache.removeComponent(elem.name);
+                }
+                else if (elem instanceof FormComponentCache){
+                    formCache.removeFormComponent(elem.name);
+                }
+            });
         }
     }
 

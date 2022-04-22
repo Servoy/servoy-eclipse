@@ -696,9 +696,9 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
 	 */
-	public void updateAllColumnInfo(final ITable t, int updateContent) throws RepositoryException
+	public void updateAllColumnInfo(final ITable t, boolean writeBackLater) throws RepositoryException
 	{
-		updateAllColumnInfo(t, updateContent, true);
+		updateAllColumnInfo(t, writeBackLater, true);
 	}
 
 	/**
@@ -708,35 +708,34 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
 	 */
-	public void updateAllColumnInfo(final ITable t, int updateContent, final boolean checkForMarkers) throws RepositoryException
+	public void updateAllColumnInfo(final ITable t, boolean writeBackLater, final boolean checkForMarkers) throws RepositoryException
 	{
-		switch (updateContent)
+		if (writeBackLater)
 		{
-			case DatabaseUtils.UPDATE_LATER :
-				// write them async, because this can be called from a resource change event (that locks the resource tree for writing)
-				Job job = new Job("Updating table column information")
+			// write them async, because this can be called from a resource change event (that locks the resource tree for writing)
+			Job job = new Job("Updating table column information")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					@Override
-					protected IStatus run(IProgressMonitor monitor)
+					try
 					{
-						try
-						{
-							updateAllColumnInfoImpl(t, checkForMarkers);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
-						return Status.OK_STATUS;
+						updateAllColumnInfoImpl(t, checkForMarkers);
 					}
-				};
-				job.setRule(resourceProject);
-				job.setSystem(true);
-				job.schedule();
-				break;
-			case DatabaseUtils.UPDATE_NOW :
-				updateAllColumnInfoImpl(t, checkForMarkers);
-				break;
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.setRule(resourceProject);
+			job.setSystem(true);
+			job.schedule();
+		}
+		else
+		{
+			updateAllColumnInfoImpl(t, checkForMarkers);
 		}
 	}
 

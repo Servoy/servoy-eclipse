@@ -27,6 +27,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -138,6 +139,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription);
 				}
 				return defaultValue;
+			}
+			if (value != null && type instanceof StringPropertyType)
+			{
+				value = value.toString();
 			}
 		}
 		catch (Exception e)

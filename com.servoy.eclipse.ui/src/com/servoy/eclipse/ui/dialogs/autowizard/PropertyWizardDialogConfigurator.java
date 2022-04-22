@@ -35,8 +35,10 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 
 /**
  * @author emera
@@ -55,6 +57,8 @@ public class PropertyWizardDialogConfigurator
 	private List<PropertyDescription> styleProperties;
 	private List<PropertyDescription> i18nProperties;
 	private List<PropertyDescription> stringProperties;
+	private List<PropertyDescription> formProperties;
+	private List<PropertyDescription> relationProperties;
 
 
 	public PropertyWizardDialogConfigurator(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, PropertyDescription property)
@@ -75,8 +79,10 @@ public class PropertyWizardDialogConfigurator
 			.collect(Collectors.toList());
 		// should be only 1 (or only 1 with values)
 		styleProperties = filterProperties(StyleClassPropertyType.class);
-		i18nProperties = filterProperties(TitleStringPropertyType.class);
+		i18nProperties = filterProperties(TagStringPropertyType.class);
 		stringProperties = filterProperties(ServoyStringPropertyType.class);
+		formProperties = filterProperties(FormPropertyType.class);
+		relationProperties = filterProperties(RelationPropertyType.class);
 		return this;
 	}
 
@@ -139,6 +145,16 @@ public class PropertyWizardDialogConfigurator
 		return stringProperties;
 	}
 
+	public List<PropertyDescription> getFormProperties()
+	{
+		return formProperties;
+	}
+
+	public List<PropertyDescription> getRelationProperties()
+	{
+		return relationProperties;
+	}
+
 	public List<Map<String, Object>> getInput()
 	{
 		return input;
@@ -147,5 +163,10 @@ public class PropertyWizardDialogConfigurator
 	public ITable getTable()
 	{
 		return table;
+	}
+
+	public String getAutoPropertyName()
+	{
+		return mainProperty.getName();
 	}
 }

@@ -57,6 +57,9 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public final class EclipseDatabaseUtils
 {
+	public static final int UPDATE_NOW = 0;
+	public static final int UPDATE_LATER = 1;
+	public static final int NO_UPDATE = 2;
 
 	private EclipseDatabaseUtils()
 	{
@@ -74,7 +77,7 @@ public final class EclipseDatabaseUtils
 	 * @param server the server to which the table will be added.
 	 * @param tableName the name of the table.
 	 * @param dbiFileContent the JSON column/table info content.
-	 * @param writeBackLater if true, the new table's info will be written to it's dbi file later. Otherwise the write will occur during this call.
+	 * @param updateContent Specify how the table's info will be written to it's dbi file.
 	 * @return null if all is OK; if any problems are encountered, they will be added to this String, separated by "\n"
 	 */
 	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, int updateContent,
@@ -284,7 +287,10 @@ public final class EclipseDatabaseUtils
 				throw new RepositoryException("Could not create db sequences for table " + table, e);
 			}
 
-			dmm.updateAllColumnInfo(table, updateContent);
+			if (updateContent != EclipseDatabaseUtils.NO_UPDATE)
+			{
+				dmm.updateAllColumnInfo(table, updateContent != EclipseDatabaseUtils.UPDATE_LATER ? false : true);
+			}
 		}
 		catch (RepositoryException e)
 		{

@@ -25,6 +25,7 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -43,8 +44,11 @@ import org.sablo.specification.PropertyDescription;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DefaultValueDelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.RelationPropertyController.RelationPropertyEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.Pair;
@@ -57,49 +61,53 @@ public class AutoWizardConfigurationViewer extends TableViewer
 	ITable table;
 
 	private final List<TextCellEditorSupport> i18nColumns = new ArrayList<>();
+	private final List<RelationCellEditorSupport> relationColumns = new ArrayList<>();
 	private final PersistContext persistContext;
 	private final FlattenedSolution fs;
+	private PropertyWizardDialogConfigurator propertiesConfig;
 
 	public AutoWizardConfigurationViewer(Composite parent, PersistContext persistContext, FlattenedSolution fs, ITable table,
-		List<PropertyDescription> dataproviderProperties,
-		List<PropertyDescription> styleClassProperties,
-		List<PropertyDescription> i18nProperties, List<PropertyDescription> stringProperties, int style)
+		PropertyWizardDialogConfigurator configurator, int style, String propertyName)
 	{
 		super(parent, style);
 		this.persistContext = persistContext;
 		this.fs = fs;
 		this.table = table;
+		this.propertiesConfig = configurator;
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
 		parent.setLayout(tableColumnLayout);
 		getTable().setLinesVisible(true);
 		getTable().setHeaderVisible(true);
-		getTable().setToolTipText("The selected columns");
+		getTable().setToolTipText("The selected " + propertyName);
 		setContentProvider(ArrayContentProvider.getInstance());
 
-		TableColumn dataproviderColumn = new TableColumn(getTable(), SWT.LEFT);
-		dataproviderColumn.setText("Columns");
-		dataproviderColumn.setToolTipText("The dataprovider for which a column is created");
-
-		TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(this, dataproviderColumn);
-		dataproviderViewerColumn.setLabelProvider(new ColumnLabelProvider()
+		if (propertiesConfig.getDataproviderProperties().size() > 0)
 		{
-			@Override
-			public String getText(Object element)
-			{
-				Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-				return row.getLeft();
-			}
-		});
-		tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
+			TableColumn dataproviderColumn = new TableColumn(getTable(), SWT.LEFT);
+			dataproviderColumn.setText(propertyName);
+			dataproviderColumn.setToolTipText("The dataprovider for which a column is created");
 
-		for (PropertyDescription dp : dataproviderProperties)
+			TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(this, dataproviderColumn);
+			dataproviderViewerColumn.setLabelProvider(new ColumnLabelProvider()
+			{
+				@Override
+				public String getText(Object element)
+				{
+					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+					return row.getLeft();
+				}
+			});
+			tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
+		}
+
+		for (PropertyDescription dp : propertiesConfig.getDataproviderProperties())
 		{
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
 			col.setText(dp.getName());
 			col.setToolTipText(dp.getDocumentation());
 
 			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new DataproviderCellEditor(this, this, style, dp, dataproviderProperties));
+			colViewer.setEditingSupport(new DataproviderCellEditor(this, this, style, dp, propertiesConfig.getDataproviderProperties()));
 			colViewer.setLabelProvider(new CentredImageCellLabelProvider()
 			{
 				@Override
@@ -113,7 +121,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
 		}
 
-		for (PropertyDescription dp : styleClassProperties)
+		for (PropertyDescription dp : propertiesConfig.getStyleProperties())
 		{
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
 			col.setText(dp.getName());
@@ -125,7 +133,37 @@ public class AutoWizardConfigurationViewer extends TableViewer
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
 		}
 
-		for (PropertyDescription dp : i18nProperties)
+		for (PropertyDescription dp : propertiesConfig.getFormProperties())
+		{
+			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
+			col.setText(dp.getName());
+			col.setToolTipText(dp.getDocumentation());
+
+			TableViewerColumn colViewer = new TableViewerColumn(this, col);
+			ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(fs, false), persistContext.getContext());
+			FormCellEditorSupport editingSupport = new FormCellEditorSupport(this, dp, persistContext, formLabelProvider, fs, getTable());
+			colViewer.setEditingSupport(editingSupport);
+			colViewer.setLabelProvider(new FormColumnLabelProvider(dp, persistContext));
+			tableColumnLayout.setColumnData(col, new ColumnWeightData(80, 150, true));
+		}
+
+		for (PropertyDescription dp : propertiesConfig.getRelationProperties())
+		{
+			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
+			col.setText(dp.getName());
+			col.setToolTipText(dp.getDocumentation());
+
+			TableViewerColumn colViewer = new TableViewerColumn(this, col);
+			RelationCellEditorSupport editingSupport = new RelationCellEditorSupport(this, dp,
+				new RelationPropertyEditor(getTable(), persistContext, table, null, true, true, false), fs);
+			colViewer.setEditingSupport(editingSupport);
+			relationColumns.add(editingSupport);
+			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
+			tableColumnLayout.setColumnData(col, new ColumnWeightData(80, 150, true));
+		}
+
+
+		for (PropertyDescription dp : propertiesConfig.getI18nProperties())
 		{
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
 			col.setText(dp.getName());
@@ -141,7 +179,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
 		}
 
-		for (PropertyDescription dp : stringProperties)
+		for (PropertyDescription dp : propertiesConfig.getStringProperties())
 		{
 			Object tag = dp.getTag("wizard");
 			if (tag instanceof JSONObject)
@@ -210,8 +248,6 @@ public class AutoWizardConfigurationViewer extends TableViewer
 			}
 		});
 		tableColumnLayout.setColumnData(delete, new ColumnWeightData(40, 100, true));
-
-
 	}
 
 	/**
@@ -223,5 +259,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 		i18nColumns.forEach(editingSupport -> editingSupport.textCellEditor = new TagsAndI18NTextCellEditor(getTable(), persistContext, fs,
 			new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT), table,
 			"Edit title/text property", Activator.getDefault().getDesignClient(), false));
+		relationColumns
+			.forEach(editingSupport -> editingSupport.cellEditor = new RelationPropertyEditor(getTable(), persistContext, table, null, true, true, false));
 	}
 }

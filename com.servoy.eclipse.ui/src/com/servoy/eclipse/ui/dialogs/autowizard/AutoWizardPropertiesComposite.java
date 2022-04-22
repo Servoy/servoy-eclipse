@@ -31,8 +31,10 @@ import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
@@ -64,6 +66,7 @@ public class AutoWizardPropertiesComposite
 		treeInput = new ArrayList<>();
 		for (Map<String, Object> map : childrenProperties)
 		{
+			//TODO get the title property value from the config
 			String dpValue = findDPValue(map);
 			treeInput.add(new Pair<>(dpValue, map));
 		}
@@ -74,6 +77,14 @@ public class AutoWizardPropertiesComposite
 		for (PropertyDescription dp : propertiesConfigurator.getDataproviderProperties())
 		{
 			if (map.get(dp.getName()) != null) return map.get(dp.getName()).toString();
+		}
+		for (PropertyDescription frm : propertiesConfigurator.getFormProperties())
+		{
+			if (map.get(frm.getName()) != null)
+			{
+				Form form = (Form)flattenedSolution.searchPersist(Utils.getAsUUID(map.get(frm.getName()), false));
+				return form != null ? form.getName() : "";
+			}
 		}
 		return null;
 	}
@@ -96,9 +107,8 @@ public class AutoWizardPropertiesComposite
 		container.setLayoutData(gridData);
 
 		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table,
-			propertiesConfigurator.getDataproviderProperties(),
-			propertiesConfigurator.getStyleProperties(), propertiesConfigurator.getI18nProperties(), propertiesConfigurator.getStringProperties(),
-			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			propertiesConfigurator,
+			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION, propertiesConfigurator.getAutoPropertyName());
 		return viewer;
 	}
 
