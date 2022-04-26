@@ -150,10 +150,12 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, this.projectName);
 					replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, this.projectName);
 					replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "projects/ng2package/package.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "projects/ng2package/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "projects/ng2package/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "projects/ng2package/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "project/package.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "project/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "project/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
+					replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, this.projectName);
+					new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + this.projectName + ".module.ts"));
 				}
 				catch (Exception ex)
 				{

@@ -69,6 +69,7 @@ public class NewWebObjectAction extends Action
 	private final String type;
 
 	private final String COMPONENT_NAME_TAG = "##componentname##";
+	private final String COMPONENT_DASH_NAME_TAG = "##componentdashname##";
 	private final String COMPONENT_CLASSNAME_TAG = "##componentclassname##";
 	private final String PACKAGE_NAME_TAG = "##packagename##";
 
@@ -256,7 +257,8 @@ public class NewWebObjectAction extends Action
 	{
 		try
 		{
-			File compDirectory = new File(packageRoot.getLocation().toOSString(), "projects/ng2package/src");
+			String moduleName = packageRoot.getProject().getName();
+			File compDirectory = new File(packageRoot.getLocation().toOSString(), "project/src/");
 			String className = componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 			String charset = "UTF-8";
 			if (elementType.equals("Component"))
@@ -272,6 +274,7 @@ public class NewWebObjectAction extends Action
 				bundleContent = Utils.getURLContent(url);
 				bundleContent = bundleContent.replaceAll(PACKAGE_NAME_TAG, packageRoot.getName());
 				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
+				bundleContent = bundleContent.replaceAll(COMPONENT_DASH_NAME_TAG, getDashedName(componentOrServiceName));
 				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG,
 					className);
 				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".ts"), bundleContent, charset);
@@ -288,8 +291,8 @@ public class NewWebObjectAction extends Action
 				modifyBuildFile(packageRoot, componentOrServiceName, charset);
 
 				IFile moduleFile = null;
-				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
-				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
+				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
 				InputStream is = moduleFile.getContents(true);
 				String moduleFileContent = null;
 				try
