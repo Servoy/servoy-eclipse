@@ -2763,7 +2763,6 @@ public class SolutionExplorerView extends ViewPart
 		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
-		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
@@ -3171,6 +3170,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
+
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS, newFormComponent);
@@ -3180,21 +3180,12 @@ public class SolutionExplorerView extends ViewPart
 
 		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentResource);
-		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newComponentResource);
-		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newComponentResource);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
 		createActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
-		createActionInTree.registerAction(UserNodeType.COMPONENT, newComponentFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.SERVICE, newServiceFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.LAYOUT, newLayoutFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
-		createActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutFolderInWebPackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -3227,8 +3218,6 @@ public class SolutionExplorerView extends ViewPart
 		NewTableAction newTableAction = new NewTableAction(this);
 		addListSelectionChangedListener(newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
-		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
-		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newComponentResource);
 
@@ -3385,9 +3374,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
-		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
@@ -3403,9 +3390,7 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
-		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrService(this, shell, UserNodeType.COMPONENT));
 		renameActionInTree.registerAction(UserNodeType.LAYOUT, new RenameLayoutAction(this, shell, UserNodeType.LAYOUT));
-		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrService(this, shell, UserNodeType.SERVICE));
 		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE,
 			new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.INMEMORY_DATASOURCE));
 		renameActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.VIEW_FOUNDSET));
