@@ -1,5 +1,5 @@
 {
-  "name": "@servoy/##packagename##",
+  "name": "##packagename##",
   "version": "1.0.0",
   "peerDependencies": {
     "@angular/animations": "^13",

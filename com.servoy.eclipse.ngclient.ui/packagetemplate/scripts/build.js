@@ -4,7 +4,7 @@ var AdmZip = require('adm-zip');
 var zip = new AdmZip();
 
 zip.addLocalFolder("./META-INF/", "/META-INF/");
-zip.addLocalFolder("./dist/servoy/ng2package/", "/dist/servoy/ng2package/");
+zip.addLocalFolder("./dist/", "/dist/");
 // add here all ng1 components/services 
 //zip.addLocalFolder("./mycomponent/", "/mycomponent/");
 

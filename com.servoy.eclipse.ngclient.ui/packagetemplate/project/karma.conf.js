@@ -27,7 +27,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, '../../../coverage/servoy/##packagename##'),
+      dir: require('path').join(__dirname, '../coverage/##packagename##'),
       subdir: '.',
       reporters: [
         { type: 'html' },
@@ -36,7 +36,7 @@ module.exports = function (config) {
     },
     reporters: ['progress', 'kjhtml','junit'],
     junitReporter: {
-        outputFile: '../../target/TEST-browser-karma.xml'
+        outputFile: '../target/TEST-browser-karma.xml'
     },
     port: 9876,
     colors: true,

@@ -6,21 +6,21 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "@servoy/##packagename##": {
+    "##packagename##": {
       "projectType": "library",
-      "root": "projects/ng2package",
-      "sourceRoot": "projects/ng2package/src",
+      "root": "project",
+      "sourceRoot": "project/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "projects/ng2package/tsconfig.lib.json",
-            "project": "projects/ng2package/ng-package.json"
+            "tsConfig": "project/tsconfig.lib.json",
+            "project": "project/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ng2package/tsconfig.lib.prod.json"
+              "tsConfig": "project/tsconfig.lib.prod.json"
             }
           }
         },
@@ -28,23 +28,13 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "preserveSymlinks": true,
-            "main": "projects/ng2package/src/test.ts",
-            "tsConfig": "projects/ng2package/tsconfig.spec.json",
-            "karmaConfig": "projects/ng2package/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "preserveSymlinks": true,
-            "lintFilePatterns": [
-              "projects/ng2package/src/**/*.ts",
-              "projects/ng2package/src/**/*.html"
-            ]
+            "main": "project/src/test.ts",
+            "tsConfig": "project/tsconfig.spec.json",
+            "karmaConfig": "project/karma.conf.js"
           }
         }
       }
     }
   },
-  "defaultProject": "@servoy/##packagename##"
+  "defaultProject": "##packagename##"
 }

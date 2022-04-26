@@ -6,12 +6,11 @@
     "start": "ng serve",
     "build": "ng build --configuration production",
     "build_debug": "ng build --watch",
-    "make_release": "node scripts/build.js",
+    "make_release": "ng build --configuration production && node scripts/build.js",
     "test": "ng test --watch --browsers Chrome",
     "test_edge": "ng test --watch --browsers Edge",
     "test_edge_nowatch": "ng test --watch=false --browsers Edge",
-    "test_headless": "ng test --browsers headlessChrome --watch=false",
-    "lint": "ng lint"
+    "test_headless": "ng test --browsers headlessChrome --watch=false"
   },
   "private": true,
   "dependencies": {
