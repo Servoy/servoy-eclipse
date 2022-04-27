@@ -1421,54 +1421,56 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		list_style_wizard.clear();
 		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
 			.getFile(new Path("medias/styles_wizard.less"));
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
+		if (styles_wizard.exists())
 		{
-			String line;
-			MyJSonObject myJsonObj = null;
-			boolean nameFound = false;
-			boolean typeFound = false;
-			JSONObject jsonObj = null;
-			List<String> myClasses = null;
-			;
-			while ((line = br.readLine()) != null)
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
 			{
-				int typePos = line.indexOf("@type:");
-				if (typePos > 0)
+				String line;
+				MyJSonObject myJsonObj = null;
+				boolean nameFound = false;
+				boolean typeFound = false;
+				JSONObject jsonObj = null;
+				List<String> myClasses = null;
+				;
+				while ((line = br.readLine()) != null)
 				{
-					typeFound = true;
-					myJsonObj = new MyJSonObject();
-					myJsonObj.type = line.substring(typePos + 6).trim();
-				}
-				int startBracketPos = line.indexOf("{");
-				if (typeFound && (line.startsWith(".") && startBracketPos > 0))
-				{
-					nameFound = true;
-					jsonObj = new JSONObject();
-					String name = line.substring(1, startBracketPos).trim();
-					jsonObj.put("name", name);
-					myClasses = new ArrayList<String>();
-				}
-				int semicolonPos = line.indexOf("();");
-				if (nameFound && (line.trim().startsWith(".") && semicolonPos > 0))
-				{
-					myClasses.add(line.substring(0, semicolonPos).trim().substring(1));
-				}
-				if (line.startsWith("}"))
-				{//end of the object detected
-					jsonObj.put("classes", myClasses);
-					myJsonObj.jsonObj = jsonObj;
-					list_style_wizard.add(myJsonObj);
-					typeFound = false;
-					nameFound = false;
+					int typePos = line.indexOf("@type:");
+					if (typePos > 0)
+					{
+						typeFound = true;
+						myJsonObj = new MyJSonObject();
+						myJsonObj.type = line.substring(typePos + 6).trim();
+					}
+					int startBracketPos = line.indexOf("{");
+					if (typeFound && (line.startsWith(".") && startBracketPos > 0))
+					{
+						nameFound = true;
+						jsonObj = new JSONObject();
+						String name = line.substring(1, startBracketPos).trim();
+						jsonObj.put("name", name);
+						myClasses = new ArrayList<String>();
+					}
+					int semicolonPos = line.indexOf("();");
+					if (nameFound && (line.trim().startsWith(".") && semicolonPos > 0))
+					{
+						myClasses.add(line.substring(0, semicolonPos).trim().substring(1));
+					}
+					if (line.startsWith("}"))
+					{//end of the object detected
+						jsonObj.put("classes", myClasses);
+						myJsonObj.jsonObj = jsonObj;
+						list_style_wizard.add(myJsonObj);
+						typeFound = false;
+						nameFound = false;
 
+					}
 				}
 			}
+			catch (IOException | CoreException e)
+			{
+				e.printStackTrace();
+			}
 		}
-		catch (IOException | CoreException e)
-		{
-			e.printStackTrace();
-		}
-
 	}
 
 	public void fireLoadingDone()
