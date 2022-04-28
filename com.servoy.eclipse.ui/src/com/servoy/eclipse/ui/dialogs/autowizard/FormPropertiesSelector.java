@@ -29,6 +29,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
@@ -50,7 +51,7 @@ public class FormPropertiesSelector
 	private final PropertyWizardDialog propertyWizardDialog;
 	private final List<PropertyDescription> formProperties;
 	private final FilteredTreeViewer formPicker;
-	private final boolean hasRelationProperty;
+	private String relationPropertyName;
 
 	public FormPropertiesSelector(PropertyWizardDialog propertyWizardDialog, SashForm form, List<PropertyDescription> formProperties,
 		List<PropertyDescription> relationProperties, PersistContext persistContext, IDialogSettings settings)
@@ -58,9 +59,14 @@ public class FormPropertiesSelector
 		this.propertyWizardDialog = propertyWizardDialog;
 		this.formProperties = formProperties;
 
-		Object relatedProperty = formProperties.get(0).getTag("wizardRelated");
-		this.hasRelationProperty = relatedProperty != null &&
+		JSONObject tag = (JSONObject)formProperties.get(0).getTag("wizard");
+		Object relatedProperty = tag != null ? tag.get("wizardRelated") : null;
+		boolean hasRelationProperty = relatedProperty != null &&
 			relationProperties.stream().filter(pd -> relatedProperty.equals(pd.getName())).findAny().isPresent();
+		if (hasRelationProperty)
+		{
+			relationPropertyName = relatedProperty.toString();
+		}
 
 		Composite parent = new Composite(form, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
@@ -111,10 +117,10 @@ public class FormPropertiesSelector
 			PropertyDescription propertyDescription = formProperties.get(0);
 			map.put(propertyDescription.getName(), form.getUUID().toString());
 
-			if (hasRelationProperty)
+			if (relationPropertyName != null)
 			{
 				Relation relation = relForm.relations != null ? relForm.relations[relForm.relations.length - 1] : null;
-				map.put(propertyDescription.getTag("wizardRelated").toString(), relation != null ? relation.getName() : null);
+				map.put(relationPropertyName, relation != null ? relation.getName() : null);
 			}
 			propertyWizardDialog.addNewRow(form.getName(), map);
 		}
