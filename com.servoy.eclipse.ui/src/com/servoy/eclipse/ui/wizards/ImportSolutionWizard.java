@@ -418,11 +418,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						return serverConfig;
 					}
 				};
-				WebPackagesListener.setIgnore(true);
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				String title = "Solution imported";
 				String description = null;
 				Status status = null;
+				WebPackagesListener.setIgnore(true);
 				try
 				{
 					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file),
@@ -478,8 +478,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					title = "Solution not imported";
 					status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + mymsg, ex);
 				}
+				finally
+				{
+					WebPackagesListener.setIgnore(false);
+				}
 				showDetailsDialog(title, description, status);
-				WebPackagesListener.setIgnore(false);
 			}
 		};
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
