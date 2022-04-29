@@ -48,7 +48,8 @@ public class StylePropertiesSelector
 		this.wizard = wizard;
 		this.styleProperties = styleProperties;
 
-		Object tag = styleProperties.get(0).getTag("wizard");
+		Object config = styleProperties.get(0).getTag("wizard");
+		Object tag = config instanceof JSONObject ? ((JSONObject)config).optJSONArray("values") : config;
 		if (tag instanceof JSONArray)
 		{
 			GridLayout layout = new GridLayout(1, false);
