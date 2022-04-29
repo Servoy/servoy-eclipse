@@ -112,7 +112,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				{
 					final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
 						"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
-						MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
+						MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
 					retval = dialog.open();
 				}
 			});

@@ -2,7 +2,7 @@ import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef } from '@
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
-    selector: '##packagename##-##componentname##',
+    selector: '##packagename##-##componentdashname##',
     templateUrl: './##componentname##.html'
 })
 export class ##componentclassname## extends ServoyBaseComponent<HTMLDivElement>{

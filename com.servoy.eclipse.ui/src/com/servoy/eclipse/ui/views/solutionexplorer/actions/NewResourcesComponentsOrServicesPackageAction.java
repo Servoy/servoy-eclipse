@@ -286,9 +286,9 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 
 		if (IPackageReader.WEB_COMPONENT.equals(packageType))
 		{
-			manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), "@servoy/" + packageName);
+			manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), packageName);
 			manifest.getMainAttributes().put(new Attributes.Name("NG2-Module"), packageName + "Module");
-			manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist/servoy/ng2package");
+			manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist");
 		}
 
 		IFolder metainf = pack.getFolder(new Path("META-INF"));

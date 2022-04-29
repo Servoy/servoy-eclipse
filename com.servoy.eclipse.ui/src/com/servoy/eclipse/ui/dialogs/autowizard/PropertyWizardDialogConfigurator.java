@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.widgets.Shell;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 
@@ -59,6 +61,7 @@ public class PropertyWizardDialogConfigurator
 	private List<PropertyDescription> stringProperties;
 	private List<PropertyDescription> formProperties;
 	private List<PropertyDescription> relationProperties;
+	private List<PropertyDescription> orderedProperties;
 
 
 	public PropertyWizardDialogConfigurator(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, PropertyDescription property)
@@ -75,7 +78,7 @@ public class PropertyWizardDialogConfigurator
 		dataproviderProperties = wizardProperties.stream()
 			.filter(prop -> FoundsetLinkedPropertyType.class.isAssignableFrom(prop.getType().getClass()) ||
 				DataproviderPropertyType.class.isAssignableFrom(prop.getType().getClass()))
-			.sorted((desc1, desc2) -> Integer.parseInt((String)desc1.getTag("wizard")) - Integer.parseInt((String)desc2.getTag("wizard")))
+			.sorted((desc1, desc2) -> getOrder(desc1) - getOrder(desc2))
 			.collect(Collectors.toList());
 		// should be only 1 (or only 1 with values)
 		styleProperties = filterProperties(StyleClassPropertyType.class);
@@ -83,7 +86,29 @@ public class PropertyWizardDialogConfigurator
 		stringProperties = filterProperties(ServoyStringPropertyType.class);
 		formProperties = filterProperties(FormPropertyType.class);
 		relationProperties = filterProperties(RelationPropertyType.class);
+		orderedProperties = properties.stream().sorted((desc1, desc2) -> getOrder(desc1) - getOrder(desc2)).collect(Collectors.toList());
 		return this;
+	}
+
+	private int getOrder(PropertyDescription desc1)
+	{
+		try
+		{
+			if (desc1.getTag("wizard") instanceof JSONObject)
+			{
+				JSONObject w = (JSONObject)desc1.getTag("wizard");
+				return Integer.parseInt(w.optString("order", null));
+			}
+			if (desc1.getTag("wizard") instanceof JSONArray)
+			{
+				return Integer.MAX_VALUE;
+			}
+			return Integer.parseInt((String)desc1.getTag("wizard"));
+		}
+		catch (NumberFormatException ex)
+		{
+			return Integer.MAX_VALUE;
+		}
 	}
 
 	public PropertyWizardDialogConfigurator withInput(List<Map<String, Object>> _input)
@@ -168,5 +193,10 @@ public class PropertyWizardDialogConfigurator
 	public String getAutoPropertyName()
 	{
 		return mainProperty.getName();
+	}
+
+	public List<PropertyDescription> getOrderedProperties()
+	{
+		return orderedProperties;
 	}
 }

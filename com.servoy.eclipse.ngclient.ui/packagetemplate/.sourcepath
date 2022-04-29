@@ -1,4 +1,4 @@
 {
-"srcDir": "projects/ng2package",
+"srcDir": "project/",
 "apiFile": "src/public-api"
 }

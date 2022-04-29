@@ -23,9 +23,10 @@ import java.util.Map;
 
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -81,6 +82,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 		getTable().setToolTipText("The selected " + propertyName);
 		setContentProvider(ArrayContentProvider.getInstance());
 
+		//TODO check: should this be the prefill property?
 		if (propertiesConfig.getDataproviderProperties().size() > 0)
 		{
 			TableColumn dataproviderColumn = new TableColumn(getTable(), SWT.LEFT);
@@ -97,94 +99,15 @@ public class AutoWizardConfigurationViewer extends TableViewer
 					return row.getLeft();
 				}
 			});
-			tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
+			tableColumnLayout.setColumnData(dataproviderColumn, getColumnWeightData(null));
 		}
 
-		for (PropertyDescription dp : propertiesConfig.getDataproviderProperties())
-		{
-			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp.getName());
-			col.setToolTipText(dp.getDocumentation());
-
-			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new DataproviderCellEditor(this, this, style, dp, propertiesConfig.getDataproviderProperties()));
-			colViewer.setLabelProvider(new CentredImageCellLabelProvider()
-			{
-				@Override
-				public Image getImage(Object element)
-				{
-					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-					return row.getRight().get(dp.getName()) != null ? com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.TRUE_RADIO
-						: com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.FALSE_RADIO;
-				}
-			});
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
-		}
-
-		for (PropertyDescription dp : propertiesConfig.getStyleProperties())
-		{
-			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp.getName());
-			col.setToolTipText(dp.getDocumentation());
-
-			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new TextCellEditorSupport(this, dp, new TextCellEditor(getTable())));
-			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
-		}
-
-		for (PropertyDescription dp : propertiesConfig.getFormProperties())
-		{
-			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp.getName());
-			col.setToolTipText(dp.getDocumentation());
-
-			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(fs, false), persistContext.getContext());
-			FormCellEditorSupport editingSupport = new FormCellEditorSupport(this, dp, persistContext, formLabelProvider, fs, getTable());
-			colViewer.setEditingSupport(editingSupport);
-			colViewer.setLabelProvider(new FormColumnLabelProvider(dp, persistContext));
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(80, 150, true));
-		}
-
-		for (PropertyDescription dp : propertiesConfig.getRelationProperties())
-		{
-			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp.getName());
-			col.setToolTipText(dp.getDocumentation());
-
-			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			RelationCellEditorSupport editingSupport = new RelationCellEditorSupport(this, dp,
-				new RelationPropertyEditor(getTable(), persistContext, table, null, true, true, false), fs);
-			colViewer.setEditingSupport(editingSupport);
-			relationColumns.add(editingSupport);
-			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(80, 150, true));
-		}
-
-
-		for (PropertyDescription dp : propertiesConfig.getI18nProperties())
-		{
-			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
-			col.setText(dp.getName());
-			col.setToolTipText(dp.getDocumentation());
-
-			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			TextCellEditorSupport editingSupport = new TextCellEditorSupport(this, dp,
-				new TagsAndI18NTextCellEditor(getTable(), persistContext, fs, new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT), table,
-					"Edit title/text property", Activator.getDefault().getDesignClient(), false));
-			colViewer.setEditingSupport(editingSupport);
-			i18nColumns.add(editingSupport);
-			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
-		}
-
-		for (PropertyDescription dp : propertiesConfig.getStringProperties())
+		for (PropertyDescription dp : propertiesConfig.getOrderedProperties())
 		{
 			Object tag = dp.getTag("wizard");
 			if (tag instanceof JSONObject)
 			{
-				String prefillProperty = ((JSONObject)tag).getString("prefill");
+				String prefillProperty = ((JSONObject)tag).optString("prefill", null);
 				if (prefillProperty != null)
 				{
 					continue;
@@ -193,11 +116,10 @@ public class AutoWizardConfigurationViewer extends TableViewer
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
 			col.setText(dp.getName());
 			col.setToolTipText(dp.getDocumentation());
-
 			TableViewerColumn colViewer = new TableViewerColumn(this, col);
-			colViewer.setEditingSupport(new TextCellEditorSupport(this, dp, new TextCellEditor(getTable())));
-			colViewer.setLabelProvider(new TextColumnLabelProvider(dp));
-			tableColumnLayout.setColumnData(col, new ColumnWeightData(40, 100, true));
+			colViewer.setEditingSupport(getEditingSupport(style, dp));
+			colViewer.setLabelProvider(getLabelProvider(dp));
+			tableColumnLayout.setColumnData(col, getColumnWeightData(dp));
 		}
 
 		TableColumn delete = new TableColumn(getTable(), SWT.CENTER);
@@ -247,12 +169,69 @@ public class AutoWizardConfigurationViewer extends TableViewer
 				}
 			}
 		});
-		tableColumnLayout.setColumnData(delete, new ColumnWeightData(40, 100, true));
+		tableColumnLayout.setColumnData(delete, getColumnWeightData(null));
 	}
 
-	/**
-	 * @param table
-	 */
+	private ColumnWeightData getColumnWeightData(PropertyDescription dp)
+	{
+		if (propertiesConfig.getRelationProperties().contains(dp))
+		{
+			return new ColumnWeightData(80, 150, true);
+		}
+		return new ColumnWeightData(40, 100, true);
+	}
+
+	private CellLabelProvider getLabelProvider(PropertyDescription dp)
+	{
+		if (propertiesConfig.getDataproviderProperties().contains(dp))
+		{
+			return new CentredImageCellLabelProvider()
+			{
+				@Override
+				public Image getImage(Object element)
+				{
+					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
+					return row.getRight().get(dp.getName()) != null ? com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.TRUE_RADIO
+						: com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.FALSE_RADIO;
+				}
+			};
+		}
+		if (propertiesConfig.getFormProperties().contains(dp))
+		{
+			return new FormColumnLabelProvider(dp, persistContext);
+		}
+		return new TextColumnLabelProvider(dp);
+	}
+
+	private EditingSupport getEditingSupport(int style, PropertyDescription dp)
+	{
+		if (propertiesConfig.getDataproviderProperties().contains(dp))
+		{
+			return new DataproviderCellEditor(this, this, style, dp, propertiesConfig.getDataproviderProperties());
+		}
+		if (propertiesConfig.getFormProperties().contains(dp))
+		{
+			return new FormCellEditorSupport(this, dp, persistContext,
+				new SolutionContextDelegateLabelProvider(new FormLabelProvider(fs, false), persistContext.getContext()), fs, getTable());
+		}
+		if (propertiesConfig.getRelationProperties().contains(dp))
+		{
+			RelationCellEditorSupport editingSupport = new RelationCellEditorSupport(this, dp,
+				new RelationPropertyEditor(getTable(), persistContext, table, null, true, true, false), fs);
+			relationColumns.add(editingSupport);
+			return editingSupport;
+		}
+		if (propertiesConfig.getI18nProperties().contains(dp))
+		{
+			TextCellEditorSupport editingSupport = new TextCellEditorSupport(this, dp,
+				new TagsAndI18NTextCellEditor(getTable(), persistContext, fs, new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT), table,
+					"Edit title/text property", Activator.getDefault().getDesignClient(), false));
+			i18nColumns.add(editingSupport);
+			return editingSupport;
+		}
+		return new TextCellEditorSupport(this, dp, new TextCellEditor(getTable()));
+	}
+
 	public void setTable(ITable table)
 	{
 		this.table = table;

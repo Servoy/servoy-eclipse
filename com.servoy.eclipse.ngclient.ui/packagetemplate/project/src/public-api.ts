@@ -1,6 +1,6 @@
 /*
  * Public API Surface
  */
-export * from './ng2package.module';
+export * from './##packagename##.module';
 //export all components here
 //export * from './svygmaps/svygmaps';
