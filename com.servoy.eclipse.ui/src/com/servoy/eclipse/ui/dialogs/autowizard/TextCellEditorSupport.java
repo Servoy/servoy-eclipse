@@ -25,8 +25,6 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.j2db.util.Pair;
-
 final class TextCellEditorSupport extends EditingSupport
 {
 
@@ -55,16 +53,15 @@ final class TextCellEditorSupport extends EditingSupport
 	@Override
 	protected Object getValue(Object element)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Object value = row.getRight().get(dp.getName());
+		Map<String, Object> row = (Map<String, Object>)element;
+		Object value = row.get(dp.getName());
 		return value == null ? "" : value.toString();
 	}
 
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Map<String, Object> rowValue = row.getRight();
+		Map<String, Object> rowValue = (Map<String, Object>)element;
 		rowValue.put(dp.getName(), value);
 		getViewer().update(element, null);
 	}

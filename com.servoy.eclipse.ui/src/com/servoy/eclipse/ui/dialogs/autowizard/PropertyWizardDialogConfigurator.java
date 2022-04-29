@@ -62,6 +62,7 @@ public class PropertyWizardDialogConfigurator
 	private List<PropertyDescription> formProperties;
 	private List<PropertyDescription> relationProperties;
 	private List<PropertyDescription> orderedProperties;
+	private List<PropertyDescription> prefillProperties;
 
 
 	public PropertyWizardDialogConfigurator(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, PropertyDescription property)
@@ -87,6 +88,9 @@ public class PropertyWizardDialogConfigurator
 		formProperties = filterProperties(FormPropertyType.class);
 		relationProperties = filterProperties(RelationPropertyType.class);
 		orderedProperties = properties.stream().sorted((desc1, desc2) -> getOrder(desc1) - getOrder(desc2)).collect(Collectors.toList());
+		prefillProperties = wizardProperties.stream()
+			.filter(prop -> prop.getTag("wizard") instanceof JSONObject && ((JSONObject)prop.getTag("wizard")).optString("prefill", null) != null)
+			.collect(Collectors.toList());
 		return this;
 	}
 
@@ -198,5 +202,10 @@ public class PropertyWizardDialogConfigurator
 	public List<PropertyDescription> getOrderedProperties()
 	{
 		return orderedProperties;
+	}
+
+	public List<PropertyDescription> getPrefillProperties()
+	{
+		return prefillProperties;
 	}
 }

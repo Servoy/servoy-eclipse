@@ -29,7 +29,6 @@ import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author emera
@@ -51,8 +50,8 @@ public class RelationCellEditorSupport extends EditingSupport
 	@Override
 	protected Object getValue(Object element)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Object val = row.getRight().get(dp.getName());
+		Map<String, Object> row = (Map<String, Object>)element;
+		Object val = row.get(dp.getName());
 		if (val == null)
 		{
 			return RelationContentProvider.NONE;
@@ -76,8 +75,7 @@ public class RelationCellEditorSupport extends EditingSupport
 			relationName = relation.getName();
 		}
 
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Map<String, Object> rowValue = row.getRight();
+		Map<String, Object> rowValue = (Map<String, Object>)element;
 		rowValue.put(dp.getName(), relationName);
 		getViewer().update(element, null);
 	}

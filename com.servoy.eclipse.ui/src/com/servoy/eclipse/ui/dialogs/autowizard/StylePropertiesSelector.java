@@ -96,12 +96,11 @@ public class StylePropertiesSelector
 		Object style = ((StructuredSelection)stylePropertiesViewer.getSelection()).getFirstElement();
 		if (style instanceof JSONObject)
 		{
-			String name = ((JSONObject)style).getString("name");
 			String styleClass = ((JSONObject)style).getString("cls");
 			Map<String, Object> map = new HashMap<>();
 			PropertyDescription propertyDescription = styleProperties.get(0);
 			map.put(propertyDescription.getName(), styleClass);
-			wizard.addNewRow(name, map);
+			wizard.addNewRow(map);
 		}
 	}
 }
