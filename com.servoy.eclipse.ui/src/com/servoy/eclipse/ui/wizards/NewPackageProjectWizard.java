@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -73,7 +74,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 	private PlatformSimpleUserNode treeNode;
 	private final String packageType;
-	private final String PROJECT_NAME_TAG = "##packagename##";
+	private final static String PROJECT_NAME_TAG = "##packagename##";
 
 	public NewPackageProjectWizard()
 	{
@@ -112,6 +113,73 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		return true;
 	}
 
+
+	/**
+	 * @param newProject
+	 */
+	public static void copyAndRenameFiles(IProject project)
+	{
+		String projectName = project.getName();
+		File packageFile = new File(project.getLocation().toOSString());
+		copyAllEntries("packagetemplate", packageFile);
+		replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/ng-package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/karma.conf.js"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, projectName);
+		new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + projectName + ".module.ts"));
+		try
+		{
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		}
+		catch (CoreException e)
+		{
+			// ignore
+		}
+	}
+
+	private static void copyAllEntries(String entryPath, File packageFile)
+	{
+		Enumeration<URL> entries = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().findEntries(entryPath, "*", true);
+		while (entries.hasMoreElements())
+		{
+			URL entry = entries.nextElement();
+			String filename = entry.getFile();
+			try
+			{
+				if (!filename.endsWith("/"))
+				{
+					try (InputStream is = entry.openStream())
+					{
+						FileUtils.copyInputStreamToFile(is, new File(packageFile, filename.substring("/packagetemplate/".length())));
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.error("Error copy file " + filename + "to node folder " + packageFile, e);
+			}
+		}
+	}
+
+	private static void replaceTagInFile(File file, String tagName, String tagValue)
+	{
+		try
+		{
+			String encoding = "UTF-8";
+			String content = FileUtils.readFileToString(file, encoding);
+			content = content.replaceAll(tagName, tagValue);
+			FileUtils.writeStringToFile(file, content, encoding);
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
 	private class CreatePackageProjectJob extends WorkspaceJob
 	{
 		private final String projectName;
@@ -145,17 +213,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, displayName, projectName, version, packageType); // TODO symbolic name here instead of double projectName?
 				try
 				{
-					File packageFile = new File(newProject.getLocation().toOSString());
-					copyAllEntries("packagetemplate", packageFile);
-					replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "project/package.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "project/ng-package.json"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "project/karma.conf.js"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, this.projectName);
-					replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, this.projectName);
-					new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + this.projectName + ".module.ts"));
+					copyAndRenameFiles(newProject);
 				}
 				catch (Exception ex)
 				{
@@ -200,44 +258,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			return Status.OK_STATUS;
 		}
 
-		private void copyAllEntries(String entryPath, File packageFile)
-		{
-			Enumeration<URL> entries = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().findEntries(entryPath, "*", true);
-			while (entries.hasMoreElements())
-			{
-				URL entry = entries.nextElement();
-				String filename = entry.getFile();
-				try
-				{
-					if (!filename.endsWith("/"))
-					{
-						try (InputStream is = entry.openStream())
-						{
-							FileUtils.copyInputStreamToFile(is, new File(packageFile, filename.substring("/packagetemplate/".length())));
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					Debug.error("Error copy file " + filename + "to node folder " + packageFile, e);
-				}
-			}
-		}
-	}
-
-	private void replaceTagInFile(File file, String tagName, String tagValue)
-	{
-		try
-		{
-			String encoding = "UTF-8";
-			String content = FileUtils.readFileToString(file, encoding);
-			content = content.replaceAll(tagName, tagValue);
-			FileUtils.writeStringToFile(file, content, encoding);
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
-		}
 	}
 
 	private class NewPackageProjectPage extends WizardPage
