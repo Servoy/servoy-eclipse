@@ -1,15 +1,18 @@
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -64,6 +67,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 public class NewPackageProjectWizard extends Wizard implements INewWizard
 {
@@ -131,6 +135,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, projectName);
 		replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, projectName);
 		new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + projectName + ".module.ts"));
+		ignoreNodeModules(project);
 		try
 		{
 			project.refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -138,6 +143,41 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		catch (CoreException e)
 		{
 			// ignore
+		}
+	}
+
+	private static void ignoreNodeModules(IProject project)
+	{
+		IFile projectFile = project.getFile(".project");
+
+		String projectFileContent = null;
+		try (InputStream is = projectFile.getContents(true))
+		{
+			projectFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+			if (projectFileContent != null)
+			{
+				int startAddIndex = projectFileContent.indexOf("</projectDescription>");
+				if (startAddIndex >= 0)
+				{
+					projectFileContent = projectFileContent.replaceFirst("</projectDescription>",
+						"	<filteredResources>\n" +
+							"		<filter>\n" +
+							"			<id>1651500530696</id>\n" +
+							"			<name></name>\n" +
+							"			<type>26</type>\n" +
+							"			<matcher>\n" +
+							"				<id>org.eclipse.ui.ide.multiFilter</id>\n" +
+							"				<arguments>1.0-name-matches-false-false-node_modules</arguments>\n" +
+							"			</matcher>\n" +
+							"		</filter>\n" +
+							"	</filteredResources>\n</projectDescription>");
+				}
+				projectFile.setContents(new ByteArrayInputStream(projectFileContent.getBytes(Charset.forName("UTF8"))), true, false, null);
+			}
+		}
+		catch (IOException | CoreException e)
+		{
+			ServoyLog.logError(e);
 		}
 	}
 
