@@ -138,6 +138,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     }
 
     if (this.glasspane.style.cursor === "pointer") {
+          if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentNode && this.canDrop.beforeChild === this.dragNode.nextElementSibling) {
+            this.canDrop.dropAllowed = false; //it does not make sense to drop exactly where it is
+          }
           if (this.canDrop.dropAllowed) {
               this.renderer.setStyle(this.dragNode, 'opacity', '1');
               const frameElem = this.doc.querySelector('iframe');
