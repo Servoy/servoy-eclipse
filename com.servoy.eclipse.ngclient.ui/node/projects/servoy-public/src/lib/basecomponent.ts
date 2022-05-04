@@ -1,6 +1,18 @@
 import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
+/**
+ * This is the BaseComponent all Titanium NGClient components should be extending
+ *  It takes care of the initialization of the component by calling {@link #svyOnInit} when the component is fully constructed
+ * This will only be fully done when the main div of the component has the #element reference in the tag. So that the ViewChild of angular can be resolved.
+ * So the main div of a component should be something like: <div #element>. This will the be the element that will be returned by  {@link #getNativeElement}
+ *
+ * This base component provides the servoyApi {@link ServoyApi}, the name and also takes care of the custom attributes set in the designer.
+ *
+ * For performance reasons all compoents should be configured to use:  changeDetection: ChangeDetectionStrategy.OnPush in there Component configuration.
+ * this way component detection is only done when a push happens on the Input fields.  If you need to trigger a change detection besides that (because of timeouts or other events)
+ * call this.detectChanges()
+ */
 @Directive()
 // eslint-disable-next-line
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
@@ -19,13 +31,17 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.componentContributor = new ComponentContributor();
     }
 
-    // final method, do not override
+    /**
+     *  final method, do not override use {@link #svyOnInit} for this
+     */
     ngOnInit() {
         this.initializeComponent();
         this.servoyApi.registerComponent(this);
     }
 
-    // final method, do not override
+    /**
+     *  final method, do not override use {@link #svyOnInit} for this
+     */
     ngAfterViewInit() {
         this.initializeComponent();
         if (this.elementRef && this.changes) {
@@ -40,7 +56,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.cdRef.detectChanges();
     }
 
-    // final method, do not override
+    /**
+     *  final method, do not override use {@link #svyOnChanges} for this
+     */
     ngOnChanges(changes: SimpleChanges) {
         this.initializeComponent();
         if (!this.elementRef) {
@@ -64,12 +82,20 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         }
     }
 
+    /**
+     * Angular onDestroy hook, called when the component is removed from the dom, use to clean up stuff
+     * make sure you call super.ngOnDestroy()
+     */
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
          if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
     }
 
-    // our init event that is called when dom is ready
+    /**
+     * This method should be overwritten to get a callback when the component is initialized
+     * The template of the component must have an #element in its main tag, else this init will not resolve.
+     * make sure you call super.svyOnInit() to get the default behavior
+     */
     svyOnInit() {
         this.addAttributes();
         this.componentContributor.componentCreated(this);
@@ -77,15 +103,22 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
     }
 
-    // our change event that is called when dom is ready
+    /**
+     * The Servoy replacement of the angular ngOnChanges, this will only be called when the component is initalized.
+     *  So that you are sure that you can reference the native element through the renderer to configure it.
+     */
     svyOnChanges(_changes: SimpleChanges) {
     }
 
+    /**
+     * Call this method to trigger a change detection if something of this component is changed which didn't came directly from an @Input field change.
+     * other events like timeouts or promise resolvements could result in that the component needs to detect stuff.
+     */
     public detectChanges() {
         this.cdRef.detectChanges();
     }
     /**
-     * this should return the main native element (like the first div)
+     * this should return the main native element (like the first div) which is marked as #element in the main div.
      */
     public getNativeElement(): T {
         return this.elementRef ? this.elementRef.nativeElement : null;
@@ -93,40 +126,65 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     /**
      * sub classes can return a different native child then the default main element.
-     * used currently only for horizontal aligment
      */
     public getNativeChild(): any {
         return this.elementRef.nativeElement;
     }
 
+    /**
+     * returns the Renderer2 object which must be used to access/change the dom elements for this component
+     */
     public getRenderer(): Renderer2 {
         return this.renderer;
     }
 
+    /**
+     * returns the Renderer2 object which must be used to access/change the dom elements for this component
+     */
     public getWidth(): number {
         return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetWidth;
     }
 
+    /**
+     * returns the Renderer2 object which must be used to access/change the dom elements for this component
+     */
     public getHeight(): number {
         return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetHeight;
     }
 
+    /**
+     * returns the Renderer2 object which must be used to access/change the dom elements for this component
+     */
     public getLocationX(): number {
         return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetLeft;
     }
 
+    /**
+     * returns the Renderer2 object which must be used to access/change the dom elements for this component
+     */
     public getLocationY(): number {
         return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetTop;
     }
 
+    /**
+     * Direcives can add a {@link IViewStateListener} to this component so they are notified when the component is fully initialized
+     * so this is for directives the same event and the {@link #svyOnInit} for subcomponents.
+     * Directives needs to have a property to gain access to the component by using a attribute on the tag (besides the attribute directive itself) like [hostcomponent]="this"
+     */
     public addViewStateListener(listener: IViewStateListener) {
         this.viewStateListeners.add(listener);
     }
 
+    /**
+     * Removes the viewstatelistener
+     */
     public removeViewStateListener(listener: IViewStateListener) {
         this.viewStateListeners.delete(listener);
     }
 
+    /**
+     * @internal
+     */
     protected initializeComponent() {
         if (!this.initialized && this.elementRef) {
             this.initialized = true;
@@ -134,6 +192,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         }
     }
 
+    /**
+     * @internal
+     */
     protected addAttributes() {
         if (!this.servoyAttributes) return;
         for (const key of Object.keys(this.servoyAttributes)) {
@@ -141,11 +202,17 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         }
     }
 }
-
+/**
+ * Interface for diretives to register itself to the the ServoyBaseComponent, to get the "svyOnInit" event.
+ */
 export interface IViewStateListener {
     afterViewInit(): void;
 }
 
+/**
+ * Services can use this to inject itself this contributor and then registering a listener {@link IComponentContributorListener}
+ * then a service will get an event when a component is created over all forms.
+ */
 @Injectable()
 export class ComponentContributor {
     private static listeners: Set<IComponentContributorListener> = new Set();
@@ -159,6 +226,9 @@ export class ComponentContributor {
     }
 }
 
+/**
+ * The interface used for {@link ComponentContributor} to listen for {@link ServoyBaseComponent} creation
+ */
 export interface IComponentContributorListener {
 
     componentCreated(component: ServoyBaseComponent<any>): void;

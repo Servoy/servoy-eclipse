@@ -38,8 +38,6 @@ export class ServoyApi extends Api {
         return this.formservice.callComponentServerSideApi(this.formname, this.item.name, methodName, args);
     }
 
-    public getFormComponentElements( _propertyName: string, _formComponentValue: any ) { }
-
     public isInDesigner() {
         return this.isDesigner;
     }

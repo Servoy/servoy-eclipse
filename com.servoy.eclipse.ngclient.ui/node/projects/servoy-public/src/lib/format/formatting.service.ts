@@ -5,6 +5,9 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
 
+/**
+  * Class reflecting a Format object coming from the server (format spec property)
+  */
 export class Format {
     display: string = null;
     uppercase = false;
@@ -20,14 +23,20 @@ export class Format {
     maxLength = 0;
 }
 
-
+/**
+ * This service is able to format/parse/unformat data of different types (dates,numbers) according to the format string of the format spec property.
+ *
+ * Components can use the {@link FormatDirective} that uses this service in the component template: [svyFormat]="format" 
+ */
 @Injectable()
 export class FormattingService {
 
     constructor(private servoyService: ServoyPublicService) {
     }
 
-    // formatting stufff
+    /**
+     * format the data give with the {@link Format} object give, optionally using the display or edit format.
+     */
     public format(data: any, format: Format, useEditFormat: boolean): string {
         const formatString = useEditFormat ? format.edit : format.display;
 
@@ -52,6 +61,9 @@ export class FormattingService {
         return data;
     }
 
+    /**
+     * utility function to test if a certain key is pressed
+     */
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
         let code: number;
 
@@ -62,7 +74,9 @@ export class FormattingService {
         return code === keyCode;
     }
 
-    // test numbers only
+    /**
+     * utility function to test if only numbers ar pressed.
+     */
     public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
@@ -94,11 +108,16 @@ export class FormattingService {
         return true;
     }
 
-    // unformatting stuff
+    /**
+     * calls the { @link #unformat} function for unformatting/parsing the data given
+     */
     public parse(data: any, format: Format, useEditFormat: boolean,  currentValue?: any): any {
         return this.unformat(data, (useEditFormat &&  format.edit && !format.isMask)? format.edit : format.display, format.type, currentValue);
     }
 
+    /**
+     * unformats/parse the give data according to the given format and type 
+     */
     public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
