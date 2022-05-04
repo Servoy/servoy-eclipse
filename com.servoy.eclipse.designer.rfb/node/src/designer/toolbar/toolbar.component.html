@@ -30,12 +30,6 @@
 		</ng-container>
 	</div>
 
-	<div class="toolbar grouping" *ngIf="grouping && grouping.length > 0">
-		<ng-container *ngFor="let item of grouping">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
-	
 	<div class="toolbar zoom" *ngIf="zoom && zoom.length > 0">
 		<ng-container *ngFor="let item of zoom">
 			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>

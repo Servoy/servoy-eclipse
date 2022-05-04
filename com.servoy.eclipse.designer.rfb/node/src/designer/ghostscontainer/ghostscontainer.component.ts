@@ -123,6 +123,11 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
 
                 for (const ghost of ghostContainer.ghosts) {
+                    if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP){
+                        ghostContainer.style.display = 'none';
+                        // groups are deprecated in new designer
+                        continue;    
+                    }
                     let style = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts

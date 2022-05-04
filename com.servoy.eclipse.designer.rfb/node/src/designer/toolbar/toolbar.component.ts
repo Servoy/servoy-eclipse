@@ -20,7 +20,6 @@ export enum TOOLBAR_CATEGORIES {
     ALIGNMENT,
     DISTRIBUTION,
     SIZING,
-    GROUPING,
     ZOOM,
     ZOOM_LEVEL,
     FORM,
@@ -87,9 +86,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnDistributeVerticalCenters: ToolbarItem;
     btnDistributeUpward: ToolbarItem;
 
-    btnGroup: ToolbarItem;
-    btnUngroup: ToolbarItem;
-
     btnReload: ToolbarItem;
 
     btnClassicEditor: ToolbarItem;
@@ -103,7 +99,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     alignment: ToolbarItem[];
     distribution: ToolbarItem[];
     sizing: ToolbarItem[];
-    grouping: ToolbarItem[];
     zoom_level: ToolbarItem[];
     design_mode: ToolbarItem[];
     sticky: ToolbarItem[];
@@ -149,8 +144,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.alignment = this.getCategoryItems(TOOLBAR_CATEGORIES.ALIGNMENT);
             this.distribution = this.getCategoryItems(TOOLBAR_CATEGORIES.DISTRIBUTION);
             this.sizing = this.getCategoryItems(TOOLBAR_CATEGORIES.SIZING);
-            //TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
-            this.grouping = this.getCategoryItems(TOOLBAR_CATEGORIES.GROUPING);
 
         } else {
             this.btnPlaceField.hide = true;
@@ -918,29 +911,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
         this.add(this.btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
 
-        this.btnGroup = new ToolbarItem(
-            'Group',
-            'images/group.png',
-            false,
-            () => {
-                this.editorSession.executeAction('createGroup');
-            }
-        );
-        this.btnGroup.disabledIcon = 'images/group-disabled.png';
-
-        this.btnUngroup = new ToolbarItem(
-            'Ungroup',
-            'images/ungroup.png',
-            false,
-            () => {
-                this.editorSession.executeAction('clearGroup');
-            }
-        );
-        this.btnUngroup.disabledIcon = 'images/ungroup-disabled.png';
-
-        this.add(this.btnGroup, TOOLBAR_CATEGORIES.GROUPING);
-        this.add(this.btnUngroup, TOOLBAR_CATEGORIES.GROUPING);
-
         this.btnReload = new ToolbarItem(
             'Reload designer (use when component changes must be reflected)',
             'images/reload.png',
@@ -1059,20 +1029,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnBottomAlign.enabled = selection.length > 1;
             this.btnCenterAlign.enabled = selection.length > 1;
             this.btnMiddleAlign.enabled = selection.length > 1;
-            //TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
-            this.btnGroup.enabled = selection.length >= 2;
-            // btnUngroup.enabled = function() {
-            //at least one selected element should be a group
-            //              for (var i = 0; i < selection.length; i++)
-            //              {
-            //                  var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
-            //                  if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-            //                  {
-            //                      return true;
-            //                  }
-            //              }
-            //              return false;
-            //          }();
             this.btnBringForward.enabled = selection.length > 0;
             this.btnSendBackward.enabled = selection.length > 0;
             this.btnBringToFront.enabled = selection.length > 0;
