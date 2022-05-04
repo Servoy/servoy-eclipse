@@ -169,6 +169,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
@@ -1639,6 +1640,7 @@ public class SolutionExplorerView extends ViewPart
 	private ContextAction createActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
 	private EditWebPackageDetailsAction editWebPackageDetailsAction;
+	private WebPackageUpgradeAction upgradeComponentPackageAction;
 	private ImportZipPackageAsProjectAction importComponentAsProject;
 	private IAction importComponentInSolution;
 	private IntroViewListener introViewListener;
@@ -2764,6 +2766,7 @@ public class SolutionExplorerView extends ViewPart
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
+		if (upgradeComponentPackageAction.isEnabled()) manager.add(upgradeComponentPackageAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
@@ -3121,9 +3124,9 @@ public class SolutionExplorerView extends ViewPart
 		duplicatePersistAction = new DuplicatePersistAction(shell);
 		importComponentInSolution = new ImportZipPackageAsZipAction(this, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		importComponentAsProject = new ImportZipPackageAsProjectAction(this);
-		IAction newComponentAction = new NewWebObjectAction(this, shell, "Component", "Create new component");
-		IAction newLayoutAction = new NewWebObjectAction(this, shell, "Layout", "Create new layout");
-		IAction newServiceAction = new NewWebObjectAction(this, shell, "Service", "Create new service");
+		IAction newComponentAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_COMPONENT, "Create new component");
+		IAction newLayoutAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_LAYOUT, "Create new layout");
+		IAction newServiceAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_SERVICE, "Create new service");
 		IAction newComponentPackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create component package",
 			IPackageReader.WEB_COMPONENT);
 		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction(this, shell, "Create component package project",
@@ -3302,10 +3305,11 @@ public class SolutionExplorerView extends ViewPart
 			UserNodeType.WEB_OBJECT_FOLDER, this);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
+		upgradeComponentPackageAction = new WebPackageUpgradeAction(this, shell, "Upgrade to Titanum NGClient package", Package.IPackageReader.WEB_COMPONENT);
 
-		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
-		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
-		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
+//		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
+//		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
+//		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
 		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
@@ -3374,7 +3378,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
+//		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
@@ -3459,6 +3463,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(duplicateFormAction);
 		addTreeSelectionChangedListener(exportComponentPackage);
 		addTreeSelectionChangedListener(editWebPackageDetailsAction);
+		addTreeSelectionChangedListener(upgradeComponentPackageAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);

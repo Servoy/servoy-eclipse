@@ -1,9 +1,10 @@
-import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
     selector: '##packagename##-##componentdashname##',
-    templateUrl: './##componentname##.html'
+    templateUrl: './##componentname##.html',
+     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ##componentclassname## extends ServoyBaseComponent<HTMLDivElement>{
 
