@@ -2003,11 +2003,15 @@ public class SolutionExplorerTreeContentProvider
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
 			handleServerNode(server, serverNode);
 		}
-		for (Object node : serverNode.children)
+		if (serverNode.children != null)
 		{
-			if (node instanceof SimpleUserNode)
+			// can be null is server is disabled/invalid
+			for (Object node : serverNode.children)
 			{
-				((SimpleUserNode)node).parent = serverNode;
+				if (node instanceof SimpleUserNode)
+				{
+					((SimpleUserNode)node).parent = serverNode;
+				}
 			}
 		}
 	}
