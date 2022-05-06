@@ -165,6 +165,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return CLIENT;
 	}
 
+	@Override
+	public Object generateBrowserFunction(String functionString)
+	{
+		return functionString;
+	}
+
 	public String getClientOSName()
 	{
 		return System.getProperty("os.name");
