@@ -383,8 +383,8 @@ export class FormattingService {
             ret = numbro( data ).format( {
                 thousandSeparated: data > 999 && patchedFormat.includes( ',' ) ? true : false,
                 mantissa: rightDataMantissaLength > minLenMantissa + optionalDigitsMantissa ? minLenMantissa + optionalDigitsMantissa : rightDataMantissaLength < minLenMantissa ? minLenMantissa : rightDataMantissaLength,
-                optionalMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
-                trimMantissa: optionalDigitsMantissa !== 0,
+                optionalMantissa: minLenMantissa === 0,
+                trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
                 characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
                 optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0 
             } );
