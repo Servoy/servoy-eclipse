@@ -58,6 +58,7 @@ import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
+import org.eclipse.dltk.javascript.typeinfo.model.ArrayType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -5108,6 +5109,12 @@ public class TypeCreator extends TypeCache
 		Parameter clone = TypeInfoModelFactory.eINSTANCE.createParameter();
 		clone.setKind(parameter.getKind());
 		clone.setName(parameter.getName());
+		if (parameter.getType() instanceof ArrayType)
+		{
+			ArrayType typeRef = TypeInfoModelFactory.eINSTANCE.createArrayType();
+			typeRef.setItemType(((ArrayType)parameter.getType()).getItemType());
+			clone.setType(typeRef);
+		}
 		if (parameter.getDirectType() != null)
 		{
 			SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
