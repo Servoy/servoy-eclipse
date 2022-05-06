@@ -340,10 +340,12 @@ export class FormService {
                 }
             }
         }
-        formComponent.detectChanges();
+        this.clientFunctionService.waitForLoading().finally(() => {
+            formComponent.detectChanges();
+        });
     }
 
-    public walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
+    private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
                 const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
