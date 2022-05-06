@@ -27,7 +27,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author emera
@@ -46,8 +45,8 @@ public class FormColumnLabelProvider extends ColumnLabelProvider
 	@Override
 	public String getText(Object element)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Object value = row.getRight().get(dp.getName());
+		Map<String, Object> row = (Map<String, Object>)element;
+		Object value = row.get(dp.getName());
 		if (value != null)
 		{
 			IPersist persist = editingFlattenedSolution

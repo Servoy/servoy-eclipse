@@ -82,9 +82,5 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     setFormStyleClasses(styleclasses: { property: string }): void {
         this.formService.setFormStyleClasses(styleclasses);
     }
-
-    getCurrentRequestInfo(): any {
-        return this.websocketService.getCurrentRequestInfo();
-    }
 }
 

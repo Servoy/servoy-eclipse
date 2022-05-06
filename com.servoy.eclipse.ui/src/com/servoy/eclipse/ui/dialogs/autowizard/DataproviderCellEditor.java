@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.dialogs.autowizard;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -27,7 +28,6 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -66,15 +66,17 @@ final class DataproviderCellEditor extends EditingSupport
 	@Override
 	protected Object getValue(Object element)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		return row.getRight().get(dp.getName()) != null; //TODO check equals pd.getDefaultValue()?
+		Map<String, Object> row = (Map<String, Object>)element;
+		return row.get(dp.getName()) != null; //TODO check equals pd.getDefaultValue()?
 	}
 
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Map<String, Object> rowValue = row.getRight();
+		Map<String, Object> rowValue = (Map<String, Object>)element;
+		Optional<PropertyDescription> dpProp = dataproviderProperties.stream().filter(pd -> rowValue.get(pd.getName()) != null).findAny();
+		if (!dpProp.isPresent()) return; //should not be the case
+		Object dpValue = rowValue.get(dpProp.get().getName());
 		if (Utils.getAsBoolean(value))
 		{
 			for (PropertyDescription pd : dataproviderProperties)
@@ -85,7 +87,6 @@ final class DataproviderCellEditor extends EditingSupport
 				}
 				else
 				{
-					String dpValue = row.getLeft();
 					rowValue.put(dp.getName(), dpValue);
 				}
 			}

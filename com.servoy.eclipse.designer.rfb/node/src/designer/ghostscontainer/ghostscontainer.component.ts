@@ -123,6 +123,11 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
 
                 for (const ghost of ghostContainer.ghosts) {
+                    if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP){
+                        ghostContainer.style.display = 'none';
+                        // groups are deprecated in new designer
+                        continue;    
+                    }
                     let style = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts
@@ -233,6 +238,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.editorSession.sendChanges(obj);
             }
+            if ((this.mousedownpoint.y == event.pageY || this.mousedownpoint.x == event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                this.renderGhostsInternal(this.ghosts);
+            }
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 const frameElem = this.doc.querySelector('iframe');
                 const frameRect = frameElem.getBoundingClientRect();
@@ -311,7 +319,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
     }
 
-    selectionChanged(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean): void {
+    selectionChanged(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean): void {
         // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
         // not sure how to detect when we really need to redraw
         if (designerChange) this.renderGhosts();

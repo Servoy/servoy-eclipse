@@ -34,7 +34,6 @@ import org.sablo.specification.PropertyDescription;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -87,8 +86,7 @@ public class PropertyWizardDialog extends Dialog
 
 		if (configurator.getDataproviderProperties().size() > 0)
 		{
-			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, configurator.getDataproviderProperties(), flattenedSolution,
-				configurator.getDataproviderOptions(),
+			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, configurator, flattenedSolution,
 				table, settings, getShell());
 		}
 
@@ -120,18 +118,18 @@ public class PropertyWizardDialog extends Dialog
 		return Collections.emptyList();
 	}
 
-	void setTreeInput(List<Pair<String, Map<String, Object>>> list)
+	void setTreeInput(List<Map<String, Object>> list)
 	{
 		tableComposite.setInput(list);
 
 	}
 
-	void addNewRow(String id, Map<String, Object> row)
+	void addNewRow(Map<String, Object> row)
 	{
-		tableComposite.addNewRow(new Pair<String, Map<String, Object>>(id, row));
+		tableComposite.addNewRow(row);
 	}
 
-	public List<Pair<String, Map<String, Object>>> getInput()
+	public List<Map<String, Object>> getInput()
 	{
 		return tableComposite.getInput();
 	}

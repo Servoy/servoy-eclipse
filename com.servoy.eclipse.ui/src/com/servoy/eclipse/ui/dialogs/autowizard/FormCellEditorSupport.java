@@ -36,7 +36,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author emera
@@ -76,8 +75,8 @@ public class FormCellEditorSupport extends EditingSupport
 	@Override
 	protected Object getValue(Object value)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)value;
-		Object val = row.getRight().get(dp.getName());
+		Map<String, Object> row = (Map<String, Object>)value;
+		Object val = row.get(dp.getName());
 		IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
 			.searchPersist((String)val);
 		if (persist instanceof AbstractBase)
@@ -93,8 +92,7 @@ public class FormCellEditorSupport extends EditingSupport
 		Form frm = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
 			.getForm(((Integer)value).intValue());
 		String val = (frm == null) ? null : frm.getUUID().toString();
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Map<String, Object> rowValue = row.getRight();
+		Map<String, Object> rowValue = (Map<String, Object>)element;
 		rowValue.put(dp.getName(), val);
 		getViewer().update(element, null);
 	}

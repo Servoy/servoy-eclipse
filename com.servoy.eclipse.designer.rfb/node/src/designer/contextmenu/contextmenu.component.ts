@@ -18,8 +18,6 @@ export enum SHORTCUT_IDS {
     SEND_TO_BACK_ID = 'com.servoy.eclipse.designer.rfb.sendtoback',
     OPEN_SCRIPT_ID = 'com.servoy.eclipse.ui.OpenFormJsAction',
     OPEN_SUPER_SCRIPT_ID = 'com.servoy.eclipse.designer.rfb.openscripteditor',
-    GROUP_ID = 'com.servoy.eclipse.designer.rfb.group',
-    UNGROUP_ID = 'com.servoy.eclipse.designer.rfb.ungroup',
     OPEN_FORM_HIERARCHY_ID = 'com.servoy.eclipse.ui.OpenFormHierarchyAction'
 }
 @Component({
@@ -544,57 +542,6 @@ export class ContextMenuComponent implements OnInit {
             entry.subMenu = arrangeActions;
             this.menuItems.push(entry);
 
-
-            const groupingActions = new Array<ContextmenuItem>();
-
-            entry = new ContextmenuItem(
-                'Group',
-                () => {
-                    this.hide();
-                    this.editorSession.executeAction('createGroup');
-                }
-            );
-            entry.getIconStyle = () => {
-                return { 'background-image': 'url(designer/assets/images/group.png)' };
-            };
-            entry.shortcut = shortcuts[SHORTCUT_IDS.GROUP_ID];
-            entry.getItemClass = () => {
-                if (!this.selection || this.selection.length < 2) return 'disabled';
-            };
-            groupingActions.push(entry);
-
-            entry = new ContextmenuItem(
-                'Ungroup',
-                () => {
-                    this.hide();
-                    this.editorSession.executeAction('clearGroup');
-                }
-            );
-            entry.getIconStyle = () => {
-                return { 'background-image': 'url(designer/assets/images/ungroup.png)' };
-            };
-            entry.shortcut = shortcuts[SHORTCUT_IDS.UNGROUP_ID];
-            entry.getItemClass = () => {
-                if (!this.hasSelection()) return 'disabled';
-                for (let i = 0; i < this.selection.length; i++) {
-                    const node = this.doc.querySelector("[svy-id='" + this.selection[i] + "']")
-                    if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_GROUP) {
-                        return '';
-                    }
-                }
-                return 'disabled';
-            };
-            groupingActions.push(entry);
-
-            entry = new ContextmenuItem(
-                'Grouping',
-                null
-            );
-            entry.getItemClass = () => {
-                return 'dropdown-submenu'
-            };
-            entry.subMenu = groupingActions;
-            this.menuItems.push(entry);
         } else { //this is an Responsive Layout
             entry = new ContextmenuItem(
                 'Add',

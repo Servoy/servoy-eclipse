@@ -131,7 +131,7 @@ public class OpenPropertiesWizardHandler implements IServerService
 
 							Display.getDefault().asyncExec(() -> {
 								editorPart.getCommandStack()
-									.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns));
+									.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns, editorPart));
 							});
 						}
 						else

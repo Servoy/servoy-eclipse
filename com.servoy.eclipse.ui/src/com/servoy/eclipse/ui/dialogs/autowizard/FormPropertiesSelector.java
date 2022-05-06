@@ -122,7 +122,7 @@ public class FormPropertiesSelector
 				Relation relation = relForm.relations != null ? relForm.relations[relForm.relations.length - 1] : null;
 				map.put(relationPropertyName, relation != null ? relation.getName() : null);
 			}
-			propertyWizardDialog.addNewRow(form.getName(), map);
+			propertyWizardDialog.addNewRow(map);
 		}
 	}
 }

@@ -23,8 +23,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.j2db.util.Pair;
-
 /**
  * @author jcomp
  *
@@ -44,8 +42,8 @@ final class TextColumnLabelProvider extends ColumnLabelProvider
 	@Override
 	public String getText(Object element)
 	{
-		Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-		Object value = row.getRight().get(dp.getName());
+		Map<String, Object> row = (Map<String, Object>)element;
+		Object value = row.get(dp.getName());
 		return value == null ? "" : value.toString();
 	}
 

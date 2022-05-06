@@ -52,7 +52,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget = null;
         if (type == "layout" || (type == "component" && !this.editorSession.isAbsoluteFormLayout())) {
             const realName = layoutName ? layoutName : "component";
@@ -216,14 +216,17 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getNode(doc: Document, event: any, topContainer?: boolean, skipNodeId?): Element {
+    getNode(doc: Document, event: any, topContainer?: boolean, skipNodeId?: string): Element {
         let point = { x: event.pageX, y: event.pageY };
         let frameElem = doc.querySelector('iframe');
         let frameRect = frameElem.getBoundingClientRect();
         point.x = point.x - frameRect.left;
         point.y = point.y - frameRect.top;
-        let elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        let found = Array.from(elements).reverse().find((node) => {
+        let elements = Array.from(frameElem.contentWindow.document.querySelectorAll('[svy-id]'));
+        if (skipNodeId) {
+           elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="'+skipNodeId+'"]'));
+        }
+        let found = elements.reverse().find((node) => {
             let position = node.getBoundingClientRect();
             this.adjustElementRect(node, position);
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {

@@ -647,10 +647,16 @@ public class CreateComponentHandler implements IServerService
 											if (dialogConfigurator.open() == Window.OK)
 											{
 												List<Map<String, Object>> result = dialogConfigurator.getResult();
+												String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
 												for (int i = 0; i < result.size(); i++)
 												{
 													Map<String, Object> row = result.get(i);
-													WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, compName, i, null);
+													String customTypeName = typeName + "_" + id.incrementAndGet();
+													while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+													{
+														customTypeName = typeName + "_" + id.incrementAndGet();
+													}
+													WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, customTypeName, i, null);
 													row.forEach((key, value) -> bean.setProperty(key, value));
 												}
 											}

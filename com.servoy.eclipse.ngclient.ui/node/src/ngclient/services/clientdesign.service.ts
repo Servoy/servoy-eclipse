@@ -38,7 +38,7 @@ export class ClientDesignService {
         dragresize.isHandle = selectElement;
         dragresize.ondragfocus = (e) => {
             var jsevent = this.utils.createJSEvent(e, "ondrag");
-            this.sabloService.callService("clientdesign", "onselect", { element: dragresize.element.getAttribute("ng-reflect-name"), formname: formname, event: jsevent }).then((result) => {
+            this.sabloService.callService("clientdesign", "onselect", { element: jsevent.elementName, formname: formname, event: jsevent }).then((result) => {
                 if (!result) dragresize.deselect(true);
                 else if (dragresize.resizeHandleSet) dragresize.resizeHandleSet(dragresize.element, true);
             });
@@ -47,14 +47,14 @@ export class ClientDesignService {
             var jsevent = this.utils.createJSEvent(e, "ondrop");
             const domRect = dragresize.element.getBoundingClientRect();
             if (isResize) this.sabloService.callService("clientdesign", "onresize", {
-                element: dragresize.element.getAttribute("ng-reflect-name"),
+                element: jsevent.elementName,
                 location: { x: domRect.left, y: domRect.top },
                 size: { width: domRect.width, height: domRect.height },
                 formname: formname,
                 event: jsevent
             })
             else this.sabloService.callService("clientdesign", "ondrop", {
-                element: dragresize.element.getAttribute("ng-reflect-name"),
+                element: jsevent.elementName,
                 location: { x: domRect.left, y: domRect.top },
                 size: { width: domRect.width, height: domRect.height },
                 formname: formname,
@@ -63,15 +63,15 @@ export class ClientDesignService {
         };
         dragresize.ondragstart = (e) => {
             var jsevent = this.utils.createJSEvent(e, "ondrag");
-            this.sabloService.callService("clientdesign", "ondrag", { element: dragresize.element.getAttribute("ng-reflect-name"), formname: formname, event: jsevent })
+            this.sabloService.callService("clientdesign", "ondrag", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.ondoubleclick = (e) => {
             var jsevent = this.utils.createJSEvent(e, "ondoubleclick");
-            this.sabloService.callService("clientdesign", "ondoubleclick", { element: dragresize.element.getAttribute("ng-reflect-name"), formname: formname, event: jsevent })
+            this.sabloService.callService("clientdesign", "ondoubleclick", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.onrightclick = (e) => {
             var jsevent = this.utils.createJSEvent(e, "onrightclick");
-            this.sabloService.callService("clientdesign", "onrightclick", { element: dragresize.element.getAttribute("ng-reflect-name"), formname: formname, event: jsevent })
+            this.sabloService.callService("clientdesign", "onrightclick", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
 
         dragresize.apply(x);

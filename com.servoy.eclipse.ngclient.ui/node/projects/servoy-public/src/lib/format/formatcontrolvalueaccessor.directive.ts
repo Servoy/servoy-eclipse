@@ -27,6 +27,13 @@ class NumberParser {
   }
 }
 
+/**
+  * This is the format directive [svyFormat]="format" that can format the dataprovider value in a input field and parse the value back when the user changes the value.
+  * this is an Angular  ControlValueAccessor  that sits between the angular component ( {@link ServoyBaseComponent } and the dom element, it writes the formatted value to the dom 
+  * and parses and pushes the parsed value back into the component.
+  *
+  * it uses the {@link FormattingService} for this. 
+  */
 @Directive({
 
     // eslint-disable-next-line @angular-eslint/directive-selector

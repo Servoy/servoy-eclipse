@@ -13,7 +13,7 @@ import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } f
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
-import {AbstractFormComponent} from '../ngclient/form/form_component.component';
+import { AbstractFormComponent } from '../ngclient/form/form_component.component';
 
 @Component({
     // eslint-disable-next-line
@@ -117,7 +117,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
-    private designMode : boolean;
+    private designMode: boolean;
     private maxLevel = 3;
     private dropHighlight: string = null;
     private dropHighlightIgnoredIds: Array<string> = null;
@@ -129,22 +129,22 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         private el: ElementRef, protected renderer: Renderer2,
         @Inject(DOCUMENT) private document: Document,
         private windowRefService: WindowRefService) {
-             super(renderer);
+        super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         this.windowRefService.nativeWindow.addEventListener("message", (event) => {
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
-                const model = {width: elWidth + 'px', height: elHeight + 'px'};
-                model['top'] =  '-200px';
-                model['left'] =   '-200px';
-                const model_inserted = {width: elWidth + 'px', height: elHeight + 'px'};
+                const model = { width: elWidth + 'px', height: elHeight + 'px' };
+                model['top'] = '-200px';
+                model['left'] = '-200px';
+                const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
                     this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
                     this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
                     if (event.data.children) {
-                        event.data.children.forEach(child =>  {
+                        event.data.children.forEach(child => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                             (this.insertedClone as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                         });
@@ -157,48 +157,48 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = true;
             }
             if (event.data.id === 'createDraggedComponent') {
-                this.insertedClone =  this.formCache.getLayoutContainer(event.data.uuid);
+                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
                 if (this.insertedClone) {
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone = new  StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
+                        this.insertedClone = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
                         parent.addChild(this.insertedClone);
                     }
-                  this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, Object.assign({}, this.insertedClone.attributes), this.insertedClone.items);
-                  this.draggedElementItem.attributes['svy-id'] = 'clone';
-                  
-                }  else {
+                    this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, Object.assign({}, this.insertedClone.attributes), this.insertedClone.items);
+                    this.draggedElementItem.attributes['svy-id'] = 'clone';
+
+                } else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone =  new ComponentCache(this.insertedClone.name+'clone', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers,
-                                this.insertedClone.layout);
+                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers,
+                            this.insertedClone.layout);
                         parent.addChild(this.insertedClone);
                     }
-                   this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
+                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
             if (event.data.id === 'insertDraggedComponent') {
-                if (this.insertedCloneParent)   this.insertedCloneParent.removeChild(this.insertedClone);
+                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
                 let beforeChild = null;
-                if(event.data.insertBefore) {
-                   beforeChild =  this.formCache.getComponent(event.data.insertBefore);
-                   if (beforeChild == null) beforeChild =  this.formCache.getLayoutContainer(event.data.insertBefore);
+                if (event.data.insertBefore) {
+                    beforeChild = this.formCache.getComponent(event.data.insertBefore);
+                    if (beforeChild == null) beforeChild = this.formCache.getLayoutContainer(event.data.insertBefore);
                 }
 
-                if (event.data.dropTarget ) {
+                if (event.data.dropTarget) {
                     this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
                 }
                 else {
                     if (this.formCache.mainStructure == null) {
                         this.formCache.mainStructure = new StructureCache(null, null);
                     }
-                    if (this.insertedCloneParent !==  this.formCache.mainStructure) {
-                        this.insertedCloneParent =  this.formCache.mainStructure;
+                    if (this.insertedCloneParent !== this.formCache.mainStructure) {
+                        this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
                 this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
@@ -212,25 +212,27 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedCloneParent.addChild(this.insertedClone, event.data.insertBefore);
             }
             if (event.data.id === 'destroyElement') {
-                this.draggedElementItem = null;
-                if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
-                this.insertedCloneParent = null;
-                this.insertedClone = null;
-                this.showWireframe = this.designMode;
+                if (this.draggedElementItem || this.insertedCloneParent || this.insertedClone) {
+                    this.draggedElementItem = null;
+                    if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                    this.insertedCloneParent = null;
+                    this.insertedClone = null;
+                    this.showWireframe = this.designMode;
+                }
             }
             if (event.data.id === 'showWireframe') {
                 const changed = this.showWireframe != event.data.value;
                 this.showWireframe = event.data.value;
-                if (changed){
-                     this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
-                } 
+                if (changed) {
+                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                }
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value);
             }
             if (event.data.id === 'dropHighlight') {
                 this.dropHighlight = event.data.value ? event.data.value.dropHighlight : null;
-                this.dropHighlightIgnoredIds =  event.data.value ? event.data.value.dropHighlightIgnoredIds : null;
+                this.dropHighlightIgnoredIds = event.data.value ? event.data.value.dropHighlightIgnoredIds : null;
             }
             if (event.data.id == 'allowedChildren') {
                 this.allowedChildren = event.data.value;
@@ -289,7 +291,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : ( item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
+            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
         } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
@@ -327,7 +329,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.absolutFormPosition['bottom'] = '0px';
         this.absolutFormPosition['position'] = 'absolute';
         this.absolutFormPosition['overflow'] = 'hidden';
-  
+
         if (formData.model.borderType) {
             const borderStyle = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
@@ -378,19 +380,19 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return api;
     }
 
-  getNGClass(item: StructureCache) : { [klass: string]: any; } {
-      const  ngclass = {};
-      ngclass[item.attributes.designclass] = this.showWireframe;
-      ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
-      const children = item.items.length;
-      if (children > 0 && children < 10)  {
-          ngclass['containerChildren'+children] = this.showWireframe && item.getDepth()  === this.maxLevel;
-      }
-      if (children >= 10)  {
-          ngclass['containerChildren10'] = this.showWireframe && item.getDepth()  === this.maxLevel;
-      }
-      ngclass['drop_highlight']  = this.canContainDraggedElement(item.attributes['svy-layoutname'], item.attributes['svy-id']);
-      return ngclass;
+    getNGClass(item: StructureCache): { [klass: string]: any; } {
+        const ngclass = {};
+        ngclass[item.attributes.designclass] = this.showWireframe;
+        ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
+        const children = item.items.length;
+        if (children > 0 && children < 10) {
+            ngclass['containerChildren' + children] = this.showWireframe && item.getDepth() === this.maxLevel;
+        }
+        if (children >= 10) {
+            ngclass['containerChildren10'] = this.showWireframe && item.getDepth() === this.maxLevel;
+        }
+        ngclass['drop_highlight'] = this.canContainDraggedElement(item.attributes['svy-layoutname'], item.attributes['svy-id']);
+        return ngclass;
     }
 
     public callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
@@ -400,23 +402,23 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     getContainerByName(containername: string): Element {
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
-    
-    private canContainDraggedElement(container: string, svyid : string): boolean {
+
+    private canContainDraggedElement(container: string, svyid: string): boolean {
         if (this.dropHighlight === null) return false;
         if (this.dropHighlightIgnoredIds && svyid && this.dropHighlightIgnoredIds.indexOf(svyid) >= 0) return false;
         const drop = this.dropHighlight.split(".");
         const allowedChildren = this.allowedChildren[container];
         if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
-        
-        for (const layout in allowedChildren){
-          const a = allowedChildren[layout].split(".");
-          if(a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+
+        for (const layout in allowedChildren) {
+            const a = allowedChildren[layout].split(".");
+            if (a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
         }
         return false;
     }
-    
-    updateFormStyleClasses(ngutilsstyleclasses : string) : void{
-    
+
+    updateFormStyleClasses(ngutilsstyleclasses: string): void {
+
     }
 }
 
@@ -437,22 +439,22 @@ class FormComponentDesignServoyApi extends ServoyApi {
     unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
     }
-    
-    public formWillShow( formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
+
+    public formWillShow(formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
         return new Promise<any>(resolve => {
             resolve(true);
         })
     }
-    
-    public hideForm( formname: string, relationname?: string, formIndex?: number,
-                        formNameThatWillShow?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number ): Promise<boolean> {
+
+    public hideForm(formname: string, relationname?: string, formIndex?: number,
+        formNameThatWillShow?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number): Promise<boolean> {
         return new Promise<any>(resolve => {
             resolve(true);
         });
     }
 
 
-    public apply( propertyName: string, value: any ) {
+    public apply(propertyName: string, value: any) {
         // noop
     }
 }

@@ -44,6 +44,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.framework.Bundle;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -62,16 +63,14 @@ import com.servoy.j2db.util.Utils;
  */
 public class NewWebObjectAction extends Action
 {
-
-	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 	private final Shell shell;
 	private final SolutionExplorerView viewer;
 	private final String type;
 
-	private final String COMPONENT_NAME_TAG = "##componentname##";
-	private final String COMPONENT_DASH_NAME_TAG = "##componentdashname##";
-	private final String COMPONENT_CLASSNAME_TAG = "##componentclassname##";
-	private final String PACKAGE_NAME_TAG = "##packagename##";
+	private static final String COMPONENT_NAME_TAG = "##componentname##";
+	private static final String COMPONENT_DASH_NAME_TAG = "##componentdashname##";
+	private static final String COMPONENT_CLASSNAME_TAG = "##componentclassname##";
+	private static final String PACKAGE_NAME_TAG = "##packagename##";
 
 	public NewWebObjectAction(SolutionExplorerView viewer, Shell shell, String type, String text)
 	{
@@ -129,7 +128,7 @@ public class NewWebObjectAction extends Action
 		return true;
 	}
 
-	void createComponentOrService(IResource packageRoot, final String elementType, final String componentOrServiceName, SimpleUserNode parentNode)
+	public void createComponentOrService(IResource packageRoot, final String elementType, final String componentOrServiceName, SimpleUserNode parentNode)
 	{
 		if (!(packageRoot instanceof IFolder) && !(packageRoot instanceof IProject)) return;
 		IFolder folder = null;
@@ -156,22 +155,25 @@ public class NewWebObjectAction extends Action
 			String moduleName = packageRoot.getName() + componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
-			if (elementType.equals("Component"))
+			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
+			if (elementType.equals(IPackageReader.WEB_COMPONENT))
 			{
-				in = uiActivator.getBundle().getEntry("/component-templates/component.html").openStream();
+				in = bundle.getEntry("/component-templates/web-component.html").openStream();
 				createFile(componentOrServiceName + ".html", folder, in);
 				in.close();
 			}
-			if (!elementType.equals("Layout"))
+			if (!elementType.equals(IPackageReader.WEB_LAYOUT))
 			{
-				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".js").openStream();
+				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
+					.openStream();
 				String text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
 				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
-				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
+				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".spec")
+					.openStream();
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName); // IMPORTANT service name from service.spec template should always be built of packagename dash name so that WebObjectSpecification.scriptifyNameIfNeeded() can get the "moduleName" or scripting name out of that
@@ -182,11 +184,13 @@ public class NewWebObjectAction extends Action
 			}
 			else
 			{
-				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".json").openStream();
+				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".json")
+					.openStream();
 				String text = IOUtils.toString(in, "UTF-8");
 				createFile(componentOrServiceName + ".json", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
-				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
+				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".spec")
+					.openStream();
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
@@ -253,7 +257,7 @@ public class NewWebObjectAction extends Action
 		EditorUtil.openFileEditor(file);
 	}
 
-	private void addNG2Code(String componentOrServiceName, String elementType, IResource packageRoot)
+	public static void addNG2Code(String componentOrServiceName, String elementType, IResource packageRoot)
 	{
 		try
 		{
@@ -261,16 +265,17 @@ public class NewWebObjectAction extends Action
 			File compDirectory = new File(packageRoot.getLocation().toOSString(), "project/src/");
 			String className = componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 			String charset = "UTF-8";
-			if (elementType.equals("Component"))
+			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
+			if (elementType.equals(IPackageReader.WEB_COMPONENT))
 			{
 				compDirectory = new File(compDirectory, componentOrServiceName);
 				FileUtils.forceMkdir(compDirectory);
 
-				URL url = uiActivator.getBundle().getEntry("/component-templates/componentng2.html");
+				URL url = bundle.getEntry("/component-templates/componentng2.html");
 				String bundleContent = Utils.getURLContent(url);
 				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".html"), bundleContent, charset);
 
-				url = uiActivator.getBundle().getEntry("/component-templates/component.ts");
+				url = bundle.getEntry("/component-templates/component.ts");
 				bundleContent = Utils.getURLContent(url);
 				bundleContent = bundleContent.replaceAll(PACKAGE_NAME_TAG, packageRoot.getName());
 				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
@@ -279,7 +284,7 @@ public class NewWebObjectAction extends Action
 					className);
 				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".ts"), bundleContent, charset);
 
-				url = uiActivator.getBundle().getEntry("/component-templates/component.spec.ts");
+				url = bundle.getEntry("/component-templates/component.spec.ts");
 				bundleContent = Utils.getURLContent(url);
 				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
 				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG, className);
@@ -312,9 +317,9 @@ public class NewWebObjectAction extends Action
 					moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
 				}
 			}
-			if (elementType.equals("Service"))
+			if (elementType.equals(IPackageReader.WEB_SERVICE))
 			{
-				URL url = uiActivator.getBundle().getEntry("/component-templates/service.ts");
+				URL url = bundle.getEntry("/component-templates/service.ts");
 				String bundleContent = Utils.getURLContent(url);
 				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
 				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".service.ts"), bundleContent, charset);
@@ -353,14 +358,14 @@ public class NewWebObjectAction extends Action
 		}
 	}
 
-	private String addToModuleFileContent(String moduleFileContent, String property, String className)
+	private static String addToModuleFileContent(String moduleFileContent, String property, String className)
 	{
 		int index = moduleFileContent.indexOf(property);
 		int startIndex = moduleFileContent.indexOf("[", index);
 		return moduleFileContent.substring(0, startIndex + 1) + "\n\t\t" + className + "," + moduleFileContent.substring(startIndex + 1);
 	}
 
-	private void modifyBuildFile(IResource packageRoot, String componentOrServiceName, String charset) throws CoreException, UnsupportedEncodingException
+	private static void modifyBuildFile(IResource packageRoot, String componentOrServiceName, String charset) throws CoreException, UnsupportedEncodingException
 	{
 		IFile buildFile = null;
 		if (packageRoot instanceof IFolder) buildFile = ((IFolder)packageRoot).getFile("scripts/build.js");
@@ -403,7 +408,7 @@ public class NewWebObjectAction extends Action
 		{
 			Manifest manifest = new Manifest(contents);
 			Attributes attr = new Attributes();
-			attr.put(new Attributes.Name("Web-" + elementType), "True");
+			attr.put(new Attributes.Name(elementType), "True");
 			manifest.getEntries().put(componentOrServiceName + "/" + componentOrServiceName + ".spec", attr);
 			out = new ByteArrayOutputStream();
 			manifest.write(out);

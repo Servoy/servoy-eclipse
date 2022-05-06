@@ -152,7 +152,7 @@ export class PaletteComponent {
                         component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
                     }
                 }
-                else {
+                else if (!this.dragItem.ghost){
                     frameElem.contentWindow.postMessage({ id: 'destroyElement' }, '*');
                     return;
                 }
@@ -164,7 +164,8 @@ export class PaletteComponent {
                     const position = node.getBoundingClientRect();
                     this.designerUtilsService.adjustElementRect(node, position);
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
-                        if (node.getAttribute('svy-types').split(',').indexOf(this.dragItem.ghost.type) >= 0) {
+                        const types = node.getAttribute('svy-types');
+                        if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
                             return node;
                         }
                     }
@@ -247,7 +248,8 @@ export class PaletteComponent {
                         const position = node.getBoundingClientRect();
                         this.designerUtilsService.adjustElementRect(node, position);
                         if (position.x <= x && position.x + position.width >= x && position.y <= y && position.y + position.height >= y) {
-                            if (node.getAttribute('svy-types').split(',').indexOf(this.dragItem.ghost.type) >= 0) {
+                            const types = node.getAttribute('svy-types');
+                            if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
                                 return node;
                             }
                         }

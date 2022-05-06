@@ -79,9 +79,5 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
 
     setFormStyleClasses(styleclasses: { property: string }): void {
     }
-
-    public getCurrentRequestInfo() {
-        return null;
-    }
 }
 

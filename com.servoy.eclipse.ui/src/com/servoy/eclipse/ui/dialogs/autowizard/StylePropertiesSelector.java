@@ -48,7 +48,8 @@ public class StylePropertiesSelector
 		this.wizard = wizard;
 		this.styleProperties = styleProperties;
 
-		Object tag = styleProperties.get(0).getTag("wizard");
+		Object config = styleProperties.get(0).getTag("wizard");
+		Object tag = config instanceof JSONObject ? ((JSONObject)config).optJSONArray("values") : config;
 		if (tag instanceof JSONArray)
 		{
 			GridLayout layout = new GridLayout(1, false);
@@ -95,12 +96,11 @@ public class StylePropertiesSelector
 		Object style = ((StructuredSelection)stylePropertiesViewer.getSelection()).getFirstElement();
 		if (style instanceof JSONObject)
 		{
-			String name = ((JSONObject)style).getString("name");
 			String styleClass = ((JSONObject)style).getString("cls");
 			Map<String, Object> map = new HashMap<>();
 			PropertyDescription propertyDescription = styleProperties.get(0);
 			map.put(propertyDescription.getName(), styleClass);
-			wizard.addNewRow(name, map);
+			wizard.addNewRow(map);
 		}
 	}
 }

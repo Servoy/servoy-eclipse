@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.Activator;
@@ -52,7 +51,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.RelationPropertyController.RelationPropertyEditor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author emera
@@ -82,7 +80,6 @@ public class AutoWizardConfigurationViewer extends TableViewer
 		getTable().setToolTipText("The selected " + propertyName);
 		setContentProvider(ArrayContentProvider.getInstance());
 
-		//TODO check: should this be the prefill property?
 		if (propertiesConfig.getDataproviderProperties().size() > 0)
 		{
 			TableColumn dataproviderColumn = new TableColumn(getTable(), SWT.LEFT);
@@ -95,8 +92,12 @@ public class AutoWizardConfigurationViewer extends TableViewer
 				@Override
 				public String getText(Object element)
 				{
-					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-					return row.getLeft();
+					Map<String, Object> row = (Map<String, Object>)element;
+					for (PropertyDescription pd : propertiesConfig.getDataproviderProperties())
+					{
+						if (row.get(pd.getName()) != null) return (String)row.get(pd.getName());
+					}
+					return "";
 				}
 			});
 			tableColumnLayout.setColumnData(dataproviderColumn, getColumnWeightData(null));
@@ -104,14 +105,9 @@ public class AutoWizardConfigurationViewer extends TableViewer
 
 		for (PropertyDescription dp : propertiesConfig.getOrderedProperties())
 		{
-			Object tag = dp.getTag("wizard");
-			if (tag instanceof JSONObject)
+			if (propertiesConfig.getPrefillProperties().contains(dp))
 			{
-				String prefillProperty = ((JSONObject)tag).optString("prefill", null);
-				if (prefillProperty != null)
-				{
-					continue;
-				}
+				continue;
 			}
 			TableColumn col = new TableColumn(getTable(), SWT.CENTER);
 			col.setText(dp.getName());
@@ -153,7 +149,7 @@ public class AutoWizardConfigurationViewer extends TableViewer
 						{
 							if (i == getTable().getColumnCount() - 1)
 							{
-								List<Pair<String, Map<String, Object>>> input = (List<Pair<String, Map<String, Object>>>)getInput();
+								List<Map<String, Object>> input = (List<Map<String, Object>>)getInput();
 								input.remove(index);
 								refresh();
 							}
@@ -190,8 +186,8 @@ public class AutoWizardConfigurationViewer extends TableViewer
 				@Override
 				public Image getImage(Object element)
 				{
-					Pair<String, Map<String, Object>> row = (Pair<String, Map<String, Object>>)element;
-					return row.getRight().get(dp.getName()) != null ? com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.TRUE_RADIO
+					Map<String, Object> row = (Map<String, Object>)element;
+					return row.get(dp.getName()) != null ? com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.TRUE_RADIO
 						: com.servoy.eclipse.ui.editors.table.ColumnLabelProvider.FALSE_RADIO;
 				}
 			};

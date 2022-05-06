@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,7 +45,6 @@ import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -72,20 +72,16 @@ public class DataproviderPropertiesSelector
 	private PersistContext persistContext;
 	private PropertyWizardDialog wizard;
 	private List<PropertyDescription> dataproviderProperties;
-	private FlattenedSolution flattenedSolution;
-	private final IDialogSettings settings;
 	private Shell shell;
 
 	DataproviderPropertiesSelector(PropertyWizardDialog wizard, final SashForm form, PersistContext persistContext,
-		List<PropertyDescription> dataproviderProperties,
-		FlattenedSolution flattenedSolution, DataProviderOptions dataproviderOptions, ITable table, IDialogSettings settings, Shell shell)
+		PropertyWizardDialogConfigurator configurator,
+		FlattenedSolution flattenedSolution, ITable table, IDialogSettings settings, Shell shell)
 	{
 		converter = new FoundsetDesignToChooserConverter(flattenedSolution);
 		this.persistContext = persistContext;
-		this.dataproviderProperties = dataproviderProperties;
-		this.flattenedSolution = flattenedSolution;
+		this.dataproviderProperties = configurator.getDataproviderProperties();
 		this.wizard = wizard;
-		this.settings = settings;
 		this.shell = shell;
 
 		Composite parent = new Composite(form, SWT.NONE);
@@ -139,7 +135,7 @@ public class DataproviderPropertiesSelector
 			lastDatasourceValue = getTableWrapper();
 		}
 		dataproviderTreeViewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
-			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
+			new DataProviderContentProvider(persistContext, flattenedSolution, table), configurator.getDataproviderOptions(), true, true,
 			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
@@ -219,7 +215,7 @@ public class DataproviderPropertiesSelector
 		IDataProvider dataprovider = (IDataProvider)((StructuredSelection)dataproviderTreeViewer.getSelection()).getFirstElement();
 		if (dataprovider != null)
 		{
-			wizard.addNewRow(dataprovider.getDataProviderID(), getDefaultRow(dataprovider.getDataProviderID()));
+			wizard.addNewRow(getDefaultRow(dataprovider.getDataProviderID()));
 		}
 	}
 

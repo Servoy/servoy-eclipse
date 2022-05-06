@@ -183,9 +183,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseUp(event: MouseEvent) {
-        if (this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY){
+        if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY){
             this.editorSession.updateFieldPositioner({ x: event.pageX + this.content.scrollLeft - this.contentRect.left - this.leftAdjust, y: event.pageY + this.content.scrollTop - this.contentRect.top - this.topAdjust });
         }
+        this.fieldLocation = null;
         if (this.editorSession.getState().dragging) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection

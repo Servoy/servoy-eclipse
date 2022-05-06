@@ -20,9 +20,16 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.WebComponent;
@@ -38,15 +45,18 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 	private final String propertyName;
 	private final PersistContext persistContext;
 	private final List<Map<String, Object>> result;
+	private final BaseVisualFormEditor editorPart;
+	private final AtomicInteger id = new AtomicInteger();
 
 	public SetCustomArrayPropertiesCommand(String propertyName,
-		PersistContext persistContext, List<Map<String, Object>> result, Set<Object> previousItemsUUIDS)
+		PersistContext persistContext, List<Map<String, Object>> result, Set<Object> previousItemsUUIDS, BaseVisualFormEditor editorPart)
 	{
 		super("setCustomArrayProperties");
 		this.previousItemsUUIDS = previousItemsUUIDS;
 		this.propertyName = propertyName;
 		this.persistContext = persistContext;
 		this.result = result;
+		this.editorPart = editorPart;
 	}
 
 	@Override
@@ -54,6 +64,11 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 	{
 		WebComponent webComponent = (WebComponent)persistContext.getPersist();
 		saveState(webComponent);
+
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponent.getTypeName());
+		PropertyDescription targetPD = spec.getProperty(propertyName);
+		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
+
 		for (int i = 0; i < result.size(); i++)
 		{
 			Map<String, Object> row = result.get(i);
@@ -61,7 +76,12 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 			Object uuid = row.get("svyUUID");
 			if (uuid == null)
 			{
-				customType = AddContainerCommand.addCustomType(webComponent, propertyName, webComponent.getName(), i, null);
+				String name = typeName + "_" + id.incrementAndGet();
+				while (!PersistFinder.INSTANCE.checkName(editorPart, name))
+				{
+					name = typeName + "_" + id.incrementAndGet();
+				}
+				customType = AddContainerCommand.addCustomType(webComponent, propertyName, name, i, null);
 			}
 			else
 			{
