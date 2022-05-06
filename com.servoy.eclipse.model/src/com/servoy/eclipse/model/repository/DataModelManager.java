@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.model.repository;
 
-import static com.servoy.j2db.util.DatabaseUtils.deserializeServerSettings;
+import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -583,7 +583,7 @@ public class DataModelManager implements IColumnInfoManager
 			try (InputStream is = dbiFile.getContents(true))
 			{
 				String json = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-				return deserializeServerSettings(json);
+				return deserializeServerInfo(serverName, json).serverSettings;
 			}
 			catch (Exception e)
 			{

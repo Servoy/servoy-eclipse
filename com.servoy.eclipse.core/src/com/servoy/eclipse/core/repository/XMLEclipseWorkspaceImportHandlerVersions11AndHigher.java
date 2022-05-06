@@ -89,6 +89,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.DBIDefinition;
 import com.servoy.j2db.util.xmlxport.GroupInfo;
 import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
@@ -883,10 +884,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 			WorkspaceFileAccess ws = new WorkspaceFileAccess(ServoyModel.getWorkspace());
 
-			for (Entry<String, String> entry : importInfo.datasourcesMap.entrySet())
+			for (Entry<String, DBIDefinition> entry : importInfo.datasourcesMap.entrySet())
 			{
 				String dataSource = entry.getKey();
-				String dbiFileContents = entry.getValue();
+				DBIDefinition dbiDefinition = entry.getValue();
 
 				String[] server_table = DataSourceUtils.getDBServernameTablename(dataSource);
 				String serverName = server_table[0];
@@ -904,13 +905,16 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					dbiFile = dmm.getDBIFile(serverName, tableName);
 				}
 
-				try
+				if (dbiDefinition.getDbiFileContents() != null)
 				{
-					ws.setUTF8Contents(dbiFile.getFullPath().toString(), dbiFileContents);
-				}
-				catch (IOException e)
-				{
-					ServoyLog.logError("Cannot save datasource dbi file", e);
+					try
+					{
+						ws.setUTF8Contents(dbiFile.getFullPath().toString(), dbiDefinition.getDbiFileContents());
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError("Cannot save datasource dbi file", e);
+					}
 				}
 			}
 		}
