@@ -677,7 +677,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if(this.rowStyleClass) {
             rowClasses += ' ' + this.rowStyleClass;
         }
-        if(this.rowStyleClassDataprovider) {
+        if(this.rowStyleClassDataprovider && this.rowStyleClassDataprovider[index]) {
             rowClasses += ' ' + this.rowStyleClassDataprovider[index];
         }
         return rowClasses;
