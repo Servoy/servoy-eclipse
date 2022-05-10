@@ -85,10 +85,11 @@ public class ExportPage extends WizardPage
 	private Text updateUrlText;
 	private Text emailAddress;
 	private Button storeBtn;
+	private Label deprecatedLabel;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
+	private final String versionsUrl = "https://download.servoy.com/ngdesktop/ngdesktop-versions-2022.03.txt";
 	private final String FIRST_VERSION_THAT_SUPPORTS_UPDATES = "2020.12";
 	private List<String> remoteVersions = new ArrayList<String>();
 
@@ -287,13 +288,18 @@ public class ExportPage extends WizardPage
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
+		srcVersionCombo.setToolTipText("NG Desktop version");
 		remoteVersions = getAvailableVersions();
 		srcVersionCombo.add("latest");
+
+		deprecatedLabel = new Label(versionGroup, SWT.NONE);
+		deprecatedLabel.setText("Deprecated: will be removed in the next release");
+		deprecatedLabel.setVisible(false);
 
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
 		});
-		srcVersionCombo.select(getVersionIndex() + 1);
+
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -302,6 +308,9 @@ public class ExportPage extends WizardPage
 				srcVersionListener(event);
 			}
 		});
+
+		srcVersionCombo.select(getVersionIndex() + 1);
+
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
 		GridDataFactory.swtDefaults()//
@@ -407,6 +416,12 @@ public class ExportPage extends WizardPage
 	{
 		setIncludeUpdateState();
 		updateUrlText.setEnabled(isUpdatableVersion());
+		deprecatedLabel.setVisible(isDeprecatedVersion());
+	}
+
+	private boolean isDeprecatedVersion()
+	{
+		return srcVersionCombo.getText().startsWith("*");
 	}
 
 	private List<String> getAvailableVersions()
@@ -430,7 +445,10 @@ public class ExportPage extends WizardPage
 						final String devVersion = ClientVersion.getMajorVersion() + "." + ClientVersion.getMiddleVersion();
 						if (SemVerComparator.compare(devVersion, servoyVersion) < 0)
 							return;
-						result.add(((JSONObject)item).getString("ngDesktopVersion"));
+						final String status = ((JSONObject)item).getString("status");
+						String version = ((JSONObject)item).getString("ngDesktopVersion");
+						if ("deprecated".equals(status)) version = "* " + version;
+						result.add(version);
 					});
 					if (result.size() > 0)
 					{
@@ -568,12 +586,15 @@ public class ExportPage extends WizardPage
 
 	public void saveState()
 	{
+		String ngdesktop_version = srcVersionCombo.getText();
+		if (ngdesktop_version.startsWith("*")) ngdesktop_version = ngdesktop_version.substring(1).trim();
+
 		final IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
 		settings.put("app_url", applicationUrlText.getText().trim());
-		settings.put("ngdesktop_version", srcVersionCombo.getText());
+		settings.put("ngdesktop_version", ngdesktop_version);
 		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
 		settings.put("icon_path", iconPath.getText().trim());
 		settings.put("image_path", imgPath.getText().trim());
