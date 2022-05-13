@@ -209,6 +209,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-scroll') !== -1;
         if(this.useScrolling) {
+            if(!this.containedForm.absoluteLayout) {
+                this.log.error('ListFormComponent ' + this.name + ' can not be used in scrolling mode because its containedForm is a responsive form');
+                return;
+            }
             this.agGridOptions = {
                 context: {
                     componentParent: this
@@ -619,9 +623,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.numberOfCells = 1;
             return;
         }
-        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
+        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
-            if (this.servoyApi.isInAbsoluteLayout()) {
+            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout) {
                 const parentWidth = this.elementRef.nativeElement.offsetWidth;
                 const parentHeight = this.elementRef.nativeElement.offsetHeight;
                 const height = this.containedForm.getStateHolder().formHeight;
@@ -632,7 +636,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 // always just render 1
                 if (this.numberOfCells < 1) this.numberOfCells = 1;
             } else {
-                this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                if(!this.servoyApi.isInAbsoluteLayout()) {
+                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                } else if(!this.containedForm.absoluteLayout) {
+                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
+                }
             }
 
         }
@@ -677,7 +685,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if(this.rowStyleClass) {
             rowClasses += ' ' + this.rowStyleClass;
         }
-        if(this.rowStyleClassDataprovider) {
+        if(this.rowStyleClassDataprovider && this.rowStyleClassDataprovider[index]) {
             rowClasses += ' ' + this.rowStyleClassDataprovider[index];
         }
         return rowClasses;

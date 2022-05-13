@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
 export interface ICustomLoadingIndicator {
@@ -19,14 +19,14 @@ export class LoadingIndicatorService {
     private timeoutShow = null;
     private timeoutHide = null;
 
-    constructor(private logFactory: LoggerFactory ) {
+    constructor(logFactory: LoggerFactory ) {
        this.customLoadingIndicator = null;
        this.log = logFactory.getLogger('LoadingIndicatorService');
     }
 
     public showLoading() {
         this.showCounter++;
-        if (this.showCounter == 1) {
+        if (this.showCounter === 1) {
             if (this.timeoutHide) {
                 clearTimeout(this.timeoutHide);
                 this.timeoutHide = null;
@@ -45,7 +45,7 @@ export class LoadingIndicatorService {
 
     public hideLoading() {
         this.showCounter--;
-        if (this.showCounter == 0) {
+        if (this.showCounter === 0) {
             this.timeoutHide = setTimeout(() => {
                 this.timeoutHide = null;
                 if (this.timeoutShow) {
@@ -65,6 +65,7 @@ export class LoadingIndicatorService {
     }
 
     public setCustomLoadingIndicator(customLoadingIndicator: ICustomLoadingIndicator) {
+        // eslint-disable-next-line eqeqeq
         if (customLoadingIndicator.hideLoading == undefined || customLoadingIndicator.showLoading == undefined) {
             this.log.warn(this.log.buildMessage(() => ('a custom loading indicator is defined but does not have the 2 functions: showLoading or hideLoading')));
             this.customLoadingIndicator = null;
