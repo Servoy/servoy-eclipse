@@ -13,6 +13,7 @@ import { ServoyPublicModule } from '@servoy/public';
 import { LicenseManager, ModuleRegistry, ServerSideRowModelModule, ClientSideRowModelModule } from '@ag-grid-enterprise/all-modules';
 import { AgGridModule } from '@ag-grid-community/angular';
 import { RowRenderer } from './listformcomponent/row-renderer.component';
+import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-responsive-container/formcomponent-responsive-container';
 
 @NgModule( {
     declarations: [
@@ -23,7 +24,8 @@ import { RowRenderer } from './listformcomponent/row-renderer.component';
         ServoyCoreFormContainer,
         ListFormComponent,
         AddAttributeDirective,
-        RowRenderer
+        RowRenderer,
+        ServoyCoreFormcomponentResponsiveCotainer
     ],
     imports: [CommonModule,
         FormsModule,
@@ -39,7 +41,8 @@ import { RowRenderer } from './listformcomponent/row-renderer.component';
         ServoyCoreSlider,
         ServoyCoreFormContainer,
         ListFormComponent,
-        AddAttributeDirective
+        AddAttributeDirective,
+        ServoyCoreFormcomponentResponsiveCotainer
     ]
 } )
 export class ServoyCoreComponentsModule {
