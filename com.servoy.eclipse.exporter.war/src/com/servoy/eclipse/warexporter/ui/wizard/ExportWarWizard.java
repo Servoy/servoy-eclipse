@@ -322,7 +322,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		};
 		try
 		{
-			getContainer().run(true, false, job);
+			getContainer().run(true, true, job);
 		}
 		catch (
 
