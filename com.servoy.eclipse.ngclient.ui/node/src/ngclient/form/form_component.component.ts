@@ -22,6 +22,8 @@ export abstract class AbstractFormComponent {
 
     abstract getFormCache(): FormCache;
 
+    abstract getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any>;
+
     abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
 
     abstract getContainerByName(containername: string): Element;
