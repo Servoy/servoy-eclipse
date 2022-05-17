@@ -253,6 +253,12 @@ describe('FormattingService', () => {
 
         myformat.display = '0,000.00';
         expect(service.format(125.5, myformat, false)).toEqual('0125.50');
+        
+        myformat.display = '#,##0.00##';
+        expect(service.format(125.5, myformat, false)).toEqual('125.50');
+        expect(service.format(125.556789, myformat, false)).toEqual('125.5568');
+        expect(service.format(125.5567, myformat, false)).toEqual('125.5567');
+        expect(service.format(125.556, myformat, false)).toEqual('125.556');
     });
 
     it('should corectly UNformat  numbers', () => {
