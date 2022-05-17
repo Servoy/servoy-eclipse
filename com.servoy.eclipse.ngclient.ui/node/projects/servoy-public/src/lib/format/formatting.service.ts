@@ -107,8 +107,8 @@ export class FormattingService {
             return data;
         } else if (type === 'DATETIME') {
             if ('' === data) return null;
-           servoyFormat = this.convertFormat(servoyFormat);
-            const d = DateTime.fromFormat(data, servoyFormat, {locale: this.servoyService.getLocale()}).toJSDate();
+            servoyFormat = this.convertFormat(servoyFormat);
+            const d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
             if (currentValue && !isNaN(currentValue.getTime())) {
@@ -315,9 +315,9 @@ export class FormattingService {
             let leftFormat = '';
             let rightFormat = '';
 
-            if ( patchedFormat.indexOf( '.' ) >= 0 ) {
-                leftFormat = patchedFormat.split( '.' )[0];
-                rightFormat = patchedFormat.split( '.' )[1];
+            if (patchedFormat.indexOf('.') >= 0) {
+                leftFormat = patchedFormat.split('.')[0];
+                rightFormat = patchedFormat.split('.')[1];
             } else {
                 leftFormat = patchedFormat;
             }
@@ -326,51 +326,58 @@ export class FormattingService {
             let minLenCharacteristicAfterZeroFound = 0;
             let optionalDigitsCharacteristic = 0;
             let zeroFound = false;
-            for ( i = 0; i < leftFormat.length; i++ ) {
-                if ( leftFormat[i] === '0' ) {
+            for (i = 0; i < leftFormat.length; i++) {
+                if (leftFormat[i] === '0') {
                     zeroFound = true;
                     minLenCharacteristic++;
-                } else if ( leftFormat[i] === '#' ) {
+                } else if (leftFormat[i] === '#') {
                     optionalDigitsCharacteristic++;
                 }
-                if ( leftFormat[i] === '#' && zeroFound ) {
+                if (leftFormat[i] === '#' && zeroFound) {
                     minLenCharacteristicAfterZeroFound++;
                 }
             }
 
             let minLenMantissa = 0;
             let optionalDigitsMantissa = 0;
-            
-            for ( i = 0; i < rightFormat.length; i++ ) {
-                if ( rightFormat[i] === '0' ) {
+
+            for (i = rightFormat.length - 1; i >= 0; i--) {
+                if (rightFormat[i] === '0') {
                     minLenMantissa++;
-                } else if ( rightFormat[i] === '#' ) {
+                } else if (rightFormat[i] === '#') {
                     optionalDigitsMantissa++;
-                } else if ( rightFormat[i] === '.' ) {
+                } else if (rightFormat[i] === '.') {
                     break;
                 }
             }
 
             let dataAsString = data + '';
-            
+
             let rightData = '';
 
-            if ( dataAsString.indexOf( '.' ) >= 0 ) {
-                rightData = dataAsString.split( '.' )[1];
+            if (dataAsString.indexOf('.') >= 0) {
+                rightData = dataAsString.split('.')[1];
             }
-            
-            let rightDataMantissaLength = rightData.length;
 
-            ret = numbro( data ).format( {
-                thousandSeparated: data > 999 && patchedFormat.includes( ',' ) ? true : false,
-                mantissa: ( rightDataMantissaLength < minLenMantissa + optionalDigitsMantissa ) && optionalDigitsMantissa > 0 ? rightDataMantissaLength : minLenMantissa !== 0 ? minLenMantissa : optionalDigitsMantissa,
-                optionalMantissa: optionalDigitsMantissa !== 0,
+            let rightDataMantissaLength = rightData.length;
+            let mantissaLength = 0;
+            if (rightDataMantissaLength <= minLenMantissa) {
+                mantissaLength = minLenMantissa
+            } else if (rightDataMantissaLength < minLenMantissa + optionalDigitsMantissa) {
+                mantissaLength = rightDataMantissaLength;
+            } else {
+                mantissaLength = minLenMantissa + optionalDigitsMantissa;
+            }
+            ret = numbro(data).format({
+                thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
+                mantissa: mantissaLength,
+                optionalMantissa: minLenMantissa === 0,
                 trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
                 characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
-                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0 
-            } );
+                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
+            });
         }
-        
+
         return prefix + ret + sufix;
     }
 
@@ -436,7 +443,7 @@ export class FormattingService {
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         dateFormat = this.convertFormat(dateFormat);
-        const formatted  = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
         return formatted.trim ? formatted.trim() : formatted;
     }
 
@@ -450,9 +457,9 @@ export class FormattingService {
         dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
         dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
         // no equivalent for K, just put h for now
-        dateFormat = dateFormat.replace(new RegExp('K','g'), 'h');
-        dateFormat = dateFormat.replace(new RegExp('k','g'), 'H');
-        dateFormat = dateFormat.replace(new RegExp('D','g'), 'o');
+        dateFormat = dateFormat.replace(new RegExp('K', 'g'), 'h');
+        dateFormat = dateFormat.replace(new RegExp('k', 'g'), 'H');
+        dateFormat = dateFormat.replace(new RegExp('D', 'g'), 'o');
         // if week is found then the year must be 'k' for luxon (iso week year)
         if (dateFormat.indexOf('W') !== -1) {
             dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'k');
