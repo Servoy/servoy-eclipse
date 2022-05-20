@@ -128,6 +128,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				WebObjectSpecification[] allServices = serviceProviderState.getAllWebComponentSpecifications();
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(webObjectSpecification.getPackageName()))
 					{
 						continue;
@@ -158,6 +159,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
 				{
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
 					{
 						continue;
@@ -179,6 +181,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
 					{
 						continue;
@@ -330,6 +333,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications())
 				{
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					if (warExportModel == null || warExportModel.getExportedComponents().contains(spec.getName()))
 					{
 						Set<CssLib> libs = spec.getNG2Config().getDependencies().getCssLibrary();

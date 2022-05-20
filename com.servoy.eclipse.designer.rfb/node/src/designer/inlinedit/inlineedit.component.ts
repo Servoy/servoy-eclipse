@@ -109,6 +109,27 @@ export class InlineEditComponent implements AfterViewInit {
                     // TODO: find an alternative for execCommand
                     this.doc.execCommand('selectAll', false, null);
                 }
+                if (event.metaKey && (event.target as Element).className == 'inlineEdit' && (event.key === 'x' || event.key === 'X')) {//cut action for mac: see the case SVY-17017
+                    //this code is executing only on mac (event.metaKey)
+                    let selectedObj = null;
+                    if (window.getSelection) {
+                        selectedObj = window.getSelection();
+                    } else if (document.getSelection) {
+                        selectedObj = document.getSelection();
+                    } 
+                    if (selectedObj != null) {
+                        let nodeText = selectedObj.anchorNode.nodeValue;
+                        //in this context anchorNode and focusNode are the same
+                        let startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
+                        let endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
+                        if (startRange != endRange) { //something is selected; 
+                            document.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
+                            var selectedText = nodeText.substring(startRange, endRange);
+                            document.activeElement.textContent = nodeText.replace(selectedText, '');
+                        }
+                    }
+                    return false; //do not dispatch the event further
+                }
             });
             this.blurListener = this.renderer.listen(this.elementRef.nativeElement, 'blur', (event: Event) => {
                 this.applyValue(this.node, this.directEditProperty, this.propertyValue);

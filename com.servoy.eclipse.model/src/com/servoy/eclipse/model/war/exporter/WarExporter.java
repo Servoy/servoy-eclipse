@@ -272,12 +272,14 @@ public class WarExporter
 		{
 			monitor.subTask("Copying NGClient components/services...");
 			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
+			if (monitor.isCanceled()) return;
 			monitor.setWorkRemaining(6);
 			monitor.subTask("Copy exported components");
 			copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 			monitor.worked(2);
 			monitor.subTask("Grouping JS and CSS resources");
-			copyMinifiedAndGrouped(tmpWarDir);
+			copyMinifiedAndGrouped(tmpWarDir, monitor);
+			if (monitor.isCanceled()) return;
 			monitor.subTask("Compile less resources");
 			monitor.worked(1);
 			if (exportModel.exportNG2Mode() != null)
@@ -289,6 +291,7 @@ public class WarExporter
 				}
 				catch (RuntimeException e)
 				{
+					if (monitor.isCanceled()) return;
 					throw new ExportException("could not create/copy Titanium NGClient resources", e);
 				}
 			}
@@ -525,7 +528,7 @@ public class WarExporter
 	 * @param tmpWarDir
 	 * @throws ExportException
 	 */
-	private void copyMinifiedAndGrouped(File tmpWarDir) throws ExportException
+	private void copyMinifiedAndGrouped(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
 		try
 		{
@@ -599,15 +602,21 @@ public class WarExporter
 			StringBuilder message = new StringBuilder();
 			while ((line = in.readLine()) != null)
 			{
+				if (monitor.isCanceled()) break;
 				message.append(line).append("\n");
 			}
 			in.close();
-			if (proc.waitFor() != 0)
+			synchronized (this)
 			{
-				ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
-				throw new ExportException(
-					"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
-						message.toString());
+				while (proc.isAlive())
+				{
+					wait(1000);
+					if (monitor.isCanceled())
+					{
+						proc.destroy();
+					}
+
+				}
 			}
 
 			//delete unneeded files
@@ -847,6 +856,7 @@ public class WarExporter
 			List<IPackageReader> packageReaders = packageManager.getAllPackageReaders();
 			for (IPackageReader packageReader : packageReaders)
 			{
+				if (monitor.isCanceled()) return;
 				File resource = packageReader.getResource();
 				if (resource != null)
 				{

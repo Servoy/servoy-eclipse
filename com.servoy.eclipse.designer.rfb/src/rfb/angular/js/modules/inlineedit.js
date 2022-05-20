@@ -50,6 +50,27 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 					if (event.keyCode == 65 && event.ctrlKey) {
 						document.execCommand('selectAll', false, null);
 					}
+					if (event.metaKey && event.target.id == 'directEdit' && (event.key === 'x' || event.key === 'X')) {//cut action for mac: see the case SVY-17017
+						//this code is executing only on mac (event.metaKey)
+						var selectedObj = null;
+						if (window.getSelection) {
+							selectedObj = window.getSelection();
+						} else if (document.getSelection) {
+							selectedObj = document.getSelection();
+						} 
+						if (selectedObj != null) {
+							var nodeText = selectedObj.anchorNode.nodeValue;
+							//in this context anchorNode and focusNode are the same
+							var startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
+							var endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
+							if (startRange != endRange) { //something is selected; 
+								document.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
+								var selectedText = nodeText.substring(startRange, endRange);
+								document.activeElement.textContent = nodeText.replace(selectedText, '');
+							}
+						}
+						return false; //do not dispatch the event further
+					}
 				})
 				.bind('blur', function() {
 					applyValue();
