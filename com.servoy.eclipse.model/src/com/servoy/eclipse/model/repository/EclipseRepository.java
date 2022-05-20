@@ -604,6 +604,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 
 		final List<IPersist> processedNodes = new ArrayList<IPersist>();
+		final Set<Integer> processedNodesThatWereCreated = new HashSet<>(); // stores indexes in processedNodes that were new persists
+		final Set<Integer> processedNodesThatWereDeleted = new HashSet<>(); // stores indexes in processedNodes that were deleted persists
+
 		final List<IScriptElement> scriptsToRegenerate = new ArrayList<IScriptElement>();
 
 		// visit each node, find deletions and renames
@@ -683,6 +686,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 						}
 					}
 					processedNodes.add(toDelete);
+					processedNodesThatWereDeleted.add(Integer.valueOf(processedNodes.size() - 1));
 				}
 
 
@@ -771,6 +775,11 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 				}
 
 				processedNodes.add(o);
+				if (AbstractRepository.searchPersist(sp.getSolution(), o) == null)
+				{
+					// it is new, only in editing solution
+					processedNodesThatWereCreated.add(Integer.valueOf(processedNodes.size() - 1));
+				}
 				return CONTINUE_TRAVERSAL;
 			}
 		};
@@ -817,6 +826,17 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 
 		// remove the processed nodes from the new, renamed and removed lists and clear the changed flags
+		for (int i = 0; i < processedNodes.size(); i++)
+		{
+			IPersist processed = processedNodes.get(i);
+			// delete and create are fired directly by AbstractBase; we need to fire the changed ones so that
+			// the persist index that listens to it does get updated correctly
+			if (!processedNodesThatWereDeleted.contains(Integer.valueOf(i)) && !processedNodesThatWereCreated.contains(Integer.valueOf(i)) &&
+				processed.isChanged())
+			{
+				solution.getChangeHandler().fireIPersistChanged(processed);
+			}
+		}
 		for (IPersist processed : processedNodes)
 		{
 			solution.clearEditingState(processed);
