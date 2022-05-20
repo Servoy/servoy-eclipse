@@ -134,6 +134,25 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		{
 			updateDataSourceCache((Form)persist);
 		}
+		// check if uuid was reset
+		Iterator<Entry<UUID, List<IPersist>>> mapIterator = duplicatesUUIDs.entrySet().iterator();
+		while (mapIterator.hasNext())
+		{
+			Entry<UUID, List<IPersist>> entry = mapIterator.next();
+			Iterator<IPersist> listIterator = entry.getValue().iterator();
+			while (listIterator.hasNext())
+			{
+				IPersist duplicatePersist = listIterator.next();
+				if (duplicatePersist == persist && !persist.getUUID().equals(entry.getKey()))
+				{
+					listIterator.remove();
+				}
+			}
+			if (entry.getValue().size() <= 1)
+			{
+				mapIterator.remove();
+			}
+		}
 	}
 
 	private void updateDataSourceCache(Form form)
