@@ -326,7 +326,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								// for resources project
 								splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
 							}
-
+							boolean returnDueToErrors = false;
 							if (errors.size() > 0)
 							{
 								output("Found error markers in solution " + solutionName);
@@ -335,7 +335,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								{
 									for (IMarker marker : errors)
 									{
-										outputExtra("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+										outputMarker(marker, true);
 									}
 									output("Ignoring error markers. ('-ie' was used)");
 									if (!verbose) output("(use -verbose for more information)");
@@ -344,11 +344,11 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								{
 									for (IMarker marker : errors)
 									{
-										output("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+										outputMarker(marker, false);
 									}
 									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers.");
 									exitCode = EXIT_EXPORT_FAILED;
-									return;
+									returnDueToErrors = true;
 								}
 							}
 
@@ -358,15 +358,15 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								if (warnings.size() > 0)
 								{
 									output("Found warning markers in projects for solution " + solutionName);
-									if (verbose)
+									if (verbose || returnDueToErrors)
 									{
 										for (IMarker marker : warnings)
 										{
-											outputExtra("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+											outputMarker(marker, false);
 										}
 									}
 								}
-
+								if (returnDueToErrors) return;
 								// now we really export
 								exportActiveSolution(configuration);
 							}
@@ -611,6 +611,23 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	public void output(String msg)
 	{
 		System.out.println(msg);
+	}
+
+	public void outputMarker(IMarker marker, boolean outputExtra)
+	{
+		if (outputExtra && !verbose) return;
+		String message = "    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.");
+		Object location = marker.getAttribute(IMarker.LOCATION, null);
+		Object lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, null);
+		if (location != null)
+		{
+			if (lineNumber != null)
+			{
+				location = location + ":" + lineNumber;
+			}
+			message += " (" + location + ")";
+		}
+		output(message);
 	}
 
 	public void outputError(String msg)
