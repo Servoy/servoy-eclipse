@@ -245,13 +245,15 @@ public abstract class AbstractNewDbAction extends Action
 	/**
 	 * Try to save the default server config. If no errors occur, open server editor.
 	 * @param origConfig
+	 * @param serverSettings
 	 * @param serverUrl
 	 * @param serverManager
 	 * @param configName
 	 */
-	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, String serverUrl, final IServerManagerInternal serverManager, String configName)
+	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, ServerSettings serverSettings, String serverUrl, IServerManagerInternal serverManager,
+		String configName)
 	{
-		final ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
+		ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
 			origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 			origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
@@ -263,12 +265,13 @@ public abstract class AbstractNewDbAction extends Action
 				try
 				{
 					serverManager.saveServerConfig(null, serverConfig);
+					serverManager.saveServerSettings(configName, serverSettings);
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logError(e);
 				}
-				EditorUtil.openServerEditor(serverConfig, ServerSettings.DEFAULT);
+				EditorUtil.openServerEditor(serverConfig, serverSettings);
 			}
 		});
 	}

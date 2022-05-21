@@ -61,7 +61,7 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 	 * @param name
 	 */
 	@Override
-	protected void setDefaultConfig(final IServerInternal serverPrototype, final String name)
+	protected void setDefaultConfig(IServerInternal serverPrototype, String name)
 	{
 		try
 		{
@@ -73,14 +73,14 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 				serverUrl = "jdbc:sybase:Tds:localhost:2638?ServiceName=" + name + "&CHARSET=utf8";
 			}
 
-			final IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			String configName = name;
 			for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)
 			{
 				configName = name + i;
 			}
 			serverManager.getServerConfig(name);
-			saveAndOpenDefaultConfig(origConfig, serverUrl, serverManager, configName);
+			saveAndOpenDefaultConfig(origConfig, serverPrototype.getSettings(), serverUrl, serverManager, configName);
 		}
 		catch (Exception e)
 		{

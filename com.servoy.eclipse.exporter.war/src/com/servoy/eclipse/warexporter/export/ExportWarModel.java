@@ -314,6 +314,8 @@ public class ExportWarModel extends AbstractWarExportModel
 					sc.setMaxPreparedStatementsIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxstatements")));
 					sc.setSkipSysTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".skipsystables")));
 					sc.setPrefixTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".prefixTables")));
+					sc.setQueryProcedures(Utils.getAsBoolean(settings.get("export.servers." + name + ".queryProcedures")));
+					sc.setClientOnlyConnections(Utils.getAsBoolean(settings.get("export.servers." + name + ".clientOnlyConnections")));
 				}
 			}
 		}
@@ -500,6 +502,8 @@ public class ExportWarModel extends AbstractWarExportModel
 				settings.put("export.servers." + name + ".maxstatements", sc.getMaxPreparedStatementsIdle());
 				settings.put("export.servers." + name + ".skipsystables", sc.isSkipSysTables());
 				settings.put("export.servers." + name + ".prefixTables", sc.isPrefixTables());
+				settings.put("export.servers." + name + ".queryProcedures", sc.isQueryProcedures());
+				settings.put("export.servers." + name + ".clientOnlyConnections", sc.isClientOnlyConnections());
 			}
 			settings.put("export.servers", sb.toString());
 		}
@@ -631,13 +635,14 @@ public class ExportWarModel extends AbstractWarExportModel
 			IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 			if (server != null)
 			{
-				serverConfiguration = new ServerConfiguration(serverName, server.getConfig());
+				serverConfiguration = new ServerConfiguration(serverName, server.getConfig(), server.getSettings());
 				servers.put(serverName, serverConfiguration);
 			}
 			else if (serverName.equals(IServer.REPOSITORY_SERVER))
 			{
 				server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, false, true);
-				serverConfiguration = server != null ? new ServerConfiguration(serverName, server.getConfig()) : new ServerConfiguration(serverName);
+				serverConfiguration = server != null ? new ServerConfiguration(serverName, server.getConfig(), server.getSettings())
+					: new ServerConfiguration(serverName);
 				servers.put(serverName, serverConfiguration);
 			}
 		}

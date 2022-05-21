@@ -60,7 +60,6 @@ import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -91,7 +90,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public abstract class AbstractMemServer<T extends ITable> implements IServerInternal, IServer
 {
 	private final Map<String, T> tables = new HashMap<>();
-	private volatile ISequenceProvider sequenceManager;
+	// RAGTEST private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
 	private final String datasource;
@@ -114,7 +113,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void init()
 	{
 		tables.clear();
-		sequenceManager = null;
+		// RAGTEST 	sequenceManager = null;
 		Iterator<IPersist> tableNodes = servoyProject.getSolution().getObjects(IRepository.TABLENODES);
 		while (tableNodes.hasNext())
 		{
@@ -1257,24 +1256,24 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServer#getSequenceProvider()
-	 */
-	@Override
-	public ISequenceProvider getSequenceProvider()
-	{
-		return sequenceManager;
-	}
+//	RAGTEST /*
+//	 * (non-Javadoc)
+//	 *
+//	 * @see com.servoy.j2db.persistence.IServer#getSequenceProvider()
+//	 */
+//	@Override
+//	public ISequenceProvider getSequenceProvider()
+//	{
+//		return sequenceManager;
+//	}
 
-	/**
-	 * @param sequenceManager the sequenceManager to set
-	 */
-	public void setSequenceProvider(ISequenceProvider sequenceManager)
-	{
-		this.sequenceManager = sequenceManager;
-	}
+// RAGTEST 	/**
+//	 * @param sequenceManager the sequenceManager to set
+//	 */
+//	public void setSequenceProvider(ISequenceProvider sequenceManager)
+//	{
+//		this.sequenceManager = sequenceManager;
+//	}
 
 
 	/**Checks if the given memTable is different from the stored property of the TableNode that stores this MemTable
