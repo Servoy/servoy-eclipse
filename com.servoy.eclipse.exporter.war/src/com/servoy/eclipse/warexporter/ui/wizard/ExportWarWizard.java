@@ -399,12 +399,24 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 				getDialogSettings().get("export.drivers") == null, false, "export_war_drivers");
-			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null, false,
-				"export_war_lafs");
-			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,
-				false, "export_war_beans");
+			// don't initialize LAF page if no LAFs are found
+			String[] lafs = ApplicationServerRegistry.get().getLafManager().getLAFDir().list();
+			if (lafs.length > 0 && !(lafs.length == 1 && lafs[0].equalsIgnoreCase(".empty")))
+			{
+				lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
+					ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
+					false,
+					"export_war_lafs");
+			}
+			// don't initialize beans page if no beans are found
+			String[] beans = ApplicationServerRegistry.get().getBeanManager().getBeansDir().list();
+			if (beans.length > 0 && !(beans.length == 1 && beans[0].equalsIgnoreCase(".empty")))
+			{
+				beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
+					ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null,
+					getDialogSettings().get("export.beans") == null,
+					false, "export_war_beans");
+			}
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true, "export_war_plugins");
@@ -435,8 +447,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			addPage(nonActiveSolutionPage);
 			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
-			addPage(beanSelectionPage);
-			addPage(lafSelectionPage);
+			if (beanSelectionPage != null) addPage(beanSelectionPage);
+			if (lafSelectionPage != null) addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
 			if (isNGExport)
 			{
