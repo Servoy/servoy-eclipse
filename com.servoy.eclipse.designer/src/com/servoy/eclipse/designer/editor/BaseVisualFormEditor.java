@@ -48,6 +48,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
@@ -747,6 +748,13 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					{
 						propertySheet.partClosed(this);
 						propertySheet.partActivated(this);
+					}
+
+					ContentOutline contentOutline = (ContentOutline)getEditorSite().getPage().findView("org.eclipse.ui.views.ContentOutline");
+					if (contentOutline != null)
+					{
+						contentOutline.partClosed(this);
+						contentOutline.partActivated(this);
 					}
 					// set up the editor actions, this is normally done in part activation listener
 					getEditorSite().getActionBarContributor().setActiveEditor(this);
