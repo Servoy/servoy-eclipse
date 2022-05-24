@@ -9,7 +9,7 @@
 		<version>2022.3.0.3742</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.linux.gtk.x86_64</artifactId>
-	<version>16.14.0</version>
+	<version>16.15.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -38,7 +38,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <url>https://nodejs.org/dist/v16.14.0/node-v16.14.0-linux-x64.tar.xz</url>
+                            <url>https://nodejs.org/dist/v16.15.0/node-v16.15.0-linux-x64.tar.xz</url>
                             <outputFileName>node.tar.xz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>
