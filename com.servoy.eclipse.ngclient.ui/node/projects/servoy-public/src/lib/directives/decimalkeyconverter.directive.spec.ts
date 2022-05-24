@@ -39,7 +39,7 @@ describe('Directive: DecimalKeyConverter', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should insert numpad decimal (nl == ,)', waitForAsync(() => {
+    it('should insert numpad decimal (nl == ,)', fakeAsync(() => {
         service.setLocaleNumberSymbol(',');
         component.format = {
             uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
