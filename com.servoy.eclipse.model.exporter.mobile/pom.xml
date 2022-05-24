@@ -5,10 +5,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2021.3.2.3644_LTS</version>
+    <version>2021.3.3.3645_LTS</version>
   </parent>
   <artifactId>com.servoy.eclipse.model.exporter.mobile</artifactId>
-  <version>2021.3.2.3644_LTS</version>
+  <version>2021.3.3.3645_LTS</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
