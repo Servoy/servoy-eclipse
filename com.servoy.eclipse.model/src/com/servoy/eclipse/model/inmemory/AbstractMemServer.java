@@ -90,7 +90,6 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public abstract class AbstractMemServer<T extends ITable> implements IServerInternal, IServer
 {
 	private final Map<String, T> tables = new HashMap<>();
-	// RAGTEST private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
 	private final String datasource;
@@ -113,7 +112,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void init()
 	{
 		tables.clear();
-		// RAGTEST 	sequenceManager = null;
 		Iterator<IPersist> tableNodes = servoyProject.getSolution().getObjects(IRepository.TABLENODES);
 		while (tableNodes.hasNext())
 		{
@@ -316,7 +314,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	@Override
 	public ServerSettings getSettings()
 	{
-		return ServerSettings.DEFAULT; // RAGTEST
+		return ServerSettings.DEFAULT;
 	}
 
 	@Override
@@ -1255,26 +1253,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void dropClientDatasource(String clientId)
 	{
 	}
-
-//	RAGTEST /*
-//	 * (non-Javadoc)
-//	 *
-//	 * @see com.servoy.j2db.persistence.IServer#getSequenceProvider()
-//	 */
-//	@Override
-//	public ISequenceProvider getSequenceProvider()
-//	{
-//		return sequenceManager;
-//	}
-
-// RAGTEST 	/**
-//	 * @param sequenceManager the sequenceManager to set
-//	 */
-//	public void setSequenceProvider(ISequenceProvider sequenceManager)
-//	{
-//		this.sequenceManager = sequenceManager;
-//	}
-
 
 	/**Checks if the given memTable is different from the stored property of the TableNode that stores this MemTable
 	 * @param abstractMemTable

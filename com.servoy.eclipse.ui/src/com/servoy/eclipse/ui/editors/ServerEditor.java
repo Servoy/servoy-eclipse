@@ -493,14 +493,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		skipSysTablesButton = checkbox(advancedSettingsComposite, toolTip);
 
 		toolTip = "When tables are defined in multiple schemas, with this option set to true, Servoy will prefix the table in the sql when needed.";
-		Label prefixTablesLabel = label(advancedSettingsComposite, "Prefix Tables", toolTip);
+		label(advancedSettingsComposite, "Prefix Tables", toolTip);
 		prefixTablesButton = checkbox(advancedSettingsComposite, toolTip);
 
 		toolTip = "Servoy has functionality that allows to automatically track all insert/updates/deletes on tables.\nThis functionality can be enabled through the Security layer inside the Solution.\nThis functionality relies on one of the enabled Database Servers configured on the Servoy Application Server being marked at 'Log server'.";
 		Label logServerLabel = label(advancedSettingsComposite, "Log Server", toolTip);
 		logServerButton = checkbox(advancedSettingsComposite, toolTip);
 
-		toolTip = " RAGTEST tooltip  Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
+		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
 			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION) +
 			"\" - will consider a connection invalid if it's getException() returns non-null.\n" + "\"" +
 			getConnectionValidationTypeAsString(CONNECTION_METADATA_VALIDATION) +
@@ -616,20 +616,21 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		separator(advancedSettingsCollapserComposite);
 
 		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
-		Label proceduresLabel = label(advancedSettingsComposite, "Enable procedures", toolTip);
+		label(advancedSettingsComposite, "Enable procedures", toolTip);
 		proceduresButton = checkbox(advancedSettingsComposite, toolTip);
 
 		toolTip = "Enabling this will set this server to only have client defined connections (datasources.db.server.defineDatasource()). This tries to postpone also the loading of the tables (only do that with a client connection)";
-		Label clientOnlyConnectionsLabel = label(advancedSettingsComposite, "Client Only Connections", toolTip);
+		label(advancedSettingsComposite, "Client Only Connections", toolTip);
 		clientOnlyConnectionsButton = checkbox(advancedSettingsComposite, toolTip);
 
-		toolTip = "RAGTEST tooltip sort ignore case";
-		Label sortIgnoreCaseLabel = label(advancedSettingsComposite, "Sort ignoring case", toolTip);
+		toolTip = "Options for ignoring case when sorting, this can be overridden at column level (in the table editor)";
+		label(advancedSettingsComposite, "Sort ignoring case", toolTip);
 		sortIgnoreCaseButton = checkbox(advancedSettingsComposite, toolTip);
 
-		Label sortNullPrecedenceLabel = label(advancedSettingsComposite, "Sorting null-precedence", toolTip);
+		toolTip = "Options for setting sorting of null values, this can be overridden at column level (in the table editor)";
+		label(advancedSettingsComposite, "Sorting null-precedence", toolTip);
 		sortNullprecedenceField = dropdown(advancedSettingsComposite, SWT.READ_ONLY, toolTip,
-			SortingNullprecedence.ragtestDefault.display(),
+			SortingNullprecedence.databaseDefault.display(),
 			SortingNullprecedence.ascNullsFirst.display(),
 			SortingNullprecedence.ascNullsLast.display());
 
@@ -1415,7 +1416,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		};
 
-		/// RAGTEST
 		IObservableValue getSortingNullprecedenceObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()

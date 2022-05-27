@@ -59,8 +59,8 @@ public class ResourcesUtils
 		file.create(source, force, null);
 	}
 
-	/** RAGTEST doc
-	 * Creates the given file, and it's parent containers (if they do not already exist).
+	/**
+	 * Creates or overwrites the given file and set the contents, and it's parent containers (if they do not already exist).
 	 *
 	 * @param file the file to be created.
 	 * @param source the content used to fill up the file.
@@ -79,8 +79,8 @@ public class ResourcesUtils
 		}
 	}
 
-	/** RAGTEST doc
-	 * Creates the given file, and it's parent containers (if they do not already exist).
+	/**
+	 * Creates or overwrites the given file and set the contents, and it's parent containers (if they do not already exist).
 	 *
 	 * @param file the file to be created.
 	 * @param source the content used to fill up the file.

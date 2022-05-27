@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnInfoManager;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -102,12 +102,12 @@ public class DBITableLoader implements ITableLoader
 	public void loadAllColumnInfo(Collection<Table> tables, IServerInternal server) throws RepositoryException
 	{
 		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
-		IColumnInfoManager[] colInfoManagers = sm.getColumnInfoManagers();
-		if (colInfoManagers != null && colInfoManagers.length > 0)
+		IServerInfoManager[] serverInfoManagers = sm.getServerInfoManagers();
+		if (serverInfoManagers != null && serverInfoManagers.length > 0)
 		{
 			for (Table table : tables)
 			{
-				colInfoManagers[0].loadAllColumnInfo(table);
+				serverInfoManagers[0].loadAllColumnInfo(table);
 			}
 		}
 	}

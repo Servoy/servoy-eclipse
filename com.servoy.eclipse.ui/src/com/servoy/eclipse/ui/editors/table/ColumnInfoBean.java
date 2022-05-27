@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import static com.servoy.j2db.persistence.SortingNullprecedence.ragtestDefault;
+import static com.servoy.j2db.persistence.SortingNullprecedence.databaseDefault;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.stream;
@@ -353,13 +353,13 @@ public class ColumnInfoBean
 	public String getSortingNullprecedence()
 	{
 		SortingNullprecedence sortingNullprecedence = columnInfo.getSortingNullprecedence();
-		return (sortingNullprecedence == null ? ragtestDefault : sortingNullprecedence).display();
+		return (sortingNullprecedence == null ? databaseDefault : sortingNullprecedence).display();
 	}
 
 	public void setSortingNullprecedence(String sortingNullprecedenceDisplay)
 	{
 		SortingNullprecedence sortingNullprecedence = SortingNullprecedence.fromDisplay(sortingNullprecedenceDisplay).orElse(null);
-		columnInfo.setSortingNullprecedence(sortingNullprecedence == ragtestDefault ? null : sortingNullprecedence);
+		columnInfo.setSortingNullprecedence(sortingNullprecedence == databaseDefault ? null : sortingNullprecedence);
 		columnInfo.flagChanged();
 	}
 

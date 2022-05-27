@@ -66,9 +66,9 @@ import com.servoy.eclipse.model.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -97,7 +97,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  * It reads dbi files into column information, writes dbi files from column information and checks for dbi errors and inconsistencies between dbi files and actual database structure.
  * @author acostescu
  */
-public class DataModelManager implements IColumnInfoManager
+public class DataModelManager implements IServerInfoManager
 {
 	public static final String SECURITY_FILE_EXTENSION = "sec";
 	public static final String SECURITY_FILE_EXTENSION_WITH_DOT = '.' + SECURITY_FILE_EXTENSION;
@@ -1852,16 +1852,16 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	/** Get the DataModelManager installed as ColumnInfoManager in the servermanager.
+	/** Get the DataModelManager installed as ServerInfoManager in the servermanager.
 	 * @param serverName
 	 * @return
 	 */
 	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager)
 	{
-		IColumnInfoManager[] cims = serverManager.getColumnInfoManagers();
+		IServerInfoManager[] cims = serverManager.getServerInfoManagers();
 		if (cims != null)
 		{
-			for (IColumnInfoManager cim : cims)
+			for (IServerInfoManager cim : cims)
 			{
 				if (cim instanceof DataModelManager)
 				{

@@ -18,7 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 import static com.servoy.j2db.persistence.SortingNullprecedence.ascNullsFirst;
 import static com.servoy.j2db.persistence.SortingNullprecedence.ascNullsLast;
-import static com.servoy.j2db.persistence.SortingNullprecedence.ragtestDefault;
+import static com.servoy.j2db.persistence.SortingNullprecedence.databaseDefault;
 import static java.util.Arrays.stream;
 
 import java.io.IOException;
@@ -216,7 +216,7 @@ public class ColumnDetailsComposite extends Composite
 		sortIgnoringcaseCombo = combo(this, (Object[])BooleanTristate.values());
 		sortIgnoringcaseCombo.setEnabled(false);
 		Label sortNullprecedenceLabel = label(this, "Null precedence");
-		sortNullprecedenceCombo = combo(this, ragtestDefault.display(), ascNullsFirst.display(), ascNullsLast.display());
+		sortNullprecedenceCombo = combo(this, databaseDefault.display(), ascNullsFirst.display(), ascNullsLast.display());
 
 		excludedCheckBox = checkbox(this, "Excluded");
 		uuidCheckBox = checkbox(this, "UUID");
