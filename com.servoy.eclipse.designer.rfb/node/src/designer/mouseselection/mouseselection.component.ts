@@ -44,7 +44,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     ngOnInit(): void {
         void this.editorSession.requestSelection();
-        this.content = this.doc.querySelector('.content-area');
+        this.content = this.doc.querySelector('.contentframe-overlay');
         this.content.addEventListener('mousedown', (event) => this.onMouseDown(event));
         this.content.addEventListener('mouseup', (event) => this.onMouseUp(event));
         this.content.addEventListener('mousemove', (event) => this.onMouseMove(event));

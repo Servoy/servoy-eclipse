@@ -555,7 +555,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.14.2"/>
+         version="16.15.0"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
@@ -564,7 +564,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.14.2"/>
+         version="16.15.0"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
@@ -573,7 +573,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.14.2"/>
+         version="16.15.0"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
@@ -595,7 +595,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.2"/>
+         version="17.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -603,7 +603,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.2"/>
+         version="17.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -611,7 +611,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.2"/>
+         version="17.0.3"/>
 
    <plugin
          id="jakarta.servlet-api"
@@ -633,7 +633,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="17.0.2"/>
+         version="17.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
@@ -642,6 +642,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="16.14.2"/>
+         version="16.15.0"/>
 
 </feature>
