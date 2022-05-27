@@ -175,7 +175,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorKey));
 		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientKey, editorPart));
-		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession);
+		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession, selectionProvider);
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 
