@@ -42,12 +42,11 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.ServerConfig;
 
 /**
  * Extension point that takes care of opening editors for {@link Element} objects.
  * It tries to load the editor based on the {@link TypeCreator#RESOURCE} attribute that is set.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -144,10 +143,6 @@ public class OpenAdapter implements IOpenDelegate
 			{
 				ServoyLog.logError(e);
 			}
-		}
-		else if (resource instanceof ServerConfig)
-		{
-			EditorUtil.openServerEditor((ServerConfig)resource);
 		}
 		else if (resource instanceof ITable)
 		{

@@ -23,6 +23,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 
 /**
  * Adapter for making a server resource a suitable input for an editor.
@@ -34,17 +35,19 @@ public class ServerEditorInput implements IEditorInput
 	public static final String EDITOR_ID = "com.servoy.eclipse.ui.editors.ServerEditor";
 
 	private final ServerConfig serverConfig;
+	private final ServerSettings serverSettings;
 	private boolean isNew = false;
 
 	/**
 	 * Creates a form input.
-	 * 
+	 *
 	 * @param solution
 	 */
 
-	public ServerEditorInput(ServerConfig serverConfig)
+	public ServerEditorInput(ServerConfig serverConfig, ServerSettings serverSettings)
 	{
 		this.serverConfig = serverConfig;
+		this.serverSettings = serverSettings.withDefaults(serverConfig);
 	}
 
 	/*
@@ -63,6 +66,10 @@ public class ServerEditorInput implements IEditorInput
 		if (ServerConfig.class.equals(adapter))
 		{
 			return serverConfig;
+		}
+		if (ServerSettings.class.equals(adapter))
+		{
+			return serverSettings;
 		}
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
@@ -88,6 +95,11 @@ public class ServerEditorInput implements IEditorInput
 		return serverConfig;
 	}
 
+	public ServerSettings getServerSettings()
+	{
+		return serverSettings;
+	}
+
 	public boolean getIsNew()
 	{
 		return isNew;
@@ -106,13 +118,6 @@ public class ServerEditorInput implements IEditorInput
 		return (IPersistableElement)getAdapter(IPersistableElement.class);
 	}
 
-// /* (non-Javadoc)
-// * Method declared on IStorageEditorInput.
-// */
-// public IStorage getStorage() {
-// return file;
-// }
-
 	/*
 	 * (non-Javadoc) Method declared on IEditorInput.
 	 */
@@ -123,7 +128,7 @@ public class ServerEditorInput implements IEditorInput
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

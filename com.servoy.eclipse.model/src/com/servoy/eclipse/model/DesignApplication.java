@@ -60,6 +60,7 @@ import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.DataServerProxy;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
+import com.servoy.j2db.dataprocessing.FoundSetManagerConfig;
 import com.servoy.j2db.dataprocessing.IClientHost;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDisplay;
@@ -383,7 +384,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			{
 				if (foundSetManager == null)
 				{
-					foundSetManager = new FoundSetManager(this, new SwingFoundSetFactory())
+					foundSetManager = new FoundSetManager(this, new FoundSetManagerConfig(getSettings()), new SwingFoundSetFactory())
 					{
 						@Override
 						public ITable getTable(String dataSource) throws RepositoryException

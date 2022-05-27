@@ -137,7 +137,6 @@ import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.AvoidMultipleExecutionsWorkspaceJob;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -1547,7 +1546,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 								if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
 								{
-									IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
+									IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
 									if (serverInformationFolder.exists())
 									{
 										try
@@ -2590,21 +2589,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 										}
 										if (file.exists() && (element.getKind() == IResourceDelta.ADDED || element.getKind() == IResourceDelta.CHANGED))
 										{
-											InputStream is = file.getContents();
-											try
+											try (InputStream is = file.getContents())
 											{
-												if (cloneFile.exists())
-												{
-													cloneFile.setContents(is, true, false, null);
-												}
-												else
-												{
-													ResourcesUtils.createFileAndParentContainers(cloneFile, is, true);
-												}
-											}
-											finally
-											{
-												Utils.closeInputStream(is);
+												ResourcesUtils.createOrWriteFile(cloneFile, is, true);
 											}
 										}
 									}
@@ -2923,7 +2910,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				// file outside of visited tree, ignore
 				continue;
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isSolutionActive(project.getName()))
+			else if (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT) && isSolutionActive(project.getName()))
 			{
 				// must be a form ".sec" file; find the form for it...
 				File projectFolder = project.getLocation().toFile();
@@ -2931,7 +2918,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				if (formsContainer != null && formsContainer.getName().equals(SolutionSerializer.FORMS_DIR) &&
 					projectFolder.equals(formsContainer.getParentFile()))
 				{
-					String formName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
+					String formName = file.getName().substring(0, file.getName().length() - DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT.length());
 					Form f = solution.getForm(formName);
 					if (f != null)
 					{
@@ -3137,8 +3124,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			{
 				columnInfoFiles.add(fileRd);
 			}
-			else if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))) ||
-				file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.equals(dataModelManager.getSecurityFile()) || file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
 			{
 				securityFiles.add(fileRd);
 			}
@@ -3208,8 +3194,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		}
 		else for (IResourceDelta fileRd : securityFiles)
 		{
-			final IFile file = (IFile)fileRd.getResource();
-			if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))))
+			IResource file = fileRd.getResource();
+
+			if (file.equals(dataModelManager.getSecurityFile()))
 			{
 				// users/groups have changed - will reload all security information
 				securityInfoChanged = true;
@@ -3218,7 +3205,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					getUserManager().reloadAllSecurityInformation();
 				}
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
 			{
 				IContainer serverContainer = file.getParent();
 				if (serverContainer != null && serverContainer.getParent() != null &&
@@ -3234,7 +3221,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							try
 							{
-								String tableName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
+								String tableName = file.getName().substring(0,
+									file.getName().length() - DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT.length());
 								ITable t = s.getTable(tableName);
 								if (t != null)
 								{

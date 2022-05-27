@@ -33,13 +33,14 @@ import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Quick fix for missing column info in the dbi file (although they are present in the DB). It will create the column info.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
@@ -103,7 +104,7 @@ public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 
 						// add the column information
 						ArrayList<String> colNames = new ArrayList<String>();

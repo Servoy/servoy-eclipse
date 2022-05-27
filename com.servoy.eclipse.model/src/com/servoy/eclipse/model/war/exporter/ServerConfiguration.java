@@ -18,6 +18,7 @@
 package com.servoy.eclipse.model.war.exporter;
 
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 
 public class ServerConfiguration
 {
@@ -36,6 +37,7 @@ public class ServerConfiguration
 	private boolean skipSysTables;
 	private boolean prefixTables;
 	private boolean queryProcedures;
+	private boolean clientOnlyConnections;
 	private final String name;
 
 	public ServerConfiguration(String name)
@@ -45,7 +47,7 @@ public class ServerConfiguration
 		catalog = ServerConfig.NONE;
 	}
 
-	public ServerConfiguration(String name, ServerConfig config)
+	public ServerConfiguration(String name, ServerConfig config, ServerSettings serverSettings)
 	{
 		this.name = name;
 		serverUrl = config.getServerUrl();
@@ -62,7 +64,9 @@ public class ServerConfiguration
 		maxPreparedStatementsIdle = config.getMaxPreparedStatementsIdle();
 		skipSysTables = config.getSkipSysTables();
 		prefixTables = config.getPrefixTables();
-		queryProcedures = config.getQueryProcedures();
+		ServerSettings serverSettingsWithDefaults = serverSettings.withDefaults(config);
+		queryProcedures = serverSettingsWithDefaults.getQueryProcedures().booleanValue();
+		clientOnlyConnections = serverSettingsWithDefaults.getClientOnlyConnections().booleanValue();
 	}
 
 	private String getDisplayValue(String value)
@@ -207,6 +211,14 @@ public class ServerConfiguration
 	}
 
 	/**
+	 * @return the clientOnlyConnections
+	 */
+	public boolean isClientOnlyConnections()
+	{
+		return clientOnlyConnections;
+	}
+
+	/**
 	 * @param serverUrl the serverUrl to set
 	 */
 	public void setServerUrl(String serverUrl)
@@ -324,6 +336,14 @@ public class ServerConfiguration
 	public void setQueryProcedures(boolean queryProcedures)
 	{
 		this.queryProcedures = queryProcedures;
+	}
+
+	/**
+	 * @param clientOnlyConnections the clientOnlyConnections to set
+	 */
+	public void setClientOnlyConnections(boolean clientOnlyConnections)
+	{
+		this.clientOnlyConnections = clientOnlyConnections;
 	}
 
 }

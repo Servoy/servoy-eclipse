@@ -46,7 +46,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -172,7 +171,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			}
 			else if (nodeType == UserNodeType.USER_GROUP_SECURITY)
 			{
-				SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
+				SimpleResourceMapping securities = getResourceProjectResourceMapping(DataModelManager.SECURITY_DIRECTORY);
 				if (securities != null) mappings.add(securities);
 			}
 			else if (nodeType == UserNodeType.I18N_FILES)
@@ -373,7 +372,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			}
 			else if (type == UserNodeType.USER_GROUP_SECURITY)
 			{
-				SimpleResourceMapping securities = getResourceProjectResourceMapping(WorkspaceUserManager.SECURITY_DIR);
+				SimpleResourceMapping securities = getResourceProjectResourceMapping(DataModelManager.SECURITY_DIRECTORY);
 				if (securities != null) return securities.getModelObject();
 			}
 			else if (type == UserNodeType.I18N_FILES)

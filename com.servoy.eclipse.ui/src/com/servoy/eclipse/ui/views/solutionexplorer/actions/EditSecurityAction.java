@@ -18,10 +18,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 
-import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
@@ -45,11 +43,10 @@ public class EditSecurityAction extends Action
 	@Override
 	public void run()
 	{
-		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyResourcesProject srp = sm.getActiveResourcesProject();
-		if (srp != null)
+		DataModelManager dataModelManager = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		if (dataModelManager != null)
 		{
-			EditorUtil.openSecurityEditor(srp.getProject().getFile(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT));
+			EditorUtil.openSecurityEditor(dataModelManager.getSecurityFile());
 		}
 	}
 

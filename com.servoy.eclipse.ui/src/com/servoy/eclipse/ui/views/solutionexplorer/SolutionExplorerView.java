@@ -189,7 +189,6 @@ import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -3598,8 +3597,9 @@ public class SolutionExplorerView extends ViewPart
 					if (server != null)
 					{
 						// re-lookup the server config here, when the server is a duplicate the server is actually the other server object.
-						ServerConfig serverConfig = server.getServerManager().getServerConfig(doubleClickedItem.getName());
-						EditorUtil.openServerEditor(serverConfig);
+						IServerManagerInternal serverManager = server.getServerManager();
+						EditorUtil.openServerEditor(serverManager.getServerConfig(doubleClickedItem.getName()),
+							serverManager.getServerSettings(doubleClickedItem.getName()));
 					}
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
@@ -4099,7 +4099,7 @@ public class SolutionExplorerView extends ViewPart
 							{
 								return new SimpleUserNode[] { cp.getServers() };
 							}
-							else if (segments[1].equals(WorkspaceUserManager.SECURITY_DIR))
+							else if (segments[1].equals(DataModelManager.SECURITY_DIRECTORY))
 							{
 								return new SimpleUserNode[] { cp.getUserGroupSecurityNode() };
 							}

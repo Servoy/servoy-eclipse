@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.core.quickfix.security;
 
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -271,15 +270,7 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 				}
 				else
 				{
-					InputStream source = Utils.getUTF8EncodedStream(correctedResult);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, correctedResult, true);
 				}
 			}
 			catch (CoreException e)

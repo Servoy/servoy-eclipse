@@ -36,6 +36,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -76,8 +78,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -107,6 +111,7 @@ import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -121,6 +126,7 @@ import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
@@ -130,6 +136,7 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
@@ -208,7 +215,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 41);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 45);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -248,6 +255,8 @@ public class WarExporter
 		monitor.worked(2);
 		addServoyProperties(tmpWarDir);
 		monitor.worked(2);
+		copySecAndDBIFiles(tmpWarDir);
+		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
 			monitor.subTask("Copy the active solution");
@@ -311,7 +320,6 @@ public class WarExporter
 		deleteDirectory(tmpWarDir);
 		monitor.worked(1);
 		monitor.done();
-		return;
 	}
 
 	private void checkDuplicateJars(File tmpWarDir) throws ExportException
@@ -1194,6 +1202,84 @@ public class WarExporter
 		}
 	}
 
+	/**
+	 * @param tmpWarDir
+	 */
+	private void copySecAndDBIFiles(File tmpWarDir)
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		Map<String, List<String>> neededServerTables = TableDefinitionUtils.getNeededServerTables(activeProject == null ? null : activeProject.getSolution(),
+			exportModel.isExportReferencedModules(), exportModel.isExportI18NData());
+
+		DataModelManager dataModelManager = servoyModel.getDataModelManager();
+		File secDir = new File(tmpWarDir, "WEB-INF/security");
+		secDir.mkdirs();
+		File dbDir = new File(tmpWarDir, "WEB-INF/db");
+		dbDir.mkdirs();
+
+		try
+		{
+			copyFileIfExists(dataModelManager.getSecurityFile(), new File(secDir, DataModelManager.SECURITY_FILENAME));
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		neededServerTables.entrySet().forEach(entry -> {
+			String serverName = entry.getKey();
+			List<String> tablesNeeded = entry.getValue();
+			try
+			{
+				for (IFile tableSecfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.SECURITY_FILE_EXTENSION, tablesNeeded,
+					exportModel.isExportAllTablesFromReferencedServers()))
+				{
+					File serverSecDir = new File(secDir, serverName);
+					serverSecDir.mkdirs();
+					copyFileIfExists(tableSecfile, new File(serverSecDir, tableSecfile.getName()));
+				}
+
+				IFile serverDBIFile = dataModelManager.getServerDBIFile(serverName);
+				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()), () -> DatabaseUtils.serializeServerSettings(ServerSettings.DEFAULT));
+				File serverDbDir = new File(dbDir, serverName);
+				serverDbDir.mkdirs();
+				for (IFile tableDBIfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, tablesNeeded,
+					exportModel.isExportAllTablesFromReferencedServers()))
+				{
+					copyFileIfExists(tableDBIfile, new File(serverDbDir, tableDBIfile.getName()));
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		});
+	}
+
+	private static void copyFileIfExists(IFile src, File dest) throws IOException, CoreException
+	{
+		copyFileIfExists(src, dest, null);
+	}
+
+	private static void copyFileIfExists(IFile src, File dest, Supplier<String> defaultContents) throws IOException, CoreException
+	{
+		if (src.exists())
+		{
+			try (FileOutputStream fos = new FileOutputStream(dest))
+			{
+				IOUtils.copy(src.getContents(true), fos);
+			}
+		}
+		else if (defaultContents != null)
+		{
+			try (FileOutputStream fos = new FileOutputStream(dest))
+			{
+				IOUtils.write(defaultContents.get(), fos, Charset.forName("UTF-8"));
+			}
+		}
+	}
+
 	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
 	{
 		String fileName = exportModel.getTomcatContextXMLFileName();
@@ -1795,6 +1881,7 @@ public class WarExporter
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
 			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
+			properties.put("server." + i + ".clientOnlyConnections", "" + sc.isClientOnlyConnections());
 			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)

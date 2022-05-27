@@ -30,6 +30,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.keyword.Ident;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
@@ -37,7 +38,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Quick fix for differences between column name in the dbi file and in the DB. It will rename the column in dbi file prefixing it with '_' character.
- * 
+ *
  * @author hhardut
  *
  */
@@ -93,7 +94,7 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{
 							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
