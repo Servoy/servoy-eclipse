@@ -121,6 +121,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	public void storeInput()
 	{
 		files.clear();
+		if (checkboxTableViewer == null) return; // if not added as a page, the checkBoxTableViewer is null
 		String[] checkedElements = removeRequiredLabelAndFolderBrackets(checkboxTableViewer.getCheckedElements());
 		for (String el : checkedElements)
 			files.add(el);
