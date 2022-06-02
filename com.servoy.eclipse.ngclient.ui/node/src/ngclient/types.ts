@@ -221,7 +221,7 @@ export class FormComponentCache implements IComponentCache {
         public readonly name: string,
         public readonly model: { [property: string]: any },
         public readonly handlers: Array<string>,
-        public readonly responsive: boolean,
+        public responsive: boolean,
         public layout: { [property: string]: string },
         public readonly formComponentProperties: FormComponentProperties,
         public readonly hasFoundset: boolean,

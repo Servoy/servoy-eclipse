@@ -38,8 +38,6 @@ export class FormattingService {
      * format the data give with the {@link Format} object give, optionally using the display or edit format.
      */
     public format(data: any, format: Format, useEditFormat: boolean): string {
-        const formatString = useEditFormat ? format.edit : format.display;
-
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
             if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
                 // make sure is always returned with correct type, otherwise compare will not work well
@@ -47,6 +45,7 @@ export class FormattingService {
             }
             return data;
         }
+        const formatString = useEditFormat ? format.edit : format.display;
         if (data === undefined || data === null) return '';
         if ((format.type === 'NUMBER') || (format.type === 'INTEGER')) {
             return this.formatNumbers(data, formatString);

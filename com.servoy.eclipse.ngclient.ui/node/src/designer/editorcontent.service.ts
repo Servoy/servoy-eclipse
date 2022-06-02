@@ -24,6 +24,7 @@ export class EditorContentService {
         let redrawDecorators = false;
         let reorderPartComponents: boolean;
         let reorderLayoutContainers: Array<StructureCache> = new Array();
+        let orphanLayoutContainers: Array<StructureCache> = new Array();
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
@@ -41,6 +42,9 @@ export class EditorContentService {
                     if (container.parent.id != newParent.id) {
                         // we moved it to another parent
                         container.parent.removeChild(container);
+                        newParent.addChild(container);
+                    }
+                    else if (newParent.items.indexOf(container) < 0){
                         newParent.addChild(container);
                     }
                     if (reorderLayoutContainers.indexOf(newParent) < 0) {
@@ -65,7 +69,10 @@ export class EditorContentService {
                             let fc = formCache.getFormComponent(parentUUID);
                             if (fc) {
                                 fc.addChild(container);
-                                formCache.addLayoutContainer(container);
+                            }
+                            else {
+                                // parent is not created yet, look for it later
+                                orphanLayoutContainers.push(container);
                             }
                         }
                     }
@@ -141,6 +148,19 @@ export class EditorContentService {
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                         formCache.addFormComponent(fcc);
+                        if (!formCache.absolute) {
+                            let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
+                            if (parentUUID) {
+                                let parent = formCache.getLayoutContainer(parentUUID);
+                                if (parent) {
+                                    parent.addChild(fcc);
+                                    if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                        // new component in layout container , make sure is inserted in correct position
+                                        reorderLayoutContainers.push(parent);
+                                    }
+                                }
+                            }
+                        }
                     }
                     else {
                         const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
@@ -178,19 +198,21 @@ export class EditorContentService {
                             refresh = true;
                             const formComponent = component as FormComponentCache;
                             if (formComponent.responsive) {
-                                formComponent.items.forEach((item) => {
+                                formComponent.items.slice().forEach((item) => {
                                     if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
                                         formCache.removeLayoutContainer(item['id']);
                                         this.removeChildFromParentRecursively(item, formComponent);
                                     }
                                 });
                             }
+                            component.responsive = elem.responsive;
                             data.formComponentsComponents.forEach((child: string) => {
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     const formComponentComponent = formCache.getComponent(child);
                                     if (formComponent.responsive) {
-                                        const container = formCache.getLayoutContainer(data.childParentMap[child]);
+                                        const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
                                         if (container) {
+                                            formComponent.removeChild(formComponentComponent);
                                             container.addChild(formComponentComponent);
                                         }
                                     } else {
@@ -202,6 +224,7 @@ export class EditorContentService {
                     }
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     if (!component.model.containedForm && component.items && component.items.length > 0) {
+                        this.removeChildrenRecursively(component, formCache)
                         component.items = [];
                     }
                 }
@@ -239,6 +262,9 @@ export class EditorContentService {
                     const fc = formCache.getFormComponent(elem);
                     if (fc) {
                         formCache.removeFormComponent(elem);
+                        if (!formCache.absolute) {
+                            this.removeChildFromParentRecursively(fc, formCache.mainStructure);
+                        }
                     }
                 }
             });
@@ -259,6 +285,23 @@ export class EditorContentService {
             // make sure the order of components in absolute layout is correct, based on formindex
             this.sortChildren(formCache.partComponentsCache);
         }
+
+        for (let container of orphanLayoutContainers) {
+            const parentUUID = data.childParentMap[container.id].uuid;
+            if (parentUUID) {
+                let parent = formCache.getLayoutContainer(parentUUID);
+                if (parent) {
+                    parent.addChild(container);
+                }
+                else {
+                    let fc = formCache.getFormComponent(parentUUID);
+                    if (fc) {
+                        fc.addChild(container);
+                    }
+                }
+            }
+        }
+
         for (let container of reorderLayoutContainers) {
             // make sure the order of components in responsive layout containers is correct, based on location
             this.sortChildren(container.items);
@@ -329,17 +372,17 @@ export class EditorContentService {
         }
     }
 
-    private removeChildrenRecursively(parent: StructureCache, formCache: FormCache) {
+    private removeChildrenRecursively(parent: StructureCache | FormComponentCache, formCache: FormCache) {
         if (parent.items) {
             parent.items.forEach((elem) => {
                 if (elem instanceof StructureCache) {
                     formCache.removeLayoutContainer(elem.id);
                     this.removeChildrenRecursively(elem, formCache);
                 }
-                else if (elem instanceof ComponentCache){
+                else if (elem instanceof ComponentCache) {
                     formCache.removeComponent(elem.name);
                 }
-                else if (elem instanceof FormComponentCache){
+                else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
                 }
             });
