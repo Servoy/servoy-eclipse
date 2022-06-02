@@ -12,7 +12,6 @@
     <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Servoy Launch Windows"/>
     <booleanAttribute key="default" value="false"/>
     <setAttribute key="deselected_workspace_bundles">
-        <setEntry value="TestPlugin"/>
         <setEntry value="com.servoy.eclipse.docgenerator"/>
         <setEntry value="com.servoy.eclipse.docgenerator.client"/>
         <setEntry value="com.servoy.eclipse.docgenerator.ui"/>
@@ -22,7 +21,6 @@
         <setEntry value="com.servoy.eclipse.nodejs.linux.gtk.x86_64"/>
         <setEntry value="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"/>
         <setEntry value="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"/>
-        <setEntry value="tester"/>
     </setAttribute>
     <booleanAttribute key="includeOptional" value="true"/>
     <stringAttribute key="location" value="${servoy_install}/workspace"/>
