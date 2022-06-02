@@ -775,7 +775,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 				}
 
 				processedNodes.add(o);
-				if (AbstractRepository.searchPersist(sp.getSolution(), o) == null)
+				if (sp != null && AbstractRepository.searchPersist(sp.getSolution(), o) == null)
 				{
 					// it is new, only in editing solution
 					processedNodesThatWereCreated.add(Integer.valueOf(processedNodes.size() - 1));
