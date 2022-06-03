@@ -198,8 +198,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		beanSelectionPage.storeInput();
-		lafSelectionPage.storeInput();
+		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
+		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		if (exportModel.getServoyPropertiesFileName() != null)
@@ -550,8 +550,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		beanSelectionPage.storeInput();
-		lafSelectionPage.storeInput();
+		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
+		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		StringBuilder sb = new StringBuilder(".\\war_export.");
@@ -574,8 +574,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
 
-		appendToBuilder(sb, " -b", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber());
-		appendToBuilder(sb, " -l", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber());
+		if (beanSelectionPage.hasElements()) appendToBuilder(sb, " -b", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber());
+		if (lafSelectionPage.hasElements()) appendToBuilder(sb, " -l", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -d", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -pi", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber());
 
