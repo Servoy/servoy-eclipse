@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.SwingUtilities;
 
@@ -74,6 +75,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -81,6 +83,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportInheritedChildren;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
@@ -287,6 +290,18 @@ public class ElementUtil
 	 */
 	public static IPersist getOverridePersist(PersistContext persistContext) throws RepositoryException
 	{
+		return getOverridePersist(persistContext, ModelUtils.getEditingFlattenedSolution(persistContext.getContext()));
+	}
+
+	/**
+	 * DO NOT CALL THIS METHOD DIRECTLY (it is for testing purposes)
+	 * @param persistContext
+	 * @param editingFlattenedSolution
+	 * @return
+	 * @throws RepositoryException
+	 */
+	public static IPersist getOverridePersist(PersistContext persistContext, FlattenedSolution editingFlattenedSolution) throws RepositoryException
+	{
 		IPersist persist = persistContext.getPersist();
 		IPersist context = persistContext.getContext();
 		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
@@ -294,7 +309,7 @@ public class ElementUtil
 			|| !(context instanceof Form) //
 			|| ancestorForm == null // persist is something else, like a relation or a solution
 			|| ancestorForm == context // already in same form
-			|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
+			|| !editingFlattenedSolution.getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
 		)
 		{
 			// no override
@@ -332,11 +347,12 @@ public class ElementUtil
 		if (newPersist == null)
 		{
 			// override does not exist yet, create it
-			ISupportChilds parent = (Form)context;
+			ISupportInheritedChildren parent = (Form)context;
+			CopyOnWriteArrayList<String> uuids = null;
 			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form))
 			{
 				parent = null;
-				parent = (ISupportChilds)context.acceptVisitor(new IPersistVisitor()
+				parent = (ISupportInheritedChildren)context.acceptVisitor(new IPersistVisitor()
 				{
 					public Object visit(IPersist o)
 					{
@@ -350,7 +366,7 @@ public class ElementUtil
 
 				if (parent == null)
 				{
-					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
+					parent = (ISupportInheritedChildren)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
 					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
 				}
@@ -359,6 +375,46 @@ public class ElementUtil
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+			if (newPersist instanceof ISupportInheritedChildren)
+			{
+				PersistHelper.setupChildrenUUIDS((ISupportChilds)newPersist, (Form)context, editingFlattenedSolution);
+				((ISupportInheritedChildren)persist).addSuperListener((ISupportInheritedChildren)newPersist);
+			}
+
+			if (((Form)ancestorForm).isResponsiveLayout() && ((ISupportExtendsID)persist).getRealParent() instanceof Form &&
+				PersistHelper.getSuperPersist(parent) instanceof ISupportInheritedChildren)
+			{
+				uuids = parent.getSortedChildren();
+				if (uuids == null)
+				{
+					uuids = PersistHelper.setupChildrenUUIDS(parent, (Form)context, editingFlattenedSolution);
+					((ISupportInheritedChildren)PersistHelper.getSuperPersist(parent)).addSuperListener(parent);
+				}
+			}
+
+			ISupportInheritedChildren realParent = (ISupportInheritedChildren)PersistHelper.getRealParent(newPersist);
+			uuids = realParent.getSortedChildren();
+			if (uuids != null)
+			{
+				int index = uuids.indexOf(parentPersist.getUUID().toString());
+				String nextUUID = index + 1 < uuids.size() ? (String)uuids.get(index + 1) : null;
+				if (index >= 0)
+				{
+					uuids.set(index, newPersist.getUUID().toString());
+				}
+				else
+				{
+					uuids.add(newPersist.getUUID().toString());
+				}
+				UUID uuid = newPersist.getUUID();
+				if (parentPersist instanceof ISupportInheritedChildren)
+				{
+					//TODO add boolean param replace to insert before?
+					((ISupportInheritedChildren)parentPersist).getListeners().ifPresent(listeners -> listeners.forEach(l -> l.insertBeforeUUID(uuid,
+						nextUUID != null ? ((ISupportChilds)parentPersist).getChild(Utils.getAsUUID(nextUUID, false)) : null)));
+				}
+				realParent.putCustomProperty(new String[] { IContentSpecConstants.PROPERTY_CHILDREN_UUIDS }, uuids);
+			}
 			if (CSSPositionUtils.useCSSPosition(persist))
 			{
 				ISupportBounds iSupportBounds = (ISupportBounds)persist;

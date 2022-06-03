@@ -28,15 +28,23 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportInheritedChildren;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.Media;
@@ -48,6 +56,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -63,6 +72,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	private final Map<UUID, List<IPersist>> duplicatesUUIDs = new HashMap<UUID, List<IPersist>>();
 	private final Map<String, Map<String, List<IPersist>>> duplicateNames = new HashMap<String, Map<String, List<IPersist>>>();
 	private final Map<Form, String> formToDataSource = new HashMap<>();
+	private final Map<Integer, List<ISupportInheritedChildren>> unresolvedSuperPersists = new HashMap<>();
 	private static final String ALL_FORMS = "";
 
 	public DeveloperPersistIndex(List<Solution> solutions)
@@ -334,7 +344,111 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			List<IChildWebObject> children = ((WebComponent)persist).getImplementation().getAllPersistMappedProperties();
 			children.forEach(child -> putInCache(child));
 		}
+		restoreSuperPersistListeners(persist);
+	}
 
+	/**
+	 * @param persist
+	 */
+	private void restoreSuperPersistListeners(IPersist persist)
+	{
+		if (persist instanceof ISupportInheritedChildren && ((ISupportInheritedChildren)persist).getExtendsID() > 0)
+		{
+			IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+			if (superPersist != null)
+			{
+				((ISupportInheritedChildren)superPersist).addSuperListener((ISupportInheritedChildren)persist);
+				syncChildrenUUIDS(ModelUtils.getEditingFlattenedSolution(persist), (ISupportInheritedChildren)superPersist, (ISupportInheritedChildren)persist);
+			}
+			else
+			{
+				Integer extendsID = Integer.valueOf(((ISupportExtendsID)persist).getExtendsID());
+				if (!unresolvedSuperPersists.containsKey(extendsID))
+				{
+					unresolvedSuperPersists.put(extendsID, new ArrayList<ISupportInheritedChildren>());
+				}
+				unresolvedSuperPersists.get(extendsID).add((ISupportInheritedChildren)persist);
+			}
+		}
+		if (unresolvedSuperPersists.containsKey(Integer.valueOf(persist.getID())))
+		{
+			unresolvedSuperPersists.get(Integer.valueOf(persist.getID())).forEach(p -> ((ISupportInheritedChildren)persist).addSuperListener(p));
+			//TODO syncChildrenUUIDS
+			unresolvedSuperPersists.remove(Integer.valueOf(persist.getID()));
+		}
+	}
+
+	//TODO leave it public for testing purposes?
+	public static void syncChildrenUUIDS(FlattenedSolution fs, ISupportInheritedChildren superPersist, ISupportInheritedChildren persist)
+	{
+		CopyOnWriteArrayList<String> uuids = persist.getSortedChildren();
+		if (uuids == null)
+		{
+			uuids = PersistHelper.setupChildrenUUIDS(superPersist, (Form)superPersist.getAncestor(IRepository.FORMS),
+				ModelUtils.getEditingFlattenedSolution(superPersist));
+		}
+		else
+		{
+			//check if we need to sync
+			Form frm = (Form)persist.getAncestor(IRepository.FORMS);
+			List<String> superUUIDS = superPersist.getSortedChildren();
+			if (superUUIDS == null)
+			{
+				superUUIDS = PersistHelper.getSortedChildren(superPersist, frm, fs);
+			}
+
+			List<String> overridesList = uuids.stream().filter(uuid -> frm.getChild(Utils.getAsUUID(uuid, false)) != null)//
+				.collect(Collectors.toList());
+
+			Map<String, String> overrides = new HashMap<>();
+			for (String uuid : overridesList)
+			{
+				IPersist superP = PersistHelper.getSuperPersist((ISupportExtendsID)frm.getChild(Utils.getAsUUID(uuid, false)));
+				if (superP != null)
+				{
+					overrides.put(superP.getUUID().toString(), uuid);
+				}
+			}
+
+			for (String u : uuids)
+			{
+				UUID uuid = Utils.getAsUUID(u, false);
+				if (persist.getChild(uuid) == null && frm.getChild(uuid) == null && !superUUIDS.contains(u) ||
+					overridesList.contains(u) && PersistHelper.getSuperPersist((ISupportExtendsID)frm.getChild(uuid)) == null)
+				{
+					//uuid deleted in super persist
+					uuids.remove(u);
+				}
+			}
+
+			String lastInheritedElement = null;
+			for (String u : superUUIDS)
+			{
+				if (!uuids.contains(u) && !overrides.containsKey(u))
+				{
+					//new uuid in super persist
+					int index = superUUIDS.indexOf(u);
+					String next = index < superUUIDS.size() - 1 ? (String)superUUIDS.get(index + 1) : lastInheritedElement;
+					index = uuids.indexOf(next);
+					if (index == -1 && overrides.containsKey(next)) index = uuids.indexOf(overrides.get(next));
+					if (next == lastInheritedElement) index = index + 1;
+					if (index >= 0 && index < uuids.size())
+					{
+						uuids.add(index, u);
+					}
+					else
+					{
+						//new child was added in super
+						uuids.add(u);
+					}
+				}
+				else
+				{
+					lastInheritedElement = overrides.containsKey(u) ? overrides.get(u) : u;
+				}
+			}
+		}
+		persist.putCustomProperty(new String[] { IContentSpecConstants.PROPERTY_CHILDREN_UUIDS }, uuids);
 	}
 
 	// below method are teh one of the ISoluitonModelPersistIndex. they are just empty in the developer fs.
