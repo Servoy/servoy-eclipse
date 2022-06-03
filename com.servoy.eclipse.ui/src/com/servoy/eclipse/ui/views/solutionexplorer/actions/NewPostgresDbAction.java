@@ -25,9 +25,11 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.Utils;
@@ -96,16 +98,16 @@ public class NewPostgresDbAction extends AbstractNewDbAction
 		try
 		{
 			ServerConfig origConfig = serverPrototype.getConfig();
+			ServerSettings origSettings = ((IServer)serverPrototype).getSettings();
 			String serverUrl = EclipseDatabaseUtils.getPostgresServerUrl(origConfig, name);
-			final IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			String configName = name;
 			for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)
 			{
 				configName = name + i;
 			}
-			serverManager.getServerConfig(name);
 
-			saveAndOpenDefaultConfig(origConfig, serverUrl, serverManager, configName);
+			saveAndOpenDefaultConfig(origConfig, origSettings.withDefaults(origConfig), serverUrl, serverManager, configName);
 
 		}
 		catch (Exception e)

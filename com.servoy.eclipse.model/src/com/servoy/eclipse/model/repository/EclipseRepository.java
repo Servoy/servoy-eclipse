@@ -57,7 +57,6 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.ContentSpec;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -208,7 +207,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 
 	private int last_element_id = Integer.MAX_VALUE / 2;
 
-	public int getNewElementID(UUID new_uuid) throws RepositoryException
+	public int getNewElementID(UUID new_uuid)
 	{
 		synchronized (uuid_element_id_map)
 		{
@@ -313,11 +312,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		//nop, remove project manually in eclipse
 	}
 
-
-	public IColumnInfoManager getColumnInfoManager()
-	{
-		return ServoyModelFinder.getServoyModel().getDataModelManager();
-	}
 
 	@Override
 	public IRootObject createNewRootObject(String name, int objectTypeId, int newElementID, UUID uuid) throws RepositoryException
@@ -758,12 +752,12 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 							if (o.getTypeID() == IRepository.FORMS) // move form security file
 							{
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
-									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + WorkspaceUserManager.SECURITY_FILE_EXTENSION;
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
 									wsa.move(oldSecFileRelativePath,
 										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-											WorkspaceUserManager.SECURITY_FILE_EXTENSION);
+											DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT);
 								}
 							}
 						}

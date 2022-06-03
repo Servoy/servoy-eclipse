@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.IScriptProjectFilenames;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Utility class for eclipse IResource operations.
@@ -52,10 +53,51 @@ public class ResourcesUtils
 	 * @param force see {@link IFile#create(InputStream, boolean, org.eclipse.core.runtime.IProgressMonitor)}.
 	 * @throws CoreException if the file or it's parent container cannot be created.
 	 */
-	public static void createFileAndParentContainers(final IFile file, final InputStream source, final boolean force) throws CoreException
+	public static void createFileAndParentContainers(IFile file, InputStream source, boolean force) throws CoreException
 	{
 		createParentContainers(file.getParent(), force);
 		file.create(source, force, null);
+	}
+
+	/**
+	 * Creates or overwrites the given file and set the contents, and it's parent containers (if they do not already exist).
+	 *
+	 * @param file the file to be created.
+	 * @param source the content used to fill up the file.
+	 * @param force see {@link IFile#create(InputStream, boolean, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * @throws CoreException if the file or it's parent container cannot be created.
+	 */
+	public static void createOrWriteFile(IFile file, InputStream source, boolean force) throws CoreException
+	{
+		if (file.exists())
+		{
+			file.setContents(source, true, false, null);
+		}
+		else
+		{
+			createFileAndParentContainers(file, source, force);
+		}
+	}
+
+	/**
+	 * Creates or overwrites the given file and set the contents, and it's parent containers (if they do not already exist).
+	 *
+	 * @param file the file to be created.
+	 * @param source the content used to fill up the file.
+	 * @param force see {@link IFile#create(InputStream, boolean, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * @throws CoreException if the file or it's parent container cannot be created.
+	 */
+	public static void createOrWriteFileUTF8(IFile file, String contents, boolean force) throws CoreException
+	{
+		InputStream source = Utils.getUTF8EncodedStream(contents);
+		if (file.exists())
+		{
+			file.setContents(source, force, false, null);
+		}
+		else
+		{
+			createFileAndParentContainers(file, source, force);
+		}
 	}
 
 	public static void createParentContainers(IContainer parent, boolean force) throws CoreException

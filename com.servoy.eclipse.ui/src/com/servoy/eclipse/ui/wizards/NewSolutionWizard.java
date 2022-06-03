@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
@@ -561,7 +562,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected static void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
-		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+
+		ServerConfig origConfig = Arrays.stream(serverManager.getServerConfigs())
 			.filter(
 				s -> s.isPostgresDriver() && s.isEnabled())
 			.findAny()
@@ -572,7 +575,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return;
 		}
 
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(origConfig.getServerName());
+		IServerInternal server = (IServerInternal)serverManager.getServer(origConfig.getServerName());
 		if (server == null || !server.isValid())
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
@@ -591,8 +594,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 			try
 			{
-				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+				serverManager.testServerConfigConnection(serverConfig, 0);
+				serverManager.saveServerConfig(null, serverConfig);
+				serverManager.saveServerSettings(serverConfig.getServerName(),
+					serverManager.getServerSettings(origConfig.getServerName()).withDefaults(serverConfig));
 			}
 			catch (Exception ex)
 			{
@@ -805,7 +810,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
 						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 
-					EditorUtil.openServerEditor(config, true);
+					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}
 			}
 		}

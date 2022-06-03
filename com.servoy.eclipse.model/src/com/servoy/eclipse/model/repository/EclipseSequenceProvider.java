@@ -36,7 +36,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnInfoSequence;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnInfoManager;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.QuerySet;
@@ -59,16 +59,16 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 	private final Map<IColumn, ColumnInfoSequence> columnInfoSeqCache;
 
-	private final IColumnInfoManager columnInfoManager;
+	private final IServerInfoManager serverInfoManager;
 
 	/**
 	 * Creates a new instance that uses the specified manager to save column info data.
 	 *
-	 * @param columnInfoManager manager to save column info data.
+	 * @param serverInfoManager manager to save column info data.
 	 */
-	public EclipseSequenceProvider(IColumnInfoManager columnInfoManager)
+	public EclipseSequenceProvider(IServerInfoManager serverInfoManager)
 	{
-		this.columnInfoManager = columnInfoManager;
+		this.serverInfoManager = serverInfoManager;
 		columnInfoSeqCache = Collections.synchronizedMap(new HashMap<IColumn, ColumnInfoSequence>());
 	}
 
@@ -288,7 +288,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 					columnInfo.setNextSequence(newSequence);
 					columnInfo.setPostSequenceChars(postSequenceChars);
 					columnInfo.flagChanged();
-					columnInfoManager.updateAllColumnInfo(column.getTable());
+					serverInfoManager.updateAllColumnInfo(column.getTable());
 				}
 			}
 		}

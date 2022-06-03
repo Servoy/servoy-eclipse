@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -87,7 +88,7 @@ public final class EclipseDatabaseUtils
 		TableDef tableInfo;
 		try
 		{
-			tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+			tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 		}
 		catch (JSONException e)
 		{
@@ -261,7 +262,8 @@ public final class EclipseDatabaseUtils
 				columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
 				columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
 				columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
-
+				columnInfo.setSortIgnorecase(columnInfoDef.sortIgnorecase);
+				columnInfo.setSortingNullprecedence(columnInfoDef.sortingNullprecedence);
 
 				if (newColumnInfoObj) column.setColumnInfo(columnInfo); // it was null before so set it in column now
 				column.setFlags(columnInfoDef.flags);

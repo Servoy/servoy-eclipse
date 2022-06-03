@@ -27,6 +27,7 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
@@ -149,12 +150,13 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 				return null;
 			}
 			ServoyModelManager.getServoyModelManager().getServoyModel();
-			ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(name);
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			ServerConfig serverConfig = serverManager.getServerConfig(name);
 			if (serverConfig == null)
 			{
 				return null;
 			}
-			return new ServerEditorInput(serverConfig);
+			return new ServerEditorInput(serverConfig, serverManager.getServerSettings(name));
 		}
 	}
 

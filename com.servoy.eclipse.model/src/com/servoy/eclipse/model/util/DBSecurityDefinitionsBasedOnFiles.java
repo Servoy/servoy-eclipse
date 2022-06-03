@@ -28,10 +28,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
@@ -39,6 +39,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
+import com.servoy.j2db.util.xmlxport.ServerDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
@@ -57,7 +58,7 @@ class DBSecurityDefinitionsBasedOnFiles
 
 	DBSecurityDefinitionsBasedOnFiles(ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefinitionsBasedOnDBIFiles)
 	{
-		IProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject(); // this should always be non-null when exporting; we always export the active solution so static access shouldn't hurt
+		DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager(); // this should always be non-null when exporting; we always export the active solution so static access shouldn't hurt
 
 		Set<String> availableGroupNames = new HashSet<>();
 		try
@@ -70,14 +71,13 @@ class DBSecurityDefinitionsBasedOnFiles
 			ServoyLog.logError(e); // should never happen as it's always an eclipse user manager that doesn't throw these
 		}
 
-		Map<String, List<TableDef>> allTableDefsFromAllServersBasedOnDBI = tableDefinitionsBasedOnDBIFiles.getServerTableDefs();
-		for (Entry<String, List<TableDef>> serverToTableList : allTableDefsFromAllServersBasedOnDBI.entrySet())
+		Map<ServerDef, List<TableDef>> allTableDefsFromAllServersBasedOnDBI = tableDefinitionsBasedOnDBIFiles.getServerTableDefs();
+		for (Entry<ServerDef, List<TableDef>> serverToTableList : allTableDefsFromAllServersBasedOnDBI.entrySet())
 		{
-			String serverName = serverToTableList.getKey();
+			String serverName = serverToTableList.getKey().name;
 			for (TableDef tableDef : serverToTableList.getValue())
 			{
-
-				IFile file = WorkspaceUserManager.getTableSecFile(serverName, tableDef.name, resourcesProject);
+				IFile file = dataModelManager.getSecurityFile(serverName, tableDef.name);
 				if (file.exists())
 				{
 					try
@@ -85,11 +85,8 @@ class DBSecurityDefinitionsBasedOnFiles
 						String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
 						if (fileContent != null)
 						{
-							// check to see if this table also has security info next to it (.sec file); if so, load it in
-							Map<String, List<SecurityInfo>> tableAccess = new HashMap<String, List<SecurityInfo>>();
-
-							// read the file into memory
-							WorkspaceUserManager.deserializeSecurityPermissionInfo(fileContent, tableAccess);
+							// check to see if this table also has security info next to it (.sec file); if so, load it into memory
+							Map<String, List<SecurityInfo>> tableAccess = WorkspaceUserManager.deserializeSecurityPermissionInfo(fileContent);
 
 							tableAccess.forEach((groupName, tableRightsFromFile) -> {
 								if (availableGroupNames.contains(groupName))

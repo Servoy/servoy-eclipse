@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.model.repository;
 
+import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,21 +66,23 @@ import com.servoy.eclipse.model.util.UpdateMarkersJob;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableMetaInfo;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -93,10 +97,16 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  * It reads dbi files into column information, writes dbi files from column information and checks for dbi errors and inconsistencies between dbi files and actual database structure.
  * @author acostescu
  */
-public class DataModelManager implements IColumnInfoManager
+public class DataModelManager implements IServerInfoManager
 {
+	public static final String SECURITY_FILE_EXTENSION = "sec";
+	public static final String SECURITY_FILE_EXTENSION_WITH_DOT = '.' + SECURITY_FILE_EXTENSION;
+	public static final String SECURITY_DIRECTORY = "security";
+	public static final String SECURITY_FILENAME = "security" + SECURITY_FILE_EXTENSION_WITH_DOT;
+
 	public static final String COLUMN_INFO_FILE_EXTENSION = "dbi";
 	public static final String COLUMN_INFO_FILE_EXTENSION_WITH_DOT = '.' + COLUMN_INFO_FILE_EXTENSION;
+
 	public static final String TABLE_DATA_FILE_EXTENSION_WITH_DOT = ".data";
 	public static final String TEMP_UPPERCASE_PREFIX = "TEMP_"; // tables that are not considered as being 'real'
 
@@ -243,19 +253,19 @@ public class DataModelManager implements IColumnInfoManager
 			catch (JSONException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw new RepositoryException(e);
 			}
 			catch (CoreException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw new RepositoryException(e);
 			}
 			catch (RepositoryException e)
 			{
 				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 				throw e;
 			}
 			finally
@@ -304,7 +314,7 @@ public class DataModelManager implements IColumnInfoManager
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 				if (json_table != null)
 				{
-					TableDef tableInfo = deserializeTableInfo(json_table);
+					TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 					if (tableName.equals(tableInfo.name))
 					{
 						return new TableMetaInfo(tableInfo.hiddenInDeveloper, Boolean.TRUE.equals(tableInfo.isMetaData));
@@ -327,7 +337,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (errMsg != null)
 				{
 					removeErrorMarker(server.getName(), tableName);
-					addDeserializeErrorMarker(server.getName(), tableName, errMsg);
+					addTableDeserializeErrorMarker(server.getName(), tableName, errMsg);
 				}
 				if (is != null)
 				{
@@ -399,7 +409,7 @@ public class DataModelManager implements IColumnInfoManager
 		try
 		{
 			String out = serializeTable(t);
-			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getFileName(t.getName()), out);
+			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getDBIFileName(t.getName()), out);
 		}
 		catch (JSONException e)
 		{
@@ -527,6 +537,65 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
+	@Override
+	public void updateServerSettings(String serverName, ServerSettings serverSettings)
+	{
+		if (serverName == null || !writeDBIFiles)
+		{
+			return;
+		}
+
+		IFile dbiFile = getServerDBIFile(serverName);
+		if (serverSettings == null)
+		{
+			if (dbiFile.exists())
+			{
+				try
+				{
+					dbiFile.delete(false, null);
+				}
+				catch (CoreException e)
+				{
+					Debug.error(e);
+				}
+			}
+		}
+		else
+		{
+			String json = DatabaseUtils.serializeServerSettings(serverSettings);
+			try
+			{
+				ResourcesUtils.createOrWriteFileUTF8(dbiFile, json, true);
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
+			}
+		}
+	}
+
+	@Override
+	public ServerSettings loadServerSettings(String serverName) throws RepositoryException
+	{
+		IFile dbiFile = getServerDBIFile(serverName);
+		if (dbiFile.exists())
+		{
+			try (InputStream is = dbiFile.getContents(true))
+			{
+				String json = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				return deserializeServerInfo(serverName, json).serverSettings;
+			}
+			catch (Exception e)
+			{
+				addServerDeserializeErrorMarker(serverName, e.getMessage());
+				throw new RepositoryException(e);
+			}
+		}
+
+		return ServerSettings.DEFAULT;
+	}
+
+
 	public void testTableAndCreateDBIFile(ITable table)
 	{
 		if (table == null) return;
@@ -562,7 +631,7 @@ public class DataModelManager implements IColumnInfoManager
 					try
 					{
 						t.acquireReadLock();
-						TableDef tableInfo = deserializeTableInfo(json_table);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 						tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
 						tObj = serializeTableInfo(tableInfo);
 					}
@@ -597,13 +666,13 @@ public class DataModelManager implements IColumnInfoManager
 		catch (JSONException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+			addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (CoreException e)
 		{
 			// maybe the .dbi file content is corrupt... add an error marker
-			addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+			addTableDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
 			throw new RepositoryException(e);
 		}
 		catch (UnsupportedEncodingException e)
@@ -683,7 +752,7 @@ public class DataModelManager implements IColumnInfoManager
 	private void deserializeTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
-		TableDef tableInfo = deserializeTableInfo(json_table);
+		TableDef tableInfo = DatabaseUtils.deserializeTableInfo(json_table);
 		if (!t.getName().equals(tableInfo.name))
 		{
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
@@ -702,31 +771,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (c != null)
 				{
 					existingColumnInfo++;
-					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
-					ColumnInfo ci = new ColumnInfo(element_id, true);
-					ci.setAutoEnterType(cid.autoEnterType);
-					ci.setAutoEnterSubType(cid.autoEnterSubType);
-					ci.setSequenceStepSize(cid.sequenceStepSize);
-					ci.setPreSequenceChars(cid.preSequenceChars);
-					ci.setPostSequenceChars(cid.postSequenceChars);
-					ci.setDefaultValue(cid.defaultValue);
-					ci.setLookupValue(cid.lookupValue);
-					ci.setDatabaseSequenceName(cid.databaseSequenceName);
-					ci.setTitleText(cid.titleText);
-					ci.setDescription(cid.description);
-					ci.setForeignType(cid.foreignType);
-					ci.setConverterName(cid.converterName);
-					ci.setConverterProperties(cid.converterProperties);
-					ci.setValidatorProperties(cid.validatorProperties);
-					ci.setValidatorName(cid.validatorName);
-					ci.setDefaultFormat(cid.defaultFormat);
-					ci.setElementTemplateProperties(cid.elementTemplateProperties);
-					ci.setDataProviderID(cid.dataProviderID);
-					ci.setContainsMetaData(cid.containsMetaData);
-					ci.setConfiguredColumnType(cid.columnType);
-					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
-					ci.setFlags(cid.flags);
-					c.setColumnInfo(ci);
+					DatabaseUtils.updateColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, cid);
 					changedColumns.add(c);
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
@@ -797,20 +842,6 @@ public class DataModelManager implements IColumnInfoManager
 			addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid));
 		}
 	}
-
-	/**
-	 * Gets the table information from a .dbi (JSON format) file like structured String.
-	 *
-	 * @param stringDBIContent the table information in .dbi format
-	 * @return the deserialized table information.
-	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
-	 */
-	public TableDef deserializeTableInfo(String stringDBIContent) throws JSONException
-	{
-		ServoyJSONObject dbiContents = new ServoyJSONObject(stringDBIContent, true);
-		return DatabaseUtils.deserializeTableInfo(dbiContents);
-	}
-
 
 	public String serializeTable(ITable t) throws JSONException
 	{
@@ -894,6 +925,8 @@ public class DataModelManager implements IColumnInfoManager
 			cid.dataProviderID = ci.getDataProviderID();
 			cid.containsMetaData = ci.getContainsMetaData();
 			cid.elementTemplateProperties = ci.getElementTemplateProperties();
+			cid.sortIgnorecase = ci.getSortIgnorecase();
+			cid.sortingNullprecedence = ci.getSortingNullprecedence();
 		}
 		else if (!onlyStoredColumns)
 		{
@@ -964,22 +997,34 @@ public class DataModelManager implements IColumnInfoManager
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
 			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
 			obj.putOpt(ColumnInfoDef.CONTAINS_META_DATA, cid.containsMetaData);
+			if (cid.sortIgnorecase != null)
+			{
+				obj.put(ColumnInfoDef.SORT_IGNORECASE, cid.sortIgnorecase);
+			}
+			if (cid.sortingNullprecedence != null)
+			{
+				obj.put(ColumnInfoDef.SORTING_NULLPRECEDENCE, cid.sortingNullprecedence.name());
+			}
 			carray.put(obj);
 		}
 		tobj.put(TableDef.PROP_COLUMNS, carray);
 		return tobj.toString(true);
 	}
 
-
-	public static String getFileName(String tableName)
+	public static String getDBIFileName(String tableName)
 	{
 		return tableName + COLUMN_INFO_FILE_EXTENSION_WITH_DOT;
+	}
+
+	public static String getSecurityFileName(String name)
+	{
+		return name + SECURITY_FILE_EXTENSION_WITH_DOT;
 	}
 
 	public static String getRelativeServerPath(String serverName)
 	{
 		if (serverName == null) return "";
-		return SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + serverName + IPath.SEPARATOR;
+		return SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + serverName;
 	}
 
 	public IFile getDBIFile(String dataSource)
@@ -994,7 +1039,25 @@ public class DataModelManager implements IColumnInfoManager
 
 	public IFile getDBIFile(String serverName, String tableName)
 	{
-		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
+		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getDBIFileName(tableName));
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getSecurityFile(String serverName, String tableName)
+	{
+		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getSecurityFileName(tableName));
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getServerDBIFile(String serverName)
+	{
+		IPath path = new Path(getRelativeServerPath(serverName) + COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
+		return resourceProject.getFile(path);
+	}
+
+	public IFile getSecurityFile()
+	{
+		IPath path = new Path(SECURITY_DIRECTORY + IPath.SEPARATOR + SECURITY_FILENAME);
 		return resourceProject.getFile(path);
 	}
 
@@ -1009,7 +1072,7 @@ public class DataModelManager implements IColumnInfoManager
 		return resourceProject.getFile(path);
 	}
 
-	public IFolder getDBIFileContainer(String serverName)
+	public IFolder getServerInformationFolder(String serverName)
 	{
 		IPath path = new Path(getRelativeServerPath(serverName));
 		return resourceProject.getFolder(path);
@@ -1159,49 +1222,53 @@ public class DataModelManager implements IColumnInfoManager
 		});
 	}
 
-	private void addDeserializeErrorMarker(String serverName, String tableName, final String message)
+	private void addTableDeserializeErrorMarker(String serverName, String tableName, String message)
 	{
-		addDeserializeErrorMarker(serverName, tableName, message, false);
+		addTableDeserializeErrorMarker(serverName, tableName, message, false);
 	}
 
-	private void addDeserializeErrorMarker(String serverName, String tableName, final String message, boolean onlyRestoreMarker)
+	private void addTableDeserializeErrorMarker(String serverName, String tableName, String message, boolean onlyRestoreMarker)
 	{
 		if (!onlyRestoreMarker) differences.addDifference(new TableDifference(serverName, tableName, message));
-		final IFile file = getDBIFile(serverName, tableName);
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
-			{
-				if (file.exists())
-				{
-					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-					// the project might have disappeared before this job was started... (delete)
-					// find out where the error occurred if possible...
-					int charNo = -1;
-					int idx = message.indexOf("character");
-					if (idx >= 0)
-					{
-						StringTokenizer st = new StringTokenizer(message.substring(idx + 9), " ");
-						if (st.hasMoreTokens())
-						{
-							String charNoString = st.nextToken();
-							try
-							{
-								charNo = Integer.parseInt(charNoString);
-							}
-							catch (NumberFormatException e)
-							{
-								// cannot fine character number... this is not a tragedy
-							}
-						}
-					}
+		updateProblemMarkers(() -> addDBIBadDBInfoMarker(getDBIFile(serverName, tableName), message));
+	}
 
-					// we have an active solution with a resources project but with invalid security info; add problem marker
-					ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
-					ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file");
+	private void addServerDeserializeErrorMarker(String serverName, String message)
+	{
+		updateProblemMarkers(() -> addDBIBadDBInfoMarker(getServerDBIFile(serverName), message));
+	}
+
+
+	private static void addDBIBadDBInfoMarker(IFile file, String message)
+	{
+		if (file.exists())
+		{
+			// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+			// the project might have disappeared before this job was started... (delete)
+			// find out where the error occurred if possible...
+			int charNo = -1;
+			int idx = message.indexOf("character");
+			if (idx >= 0)
+			{
+				StringTokenizer st = new StringTokenizer(message.substring(idx + 9), " ");
+				if (st.hasMoreTokens())
+				{
+					String charNoString = st.nextToken();
+					try
+					{
+						charNo = Integer.parseInt(charNoString);
+					}
+					catch (NumberFormatException e)
+					{
+						// cannot fine character number... this is not a tragedy
+					}
 				}
 			}
-		});
+
+			// we have an active solution with a resources project but with invalid security info; add problem marker
+			ServoyMarker mk = MarkerMessages.DBIBadDBInfo.fill(message);
+			ServoyBuilder.addMarker(file, mk.getType(), mk.getText(), charNo, ServoyBuilder.DBI_BAD_INFO, IMarker.PRIORITY_NORMAL, "JSON file");
+		}
 	}
 
 	private static int getErrorSeverity(String name)
@@ -1305,7 +1372,7 @@ public class DataModelManager implements IColumnInfoManager
 	private void removeErrorMarkers(final String serverName)
 	{
 		differences.removeDifferences(serverName);
-		final IFolder folder = getDBIFileContainer(serverName);
+		final IFolder folder = getServerInformationFolder(serverName);
 		updateProblemMarkers(new Runnable()
 		{
 			public void run()
@@ -1753,7 +1820,7 @@ public class DataModelManager implements IColumnInfoManager
 
 				if (dbiFileContent != null)
 				{
-					TableDef tableInfo = deserializeTableInfo(dbiFileContent);
+					TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 					if (!c.getTable().getName().equals(tableInfo.name))
 					{
 						throw new RepositoryException("Table name does not match dbi file name for " + c.getTable().getName());
@@ -1785,17 +1852,16 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	/** Get the DataModelManager installe as ColumnInfoManager in the servermanager.
-	 * @param serverManager
+	/** Get the DataModelManager installed as ServerInfoManager in the servermanager.
 	 * @param serverName
 	 * @return
 	 */
-	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager, String serverName)
+	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager)
 	{
-		IColumnInfoManager[] cims = serverManager.getColumnInfoManagers(serverName);
+		IServerInfoManager[] cims = serverManager.getServerInfoManagers();
 		if (cims != null)
 		{
-			for (IColumnInfoManager cim : cims)
+			for (IServerInfoManager cim : cims)
 			{
 				if (cim instanceof DataModelManager)
 				{
@@ -1828,7 +1894,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (server != null)
 				{
 					List<String> tableNames = serversTables.get(serverName);
-					IFolder serverInformationFolder = getDBIFileContainer(server.getName());
+					IFolder serverInformationFolder = getServerInformationFolder(server.getName());
 					for (String tableName : server.getTableAndViewNames(true))
 					{
 						if (!tableNames.contains(tableName)) continue;
@@ -1849,7 +1915,7 @@ public class DataModelManager implements IColumnInfoManager
 	@Override
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
-		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository(), c, createMissingServoySequence);
+		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, createMissingServoySequence);
 	}
 
 	@Override
@@ -1881,7 +1947,7 @@ public class DataModelManager implements IColumnInfoManager
 		for (TableDifference difference : differences.getDifferences())
 		{
 			if (difference.getType() == TableDifference.DESERIALIZE_PROBLEM)
-				addDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
+				addTableDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
 			else addDifferenceMarker(difference, true);
 		}
 	}

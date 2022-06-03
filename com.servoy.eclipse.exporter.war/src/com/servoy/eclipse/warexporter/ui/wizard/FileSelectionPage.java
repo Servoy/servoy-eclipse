@@ -132,7 +132,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		});
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
-		exportActiveSolution.setText("Include active solution and modules");
+		exportActiveSolution.setText("Include active solution and modules (a war export without solution does not support newest features)");
 		exportActiveSolution.setSelection(exportModel.isExportActiveSolution());
 		exportActiveSolution.addSelectionListener(new SelectionAdapter()
 		{
@@ -614,25 +614,31 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	{
 		if (exportModel.getWarFileName() == null) return null;
 
+		if (!exportActiveSolution.getSelection())
+		{
+			MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
+			msg.setText("Export without active solution");
+			msg.setMessage(
+				"When a war is deployed without active solution, not all features are supported in the uploaded solution,\nDo you want to continue?");
+			if (msg.open() != SWT.YES)
+			{
+				return null;
+			}
+		}
+
 		File f = new File(exportModel.getWarFileName());
 		if (f.exists())
 		{
 			MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
 			msg.setText("File already exists");
 			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
-			if (msg.open() == SWT.YES)
-			{
-				return super.getNextPage();
-			}
-			else
+			if (msg.open() != SWT.YES)
 			{
 				return null;
 			}
 		}
-		else
-		{
-			return super.getNextPage();
-		}
+
+		return super.getNextPage();
 	}
 
 	@Override
@@ -641,9 +647,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		fileNameText.setText("");
 		exportSomeNonActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
-		exportActiveSolution.setSelection(false);
+		exportActiveSolution.setSelection(true);
 		exportNG2.setSelection(false);
-		exportModel.setExportActiveSolution(false);
+		exportModel.setExportActiveSolution(true);
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
 		exportModel.setOverrideDefaultValues(false);

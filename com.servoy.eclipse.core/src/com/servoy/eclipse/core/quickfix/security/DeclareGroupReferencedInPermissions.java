@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
@@ -110,8 +108,7 @@ public class DeclareGroupReferencedInPermissions extends AlterPermissionSecFileQ
 				return "";
 			}
 		};
-		IPath path = new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT);
-		IFile usersGroupsFile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getFile(path);
+		IFile usersGroupsFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getSecurityFile();
 		alterUsersAndGroups.run(WorkspaceUserManager.SecurityReadException.UNKNOWN, null, usersGroupsFile); // type and wrong value are not relevant
 
 		return permissionsFileAltered;
