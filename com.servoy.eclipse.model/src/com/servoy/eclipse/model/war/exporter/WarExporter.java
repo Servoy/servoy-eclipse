@@ -609,7 +609,7 @@ public class WarExporter
 					}
 
 				}
-				if (proc.exitValue() != 0)
+				if (!monitor.isCanceled() && proc.exitValue() != 0)
 				{
 					ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
 					throw new ExportException(
