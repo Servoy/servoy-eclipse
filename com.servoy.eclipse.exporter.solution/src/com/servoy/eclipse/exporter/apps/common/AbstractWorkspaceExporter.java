@@ -617,13 +617,13 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	{
 		if (outputExtra && !verbose) return;
 		String message = "    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.");
-		Object lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, null);
+		Object location = marker.getAttribute(IMarker.LOCATION, null);
 		String path = marker.getResource().getLocation().toOSString();
 		if (path != null)
 		{
-			if (lineNumber != null)
+			if (location != null)
 			{
-				path = path + " : Line " + lineNumber;
+				path = path + " : " + location;
 			}
 			message += " (" + path + ")";
 		}
