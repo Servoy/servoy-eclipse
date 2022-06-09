@@ -10,18 +10,18 @@ export class DialogService {
     i18nOK = 'OK';
     i18nCancel = 'Cancel';
 
-    constructor(private matDialog: MatDialog, servoyService: ServoyPublicService) {
-        setTimeout(() => {
-            try {
-                servoyService.getI18NMessages('servoy.button.cancel', 'servoy.button.ok').then((val) => {
-                    this.i18nOK = val['servoy.button.ok'];
-                    this.i18nCancel = val['servoy.button.cancel'];
-                })
-            }
-            catch (e) {
-                console.error(e);
-            }
-        }, 2000);
+    constructor(private matDialog: MatDialog, private servoyService: ServoyPublicService) {
+    }
+
+    public init(): void {
+        try {
+            this.servoyService.getI18NMessages('servoy.button.cancel', 'servoy.button.ok').then((val) => {
+                this.i18nOK = val['servoy.button.ok'];
+                this.i18nCancel = val['servoy.button.cancel'];
+            });
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     public async showErrorDialog(dialogTitle: string, dialogMessage: string, ...buttonsText: string[]): Promise<any> {

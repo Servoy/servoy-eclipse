@@ -49,9 +49,13 @@ export class FormService {
                     // if form is loaded just call the api
                     if (this.formComponentCache.has(msg.call.form) && !(this.formComponentCache.get(msg.call.form) instanceof Deferred)) {
                         const formComponent = this.formComponentCache.get(msg.call.form) as IFormComponent;
-                        const retValue = formComponent.callApi(msg.call.bean, msg.call.api, msg.call.args, msg.call.propertyPath);
-                        formComponent.detectChanges();
-                        return retValue;
+                            const def = new Deferred();
+                            this.clientFunctionService.waitForLoading().finally(() => {
+                                const retValue = formComponent.callApi(msg.call.bean, msg.call.api, msg.call.args, msg.call.propertyPath);
+                                formComponent.detectChanges();
+                                def.resolve(retValue);
+                            });
+                            return def.promise;
                     }
                     if (!msg.call.delayUntilFormLoads) {
                         // form is not loaded yet, api cannot wait; i think this should be an error

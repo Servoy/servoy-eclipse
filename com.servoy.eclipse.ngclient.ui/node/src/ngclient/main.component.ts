@@ -26,9 +26,9 @@ export class MainComponent implements OnInit {
           public loadingIndicatorService: LoadingIndicatorService,
           allService: AllServiceService,
           serverData: ServerDataService) {
+    this.servoyService.connect();
     allService.init();
     serverData.init();
-    this.servoyService.connect();
   }
 
   ngOnInit() {

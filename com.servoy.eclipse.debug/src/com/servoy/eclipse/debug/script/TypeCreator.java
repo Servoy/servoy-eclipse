@@ -5115,7 +5115,7 @@ public class TypeCreator extends TypeCache
 			typeRef.setItemType(((ArrayType)parameter.getType()).getItemType());
 			clone.setType(typeRef);
 		}
-		if (parameter.getDirectType() != null)
+		else if (parameter.getDirectType() != null)
 		{
 			SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 			typeRef.setTarget(parameter.getDirectType());
