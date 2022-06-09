@@ -42,7 +42,11 @@ export class AllServiceService implements ServiceProvider {
     }
 
     init() {
-        // just here is it can be called on.
+        Object.keys(this).forEach(key => {
+            if (typeof this[key].init === 'function') {
+                this[key].init();
+            }
+        });
     }
 
 }

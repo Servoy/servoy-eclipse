@@ -10,9 +10,12 @@ export class DialogService {
     i18nOK = 'OK';
     i18nCancel = 'Cancel';
 
-    constructor(private matDialog: MatDialog, servoyService: ServoyPublicService) {
+    constructor(private matDialog: MatDialog, private servoyService: ServoyPublicService) {
+    }
+
+    public init(): void {
         try {
-            servoyService.getI18NMessages('servoy.button.cancel', 'servoy.button.ok').then((val) => {
+            this.servoyService.getI18NMessages('servoy.button.cancel', 'servoy.button.ok').then((val) => {
                 this.i18nOK = val['servoy.button.ok'];
                 this.i18nCancel = val['servoy.button.cancel'];
             });
