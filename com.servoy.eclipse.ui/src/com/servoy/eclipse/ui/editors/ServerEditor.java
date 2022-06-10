@@ -611,9 +611,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 
 
-		empty(advancedSettingsComposite);
-
-		separator(advancedSettingsCollapserComposite);
+		Label separator4 = separator(advancedSettingsComposite);
 
 		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
 		label(advancedSettingsComposite, "Enable procedures", toolTip);
@@ -667,29 +665,29 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		mainComposite.setLayout(gridLayout);
 
 		// simple part of editor layout setup follows
-		serverNameLabel.setLayoutData(col1GD());
-		serverNameField.setLayoutData(col234GD());
+		serverNameLabel.setLayoutData(oneColumn());
+		serverNameField.setLayoutData(threeColumns());
 
 		for (int i = 0; i < urlPropertiesLabels.size(); i += 2)
 		{
-			urlPropertiesLabels.get(i).setLayoutData(col1GD());
-			urlPropertiesFields.get(i).setLayoutData(col2GD());
+			urlPropertiesLabels.get(i).setLayoutData(oneColumn());
+			urlPropertiesFields.get(i).setLayoutData(oneColumnFill());
 			if (i + 1 < urlPropertiesLabels.size())
 			{
-				urlPropertiesLabels.get(i + 1).setLayoutData(col3GD());
-				urlPropertiesFields.get(i + 1).setLayoutData(col4GD());
+				urlPropertiesLabels.get(i + 1).setLayoutData(oneColumn());
+				urlPropertiesFields.get(i + 1).setLayoutData(oneColumnFill());
 			}
 			else
 			{
-				urlPropertiesFields.get(i).setLayoutData(col234GD());
+				urlPropertiesFields.get(i).setLayoutData(threeColumns());
 			}
 		}
 
-		userNameLabel.setLayoutData(col1GD());
-		userNameField.setLayoutData(col2GD());
+		userNameLabel.setLayoutData(oneColumn());
+		userNameField.setLayoutData(oneColumnFill());
 
-		passwordLabel.setLayoutData(col3GD());
-		passwordField.setLayoutData(col4GD());
+		passwordLabel.setLayoutData(oneColumn());
+		passwordField.setLayoutData(oneColumnFill());
 
 		tmpGD = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		tmpGD.verticalIndent = 15;
@@ -701,11 +699,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		// layout missing driver if necessary
 		if (noDriverMessage != null)
 		{
-			tmpGD = col1234GD();
+			tmpGD = fourColumns();
 			tmpGD.verticalIndent = 20;
 			noDriverWarningWrapper.setLayoutData(tmpGD);
-			noDriverMessageWrapper.setLayoutData(col1234GD());
-			addDriverButton.setLayoutData(col1234GD());
+			noDriverMessageWrapper.setLayoutData(fourColumns());
+			addDriverButton.setLayoutData(fourColumns());
 		}
 
 		// layout advanced settings
@@ -717,13 +715,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		advancedSettingsCollapserComposite.setLayout(gridLayout);
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
-		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
-		tmpGD.verticalIndent = 20;
-		separator1.setLayoutData(tmpGD);
 		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tmpGD = new GridData(SWT.FILL, SWT.TOP, true, false);
-		tmpGD.minimumHeight = 0;
-		separator2.setLayoutData(tmpGD);
+		separator1.setLayoutData(separatorGd());
+		separator2.setLayoutData(separatorGd());
+		separator3.setLayoutData(separatorGd());
+		separator4.setLayoutData(separatorGd());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginRight = 0;
@@ -734,63 +730,59 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		gridLayout.horizontalSpacing = 10;
 		advancedSettingsComposite.setLayout(gridLayout);
 
-		urlLabel.setLayoutData(col1GD());
-		urlField.setLayoutData(col234GD());
+		urlLabel.setLayoutData(oneColumn());
+		urlField.setLayoutData(threeColumns());
 
-		driverLabel.setLayoutData(col1GD());
-		driverField.setLayoutData(col234GD());
+		driverLabel.setLayoutData(oneColumn());
+		driverField.setLayoutData(threeColumns());
 
-		catalogLabel.setLayoutData(col1GD());
-		catalogField.setLayoutData(col2GD());
+		catalogLabel.setLayoutData(oneColumn());
+		catalogField.setLayoutData(oneColumnFill());
 
-		schemaLabel.setLayoutData(col3GD());
-		schemaField.setLayoutData(col4GD());
+		schemaLabel.setLayoutData(oneColumn());
+		schemaField.setLayoutData(oneColumnFill());
 
-		maxActiveLabel.setLayoutData(col1GD());
-		maxActiveField.setLayoutData(col2GD());
+		maxActiveLabel.setLayoutData(oneColumn());
+		maxActiveField.setLayoutData(oneColumnFill());
 
-		maxIdleLabel.setLayoutData(col3GD());
-		maxIdleField.setLayoutData(col4GD());
+		maxIdleLabel.setLayoutData(oneColumn());
+		maxIdleField.setLayoutData(oneColumnFill());
 
-		idleTimoutLabel.setLayoutData(col1GD());
-		idleTimoutField.setLayoutData(col2GD());
+		idleTimoutLabel.setLayoutData(oneColumn());
+		idleTimoutField.setLayoutData(oneColumnFill());
 
-		maxPreparedStatementsIdleLabel.setLayoutData(col3GD());
-		maxPreparedStatementsIdleField.setLayoutData(col4GD());
+		maxPreparedStatementsIdleLabel.setLayoutData(oneColumn());
+		maxPreparedStatementsIdleField.setLayoutData(oneColumnFill());
 
-		tmpGD = col1234GD();
-		tmpGD.verticalIndent = 10;
-		separator3.setLayoutData(tmpGD);
-
-		tmpGD = col1GD();
+		tmpGD = oneColumn();
 		tmpGD.verticalIndent = 10;
 		validationTypeLabel.setLayoutData(tmpGD);
 
-		tmpGD = col2GD();
+		tmpGD = oneColumnFill();
 		tmpGD.verticalIndent = 10;
 		validationTypeField.setLayoutData(tmpGD);
 
-		tmpGD = col3GD();
+		tmpGD = oneColumn();
 		tmpGD.verticalIndent = 10;
 		validationQueryLabel.setLayoutData(tmpGD);
 
-		tmpGD = col4GD();
+		tmpGD = oneColumnFill();
 		tmpGD.verticalIndent = 10;
 		validationQueryField.setLayoutData(tmpGD);
 
-		dataModel_cloneFromLabel.setLayoutData(col1GD());
-		dataModel_cloneFromField.setLayoutData(col234GD());
+		dataModel_cloneFromLabel.setLayoutData(oneColumn());
+		dataModel_cloneFromField.setLayoutData(threeColumns());
 
-		enabledLabel.setLayoutData(col1GD());
-		enabledButton.setLayoutData(col1GD());
+		enabledLabel.setLayoutData(oneColumn());
+		enabledButton.setLayoutData(oneColumn());
 
-		skipSysTablesLabel.setLayoutData(col3GD());
-		skipSysTablesButton.setLayoutData(col3GD());
+		skipSysTablesLabel.setLayoutData(oneColumn());
+		skipSysTablesButton.setLayoutData(oneColumn());
 
-		logServerLabel.setLayoutData(col1GD());
-		logServerButton.setLayoutData(col1GD());
+		logServerLabel.setLayoutData(oneColumn());
+		logServerButton.setLayoutData(oneColumn());
 
-		buttonsComposite.setLayoutData(col34GD());
+		buttonsComposite.setLayoutData(twoColumns());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
@@ -798,9 +790,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		buttonsComposite.setLayout(gridLayout);
 
 		logTableLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.minimumWidth = 100;
-		logTableName.setLayoutData(gd);
+		logTableName.setLayoutData(oneColumnFill());
 		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
@@ -888,12 +878,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private static Label separator(Composite parent)
 	{
 		return new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-	}
-
-	private static void empty(Composite parent)
-	{
-		new Label(parent, SWT.NONE);
-		new Label(parent, SWT.NONE);
 	}
 
 	/**
@@ -988,50 +972,44 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		parentControl.layout(true, true);
 	}
 
-	// declare some grid-datas creators to be reused per column for easier tuning
-	private static GridData col1GD()
+	private static GridData oneColumnFill()
+	{
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	}
+
+	private static GridData oneColumn()
 	{
 		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 	}
 
-	private static GridData col2GD()
+	private static GridData twoColumns()
 	{
-		GridData col2GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		col2GD.minimumWidth = 100;
-		return col2GD;
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 	}
 
-	private static GridData col3GD()
+	private static GridData threeColumns()
 	{
-		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 	}
 
-	private static GridData col4GD()
+	private static GridData fourColumns()
 	{
-		GridData col4GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		col4GD.minimumWidth = 100;
-		return col4GD;
+		return new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 	}
 
-	private static GridData col234GD()
+	private static GridData separatorGd()
 	{
-		GridData col234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
-		col234GD.minimumWidth = 100;
-		return col234GD;
+		GridData gd = fourColumns();
+		gd.verticalAlignment = 10;
+		return gd;
 	}
 
-	private static GridData col34GD()
+	private static GridData width(GridData gd)
 	{
-		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-		col1234GD.minimumWidth = 100;
-		return col1234GD;
+		gd.minimumWidth = 100;
+		return gd;
 	}
 
-	private static GridData col1234GD()
-	{
-		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
-		return col1234GD;
-	}
 
 	@Override
 	public void dispose()
