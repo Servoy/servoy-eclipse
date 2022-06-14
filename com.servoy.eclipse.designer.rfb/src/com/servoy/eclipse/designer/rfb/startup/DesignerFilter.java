@@ -610,7 +610,7 @@ public class DesignerFilter implements Filter
 	private JSONObject getLayoutAttributes(JSONObject config, WebLayoutSpecification spec, boolean isChild)
 	{
 		JSONObject result = new JSONObject();
-		String value = config.optString("class");
+		String value = config != null ? config.optString("class") : null;
 		if (value == null) result.put("svy-title", "<null>");
 		else result.put("svy-title", (value.startsWith("col-") && !isChild ? "md-*" : value));
 		result.put("designclass", spec.getDesignStyleClass());
