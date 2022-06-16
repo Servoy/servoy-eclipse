@@ -67,6 +67,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -298,6 +299,10 @@ public class EditorServiceHandler implements IServerService
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
+					}
+					if (args.has("sameSizeIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowSameSizeFeedback());
 					}
 					if (args.has("isHideInherited"))
 					{

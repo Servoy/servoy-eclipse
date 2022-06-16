@@ -8,9 +8,13 @@ export enum TOOLBAR_CONSTANTS {
     LAYOUTS_COMPONENTS_CSS = 'Layouts & Components CSS',
     COMPONENTS_CSS = 'Components CSS',
     NO_CSS = 'No CSS',
+    SAME_SIZE = 'Selected Element Same Size Indicator',
     LAYOUTS_COMPONENTS_CSS_ICON = 'url(designer/assets/images/layouts_components_css.png)',
+    VISUAL_FEEDBACK_CSS_ICON = 'url(designer/assets/images/grid.png)',
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
-    NO_CSS_ICON = 'url(designer/assets/images/no_css.png)'
+    PLACEMENT_GUIDE_CSS_ICON = 'url(designer/assets/images/snaptogrid.png)',
+    NO_CSS_ICON = 'url(designer/assets/images/no_css.png)',
+    CHECK_ICON = 'url(designer/assets/images/check.png)'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -60,6 +64,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnSaveAsTemplate: ToolbarItem;
 
     btnHideInheritedElements: ToolbarItem;
+    btnVisualFeedbackOptions: ToolbarItem;
+    btnPlacementGuideOptions: ToolbarItem;
 
     btnBringForward: ToolbarItem;
     btnSendBackward: ToolbarItem;
@@ -145,6 +151,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.distribution = this.getCategoryItems(TOOLBAR_CATEGORIES.DISTRIBUTION);
             this.sizing = this.getCategoryItems(TOOLBAR_CATEGORIES.SIZING);
 
+            const ShowSameSizeIndicatorPromise = this.editorSession.showSameSizeIndicator();
+            void ShowSameSizeIndicatorPromise.then((result: boolean) => {
+                if (!result) {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                this.editorSession.setSameSizeIndicator(result);
+            });
+
         } else {
             this.btnPlaceField.hide = true;
             this.btnPlaceImage.hide = true;
@@ -172,7 +189,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleShowData.state = result;
         });
         const wireframePromise = this.editorSession.isShowWireframe();
-       void  wireframePromise.then((result: boolean) => {
+        void wireframePromise.then((result: boolean) => {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
@@ -209,7 +226,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.editorSession.getState().showSolutionCss = result;
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
-       void  zoomLevelPromise.then((result: number) => {
+        void zoomLevelPromise.then((result: number) => {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
@@ -479,7 +496,58 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
         this.btnHideInheritedElements.state = false;
 
+        this.btnVisualFeedbackOptions = new ToolbarItem(
+            'Visual feedback options',
+            null,
+            true,
+            null
+        );
+
+        this.btnVisualFeedbackOptions.getIconStyle = (selection) => {
+            return { 'background-image': TOOLBAR_CONSTANTS.VISUAL_FEEDBACK_CSS_ICON };
+        };
+
+        this.btnVisualFeedbackOptions.list = [
+            { 'text': 'Selected Element Anchoring Indicator', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Selected Element Alignment Guide', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Grid', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Rulers', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+        ];
+
+        this.btnVisualFeedbackOptions.onselection = (selection) => {
+            if (selection == TOOLBAR_CONSTANTS.SAME_SIZE) {
+                this.editorSession.setSameSizeIndicator(!this.editorSession.getState().sameSizeIndicator);
+                if (this.editorSession.getState().sameSizeIndicator) {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                }
+            }
+            return selection;
+        }
+
+        this.btnPlacementGuideOptions = new ToolbarItem(
+            'Element placement guide options',
+            null,
+            true,
+            null
+        );
+
+        this.btnPlacementGuideOptions.list = [
+            { 'text': 'None', 'iconStyle': { 'background-image': 'none' } },
+            { 'text': 'Grid guides', 'iconStyle': { 'background-image': 'none' } },
+            { 'text': 'Alignment guides', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+        ];
+
+        this.btnPlacementGuideOptions.getIconStyle = (selection) => {
+            return { 'background-image': TOOLBAR_CONSTANTS.PLACEMENT_GUIDE_CSS_ICON };
+        };
+
         this.add(this.btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
+        this.add(this.btnVisualFeedbackOptions, TOOLBAR_CATEGORIES.DISPLAY);
+        this.add(this.btnPlacementGuideOptions, TOOLBAR_CATEGORIES.DISPLAY);
 
         this.btnBringForward = new ToolbarItem(
             'Bring forward',
@@ -1040,18 +1108,18 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnZoomIn.enabled = selection.length == 1;
         }
     }
-    
-    applyHideInherited(hideInherited : boolean){
+
+    applyHideInherited(hideInherited: boolean) {
         const frameElem = this.doc.querySelector('iframe');
         const initializedElements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
         if (initializedElements.length == 0) setTimeout(() => this.applyHideInherited(hideInherited), 400);
-        const elements =  Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
+        const elements = Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
         elements.forEach((node) => {
             if (hideInherited) {
                 this.renderer.setStyle(node, 'visibility', 'hidden');
             }
             else {
-                this.renderer.setStyle(node, 'visibility', 'visible' );
+                this.renderer.setStyle(node, 'visibility', 'visible');
             }
         });
     }
@@ -1064,7 +1132,7 @@ export class ToolbarItem {
     style: string;
     disabledIcon: string;
     faIcon: string;
-    list: Array<{text: string; iconStyle?:{ 'background-image': string}}>;
+    list: Array<{ text: string; iconStyle?: { 'background-image': string } }>;
     getIconStyle: (text: string) => object;
     onselection: (text: string) => string;
     initialValue: number;

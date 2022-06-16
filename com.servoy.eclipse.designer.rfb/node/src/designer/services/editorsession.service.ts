@@ -140,6 +140,12 @@ export class EditorSessionService implements ServiceProvider {
         }, false)
     }
 
+    showSameSizeIndicator() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'sameSizeIndicator': true
+        }, false)
+    }
+    
     toggleShowWireframe() {
         const res = this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
             'show': 'showWireframeInDesigner'
@@ -325,6 +331,11 @@ export class EditorSessionService implements ServiceProvider {
         this.stateListener.next('statusText');
     }
 
+    setSameSizeIndicator(flag:boolean) {
+        this.state.sameSizeIndicator = flag;
+        this.stateListener.next('sameSizeIndicator');
+    }
+    
     getState(): State {
         return this.state;
     }
@@ -436,6 +447,7 @@ class State {
     showWireframe: boolean;
     showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
+    sameSizeIndicator : boolean;
     statusText: string;
     maxLevel: number;
     dragging = false;
