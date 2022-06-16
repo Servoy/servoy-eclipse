@@ -35,6 +35,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
@@ -293,7 +294,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				// if this is a WebCustomType this can be created multiply times for the same thing
 				// we should check if it is the same parent and the same index then assume this is the same thing
 				boolean isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
-					(existingPersist.getParent() == persist.getParent()) &&
+					(existingPersist.getAncestor(IRepository.WEBCOMPONENTS) == persist.getAncestor(IRepository.WEBCOMPONENTS)) &&
 					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex()));
 				if (isDifferent)
 				{
