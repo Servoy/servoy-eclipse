@@ -16,12 +16,7 @@
 */
 package com.servoy.eclipse.ui.editors.table;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -39,48 +34,15 @@ import com.servoy.j2db.persistence.RepositoryException;
 public class AggregationNameEditingSupport extends EditingSupport
 {
 	private final VerifyingTextCellEditor editor;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	public AggregationNameEditingSupport(TreeViewer tv)
 	{
 		super(tv);
 		editor = new VerifyingTextCellEditor(tv.getTree());
 		editor.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
-
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -104,7 +66,7 @@ public class AggregationNameEditingSupport extends EditingSupport
 				{
 					IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 					aggregationVariable.updateName(nameValidator, value.toString());
-					changeSupport.fireEvent(new ChangeEvent(observable));
+					observable.fireChangeEvent();
 				}
 			}
 			catch (final RepositoryException e)

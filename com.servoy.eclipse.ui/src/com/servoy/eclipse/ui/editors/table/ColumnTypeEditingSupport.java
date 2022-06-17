@@ -16,10 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
@@ -52,28 +50,11 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		types[length++] = ColumnLabelProvider.UUID_NATIVE;
 	}
 
-	public class ColumnTypeEditingObservable extends AbstractObservable
+	public class ColumnTypeEditingObservable extends ChangeSupportObservable
 	{
-		public ColumnTypeEditingObservable(Realm realm)
+		public ColumnTypeEditingObservable(ChangeSupport changeSupport)
 		{
-			super(realm);
-		}
-
-		@Override
-		public void addChangeListener(IChangeListener listener)
-		{
-			changeSupport.addChangeListener(listener);
-		}
-
-		@Override
-		public void removeChangeListener(IChangeListener listener)
-		{
-			changeSupport.removeChangeListener(listener);
-		}
-
-		public boolean isStale()
-		{
-			return false;
+			super(changeSupport);
 		}
 
 		public ColumnTypeEditingSupport getEditingSupport()
@@ -83,9 +64,9 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	}
 
 	private final CellEditor editor;
-	private final ChangeSupport changeSupport;
 	private Column column;
 	private final TableViewer tv;
+	private final ColumnTypeEditingObservable observable;
 
 	public ColumnTypeEditingSupport(TableViewer tv)
 	{
@@ -102,19 +83,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 				editor.deactivate();
 			}
 		});
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		new ColumnTypeEditingObservable(Realm.getDefault());
+		observable = new ColumnTypeEditingObservable(new SimpleChangeSupport());
 	}
 
 	@Override
@@ -228,12 +197,12 @@ public class ColumnTypeEditingSupport extends EditingSupport
 
 	public void addChangeListener(IChangeListener listener)
 	{
-		changeSupport.addChangeListener(listener);
+		observable.addChangeListener(listener);
 	}
 
 	public void removeChangeListener(IChangeListener listener)
 	{
-		changeSupport.removeChangeListener(listener);
+		observable.removeChangeListener(listener);
 	}
 
 	public Column getColumn()

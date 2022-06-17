@@ -19,12 +19,7 @@ package com.servoy.eclipse.ui.editors.table;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -38,7 +33,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 public class CalculationTypeEditingSupport extends EditingSupport
 {
 	private final CellEditor editor;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	public CalculationTypeEditingSupport(TreeViewer tv)
 	{
@@ -49,40 +44,8 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
 		}
 		editor = new FixedComboBoxCellEditor(tv.getTree(), types, SWT.READ_ONLY);
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -110,7 +73,7 @@ public class CalculationTypeEditingSupport extends EditingSupport
 				calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(
 					ScriptCalculation.getDefaultReturnMethodString(calculation.getType())));
 			}
-			changeSupport.fireEvent(new ChangeEvent(observable));
+			observable.fireChangeEvent();
 			getViewer().update(element, null);
 		}
 	}

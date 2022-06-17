@@ -26,13 +26,9 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoObservables;
 import org.eclipse.core.databinding.conversion.Converter;
-import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.IDisposeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -120,7 +116,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	private final Text databaseDefaultValue;
 	private Column column;
 	private ColumnInfoBean columnInfoBean;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	private final ColumnAutoEnterServoySeqComposite columnAutoEnterServoySeqComposite;
 	private final ColumnAutoEnterDBSeqComposite columnAutoEnterDBSeqComposite;
@@ -411,39 +407,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 				.addContainerGap()));
 		setLayout(groupLayout);
 
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
-		//
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
 
 	@Override
@@ -665,7 +629,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						{
 							column.setSequenceType(element);
 							columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
-							changeSupport.fireEvent(new ChangeEvent(observable));
+							observable.fireChangeEvent();
 							break;
 						}
 					}
@@ -795,7 +759,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					{
 						columnInfo.setAutoEnterSubType(element);
 						columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
-						changeSupport.fireEvent(new ChangeEvent(observable));
+						observable.fireChangeEvent();
 						if (element == ColumnInfo.SERVOY_SEQUENCE)
 						{
 							columnInfo.setPreSequenceChars("");
@@ -807,8 +771,6 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			}
 		}
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{

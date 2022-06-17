@@ -49,7 +49,7 @@ public class AggregationLabelProvider extends LabelProvider implements ITableLab
 				case AggregationsComposite.CI_NAME :
 					return aggregateVariable.getName();
 				case AggregationsComposite.CI_TYPE :
-					return aggregateVariable.getTypeAsString();
+					return AggregationTypeEditingSupport.getDisplay(aggregateVariable);
 				case AggregationsComposite.CI_COLUMN :
 					return aggregateVariable.getColumnNameToAggregate();
 				default :
