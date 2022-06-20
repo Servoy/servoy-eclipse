@@ -382,6 +382,10 @@ export class EditorSessionService implements ServiceProvider {
         return this.bIsDirty;
     }
 
+    setDirty(dirty : boolean){
+        this.bIsDirty = dirty;    
+    }
+    
     sendState(key: string, result: unknown): void {
         const iframe = this.doc.querySelector('iframe');
         const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
