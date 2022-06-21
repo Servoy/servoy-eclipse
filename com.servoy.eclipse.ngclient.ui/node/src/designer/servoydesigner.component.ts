@@ -108,6 +108,19 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         }
     }
 
+    contentRefresh() {
+        this.wsSession.callService("$editor", "getData", {
+            form: this.mainForm,
+            solution: this.solutionName,
+            ng2: true
+        }, false).then((data: string) => {
+            const formState = JSON.parse(data)[this.mainForm];
+            this.formService.destroyFormCache(this.mainForm);
+            this.formService.createFormCache(this.mainForm, formState, null);
+            this.designFormComponent.formCacheRefresh();
+        });
+    }
+    
     ngAfterViewInit() {
         this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
     }
@@ -122,4 +135,5 @@ export declare interface IDesignFormComponent {
     renderGhosts(): void;
     updateForm(width: number, height: number): void;
     redrawDecorators(): void;
+    contentRefresh() : void;
 }

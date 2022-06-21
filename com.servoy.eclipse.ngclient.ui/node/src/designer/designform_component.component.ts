@@ -249,6 +249,26 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.detectChanges();
     }
 
+    public formCacheRefresh(): void {
+        this.initFormCache();
+        this.detectChanges();
+    }
+
+    private initFormCache(): void {
+        // really make sure all form state is reverted to default
+        // Form Instances are reused for tabpanels that have a template reference to this.
+        this.formCache = this.formservice.getFormCache(this);
+        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+        if (styleClasses)
+            this.formClasses = styleClasses.split(' ');
+        else
+            this.formClasses = null;
+        this._containers = this.formCache.getComponent('').model.containers;
+        this._cssstyles = this.formCache.getComponent('').model.cssstyles;
+        this.servoyApiCache = {};
+        this.componentCache = {};
+    }
+
     public getFormCache(): FormCache {
         return this.formCache;
     }
@@ -266,18 +286,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.name) {
-            // really make sure all form state is reverted to default
-            // Form Instances are reused for tabpanels that have a template reference to this.
-            this.formCache = this.formservice.getFormCache(this);
-            const styleClasses: string = this.formCache.getComponent('').model.styleClass;
-            if (styleClasses)
-                this.formClasses = styleClasses.split(' ');
-            else
-                this.formClasses = null;
-            this._containers = this.formCache.getComponent('').model.containers;
-            this._cssstyles = this.formCache.getComponent('').model.cssstyles;
-            this.servoyApiCache = {};
-            this.componentCache = {};
+            this.initFormCache();
 
             //this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
             this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
