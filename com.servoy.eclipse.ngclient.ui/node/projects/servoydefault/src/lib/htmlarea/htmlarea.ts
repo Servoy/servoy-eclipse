@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
@@ -53,21 +53,18 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         this.tinyConfig['language'] = this.servoyService.getLocale();
 
         // app level configuration
-        let defaultConfiguration = this.servoyService.getUIProperty("config");
+        let defaultConfiguration = this.servoyService.getUIProperty('config');
         if (defaultConfiguration) {
-            try {
-                defaultConfiguration = JSON.parse(defaultConfiguration);
+            if (typeof defaultConfiguration === 'string') {
+                try {
+                    defaultConfiguration = JSON.parse(defaultConfiguration);
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            catch (e) {
-                console.error(e)
-            }
-            for (var key in defaultConfiguration) {
+            for (const key in defaultConfiguration) {
                 if (defaultConfiguration.hasOwnProperty(key)) {
-                    var value = defaultConfiguration[key]
-                    if (key === "plugins") {
-                        value += " tabindex";
-                    }
-                    this.tinyConfig[key] = value;
+                    this.tinyConfig[key] =  defaultConfiguration[key];
                 }
             }
         }
@@ -75,22 +72,20 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         // element level configuration
         let configuration = this.servoyApi.getClientProperty('config');
         if (configuration) {
-            try {
-                configuration = JSON.parse(configuration);
-            }
-            catch (e) {
-                console.error(e)
-            }
-            for (var key in configuration) {
-                if (configuration.hasOwnProperty(key)) {
-                    var value = configuration[key];
-                    if (key === "plugins") {
-                        value += " tabindex";
-                    }
-                    this.tinyConfig[key] = value;
+            if (typeof configuration === 'string') {
+                try {
+                    configuration = JSON.parse(configuration);
+                } catch (e) {
+                    console.error(e);
                 }
             }
-        }   
+            for (const key in configuration) {
+                if (configuration.hasOwnProperty(key)) {
+                    this.tinyConfig[key] = configuration[key];
+                }
+            }
+        }
+
     }
     
     svyOnInit() {
