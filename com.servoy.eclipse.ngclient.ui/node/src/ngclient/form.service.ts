@@ -343,6 +343,9 @@ export class FormService {
                     comp.model[property] = value;
                 }
             }
+            if (beanConversion){
+                formCache.addConversionInfo(beanname , beanConversion);
+            }
         }
         this.clientFunctionService.waitForLoading().finally(() => {
             formComponent.detectChanges();
