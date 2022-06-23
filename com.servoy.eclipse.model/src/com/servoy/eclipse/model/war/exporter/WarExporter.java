@@ -617,6 +617,13 @@ public class WarExporter
 					}
 
 				}
+				if (!monitor.isCanceled() && proc.exitValue() != 0)
+				{
+					ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
+					throw new ExportException(
+						"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
+							message.toString());
+				}
 			}
 
 			//delete unneeded files

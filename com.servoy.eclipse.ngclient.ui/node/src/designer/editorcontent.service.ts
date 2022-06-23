@@ -348,8 +348,9 @@ export class EditorContentService {
         }*/
         this.designFormCallback.updateForm(width, height);
     }
+    
     contentRefresh() {
-
+        this.designFormCallback.contentRefresh();
     }
 
     updateStyleSheets() {

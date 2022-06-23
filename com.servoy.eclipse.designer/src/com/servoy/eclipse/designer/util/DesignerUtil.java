@@ -456,7 +456,8 @@ public class DesignerUtil
 								if (layoutSpec.isDeprecated()) continue;
 								try
 								{
-									String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+									String config = (String)layoutSpec.getConfig();
+									String layoutName = config == null ? null : new JSONObject(config).optString("layoutName", null);
 									if (layoutName == null)
 									{
 										layoutName = layoutSpec.getName();
@@ -485,7 +486,8 @@ public class DesignerUtil
 				if (layoutSpec.isDeprecated()) continue;
 				try
 				{
-					String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+					String config = (String)layoutSpec.getConfig();
+					String layoutName = config == null ? null : new JSONObject(config).optString("layoutName", null);
 					if (layoutName == null)
 					{
 						layoutName = layoutSpec.getName();

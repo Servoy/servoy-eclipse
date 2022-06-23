@@ -28,12 +28,13 @@ import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 
+import com.servoy.eclipse.ui.editors.table.SimpleChangeSupport;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 
 /**
  * Editing support for setting security checkboxes in form editor security page.
- * 
+ *
  * @author lvostinar
  */
 
@@ -49,18 +50,7 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 		editor = new CheckboxCellEditor(viewer.getTable());
 		this.mask = mask;
 		this.model = model;
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
+		changeSupport = new SimpleChangeSupport();
 	}
 
 	private final ChangeSupport changeSupport;

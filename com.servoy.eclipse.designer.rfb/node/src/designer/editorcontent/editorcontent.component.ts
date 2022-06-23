@@ -87,6 +87,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
     
     adjustFromContentSize() {
+        const overlay = this.doc.querySelector('.contentframe-overlay');
+        this.renderer.setStyle(overlay, 'height', '100%');
+        this.renderer.setStyle(overlay, 'width', '100%');
+        
         let paletteHeight = '100%';
         if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
             const iframe = this.doc.querySelector('iframe');
@@ -97,8 +101,13 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
             }
         }
         const palette = this.doc.querySelector('.palette');
-        this.renderer.setStyle(palette, 'height', paletteHeight + 'px');
-        this.renderer.setStyle(palette, 'max-height', paletteHeight + 'px');
+        this.renderer.setStyle(palette, 'height', paletteHeight );
+        this.renderer.setStyle(palette, 'max-height', paletteHeight);
+        
+        // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
+        const contentArea = this.doc.querySelector('.content-area');
+        this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 'px');
+        this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 'px');
     }
 
     setContentSizeFull() {

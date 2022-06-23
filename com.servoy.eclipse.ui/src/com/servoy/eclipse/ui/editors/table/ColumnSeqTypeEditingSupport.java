@@ -16,12 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -32,6 +28,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
@@ -43,29 +40,11 @@ import com.servoy.j2db.query.ColumnType;
 public class ColumnSeqTypeEditingSupport extends EditingSupport
 {
 
-	public class ColumnSeqTypeEditingObservable extends AbstractObservable
+	public class ColumnSeqTypeEditingObservable extends ChangeSupportObservable
 	{
-
-		public ColumnSeqTypeEditingObservable(Realm realm)
+		public ColumnSeqTypeEditingObservable(ChangeSupport changeSupport)
 		{
-			super(realm);
-		}
-
-		@Override
-		public void addChangeListener(IChangeListener listener)
-		{
-			changeSupport.addChangeListener(listener);
-		}
-
-		@Override
-		public void removeChangeListener(IChangeListener listener)
-		{
-			changeSupport.removeChangeListener(listener);
-		}
-
-		public boolean isStale()
-		{
-			return false;
+			super(changeSupport);
 		}
 
 		public ColumnSeqTypeEditingSupport getEditingSupport()
@@ -77,7 +56,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	private final CellEditor editor;
 	private final String[] comboSeqTypes;
 	private Column column;
-	private final IObservable observable;
+	private final ColumnSeqTypeEditingObservable observable;
 
 	public ColumnSeqTypeEditingSupport(TableViewer tv, ITable table)
 	{
@@ -94,19 +73,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 				editor.deactivate();
 			}
 		});
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new ColumnSeqTypeEditingObservable(Realm.getDefault());
+		observable = new ColumnSeqTypeEditingObservable(new SimpleChangeSupport());
 	}
 
 	@Override
@@ -121,8 +88,6 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	{
 		return editor;
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -167,10 +132,10 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 				{
 					if (i == previousSeqType) return;
 					pi.setSequenceType(i);
-					pi.setFlag(Column.UUID_COLUMN, i == ColumnInfo.UUID_GENERATOR);
+					pi.setFlag(IBaseColumn.UUID_COLUMN, i == ColumnInfo.UUID_GENERATOR);
 					column = pi;
 					int dpType = Column.mapToDefaultType(pi.getConfiguredColumnType().getSqlType());
-					changeSupport.fireEvent(new ChangeEvent(observable));
+					observable.fireChangeEvent();
 					if (i == ColumnInfo.DATABASE_IDENTITY && i != previousSeqType && pi.getTable().getExistInDB())
 					{
 						MessageDialog.openWarning(((TableViewer)this.getViewer()).getTable().getShell(), "Warning",

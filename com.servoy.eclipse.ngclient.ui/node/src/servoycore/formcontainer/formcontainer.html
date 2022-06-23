@@ -6,9 +6,12 @@
     [sabloTabseqConfig]="{container: true, reservedGap: 50}"
     #element>
     <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  (@slideAnimation.done)="animationDone($event, 'form1')" *ngIf="form1_visible" [ngStyle]="getContainerStyle(getForm1())">
-    <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
+    <ng-template [ngIf]="!servoyApi.isInDesigner()" [ngIfElse]="desingform" [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
     </div>
     <div class='svy-tabcontainer' [@slideAnimation]="form2_state" (@slideAnimation.done)="animationDone($event, 'form2')" *ngIf="form2_visible"  [ngStyle]="getContainerStyle(getForm2())">
-    <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
+    <ng-template [ngIf]="!servoyApi.isInDesigner()" [ngIfElse]="desingform" [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
     </div>
 </div>
+<ng-template #desingform>
+    <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
+</ng-template>

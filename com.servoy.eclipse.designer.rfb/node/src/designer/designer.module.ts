@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { DesignerComponent } from './designer.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { StatusBarComponent } from './statusbar/statusbar.component';
+import { SameSizeIndicatorComponent } from './samesizeindicator/samesizeindicator.component';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
@@ -38,6 +39,7 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     ToolbarSpinnerComponent,
     ToolbarSwitchComponent,
     StatusBarComponent,
+    SameSizeIndicatorComponent,
     PaletteComponent,
     ResizerComponent,
     ContextMenuComponent,

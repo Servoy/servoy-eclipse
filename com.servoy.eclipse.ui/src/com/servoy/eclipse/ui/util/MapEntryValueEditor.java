@@ -21,12 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
-import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -41,21 +36,22 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.servoy.eclipse.ui.editors.table.ChangeSupportObservable;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
 import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
+import com.servoy.eclipse.ui.editors.table.SimpleChangeSupport;
 
 /**
  * Editor for name-value pairs in a table view editor.
- * 
+ *
  * @author jblok
  */
 
 public class MapEntryValueEditor extends TableViewer
 {
-	private final Observable observable;
+	private final ChangeSupportObservable observable;
 	private static final int CI_NAME = 0;
 	private static final int CI_VALUE = 1;
-	private final ChangeSupport changeSupport;
 
 
 	public MapEntryValueEditor(Composite comp, int flags)
@@ -67,23 +63,9 @@ public class MapEntryValueEditor extends TableViewer
 	{
 		super(comp, flags);
 
-		observable = new Observable();
-
 		createTableColumns(comp, cellEditorProvider);
 
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
 
 	/**
@@ -146,41 +128,6 @@ public class MapEntryValueEditor extends TableViewer
 		parent.setLayout(layout);
 		layout.setColumnData(nameColumn, new ColumnWeightData(1, 50, true));
 		layout.setColumnData(valueColumn, new ColumnWeightData(1, 50, true));
-	}
-
-	private class Observable extends AbstractObservable
-	{
-
-		/**
-		 * @param realm
-		 */
-		public Observable()
-		{
-			super(Realm.getDefault());
-		}
-
-
-		/**
-		 * @see org.eclipse.core.databinding.observable.IObservable#isStale()
-		 */
-		public boolean isStale()
-		{
-			return false;
-		}
-
-
-		@Override
-		public void addChangeListener(IChangeListener listener)
-		{
-			changeSupport.addChangeListener(listener);
-		}
-
-		@Override
-		public void removeChangeListener(IChangeListener listener)
-		{
-			changeSupport.removeChangeListener(listener);
-		}
-
 	}
 
 	class MapEntryLabelProvider extends ColumnLabelProvider
@@ -252,7 +199,7 @@ public class MapEntryValueEditor extends TableViewer
 					realValue = relayEditorProvider.convertSetValue(pi.getKey(), value);
 				}
 				pi.setValue((realValue != null ? realValue.toString() : ""));
-				changeSupport.fireEvent(new ChangeEvent(observable));
+				observable.fireChangeEvent();
 				getViewer().update(element, null);
 			}
 		}

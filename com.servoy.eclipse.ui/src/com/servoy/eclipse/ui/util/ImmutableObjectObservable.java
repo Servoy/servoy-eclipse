@@ -23,6 +23,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.eclipse.core.databinding.BindingException;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
@@ -32,21 +33,28 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Observer immutable objects, the setters will create a new instance.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ImmutableObjectObservable<T>
 {
 	private T object;
 	private final Class< ? >[] constructorTypes;
 	private final String[] constructorProperties;
+	private final String[] ignoredProperties;
 
 	public ImmutableObjectObservable(T object, Class< ? >[] constructorTypes, String[] constructorProperties)
+	{
+		this(object, constructorTypes, constructorProperties, null);
+	}
+
+	public ImmutableObjectObservable(T object, Class< ? >[] constructorTypes, String[] constructorProperties, String[] ignoredProperties)
 	{
 		this.object = object;
 		this.constructorTypes = constructorTypes;
 		this.constructorProperties = constructorProperties;
+		this.ignoredProperties = ignoredProperties;
 	}
 
 	public IObservableValue observePropertyValue(String property)
@@ -146,17 +154,25 @@ public class ImmutableObjectObservable<T>
 				Object[] initargs = new Object[constructorProperties.length];
 				for (int i = 0; i < initargs.length; i++)
 				{
-					if ("this".equals(constructorProperties[i]))
+					String constructorProperty = constructorProperties[i];
+					if (ignoredProperties != null && Arrays.asList(ignoredProperties).contains(constructorProperty))
 					{
-						initargs[i] = object;
-					}
-					else if (propertyDescriptor.getName().equals(constructorProperties[i]))
-					{
-						initargs[i] = value;
+						initargs[i] = getDefaultValue(constructorTypes[i]);
 					}
 					else
 					{
-						initargs[i] = getPropertyValue(object, getPropertyDescriptor(object.getClass(), constructorProperties[i]));
+						if ("this".equals(constructorProperty))
+						{
+							initargs[i] = object;
+						}
+						else if (propertyDescriptor.getName().equals(constructorProperty))
+						{
+							initargs[i] = value;
+						}
+						else
+						{
+							initargs[i] = getPropertyValue(object, getPropertyDescriptor(object.getClass(), constructorProperty));
+						}
 					}
 				}
 				object = constructor.newInstance(initargs);
@@ -172,6 +188,19 @@ public class ImmutableObjectObservable<T>
 			{
 				ServoyLog.logError(e);
 			}
+		}
+
+		private Object getDefaultValue(Class< ? > cls)
+		{
+			if (cls == int.class) return Integer.valueOf(0);
+			if (cls == byte.class) return Byte.valueOf((byte)0);
+			if (cls == short.class) return Short.valueOf((short)0);
+			if (cls == long.class) return Long.valueOf(0);
+			if (cls == float.class) return Float.valueOf(0);
+			if (cls == double.class) return Double.valueOf(0);
+			if (cls == boolean.class) return Boolean.FALSE;
+			if (cls == char.class) return Character.valueOf((char)0);
+			return null;
 		}
 	}
 }

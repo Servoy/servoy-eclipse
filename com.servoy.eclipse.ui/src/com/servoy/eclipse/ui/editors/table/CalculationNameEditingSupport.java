@@ -20,12 +20,7 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -58,7 +53,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 	private final ComboBoxCellEditor editor;
 	private String[] columns;
 	private final ITable table;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	public CalculationNameEditingSupport(TreeViewer viewer, ITable table)
 	{
@@ -68,40 +63,8 @@ public class CalculationNameEditingSupport extends EditingSupport
 		editor = new ComboBoxCellEditor(viewer.getTree(), columns, SWT.NONE);
 		CCombo combo = (CCombo)editor.getControl();
 		combo.addVerifyListener(new DocumentValidatorVerifyListener(new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL) }));
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -190,7 +153,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 						}
 					}
 					calculation.updateName(nameValidator, combo.getText());
-					changeSupport.fireEvent(new ChangeEvent(observable));
+					observable.fireChangeEvent();
 				}
 			}
 			catch (RepositoryException e)

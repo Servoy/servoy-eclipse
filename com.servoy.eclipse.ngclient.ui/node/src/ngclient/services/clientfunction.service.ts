@@ -36,8 +36,19 @@ export class ClientFunctionService {
         this.renderer.appendChild(this.doc.body, this.script);
     }
 
-    public waitForLoading(): Promise<void> {
+    public waitForLoading(): IPromiseLike {
         if (this.deferred)  return this.deferred.promise;
-        return Promise.resolve();
+        return new PromiseLike();
+    }
+}
+
+
+export interface IPromiseLike {
+    finally(fun: () => void): void;
+}
+
+class PromiseLike implements IPromiseLike {
+    finally(fun: () => void): void {
+      fun();
     }
 }

@@ -89,7 +89,7 @@ public class ExportPage extends WizardPage
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/ngdesktop-versions-2022.03.txt";
+	private final String versionsUrl = "https://download.servoy.com/ngdesktop/2022.09.0/ngdesktop-versions-2022.09.txt";
 	private final String FIRST_VERSION_THAT_SUPPORTS_UPDATES = "2020.12";
 	private List<String> remoteVersions = new ArrayList<String>();
 
