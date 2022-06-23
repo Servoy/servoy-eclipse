@@ -384,11 +384,12 @@ public class ElementUtil
 			if (((Form)ancestorForm).isResponsiveLayout() && ((ISupportExtendsID)persist).getRealParent() instanceof Form &&
 				PersistHelper.getSuperPersist(parent) instanceof ISupportInheritedChildren)
 			{
-				uuids = parent.getSortedChildren();
+				uuids = editingFlattenedSolution.getFlattenedForm(parent).getSortedChildren();
 				if (uuids == null)
 				{
 					uuids = PersistHelper.setupChildrenUUIDS(parent, (Form)context, editingFlattenedSolution);
 					((ISupportInheritedChildren)PersistHelper.getSuperPersist(parent)).addSuperListener(parent);
+					parent.putCustomProperty(new String[] { IContentSpecConstants.PROPERTY_CHILDREN_UUIDS }, uuids);
 				}
 			}
 
