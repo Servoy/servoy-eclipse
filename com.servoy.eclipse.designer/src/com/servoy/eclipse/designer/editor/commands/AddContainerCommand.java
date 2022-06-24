@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -40,6 +41,7 @@ import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -76,6 +78,7 @@ import com.servoy.j2db.util.Utils;
 public class AddContainerCommand extends AbstractHandler implements IHandler
 {
 	public static final String COMMAND_ID = "com.servoy.eclipse.designer.rfb.add";
+	private final AtomicInteger id = new AtomicInteger();
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException
@@ -278,10 +281,17 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									for (String string : allPropertiesNames)
 									{
 										PropertyDescription property = spec.getProperty(string);
-										if (property != null && property.getInitialValue() != null)
+										if (property != null)
 										{
-											Object initialValue = property.getInitialValue();
-											if (initialValue != null) ((WebComponent)persist).setProperty(string, initialValue);
+											if (property.getInitialValue() != null)
+											{
+												Object initialValue = property.getInitialValue();
+												if (initialValue != null) ((WebComponent)persist).setProperty(string, initialValue);
+											}
+											if ("autoshow".equals(property.getTag("wizard")))
+											{
+												CreateComponentHandler.autoshowWizard(parentPersist, spec, ((WebComponent)persist), property, activeEditor, id);
+											}
 										}
 									}
 								}
