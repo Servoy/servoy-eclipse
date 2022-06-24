@@ -73,6 +73,7 @@ import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.specification.property.types.InsetsPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.ObjectPropertyType;
 import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
@@ -1510,6 +1511,28 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						propertyType == LabelForPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
+							new ICellEditorFactory()
+							{
+								public CellEditor createPropertyEditor(Composite parent)
+								{
+									return new TextCellEditor(parent);
+								}
+							});
+					}
+					else if (propertyType == ObjectPropertyType.INSTANCE)
+					{
+						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
+						{
+							public Object convertProperty(Object id, Object value)
+							{
+								return value == null ? "" : value;
+							}
+
+							public Object convertValue(Object id, Object value)
+							{
+								return "".equals(value) ? null : value;
+							}
+						}, null,
 							new ICellEditorFactory()
 							{
 								public CellEditor createPropertyEditor(Composite parent)
