@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -56,6 +55,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
@@ -114,8 +114,9 @@ public class DataproviderPropertiesSelector
 		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter));
 		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), converter));
 
-		ITable formTable = ((Form)persistContext.getContext()).getDataSource() != null
-			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Form)persistContext.getContext()).getDataSource()) : null;
+		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+		ITable formTable = frm != null && frm.getDataSource() != null
+			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(frm.getDataSource()) : null;
 		dataSourceViewer.setInput(FoundsetPropertyEditor.getFoundsetInputOptions(formTable, null, false));
 		GridData data = new GridData(SWT.FILL, SWT.NONE, true, false);
 		data.horizontalAlignment = GridData.FILL;
@@ -204,7 +205,8 @@ public class DataproviderPropertiesSelector
 		IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
 		if (selection.getFirstElement() == FormFoundsetEntryContentProvider.FORM_FOUNDSET)
 		{
-			String dataSource = ((Form)persistContext.getContext()).getDataSource();
+			Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+			String dataSource = frm != null ? frm.getDataSource() : null;
 			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
 		}
 		return (IDataSourceWrapper)selection.getFirstElement();
