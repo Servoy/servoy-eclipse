@@ -620,59 +620,7 @@ public class CreateComponentHandler implements IServerService
 								}
 								if ("autoshow".equals(property.getTag("wizard")))
 								{
-									// prop type should be an array of a custom type..
-									IPropertyType< ? > propType = property.getType();
-									if (propType instanceof CustomJSONArrayType< ? , ? >)
-									{
-
-										CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
-											.getCustomJSONTypeDefinition().getType();
-										PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
-										Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
-										if (wizardProperties.size() > 0)
-										{
-											// feed this wizardProperties into the wizard
-											System.err.println(wizardProperties);
-											Display current = Display.getCurrent();
-											if (current == null) current = Display.getDefault();
-
-											PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
-											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
-
-											PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
-												context,
-												flattenedSolution, property).withTable(table).withProperties(wizardProperties);
-											if (dialogConfigurator.open() == Window.OK)
-											{
-												List<Map<String, Object>> result = dialogConfigurator.getResult();
-												String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
-												for (int i = 0; i < result.size(); i++)
-												{
-													Map<String, Object> row = result.get(i);
-													String customTypeName = typeName + "_" + id.incrementAndGet();
-													while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
-													{
-														customTypeName = typeName + "_" + id.incrementAndGet();
-													}
-													WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, customTypeName, i, null);
-													row.forEach((key, value) -> bean.setProperty(key, value));
-												}
-											}
-										}
-										else
-										{
-											ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
-												"\nhas no wizard properties\n" + propType, null);
-										}
-									}
-									else
-									{
-										ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
-											" that is not an custom array type " + propType, null);
-									}
-
+									autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 								}
 							}
 						}
@@ -840,6 +788,64 @@ public class CreateComponentHandler implements IServerService
 		}
 
 		return null;
+	}
+
+	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
+		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
+	{
+
+		// prop type should be an array of a custom type..
+		IPropertyType< ? > propType = property.getType();
+		if (propType instanceof CustomJSONArrayType< ? , ? >)
+		{
+
+			CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+				.getCustomJSONTypeDefinition().getType();
+			PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+			Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+			if (wizardProperties.size() > 0)
+			{
+				// feed this wizardProperties into the wizard
+				System.err.println(wizardProperties);
+				Display current = Display.getCurrent();
+				if (current == null) current = Display.getDefault();
+
+				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+					context,
+					flattenedSolution, property).withTable(table).withProperties(wizardProperties);
+				if (dialogConfigurator.open() == Window.OK)
+				{
+					List<Map<String, Object>> result = dialogConfigurator.getResult();
+					String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
+					for (int i = 0; i < result.size(); i++)
+					{
+						Map<String, Object> row = result.get(i);
+						String customTypeName = typeName + "_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+						{
+							customTypeName = typeName + "_" + id.incrementAndGet();
+						}
+						WebCustomType bean = AddContainerCommand.addCustomType(webComponent, property.getName(), customTypeName, i, null);
+						row.forEach((key, value) -> bean.setProperty(key, value));
+					}
+				}
+			}
+			else
+			{
+				ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+					"\nhas no wizard properties\n" + propType, null);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+				" that is not an custom array type " + propType, null);
+		}
 	}
 
 	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException

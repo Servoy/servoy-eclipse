@@ -41,6 +41,7 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Relation;
 
 /**
@@ -75,7 +76,8 @@ public class FormPropertiesSelector
 		layout.marginRight = 5;
 		parent.setLayout(layout);
 
-		ITreeContentProvider contentProvider = new RelatedFormsContentProvider((Form)persistContext.getContext());
+		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+		ITreeContentProvider contentProvider = new RelatedFormsContentProvider(frm);
 		formPicker = new FilteredTreeViewer(parent, true, true,
 			// contentProvider
 			contentProvider,
@@ -89,7 +91,7 @@ public class FormPropertiesSelector
 			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS)),
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
-		formPicker.setInput(persistContext.getContext());
+		formPicker.setInput(frm);
 
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
