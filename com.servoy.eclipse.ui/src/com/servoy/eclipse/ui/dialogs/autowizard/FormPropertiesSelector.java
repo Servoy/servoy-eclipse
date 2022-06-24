@@ -91,7 +91,7 @@ public class FormPropertiesSelector
 			new TreePatternFilter(TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS)),
 			// selectionFilter
 			new LeafnodesSelectionFilter(contentProvider));
-		formPicker.setInput(persistContext.getContext());
+		formPicker.setInput(frm);
 
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
