@@ -9,6 +9,7 @@ export enum TOOLBAR_CONSTANTS {
     COMPONENTS_CSS = 'Components CSS',
     NO_CSS = 'No CSS',
     SAME_SIZE = 'Selected Element Same Size Indicator',
+    ANCHOR_INDICATOR = 'Selected Element Anchoring Indicator',
     LAYOUTS_COMPONENTS_CSS_ICON = 'url(designer/assets/images/layouts_components_css.png)',
     VISUAL_FEEDBACK_CSS_ICON = 'url(designer/assets/images/grid.png)',
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
@@ -160,6 +161,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 this.editorSession.setSameSizeIndicator(result);
+            });
+
+            const ShowAnchoringIndicatorPromise = this.editorSession.showAnchoringIndicator();
+            void ShowAnchoringIndicatorPromise.then((result: boolean) => {
+                if (!result) {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                this.editorSession.setAnchoringIndicator(result);
             });
 
         } else {
@@ -523,6 +535,15 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 else {
                     this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                }
+            }
+            if (selection == TOOLBAR_CONSTANTS.ANCHOR_INDICATOR) {
+                this.editorSession.setAnchoringIndicator(!this.editorSession.getState().anchoringIndicator);
+                if (this.editorSession.getState().anchoringIndicator) {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
                 }
             }
             return selection;

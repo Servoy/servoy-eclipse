@@ -5,6 +5,7 @@ import { DesignerComponent } from './designer.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { StatusBarComponent } from './statusbar/statusbar.component';
 import { SameSizeIndicatorComponent } from './samesizeindicator/samesizeindicator.component';
+import { AnchoringIndicatorComponent } from './anchoringindicator/anchoringindicator.component';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
@@ -40,6 +41,7 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     ToolbarSwitchComponent,
     StatusBarComponent,
     SameSizeIndicatorComponent,
+    AnchoringIndicatorComponent,
     PaletteComponent,
     ResizerComponent,
     ContextMenuComponent,

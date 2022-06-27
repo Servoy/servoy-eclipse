@@ -304,6 +304,10 @@ public class EditorServiceHandler implements IServerService
 					{
 						return Boolean.valueOf(new DesignerPreferences().getShowSameSizeFeedback());
 					}
+					if (args.has("anchoringIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowAnchorFeedback());
+					}
 					if (args.has("isHideInherited"))
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();

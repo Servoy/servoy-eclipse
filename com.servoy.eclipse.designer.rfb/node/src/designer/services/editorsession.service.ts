@@ -56,7 +56,7 @@ export class EditorSessionService implements ServiceProvider {
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
                 this.allowedChildren = JSON.parse(result);
-				this.sendState('allowedChildren', this.allowedChildren);
+                this.sendState('allowedChildren', this.allowedChildren);
             }).catch(e => console.log(e));
         }
         this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
@@ -143,6 +143,12 @@ export class EditorSessionService implements ServiceProvider {
     showSameSizeIndicator() {
         return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
             'sameSizeIndicator': true
+        }, false)
+    }
+    
+    showAnchoringIndicator() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'anchoringIndicator': true
         }, false)
     }
     
@@ -336,6 +342,11 @@ export class EditorSessionService implements ServiceProvider {
         this.stateListener.next('sameSizeIndicator');
     }
     
+    setAnchoringIndicator(flag:boolean) {
+        this.state.anchoringIndicator = flag;
+        this.stateListener.next('anchoringIndicator');
+    }
+    
     getState(): State {
         return this.state;
     }
@@ -452,12 +463,13 @@ class State {
     showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
     sameSizeIndicator : boolean;
+    anchoringIndicator : boolean;
     statusText: string;
     maxLevel: number;
     dragging = false;
     pointerEvents = 'none';
     packages : Array<Package>;
-	drop_highlight: string;
+    drop_highlight: string;
 }
 
 export class PaletteComp {
