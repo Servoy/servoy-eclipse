@@ -644,4 +644,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          install-size="0"
          version="16.15.0"/>
 
+   <plugin
+         id="org.apache.logging.log4j.jcl"
+         download-size="0"
+         install-size="0"
+         version="2.17.2"
+         unpack="false"/>
+
 </feature>

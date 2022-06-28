@@ -23,6 +23,9 @@
 	<bundle id="org.apache.logging.log4j.core">
 		<category name="bundles" />
 	</bundle>
+    <bundle id="org.apache.logging.log4j.jcl">
+        <category name="bundles" />
+    </bundle>
 	<bundle id="org.jsoup" >
 		<category name="bundles" />
 	</bundle>
