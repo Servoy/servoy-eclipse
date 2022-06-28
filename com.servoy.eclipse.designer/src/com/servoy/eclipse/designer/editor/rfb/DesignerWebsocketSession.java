@@ -52,6 +52,7 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -207,7 +208,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					{
 						zoomedInContainer = (LayoutContainer)((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 					}
-					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS();
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS(new ServoyDataConverterContext(fs,
+						Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? ServoyModelFinder.getServoyModel().getMessagesManager() : null));
 				}
 				else
 				{

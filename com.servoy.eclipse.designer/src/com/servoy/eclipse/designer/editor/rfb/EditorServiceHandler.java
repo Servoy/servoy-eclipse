@@ -254,6 +254,10 @@ public class EditorServiceHandler implements IServerService
 				{
 					String showValue = args.getString("show");
 					Activator.getDefault().toggleShow(showValue);
+					if (Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER.equals(showValue))
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					}
 					return Activator.getDefault().getPreferenceStore().contains(showValue)
 						? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(showValue)) : Boolean.FALSE;
 				}
@@ -313,6 +317,12 @@ public class EditorServiceHandler implements IServerService
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
 							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+					}
+					if (args.has("showI18NValues"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
 					}
 				}
 				return Boolean.FALSE;

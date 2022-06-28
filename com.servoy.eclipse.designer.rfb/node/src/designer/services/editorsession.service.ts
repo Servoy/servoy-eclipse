@@ -186,6 +186,18 @@ export class EditorSessionService implements ServiceProvider {
         }, false);
     }
 
+    isShowI18NValues() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showI18NValuesInDesigner': true
+        }, false)
+    }
+    
+    toggleShowI18NValues() {
+        return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show':  'showI18NValuesInDesigner'
+        }, false);
+    }
+
     createComponents(components) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
