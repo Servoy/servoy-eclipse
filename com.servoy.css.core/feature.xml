@@ -150,7 +150,7 @@
          id="org.eclipse.wst.sse.ui"
          download-size="0"
          install-size="0"
-         version="1.7.300.v202111190506"
+         version="1.7.400.v202204091445"
          unpack="false"/>
 
    <plugin
@@ -206,7 +206,7 @@
          id="org.apache.xml.resolver"
          download-size="0"
          install-size="0"
-         version="1.2.0.v201005080400"
+         version="1.2.0.v20220401-1849"
          unpack="false"/>
 
    <plugin
