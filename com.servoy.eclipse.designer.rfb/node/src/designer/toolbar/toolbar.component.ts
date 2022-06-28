@@ -15,7 +15,8 @@ export enum TOOLBAR_CONSTANTS {
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
     PLACEMENT_GUIDE_CSS_ICON = 'url(designer/assets/images/snaptogrid.png)',
     NO_CSS_ICON = 'url(designer/assets/images/no_css.png)',
-    CHECK_ICON = 'url(designer/assets/images/check.png)'
+    CHECK_ICON = 'url(designer/assets/images/check.png)',
+    I18N_ICON = 'url(designer/assets/images/i18n.png)'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -94,7 +95,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnDistributeUpward: ToolbarItem;
 
     btnReload: ToolbarItem;
-
+	btnToggleI18NValues: ToolbarItem;
     btnClassicEditor: ToolbarItem;
 
     btnShowErrors: ToolbarItem;
@@ -244,6 +245,13 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.editorSession.getState().maxLevel = result;
                 this.editorSession.sendState('maxLevel', result);
                 this.editorSession.setZoomLevel(result);
+            }
+        });
+        
+        const showI18NValuesPromise  = this.editorSession.isShowI18NValues();
+        void showI18NValuesPromise.then((result: boolean) => {
+            if (!result) {
+                this.btnToggleI18NValues.text ='Show I18N values' ;
             }
         });
 
@@ -1010,6 +1018,24 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.add(this.btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+        
+        this.btnToggleI18NValues = new ToolbarItem(
+                'Show I18n Values',
+                'images/i8n.png',
+                true,
+                () => {
+                    if (this.btnToggleI18NValues.state) {
+                        this.btnToggleI18NValues.state = false;
+                        this.btnToggleI18NValues.text = 'Show I18N values';
+                    } else {
+                        this.btnToggleI18NValues.state = true;
+                        this.btnToggleI18NValues.text = 'Show I18N keys';
+                    }
+                    this.editorSession.toggleShowI18NValues();
+                }
+            );
+            this.btnToggleI18NValues.state = false;
+            this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnClassicEditor = new ToolbarItem(
             'Switch to classic editor',
