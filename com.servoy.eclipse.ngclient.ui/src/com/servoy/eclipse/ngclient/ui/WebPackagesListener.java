@@ -46,6 +46,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +71,7 @@ import org.sablo.websocket.impl.ClientService;
 import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
@@ -110,6 +115,24 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
+			if (warExportModel == null)
+			{
+				Display.getDefault().asyncExec(() -> {
+					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
+					{
+						IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+						for (IEditorReference editorRef : editorRefs)
+						{
+							IEditorPart editor = editorRef.getEditor(false);
+							if (editor instanceof IEditorRefresh)
+							{
+								((IEditorRefresh)editor).refresh();
+							}
+						}
+					}
+				});
+			}
 			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 			try
 			{
