@@ -15,8 +15,7 @@ export enum TOOLBAR_CONSTANTS {
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
     PLACEMENT_GUIDE_CSS_ICON = 'url(designer/assets/images/snaptogrid.png)',
     NO_CSS_ICON = 'url(designer/assets/images/no_css.png)',
-    CHECK_ICON = 'url(designer/assets/images/check.png)',
-    I18N_ICON = 'url(designer/assets/images/i18n.png)'
+    CHECK_ICON = 'url(designer/assets/images/check.png)'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -1021,7 +1020,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         
         this.btnToggleI18NValues = new ToolbarItem(
                 'Show I18n Values',
-                'images/i8n.png',
+                'toolbar/icons/i18n.png',
                 true,
                 () => {
                     if (this.btnToggleI18NValues.state) {
