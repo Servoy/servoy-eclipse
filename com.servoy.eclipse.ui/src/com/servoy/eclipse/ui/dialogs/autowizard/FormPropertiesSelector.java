@@ -40,6 +40,7 @@ import com.servoy.eclipse.ui.labelproviders.RelatedFormsLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.RelatedFormsContentProvider;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Relation;
@@ -55,7 +56,7 @@ public class FormPropertiesSelector
 	private String relationPropertyName;
 
 	public FormPropertiesSelector(PropertyWizardDialog propertyWizardDialog, SashForm form, List<PropertyDescription> formProperties,
-		List<PropertyDescription> relationProperties, PersistContext persistContext, IDialogSettings settings)
+		List<PropertyDescription> relationProperties, PersistContext persistContext, IDialogSettings settings, FlattenedSolution flattenedSolution)
 	{
 		this.propertyWizardDialog = propertyWizardDialog;
 		this.formProperties = formProperties;
@@ -77,7 +78,7 @@ public class FormPropertiesSelector
 		parent.setLayout(layout);
 
 		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
-		ITreeContentProvider contentProvider = new RelatedFormsContentProvider(frm);
+		ITreeContentProvider contentProvider = new RelatedFormsContentProvider(frm, flattenedSolution);
 		formPicker = new FilteredTreeViewer(parent, true, true,
 			// contentProvider
 			contentProvider,

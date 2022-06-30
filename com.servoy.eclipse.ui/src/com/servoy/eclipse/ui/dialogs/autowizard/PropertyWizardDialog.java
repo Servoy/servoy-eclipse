@@ -101,7 +101,7 @@ public class PropertyWizardDialog extends Dialog
 		if (configurator.getFormProperties().size() > 0)
 		{
 			formPropertiesSelector = new FormPropertiesSelector(this, form2, configurator.getFormProperties(), configurator.getRelationProperties(),
-				persistContext, settings);
+				persistContext, settings, flattenedSolution);
 		}
 
 		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution,
