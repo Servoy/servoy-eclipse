@@ -224,6 +224,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				boolean sourceChanged = false;
 				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
+					File distIndexFile = new File(projectFolder, "dist/app/index.html");
+					sourceChanged = !distIndexFile.exists();
+					if (sourceChanged)
+					{
+						writeConsole(console, "No generated files, build will be triggered");
+					}
 					try
 					{
 						File packageJson = new File(projectFolder, "package.json");
