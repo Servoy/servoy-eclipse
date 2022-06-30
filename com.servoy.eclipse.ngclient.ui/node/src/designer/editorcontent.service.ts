@@ -22,6 +22,7 @@ export class EditorContentService {
         let formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
         let refresh = false;
         let redrawDecorators = false;
+        let renderGhosts = false;
         let reorderPartComponents: boolean;
         let reorderLayoutContainers: Array<StructureCache> = new Array();
         let orphanLayoutContainers: Array<StructureCache> = new Array();
@@ -226,6 +227,8 @@ export class EditorContentService {
                     if (!component.model.containedForm && component.items && component.items.length > 0) {
                         this.removeChildrenRecursively(component, formCache)
                         component.items = [];
+                        // how can we know if the old components had ghosts or not
+                        renderGhosts = true;
                     }
                 }
 
@@ -243,6 +246,8 @@ export class EditorContentService {
                 if (found) {
                     found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
                     toDelete.push(...found);
+                    // how can we know if the old components had ghosts or not
+                    renderGhosts = true;
                 }
             }
         }
@@ -306,7 +311,7 @@ export class EditorContentService {
             // make sure the order of components in responsive layout containers is correct, based on location
             this.sortChildren(container.items);
         }
-        if (data.renderGhosts) {
+        if (data.renderGhosts || renderGhosts) {
             this.designFormCallback.renderGhosts();
         }
         if (refresh) {

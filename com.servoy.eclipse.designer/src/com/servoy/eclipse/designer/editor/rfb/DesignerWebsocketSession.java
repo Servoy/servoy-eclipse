@@ -494,8 +494,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				ghost = true;
 			}
-			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
+			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), containers, childParentMap);
+			if (fcGhosts) ghost = fcGhosts;
 		}
 		else
 		{
@@ -824,9 +825,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return writer.toString();
 	}
 
-	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
+	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
 		FlattenedSolution fs, HashSet<String> forms, List<LayoutContainer> containers, Map<String, String> childParentMap)
 	{
+		boolean ghost = false;
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
 		{
@@ -849,7 +851,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers, childParentMap);
+						if (element.getPersistIfAvailable() instanceof ISupportsIndexedChildren &&
+							((ISupportsIndexedChildren)element.getPersistIfAvailable()).getAllObjects().hasNext())
+						{
+							ghost = true;
+						}
+						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers,
+							childParentMap);
+						if (fcGhosts) ghost = fcGhosts;
 					}
 					if (frm.isResponsiveLayout())
 					{
@@ -858,15 +867,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							LayoutContainer container = it.next();
 							childParentMap.put(container.getUUID().toString(), formElement.getPersistIfAvailable().getUUID().toString());
-							checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents, formComponentsComponents,
+							boolean fcGhosts = checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents,
+								formComponentsComponents,
 								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs, childParentMap,
 								true);
+							if (fcGhosts) ghost = fcGhosts;
 						}
 					}
 					forms.remove(frm.getName());
 				}
 			}
 		}
+		return ghost;
 	}
 
 	private IFormElement getFormComponentElement(FlattenedSolution fs, IFormElement formComponent, String elementName)
