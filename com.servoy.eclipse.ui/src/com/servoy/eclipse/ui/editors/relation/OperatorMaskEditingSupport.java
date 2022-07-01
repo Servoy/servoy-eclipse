@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2010 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2022 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -16,12 +16,17 @@
  */
 package com.servoy.eclipse.ui.editors.relation;
 
-import static com.servoy.base.query.IBaseSQLCondition.IN_OPERATOR;
+import static com.servoy.base.query.IBaseSQLCondition.ALL_MODIFIERS;
+import static com.servoy.base.query.IBaseSQLCondition.CASEINSENTITIVE_MODIFIER;
 import static com.servoy.base.query.IBaseSQLCondition.OPERATOR_MASK;
+import static com.servoy.base.query.IBaseSQLCondition.ORNULL_MODIFIER;
 import static com.servoy.j2db.persistence.RelationItem.RELATION_OPERATORS;
 import static com.servoy.j2db.util.Utils.getAsInteger;
 import static com.servoy.j2db.util.Utils.indexOf;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
+import java.util.Objects;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -31,24 +36,26 @@ import org.eclipse.swt.SWT;
 
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
-import com.servoy.j2db.persistence.RelationItem;
 
-public class OperatorEditingSupport extends EditingSupport
+public class OperatorMaskEditingSupport extends EditingSupport
 {
+	private static final String OR_IS_NULL_MODIFIER_STRING = "or-is-null";
+	private static final String CASE_INSENSITIVE_MODIFIER_STRING = "case-insensitive";
+
 	private final ComboBoxCellEditor editor;
 	private final RelationEditor relationEditor;
 	private final int[] values;
 
-	public OperatorEditingSupport(RelationEditor re, TableViewer tv)
+	public OperatorMaskEditingSupport(RelationEditor re, TableViewer tv)
 	{
 		super(tv);
 		relationEditor = re;
 
 		values = stream(RELATION_OPERATORS)
-			.filter(element -> element != IN_OPERATOR && (element & OPERATOR_MASK) == element)
-			.toArray();
+			.map(element -> element & ~OPERATOR_MASK)
+			.distinct().toArray();
 		String[] items = stream(values)
-			.mapToObj(OperatorEditingSupport::getColumnText)
+			.mapToObj(OperatorMaskEditingSupport::getColumnText)
 			.toArray(String[]::new);
 
 		editor = new FixedComboBoxCellEditor(tv.getTable(), items, SWT.READ_ONLY);
@@ -60,22 +67,19 @@ public class OperatorEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-
 			int newValue = values[getAsInteger(value)];
-			int previousValue = pi.getMaskedOperator();
-			if (previousValue != newValue)
-			{
-				if (indexOf(RELATION_OPERATORS, newValue | pi.getMask()) < 0)
-				{
-					// combination with mask is not valid, clear mask
-					pi.setMask(0);
-				}
-				relationEditor.flagModified(true);
 
-				pi.setMaskedOperator(newValue);
+			if (indexOf(RELATION_OPERATORS, newValue | pi.getMaskedOperator()) >= 0) // check if combination is valid
+			{
+				int previousValue = pi.getMask();
+				if (previousValue != newValue)
+				{
+					relationEditor.flagModified(true);
+				}
+				pi.setMask(newValue);
 			}
+			getViewer().update(element, null);
 		}
-		getViewer().update(element, null);
 	}
 
 	@Override
@@ -84,7 +88,7 @@ public class OperatorEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			int index = indexOf(values, pi.getMaskedOperator());
+			int index = indexOf(values, pi.getMask());
 			if (index >= 0)
 			{
 				return Integer.valueOf(index);
@@ -109,8 +113,28 @@ public class OperatorEditingSupport extends EditingSupport
 		return false;
 	}
 
-	public static String getColumnText(int maskedOperator)
+	public static String getColumnText(int mask)
 	{
-		return RelationItem.getOperatorAsString(maskedOperator);
+		return stream(ALL_MODIFIERS)
+			.filter(elem -> (elem & mask) != 0)
+			.mapToObj(value -> {
+				switch (value)
+				{
+					case ORNULL_MODIFIER :
+						return OR_IS_NULL_MODIFIER_STRING;
+					case CASEINSENTITIVE_MODIFIER :
+						return CASE_INSENSITIVE_MODIFIER_STRING;
+				}
+				return null;
+			})
+			.filter(Objects::nonNull)
+			.collect(joining(", "));
+	}
+
+	public static String getTooltip()
+	{
+		return "Modifier to relation operator\n" +
+			OR_IS_NULL_MODIFIER_STRING + ": select ... where from_column <op> to_column OR to_colum IS NULL\n" +
+			CASE_INSENSITIVE_MODIFIER_STRING + ": compare from_column and to_column in a case insensitive way\n";
 	}
 }

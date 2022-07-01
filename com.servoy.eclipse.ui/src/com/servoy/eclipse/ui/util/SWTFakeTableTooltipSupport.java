@@ -39,33 +39,28 @@ public class SWTFakeTableTooltipSupport
 		table.setToolTipText("");
 
 		// Implement a "fake" tooltip
-		final Listener labelListener = new Listener()
-		{
-			public void handleEvent(Event event)
+		final Listener labelListener = event -> {
+			Label label = (Label)event.widget;
+			Shell shell = label.getShell();
+			switch (event.type)
 			{
-				Label label = (Label)event.widget;
-				Shell shell = label.getShell();
-				switch (event.type)
-				{
-					case SWT.MouseDown :
-						Event e = new Event();
-						e.item = (TableItem)label.getData("_TABLEITEM");
-						// Assuming table is single select, set the selection as if
-						// the mouse down event went through to the table
-						table.setSelection(new TableItem[] { (TableItem)e.item });
-						table.notifyListeners(SWT.Selection, e);
-						// fall through
-					case SWT.MouseExit :
-						shell.dispose();
-						break;
-				}
+				case SWT.MouseDown :
+					Event e = new Event();
+					e.item = (TableItem)label.getData("_TABLEITEM");
+					// Assuming table is single select, set the selection as if
+					// the mouse down event went through to the table
+					table.setSelection(new TableItem[] { (TableItem)e.item });
+					table.notifyListeners(SWT.Selection, e);
+					//$FALL-THROUGH$
+				case SWT.MouseExit :
+					shell.dispose();
+					break;
 			}
 		};
 
 		Listener tableListener = new Listener()
 		{
 			Shell tip = null;
-
 			Label label = null;
 
 			public void handleEvent(Event event)
@@ -76,11 +71,12 @@ public class SWTFakeTableTooltipSupport
 					case SWT.KeyDown :
 					case SWT.MouseMove :
 					{
-						if (tip == null)
-							break;
-						tip.dispose();
-						tip = null;
-						label = null;
+						if (tip != null)
+						{
+							tip.dispose();
+							tip = null;
+							label = null;
+						}
 						break;
 					}
 					case SWT.MouseHover :
@@ -108,7 +104,7 @@ public class SWTFakeTableTooltipSupport
 							label.setBackground(table.getDisplay()
 								.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 							label.setData("_TABLEITEM", item);
-							if (column >= 0 && columnTooltips[column] != null)
+							if (columnTooltips[column] != null)
 							{
 								label.setText(columnTooltips[column]);
 							}
@@ -119,7 +115,6 @@ public class SWTFakeTableTooltipSupport
 							label.addListener(SWT.MouseExit, labelListener);
 							label.addListener(SWT.MouseDown, labelListener);
 							Point size = tip.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-							//Rectangle rect = item.getBounds(column);
 							Point pt = table.toDisplay(event.x, event.y);
 							tip.setBounds(pt.x + 10, pt.y + 10, size.x, size.y);
 							tip.setVisible(true);
