@@ -1290,7 +1290,7 @@ public class WarExporter
 	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
 	{
 		String fileName = exportModel.getTomcatContextXMLFileName();
-		if (fileName != null)
+		if (fileName != null && !"".equals(fileName.trim()))
 		{
 			File source = new File(fileName);
 			if (source.exists())
