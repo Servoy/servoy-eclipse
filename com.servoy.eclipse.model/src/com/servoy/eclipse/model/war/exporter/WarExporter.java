@@ -1760,7 +1760,7 @@ public class WarExporter
 			String password = sc.getPassword();
 			try
 			{
-				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password);
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password != null ? password : "");
 			}
 			catch (Exception e)
 			{
