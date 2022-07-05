@@ -1171,6 +1171,9 @@ public class TypeCreator extends TypeCache
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
+		type.setDeprecated(spec.isDeprecated());
+		if (spec.getDeprecatedMessage() != null && !"".equals(spec.getDeprecatedMessage())) type.setDescription(spec.getDeprecatedMessage());
+
 		// test form formcomponnent properties
 		String specName = null;
 		if (fullTypeName.startsWith(RUNTIME_WEB_COMPONENT))
