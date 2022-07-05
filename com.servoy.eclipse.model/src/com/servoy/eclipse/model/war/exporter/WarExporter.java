@@ -81,6 +81,7 @@ import org.apache.commons.io.IOCase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -312,8 +313,51 @@ public class WarExporter
 		createDeployPropertiesFile(tmpWarDir);
 		monitor.worked(1);
 		monitor.subTask("Checking war for duplicate jars");
+		if (monitor.isCanceled()) return;
+		// first check,remove duplicate jars from the plugins dir.
 		checkDuplicateJars(tmpWarDir);
 		monitor.worked(1);
+		// after that copy or move everything to the WEB-INF/lib dir to have 1 big classpath but only if this is not for a smartclient
+		if (!exportModel.getStartRMI())
+		{
+			File pluginsDir = new File(tmpWarDir, "plugins");
+			try
+			{
+				Files.walk(pluginsDir.toPath()).map(path -> path.toFile()).filter(file -> file.isFile() && !file.getName().toLowerCase().endsWith(".jnlp") &&
+					!file.getName().toLowerCase().equals("plugins.properties"))
+					.forEach(file -> {
+						File targetFile = new File(targetLibDir, file.getName());
+						if (targetFile.exists())
+						{
+
+							// this shouldn't be a duplicate jar of the same thing (checkDuplicatJars should already have handled this)
+							// so this is the same name for a different jar, like mail.jar (plugin) and mail.jar (sun mail lib)
+							targetFile = new File(targetLibDir, "copy_" + (RandomStringUtils.randomAlphanumeric(3)) + '_' + file.getName());
+						}
+						try
+						{
+							FileUtils.moveFile(file, targetFile);
+						}
+						catch (IOException e)
+						{
+							throw new RuntimeException(new ExportException("Could not copy the lib from plugins " + file + " to " + targetFile, e));
+						}
+					});
+				FileUtils.deleteDirectory(pluginsDir);
+			}
+			catch (IOException e)
+			{
+				throw new ExportException("Couldn't move/copy plugin libs to the WEB-INF/lib", e);
+			}
+			catch (RuntimeException re)
+			{
+				if (re.getCause() instanceof ExportException) throw (ExportException)re.getCause();
+				else throw re;
+			}
+		}
+
+		monitor.worked(1);
+		if (monitor.isCanceled()) return;
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
