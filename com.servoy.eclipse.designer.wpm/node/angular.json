@@ -131,7 +131,6 @@
       }
     }
   },
-  "defaultProject": "wpm2",
   "cli": {
     "analytics": "bdd6071a-93e5-445c-af9b-e068bd29f8dc"
   }
