@@ -1,4 +1,4 @@
-import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -6,7 +6,7 @@ import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
-import { WindowRefService, LocalStorageService, SessionStorageService } from '@servoy/public';
+import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
@@ -29,9 +29,7 @@ export class WindowService {
     constructor(private formService: FormService,
         public servoyService: ServoyService,
         private windowRefService: WindowRefService,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private _applicationRef: ApplicationRef,
-        private _injector: Injector,
+        private mainViewRefService: MainViewRefService,
         public localStorageService: LocalStorageService,
         public sessionStorageService: SessionStorageService,
         private titleService: Title,
@@ -156,10 +154,9 @@ export class WindowService {
             const loc = { left: location.x, top: location.y };
 
             // create the bs window instance
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DialogWindowComponent);
-            const dialogWindowComponent = componentFactory.create(this._injector);
+            const dialogWindowComponent  = this.mainViewRefService.mainContainer.createComponent(DialogWindowComponent);
+//
             dialogWindowComponent.instance.setWindow(instance);
-            this._applicationRef.attachView(dialogWindowComponent.hostView);
             instance.componentRef = dialogWindowComponent;
 
             const opt: BSWindowOptions = {
