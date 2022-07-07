@@ -52,6 +52,7 @@ export class FileUploadWindowComponent {
                 this.i18n_remove = val['servoy.filechooser.button.remove'];
                 this.i18n_name = val['servoy.filechooser.label.name'];
                 this.genericError = val['servoy.filechooser.error'];
+                if (!this.title) this.title = this.i18n_chooseFiles;
             });
     }
 
