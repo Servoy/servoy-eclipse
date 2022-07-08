@@ -1237,6 +1237,7 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
+				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
 				Property property = createProperty(name, false, memberType, SolutionExplorerListContentProvider.getParsedComment(pd.getDocumentation(),
 					STANDARD_ELEMENT_NAME, true), null);
 				property.setDeprecated(pd.isDeprecated());
