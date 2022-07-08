@@ -319,7 +319,7 @@ public class ServoyFormBuilder
 							FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, fs, null, true);
 							for (PropertyDescription pd : properties)
 							{
-								String datasource = null;
+								String datasource = form.getDataSource();
 								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 								if (frm == null) continue;
