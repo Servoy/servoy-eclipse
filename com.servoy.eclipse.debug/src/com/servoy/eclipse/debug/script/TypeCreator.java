@@ -253,6 +253,7 @@ import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyTy
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
 import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
@@ -1395,6 +1396,24 @@ public class TypeCreator extends TypeCache
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		if (RuntimeComponentPropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, "Component");
+		if (ValueListPropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			Type valueListType = TypeInfoModelFactory.eINSTANCE.createType();
+			valueListType.setName("ValueListPropertyType");
+			EList<Member> members = valueListType.getMembers();
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("name");
+			property.setType(getTypeRef(context, ITypeNames.STRING));
+			property.setDescription("Gets the name of the current valuelist or give name to change the used valuelist to a different one with that name");
+			members.add(property);
+			property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("dataset");
+			property.setDescription(
+				"Get or Set the current dataset of this valuelist,</br>Assign a JSDataSet to it when you want to change the values, setting is only possible for a CustomValueList");
+			property.setType(getTypeRef(context, "JSDataSet<{display_values:string,real_values:object}>"));
+			members.add(property);
+			return TypeUtil.ref(valueListType);
+		}
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
