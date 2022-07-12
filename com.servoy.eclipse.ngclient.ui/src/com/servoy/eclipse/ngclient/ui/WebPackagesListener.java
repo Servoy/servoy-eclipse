@@ -490,21 +490,32 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					/* component/services imports */
 					if (cssLibs.size() > -0)
 					{
-						String content = FileUtils.readFileToString(new File(projectFolder, "src/styles.css"), "UTF-8");
-						int index = content.indexOf("/* component/services imports end */");
-						StringBuilder sb = new StringBuilder();
-						cssLibs.forEach(lib -> sb.append("@import \"").append(lib.getUrl()).append("\";\n"));
-						String imports = sb.toString();
-						if (!imports.equals(content.substring(0, index)))
-						{
-							if (index > 0)
+						File angularJSON = new File(projectFolder, "angular.json");
+						String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
+						JSONObject json = new JSONObject(angularJSONContents);
+						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
+							.getJSONObject("options").getJSONArray("styles");
+						boolean[] stylesChanged = new boolean[] { false };
+						cssLibs.forEach((style) -> {
+							boolean[] styleFound = new boolean[] { false };
+							String styleUrl = style.getUrl().replace("~", "./node_modules/");
+							styles.forEach(existingStyle -> {
+								if (existingStyle.toString().equals(styleUrl))
+								{
+									styleFound[0] = true;
+								}
+							});
+							if (!styleFound[0])
 							{
-								content = content.substring(index);
+								stylesChanged[0] = true;
+								styles.put(styleUrl);
 							}
-							content = imports + content;
-							sourceChanged = true;
+						});
+						if (stylesChanged[0])
+						{
 							writeConsole(console, "Styles source changed");
-							FileUtils.writeStringToFile(new File(projectFolder, "src/styles.css"), content, "UTF-8");
+							sourceChanged = true;
+							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
 						}
 					}
 				}
