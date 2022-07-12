@@ -7,14 +7,13 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      background: #C9C9C9;
-    }
-
     .content-wrapper {
+      background-image: url('/rfb/angular2/designer/assets/light-raster-background.png');
       flex-direction: column;
       display: flex;
       position: absolute;
+      top: 0px;
+      left: 0px;
       width: 100%;
       height: 100%;
       font-family: system-ui;
@@ -25,8 +24,9 @@
       display: flex;
       justify-content: center;
       text-align: center;
+      background-color: rgba(255, 234, 213, 0.4);
     }
-    
+
     .big-text {
       font-size: x-large;
       font-weight: 600;
@@ -128,7 +128,7 @@
 </head>
 <body>
     <div class="content-wrapper">
-      <div class="content big-text">Please wait (building)... Active solution's packages are being assembled.</div>
+      <div class="content big-text">Building. Please wait... The active solution's packages are being assembled.</div>
       <div class="content">(check the "Console" View, "Titanium NG Build Console" for more information)</div>
       <div class="loading-i-holder">
         <div class="lii-1 lii-shape"></div>
