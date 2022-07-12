@@ -174,6 +174,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		expandBar.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		expandBar.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
 		expandComposite = new SolutionAdvancedSettingsComposite(expandBar, isModuleWizard);
+		expandComposite.setBackground(topLevel.getBackground());
 		collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
 		collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		collapsableItem.setControl(expandComposite);
