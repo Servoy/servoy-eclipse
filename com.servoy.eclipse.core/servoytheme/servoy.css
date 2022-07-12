@@ -28,3 +28,11 @@
 #svybackground {
 	background-color: #FFFFFF;
 }
+
+Composite, Label, Button, Group, ToolItem, ToolBar, Shell{
+	background-color: #FFFFFF;
+}
+
+Table, Tree {
+	swt-lines-visible: false;
+}
