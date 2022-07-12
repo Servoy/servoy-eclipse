@@ -1054,7 +1054,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// only schedule 1 and a bit later to relax first the system
 		if (scheduled.compareAndSet(0, 1))
 		{
-			Job job = new PackageCheckerJob("Checking/Installing NGClient2 Components and Services", null);
+			Job job = new PackageCheckerJob("Checking/Installing Titanium NG Components and Services", null);
 			job.schedule(5000);
 		}
 		else if (scheduled.get() == 2)
