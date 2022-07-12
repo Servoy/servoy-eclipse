@@ -7,7 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --configuration production --subresource-integrity=true ngclient2",
-    "build_sourcemap": "ng build --configuration production --subresource-integrity=true  --source-map ngclient2",
+    "build_sourcemap": "ng build ngclient2 --configuration production --subresource-integrity=true  --source-map ngclient2",
     "build_lib": "ng build @servoy/public --configuration production",
     "build_lib_debug_nowatch": "ng build @servoy/public --watch=false",
     "build_debug": "ng build ngclient2 --watch",
