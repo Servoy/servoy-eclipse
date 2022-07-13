@@ -149,16 +149,14 @@ export class EditorContentService {
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                         formCache.addFormComponent(fcc);
-                        if (!formCache.absolute) {
-                            let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
-                            if (parentUUID) {
-                                let parent = formCache.getLayoutContainer(parentUUID);
-                                if (parent) {
-                                    parent.addChild(fcc);
-                                    if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                        // new component in layout container , make sure is inserted in correct position
-                                        reorderLayoutContainers.push(parent);
-                                    }
+                        const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
+                        if (parentUUID) {
+                            const parent = formCache.getLayoutContainer(parentUUID);
+                            if (parent) {
+                                parent.addChild(fcc);
+                                if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                    // new component in layout container , make sure is inserted in correct position
+                                    reorderLayoutContainers.push(parent);
                                 }
                             }
                         }
@@ -166,16 +164,14 @@ export class EditorContentService {
                     else {
                         const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                         formCache.add(comp);
-                        if (!formCache.absolute) {
-                            let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
-                            if (parentUUID) {
-                                let parent = formCache.getLayoutContainer(parentUUID);
-                                if (parent) {
-                                    parent.addChild(comp);
-                                    if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                        // new component in layout container , make sure is inserted in correct position
-                                        reorderLayoutContainers.push(parent);
-                                    }
+                        const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
+                        if (parentUUID) {
+                            const parent = formCache.getLayoutContainer(parentUUID);
+                            if (parent) {
+                                parent.addChild(comp);
+                                if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                    // new component in layout container , make sure is inserted in correct position
+                                    reorderLayoutContainers.push(parent);
                                 }
                             }
                         }
