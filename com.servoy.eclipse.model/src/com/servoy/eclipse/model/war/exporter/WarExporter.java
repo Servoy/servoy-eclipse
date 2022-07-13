@@ -216,7 +216,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 45);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 46);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
