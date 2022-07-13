@@ -104,6 +104,7 @@ export class ContextMenuComponent implements OnInit {
                                             }
                                             component = this.convertToContentPoint(component) as PaletteComp;
                                             this.editorSession.createComponent(component);
+                                            return false;
                                         });
                                     this.menuItems[i].subMenu.push(submenuItem);
                                 }
@@ -276,6 +277,11 @@ export class ContextMenuComponent implements OnInit {
         this.menuItems.push(entry);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
+            entry = new ContextmenuItem(
+                'Add',
+                null
+            );
+            this.menuItems.push(entry);
             // sizing
             const sizingActions = new Array<ContextmenuItem>();
 
