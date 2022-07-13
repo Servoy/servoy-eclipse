@@ -83,6 +83,8 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
@@ -689,7 +691,7 @@ public class CreateComponentHandler implements IServerService
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
 								Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
-								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p.x,
+								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p,
 									specifications, args.optString("packageName"));
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -969,17 +971,27 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected List<IPersist> createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
-		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		JSONObject config, Point location, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
+		throws RepositoryException, JSONException
 	{
 		List<IPersist> newPersists = new ArrayList<IPersist>();
+		int type = layoutSpec.getName().equals("servoycore-responsivecontainer") ? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
-			IRepository.LAYOUTCONTAINERS);
+			type);
 		container.setSpecName(layoutSpec.getName());
 		container.setPackageName(packageName);
 		parent.addChild(container);
-		container.setLocation(new Point(index, index));
+		if (container instanceof CSSPositionLayoutContainer)
+		{
+			((CSSPositionLayoutContainer)container)
+				.setCssPosition(new CSSPosition(Integer.toString(location.y), "-1", "-1", Integer.toString(location.x), "200", "200"));
+		}
+		else
+		{
+			container.setLocation(new Point(location.x, location.x));
+			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
+		}
 		newPersists.add(container);
-		if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
@@ -1001,7 +1013,8 @@ public class CreateComponentHandler implements IServerService
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
 							newPersists.addAll(
-								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName));
+								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), new Point(i + 1, i + 1), specifications,
+									packageName));
 						}
 						else if (jsonObject.has("componentName"))
 						{

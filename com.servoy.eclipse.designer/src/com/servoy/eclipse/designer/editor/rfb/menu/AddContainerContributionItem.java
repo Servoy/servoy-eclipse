@@ -22,6 +22,7 @@ import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -50,7 +51,11 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
 		IPersist persist = null;
 		if (persistContext != null) persist = persistContext.getPersist();
-		if (persist instanceof LayoutContainer)
+		if (persist instanceof CSSPositionLayoutContainer)
+		{
+			addMenuItem(list, null, null, null);
+		}
+		else if (persist instanceof LayoutContainer)
 		{
 			String packageName = ((LayoutContainer)persist).getPackageName();
 			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
