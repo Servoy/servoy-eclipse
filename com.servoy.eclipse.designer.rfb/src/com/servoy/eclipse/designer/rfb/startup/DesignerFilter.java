@@ -219,7 +219,9 @@ public class DesignerFilter implements Filter
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
-							if (!"Absolute-Layout".equals(layoutType))
+							// hard coded that in absolute layout we get the servoycore (responsive container) layout
+							if ((!"servoycore".equals(key) && !"Absolute-Layout".equals(layoutType)) ||
+								("servoycore".equals(key) && "Absolute-Layout".equals(layoutType)))
 							{
 								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
