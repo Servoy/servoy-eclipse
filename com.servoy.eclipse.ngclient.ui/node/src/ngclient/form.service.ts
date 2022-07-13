@@ -355,13 +355,13 @@ export class FormService {
     private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
+                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);
                     formCache.mainStructure = parent;
                 }
-                if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
+                if (parent instanceof StructureCache || parent instanceof FormComponentCache || PartCache) {
                     parent.addChild(structure);
                 }
                formCache.addLayoutContainer(structure);

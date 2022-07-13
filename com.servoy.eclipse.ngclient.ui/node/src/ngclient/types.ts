@@ -11,8 +11,8 @@ export class FormCache implements IFormCache {
     public componentCache: Map<string, ComponentCache>;
     public partComponentsCache: Array<ComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
-    private _mainStructure: StructureCache;
     public formComponents: Map<string, FormComponentCache>;
+    private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
     private conversionInfo = {};
     private responsive: boolean;
@@ -143,8 +143,8 @@ export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
     obj != null && (obj).detectChanges instanceof Function;
 
 export class ComponentCache implements IComponentCache {
-    public parent : StructureCache;
-    
+    public parent: StructureCache;
+
     constructor(public readonly name: string,
         public readonly type: string,
         public model: { [property: string]: any },
@@ -154,10 +154,11 @@ export class ComponentCache implements IComponentCache {
 }
 
 export class StructureCache {
-    public parent : StructureCache;
+    public parent: StructureCache;
+    public model = {visible:true};
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
-        public readonly id?: string, public readonly cssPositionContainer? : boolean) {
+        public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
         if (!this.items) this.items = [];
     }
 
@@ -203,11 +204,11 @@ export class StructureCache {
 export class PartCache {
     constructor(public readonly classes: Array<string>,
         public readonly layout: { [property: string]: string },
-        public readonly items?: Array<ComponentCache | FormComponentCache>) {
+        public readonly items?: Array<ComponentCache | FormComponentCache | StructureCache>) {
         if (!this.items) this.items = [];
     }
 
-    addChild(child: ComponentCache | FormComponentCache) {
+    addChild(child: ComponentCache | FormComponentCache | StructureCache) {
         if (child instanceof ComponentCache && child.type && child.type === 'servoycoreNavigator')
             return;
         this.items.push(child);

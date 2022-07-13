@@ -408,6 +408,12 @@ fieldset[disabled] .btn-default.focus {
     width: 100%;
 }
 
+.svy-wrapper > .svy-layoutcontainer {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
 .svy-wrapper > * >* > .svy-tabcontainer {
     overflow: auto;
     height: 100%;
