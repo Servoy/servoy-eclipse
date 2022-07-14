@@ -53,6 +53,7 @@ export class EditorContentService {
                 } else {
                     container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                     formCache.addLayoutContainer(container);
+                    redrawDecorators = true;
                     const parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
                         const parent = formCache.getLayoutContainer(parentUUID);
@@ -271,6 +272,7 @@ export class EditorContentService {
                 }
             });
             refresh = true;
+            redrawDecorators = true;
         }
         if (reorderPartComponents) {
             // make sure the order of components in absolute layout is correct, based on formindex
