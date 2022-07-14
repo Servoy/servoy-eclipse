@@ -10,7 +10,7 @@ export class FormCache implements IFormCache {
     public size: Dimension;
     public componentCache: Map<string, ComponentCache>;
     public partComponentsCache: Array<ComponentCache>;
-    public layoutContainersCache: Map<string, StructureCache>;
+    public layoutContainers: Array<StructureCache>;
     public formComponents: Map<string, FormComponentCache>;
     private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
@@ -24,8 +24,26 @@ export class FormCache implements IFormCache {
         this.partComponentsCache = new Array();
         this._parts = [];
         this.formComponents = new Map();
-        this.layoutContainersCache = new Map();
+        this.layoutContainers = new Array();
     }
+
+    get absolute(): boolean {
+        return !this.responsive;
+    }
+    get parts(): Array<PartCache> {
+        return this._parts;
+    }
+
+    get mainStructure(): StructureCache {
+        return this._mainStructure;
+    }
+
+    set mainStructure(structure: StructureCache) {
+        this._mainStructure = structure;
+        this.findComponents(structure);
+    }
+
+
     public add(comp: ComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
         this.componentCache.set(comp.name, comp);
         if (parent != null) {
@@ -37,29 +55,11 @@ export class FormCache implements IFormCache {
     }
 
     public addLayoutContainer(container: StructureCache) {
-        if (container.id){
-            this.layoutContainersCache.set(container.id, container);
-        }
+        this.layoutContainers.push(container);
     }
 
     public addPart(part: PartCache) {
         this._parts.push(part);
-    }
-
-    set mainStructure(structure: StructureCache) {
-        this._mainStructure = structure;
-        this.findComponents(structure);
-    }
-
-    get mainStructure(): StructureCache {
-        return this._mainStructure;
-    }
-
-    get absolute(): boolean {
-        return !this.responsive;
-    }
-    get parts(): Array<PartCache> {
-        return this._parts;
     }
 
     public addFormComponent(formComponent: FormComponentCache) {
@@ -75,11 +75,11 @@ export class FormCache implements IFormCache {
     }
 
     public getLayoutContainer(id: string): StructureCache {
-        return this.layoutContainersCache.get(id);
+        return this.layoutContainers.find( container => container.id === id);
     }
 
     public removeComponent(name: string) {
-        let comp = this.componentCache.get(name);
+        const comp = this.componentCache.get(name);
         this.componentCache.delete(name);
         if (comp){
              this.partComponentsCache.splice(this.partComponentsCache.indexOf(comp),1);
@@ -87,7 +87,10 @@ export class FormCache implements IFormCache {
     }
 
     public removeLayoutContainer(id: string) {
-        this.layoutContainersCache.delete(id);
+        const number = this.layoutContainers.findIndex(container => container.id === id);
+        if (number => 0) {
+            this.layoutContainers.splice(number, 1);
+        }
     }
 
     public removeFormComponent(name: string) {
