@@ -46,15 +46,15 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             const nodeid = selection[0];
             const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
             if (element) {
-                if (element.parentElement.closest(".svy-responsivecontainer")) return;
-                let addedSameWidth: boolean = false;
-                let addedSameHeight: boolean = false;
+                if (element.parentElement.closest('.svy-responsivecontainer')) return;
+                let addedSameWidth = false;
+                let addedSameHeight = false;
 
                 const elementRect = element.getBoundingClientRect();
 
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 Array.from(elements).forEach(node => {
-                    if (element != node && node.parentElement.closest(".svy-responsivecontainer") == null) {
+                    if (element != node && node.parentElement.closest('.svy-responsivecontainer') == null) {
                         const position = node.getBoundingClientRect();
                         if (position.width >= 5 && position.width == elementRect.width) {
                             this.addSameSizeIndicator(newindicators, position, true);
@@ -72,6 +72,8 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
                 if (addedSameHeight) {
                     this.addSameSizeIndicator(newindicators, elementRect, false);
                 }
+            } else {
+                setTimeout(() => this.selectionChanged(selection), 50);
             }
         }
         this.indicators = newindicators;
