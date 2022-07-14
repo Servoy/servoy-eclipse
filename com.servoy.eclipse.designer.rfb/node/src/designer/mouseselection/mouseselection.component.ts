@@ -135,7 +135,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         style: style,
                         isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         svyid: node.getAttribute('svy-id'),
-                        isContainer: node.getAttribute('svy-layoutname') != null,
+                        isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign')
                     })
                 }
@@ -218,7 +218,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         } as CSSStyleDeclaration,
                         svyid: node.getAttribute('svy-id'),
                         isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: node.getAttribute('svy-layoutname') != null,
+                        isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign')
                     };
                     newNodes.push(newNode);
@@ -270,7 +270,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     } as CSSStyleDeclaration,
                     isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                     svyid: node.getAttribute('svy-id'),
-                    isContainer: node.getAttribute('svy-layoutname') != null,
+                    isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
                     maxLevelDesign: node.classList.contains('maxLevelDesign')
                 };
                 if (event.ctrlKey || event.metaKey) {
@@ -314,7 +314,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (node === undefined) return;
         const position = node.getBoundingClientRect();
         // TODO is && node.getAttribute('svy-layoutname') needed??
-        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && position.width > 0 && position.height > 0) {
+        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
             this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title'));
             if (this.editorSession.getState().showWireframe) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
