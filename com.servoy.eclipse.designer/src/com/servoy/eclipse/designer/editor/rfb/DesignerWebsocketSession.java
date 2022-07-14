@@ -728,7 +728,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : containersList)
 			{
 				writer.object();
-				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, true);
+				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
 				writer.endObject();
 			}
 			writer.endArray();

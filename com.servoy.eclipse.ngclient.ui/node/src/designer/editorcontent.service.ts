@@ -18,14 +18,14 @@ export class EditorContentService {
     }
 
     updateFormData(updates) {
-        let data = JSON.parse(updates);
-        let formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
-        let refresh = false;
-        let redrawDecorators = false;
+        const data = JSON.parse(updates);
+        const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
+        const reorderLayoutContainers: Array<StructureCache> = new Array();
+        const orphanLayoutContainers: Array<StructureCache> = new Array();
         let renderGhosts = false;
+        let redrawDecorators = false;
+        let refresh = false;
         let reorderPartComponents: boolean;
-        let reorderLayoutContainers: Array<StructureCache> = new Array();
-        let orphanLayoutContainers: Array<StructureCache> = new Array();
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
@@ -36,29 +36,26 @@ export class EditorContentService {
                     let newParent = container.parent;
                     if (parentUUID) {
                         newParent = formCache.getLayoutContainer(parentUUID);
+                    } else {
+                        newParent = formCache.mainStructure;
                     }
-                    else {
-                        newParent = formCache.mainStructure
-                    }
-                    if (container.parent.id != newParent.id) {
+                    if (container.parent.id !== newParent.id) {
                         // we moved it to another parent
                         container.parent.removeChild(container);
                         newParent.addChild(container);
-                    }
-                    else if (newParent.items.indexOf(container) < 0){
+                    } else if (newParent.items.indexOf(container) < 0){
                         newParent.addChild(container);
                     }
                     if (reorderLayoutContainers.indexOf(newParent) < 0) {
                         // existing layout container in parent layout container , make sure is inserted in correct position
                         reorderLayoutContainers.push(newParent);
                     }
-                }
-                else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
+                } else {
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                     formCache.addLayoutContainer(container);
                     const parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
-                        let parent = formCache.getLayoutContainer(parentUUID);
+                        const parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
                             parent.addChild(container);
                             if (reorderLayoutContainers.indexOf(parent) < 0) {
