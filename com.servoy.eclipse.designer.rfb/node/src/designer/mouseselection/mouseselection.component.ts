@@ -111,6 +111,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private createNodes(selection: Array<string>) {
+        this.createNodesImpl(selection);
+        if (this.nodes.length != selection.length) {
+              setTimeout(() => this.createNodesImpl(selection), 20);
+        }
+    }
+    
+    private createNodesImpl(selection: Array<string>) {
         const newNodes = new Array<SelectionNode>();
         if (selection.length > 0) {
             const iframe = this.doc.querySelector('iframe');
