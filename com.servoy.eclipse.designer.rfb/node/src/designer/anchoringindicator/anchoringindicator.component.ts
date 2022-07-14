@@ -53,7 +53,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.leftAdjust = frameRect.left;
             const nodeid = selection[0];
             const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
-            if (element && element.hasAttribute('svy-anchors')) {
+            if (element) {
                 const elementRect = element.getBoundingClientRect();
                 let image: string;
                 if (!this.urlParser.isCSSPositionFormLayout()) {
