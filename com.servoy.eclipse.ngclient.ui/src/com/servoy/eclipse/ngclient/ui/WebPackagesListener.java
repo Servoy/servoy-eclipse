@@ -496,7 +496,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
 							.getJSONObject("options").getJSONArray("styles");
 						boolean[] stylesChanged = new boolean[] { false };
-						cssLibs.forEach((style) -> {
+						for (CssLib style : cssLibs)
+						{
 							boolean[] styleFound = new boolean[] { false };
 							String styleUrl = style.getUrl().replace("~", "./node_modules/");
 							styles.forEach(existingStyle -> {
@@ -508,13 +509,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							if (!styleFound[0])
 							{
 								stylesChanged[0] = true;
-								styles.put(styleUrl);
+								break;
 							}
-						});
+						}
 						if (stylesChanged[0])
 						{
+							// just write everything back to be sure the priority is respected
 							writeConsole(console, "Styles source changed");
 							sourceChanged = true;
+							while (styles.length() > 0)
+							{
+								styles.remove(0);
+							}
+							for (CssLib style : cssLibs)
+							{
+								styles.put(style.getUrl().replace("~", "./node_modules/"));
+							}
+							styles.put("src/styles.css");
 							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
 						}
 					}
