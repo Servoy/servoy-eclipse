@@ -62,19 +62,16 @@ export class EditorContentService {
                                 // new layout container in parent layout container , make sure is inserted in correct position
                                 reorderLayoutContainers.push(parent);
                             }
-                        }
-                        else {
-                            let fc = formCache.getFormComponent(parentUUID);
+                        } else {
+                            const fc = formCache.getFormComponent(parentUUID);
                             if (fc) {
                                 fc.addChild(container);
-                            }
-                            else {
+                            } else {
                                 // parent is not created yet, look for it later
                                 orphanLayoutContainers.push(container);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         // dropped directly on form
                         if (formCache.mainStructure == null) {
                             formCache.mainStructure = new StructureCache(null, null);
@@ -91,7 +88,7 @@ export class EditorContentService {
         }
         if (data.ng2components) {
             data.ng2components.forEach((elem) => {
-                let component = formCache.getComponent(elem.name);
+                const component = formCache.getComponent(elem.name);
                 if (component) {
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     // existing component updated, make sure it is in correct position relative to its sibblings
@@ -100,12 +97,10 @@ export class EditorContentService {
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
                             reorderLayoutContainers.push(component.parent);
                         }
-                    }
-                    else if (formCache.absolute) {
+                    } else if (formCache.absolute) {
                         reorderPartComponents = true;
                     }
-                }
-                else if (formCache.getFormComponent(elem.name) == null) {
+                } else if (formCache.getFormComponent(elem.name) == null) {
                     redrawDecorators = true;
                     if (elem.model[ConverterService.TYPES_KEY] != null) {
                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
@@ -130,7 +125,7 @@ export class EditorContentService {
 
                             if (minHeight) {
                                 layout['min-height'] = minHeight + 'px';
-                                if (!continingFormIsResponsive) layout['height'] = "100%"; // allow anchoring to bottom in anchored form + anchored form component
+                                if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
                             }
                             if (minWidth) {
                                 layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
@@ -157,8 +152,7 @@ export class EditorContentService {
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else {
                         const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
@@ -171,8 +165,7 @@ export class EditorContentService {
                                     reorderLayoutContainers.push(parent);
                                 }
                             }
-                        }
-                        else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
+                        } else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
                             formCache.partComponentsCache.push(comp);
                             reorderPartComponents = true;
                         }
@@ -181,12 +174,12 @@ export class EditorContentService {
             });
             data.ng2components.forEach((elem) => {
                 //FORM COMPONENTS
-                let component = formCache.getFormComponent(elem.name);
+                const component = formCache.getFormComponent(elem.name);
                 if (component) {
                     if (data.updatedFormComponentsDesignId) {
-                        var fixedName = elem.name.replace(/-/g, "_");
+                        let fixedName = elem.name.replace(/-/g, '_');
                         if (!isNaN(fixedName[0])) {
-                            fixedName = "_" + fixedName;
+                            fixedName = '_' + fixedName;
                         }
                         if ((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1) {
                             refresh = true;
@@ -218,7 +211,7 @@ export class EditorContentService {
                     }
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     if (!component.model.containedForm && component.items && component.items.length > 0) {
-                        this.removeChildrenRecursively(component, formCache)
+                        this.removeChildrenRecursively(component, formCache);
                         component.items = [];
                         // how can we know if the old components had ghosts or not
                         renderGhosts = true;
@@ -233,7 +226,7 @@ export class EditorContentService {
         if (data.updatedFormComponentsDesignId) {
             for (var index in data.updatedFormComponentsDesignId) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
-                const fc = formCache.getFormComponent(fcname.replace(/_/g, "-"));
+                const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
                 //delete components of the old form component
                 const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) == -1));
                 if (found) {
@@ -255,8 +248,7 @@ export class EditorContentService {
                     if (!formCache.absolute) {
                         this.removeChildFromParentRecursively(comp, formCache.mainStructure);
                     }
-                }
-                else {
+                } else {
                     const fc = formCache.getFormComponent(elem);
                     if (fc) {
                         formCache.removeFormComponent(elem);
@@ -267,6 +259,7 @@ export class EditorContentService {
                 }
             });
             refresh = true;
+            redrawDecorators = true;
         }
         if (data.deletedContainers) {
             data.deletedContainers.forEach((elem) => {
@@ -274,7 +267,7 @@ export class EditorContentService {
                 if (container) {
                     formCache.removeLayoutContainer(elem);
                     this.removeChildFromParentRecursively(container, formCache.mainStructure);
-                    this.removeChildrenRecursively(container, formCache)
+                    this.removeChildrenRecursively(container, formCache);
                 }
             });
             refresh = true;
@@ -284,15 +277,14 @@ export class EditorContentService {
             this.sortChildren(formCache.partComponentsCache);
         }
 
-        for (let container of orphanLayoutContainers) {
+        for (const container of orphanLayoutContainers) {
             const parentUUID = data.childParentMap[container.id].uuid;
             if (parentUUID) {
-                let parent = formCache.getLayoutContainer(parentUUID);
+                const parent = formCache.getLayoutContainer(parentUUID);
                 if (parent) {
                     parent.addChild(container);
-                }
-                else {
-                    let fc = formCache.getFormComponent(parentUUID);
+                } else {
+                    const fc = formCache.getFormComponent(parentUUID);
                     if (fc) {
                         fc.addChild(container);
                     }
@@ -300,7 +292,7 @@ export class EditorContentService {
             }
         }
 
-        for (let container of reorderLayoutContainers) {
+        for (const container of reorderLayoutContainers) {
             // make sure the order of components in responsive layout containers is correct, based on location
             this.sortChildren(container.items);
         }
@@ -346,7 +338,7 @@ export class EditorContentService {
         }*/
         this.designFormCallback.updateForm(width, height);
     }
-    
+
     contentRefresh() {
         this.designFormCallback.contentRefresh();
     }
@@ -377,11 +369,9 @@ export class EditorContentService {
                 if (elem instanceof StructureCache) {
                     formCache.removeLayoutContainer(elem.id);
                     this.removeChildrenRecursively(elem, formCache);
-                }
-                else if (elem instanceof ComponentCache) {
+                } else if (elem instanceof ComponentCache) {
                     formCache.removeComponent(elem.name);
-                }
-                else if (elem instanceof FormComponentCache) {
+                } else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
                 }
             });
@@ -391,8 +381,8 @@ export class EditorContentService {
     private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (items) {
             items.sort((comp1, comp2): number => {
-                let priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes["svy-priority"]) : parseInt(comp1.model.servoyAttributes["svy-priority"]);
-                let priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes["svy-priority"]) : parseInt(comp2.model.servoyAttributes["svy-priority"]);
+                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority']) : parseInt(comp1.model.servoyAttributes['svy-priority']);
+                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority']) : parseInt(comp2.model.servoyAttributes['svy-priority']);
                 // priority is location in responsive form and formindex in absolute form
                 if (priocomp2 > priocomp1) {
                     return -1;
