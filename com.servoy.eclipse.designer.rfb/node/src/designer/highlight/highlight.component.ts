@@ -2,6 +2,7 @@ import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
+import { WindowRefService } from '@servoy/public';
 
 @Component({
     selector: 'designer-highlight',
@@ -13,7 +14,11 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
     showPermanentHighlight = false;
     onMoveTimer:  ReturnType<typeof setTimeout>;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService) {
+    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService, windowRefService: WindowRefService) {
+        windowRefService.nativeWindow.addEventListener('message', (event:  MessageEvent<{id:string, width: number, height: number}>) => {
+            if (event.data.id === 'redrawDecorators') 
+                this.highlightChanged(this.showPermanentHighlight);
+        });
         this.editorSession.addHighlightChangedListener(this);
     }
 
