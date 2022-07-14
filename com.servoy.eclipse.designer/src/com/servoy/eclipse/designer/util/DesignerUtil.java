@@ -534,6 +534,10 @@ public class DesignerUtil
 				tag.append("\"");
 			}
 		}
+		if (layout instanceof CSSPositionLayoutContainer)
+		{
+			tag.append(" [ResponsiveContainer]");
+		}
 		tag.append(">");
 		if (layout.getName() != null)
 		{

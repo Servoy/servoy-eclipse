@@ -37,6 +37,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -106,6 +107,7 @@ public class ZOrderCommand extends AbstractEditorAndOutlineActionDelegateHandler
 		for (Object pc : contextSelection)
 		{
 			selection.add(((PersistContext)pc).getPersist());
+			if (((PersistContext)pc).getPersist().getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null) return null;
 		}
 		Form form = null;
 		if (editorPart != null)
