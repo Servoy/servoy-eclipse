@@ -21,6 +21,9 @@ export class DesignerUtilsService {
             if (position.width == 0) position.width = correctWidth;
             if (position.height == 0) position.height = correctHeight;
         } else if (node.getAttribute('svy-id') != null) {
+            if (node.parentElement.classList.contains('svy-layoutcontainer')) {
+                return;
+            }
             let currentNode = null;
             if (node.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement;
@@ -28,14 +31,17 @@ export class DesignerUtilsService {
             if (!currentNode && node.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement;
             }
+            if (!currentNode && node.parentElement.parentElement.classList.contains('svy-layoutcontainer')) {
+                return;
+            }
             if (!currentNode && node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement.parentElement;
             }
-            if (currentNode){
+            if (currentNode) {
                 // take position from wrapper div if available, is more accurate
-                 const parentPosition = currentNode.getBoundingClientRect();
-                 position.width = parentPosition.width;
-                 position.height = parentPosition.height;
+                const parentPosition = currentNode.getBoundingClientRect();
+                position.width = parentPosition.width;
+                position.height = parentPosition.height;
             }
         }
     }
@@ -224,7 +230,7 @@ export class DesignerUtilsService {
         point.y = point.y - frameRect.top;
         let elements = Array.from(frameElem.contentWindow.document.querySelectorAll('[svy-id]'));
         if (skipNodeId) {
-           elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="'+skipNodeId+'"]'));
+            elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="' + skipNodeId + '"]'));
         }
         let found = elements.reverse().find((node) => {
             let position = node.getBoundingClientRect();

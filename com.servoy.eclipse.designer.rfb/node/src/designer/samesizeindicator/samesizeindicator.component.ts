@@ -46,6 +46,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             const nodeid = selection[0];
             const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
             if (element) {
+                if (element.parentElement.closest(".svy-responsivecontainer")) return;
                 let addedSameWidth: boolean = false;
                 let addedSameHeight: boolean = false;
 
@@ -53,7 +54,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
 
                 const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
                 Array.from(elements).forEach(node => {
-                    if (element != node) {
+                    if (element != node && node.parentElement.closest(".svy-responsivecontainer") == null) {
                         const position = node.getBoundingClientRect();
                         if (position.width >= 5 && position.width == elementRect.width) {
                             this.addSameSizeIndicator(newindicators, position, true);
