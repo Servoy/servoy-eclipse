@@ -466,6 +466,7 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = anchoringActions;
@@ -543,6 +544,7 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = arrangeActions;
@@ -683,6 +685,19 @@ export class ContextMenuComponent implements OnInit {
     private hasSelection(selectionSize?: number): boolean {
         if (this.selection && this.selection.length > 0 && (selectionSize == undefined || this.selection.length == selectionSize))
             return true;
+        return false;
+    }
+
+    private isInResponsiveContainer(): boolean {
+        if (this.selection && this.selection.length > 0) {
+             const frameElem = this.doc.querySelector('iframe');
+            for (const selection of this.selection) {
+                const node = frameElem.contentWindow.document.querySelector("[svy-id='" + selection + "']")
+                if (node && node.parentElement.closest('.svy-responsivecontainer')) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
