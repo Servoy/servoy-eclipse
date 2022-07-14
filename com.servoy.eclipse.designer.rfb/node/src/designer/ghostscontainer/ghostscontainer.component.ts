@@ -31,16 +31,16 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     formHeight: number;
 
     constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService, private windowRefService: WindowRefService) {
-        this.windowRefService.nativeWindow.addEventListener('message', (event) => {
+        protected urlParser: URLParserService,windowRefService: WindowRefService) {
+        windowRefService.nativeWindow.addEventListener('message', (event:  MessageEvent<{id:string, width: number, height: number}>) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'renderGhosts') {
                 this.renderGhosts();
             }
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
-                this.formWidth = event.data.width as number;
-                this.formHeight = event.data.height as number;
+                this.formWidth = event.data.width;
+                this.formHeight = event.data.height;
                 this.renderGhosts();
             }
             if (event.data.id === 'redrawDecorators') {
