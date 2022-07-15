@@ -9,8 +9,8 @@ export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
     public componentCache: Map<string, ComponentCache>;
-    public partComponentsCache: Array<ComponentCache>;
-    public layoutContainers: Array<StructureCache>;
+    public partComponentsCache: Array<ComponentCache | StructureCache>;
+    public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>;
     private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
@@ -24,7 +24,7 @@ export class FormCache implements IFormCache {
         this.partComponentsCache = new Array();
         this._parts = [];
         this.formComponents = new Map();
-        this.layoutContainers = new Array();
+        this.layoutContainersCache = new Map();
     }
 
     get absolute(): boolean {
@@ -44,8 +44,9 @@ export class FormCache implements IFormCache {
     }
 
 
-    public add(comp: ComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
-        this.componentCache.set(comp.name, comp);
+    public add(comp: ComponentCache | StructureCache, parent?: StructureCache | FormComponentCache | PartCache) {
+        if (comp instanceof ComponentCache)
+            this.componentCache.set(comp.name, comp);
         if (parent != null) {
             parent.addChild(comp);
         }
@@ -55,7 +56,9 @@ export class FormCache implements IFormCache {
     }
 
     public addLayoutContainer(container: StructureCache) {
-        this.layoutContainers.push(container);
+        if (container.id){
+           this.layoutContainersCache.set(container.id, container);
+        }
     }
 
     public addPart(part: PartCache) {
@@ -75,7 +78,7 @@ export class FormCache implements IFormCache {
     }
 
     public getLayoutContainer(id: string): StructureCache {
-        return this.layoutContainers.find( container => container.id === id);
+        return this.layoutContainersCache.get(id);
     }
 
     public removeComponent(name: string) {
@@ -87,16 +90,13 @@ export class FormCache implements IFormCache {
     }
 
     public removeLayoutContainer(id: string) {
-        const number = this.layoutContainers.findIndex(container => container.id === id);
-        if (number => 0) {
-            this.layoutContainers.splice(number, 1);
-        }
+       this.layoutContainersCache.delete(id);
     }
 
     public removeFormComponent(name: string) {
          this.formComponents.delete(name);
     }
-    
+
     public getConversionInfo(beanname: string) {
         return this.conversionInfo[beanname];
     }
@@ -158,7 +158,7 @@ export class ComponentCache implements IComponentCache {
 
 export class StructureCache {
     public parent: StructureCache;
-    public model = {visible:true};
+    public model:  { [property: string]: any } = {};
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
@@ -238,7 +238,7 @@ export class FormComponentCache implements IComponentCache {
         if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
             this.items.push(child);
     }
-    
+
     removeChild(child: StructureCache | ComponentCache | FormComponentCache): boolean {
         const index = this.items.indexOf(child);
         if (index >= 0) {

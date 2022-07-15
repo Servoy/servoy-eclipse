@@ -361,10 +361,15 @@ export class FormService {
                     parent = new StructureCache(null, null);
                     formCache.mainStructure = parent;
                 }
-                if (parent instanceof StructureCache || parent instanceof FormComponentCache || PartCache) {
+                if (parent instanceof StructureCache || parent instanceof FormComponentCache ) {
                     parent.addChild(structure);
                 }
-               formCache.addLayoutContainer(structure);
+
+                if (parent instanceof PartCache) {
+                    // this is a absolute form where a layout container is added to a part, make sure the form knows about this main "component"
+                     formCache.add(structure, parent);
+                }
+                formCache.addLayoutContainer(structure);
             } else
                 if (elem.formComponent) {
                     const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();

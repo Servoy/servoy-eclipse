@@ -29,9 +29,6 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div *ngFor="let item of formCache.layoutContainers" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
-          </div>
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
