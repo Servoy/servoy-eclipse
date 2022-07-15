@@ -23,8 +23,8 @@ Require-Bundle: com.servoy.eclipse.model,
  org.eclipse.ui.ide,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-collections4,
- org.apache.httpcomponents.httpcore,
- org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.client5.httpclient5,
+ org.apache.httpcomponents.core5.httpcore5,
  com.servoy.eclipse.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

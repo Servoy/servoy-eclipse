@@ -381,17 +381,17 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpcore"
+         id="org.apache.httpcomponents.core5.httpcore5"
          download-size="0"
          install-size="0"
-         version="4.4.15.v20220209-2345"
+         version="5.1.2.v20211217-1500"
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpclient"
+         id="org.apache.httpcomponents.client5.httpclient5"
          download-size="0"
          install-size="0"
-         version="4.5.13.v20210128-2225"
+         version="5.1.2.v20211217-1500"
          unpack="false"/>
 
    <plugin

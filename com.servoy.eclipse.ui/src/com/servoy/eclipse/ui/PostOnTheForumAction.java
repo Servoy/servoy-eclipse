@@ -22,16 +22,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -110,9 +111,9 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 
 				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
 				httpPost.setEntity(entity);
-				HttpResponse response = client.execute(httpPost, context);
+				CloseableHttpResponse response = client.execute(httpPost, context);
 				String content = EntityUtils.toString(response.getEntity());
-				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
+				if (response.getCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
 				{
 					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Thank you for posting", null,
 						"You can view your post on the Servoy forum.", MessageDialog.CONFIRM,
@@ -131,7 +132,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 						}
 					}
 				}
-				else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+				else if (response.getCode() == HttpStatus.SC_UNAUTHORIZED)
 				{
 					setErrorMessage("Could not login on the forum.");
 				}
@@ -140,9 +141,9 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 					ServoyLog.logInfo("Cannot post to the forum " + EntityUtils.toString(response.getEntity()));
 					setErrorMessage("Cannot post to the forum. Please try again later.");
 				}
-				return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+				return response.getCode() == HttpStatus.SC_OK;
 			}
-			catch (IOException | StorageException e)
+			catch (IOException | StorageException | ParseException e)
 			{
 				ServoyLog.logError(e);
 			}
