@@ -54,6 +54,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -405,7 +406,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
 				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 					packageName);
-				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
+				int type = specName.equals("servoycore-responsivecontainer") ? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
+				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), type);
 				container.setSpecName(specName);
 				container.setPackageName(packageName);
 				parent.addChild(container);
@@ -467,6 +469,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 
 	private int computeNextLayoutContainerIndex(IPersist parent)
 	{
+		if (parent instanceof CSSPositionLayoutContainer)
+		{
+			return ((CSSPositionLayoutContainer)parent).getAllObjectsAsList().size();
+		}
 		int i = 1;
 		if (parent instanceof ISupportFormElements)
 		{

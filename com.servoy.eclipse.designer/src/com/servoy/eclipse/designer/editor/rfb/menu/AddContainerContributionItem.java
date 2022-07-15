@@ -54,6 +54,11 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		if (persist instanceof CSSPositionLayoutContainer)
 		{
 			addMenuItem(list, null, null, null);
+			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+				"servoycore");
+			WebLayoutSpecification layoutSpec = specifications.getSpecification(((LayoutContainer)persist).getSpecName());
+			String config = layoutSpec.getConfig() instanceof String ? layoutSpec.getConfig().toString() : "{}";
+			addMenuItem(list, layoutSpec, config, null);
 		}
 		else if (persist instanceof LayoutContainer)
 		{
