@@ -94,9 +94,6 @@ export class InlineEditComponent implements AfterViewInit {
                     this.showDirectEdit = false;
                     this.editorSession.setInlineEditMode(false);
                 }
-                if (event.key === 'Enter') {
-                    this.applyValue(this.node, this.directEditProperty, this.propertyValue);
-                }
                 if (event.key == 'Delete') {
                     return false;
                 }
@@ -108,6 +105,9 @@ export class InlineEditComponent implements AfterViewInit {
                 if (event.key === 'a' && event.ctrlKey) {
                     // TODO: find an alternative for execCommand
                     this.doc.execCommand('selectAll', false, null);
+                }
+                if (event.key === 'Enter') {
+                    this.applyValue(this.node, this.directEditProperty, this.propertyValue);
                 }
                 if (event.metaKey && (event.target as Element).className == 'inlineEdit' && (event.key === 'x' || event.key === 'X')) {//cut action for mac: see the case SVY-17017
                     //this code is executing only on mac (event.metaKey)
