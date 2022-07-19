@@ -482,7 +482,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
 				? getDialogSettings().getInt(wizard.getSettingsPrefix() + SOLUTION_TYPE) : SolutionMetaData.NG_CLIENT_ONLY;
 			solutionTypeCombo.select(
-				IntStream.range(0, solutionTypeComboValues.length).filter(i -> defaultSolutionType == solutionTypeComboValues[i]).findFirst().getAsInt());
+				IntStream.range(0, solutionTypeComboValues.length).filter(i -> defaultSolutionType == solutionTypeComboValues[i]).findFirst()
+					.orElse(IntStream.range(0, solutionTypeComboValues.length).filter(i -> SolutionMetaData.NG_CLIENT_ONLY == solutionTypeComboValues[i])
+						.findFirst().getAsInt()));
 			handleSolutionTypeComboSelected();
 			solutionTypeCombo.addSelectionListener(new SelectionAdapter()
 			{
