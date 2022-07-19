@@ -1589,6 +1589,10 @@ public class ElementFactory
 							if (o instanceof IChildWebObject)
 							{
 								((IChildWebObject)o).resetUUID();
+								if (parent.getRootObject().getChangeHandler() != null)
+								{
+									parent.getRootObject().getChangeHandler().fireIPersistChanged(o);
+								}
 							}
 
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
