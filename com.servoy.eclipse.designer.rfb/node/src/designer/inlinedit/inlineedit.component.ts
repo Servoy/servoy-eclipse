@@ -149,7 +149,7 @@ export class InlineEditComponent implements AfterViewInit {
         this.renderer.setProperty(this.elementRef.nativeElement, 'innerHTML', propertyValue);
         this.renderer.setStyle(this.elementRef.nativeElement, 'left', absolutePoint.x+'px');
         this.renderer.setStyle(this.elementRef.nativeElement, 'top', absolutePoint.y + 'px');
-        this.renderer.setStyle(this.elementRef.nativeElement, 'width', absolutePoint.width + 'px');
+        this.renderer.setStyle(this.elementRef.nativeElement, 'min-width', absolutePoint.width + 'px');
         this.renderer.setStyle(this.elementRef.nativeElement, 'height', absolutePoint.height + 'px');
 
         setTimeout(() => this.elementRef.nativeElement.focus());
