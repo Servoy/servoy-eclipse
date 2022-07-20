@@ -85,7 +85,8 @@ export class FormCache implements IFormCache {
         const comp = this.componentCache.get(name);
         this.componentCache.delete(name);
         if (comp){
-             this.partComponentsCache.splice(this.partComponentsCache.indexOf(comp),1);
+            const index = this.partComponentsCache.indexOf(comp);
+            if (index !== -1) this.partComponentsCache.splice(index,1);
         }
     }
 
