@@ -150,7 +150,10 @@ public class WebComponentPropertySource extends PDPropertySource
 				props.add(new BeanPropertyHandler(beanPropertyDescriptor));
 			}
 		}
-
+		if (persist instanceof CSSPositionLayoutContainer)
+		{
+			props.add(new BeanPropertyHandler(CONTAINER_PROPERTIES.get("cssPosition")));
+		}
 		if (propertyDescription instanceof WebObjectSpecification)
 		{
 			for (WebObjectFunctionDefinition desc : ((WebObjectSpecification)propertyDescription).getHandlers().values())
