@@ -137,13 +137,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
                     } as CSSStyleDeclaration;
-
+                    const layoutName = node.getAttribute('svy-layoutname');
                     newNodes.push({
                         style: style,
                         isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         svyid: node.getAttribute('svy-id'),
-                        isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
-                        maxLevelDesign: node.classList.contains('maxLevelDesign')
+                        isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                        maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                        containerName : layoutName
                     })
                 }
             });
@@ -215,6 +216,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x, y: position.y + frameRect.y + position.height }) ||
                     this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + frameRect.x + position.width, y: position.y + frameRect.y + position.height })) {
+                    const layoutName = node.getAttribute('svy-layoutname');
                     const newNode: SelectionNode = {
                         style: {
                             height: position.height + 'px',
@@ -225,8 +227,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         } as CSSStyleDeclaration,
                         svyid: node.getAttribute('svy-id'),
                         isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
-                        maxLevelDesign: node.classList.contains('maxLevelDesign')
+                        isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                        maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                        containerName: layoutName
                     };
                     newNodes.push(newNode);
                     newSelection.push(node.getAttribute('svy-id'))
@@ -267,6 +270,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             if (addToSelection) {
                 const id = node.getAttribute('svy-id');
                 let selection = this.editorSession.getSelection();
+                const layoutName = node.getAttribute('svy-layoutname');
                 const newNode = {
                     style: {
                         height: position.height + 'px',
@@ -277,8 +281,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     } as CSSStyleDeclaration,
                     isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                     svyid: node.getAttribute('svy-id'),
-                    isContainer: node.getAttribute('svy-layoutname') != null && !node.classList.contains('svy-responsivecontainer'),
-                    maxLevelDesign: node.classList.contains('maxLevelDesign')
+                    isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                    maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                    containerName: layoutName
                 };
                 if (event.ctrlKey || event.metaKey) {
                     const index = selection.indexOf(id);
@@ -446,6 +451,7 @@ export class SelectionNode {
     isResizable?: ResizeDefinition;
     isContainer: boolean;
     maxLevelDesign: boolean;
+    containerName : string;
 }
 export class Point {
     x: number;
