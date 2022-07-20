@@ -800,6 +800,11 @@ export class ContextmenuItem {
 
     constructor(
         public text: string,
-        public execute: () => void) {
+        private functionToExecute: () => void) {
+    }
+    
+    public execute() {
+        this.functionToExecute();
+        return false;
     }
 }
