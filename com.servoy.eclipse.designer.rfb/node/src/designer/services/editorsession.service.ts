@@ -22,7 +22,7 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
-    private allowedChildren = {'servoycore.servoycore-responsivecontainer': ['component']};
+    private allowedChildren = {'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer']};
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;

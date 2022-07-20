@@ -54,7 +54,6 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -260,7 +259,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									}
 									persist = parentPersist.createNewWebComponent(componentName, spec.getName());
 
-									if (activeEditor.getForm().isResponsiveLayout())
+									if (parentPersist instanceof LayoutContainer || activeEditor.getForm().isResponsiveLayout())
 									{
 										int maxLocation = 0;
 										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist),
@@ -406,8 +405,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
 				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 					packageName);
-				int type = specName.equals("servoycore-responsivecontainer") ? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
-				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), type);
+				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
 				container.setSpecName(specName);
 				container.setPackageName(packageName);
 				parent.addChild(container);
@@ -469,9 +467,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 
 	private int computeNextLayoutContainerIndex(IPersist parent)
 	{
-		if (parent instanceof CSSPositionLayoutContainer)
+		if (parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null)
 		{
-			return ((CSSPositionLayoutContainer)parent).getAllObjectsAsList().size();
+			return ((LayoutContainer)parent).getAllObjectsAsList().size();
 		}
 		int i = 1;
 		if (parent instanceof ISupportFormElements)

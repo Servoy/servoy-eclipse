@@ -975,7 +975,8 @@ public class CreateComponentHandler implements IServerService
 		throws RepositoryException, JSONException
 	{
 		List<IPersist> newPersists = new ArrayList<IPersist>();
-		int type = layoutSpec.getName().equals("servoycore-responsivecontainer") ? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
+		int type = parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) == null && layoutSpec.getName().equals("servoycore-responsivecontainer")
+			? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			type);
 		container.setSpecName(layoutSpec.getName());
