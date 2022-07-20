@@ -248,6 +248,8 @@ export class EditorContentService {
                     formCache.removeComponent(elem);
                     if (!formCache.absolute) {
                         this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                    } else if (comp.parent) {
+                        comp.parent.removeChild(comp);
                     }
                 } else {
                     const fc = formCache.getFormComponent(elem);
