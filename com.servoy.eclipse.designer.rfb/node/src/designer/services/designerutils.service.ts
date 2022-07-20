@@ -9,6 +9,10 @@ export class DesignerUtilsService {
 
     public adjustElementRect(node: Element, position: DOMRect) {
         if (position.width == 0 || position.height == 0) {
+            if (node.parentElement.classList.contains('svy-layoutcontainer')) {
+                // if the parent element is a responsive container then height or width can be nust null
+                return;
+            }
             let correctWidth = position.width;
             let correctHeight = position.height;
             let currentNode = node.parentElement;
