@@ -94,12 +94,13 @@ export class InlineEditComponent implements AfterViewInit {
                     this.showDirectEdit = false;
                     this.editorSession.setInlineEditMode(false);
                 }
-                if (event.key == 'Delete') {
+                if ( event.key == 'Delete') {
+                    event.stopPropagation();
                     return false;
                 }
             });
             this.keydownListener = this.renderer.listen(this.elementRef.nativeElement, 'keydown', (event: KeyboardEvent) => {
-                if (event.key === 'Backspace') {
+                if (event.key === 'Backspace' || event.key == 'Delete') {
                     event.stopPropagation();
                 }
                 if (event.key === 'a' && event.ctrlKey) {
