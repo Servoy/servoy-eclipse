@@ -140,9 +140,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const layoutName = node.getAttribute('svy-layoutname');
                     newNodes.push({
                         style: style,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer')? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         svyid: node.getAttribute('svy-id'),
-                        isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                        isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName : layoutName
                     })
@@ -226,8 +226,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             display: 'block'
                         } as CSSStyleDeclaration,
                         svyid: node.getAttribute('svy-id'),
-                        isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName: layoutName
                     };
@@ -279,9 +279,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         left: position.left + this.leftAdjust + 'px',
                         display: 'block'
                     } as CSSStyleDeclaration,
-                    isResizable: this.urlParser.isAbsoluteFormLayout() ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                    isResizable: this.urlParser.isAbsoluteFormLayout()&& !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                     svyid: node.getAttribute('svy-id'),
-                    isContainer: layoutName != null && !node.classList.contains('svy-responsivecontainer'),
+                    isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                     maxLevelDesign: node.classList.contains('maxLevelDesign'),
                     containerName: layoutName
                 };
