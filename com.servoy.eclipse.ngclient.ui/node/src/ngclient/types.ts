@@ -91,7 +91,12 @@ export class FormCache implements IFormCache {
     }
 
     public removeLayoutContainer(id: string) {
+        const layout = this.layoutContainersCache.get(id);
        this.layoutContainersCache.delete(id);
+       if (layout) {
+            const index = this.partComponentsCache.indexOf(layout);
+            if (index !== -1) this.partComponentsCache.splice(index,1);
+        }
     }
 
     public removeFormComponent(name: string) {

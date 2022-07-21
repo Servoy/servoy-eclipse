@@ -33,22 +33,24 @@ export class EditorContentService {
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
                     const parentUUID = data.childParentMap[container.id].uuid;
-                    let newParent = container.parent;
-                    if (parentUUID) {
-                        newParent = formCache.getLayoutContainer(parentUUID);
-                    } else {
-                        newParent = formCache.mainStructure;
-                    }
-                    if (container.parent.id !== newParent.id) {
-                        // we moved it to another parent
-                        container.parent.removeChild(container);
-                        newParent.addChild(container);
-                    } else if (newParent.items.indexOf(container) < 0){
-                        newParent.addChild(container);
-                    }
-                    if (reorderLayoutContainers.indexOf(newParent) < 0) {
-                        // existing layout container in parent layout container , make sure is inserted in correct position
-                        reorderLayoutContainers.push(newParent);
+                    if (container.parent) {
+                        let newParent = container.parent;
+                        if (parentUUID) {
+                            newParent = formCache.getLayoutContainer(parentUUID);
+                        } else {
+                            newParent = formCache.mainStructure;
+                        }
+                        if (container?.parent?.id !== newParent?.id) {
+                            // we moved it to another parent
+                            container.parent.removeChild(container);
+                            newParent.addChild(container);
+                        } else if (newParent?.items.indexOf(container) < 0){
+                            newParent.addChild(container);
+                        }
+                        if (reorderLayoutContainers.indexOf(newParent) < 0) {
+                            // existing layout container in parent layout container , make sure is inserted in correct position
+                            reorderLayoutContainers.push(newParent);
+                        }
                     }
                 } else {
                     container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
@@ -72,6 +74,8 @@ export class EditorContentService {
                                 orphanLayoutContainers.push(container);
                             }
                         }
+                    } else if (formCache.absolute) {
+                         formCache.partComponentsCache.push(container);
                     } else {
                         // dropped directly on form
                         if (formCache.mainStructure == null) {
@@ -94,6 +98,11 @@ export class EditorContentService {
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
+                        const currentParent = data.childParentMap[component.name];
+                        if (currentParent && component.parent.id !== currentParent.uuid) {
+                            component.parent.removeChild(component);
+                            formCache.getLayoutContainer(currentParent.uuid).addChild(component);
+                        }
                         redrawDecorators = true;
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
                             reorderLayoutContainers.push(component.parent);
@@ -269,7 +278,8 @@ export class EditorContentService {
                 const container = formCache.getLayoutContainer(elem);
                 if (container) {
                     formCache.removeLayoutContainer(elem);
-                    this.removeChildFromParentRecursively(container, formCache.mainStructure);
+                    if (formCache.mainStructure) this.removeChildFromParentRecursively(container, formCache.mainStructure);
+                    else if (container.parent) container.parent.removeChild(container);
                     this.removeChildrenRecursively(container, formCache);
                 }
             });
