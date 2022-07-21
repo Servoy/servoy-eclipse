@@ -247,6 +247,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
  
   ngAfterViewInit() {
     console.log('  ChildComponent==>AfterViewInit');
+    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
   }
   
     public detectChanges() {
