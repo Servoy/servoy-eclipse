@@ -408,8 +408,8 @@ fieldset[disabled] .btn-default.focus {
     width: 100%;
 }
 
-.svy-wrapper > .svy-layoutcontainer {
-    overflow: hidden;
+.svy-wrapper > .svy-responsivecontainer {
+    overflow: auto;
     height: 100%;
     width: 100%;
 }
