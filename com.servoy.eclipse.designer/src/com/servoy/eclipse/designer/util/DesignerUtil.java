@@ -635,9 +635,9 @@ public class DesignerUtil
 		return false;
 	}
 
-	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj)
+	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj, Form form)
 	{
-		if (parent instanceof CSSPositionLayoutContainer) return true;
+		if (parent instanceof LayoutContainer && !form.isResponsiveLayout()) return true;
 		if (parent instanceof LayoutContainer)
 		{
 			Set<String> allowed = getAllowedChildren().get(

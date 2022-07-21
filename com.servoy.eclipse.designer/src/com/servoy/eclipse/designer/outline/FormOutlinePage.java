@@ -70,7 +70,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -229,7 +228,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
 						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject) &&
-							!(inputPersist.getParent() instanceof CSSPositionLayoutContainer))
+							!(inputPersist.getParent() instanceof LayoutContainer))
 						{
 							// in absolute layout only drag ghost components
 							return false;
@@ -325,7 +324,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							boolean doAllow = true;
 							for (IPersist p : dragObjects)
 							{
-								doAllow = DesignerUtil.isDropAllowed((AbstractContainer)targetLayoutContainer, p);
+								doAllow = DesignerUtil.isDropAllowed((AbstractContainer)targetLayoutContainer, p, form);
 								if (!doAllow) return false;
 							}
 							if (doAllow)
