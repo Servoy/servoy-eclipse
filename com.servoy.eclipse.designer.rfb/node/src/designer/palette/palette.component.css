@@ -17,14 +17,16 @@
 
 .palette ul {
     list-style-type: none;
-    padding-left: 15px;
-    cursor: copy
+    padding-left: 10px;
+    cursor: copy;
+     margin-bottom: 0;
 }
 
 .palette li {
     padding-top: 0px;
     white-space: nowrap;
     font-size: 12px;
+     margin-bottom: 0;
 }
 
 .palette img {
