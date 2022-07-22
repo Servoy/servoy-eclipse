@@ -335,10 +335,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 		for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 		{
-			List<String> libs = entry.getNg2CssDesignLibrary();
-			if (libs != null)
+			Object responsiveLib = entry.getManifest().getMainAttributes().getValue("Responsive-Layout");
+			if (form.isResponsiveLayout() && "True".equals(responsiveLib))
 			{
-				designCssLibs.addAll(libs);
+				List<String> libs = entry.getNg2CssDesignLibrary();
+				if (libs != null)
+				{
+					designCssLibs.addAll(libs);
+				}
 			}
 		}
 		// also add the solution css
