@@ -138,7 +138,7 @@ export interface IFormComponent extends IApiExecutor {
     // called when a model property is updated for the given compponent, but the value itself didn't change  (only nested)
     propertyChanged(componentName: string, property: string, value: any): void;
 
-    updateFormStyleClasses(ngutilsstyleclasses : string): void;
+    updateFormStyleClasses(ngutilsstyleclasses: string): void;
 }
 
 export interface IApiExecutor {
@@ -160,11 +160,11 @@ export class ComponentCache implements IComponentCache {
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string }) {
     }
-    
+
         toString() {
-        return "ComponentCache(" + this.name + ", "+ this.type + ")";
+        return 'ComponentCache(' + this.name + ', '+ this.type + ')';
         }
-    
+
 }
 
 export class StructureCache {
@@ -177,7 +177,6 @@ export class StructureCache {
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache {
-        console.log("adding child " + child + " to struture cache  " + this.id);
         if (insertBefore) {
             const idx =  this.items.indexOf(insertBefore);
            this.items.splice( idx, 0, child);
@@ -214,9 +213,9 @@ export class StructureCache {
         }
         return level;
     }
-    
+
     toString() {
-        return "StructureCache(" + this.id + ")";
+        return 'StructureCache(' + this.id + ')';
     }
 }
 
@@ -230,7 +229,6 @@ export class PartCache {
     addChild(child: ComponentCache | FormComponentCache | StructureCache) {
         if (child instanceof ComponentCache && child.type && child.type === 'servoycoreNavigator')
             return;
-            console.log("adding child " + child + " to part cache  ");
         this.items.push(child);
     }
 }
@@ -252,10 +250,8 @@ export class FormComponentCache implements IComponentCache {
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {
-        if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator')) {
-        console.log("adding child " + child + " to form  cache  ");
+        if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
             this.items.push(child);
-        }
     }
 
     removeChild(child: StructureCache | ComponentCache | FormComponentCache): boolean {
