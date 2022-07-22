@@ -160,6 +160,11 @@ export class ComponentCache implements IComponentCache {
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string }) {
     }
+    
+        toString() {
+        return "ComponentCache(" + this.name + ", "+ this.type + ")";
+        }
+    
 }
 
 export class StructureCache {
@@ -172,6 +177,7 @@ export class StructureCache {
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache {
+        console.log("adding child " + child + " to struture cache  " + this.id);
         if (insertBefore) {
             const idx =  this.items.indexOf(insertBefore);
            this.items.splice( idx, 0, child);
@@ -208,6 +214,10 @@ export class StructureCache {
         }
         return level;
     }
+    
+    toString() {
+        return "StructureCache(" + this.id + ")";
+    }
 }
 
 export class PartCache {
@@ -220,6 +230,7 @@ export class PartCache {
     addChild(child: ComponentCache | FormComponentCache | StructureCache) {
         if (child instanceof ComponentCache && child.type && child.type === 'servoycoreNavigator')
             return;
+            console.log("adding child " + child + " to part cache  ");
         this.items.push(child);
     }
 }
@@ -241,8 +252,10 @@ export class FormComponentCache implements IComponentCache {
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {
-        if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator'))
+        if (!(child instanceof ComponentCache && (child as ComponentCache).type === 'servoycoreNavigator')) {
+        console.log("adding child " + child + " to form  cache  ");
             this.items.push(child);
+        }
     }
 
     removeChild(child: StructureCache | ComponentCache | FormComponentCache): boolean {
