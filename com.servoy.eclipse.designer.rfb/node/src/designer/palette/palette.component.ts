@@ -79,7 +79,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { property: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: { property: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         event.stopPropagation();
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -321,7 +321,7 @@ export class DragItem {
     packageName?: string;
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName?: string;
-    propertyValue?: { property: string };
+    propertyValue?: { [property: string]: string };
     componentType?: string;
     topContainer?: boolean = false;
     layoutName?: string;
