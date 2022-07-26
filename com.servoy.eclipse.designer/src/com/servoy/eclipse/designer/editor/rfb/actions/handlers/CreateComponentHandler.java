@@ -181,6 +181,7 @@ public class CreateComponentHandler implements IServerService
 		{
 			public void run()
 			{
+				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
 				editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
 				{
 					private IPersist[] newPersist;
@@ -198,9 +199,8 @@ public class CreateComponentHandler implements IServerService
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 								if (!args.optBoolean("keepOldSelection", false))
 								{
-									IStructuredSelection structuredSelection = new StructuredSelection(
+									newSelection[0] = new StructuredSelection(
 										newPersist.length > 0 ? PersistContext.create(newPersist[0], editorPart.getForm()) : newPersist);
-									selectionProvider.setSelection(structuredSelection);
 								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
@@ -247,6 +247,8 @@ public class CreateComponentHandler implements IServerService
 					}
 
 				});
+
+				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
 		});
 		return null;

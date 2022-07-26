@@ -39,7 +39,7 @@ export class InlineEditComponent implements AfterViewInit {
     enterInlineEdit(event: MouseEvent){
         const selection = this.editorSession.getSelection();
         if (selection && selection.length > 0) {
-            let eventNode = this.designerUtilsService.getNode(this.doc, event);
+            let eventNode = this.designerUtilsService.getNode(event);
             if (eventNode) {
                 for (let i = 0; i < selection.length; i++) {
                     const node = selection[i];
@@ -47,11 +47,11 @@ export class InlineEditComponent implements AfterViewInit {
                         const directEditProperty = eventNode.getAttribute("directEditPropertyName");
                         if (directEditProperty) {
                             this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: string) => {
-                                if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild) {
+                                if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild instanceof HTMLElement) {
                                     eventNode = eventNode.firstElementChild;
                                 }
                                 const position = eventNode.getBoundingClientRect();
-                                const absolutePoint = this.designerUtilsService.convertToAbsolutePoint(this.doc, {
+                                const absolutePoint = this.designerUtilsService.convertToAbsolutePoint({
                                     x: position.x,
                                     y: position.y
                                 });
@@ -112,21 +112,15 @@ export class InlineEditComponent implements AfterViewInit {
                 }
                 if (event.metaKey && (event.target as Element).className == 'inlineEdit' && (event.key === 'x' || event.key === 'X')) {//cut action for mac: see the case SVY-17017
                     //this code is executing only on mac (event.metaKey)
-                    let selectedObj = null;
-                    if (window.getSelection) {
-                        selectedObj = window.getSelection();
-                    } else if (document.getSelection) {
-                        selectedObj = document.getSelection();
-                    } 
+                    const selectedObj = this.doc.getSelection();
                     if (selectedObj != null) {
-                        let nodeText = selectedObj.anchorNode.nodeValue;
+                        const nodeText = selectedObj.anchorNode.nodeValue;
                         //in this context anchorNode and focusNode are the same
-                        let startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
-                        let endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
+                        const startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
+                        const endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
                         if (startRange != endRange) { //something is selected; 
-                            document.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
-                            var selectedText = nodeText.substring(startRange, endRange);
-                            document.activeElement.textContent = nodeText.replace(selectedText, '');
+                            this.doc.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
+                            this.doc.activeElement.textContent = nodeText.replace(nodeText.substring(startRange, endRange), '');
                         }
                     }
                     return false; //do not dispatch the event further

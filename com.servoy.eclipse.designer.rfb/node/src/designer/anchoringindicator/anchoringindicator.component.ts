@@ -1,7 +1,7 @@
-import { Component, AfterViewInit, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 import { SameSizeIndicator } from '../samesizeindicator/samesizeindicator.component';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -27,7 +27,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     topAdjust: number;
     leftAdjust: number;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected urlParser: URLParserService,) {
+    constructor(protected readonly editorSession: EditorSessionService, protected editorContentService : EditorContentService, protected urlParser: URLParserService,) {
         this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -47,12 +47,9 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     selectionChanged(selection: Array<string>): void {
         this.indicator = null;
         if (this.anchoringIndicator && selection && selection.length == 1) {
-            const frameElem = this.doc.querySelector('iframe');
-            const frameRect = frameElem.getBoundingClientRect();
-            this.topAdjust = frameRect.top;
-            this.leftAdjust = frameRect.left;
-            const nodeid = selection[0];
-            const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+            this.topAdjust = this.editorContentService.getTopPositionIframe();
+            this.leftAdjust = this.editorContentService.getLeftPositionIframe();
+            const element = this.editorContentService.getContentElement(selection[0])
             if (element) {
                 if (element.parentElement.closest(".svy-responsivecontainer")) return;
                 const elementRect = element.getBoundingClientRect();

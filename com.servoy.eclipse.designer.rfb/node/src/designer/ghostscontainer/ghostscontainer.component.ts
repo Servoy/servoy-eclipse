@@ -1,16 +1,15 @@
-import { Component, OnInit, Inject, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
-import { WindowRefService } from '@servoy/public';
 import { Point } from '../mouseselection/mouseselection.component';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css']
 })
-export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy {
+export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
 
     @ViewChild('element', { static: false }) elementRef: ElementRef<Element>;
 
@@ -30,32 +29,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     formWidth: number;
     formHeight: number;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService,windowRefService: WindowRefService) {
-        windowRefService.nativeWindow.addEventListener('message', (event:  MessageEvent<{id:string, width: number, height: number}>) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (event.data.id === 'renderGhosts') {
-                this.renderGhosts();
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (event.data.id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
-                this.formWidth = event.data.width;
-                this.formHeight = event.data.height;
-                this.renderGhosts();
-            }
-            if (event.data.id === 'redrawDecorators') {
-                if (this.ghosts) {
-                    for (const ghostContainer of this.ghosts) {
-                        for (const ghost of ghostContainer.ghosts) {
-                            if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
-                                this.renderGhosts();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
+        protected urlParser: URLParserService, private editorContentService: EditorContentService) {
+        this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -64,13 +40,38 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             // for responsive this is way too early we need the real content size to show the ghosts
             this.renderGhosts()
         }
-        const content = this.doc.querySelector('.content-area');
-        content.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
-        content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+        this.editorContentService.getContentArea().addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
+        this.editorContentService.getContentArea().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
     }
 
     ngOnDestroy(): void {
         this.removeSelectionChangedListener();
+        this.editorContentService.removeContentMessageListener(this);
+    }
+
+    contentMessageReceived(id: string, data: { property: string, width? : number, height? : number }) {
+        if (id === 'renderGhosts') {
+            this.renderGhosts();
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
+            this.formWidth = data.width;
+            this.formHeight = data.height;
+            this.renderGhosts();
+        }
+        
+        if (id === 'redrawDecorators') {
+            if (this.ghosts) {
+                for (const ghostContainer of this.ghosts) {
+                    for (const ghost of ghostContainer.ghosts) {
+                        if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
+                            this.renderGhosts();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     renderGhosts() {
@@ -99,8 +100,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     }
                 }
                 if (!this.urlParser.isAbsoluteFormLayout()) {
-                    const iframe = this.doc.querySelector('iframe');
-                    const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + ghostContainer.uuid + '"]')[0];
+                    const node = this.editorContentService.getContentElement(ghostContainer.uuid);
                     if (node !== undefined) {
                         ghostContainer.parentCompBounds = node.getBoundingClientRect();
                     }
@@ -123,10 +123,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
 
                 for (const ghost of ghostContainer.ghosts) {
-                    if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP){
+                    if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
                         ghostContainer.style.display = 'none';
                         // groups are deprecated in new designer
-                        continue;    
+                        continue;
                     }
                     let style = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
@@ -242,10 +242,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.renderGhostsInternal(this.ghosts);
             }
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                const frameElem = this.doc.querySelector('iframe');
-                const frameRect = frameElem.getBoundingClientRect();
                 const obj = {};
-                obj[this.draggingGhost.uuid] = { 'x': event.pageX - frameRect.x - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - frameRect.y - this.topOffsetRelativeToSelectedGhost };
+                obj[this.draggingGhost.uuid] = { 'x': event.pageX - this.editorContentService.getLeftPositionIframe() - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - this.editorContentService.getTopPositionIframe() - this.topOffsetRelativeToSelectedGhost };
                 this.editorSession.sendChanges(obj);
                 this.renderGhosts();
             }
@@ -265,7 +263,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     private onMouseMove(event: MouseEvent) {
         if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
             if (!this.draggingClone.parentNode) {
-                this.doc.body.appendChild(this.draggingClone);
+                this.editorContentService.getBodyElement().appendChild(this.draggingClone);
             }
             this.renderer.setStyle(this.draggingClone, 'left', (event.pageX - this.leftOffsetRelativeToSelectedGhost) + 'px');
             this.renderer.setStyle(this.draggingClone, 'top', (event.pageY - this.topOffsetRelativeToSelectedGhost) + 'px');
@@ -312,7 +310,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
             if (this.draggingGhostComponent === null) {
-                this.draggingGhostComponent = this.doc.querySelector('.contentframe-overlay').querySelectorAll('[svy-id="' + this.draggingGhost.uuid + '"]')[0] as HTMLElement;
+                this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
             }
             this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
             this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');

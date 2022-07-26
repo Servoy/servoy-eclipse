@@ -1,7 +1,7 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 
 export enum SHORTCUT_IDS {
@@ -34,8 +34,8 @@ export class ContextMenuComponent implements OnInit {
     selection: string[];
     selectionAnchor = 0;
 
-    constructor(protected readonly editorSession: EditorSessionService,
-        protected urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
+        protected urlParser: URLParserService) {
     }
 
     ngOnInit(): void {
@@ -48,10 +48,9 @@ export class ContextMenuComponent implements OnInit {
 
     private setup(shortcuts: { [key: string]: string; }, superForms: Array<string>): void {
         this.createItems(shortcuts, superForms);
-        const contentArea = this.doc.querySelector('.content-area');
+        const contentArea = this.editorContentService.getContentArea();
         contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
-            const frameElem = this.doc.querySelector('iframe');
             const selectionChanged = this.selection !== this.editorSession.getSelection();
             this.selection = this.editorSession.getSelection();
             if (this.selection && this.selection.length == 1) {
@@ -61,13 +60,13 @@ export class ContextMenuComponent implements OnInit {
                     event.stopPropagation();
                     return;
                 }
-                node = frameElem.contentWindow.document.querySelector("[svy-id='" + this.selection[0] + "']");
+                node = this.editorContentService.getContentElement(this.selection[0]);
                 if (node && node.hasAttribute('svy-anchors')) {
                     this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
                 }
             }
             if (!node) {
-                node = frameElem.contentWindow.document.querySelector('.svy-form');
+                node = this.editorContentService.getContentForm();
             }
             if (node) {
                 for (let i = 0; i < this.menuItems.length; i++) {
@@ -167,12 +166,12 @@ export class ContextMenuComponent implements OnInit {
             event.stopPropagation();
         });
         // for some reason click event is not always triggered
-        this.doc.body.addEventListener('mouseup', (event: MouseEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('mouseup', (event: MouseEvent) => {
             if (event.button == 0) {
                 setTimeout(() => this.hide(), 200);
             }
         });
-        this.doc.body.addEventListener('keyup', (event: KeyboardEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
                 this.hide();
@@ -218,7 +217,7 @@ export class ContextMenuComponent implements OnInit {
             this.element.nativeElement.style.top = top + 'px';
         }
         else {
-            const submenu = this.doc.querySelector('.dropdown-submenu:hover');
+            const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
             if (submenu) {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
                 //the submenu can only be displayed on the right or left side of the contextmenu
@@ -690,9 +689,8 @@ export class ContextMenuComponent implements OnInit {
 
     private isInResponsiveContainer(): boolean {
         if (this.selection && this.selection.length > 0) {
-             const frameElem = this.doc.querySelector('iframe');
             for (const selection of this.selection) {
-                const node = frameElem.contentWindow.document.querySelector("[svy-id='" + selection + "']")
+                const node = this.editorContentService.getContentElement(selection );
                 if (node && node.parentElement.closest('.svy-responsivecontainer')) {
                     return true;
                 }
@@ -716,8 +714,7 @@ export class ContextMenuComponent implements OnInit {
         if (this.selection && this.selection.length == 1) {
             const obj = {};
             const nodeid = this.selection[0];
-            const frameElem = this.doc.querySelector('iframe');
-            const node = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+            const node = this.editorContentService.getContentElement(this.selection[0] );
             if (node && node.hasAttribute('svy-anchors')) {
                 let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
                 if (beanAnchor == 0)
@@ -777,7 +774,7 @@ export class ContextMenuComponent implements OnInit {
     }
 
     private convertToContentPoint(point: { x?: number; y?: number; left?: number; top?: number }) {
-        const glasspane = this.doc.querySelector('.contentframe-overlay');
+        const glasspane = this.editorContentService.getGlassPane();
         const frameRect = glasspane.getBoundingClientRect();
 
         if (point.x && point.y) {

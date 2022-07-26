@@ -141,7 +141,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
-                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null ,null, false, model_inserted);
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, null, false, model_inserted);
                     this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
                     if (event.data.children) {
                         event.data.children.forEach(child => {
@@ -224,7 +224,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const changed = this.showWireframe != event.data.value;
                 this.showWireframe = event.data.value;
                 if (changed) {
-                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                    // how can we detect the style is completely applied before redraw ?
+                    setTimeout(() => {
+                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'redrawDecorators' }, '*');
+                    }, 200);
                 }
             }
             if (event.data.id === 'maxLevel') {
@@ -241,15 +245,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         })
     }
 
-  ngAfterContentInit() {
-    console.log('  ChildComponent==>ngAfterContentInit');
-  }
- 
-  ngAfterViewInit() {
-    console.log('  ChildComponent==>AfterViewInit');
-    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
-  }
-  
+    ngAfterContentInit() {
+        //console.log('  ChildComponent==>ngAfterContentInit');
+    }
+
+    ngAfterViewInit() {
+        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
+    }
+
     public detectChanges() {
         this.changeHandler.markForCheck();
     }

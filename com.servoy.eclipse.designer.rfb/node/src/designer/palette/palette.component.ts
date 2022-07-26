@@ -1,9 +1,9 @@
-import { Component, Pipe, PipeTransform, Renderer2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, Pipe, PipeTransform, Renderer2 } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-palette',
@@ -16,14 +16,10 @@ export class PaletteComponent {
     public activeIds: Array<string>;
 
     dragItem: DragItem = {};
-    topAdjust: number;
-    leftAdjust: number;
-    glasspane: HTMLElement;
-    timeoutId: ReturnType<typeof setTimeout>;
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
 
-    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document,
-        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService) {
+    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
+        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = 'Absolute-Layout';
@@ -67,8 +63,8 @@ export class PaletteComponent {
             }
             this.editorSession.getState().packages = packages;
         });
-        this.doc.body.addEventListener('mouseup', this.onMouseUp);
-        this.doc.body.addEventListener('mousemove', this.onMouseMove);
+        this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
+        this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
     }
 
     openPackageManager() {
@@ -92,7 +88,7 @@ export class PaletteComponent {
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
-        this.doc.body.appendChild(this.dragItem.paletteItemBeingDragged);
+        this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
 
         this.dragItem.elementName = elementName;
         this.dragItem.packageName = packageName;
@@ -104,27 +100,20 @@ export class PaletteComponent {
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
 
-        this.glasspane = this.doc.querySelector('.contentframe-overlay');
-        const frameElem = this.doc.querySelector('iframe');
-        const frameRect = frameElem.getBoundingClientRect();
-
-        this.topAdjust = frameRect.top;
-        this.leftAdjust = frameRect.left;
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
             this.editorSession.getState().dragging = true;
-            frameElem.contentWindow.postMessage({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children }, '*');
+            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
         }
     }
 
     onMouseUp = (event: MouseEvent) => {
         if (this.dragItem.paletteItemBeingDragged) {
             this.editorSession.getState().dragging = false;
-            this.doc.body.removeChild(this.dragItem.paletteItemBeingDragged);
+            this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
-            this.glasspane.style.cursor = '';
-            const frameElem = this.doc.querySelector('iframe');
+            this.editorContentService.getGlassPane().style.cursor = '';
 
             const component = {} as PaletteComp;
             component.name = this.dragItem.elementName;
@@ -134,8 +123,8 @@ export class PaletteComponent {
             component.y = event.pageY;
 
             // do we also need to set size here ?
-            component.x = component.x - this.leftAdjust;
-            component.y = component.y - this.topAdjust;
+            component.x = component.x - this.editorContentService.getLeftPositionIframe();
+            component.y = component.y - this.editorContentService.getTopPositionIframe();
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -153,13 +142,13 @@ export class PaletteComponent {
                     }
                 }
                 else if (!this.dragItem.ghost){
-                    frameElem.contentWindow.postMessage({ id: 'destroyElement' }, '*');
+                    this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
                     return;
                 }
             }
 
             if (this.dragItem.ghost) {
-                const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+                const elements = this.editorContentService.getAllContentElements();
                 const found = Array.from(elements).find((node) => {
                     const position = node.getBoundingClientRect();
                     this.designerUtilsService.adjustElementRect(node, position);
@@ -183,12 +172,12 @@ export class PaletteComponent {
                 this.editorSession.createComponent(component);
             }
 
-            frameElem.contentWindow.postMessage({ id: 'destroyElement' }, '*');
+             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
         }
     }
 
     onMouseMove = (event: MouseEvent) => {
-        if (event.pageX >= this.leftAdjust && event.pageY >= this.topAdjust && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
+        if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
@@ -197,32 +186,28 @@ export class PaletteComponent {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.leftAdjust + 'px');
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.topAdjust + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
                 if (!this.urlParser.isAbsoluteFormLayout() || this.urlParser.isShowingContainer()) {
-                    this.canDrop = this.designerUtilsService.getDropNode(this.doc, this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                    this.canDrop = this.designerUtilsService.getDropNode( this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
                     if (!this.canDrop.dropAllowed) {
-                        this.glasspane.style.cursor = 'not-allowed';
+                        this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                     }
                     else {
-                        this.glasspane.style.cursor = 'pointer';
+                        this.editorContentService.getGlassPane().style.cursor = 'pointer';
                     }
 
                     if (this.dragItem.contentItemBeingDragged) {
-                        if (this.glasspane.style.cursor === "pointer") {
+                        if (this.editorContentService.getGlassPane().style.cursor === "pointer") {
                             //TODO do we need to optimize the calls to insert the dragged component?
-                            //if (this.timeoutId) clearTimeout(this.timeoutId);
-                            //this.timeoutId = setTimeout(() => {
                             if (this.canDrop.dropAllowed) {
-                                const frameElem = this.doc.querySelector('iframe');
-                                frameElem.contentWindow.postMessage({
+                                this.editorContentService.sendMessageToIframe({
                                     id: 'insertDraggedComponent',
                                     dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
                                     insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
-                                }, '*');
+                                });
                             }
-                            //}, 200);
                             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         } else {
                             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
@@ -232,18 +217,17 @@ export class PaletteComponent {
                 }
             }
             else {
-                const frameElem = this.doc.querySelector('iframe');
                 if (!this.dragItem.ghost) {
                     // if is a type, do try to create the preview
-                    this.dragItem.contentItemBeingDragged = frameElem.contentWindow.document.getElementById('svy_draggedelement');
+                    this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
                     if (this.dragItem.contentItemBeingDragged) {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                     }
                 }
                 else {
-                    const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-                    const x = event.pageX - this.leftAdjust;
-                    const y = event.pageY - this.topAdjust;
+                    const elements = this.editorContentService.getAllContentElements();
+                    const x = event.pageX - this.editorContentService.getLeftPositionIframe();
+                    const y = event.pageY - this.editorContentService.getTopPositionIframe();
                     const found = Array.from(elements).find((node) => {
                         const position = node.getBoundingClientRect();
                         this.designerUtilsService.adjustElementRect(node, position);
@@ -255,10 +239,10 @@ export class PaletteComponent {
                         }
                     });
                     if (!found) {
-                        this.glasspane.style.cursor = 'not-allowed';
+                        this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                     }
                     else {
-                        this.glasspane.style.cursor = 'pointer';
+                        this.editorContentService.getGlassPane().style.cursor = 'pointer';
                     }
                 }
             }

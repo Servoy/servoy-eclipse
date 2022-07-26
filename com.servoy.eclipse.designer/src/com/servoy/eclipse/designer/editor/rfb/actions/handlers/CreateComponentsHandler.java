@@ -53,6 +53,7 @@ public class CreateComponentsHandler extends CreateComponentHandler
 		{
 			public void run()
 			{
+				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
 				editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponents")
 				{
 					private List<IPersist> newPersists;
@@ -87,9 +88,8 @@ public class CreateComponentsHandler extends CreateComponentHandler
 							if (newPersists != null && newPersists.size() > 0)
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
-								IStructuredSelection structuredSelection = new StructuredSelection(
+								newSelection[0] = new StructuredSelection(
 									newPersists.stream().map(persist -> PersistContext.create(persist, editorPart.getForm())).collect(Collectors.toList()));
-								selectionProvider.setSelection(structuredSelection);
 							}
 						}
 						catch (Exception ex)
@@ -119,6 +119,7 @@ public class CreateComponentsHandler extends CreateComponentHandler
 					}
 
 				});
+				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
 		});
 		return null;

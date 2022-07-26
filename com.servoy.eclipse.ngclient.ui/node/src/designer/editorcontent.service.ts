@@ -30,6 +30,7 @@ export class EditorContentService {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
                 if (container) {
+                    redrawDecorators = true;
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
                     const parentUUID = data.childParentMap[container.id].uuid;

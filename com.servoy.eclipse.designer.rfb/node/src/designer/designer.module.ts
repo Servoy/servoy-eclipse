@@ -14,6 +14,7 @@ import { HighlightComponent } from './highlight/highlight.component';
 import { GhostsContainerComponent } from './ghostscontainer/ghostscontainer.component';
 import { EditorContentComponent } from './editorcontent/editorcontent.component';
 import {EditorSessionService} from './services/editorsession.service';
+import {EditorContentService} from './services/editorcontent.service';
 import {URLParserService} from './services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
@@ -66,7 +67,7 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     NgbModule,
     DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

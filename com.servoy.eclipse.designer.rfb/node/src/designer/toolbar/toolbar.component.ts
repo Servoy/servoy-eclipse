@@ -1,8 +1,8 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2 } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 export enum TOOLBAR_CONSTANTS {
     LAYOUTS_COMPONENTS_CSS = 'Layouts & Components CSS',
@@ -94,7 +94,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnDistributeUpward: ToolbarItem;
 
     btnReload: ToolbarItem;
-	btnToggleI18NValues: ToolbarItem;
+    btnToggleI18NValues: ToolbarItem;
     btnClassicEditor: ToolbarItem;
 
     btnShowErrors: ToolbarItem;
@@ -114,7 +114,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     show_data: ToolbarItem[];
 
     constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService, private readonly renderer: Renderer2) {
+        protected designSize: DesignSizeService, private readonly renderer: Renderer2, private editorContentService: EditorContentService) {
         this.createItems();
         this.designSize.createItems(this);
         this.editorSession.addSelectionChangedListener(this);
@@ -205,7 +205,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            if (result) this.editorSession.sendState('showWireframe', result);
+            if (result) {
+                this.editorContentService.executeOnlyAfterInit(() => {
+                    this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
+                });
+            }
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -242,24 +246,26 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
-                this.editorSession.sendState('maxLevel', result);
+                this.editorContentService.executeOnlyAfterInit(() => {
+                    this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: result });
+                });
                 this.editorSession.setZoomLevel(result);
             }
         });
-        
-        const showI18NValuesPromise  = this.editorSession.isShowI18NValues();
+
+        const showI18NValuesPromise = this.editorSession.isShowI18NValues();
         void showI18NValuesPromise.then((result: boolean) => {
             if (!result) {
-                this.btnToggleI18NValues.text ='Show I18N values' ;
+                this.btnToggleI18NValues.text = 'Show I18N values';
             }
         });
 
-        if (this.doc.getElementById('errorsDiv') !== null) {
+        if (this.editorContentService.getDesignerElementById('errorsDiv') !== null) {
             this.btnShowErrors.enabled = true;
-            if (this.doc.getElementById('closeErrors')) {
-                this.doc.getElementById('closeErrors').addEventListener('click', () => {
+            if (this.editorContentService.getDesignerElementById('closeErrors')) {
+                this.editorContentService.getDesignerElementById('closeErrors').addEventListener('click', () => {
                     this.btnShowErrors.state = !this.btnShowErrors.state;
-                    this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                    this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
         }
@@ -362,7 +368,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 void promise.then((result: boolean) => {
                     this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
-                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result }, '*');
+                    this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
                     this.editorSession.stateListener.next('showWireframe');
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
@@ -469,7 +475,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             (value) => {
                 const lvl = parseInt(value);
                 this.editorSession.getState().maxLevel = lvl;
-                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value }, '*');
+                this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: value });
                 this.editorSession.setZoomLevel(lvl);
             }
         );
@@ -678,10 +684,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let left: number = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (left == null) {
@@ -693,7 +698,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != left) {
@@ -719,10 +724,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let right = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (right == null) {
@@ -734,7 +738,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if ((elementRect.x + elementRect.width) != right) {
@@ -760,10 +764,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let top: number = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (top == null) {
@@ -775,7 +778,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.y != top) {
@@ -801,10 +804,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let bottom = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (bottom == null) {
@@ -816,7 +818,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if ((elementRect.y + elementRect.height) != bottom) {
@@ -843,10 +845,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
@@ -866,7 +867,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
@@ -893,10 +894,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
@@ -916,7 +916,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
@@ -1017,24 +1017,24 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.add(this.btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
-        
+
         this.btnToggleI18NValues = new ToolbarItem(
-                'Show I18n Values',
-                'toolbar/icons/i18n.png',
-                true,
-                () => {
-                    if (this.btnToggleI18NValues.state) {
-                        this.btnToggleI18NValues.state = false;
-                        this.btnToggleI18NValues.text = 'Show I18N values';
-                    } else {
-                        this.btnToggleI18NValues.state = true;
-                        this.btnToggleI18NValues.text = 'Show I18N keys';
-                    }
-                    this.editorSession.toggleShowI18NValues();
+            'Show I18n Values',
+            'toolbar/icons/i18n.png',
+            true,
+            () => {
+                if (this.btnToggleI18NValues.state) {
+                    this.btnToggleI18NValues.state = false;
+                    this.btnToggleI18NValues.text = 'Show I18N values';
+                } else {
+                    this.btnToggleI18NValues.state = true;
+                    this.btnToggleI18NValues.text = 'Show I18N keys';
                 }
-            );
-            this.btnToggleI18NValues.state = false;
-            this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+                void this.editorSession.toggleShowI18NValues();
+            }
+        );
+        this.btnToggleI18NValues.state = false;
+        this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnClassicEditor = new ToolbarItem(
             'Switch to classic editor',
@@ -1053,7 +1053,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.btnShowErrors.state = !this.btnShowErrors.state;
-                this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
             }
         );
         this.btnShowErrors.disabledIcon = 'toolbar/icons/disabled_error.png';
@@ -1093,9 +1093,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
     }
 
-    setSolutionLayoutsCss(state) {
-        const frameElem = this.doc.querySelector('iframe');
-        frameElem.contentWindow.document.querySelectorAll('[svy-solution-layout-class]').forEach(element => {
+    setSolutionLayoutsCss(state: boolean) {
+        this.editorContentService.querySelectorAllInContent('[svy-solution-layout-class]').forEach(element => {
             const classes = element.getAttribute('svy-solution-layout-class');
             if (classes) {
                 classes.split(' ').forEach(cssclass => {
@@ -1111,9 +1110,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     }
 
     setShowSolutionCss(state) {
-        const frameElem = this.doc.querySelector('iframe');
-        frameElem.contentWindow.document.head.querySelectorAll('link').forEach(link => {
-            if (link.getAttribute('svy-stylesheet')) {
+        this.editorContentService.querySelectorAllInContent('link').forEach(link  => {
+            if (link instanceof HTMLLinkElement && link.getAttribute('svy-stylesheet')) {
                 if (state) {
                     link.disabled = false;
                 }
@@ -1156,17 +1154,16 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     }
 
     applyHideInherited(hideInherited: boolean) {
-        const frameElem = this.doc.querySelector('iframe');
-        const initializedElements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        if (initializedElements.length == 0) setTimeout(() => this.applyHideInherited(hideInherited), 400);
-        const elements = Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
-        elements.forEach((node) => {
-            if (hideInherited) {
-                this.renderer.setStyle(node, 'visibility', 'hidden');
-            }
-            else {
-                this.renderer.setStyle(node, 'visibility', 'visible');
-            }
+        this.editorContentService.executeOnlyAfterInit(() => {
+            const elements = this.editorContentService.querySelectorAllInContent('.inherited_element').concat(Array.from(this.editorContentService.querySelectorAll('.inherited_element')));
+            elements.forEach((node) => {
+                if (hideInherited) {
+                    this.renderer.setStyle(node, 'visibility', 'hidden');
+                }
+                else {
+                    this.renderer.setStyle(node, 'visibility', 'visible');
+                }
+            });
         });
     }
 
