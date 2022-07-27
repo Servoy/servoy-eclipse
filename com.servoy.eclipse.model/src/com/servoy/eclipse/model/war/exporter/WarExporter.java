@@ -155,12 +155,13 @@ import com.servoy.j2db.util.Utils;
  */
 public class WarExporter
 {
-	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
+	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar" };
+		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "org.apache.httpcomponents.client5.httpclient5_*.jar", //
+		"org.apache.httpcomponents.core5.httpcore5-h2_*.jar", "org.apache.httpcomponents.core5.httpcore5_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
@@ -302,11 +303,11 @@ public class WarExporter
 		{
 			// just always copy the nglibs to it even if it is just pure smart client
 			// the log4j libs are always needed.
-			copyNGLibs(targetLibDir, exportModel.isNGExport());
+			copyWARLibs(targetLibDir, exportModel.isNGExport());
 		}
 		catch (IOException e)
 		{
-			throw new ExportException("Could not copy the libs " + Arrays.toString(NG_LIBS) + ", " + pluginFiles, e);
+			throw new ExportException("Could not copy the libs " + Arrays.toString(WAR_LIBS) + ", " + pluginFiles, e);
 		}
 		monitor.worked(1);
 		monitor.subTask("Creating deploy properties");
@@ -1014,7 +1015,7 @@ public class WarExporter
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyNGLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
+	private void copyWARLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -2372,7 +2373,7 @@ public class WarExporter
 	}
 
 	/**
-	 * Check if all NG_LIBS can be found in the specified plugin locations.
+	 * Check if all WAR_LIBS can be found in the specified plugin locations.
 	 * @return message to add path to the missing jar
 	 */
 	public String searchExportedPlugins()
@@ -2391,7 +2392,7 @@ public class WarExporter
 			}
 		}
 		pluginLocations.addAll(exportModel.getPluginLocations());
-		for (String libName : NG_LIBS)
+		for (String libName : WAR_LIBS)
 		{
 			int i = 0;
 			boolean found = false;
