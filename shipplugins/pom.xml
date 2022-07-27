@@ -9,7 +9,7 @@
 
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.17.2</log4j-version>
+        <log4j-version>2.18.0</log4j-version>
         <eclipse.url>https://download.eclipse.org/eclipse/updates/4.24/</eclipse.url>
     </properties>
 
@@ -221,7 +221,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.15.1</version>
+            <version>1.15.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
