@@ -323,6 +323,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public String exportNG1LegacyMode()
+		{
+			return configuration.exportNG1LegacyMode();
+		}
+
+		@Override
 		public boolean isExportMetaData()
 		{
 			return configuration.shouldExportMetadata();

@@ -272,18 +272,31 @@ public class WarExporter
 		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
-			monitor.subTask("Copying NGClient components/services...");
-			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
-			if (monitor.isCanceled()) return;
-			monitor.setWorkRemaining(6);
-			monitor.subTask("Copy exported components");
-			copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-			monitor.worked(2);
-			monitor.subTask("Grouping JS and CSS resources");
-			copyMinifiedAndGrouped(tmpWarDir, monitor);
-			if (monitor.isCanceled()) return;
-			monitor.subTask("Compile less resources");
-			monitor.worked(1);
+			if (Utils.getAsBoolean(exportModel.exportNG1LegacyMode()))
+			{
+				monitor.subTask("Copying NGClient components/services...");
+				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
+				if (monitor.isCanceled()) return;
+				monitor.setWorkRemaining(6);
+				monitor.subTask("Copy exported components");
+				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+				monitor.worked(2);
+				monitor.subTask("Grouping JS and CSS resources");
+				copyMinifiedAndGrouped(tmpWarDir, monitor);
+				if (monitor.isCanceled()) return;
+				monitor.subTask("Compile less resources");
+				monitor.worked(1);
+			}
+			else
+			{
+				monitor.subTask("Copying components/services specs...");
+				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, true);
+				if (monitor.isCanceled()) return;
+				monitor.setWorkRemaining(5);
+				monitor.subTask("Copy exported components");
+				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+				monitor.worked(2);
+			}
 			if (exportModel.exportNG2Mode() != null)
 			{
 				monitor.subTask("Copy Titanium NGClient resources");
@@ -888,7 +901,7 @@ public class WarExporter
 	/**
 	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 */
-	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, final File targetLibDir) throws ExportException
+	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, boolean specsOnly) throws ExportException
 	{
 		try
 		{
@@ -969,11 +982,13 @@ public class WarExporter
 			}
 			monitor.worked(1);
 
-			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
-			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
+			if (!specsOnly)
+			{
+				createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
+				createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 
-			copyAllHtmlTemplates(tmpWarDir, allTemplates);
-
+				copyAllHtmlTemplates(tmpWarDir, allTemplates);
+			}
 			monitor.worked(1);
 		}
 		catch (IOException e)
