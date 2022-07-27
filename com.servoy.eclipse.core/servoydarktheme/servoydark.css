@@ -2,7 +2,7 @@
 	background-color: #2F2F2F;
 }
 
-Composite, Label, Button, Group, ToolItem, ToolBar, Shell, #PerspectiveSpacer, ScalingHyperlink{
+ * , #PerspectiveSpacer, ScalingHyperlink {
 	background-color: #2F2F2F;
 }
 
