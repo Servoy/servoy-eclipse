@@ -22,13 +22,13 @@
             <unit id="org.apache.commons.commons-text" version="1.9.0"/>
             <unit id="org.apache.commons.lang3" version="3.12.0"/>
             <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
-            <unit id="org.apache.logging.log4j.api" version="2.17.2"/>
-            <unit id="org.apache.logging.log4j.core" version="2.17.2"/>
-            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.17.2"/>
+            <unit id="org.apache.logging.log4j.api" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.core" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.18.0"/>
             <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
             <unit id="org.jboss.logging.jboss-logging" version="3.4.3.Final"/>
-            <unit id="net.bytebuddy.byte-buddy" version="1.12.9"/>
-            <unit id="org.jsoup" version="1.14.3"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.12.12"/>
+            <unit id="org.jsoup" version="1.15.2"/>
             <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
             <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
             <unit id="org.sweetlemonade.eclipse.json" version="1.0.5"/>
@@ -36,7 +36,6 @@
             <unit id="sj.jsonschemavalidation" version="2.0.1"/>
             <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
             <unit id="tus-java-server" version="2.0.0.s2"/>
-            <unit id="org.apache.commons.commons-codec" version="1.14.0"/>
             <unit id="org.objectweb.asm.commons" version="9.2.0"/>
         </location>    
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">

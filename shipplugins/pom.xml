@@ -9,7 +9,7 @@
 
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.17.2</log4j-version>
+        <log4j-version>2.18.0</log4j-version>
         <eclipse.url>https://download.eclipse.org/eclipse/updates/4.23/</eclipse.url>
     </properties>
 
@@ -190,7 +190,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.9</version>
+            <version>1.12.12</version>
         </dependency>
 
         <dependency>
@@ -216,7 +216,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.14.3</version>
+            <version>1.15.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
@@ -307,11 +307,6 @@
             <groupId>com.servoy</groupId>
             <artifactId>tus-java-server</artifactId>
             <version>2.0.0.s2</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.14</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
