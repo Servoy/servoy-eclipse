@@ -135,7 +135,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		startRMIPortText.setText("1099");
 		startRMIPortText.setEnabled(true);
 
-		exportModel.setStartRMI(true);
+		exportModel.setStartRMI(false);
 		exportModel.setStartRMIPort("1099");
 	}
 
