@@ -160,8 +160,8 @@ public class WarExporter
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "org.apache.httpcomponents.client5.httpclient5_*.jar", //
-		"org.apache.httpcomponents.core5.httpcore5-h2_*.jar", "org.apache.httpcomponents.core5.httpcore5_*.jar" };
+		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
+		/* "org.apache.httpcomponents.client5.httpclient5_*.jar", "org.apache.httpcomponents.core5.httpcore5_*.jar" */ };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
