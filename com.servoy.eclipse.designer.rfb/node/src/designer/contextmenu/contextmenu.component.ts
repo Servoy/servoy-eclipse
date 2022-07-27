@@ -109,7 +109,7 @@ export class ContextMenuComponent implements OnInit {
                                     this.menuItems[i].subMenu.push(submenuItem);
                                 }
                             for (const type of typesArray) {
-                                const submenuItem = new ContextmenuItem(type.type + ' for ' + type.property,
+                                const submenuItem = new ContextmenuItem(type.type + ' -> ' + type.property,
                                     () => {
                                         this.hide();
                                         let component: PaletteComp = {} as PaletteComp;
@@ -245,6 +245,12 @@ export class ContextMenuComponent implements OnInit {
             }
             return ''
         };
+        this.menuItems.push(entry);
+
+        entry = new ContextmenuItem(
+            'Add',
+            null
+        );
         this.menuItems.push(entry);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
@@ -566,12 +572,6 @@ export class ContextMenuComponent implements OnInit {
             entry.subMenu = groupingActions;
             this.menuItems.push(entry);
         } else { //this is an Responsive Layout
-            entry = new ContextmenuItem(
-                'Add',
-                null
-            );
-            this.menuItems.push(entry);
-
             entry = new ContextmenuItem(
                 'Zoom in',
                 () => {
