@@ -282,11 +282,6 @@ export class ContextMenuComponent implements OnInit {
         this.menuItems.push(entry);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
-            entry = new ContextmenuItem(
-                'Add',
-                null
-            );
-            this.menuItems.push(entry);
             // sizing
             const sizingActions = new Array<ContextmenuItem>();
 
