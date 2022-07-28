@@ -119,7 +119,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		browseButton.addListener(SWT.Selection, this);
 
 		exportNG1LegacyMode = new Button(composite, SWT.CHECK);
-		exportNG1LegacyMode.setText("Export NG1 resources");
+		exportNG1LegacyMode.setText("Export NG1 Client resources (by default only Titanium Client will be exported)");
 		exportNG1LegacyMode.setEnabled(exportModel.isNGExport());
 		exportNG1LegacyMode.setSelection(exportModel.exportNG1LegacyMode() != null);
 		exportNG1LegacyMode.addSelectionListener(new SelectionAdapter()
