@@ -18,9 +18,9 @@ import { ServoyApi } from './servoy_api';
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name: string;
     @Input() servoyApi: ServoyApi;
-    @Input() servoyAttributes: {  [property: string]: string };
+    @Input() servoyAttributes: { [property: string]: string };
 
-    @ViewChild('element', { static: false, read: ElementRef}) elementRef: ElementRef<T>;
+    @ViewChild('element', { static: false, read: ElementRef }) elementRef: ElementRef<T>;
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
@@ -49,9 +49,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
             this.changes = null;
         }
         if (!this.elementRef) {
-                // using logger would be better, but that would break all extends..
-                console.log('component should have #element it its template for correct initalization for targetting the main div');
-                console.log(this);
+            // using logger would be better, but that would break all extends..
+            console.log('component should have #element it its template for correct initalization for targetting the main div');
+            console.log(this);
         }
         this.cdRef.detectChanges();
     }
@@ -88,7 +88,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      */
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
-         if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
+        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
     }
 
     /**
@@ -100,7 +100,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.addAttributes();
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
-        if(this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
+        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
     }
 
     /**
@@ -108,6 +108,18 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      *  So that you are sure that you can reference the native element through the renderer to configure it.
      */
     svyOnChanges(_changes: SimpleChanges) {
+        if (_changes['servoyAttributes'] && !_changes['servoyAttributes'].firstChange) {
+            if (_changes['servoyAttributes'].previousValue) {
+                for (const key of Object.keys(_changes['servoyAttributes'].previousValue)) {
+                    this.renderer.removeAttribute(this.getNativeElement(), key);
+                }
+            }
+            if (_changes['servoyAttributes'].currentValue) {
+                for (const key of Object.keys(_changes['servoyAttributes'].currentValue)) {
+                    this.renderer.setAttribute(this.getNativeElement(), key, _changes['servoyAttributes'].currentValue[key]);
+                }
+            }
+        }
     }
 
     /**
@@ -198,7 +210,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
     protected addAttributes() {
         if (!this.servoyAttributes) return;
         for (const key of Object.keys(this.servoyAttributes)) {
-             this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes[key]);
+            this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes[key]);
         }
     }
 }
@@ -222,7 +234,7 @@ export class ComponentContributor {
     }
 
     public addComponentListener(listener: IComponentContributorListener) {
-       ComponentContributor.listeners.add(listener);
+        ComponentContributor.listeners.add(listener);
     }
 }
 

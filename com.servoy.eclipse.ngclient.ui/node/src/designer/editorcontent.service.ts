@@ -333,7 +333,9 @@ export class EditorContentService {
                     (prop: string) => component.model ? component.model[prop] : component.model);
             }
             if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
-                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y)) {
+                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y) ||
+                property === 'anchors' && component.model[property] != value || 
+                property === 'cssPosition' && (component.model[property].top !== value.top || component.model[property].bottom !== value.bottom || component.model[property].left !== value.left || component.model[property].right !== value.right) ) {
                 redrawDecorators = true;
             }
             component.model[property] = value;

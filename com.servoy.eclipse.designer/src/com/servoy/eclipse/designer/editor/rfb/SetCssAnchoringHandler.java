@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.CheckGroupDialog;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
@@ -84,14 +85,20 @@ public class SetCssAnchoringHandler implements IServerService
 		}
 
 		CompoundCommand cc = new CompoundCommand();
+		List<IPersist> changedPersists = new ArrayList<IPersist>();
 		selection.forEach(uuid -> {
 			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)uuid);
 			if (persist != null)
 			{
 				cc.add(new SetCssAnchoringCommand(top, right, bottom, left, persist));
+				changedPersists.add(persist);
 			}
 		});
 		if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
+		if (changedPersists.size() > 0)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
+		}
 		return null;
 	}
 
