@@ -664,7 +664,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 		appendToBuilder(sb, " -ng2", exportModel.exportNG2Mode());
-		appendToBuilder(sb, " -legacyng", exportModel.exportNG1LegacyMode());
+		appendToBuilder(sb, " -ng1", exportModel.exportNG1());
 		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());

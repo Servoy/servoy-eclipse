@@ -78,7 +78,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
 	private String exportNG2 = "true";
-	private String exportNG1LegacyMode = "false";
+	private boolean exportNG1 = false;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -174,7 +174,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNG2 = settings.get("export.ng2");
-		exportNG1LegacyMode = settings.get("export.legacyng");
+		exportNG1 = Utils.getAsBoolean(settings.get("export.legacyng"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -372,7 +372,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.ng2", exportNG2Mode());
-		settings.put("export.legacyng", exportNG1LegacyMode());
+		settings.put("export.legacyng", exportNG1());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -606,14 +606,14 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	@Override
-	public String exportNG1LegacyMode()
+	public boolean exportNG1()
 	{
-		return exportNG1LegacyMode;
+		return exportNG1;
 	}
 
-	public void setExportNG1LegacyMode(String exportNG1LegacyMode)
+	public void setExportNG1(boolean exportNG1)
 	{
-		this.exportNG1LegacyMode = exportNG1LegacyMode;
+		this.exportNG1 = exportNG1;
 	}
 
 	public List<String> getPlugins()
