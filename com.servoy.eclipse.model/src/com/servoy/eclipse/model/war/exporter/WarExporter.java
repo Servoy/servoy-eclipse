@@ -272,7 +272,7 @@ public class WarExporter
 		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
-			if (Utils.getAsBoolean(exportModel.exportNG1LegacyMode()))
+			if (exportModel.exportNG1())
 			{
 				monitor.subTask("Copying NGClient components/services...");
 				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
@@ -297,7 +297,7 @@ public class WarExporter
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
 			}
-			if (exportModel.exportNG2Mode() != null)
+			if (exportModel.exportNG2Mode() != null && !exportModel.exportNG2Mode().equals("false"))
 			{
 				monitor.subTask("Copy Titanium NGClient resources");
 				try

@@ -141,5 +141,5 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public void displayWarningMessage(String string, String message);
 
-	public String exportNG1LegacyMode();
+	public boolean exportNG1();
 }

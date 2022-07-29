@@ -323,9 +323,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public String exportNG1LegacyMode()
+		public boolean exportNG1()
 		{
-			return configuration.exportNG1LegacyMode();
+			return configuration.exportNG1();
 		}
 
 		@Override
@@ -605,7 +605,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void checkAndExportSolutions(WarArgumentChest configuration)
 	{
-		if (configuration.exportNG2Mode() != null)
+		if (configuration.exportNG2Mode() != null && !configuration.exportNG2Mode().equals("false"))
 		{
 			WebPackagesListener.setIgnore(true);
 			Activator.getInstance().setConsole(() -> new StringOutputStream()
