@@ -491,7 +491,23 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
         return this.parent.getTemplateForLFC(item);
     }
-
+    
+    findElement(items : Array<StructureCache | ComponentCache | FormComponentCache>, item : ComponentCache ) : ComponentModel{
+        for (let elem of items){
+            if (elem['name'] === item.name)
+            {
+                return elem as ComponentModel;
+            }
+            if (elem['items']){
+                const found = this.findElement(elem['items'], item);
+                if (found){
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+    
     getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache {
         if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
@@ -499,7 +515,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         let cm: ComponentModel = null;
         if (item instanceof ComponentCache) {
             if (this.servoyApi.isInDesigner()) {
-                cm = this.cache.items.find(elem => elem['name'] === item.name) as ComponentModel;
+                cm = this.findElement(this.cache.items, item) as ComponentModel;
             }
             else {
                 cm = this.getRowItems().find(elem => elem.name === item.name) as ComponentModel;

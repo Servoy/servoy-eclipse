@@ -1,6 +1,6 @@
 import {
-    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
+    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, AfterViewInit, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
@@ -83,7 +83,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -243,10 +243,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             this.detectChanges();
         })
-    }
-
-    ngAfterContentInit() {
-        //console.log('  ChildComponent==>ngAfterContentInit');
     }
 
     ngAfterViewInit() {
