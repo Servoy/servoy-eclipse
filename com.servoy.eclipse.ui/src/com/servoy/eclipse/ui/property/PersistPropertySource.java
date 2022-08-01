@@ -187,6 +187,7 @@ import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -1716,21 +1717,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
 				}
 			};
+			String tooltipText = null;
 			Object config = propertyDescription.getConfig();
 			if (config instanceof JSONObject)
 			{
 				// this is for when WebObjectFunctionDefinition.getAsPropertyDescription is given here as PD (for custom web components)
 				// then the config is the actual json definition of that in the spec file it seems
-				String tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
 			}
 			else
 			{
 				// config is probably a boolean - created in case of legacy component event handlers
 				// but then the tooltip should be in tags as for normal properties see PersistPropertyHandler.getPropertyDescription() for events
-				String tooltipText = propertyDescription.getDocumentation();
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = propertyDescription.getDocumentation();
 			}
+			if (tooltipText == null && !(persistContext.getPersist() instanceof IBasicWebObject))
+			{
+				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(ScriptMethod.class, propertyDescription.getName());
+				if (legacyMethodTemplate != null) tooltipText = legacyMethodTemplate.getDescription();
+			}
+			if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
 		}
 		return methodPropertyController;
 	}
