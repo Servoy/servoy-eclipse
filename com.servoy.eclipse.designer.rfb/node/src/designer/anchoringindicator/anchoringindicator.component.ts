@@ -44,7 +44,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
         this.editorContentService.removeContentMessageListener(this);
     }
 
-    contentMessageReceived(id: string, data: { property: string }) {
+    contentMessageReceived(id: string) {
         if (id === 'redrawDecorators') {
             this.selectionChanged(this.editorSession.getSelection());
         }
@@ -56,7 +56,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
-                    if (element.parentElement.closest(".svy-responsivecontainer")) return;
+                    if (element.parentElement.closest('.svy-responsivecontainer')) return;
                     const elementRect = element.getBoundingClientRect();
                     let image: string;
                     if (!this.urlParser.isCSSPositionFormLayout()) {
@@ -90,7 +90,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                         }
                     }
                     else {
-                        const wrapper = element.closest('.svy-wrapper') as HTMLDivElement;
+                        const wrapper: HTMLDivElement = element.closest('.svy-wrapper');
                         if (wrapper.style.top) {
                             if (wrapper.style.left) {
                                 if (wrapper.style.bottom) {
