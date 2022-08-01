@@ -3938,9 +3938,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						while (it.hasNext())
 						{
 							String path = it.next();
-							IResource resource = getWorkspace().getRoot().getFile(new Path(path));
-							resources.add(resource);
-							if (!resource.exists())
+							IResource resource = null;
+							try
+							{
+								resource = getWorkspace().getRoot().getFile(new Path(path));
+								resources.add(resource);
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+							}
+							if (resource == null || !resource.exists())
 							{
 								it.remove();
 							}
