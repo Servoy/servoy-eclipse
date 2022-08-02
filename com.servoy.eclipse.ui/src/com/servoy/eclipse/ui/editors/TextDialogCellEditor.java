@@ -19,9 +19,6 @@ package com.servoy.eclipse.ui.editors;
 
 import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
@@ -31,6 +28,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -43,7 +41,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
  * A cell editor that manages a text field and includes a '...' button for editing the text field in a dialog.
@@ -75,7 +72,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 	private Object value = null;
 
 	public final static Object CANCELVALUE = new Object();
-
+	private boolean buttonHovering = false;
 	/**
 	 * label provider used when multi-line values are shown
 	 */
@@ -131,6 +128,20 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			}
 		});
 
+		button1.addMouseTrackListener(new MouseTrackAdapter()
+		{
+			@Override
+			public void mouseEnter(MouseEvent e)
+			{
+				TextDialogCellEditor.this.buttonHovering = true;
+			}
+
+			@Override
+			public void mouseExit(MouseEvent e)
+			{
+				TextDialogCellEditor.this.buttonHovering = false;
+			}
+		});
 		button2 = createButton2(editor);
 		if (button2 != null)
 		{
@@ -196,7 +207,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusGained(FocusEvent e)
@@ -206,7 +217,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusLost(FocusEvent e)
@@ -223,11 +234,11 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 	protected boolean editing = false;
 
-	private boolean ignoreFocusLost = true;
+	private boolean alwaysLooseFocus = false;
 
-	public void setIgnoreFocusLost(boolean b)
+	public void setAlwaysLooseFocus(boolean b)
 	{
-		ignoreFocusLost = b;
+		alwaysLooseFocus = b;
 	}
 
 	protected void editValue(Control control)
@@ -236,7 +247,6 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		editing = true;
 		try
 		{
-			setIgnoreFocusLost(true);
 			Object newValue = openDialogBox(control);
 			if (CANCELVALUE.equals(newValue))
 			{
@@ -317,23 +327,11 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 	@Override
 	protected void focusLost()
 	{
-		if (!ignoreFocusLost && isActivated())
+		// if button was pressed we want to keep editing, otherwise we cannot apply the value from dialog
+		// how can know the button was pressed ? just use hovering for now
+		if (alwaysLooseFocus || !this.buttonHovering)
 		{
-			// Handle lost focus in a job so that we can still process the button
-			// click and keep the editor active.
-			// Note: disabled focus lost handling, on some OSes (winXp) we saw that the button could still not be processed
-			new WorkbenchJob("looseFocusJob")
-			{
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor)
-				{
-					if (!editing)
-					{
-						TextDialogCellEditor.super.focusLost();
-					}
-					return Status.OK_STATUS;
-				}
-			}.schedule(100);
+			TextDialogCellEditor.super.focusLost();
 		}
 	}
 
