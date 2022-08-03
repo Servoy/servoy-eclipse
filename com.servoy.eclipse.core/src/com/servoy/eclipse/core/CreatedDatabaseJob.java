@@ -95,7 +95,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 		monitor.beginTask("Creating PostgreSQL database", 3);
 		try
 		{
-			ProcessBuilder pb = new ProcessBuilder(batchFile.getAbsolutePath());
+			ProcessBuilder pb = new ProcessBuilder("\"" + batchFile.getAbsolutePath() + "\"");
 			pb.directory(batchFile.getParentFile());
 			Process process = pb.start();
 			process.waitFor();
@@ -115,7 +115,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 			{
 				startPostgres = new File(batchFile.getParentFile().getParentFile(), "startpostgres.sh");
 			}
-			pb = new ProcessBuilder(startPostgres.getAbsolutePath());
+			pb = new ProcessBuilder("\"" + startPostgres.getAbsolutePath() + "\"");
 			pb.directory(startPostgres.getParentFile());
 			Process process = pb.start();
 			process.waitFor();
