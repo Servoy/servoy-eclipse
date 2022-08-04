@@ -1,6 +1,6 @@
 import {
-    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, AfterViewInit, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
+    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
@@ -27,6 +27,9 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
           </div>
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
+          </div>
+          <div (mousedown)="variantChoosen(item)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
@@ -83,7 +86,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -113,6 +116,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     draggedElementItem: ComponentCache | StructureCache;
     insertedCloneParent: StructureCache;
     insertedClone: ComponentCache | StructureCache;
+    variantElements: Array<ComponentCache> = new Array<ComponentCache>();
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
@@ -141,8 +145,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
-                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, null, false, model_inserted);
-                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
+                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
                     if (event.data.children) {
                         event.data.children.forEach(child => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
@@ -156,6 +160,37 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
+            if (event.data.id === 'createVariants') {
+				console.log(event.data)
+				const elWidth = event.data.model.size ? event.data.model.size.width : 80;
+                const elHeight = event.data.model.size ? event.data.model.size.height : 30;
+                const columns = event.data.columns;
+                const margin = event.data.margin;
+                let columnIndex = 0;
+                let rowIndex = 0;
+                
+                
+                event.data.variants.forEach((variant) => {
+					const model = { width: elWidth + 'px', height: elHeight + 'px' };
+					model['left'] = (columnIndex * (elWidth + 15) + 10) + 'px' ;
+					model['top'] = (rowIndex * (elHeight + 15) + 10) + 'px';
+					columnIndex++;
+					if (columnIndex % columns == 0) {
+						columnIndex = 0;
+						rowIndex++;
+					}
+					const eventModel = JSON.parse(JSON.stringify(event.data.model).slice());
+					eventModel.styleClass = variant + ' variantClass';
+                	this.variantElements.push(new ComponentCache('variant_element', event.data.name, eventModel, [], model));
+				});
+                
+               /* event.data.model.styleClass = event.data.variants[0];
+                const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
+                this.variantElements.push(new ComponentCache('variant_element', event.data.name, event.data.model, [], model));*/
+                //this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, event.data.model, [], model_inserted); //TODO only in responsive
+                this.designMode = this.showWireframe;
+                this.showWireframe = true;
+			}
             if (event.data.id === 'createDraggedComponent') {
                 this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
                 if (this.insertedClone) {
@@ -224,11 +259,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const changed = this.showWireframe != event.data.value;
                 this.showWireframe = event.data.value;
                 if (changed) {
-                    // how can we detect the style is completely applied before redraw ?
-                    setTimeout(() => {
-                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
-                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'redrawDecorators' }, '*');
-                    }, 200);
+                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
                 }
             }
             if (event.data.id === 'maxLevel') {
@@ -244,10 +275,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             this.detectChanges();
         })
     }
-
-    ngAfterViewInit() {
-        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
-    }
+    
+    public variantChoosen(item: ComponentCache) {
+		console.log(item);
+	}
 
     public detectChanges() {
         this.changeHandler.markForCheck();

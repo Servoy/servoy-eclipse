@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONArray;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -554,4 +555,16 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		});
 		return foreignElementUUIDs;
 	}
+
+	public JSONArray js_getExistingVariants(String variantCategoryName)
+	{
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getExistingVariants(variantCategoryName);
+	}
+
+	public void js_setVariantsFor(String variantCategoryName, String jsonArrayString)
+	{
+		ServoyModelManager.getServoyModelManager().getServoyModel().setVariantsFor(variantCategoryName, jsonArrayString);
+	}
+
+
 }

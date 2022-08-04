@@ -242,11 +242,16 @@
 			"description": "The javascript definition",
 			"type": "string"
 		},
-		"categoryName" : 
-		{
-			"description": "The category name which is a sub node in the palette",
-			"type": "string"
-		},
+        "categoryName" : 
+        {
+            "description": "The category name which is a sub node in the palette",
+            "type": "string"
+        },
+        "styleVariantCategory" : 
+        {
+            "description": "The category name which is a sub node in the palette",
+            "enum" : ["label", "button", "datalabel"]
+        },
 		"designStyleClass" :
 		{
 			"description": "A style class that is being used for a layout container purely in the designer",

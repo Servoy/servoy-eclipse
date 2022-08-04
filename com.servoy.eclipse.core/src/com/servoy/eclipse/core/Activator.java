@@ -189,6 +189,7 @@ public class Activator extends Plugin
 
 	private final List<Runnable> postgressCheckedNotify = new ArrayList<Runnable>(3);
 
+	private boolean designerCallbackNotSetTodch = true;
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -402,7 +403,7 @@ public class Activator extends Plugin
 				}
 			});
 		}
-
+		com.servoy.eclipse.ngclient.startup.Activator.setDesignerCallback(getDesignerCallback());
 	}
 
 	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
@@ -563,6 +564,16 @@ public class Activator extends Plugin
 	public IDebugClientHandler getDebugClientHandler()
 	{
 		IDebugClientHandler dch = ApplicationServerRegistry.get().getDebugClientHandler();
+		if (designerCallbackNotSetTodch)
+		{
+			designerCallbackNotSetTodch = false;
+			dch.setDesignerCallback(getDesignerCallback());
+		}
+		return dch;
+	}
+
+	private IDesignerCallback getDesignerCallback()
+	{
 		if (designerCallback == null)
 		{
 			designerCallback = new IDesignerCallback()
@@ -650,9 +661,8 @@ public class Activator extends Plugin
 					}
 				}
 			};
-			dch.setDesignerCallback(designerCallback);
 		}
-		return dch;
+		return designerCallback;
 	}
 
 	/**

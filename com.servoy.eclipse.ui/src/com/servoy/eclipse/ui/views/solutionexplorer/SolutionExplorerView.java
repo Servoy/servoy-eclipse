@@ -414,6 +414,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private EditVariableAction editVariableAction;
 
+	private EditComponentVariantsAction editComponentVariantsAction;
+
 	private DebugMethodAction debugMethodAction;
 
 	private ContextAction newActionInListSecondary;
@@ -2849,6 +2851,7 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(submenu);
 		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
+		if (editComponentVariantsAction.isEnabled()) manager.add(editComponentVariantsAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		if (searchListAction.isEnabled()) manager.add(searchListAction);
@@ -3315,6 +3318,7 @@ public class SolutionExplorerView extends ViewPart
 
 		copyTable = new CopyTableAction(shell);
 		editVariableAction = new EditVariableAction(this);
+		editComponentVariantsAction = new EditComponentVariantsAction(this);
 
 		debugMethodAction = new DebugMethodAction(this);
 
@@ -3404,6 +3408,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(openAction);
 		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
+		addListSelectionChangedListener(editComponentVariantsAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
 		addListSelectionChangedListener(renameMediaAction);

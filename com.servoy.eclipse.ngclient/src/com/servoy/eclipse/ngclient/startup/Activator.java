@@ -32,6 +32,7 @@ import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.j2db.IDebugClientHandler;
+import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.server.ngclient.NGClient;
 import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
@@ -47,6 +48,7 @@ public class Activator implements BundleActivator
 
 	private static final Bundle ngclientBundle = Platform.getBundle("servoy_ngclient");
 	private static final Bundle saboBundle = Platform.getBundle("sablo");
+	static IDesignerCallback designerCallback;
 
 	public static Bundle getNClientBundle()
 	{
@@ -56,6 +58,11 @@ public class Activator implements BundleActivator
 	public static Bundle getSaboBundle()
 	{
 		return saboBundle;
+	}
+
+	public static void setDesignerCallback(IDesignerCallback designerCallback)
+	{
+		Activator.designerCallback = designerCallback;
 	}
 
 	@Override
@@ -68,7 +75,7 @@ public class Activator implements BundleActivator
 				@Override
 				public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception
 				{
-					NGClientWebsocketSession wsSession = new NGClientWebsocketSession(sessionKey)
+					NGClientWebsocketSession wsSession = new NGClientWebsocketSession(sessionKey, designerCallback)
 					{
 						@Override
 						public void init(Map<String, List<String>> requestParams) throws Exception
@@ -83,7 +90,7 @@ public class Activator implements BundleActivator
 //								else 
 								if (requestParams.containsKey("nodebug"))
 								{
-									setClient(new NGClient(this));
+									setClient(new NGClient(this, designerCallback));
 								}
 								else
 								{
@@ -102,7 +109,7 @@ public class Activator implements BundleActivator
 									}
 									else
 									{
-										setClient(new NGClient(this));
+										setClient(new NGClient(this, designerCallback));
 									}
 								}
 							}

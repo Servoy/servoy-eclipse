@@ -140,10 +140,20 @@ export class EditorContentService {
     removeContentMessageListener(listener: IContentMessageListener) {
         this.contentMessageListeners.splice(this.contentMessageListeners.indexOf(listener), 1);
     }
+    
+    sendMessageToPreview(message) {
+		const previewElement: HTMLIFrameElement = this.document.getElementById('PreviewForm') as HTMLIFrameElement;
+		previewElement.contentWindow.postMessage(message, '*');
+	}
 
-    private initIFrame() {
+   private initIFrame() {
         if (!this.frameElement) {
-            this.frameElement = this.document.querySelector('iframe');
+			const frames = this.document.getElementsByTagName('iframe');
+			if (frames[0] && frames[0].id != 'PreviewForm') {
+				this.frameElement = frames[0];
+			} else {
+				this.frameElement = frames[1];
+			}       
             const frameRect = this.frameElement.getBoundingClientRect();
             this.topPositionIframe = frameRect.top;
             this.leftPositionIframe = frameRect.left;

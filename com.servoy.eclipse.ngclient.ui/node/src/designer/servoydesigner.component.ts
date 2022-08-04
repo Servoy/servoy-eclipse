@@ -28,6 +28,8 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     mainForm: string;
     solutionName: string;
     private wsSession: WebsocketSession;
+    previewRequested: boolean;
+    previewFormTemplate = '{ "PreviewForm": { "responsive": false, "size": { "width": "100%", "height": "100%" }, "children": [ { "name": "", "model": { "borderType": { "type": "BevelBorder", "borderStyle": { "borderColor": "null null null null", "borderWidth": "2px", "borderStyle": "outset" } }, "designSize": { "width": "100%", "height": "100%" }, "size": { "width": "100%", "height": "100%" }, "addMinSize": true, "useCssPosition": {}, "absoluteLayout": { "": true }, "hasExtraParts": false } }, { "part": true, "classes": [ "svy-body" ], "layout": { "position": "absolute", "left": "0px", "right": "0px", "top": "0px", "bottom": "0px", "overflow-x": "auto", "overflow-y": "auto" }, "children": [] } ] } }';
 
     constructor(private windowRef: WindowRefService,
         private websocketService: WebsocketService,
@@ -35,41 +37,53 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         private services: ServicesService,
         private editorContentService: EditorContentService,
         protected renderer: Renderer2,
-        @Inject(DOCUMENT) private doc: Document) { }
+        @Inject(DOCUMENT) private doc: Document) { 
+		}
 
     ngOnInit() {
         this.renderer.setStyle(this.doc.body, "overflow", "hidden");
         let path: string = this.windowRef.nativeWindow.location.pathname;
         let formStart = path.indexOf('/form/') + 6;
         let formName = path.substring(formStart, path.indexOf('/', formStart));
+        this.previewRequested = (formName == "PreviewForm");
         this.solutionName = path.substring(path.indexOf('/solution/') + 10, path.indexOf('/form/'));
         let clientnr = path.substring(path.indexOf('/clientnr/') + 10);
         this.websocketService.setPathname('/rfb/angular/content/');
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
-        this.wsSession.callService("$editor", "getData", {
-            form: formName,
-            solution: this.solutionName,
-            ng2: true
-        }, false).then((data: string) => {
-            const formState = JSON.parse(data)[formName];
-            this.formService.createFormCache(formName, formState, null);
-            this.mainForm = formName;
-        });
-        this.wsSession.callService("$editor", "getStyleSheets", {
-            form: formName,
-            solution: this.solutionName,
-            ng2: true
-        }).then((paths: string[]) => {
-            if (paths) {
-                for (const path of paths) {
-                    const link: HTMLLinkElement = this.doc.createElement('link');
-                    link.setAttribute('rel', 'stylesheet');
-                    this.doc.head.appendChild(link);
-                    link.setAttribute('href', path);
-                    if (path.indexOf('resources/fs/') >= 0) link.setAttribute('svy-stylesheet', path);
-                }
-            }
-        });
+        if (this.previewRequested) {
+			const formState = JSON.parse(this.previewFormTemplate)[formName];
+	        this.formService.createFormCache(formName, formState, null);
+	        this.mainForm = formName;
+		} else {
+			this.wsSession.callService("$editor", "getData", {
+	            form: formName,
+	            solution: this.solutionName,
+	            ng2: true
+	        }, false).then((data: string) => {
+	            const formState = JSON.parse(data)[formName];
+	            this.formService.createFormCache(formName, formState, null);
+	            this.mainForm = formName;
+	        });
+		}
+		this.wsSession.callService("$editor", "getStyleSheets", {
+		    form: formName,
+		    solution: this.solutionName,
+		    ng2: true
+		}).then((paths: string[]) => {
+		    if (paths) {
+		        for (const path of paths) {
+		            const link: HTMLLinkElement = this.doc.createElement('link');
+		            link.setAttribute('rel', 'stylesheet');
+		            this.doc.head.appendChild(link);
+		            link.setAttribute('href', path);
+		            if (path.indexOf('resources/fs/') >= 0) link.setAttribute('svy-stylesheet', path);
+		        }
+		    }
+		    if (this.previewRequested) {
+				 this.windowRef.nativeWindow.parent.postMessage({ id: 'previewReady'}, '*');
+			}
+		});
+
         let _editorContentService = this.editorContentService;
         this.editorContentService.setDesignFormComponent(this);
         this.services.setServiceProvider({
@@ -109,7 +123,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     contentRefresh() {
-        this.wsSession.callService("$editor", "getData", {
+		this.wsSession.callService("$editor", "getData", {
             form: this.mainForm,
             solution: this.solutionName,
             ng2: true
