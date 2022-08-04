@@ -33,6 +33,11 @@
 	background-color: #FFFFFF;
 }
 
+Button[style~='SWT.PUSH']  {
+    background-color: unset;
+    color: unset;
+}
+
 Table, Tree {
 	swt-lines-visible: false;
 }
