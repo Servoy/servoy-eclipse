@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
-import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
+//import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'designer-palette',
@@ -18,7 +18,7 @@ export class PaletteComponent {
 
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
-    margin = 15; // preview space in pixels between variants
+  //  margin = 15; // preview space in pixels between variants
  
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
@@ -84,7 +84,7 @@ export class PaletteComponent {
         component.isOpen = !component.isOpen;
     }
     
-    onPreviewReady(component: PaletteComp) {
+    /*onPreviewReady(component: PaletteComp) {
 		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
 		this.editorContentService.sendMessageToPreview({ 
 			id: 'createVariants', 
@@ -95,22 +95,17 @@ export class PaletteComponent {
 			margin: this.margin,
 			columns: columns
 		});
-	/*	const previewFormElement = this.doc.getElementById('PreviewForm');
-		const frameElement = previewFormElement.getElementsByTagName('	')[0];
-		frameElement.contentWindow.postMessage({ 
-			, 
-		'*');*/
-	}
+	}*/
 	
-	getPreviewFormSize(component: PaletteComp) {
+	/*getPreviewFormSize(component: PaletteComp) {
 		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
 		const size = (JSON.parse(JSON.stringify(component.model))['size']) as {width: number, height: number}; 
 		const rows = Math.round(component.styleVariants.length / columns ) + 1;
 		return {width: columns * (size.width + 15) + size.width / 2,
 				height: rows * (size.height + 15)};
-	}
+	}*/
 	
-	onVariantsClick(event: MouseEvent, popover: NgbPopover, component: PaletteComp) {
+	/*onVariantsClick(event: MouseEvent, popover: NgbPopover, component: PaletteComp) {
         event.stopPropagation();
         if (popover.isOpen()) {
           	popover.close();
@@ -125,9 +120,9 @@ export class PaletteComponent {
 					console.log(err);
 				});
         }         
-    }
+    }*/
     
-    doAddVariant(event: MouseEvent, component: PaletteComp) {
+    /*doAddVariant(event: MouseEvent, component: PaletteComp) {
         event.stopPropagation();
         this.editorSession.addStyleVariantFor(component.styleVariantCategory);
     }
@@ -135,16 +130,20 @@ export class PaletteComponent {
     doEditVariants(event: MouseEvent, component: PaletteComp) {
         event.stopPropagation();
         this.editorSession.editStyleVariantsFor(component.styleVariantCategory);
-    }
+    }*/
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+		console.log('Mousedown - received in palette');
         if (event.target && (event.target as Element).getAttribute("name") === "variants") {
 			return; // it has a separate handler in a more nested elem)
 		}
+		 if (event.target && (event.target as Element).getAttribute("id") === "previewVariants") {
+			return; // it has a separate handler in a more nested elem)
+		}
 		
-		const iFrame = (event.target as Element).getElementsByTagName('iframe');
+		/*const iFrame = (event.target as Element).getElementsByTagName('iframe');
 		const preview = (iFrame[0] && iFrame[0].id === 'PreviewForm') ? true : false;
-		if (!preview) {
+		if (!preview) {*/
 			event.stopPropagation();
 
 	        this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
@@ -174,7 +173,7 @@ export class PaletteComponent {
 	            this.editorSession.getState().dragging = true;
 	            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
 	        }
-		}
+		//}
     }
 
     onMouseUp = (event: MouseEvent) => {

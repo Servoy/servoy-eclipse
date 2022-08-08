@@ -106,6 +106,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         return true;
     }
     
+    onMouseDown(event: Event) {
+		console.log('Mousedown - from editorcontent');
+	}
+    
     
     adjustFromContentSize() {
         const overlay = this.doc.querySelector('.contentframe-overlay');

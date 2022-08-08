@@ -1,3 +1,3 @@
-<div #element id="mainForm" class="svy-main-window-container user-selection-off"  *ngIf="mainForm != null">
+<div #element (mousedown)="onMouseDown($event)" id="mainForm" class="svy-main-window-container user-selection-off"  *ngIf="mainForm != null">
     <svy-designform [name]="mainForm" #DesignFormComponent></svy-designform>
 </div> 

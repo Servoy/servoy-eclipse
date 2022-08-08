@@ -29,7 +29,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div (mousedown)="variantChoosen(item)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
+          <div (mousedown)="onMouseDown($event)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
@@ -172,8 +172,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 
                 event.data.variants.forEach((variant) => {
 					const model = { width: elWidth + 'px', height: elHeight + 'px' };
-					model['left'] = (columnIndex * (elWidth + 15) + 10) + 'px' ;
-					model['top'] = (rowIndex * (elHeight + 15) + 10) + 'px';
+					model['left'] = (columnIndex * (elWidth + margin) + 10) + 'px' ;
+					model['top'] = (rowIndex * (elHeight + margin) + 10) + 'px';
 					columnIndex++;
 					if (columnIndex % columns == 0) {
 						columnIndex = 0;
@@ -276,8 +276,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         })
     }
     
-    public variantChoosen(item: ComponentCache) {
-		console.log(item);
+    public onMouseDown(event: Event) {
+		console.log('Designform - mouse down');
 	}
 
     public detectChanges() {

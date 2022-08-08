@@ -15,15 +15,17 @@
                 <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img draggable="false" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
-					<!--<button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
-                        [popoverTitle]="popTitle" triggers="manual" #popOv="ngbPopover" (click)="onVariantsClick($event, popOv, component)">
-                        <i name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
+                    <ngbd-modal-component (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngIf="component.styleVariantCategory" [component]="component" ></ngbd-modal-component>
+
+                   <!-- <button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm"
+                        (click)="onVariantsClick($event, component)">
+                        <i id="previewVariants" name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
                     </button>-->
-                    <button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
+                    
+                    <!--<button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
                         triggers="manual" #popOv="ngbPopover" (click)="onVariantsClick($event, popOv, component)">
                         <i id="previewVariants" name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
                     </button>
-					<!--<ng-template #popTitle>Available styling variants (drag one of them to the form):</ng-template>-->
                     <ng-template #popContent let-cmp="comp" let-popOv="popOv" let-width="width" let-height="height">
 	                    <div class="modal-body"
 	                    	 [ngStyle]="{'display': 'block', 'width': width, 'height': height}">
@@ -31,13 +33,6 @@
 									[styleVariantPreview]="true" 
 								    (previewReady)="onPreviewReady(cmp)"
 								></designer-editorcontent>
-	                                       <!--<p *ngFor="let variant of c.styleVariants" (mousedown)="variantChosen(po, component, variant)">
-	                                    Sample <i>{{c.styleVariantCategory}}</i> - <b>{{variant}}</b>
-	                                </p><br/>-->
-	                                <!--<p>{{cmp.styleVariantCategory}}</p>
-	                                <p>{{(cmp.styleVariantCategory !== 'undefined') && (cmp.styleVariantCategory !== null)}}</p>-->
-	                               
-	                                <!--Need to update variantChosen in d&d context-->
 	                    </div>
 	                    <div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
 	                        <button name="variants" type="button" 
@@ -53,7 +48,7 @@
 	                            Edit
 	                        </button>
 	                    </div>
-                    </ng-template>             
+                    </ng-template>    -->         
                     <ul>
                     <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
                     </ul>

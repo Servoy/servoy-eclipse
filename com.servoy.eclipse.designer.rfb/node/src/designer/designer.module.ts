@@ -32,6 +32,7 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
 import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
+import { NgbdModalComponent, NgbdModalContent } from './palette/preview/preview.component'
 
 @NgModule({
   declarations: [
@@ -57,7 +58,9 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     PositionMenuDirective,
     DragselectionComponent,
     DragselectionResponsiveComponent,
-    InlineEditComponent
+    InlineEditComponent,
+    NgbdModalComponent, 
+    NgbdModalContent
   ],
   imports: [
     BrowserModule,
