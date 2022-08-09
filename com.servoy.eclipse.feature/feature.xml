@@ -181,7 +181,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="2022.9.0.3800_rc"
+         version="1.7.14.s1"
          unpack="false"/>
 
    <plugin
