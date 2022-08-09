@@ -1,6 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { EditorSessionService, ISupportAutoscroll } from './services/editorsession.service';
+import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild, Input } from '@angular/core';
+import { EditorSessionService, ISupportAutoscroll, PaletteComp } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
+import { EditorContentService } from './services/editorcontent.service';
 
 @Component({
     selector: 'app-designer',
@@ -22,8 +23,23 @@ export class DesignerComponent implements OnInit, AfterViewInit {
     autoscrollEnter: { [key: string]: (event: MouseEvent) => void; } = {};
     autoscrollStop: { [key: string]: ReturnType<typeof setInterval> } = {};
     autoscrollLeave: { [key: string]: (event: MouseEvent) => void; } = {};
+    
+    preview = false;
+    
+    @Input() component: PaletteComp;
+    
 
-    constructor(public readonly editorSession: EditorSessionService, public urlParser: URLParserService, protected readonly renderer: Renderer2) {
+    constructor(
+		public readonly editorSession: EditorSessionService,
+		private editorContentService: EditorContentService, 
+		public urlParser: URLParserService, 
+		protected readonly renderer: Renderer2
+		) {
+		
+		this.editorSession.previewRequested.subscribe((value: {cmp: PaletteComp}) => {
+			this.preview = !this.preview;
+			this.component = value.cmp;
+		})
     }
 
     ngOnInit() {
@@ -157,5 +173,32 @@ export class DesignerComponent implements OnInit, AfterViewInit {
     unregisterDOMEvent(eventType: string, target: string, callback: (event: MouseEvent) => void) {
         const element: HTMLElement = this.getAutoscrollElement(target);
         if (element) element.removeEventListener(eventType, callback);
+    }
+    
+    onPreviewReady() {
+		const columns = this.component.styleVariants.length > 8 ? 3 : this.component.styleVariants.length > 3 ? 2 : 1;
+		this.editorContentService.sendMessageToPreview({ 
+			id: 'createVariants', 
+			variants: this.component.styleVariants, 
+			model: this.component.model, 
+			name: this.convertToJSName(this.component.name), 
+			type: 'component',
+			margin: 15,
+			columns: columns
+		});
+	}
+	
+	convertToJSName(name: string): string {
+        // this should do the same as websocket.ts #scriptifyServiceNameIfNeeded() and ClientService.java #convertToJSName()
+        if (name) {
+            const packageAndName = name.split('-');
+            if (packageAndName.length > 1) {
+                name = packageAndName[0];
+                for (let i = 1; i < packageAndName.length; i++) {
+                    if (packageAndName[1].length > 0) name += packageAndName[i].charAt(0).toUpperCase() + packageAndName[i].slice(1);
+                }
+            }
+        }
+        return name;
     }
 }
