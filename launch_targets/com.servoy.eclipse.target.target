@@ -79,9 +79,9 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.1.202207070515"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.1.202207070515"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="95.0.1.202207070519"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.2.202207270122"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.2.202207270122"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.2.202207270137"/>
         </location>
     </locations>
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
