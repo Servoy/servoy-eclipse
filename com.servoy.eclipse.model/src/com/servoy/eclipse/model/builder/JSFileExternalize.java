@@ -22,25 +22,19 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.dltk.compiler.problem.IProblemSeverityTranslator;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
-import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.parser.Reporter;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -49,28 +43,18 @@ import com.servoy.eclipse.model.util.ServoyLog;
  * Class used for generating warnings for non-externalized strings in the js file
  * @author gboros
  */
-public class JSFileExternalize implements IBuildParticipantFactory
+public class JSFileExternalize extends JSFileBuildParticipantFactory
 {
-	private StringExternalizeParser stringExternalizeParser;
-
 	/*
-	 * @see org.eclipse.dltk.core.builder.IBuildParticipantFactory#createBuildParticipant(org.eclipse.dltk.core.IScriptProject)
+	 * @see com.servoy.eclipse.model.builder.JSFileBuildParticipantFactory#newBuildParticipant()
 	 */
-	public IBuildParticipant createBuildParticipant(IScriptProject project) throws CoreException
+	@Override
+	public IBuildParticipant newBuildParticipant()
 	{
-		return getParser();
+		return new StringExternalizeParser();
 	}
 
-	private StringExternalizeParser getParser()
-	{
-		if (stringExternalizeParser == null)
-		{
-			stringExternalizeParser = new StringExternalizeParser();
-		}
-		return stringExternalizeParser;
-	}
-
-	class StringExternalizeParser implements IBuildParticipant
+	class StringExternalizeParser extends JSFileBuildParticipant
 	{
 		private int numberOfWarningsPerBlock = 0;
 
@@ -95,29 +79,6 @@ public class JSFileExternalize implements IBuildParticipantFactory
 			{
 				checkForNonExternalizedString(script, new Reporter(context.getLineTracker(), context.getProblemReporter()), context.getContents());
 			}
-		}
-
-		private Script getScript(IBuildContext context)
-		{
-			final IModuleDeclaration savedAST = (IModuleDeclaration)context.get(IBuildContext.ATTR_MODULE_DECLARATION);
-			if (savedAST instanceof Script)
-			{
-				return (Script)savedAST;
-			}
-			final ISourceModule module = context.getSourceModule();
-			if (module != null)
-			{
-				final IModuleDeclaration declaration = SourceParserUtil.parse(module, context.getProblemReporter());
-				if (declaration instanceof Script)
-				{
-					context.set(IBuildContext.ATTR_MODULE_DECLARATION, declaration);
-					return (Script)declaration;
-				}
-			}
-			final JavaScriptParser parser = new JavaScriptParser();
-			final Script script = parser.parse(context, context.getProblemReporter());
-			context.set(IBuildContext.ATTR_MODULE_DECLARATION, script);
-			return script;
 		}
 
 		private void reportWarning(Reporter reporter, int sourceStart, int sourceStop, int stringLiteralIdx)
