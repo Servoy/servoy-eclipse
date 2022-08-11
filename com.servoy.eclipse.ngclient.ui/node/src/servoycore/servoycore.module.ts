@@ -10,8 +10,11 @@ import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import {AddAttributeDirective} from './addattribute.directive';
 import { ListFormComponent } from './listformcomponent/listformcomponent';
 import { ServoyPublicModule } from '@servoy/public';
-import { LicenseManager, ModuleRegistry, ServerSideRowModelModule, ClientSideRowModelModule } from '@ag-grid-enterprise/all-modules';
 import { AgGridModule } from '@ag-grid-community/angular';
+import { ModuleRegistry } from '@ag-grid-community/core';
+import { LicenseManager } from '@ag-grid-enterprise/core';
+import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
+import {  ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
 import { RowRenderer } from './listformcomponent/row-renderer.component';
 import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-responsive-container/formcomponent-responsive-container';
 
@@ -30,7 +33,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
     imports: [CommonModule,
         FormsModule,
         ServoyPublicModule,
-        AgGridModule.withComponents([])
+        AgGridModule
     ],
     providers: [],
     bootstrap: [],
