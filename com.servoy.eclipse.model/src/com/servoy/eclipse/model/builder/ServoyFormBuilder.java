@@ -2054,6 +2054,8 @@ public class ServoyFormBuilder
 						if (((dataProvider instanceof ScriptVariable &&
 							((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA &&
 							((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+
+							// RAGTEST getType is niet column type
 							(dataProvider instanceof AggregateVariable &&
 								((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA &&
 								((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||

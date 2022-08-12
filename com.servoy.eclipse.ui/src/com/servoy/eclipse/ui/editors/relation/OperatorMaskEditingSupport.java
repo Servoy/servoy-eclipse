@@ -18,31 +18,33 @@ package com.servoy.eclipse.ui.editors.relation;
 
 import static com.servoy.base.query.IBaseSQLCondition.ALL_MODIFIERS;
 import static com.servoy.base.query.IBaseSQLCondition.CASEINSENTITIVE_MODIFIER;
-import static com.servoy.base.query.IBaseSQLCondition.OPERATOR_MASK;
 import static com.servoy.base.query.IBaseSQLCondition.ORNULL_MODIFIER;
+import static com.servoy.base.query.IBaseSQLCondition.REMOVE_WHEN_NULL_MODIFIER;
 import static com.servoy.j2db.persistence.RelationItem.RELATION_OPERATORS;
-import static com.servoy.j2db.util.Utils.getAsInteger;
 import static com.servoy.j2db.util.Utils.indexOf;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 
+import com.servoy.base.query.IBaseSQLCondition;
 import com.servoy.eclipse.ui.editors.RelationEditor;
-import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
+import com.servoy.eclipse.ui.util.MultiCheckboxCellEditor;
 
 public class OperatorMaskEditingSupport extends EditingSupport
 {
 	private static final String OR_IS_NULL_MODIFIER_STRING = "or-is-null";
 	private static final String CASE_INSENSITIVE_MODIFIER_STRING = "case-insensitive";
+	private static final String REMOVE_WHEN_NULL_MODIFIER_STRING = "remove-when-null";
 
-	private final ComboBoxCellEditor editor;
+	private final MultiCheckboxCellEditor editor;
 	private final RelationEditor relationEditor;
 	private final int[] values;
 
@@ -51,14 +53,16 @@ public class OperatorMaskEditingSupport extends EditingSupport
 		super(tv);
 		relationEditor = re;
 
-		values = stream(RELATION_OPERATORS)
-			.map(element -> element & ~OPERATOR_MASK)
-			.distinct().toArray();
+		values = stream(IBaseSQLCondition.ALL_MODIFIERS)
+			.filter(element -> stream(RELATION_OPERATORS).anyMatch(op -> (op & element) != 0))
+			.toArray();
+
 		String[] items = stream(values)
 			.mapToObj(OperatorMaskEditingSupport::getColumnText)
 			.toArray(String[]::new);
 
-		editor = new FixedComboBoxCellEditor(tv.getTable(), items, SWT.READ_ONLY);
+		editor = new MultiCheckboxCellEditor(tv.getTable(), items, SWT.READ_ONLY);
+		editor.setDefaultText("mask");
 	}
 
 	@Override
@@ -67,19 +71,25 @@ public class OperatorMaskEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			int newValue = values[getAsInteger(value)];
+			int newMask = calculateMask((int[])value);
+			int newOperator = pi.getMaskedOperator() | newMask;
 
-			if (indexOf(RELATION_OPERATORS, newValue | pi.getMaskedOperator()) >= 0) // check if combination is valid
+			if (indexOf(RELATION_OPERATORS, newOperator) >= 0) // check if combination is valid
 			{
 				int previousValue = pi.getMask();
-				if (previousValue != newValue)
+				if (previousValue != newMask)
 				{
 					relationEditor.flagModified(true);
+					pi.setMask(newMask);
 				}
-				pi.setMask(newValue);
 			}
 			getViewer().update(element, null);
 		}
+	}
+
+	private int calculateMask(int[] value)
+	{
+		return stream(value).map(index -> values[index]).reduce((a, b) -> a | b).orElse(0);
 	}
 
 	@Override
@@ -88,11 +98,16 @@ public class OperatorMaskEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			int index = indexOf(values, pi.getMask());
-			if (index >= 0)
+
+			List<Integer> selection = new ArrayList<>();
+			for (int i = 0; i < values.length; i++)
 			{
-				return Integer.valueOf(index);
+				if ((values[i] & pi.getMask()) != 0)
+				{
+					selection.add(Integer.valueOf(i));
+				}
 			}
+			return selection.stream().mapToInt(Integer::intValue).toArray();
 		}
 		return null;
 	}
@@ -124,6 +139,8 @@ public class OperatorMaskEditingSupport extends EditingSupport
 						return OR_IS_NULL_MODIFIER_STRING;
 					case CASEINSENTITIVE_MODIFIER :
 						return CASE_INSENSITIVE_MODIFIER_STRING;
+					case REMOVE_WHEN_NULL_MODIFIER :
+						return REMOVE_WHEN_NULL_MODIFIER_STRING;
 				}
 				return null;
 			})
