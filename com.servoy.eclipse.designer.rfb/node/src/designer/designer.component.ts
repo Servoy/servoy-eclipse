@@ -34,13 +34,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
 		private editorContentService: EditorContentService, 
 		public urlParser: URLParserService, 
 		protected readonly renderer: Renderer2
-		) {
-		
-		this.editorSession.previewRequested.subscribe((value: {cmp: PaletteComp}) => {
-			this.preview = !this.preview;
-			this.component = value.cmp;
-		})
-    }
+		) {}
 
     ngOnInit() {
         this.editorSession.connect();
@@ -174,31 +168,5 @@ export class DesignerComponent implements OnInit, AfterViewInit {
         const element: HTMLElement = this.getAutoscrollElement(target);
         if (element) element.removeEventListener(eventType, callback);
     }
-    
-    onPreviewReady() {
-		const columns = this.component.styleVariants.length > 8 ? 3 : this.component.styleVariants.length > 3 ? 2 : 1;
-		this.editorContentService.sendMessageToPreview({ 
-			id: 'createVariants', 
-			variants: this.component.styleVariants, 
-			model: this.component.model, 
-			name: this.convertToJSName(this.component.name), 
-			type: 'component',
-			margin: 15,
-			columns: columns
-		});
-	}
-	
-	convertToJSName(name: string): string {
-        // this should do the same as websocket.ts #scriptifyServiceNameIfNeeded() and ClientService.java #convertToJSName()
-        if (name) {
-            const packageAndName = name.split('-');
-            if (packageAndName.length > 1) {
-                name = packageAndName[0];
-                for (let i = 1; i < packageAndName.length; i++) {
-                    if (packageAndName[1].length > 0) name += packageAndName[i].charAt(0).toUpperCase() + packageAndName[i].slice(1);
-                }
-            }
-        }
-        return name;
-    }
+  
 }

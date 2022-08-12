@@ -140,11 +140,6 @@ export class EditorContentService {
     removeContentMessageListener(listener: IContentMessageListener) {
         this.contentMessageListeners.splice(this.contentMessageListeners.indexOf(listener), 1);
     }
-    
-    sendMessageToPreview(message) {
-		const previewElement: HTMLIFrameElement = this.document.getElementById('PreviewForm') as HTMLIFrameElement;
-		previewElement.contentWindow.postMessage(message, '*');
-	}
 
    private initIFrame() {
         if (!this.frameElement) {

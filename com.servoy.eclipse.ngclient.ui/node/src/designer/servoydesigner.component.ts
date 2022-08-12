@@ -142,10 +142,6 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     ngOnDestroy() {
         if (this.resizeObserver) this.resizeObserver.unobserve(this.elementRefInit.nativeElement);
     }
-    
-    onMouseDown(event: Event) {
-		console.log('Mousedown - from servoy designer');
-	}
 }
 export declare interface IDesignFormComponent {
     getFormName(): string;

@@ -37,3 +37,7 @@ html, body
 .palette > input::placeholder {
    font-style: italic;
 }
+
+.popover { 
+	max-width: 100% !important;
+}

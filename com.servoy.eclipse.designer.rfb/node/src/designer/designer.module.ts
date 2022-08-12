@@ -32,7 +32,7 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
 import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
-import { NgbdModalComponent, NgbdModalContent } from './palette/preview/preview.component'
+import { VariantsContentComponent } from './variantscontent/variantscontent.component'
 
 @NgModule({
   declarations: [
@@ -59,8 +59,7 @@ import { NgbdModalComponent, NgbdModalContent } from './palette/preview/preview.
     DragselectionComponent,
     DragselectionResponsiveComponent,
     InlineEditComponent,
-    NgbdModalComponent, 
-    NgbdModalContent
+    VariantsContentComponent
   ],
   imports: [
     BrowserModule,

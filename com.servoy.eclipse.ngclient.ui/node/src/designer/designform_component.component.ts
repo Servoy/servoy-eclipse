@@ -29,7 +29,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div (mousedown)="onMouseDown($event)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
+          <div (mousedown)="onMouseDown($event, item)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
@@ -117,6 +117,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     insertedCloneParent: StructureCache;
     insertedClone: ComponentCache | StructureCache;
     variantElements: Array<ComponentCache> = new Array<ComponentCache>();
+    dragItem: Element;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
@@ -161,7 +162,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = true;
             }
             if (event.data.id === 'createVariants') {
-				console.log(event.data)
 				const elWidth = event.data.model.size ? event.data.model.size.width : 80;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 30;
                 const columns = event.data.columns;
@@ -180,14 +180,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 						rowIndex++;
 					}
 					const eventModel = JSON.parse(JSON.stringify(event.data.model).slice());
-					eventModel.styleClass = variant + ' variantClass';
+					eventModel.styleClass = variant;
                 	this.variantElements.push(new ComponentCache('variant_element', event.data.name, eventModel, [], model));
 				});
-                
-               /* event.data.model.styleClass = event.data.variants[0];
-                const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
-                this.variantElements.push(new ComponentCache('variant_element', event.data.name, event.data.model, [], model));*/
-                //this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, event.data.model, [], model_inserted); //TODO only in responsive
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
 			}
@@ -276,8 +271,27 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         })
     }
     
-    public onMouseDown(event: Event) {
-		console.log('Designform - mouse down');
+    public onMouseDown(event: MouseEvent, item: ComponentCache) {
+		this.dragItem = this.document.elementFromPoint(event.clientX, event.clientY).cloneNode(true) as Element;
+		this.renderer.setStyle(this.dragItem, 'left', event.pageX + 'px');
+        this.renderer.setStyle(this.dragItem, 'top', event.pageY + 'px');
+        this.renderer.setStyle(this.dragItem, 'position', 'absolute');
+        this.document.body.appendChild(this.dragItem);
+		console.log(item);
+		this.windowRefService.nativeWindow.parent.postMessage({ id: 'createVariantItem', element: item}, '*');
+	}
+		
+	public onMouseUp(event: MouseEvent) {
+		//this is not catched here - but where??
+		console.log('mouseuop from designer')
+		this.document.body.removeChild(this.dragItem);
+	}
+	
+	public onMouseMove(event: MouseEvent) {
+		if (this.dragItem) {
+			this.renderer.setStyle(this.dragItem, 'left', event.pageX + 'px');
+        	this.renderer.setStyle(this.dragItem, 'top', event.pageY + 'px');
+		}
 	}
 
     public detectChanges() {

@@ -15,42 +15,9 @@
                 <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img draggable="false" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
-                    <ngbd-modal-component (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngIf="component.styleVariantCategory" [component]="component" ></ngbd-modal-component>
-
-                   <!-- <button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm"
-                        (click)="onVariantsClick($event, component)">
-                        <i id="previewVariants" name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
-                    </button>-->
-                    
-                    <!--<button name="variants" *ngIf="component.styleVariantCategory" type="button" class="btn btn-light btn-sm" [ngbPopover]="popContent"
-                        triggers="manual" #popOv="ngbPopover" (click)="onVariantsClick($event, popOv, component)">
-                        <i id="previewVariants" name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
-                    </button>
-                    <ng-template #popContent let-cmp="comp" let-popOv="popOv" let-width="width" let-height="height">
-	                    <div class="modal-body"
-	                    	 [ngStyle]="{'display': 'block', 'width': width, 'height': height}">
-	                        	<designer-editorcontent
-									[styleVariantPreview]="true" 
-								    (previewReady)="onPreviewReady(cmp)"
-								></designer-editorcontent>
-	                    </div>
-	                    <div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
-	                        <button name="variants" type="button" 
-	                            class="btn btn-outline-dark btn-sm" 
-	                            (click)="doAddVariant($event, cmp)">
-	                            <i name="variants" class="fa fa-plus" aria-hidden="true"></i>
-	                            Add
-	                        </button>
-	                        <button name="variants" type="button" 
-	                            class="btn btn-outline-dark btn-sm" 
-	                            (click)="doEditVariants($event, cmp)">
-	                            <i name="variants" class="fa fa-pen" aria-hidden="true"></i>
-	                            Edit
-	                        </button>
-	                    </div>
-                    </ng-template>    -->         
+                    <designer-variantscontent (click)="onVariantClick(popover, component)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
                     <ul>
-                    <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
+                    	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
                     </ul>
                     <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
                         <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><img draggable="false" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>

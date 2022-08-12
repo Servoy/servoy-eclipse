@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
-//import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'designer-palette',
@@ -15,11 +15,12 @@ export class PaletteComponent {
 
     public searchText: string;
     public activeIds: Array<string>;
-
+	
     dragItem: DragItem = {};
-    canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
-  //  margin = 15; // preview space in pixels between variants
- 
+    canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean }; 
+    
+    popover: NgbPopover;
+     
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
         let layoutType: string;
@@ -78,11 +79,10 @@ export class PaletteComponent {
 			//variants and PreviewForm has separate handlers
 			if ((event.target as Element).getAttribute("name") === "variants")
 				return;
-			if ((event.target as Element).getAttribute("id") == 'PreviewForm')
-				return;
 		}
         component.isOpen = !component.isOpen;
     }
+    
     
     /*onPreviewReady(component: PaletteComp) {
 		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
@@ -122,58 +122,44 @@ export class PaletteComponent {
         }         
     }*/
     
-    /*doAddVariant(event: MouseEvent, component: PaletteComp) {
-        event.stopPropagation();
-        this.editorSession.addStyleVariantFor(component.styleVariantCategory);
-    }
-
-    doEditVariants(event: MouseEvent, component: PaletteComp) {
-        event.stopPropagation();
-        this.editorSession.editStyleVariantsFor(component.styleVariantCategory);
-    }*/
+    onVariantClick(popover: NgbPopover, component: PaletteComp) {
+		this.editorSession.openPopoverTriggered.emit({component: component});
+	}
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-		console.log('Mousedown - received in palette');
         if (event.target && (event.target as Element).getAttribute("name") === "variants") {
 			return; // it has a separate handler in a more nested elem)
 		}
-		 if (event.target && (event.target as Element).getAttribute("id") === "previewVariants") {
-			return; // it has a separate handler in a more nested elem)
-		}
-		
-		/*const iFrame = (event.target as Element).getElementsByTagName('iframe');
-		const preview = (iFrame[0] && iFrame[0].id === 'PreviewForm') ? true : false;
-		if (!preview) {*/
-			event.stopPropagation();
+				
+		event.stopPropagation();
 
-	        this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
-	        Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
-	            if (child.tagName == 'UL') {
-	                this.dragItem.paletteItemBeingDragged.removeChild(child);
-	            }
-	        })
-	        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
-	        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
-	        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
-	        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
-	        this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
+        this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
+        Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
+            if (child.tagName == 'UL' || child.nodeName == 'DESIGNER-VARIANTSCONTENT') {
+                this.dragItem.paletteItemBeingDragged.removeChild(child);
+            }
+        })
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
+        this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
 	
-	        this.dragItem.elementName = elementName;
-	        this.dragItem.packageName = packageName;
-	        this.dragItem.ghost = ghost;
-	        this.dragItem.propertyName = propertyName;
-	        this.dragItem.propertyValue = propertyValue;
-	        this.dragItem.topContainer = topContainer;
-	        this.dragItem.componentType = componentType;
-	        this.dragItem.layoutName = layoutName;
-	        this.dragItem.attributes = attributes;
+        this.dragItem.elementName = elementName;
+        this.dragItem.packageName = packageName;
+        this.dragItem.ghost = ghost;
+        this.dragItem.propertyName = propertyName;
+        this.dragItem.propertyValue = propertyValue;
+        this.dragItem.topContainer = topContainer;
+        this.dragItem.componentType = componentType;
+        this.dragItem.layoutName = layoutName;
+        this.dragItem.attributes = attributes;
 	
-	        this.canDrop = { dropAllowed: false };
-	        if (!ghost) {
-	            this.editorSession.getState().dragging = true;
-	            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
-	        }
-		//}
+        this.canDrop = { dropAllowed: false };
+        if (!ghost) {
+            this.editorSession.getState().dragging = true;
+            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
+        }
     }
 
     onMouseUp = (event: MouseEvent) => {

@@ -2,10 +2,6 @@
 <designer-toolbar></designer-toolbar>
 <div class="fill-area">
     <designer-palette></designer-palette>
-    <designer-editorcontent *ngIf="preview"
-			[styleVariantPreview]="true"
-			(previewReady)="onPreviewReady()"
-	></designer-editorcontent>
     <designer-resizer></designer-resizer> 
     <div #contentArea class="content-area" tabindex="0">
         <div #glasspane class="contentframe-overlay">

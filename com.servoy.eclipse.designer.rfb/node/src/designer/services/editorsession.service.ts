@@ -1,6 +1,5 @@
-import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, ElementRef } from '@angular/core';
+import { Inject, Injectable, EventEmitter } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -26,6 +25,8 @@ export class EditorSessionService implements ServiceProvider {
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
+    
+    openPopoverTriggered = new EventEmitter<{component: PaletteComp}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {

@@ -36,45 +36,29 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-		this.formName = this.styleVariantPreview ? ('PreviewForm') : this.urlParser.getFormName();
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/' + this.formName + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
-        if (this.styleVariantPreview) {
-			this.windowRef.nativeWindow.addEventListener('message', (event) => {
-	            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	        	if (event.data.id === 'previewReady') {
-	                console.log('Preview ready event received');
-	                this.previewReady.emit({previewReady: true});
+       	this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
+		if (this.urlParser.isAbsoluteFormLayout()) {
+	        this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
+	        this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
+	        this.windowRef.nativeWindow.addEventListener('message', (event) => {
+	                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	            if (event.data.id === 'updateFormSize') {
+	                this.contentStyle['width'] = event.data.width + 'px';
+	                this.contentStyle['height'] = event.data.height + 'px';
 	            }
 	        });
-			this.contentStyle['top'] = '0px';
-	        this.contentStyle['left'] = '0px';
-	        this.contentStyle['maxWidth'] = '100%';
-	        this.contentStyle['width'] = '100%';
-	        this.contentStyle['height'] = '100%';
-		} else {
-			if (this.urlParser.isAbsoluteFormLayout()) {
-	            this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
-	            this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
-	            this.windowRef.nativeWindow.addEventListener('message', (event) => {
-	                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	                if (event.data.id === 'updateFormSize') {
-	                    this.contentStyle['width'] = event.data.width + 'px';
-	                    this.contentStyle['height'] = event.data.height + 'px';
-	                }
-	            });
-	        }
-	        else {
-	            this.contentStyle['bottom'] = '20px';
-	            this.contentStyle['right'] = '20px';
-	            this.contentStyle['minWidth'] = '992px';
-	            this.windowRef.nativeWindow.addEventListener('message', (event: MessageEvent) => {
-	                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	                if (event.data.id === 'contentSizeChanged') {
-	                    this.adjustFromContentSize();
-	                }
-	            });
-	        }
-		}
+	    }
+	    else {
+	        this.contentStyle['bottom'] = '20px';
+	        this.contentStyle['right'] = '20px';
+	        this.contentStyle['minWidth'] = '992px';
+	        this.windowRef.nativeWindow.addEventListener('message', (event: MessageEvent) => {
+	            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	            if (event.data.id === 'contentSizeChanged') {
+	                this.adjustFromContentSize();
+	            }
+	        });
+	    }
     }
 
     ngAfterViewInit() {
