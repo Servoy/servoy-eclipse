@@ -126,31 +126,6 @@ export class FoundsetConverter implements IConverter {
                 updates = true;
             }
 
-            if (serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS] !== undefined) {
-                // array of { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
-                const handledRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
-                const internalState = currentClientValue.state;
-
-                handledRequests.forEach((handledReq) => {
-                    const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
-                    if (defer) {
-                        const promise: RequestInfoPromise<any> = defer.promise;
-                        if (hasListeners && promise.requestInfo) {
-                            if (!requestInfos) requestInfos = [];
-                            requestInfos.push(promise.requestInfo);
-                        }
-                        if (defer === internalState.selectionUpdateDefer) {
-                            this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], currentClientValue.selectedRowIndexes, handledReq[FoundsetConverter.VALUE_KEY]);
-                            delete internalState.selectionUpdateDefer;
-                        } else {
-                            this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], null, handledReq[FoundsetConverter.VALUE_KEY]);
-                        }
-                    }
-                });
-
-                updates = true;
-            }
-
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT] !== undefined) {
                 updates = true;
                 const viewPortUpdate = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT];
@@ -239,6 +214,29 @@ export class FoundsetConverter implements IConverter {
                 for (let i = rows.length - 1; i >= 0; i--) {
                     rows[i] = SabloUtils.cloneWithDifferentPrototype(rows[i], internalState.rowPrototype);
                 }
+            }
+
+            if (serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS] !== undefined) {
+                // array of { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
+                const handledRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
+                const internalState = currentClientValue.state;
+
+                handledRequests.forEach((handledReq) => {
+                    const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
+                    if (defer) {
+                        const promise: RequestInfoPromise<any> = defer.promise;
+                        if (hasListeners && promise.requestInfo) {
+                            if (!requestInfos) requestInfos = [];
+                            requestInfos.push(promise.requestInfo);
+                        }
+                        if (defer === internalState.selectionUpdateDefer) {
+                            this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], currentClientValue.selectedRowIndexes, handledReq[FoundsetConverter.VALUE_KEY]);
+                            delete internalState.selectionUpdateDefer;
+                        } else {
+                            this.sabloService.resolveDeferedEvent(handledReq[FoundsetConverter.ID_KEY], null, handledReq[FoundsetConverter.VALUE_KEY]);
+                        }
+                    }
+                });
             }
 
             this.log.spam(this.log.buildMessage(() => ('svy foundset * updates or value received from server; new viewport and server size (' +
