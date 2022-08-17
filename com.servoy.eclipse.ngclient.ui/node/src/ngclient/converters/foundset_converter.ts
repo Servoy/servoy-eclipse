@@ -155,7 +155,7 @@ export class FoundsetConverter implements IConverter {
             }
             
             const handledClientRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
-            if (handledClientRequests) delete serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS]; // make sure it does not end up in the actual value if this is a full value update
+            if (handledClientRequests !== undefined) delete serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS]; // make sure it does not end up in the actual value if this is a full value update
 
             // if it's a no-op, ignore it (sometimes server asks a prop. to send changes even though it has none to send);
             // if it has serverJSONValue[FoundsetConverter.SERVER_SIZE] !== undefined that means a full value has been sent from server; so no granular updates above
@@ -208,7 +208,7 @@ export class FoundsetConverter implements IConverter {
                 }
             }
 
-            if (handledClientRequests !== undefined) {
+            if (handledClientRequests != undefined) {
                 // array of { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
                 const internalState = currentClientValue.state;
 
