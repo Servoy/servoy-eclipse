@@ -56,22 +56,18 @@ export class FoundsetConverter implements IConverter {
 
         } else {
             // check for updates
-            let updates = false;
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] !== undefined) {
                 if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = {
                     oldValue: currentClientValue.serverSize,
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE]
                 };
                 currentClientValue.serverSize = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE]; // currentClientValue should always be defined in this case
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.FOUNDSET_DEFINITION_CHANGE] !== undefined) {
                 if (hasListeners) notificationParamForListeners.foundsetDefinitionChanged = true;
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.PUSH_TO_SERVER] !== undefined) {
                 currentClientValue.state.push_to_server = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.PUSH_TO_SERVER];
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS] !== undefined) {
                 if (hasListeners) notificationParamForListeners.hasMoreRowsChanged = {
@@ -79,7 +75,6 @@ export class FoundsetConverter implements IConverter {
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS]
                 };
                 currentClientValue.hasMoreRows = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS];
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT] !== undefined) {
                 if (hasListeners) notificationParamForListeners.multiSelectChanged = {
@@ -87,12 +82,10 @@ export class FoundsetConverter implements IConverter {
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT]
                 };
                 currentClientValue.multiSelect = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT];
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.FOUNDSET_ID] !== undefined) {
                 currentClientValue.foundsetId = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.FOUNDSET_ID] ?
                     serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.FOUNDSET_ID] : undefined;
-                updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS] !== undefined) {
                 if (hasListeners) notificationParamForListeners.columnFormatsChanged = {
@@ -100,7 +93,6 @@ export class FoundsetConverter implements IConverter {
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS]
                 };
                 currentClientValue.columnFormats = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS];
-                updates = true;
             }
 
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS] !== undefined) {
@@ -109,7 +101,6 @@ export class FoundsetConverter implements IConverter {
                     newValue: serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS]
                 };
                 currentClientValue.sortColumns = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS];
-                updates = true;
             }
 
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES] !== undefined) {
@@ -123,11 +114,9 @@ export class FoundsetConverter implements IConverter {
                     }
                 }
                 currentClientValue.selectedRowIndexes = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES];
-                updates = true;
             }
 
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT] !== undefined) {
-                updates = true;
                 const viewPortUpdate = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT];
                 const internalState = currentClientValue.state;
 
@@ -164,11 +153,14 @@ export class FoundsetConverter implements IConverter {
                     }
                 }
             }
+            
+            const handledClientRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
+            if (handledClientRequests) delete serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS]; // make sure it does not end up in the actual value if this is a full value update
 
-            // if it's a no-op, ignore it (sometimes server asks a prop. to send changes even though it has none to send)
-            if (!updates && !serverJSONValue[FoundsetConverter.NO_OP]) {
-                // not updates - so whole thing receive
-                // conversion to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
+            // if it's a no-op, ignore it (sometimes server asks a prop. to send changes even though it has none to send);
+            // if it has serverJSONValue[FoundsetConverter.SERVER_SIZE] !== undefined that means a full value has been sent from server; so no granular updates above
+            if (!serverJSONValue[FoundsetConverter.NO_OP] && serverJSONValue[FoundsetConverter.SERVER_SIZE] !== undefined) {
+                // not updates - so the whole thing was received
                 let oldValue: IFoundsetFieldsOnly;
                 let internalState: FoundsetState;
                 if (!newValue /* newValue is now already currentValue, see code above, so we are checking current value here */) {
@@ -216,12 +208,11 @@ export class FoundsetConverter implements IConverter {
                 }
             }
 
-            if (serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS] !== undefined) {
+            if (handledClientRequests !== undefined) {
                 // array of { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
-                const handledRequests = serverJSONValue[FoundsetConverter.HANDLED_CLIENT_REQUESTS];
                 const internalState = currentClientValue.state;
 
-                handledRequests.forEach((handledReq) => {
+                handledClientRequests.forEach((handledReq) => {
                     const defer = this.sabloDeferHelper.retrieveDeferForHandling(handledReq[FoundsetConverter.ID_KEY], internalState);
                     if (defer) {
                         const promise: RequestInfoPromise<any> = defer.promise;
@@ -245,11 +236,11 @@ export class FoundsetConverter implements IConverter {
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ('svy foundset * firing founset listener notifications...')));
 
-				const currentRequestInfo = this.sabloService.getCurrentRequestInfo();
-				if(currentRequestInfo) {
-					if (!requestInfos) requestInfos = [];
-					requestInfos.push(currentRequestInfo);
-				}
+                const currentRequestInfo = this.sabloService.getCurrentRequestInfo();
+                if(currentRequestInfo) {
+                    if (!requestInfos) requestInfos = [];
+                    requestInfos.push(currentRequestInfo);
+                }
 
                 if (requestInfos) notificationParamForListeners.requestInfos = requestInfos;
 
