@@ -92,8 +92,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         if (this.isValidTab(tab)) {
             this.log.debug(this.log.buildMessage(() => ('svy * Will select tab \'' + (tab ? tab.containsFormId : undefined) + '\'. Previously selected: \'' +
                 (this.selectedTab ? this.selectedTab.containsFormId : undefined) + '\'. Same: ' + (tab === this.selectedTab))));
-            if ((tab !== undefined && this.selectedTab !== undefined && tab.containsFormId === this.selectedTab.containsFormId
-                && tab.relationName === this.selectedTab.relationName) || (tab === this.selectedTab)) return;
+           if (this.isValidTab(this.selectedTab) && this.selectedTab === tab) return;
             const selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
             if (this.selectedTab) {
                 if (this.selectedTab.containsFormId && !this.waitingForServerVisibility[this.selectedTab.containsFormId]) {
@@ -175,8 +174,8 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     private isValidTab(tab: Tab) {
         if (this.tabs) {
-            for (let i = 0; i < this.tabs.length; i++) {
-                if (this.tabs[i] === tab) {
+            for (const t of this.tabs) {
+                if (t === tab) {
                     return true;
                 }
             }
