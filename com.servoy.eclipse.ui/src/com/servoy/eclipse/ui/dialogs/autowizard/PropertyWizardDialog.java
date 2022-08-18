@@ -83,6 +83,8 @@ public class PropertyWizardDialog extends Dialog
 		c.setLayout(new FillLayout());
 		SashForm form = new SashForm(c, SWT.HORIZONTAL);
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
+		SashForm form3 = new SashForm(form, SWT.VERTICAL | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		form.setWeights(40, 60);
 
 		if (configurator.getDataproviderProperties().size() > 0)
 		{
@@ -104,7 +106,7 @@ public class PropertyWizardDialog extends Dialog
 				persistContext, settings, flattenedSolution);
 		}
 
-		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution,
+		tableComposite = new AutoWizardPropertiesComposite(form3, persistContext, flattenedSolution,
 			configurator);
 		return area;
 	}
