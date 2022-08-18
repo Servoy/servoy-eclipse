@@ -79,9 +79,9 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.2.202207270122"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.2.202207270122"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="95.0.2.202207270137"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.3.202208172219"/>
         </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
