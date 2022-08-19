@@ -74,7 +74,7 @@ export class FoundsetLinkedConverter implements IConverter {
                     if (internalState.viewportSizeChangedListener === undefined) {
                         this.sabloService.addIncomingMessageHandlingDoneTask(() => {
                             const fs: IFoundset = internalState.forFoundset();
-                            internalState.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
+                            if (fs) internalState.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
                                 if (event.viewPortSizeChanged || event.fullValueChanged) {
                                     const newSize = this.converterService.getInDepthProperty(internalState.forFoundset(), 'viewPort', 'size');
                                     if (newSize === internalState.singleValueState.viewPortSize) return;

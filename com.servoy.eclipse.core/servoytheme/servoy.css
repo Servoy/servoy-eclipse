@@ -41,3 +41,35 @@ Button[style~='SWT.PUSH']  {
 Table, Tree {
 	swt-lines-visible: false;
 }
+
+.svyNatTable {
+	min-height: 300px;
+	min-width: 600px;
+}
+
+.svyNatTable > .styleClass,  .svyNatTable > .headertext{
+	text-align: center;
+}
+
+.svyNatTable:select {
+    painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+}
+
+.svyNatTable > .COLUMN_HEADER {
+	painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+	padding: 2;
+	render-grid-lines: false;
+	row-height: auto;
+	text-trim: false;
+	color: #4C4E52;
+	/* column-width: auto; */
+	text-align: center;
+}
+
+
+.svyNatTable > .COLUMN_0 {
+	padding-left: 5px;
+	text-align: left;
+}

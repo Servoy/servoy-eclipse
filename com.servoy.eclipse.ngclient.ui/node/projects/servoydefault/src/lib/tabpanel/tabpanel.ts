@@ -22,9 +22,9 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     onTabChange( event: NgbNavChangeEvent ) {
         // do prevent it by default, so that hte server side can decide of the swich can happen.
         event.preventDefault();
-        for ( let i = 0; i < this.tabs.length; i++ ) {
-            if ( this.tabs[i]._id == event.nextId ) {
-                this.select( this.tabs[i] );
+            for (const tab of this.tabs) { 
+            if ( tab._id === event.nextId ) {
+                this.select( tab );
                 return;
             }
         }

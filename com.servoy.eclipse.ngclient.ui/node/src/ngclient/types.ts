@@ -161,9 +161,13 @@ export class ComponentCache implements IComponentCache {
         public layout: { [property: string]: string }) {
     }
 
-        toString() {
+    sendChanges(dp: string, value: any, oldValue: any, rowId: any, dataprovider?: boolean) {
+        // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.) 
+    }
+
+    toString() {
         return 'ComponentCache(' + this.name + ', '+ this.type + ')';
-        }
+    }
 
 }
 

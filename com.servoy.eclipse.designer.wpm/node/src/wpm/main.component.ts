@@ -7,7 +7,15 @@ import { WpmService } from './wpm.service';
   styleUrls: ['./main.component.css']
 })
 export class MainComponent {
+  url: URL;
+  darkTheme: boolean;
+
   constructor(public wpmService: WpmService) {
+	this.url = new URL(window.location.href);
+	this.darkTheme = this.url.searchParams.get('darkTheme') === 'true';
+	if (this.darkTheme) {
+		document.body.classList.add('dark');
+	}
   }
 
   isContentAvailable(): boolean {

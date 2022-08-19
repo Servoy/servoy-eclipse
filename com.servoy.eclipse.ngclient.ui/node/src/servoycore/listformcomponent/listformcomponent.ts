@@ -119,6 +119,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
     private rowItems: Array<ComponentModel | FormComponentCache>;
+    
+    private designerViewportRows = [{} as ViewPortRow];
 
     // used for paging
     private waitingForLoad = false;
@@ -431,7 +433,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getViewportRows(): ViewPortRow[] {
         if (this.servoyApi.isInDesigner()) {
-            return [{} as ViewPortRow];
+            return this.designerViewportRows;
         }
         if (this.numberOfCells === 0) return [];
         return this.foundset.viewPort.rows;
