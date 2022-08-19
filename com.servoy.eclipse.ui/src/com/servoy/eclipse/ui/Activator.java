@@ -692,4 +692,32 @@ public class Activator extends AbstractUIPlugin
 
 		return provisioningAgent;
 	}
+
+	public boolean isDarkThemeSelected()
+	{
+		boolean IS_DARK_THEME = false;
+		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
+		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
+		if (serviceReference != null)
+		{
+			IThemeManager manager = ctx.getService(serviceReference);
+			if (manager != null)
+			{
+				Display d = Display.getDefault();
+				IThemeEngine engine = manager.getEngineForDisplay(d);
+				if (engine != null)
+				{
+					ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()))
+						{
+							IS_DARK_THEME = true;
+						}
+					}
+				}
+			}
+		}
+		return IS_DARK_THEME;
+	}
 }
