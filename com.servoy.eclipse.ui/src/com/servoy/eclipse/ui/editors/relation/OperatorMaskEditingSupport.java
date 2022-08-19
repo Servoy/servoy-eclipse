@@ -17,7 +17,7 @@
 package com.servoy.eclipse.ui.editors.relation;
 
 import static com.servoy.base.query.IBaseSQLCondition.ALL_MODIFIERS;
-import static com.servoy.base.query.IBaseSQLCondition.CASEINSENTITIVE_MODIFIER;
+import static com.servoy.base.query.IBaseSQLCondition.CASEINSENSITIVE_MODIFIER;
 import static com.servoy.base.query.IBaseSQLCondition.ORNULL_MODIFIER;
 import static com.servoy.base.query.IBaseSQLCondition.REMOVE_WHEN_NULL_MODIFIER;
 import static com.servoy.j2db.persistence.RelationItem.RELATION_OPERATORS;
@@ -137,7 +137,7 @@ public class OperatorMaskEditingSupport extends EditingSupport
 				{
 					case ORNULL_MODIFIER :
 						return OR_IS_NULL_MODIFIER_STRING;
-					case CASEINSENTITIVE_MODIFIER :
+					case CASEINSENSITIVE_MODIFIER :
 						return CASE_INSENSITIVE_MODIFIER_STRING;
 					case REMOVE_WHEN_NULL_MODIFIER :
 						return REMOVE_WHEN_NULL_MODIFIER_STRING;
