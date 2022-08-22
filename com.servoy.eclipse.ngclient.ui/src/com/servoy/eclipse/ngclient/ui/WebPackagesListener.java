@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -81,6 +83,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -644,6 +647,33 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						ServoyLog.logError(e);
 					}
+					// after dedup we have to run our own dedup, but then compared to the root node_modules
+					File projectNodeModules = new File(this.projectFolder, "node_modules");
+					File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
+
+					File[] projectListing = projectNodeModules.listFiles();
+					File[] rootListing = rootNodeModules.listFiles();
+
+					BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
+						Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
+						SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
+						result.retainAll(Arrays.asList(list2));
+						return result;
+					};
+
+					SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
+
+					mainDirs.forEach(file -> {
+						if (file.isDirectory())
+						{
+							SortedList<File> nestedResult = filterFunction.apply(file.listFiles(), new File(rootNodeModules, file.getName()).listFiles());
+							nestedResult.forEach(nested -> {
+								if (nested.isDirectory() && new File(nested, "package.json").exists()) FileUtils.deleteQuietly(nested);
+							});
+						}
+					});
+
+
 					if (SOURCE_DEBUG)
 					{
 						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
