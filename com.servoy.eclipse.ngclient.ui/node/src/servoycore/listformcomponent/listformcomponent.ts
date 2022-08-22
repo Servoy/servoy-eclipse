@@ -19,7 +19,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
 import { RowRenderer } from './row-renderer.component';
 import { AgGridAngular } from '@ag-grid-community/angular';
-import _ from 'lodash';
+
 
 const AGGRID_CACHE_BLOCK_SIZE = 10;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
