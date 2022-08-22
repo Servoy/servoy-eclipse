@@ -90,13 +90,13 @@ export class LocaleService {
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
         return new Promise<string>((resolve, reject) => {
             import(
-                `../../node_modules/@angular/common/locales/${localeId}.mjs`).then(
+                `@/../../node_modules/@angular/common/locales/${localeId}.mjs`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);
                 },
                 () => {
-                    import(`../../node_modules/@angular/common/locales/${language.toLowerCase()}.mjs`).then(module => {
+                    import(`@/../../node_modules/@angular/common/locales/${language.toLowerCase()}.mjs`).then(module => {
                         registerLocaleData(module.default, localeId.split('-')[0]);
                         resolve(language.toLowerCase());
                     }, reject);
