@@ -102,9 +102,15 @@ public class NodeFolderCreatorJob extends Job
 			if (!codeChanged)
 			{
 				Optional<File> srcMax = FileUtils.listFiles(new File(nodeFolder, "src"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
-					.max((file1, file2) -> (int)(file1.lastModified() - file2.lastModified()));
+					.max((file1, file2) -> {
+						long tm = file1.lastModified() - file2.lastModified();
+						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+					});
 				Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
-					.max((file1, file2) -> (int)(file1.lastModified() - file2.lastModified()));
+					.max((file1, file2) -> {
+						long tm = file1.lastModified() - file2.lastModified();
+						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+					});
 
 				long timestamp = Math.max(srcMax.isPresent() ? srcMax.get().lastModified() : 0, projectsMax.isPresent() ? projectsMax.get().lastModified() : 0);
 

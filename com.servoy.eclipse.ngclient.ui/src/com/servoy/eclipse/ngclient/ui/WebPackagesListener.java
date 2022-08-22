@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -894,16 +895,20 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										WebPackagesListener.watchCreated.put(packageReader.getPackageName(), new DirectorySync(srcDir, packageFolder, null));
 
 										Optional<File> srcMax = FileUtils.listFiles(packageFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
-											.max((file1, file2) -> (int)(file1.lastModified() - file2.lastModified()));
+											.max((file1, file2) -> {
+												long tm = file1.lastModified() - file2.lastModified();
+												return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+											});
 
 										long tm = srcMax.isPresent() ? srcMax.get().lastModified() : 0;
 
 										if (tm != timestamp)
 										{
-											FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(tm), "UTF8");
+											writeConsole(console, "Source Package project changed " + project.getName() + " current timestamp: " +
+												new Date(tm) + " is not stored timestamp " + new Date(timestamp));
 											packageJsonChanged = true;
 										}
-
+										FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(tm), "UTF8");
 									}
 									// also add if this is a src thing to the ts config
 									if (sourcePathJson != null)
