@@ -649,7 +649,8 @@ public class CreateComponentHandler implements IServerService
 									if (!overridePersist.getUUID().equals(child.getUUID()))
 									{
 										parent.removeChild(child);
-										parent.addChild(overridePersist);
+										// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
+										//parent.addChild(overridePersist);
 									}
 								}
 							}
