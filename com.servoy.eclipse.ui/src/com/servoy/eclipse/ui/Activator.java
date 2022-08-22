@@ -148,7 +148,6 @@ public class Activator extends AbstractUIPlugin
 		// make sure that core is fully initialized; this should also make sure app. server is initialised
 		com.servoy.eclipse.core.Activator.getDefault();
 		com.servoy.eclipse.ngclient.ui.Activator.getInstance().extractNode();
-		com.servoy.eclipse.ngclient.ui.Activator.getInstance().copyNodeFolder(true, false);
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
 		{
