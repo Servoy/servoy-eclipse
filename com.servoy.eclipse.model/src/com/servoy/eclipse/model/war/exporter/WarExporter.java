@@ -297,7 +297,7 @@ public class WarExporter
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
 			}
-			if (exportModel.exportNG2Mode() != null && !exportModel.exportNG2Mode().equals("false"))
+			if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 			{
 				monitor.subTask("Copy Titanium NGClient resources");
 				try
@@ -530,6 +530,13 @@ public class WarExporter
 			public File getExportLocation()
 			{
 				return tmpWarDir;
+			}
+
+			public String getSolutionName()
+			{
+				IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+				FlattenedSolution solution = servoyModel.getFlattenedSolution();
+				return solution.getName();
 			}
 		});
 	}
