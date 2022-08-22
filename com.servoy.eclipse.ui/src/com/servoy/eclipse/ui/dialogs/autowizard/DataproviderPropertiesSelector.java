@@ -152,7 +152,7 @@ public class DataproviderPropertiesSelector
 		dataproviderTreeViewer.addSelectionChangedListener(event -> moveDataproviderSelection());
 		dataproviderTreeViewer.addOpenListener(event -> moveDataproviderSelection());
 
-		dataproviderTreeViewer.getViewer().getTree().setToolTipText("Select the dataprovders for which you want to place fields");
+		dataproviderTreeViewer.getViewer().getTree().setToolTipText("Select the dataproviders for which you want to place fields");
 
 		dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{

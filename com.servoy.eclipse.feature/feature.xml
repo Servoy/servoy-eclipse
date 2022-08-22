@@ -181,7 +181,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="2022.9.0.3800_rc"
+         version="1.7.14.s1"
          unpack="false"/>
 
    <plugin
@@ -485,7 +485,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2.18.0"
          unpack="false"/>
 
-
    <plugin
          id="javax.transaction"
          download-size="0"
@@ -603,7 +602,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.3"/>
+         version="17.0.4"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -611,7 +610,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.3"/>
+         version="17.0.4"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -619,7 +618,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.3"/>
+         version="17.0.4"/>
 
    <plugin
          id="jakarta.servlet-api"
@@ -641,7 +640,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="17.0.3"/>
+         version="17.0.4"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"

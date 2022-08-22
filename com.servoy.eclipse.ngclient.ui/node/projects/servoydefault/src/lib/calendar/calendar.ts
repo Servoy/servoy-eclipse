@@ -107,6 +107,10 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
             this.picker.dates.setValue(value);
         }
+        if (this.dataProviderID) {
+            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
+            this.config.viewDate = value;
+       }
         if (changes.format)
             if (changes.format.currentValue) {
                 if (changes.format.currentValue.type === 'DATETIME' && changes.format.currentValue.display) {
@@ -158,13 +162,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     private initializePicker() {
         if (!this.picker) {
-            let formatted = '';
-            if (this.dataProviderID) {
-                formatted = this.formattingService.format(this.dataProviderID, this.format, false);
-            }
-            this.renderer.setProperty(this.inputElementRef.nativeElement, 'value', formatted);
             this.picker = new TempusDominus(this.getNativeElement(), this.config);
-            this.picker.dates.formatInput =  (date: DateTime) => this.formattingService.format(date, this.format, false);
+            this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format, false):'';
             this.picker.dates.parseInput =  (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID);
                 if (parsed instanceof Date && !isNaN(parsed.getTime())) return  new DateTime(parsed);
