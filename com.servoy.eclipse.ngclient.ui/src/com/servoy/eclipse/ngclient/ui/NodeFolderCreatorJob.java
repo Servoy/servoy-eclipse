@@ -114,9 +114,7 @@ public class NodeFolderCreatorJob extends Job
 
 				long timestamp = Math.max(srcMax.isPresent() ? srcMax.get().lastModified() : 0, projectsMax.isPresent() ? projectsMax.get().lastModified() : 0);
 
-				codeChanged = checkForHigherTimestamp("/node", false, timestamp);
-
-
+				codeChanged = checkForHigherTimestamp("/node", false, timestamp, console);
 			}
 			if (codeChanged)
 			{
@@ -200,7 +198,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	private boolean checkForHigherTimestamp(String entryPath, boolean deepFindEntries, long timestamp)
+	private boolean checkForHigherTimestamp(String entryPath, boolean deepFindEntries, long timestamp, StringOutputStream console)
 	{
 		boolean higherFound = false;
 		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries(entryPath, "*", deepFindEntries);
@@ -217,13 +215,14 @@ public class NodeFolderCreatorJob extends Job
 					if (filename.endsWith("/"))
 					{
 						// if it was not a deep findEntries then sub-entries must be deep-checked
-						if (!deepFindEntries) higherFound = checkForHigherTimestamp(entry.getFile(), true, timestamp);
+						if (!deepFindEntries) higherFound = checkForHigherTimestamp(entry.getFile(), true, timestamp, console);
 					}
 					else
 					{
 						long lm = entry.openConnection().getLastModified();
 						if (lm > timestamp)
 						{
+							writeConsole(console, "core source changed: " + entry.getFile() + " , build will be triggered");
 							higherFound = true;
 						}
 					}
