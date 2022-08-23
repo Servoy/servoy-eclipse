@@ -1107,7 +1107,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	public WebPackagesListener()
 	{
-		if (WebServiceSpecProvider.isLoaded())
+		if (WebServiceSpecProvider.isLoaded() && ServoyModelFinder.getServoyModel().getActiveProject() != null)
 			createNodeFolderAndCheckPackages();
 	}
 
