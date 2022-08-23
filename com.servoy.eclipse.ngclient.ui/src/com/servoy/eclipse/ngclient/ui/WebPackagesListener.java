@@ -647,6 +647,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						ServoyLog.logError(e);
 					}
+					long dedupTime = System.currentTimeMillis();
 					// after dedup we have to run our own dedup, but then compared to the root node_modules
 					File projectNodeModules = new File(this.projectFolder, "node_modules");
 					File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
@@ -673,6 +674,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 					});
 
+					writeConsole(console,
+						"None NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - time) / 1000));
 
 					if (SOURCE_DEBUG)
 					{
