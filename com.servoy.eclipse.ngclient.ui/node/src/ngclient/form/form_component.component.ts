@@ -37,11 +37,23 @@ export abstract class AbstractFormComponent {
     @Input()
     set containers(containers: { added: any; removed: any }) {
         if (!containers) return;
-        this._containers = containers;
         for (const containername in containers.added) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
+            }
+        }
+        if (this._containers && this._containers.added) {
+            for (const containername in this._containers.added) {
+                const container = this.getContainerByName(containername);
+                if (container) {
+                    let classesToRemove = this._containers.added[containername];
+                    if (containers.added[containername]) {
+                        const stillToAdd = this._containers.added[containername];
+                        classesToRemove = classesToRemove.filter((value: string) => stillToAdd.indexOf(value) === -1);
+                    }
+                    classesToRemove.forEach((cls: string) => this.renderer.removeClass(container, cls));
+                }
             }
         }
         for (const containername in containers.removed) {
@@ -50,6 +62,20 @@ export abstract class AbstractFormComponent {
                 containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
             }
         }
+        if (this._containers && this._containers.removed) {
+            for (const containername in this._containers.removed) {
+                const container = this.getContainerByName(containername);
+                if (container) {
+                    let classesToAddBackIn = this._containers.removed[containername];
+                    if (containers.removed[containername]) {
+                        const stillToRemove = this._containers.removed[containername];
+                        classesToAddBackIn = classesToAddBackIn.filter((value: string) => stillToRemove.indexOf(value) === -1);
+                    }
+                    classesToAddBackIn.forEach((cls: string) => this.renderer.addClass(container, cls));
+                }
+            }
+        }
+        this._containers = containers;
     }
 
     get containers() {
