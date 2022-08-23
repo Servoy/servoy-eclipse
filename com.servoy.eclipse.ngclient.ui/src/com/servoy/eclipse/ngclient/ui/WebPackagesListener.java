@@ -925,6 +925,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 												}
 											}
 										}
+										else
+										{
+											writeConsole(console, "The source of the package.json in " + packageFolder + " was modified");
+										}
+									}
+									else
+									{
+										writeConsole(console, "Package.json in " + packageFolder + " did not exists installing this package");
 									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()) || !packageFolder.exists() ||
@@ -933,8 +941,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
+										writeConsole(console, "Deleted folder: " + packageFolder);
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
+										writeConsole(console, "Copied folder: " + srcDir + " to " + packageFolder);
 										WebPackagesListener.watchCreated.put(packageReader.getPackageName(), new DirectorySync(srcDir, packageFolder, null));
 
 										Optional<File> srcMax = FileUtils.listFiles(packageFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
