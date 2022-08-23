@@ -938,7 +938,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										if (tm != timestamp)
 										{
 											writeConsole(console, "Source Package project changed " + project.getName() + " current timestamp: " +
-												new Date(tm) + " is not stored timestamp " + new Date(timestamp));
+												new Date(tm) + " compared to the stored timestamp " + new Date(timestamp));
 											packageJsonChanged = true;
 										}
 										FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(tm), "UTF8");
