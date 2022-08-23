@@ -227,7 +227,7 @@ public class WarExporter
 		File tmpWarDir = createTempDir();
 		monitor.worked(2);
 		String appServerDir = exportModel.getServoyApplicationServerDir();
-		monitor.subTask("Copy root webapp files");
+		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy beans");
@@ -239,7 +239,7 @@ public class WarExporter
 		monitor.subTask("Copy lafs");
 		copyLafs(tmpWarDir, appServerDir);
 		monitor.worked(2);
-		monitor.subTask("Copy all standard libraries");
+		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
 		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy Drivers");
