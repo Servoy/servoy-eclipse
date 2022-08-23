@@ -265,7 +265,7 @@ public class WarExporter
 		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
-			monitor.subTask("Copy the active solution" + SDF.format(new Date()) + ")");
+			monitor.subTask("Copy the active solution (" + SDF.format(new Date()) + ")");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
 			compileLessResources(tmpWarDir);
