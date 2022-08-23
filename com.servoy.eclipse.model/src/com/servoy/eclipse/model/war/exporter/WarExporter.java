@@ -90,6 +90,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.Version;
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
@@ -1107,6 +1108,43 @@ public class WarExporter
 				if (fl.getName().endsWith(".html"))
 				{
 					allTemplates.put(dirName + "/" + je.getName(), fl);
+				}
+				if (specFilesOnly && je.getName().endsWith(".spec"))
+				{
+					JSONObject json = new JSONObject(Utils.getTXTFileContent(jarfile.getInputStream(je), Charset.forName("UTF8"), true));
+					List<String> scripts = new ArrayList<String>();
+					if (json.has("serverscript"))
+					{
+						scripts.add(json.getString("serverscript"));
+					}
+					if (json.has("ng2Config"))
+					{
+						JSONObject configJSON = json.getJSONObject("ng2Config");
+						if (configJSON.has("dependencies"))
+						{
+							JSONObject dependenciesJSON = configJSON.getJSONObject("dependencies");
+							if (dependenciesJSON.has("serverscript"))
+							{
+								scripts.add(dependenciesJSON.getString("serverscript"));
+							}
+						}
+					}
+					scripts.forEach((String path) -> {
+						String serverScriptName = path.substring(path.lastIndexOf("/") + 1);
+						ZipEntry serverScriptEntry = jarfile.getEntry(path);
+						File destScriptFile = new File(destdir, serverScriptName);
+						try (InputStream is = jarfile.getInputStream(serverScriptEntry); FileOutputStream fo = new FileOutputStream(destScriptFile))
+						{
+							while (is.available() > 0)
+							{
+								fo.write(is.read());
+							}
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					});
 				}
 			}
 		}
@@ -2352,6 +2390,41 @@ public class WarExporter
 					allTemplates.put(path, newFile);
 				}
 				writtenFiles.add(file);
+				if (specFilesOnly && file.getName().endsWith(".spec"))
+				{
+					JSONObject json = new JSONObject(Utils.getTXTFileContent(file));
+					List<String> scripts = new ArrayList<String>();
+					if (json.has("serverscript"))
+					{
+						scripts.add(json.getString("serverscript"));
+					}
+					if (json.has("ng2Config"))
+					{
+						JSONObject configJSON = json.getJSONObject("ng2Config");
+						if (configJSON.has("dependencies"))
+						{
+							JSONObject dependenciesJSON = configJSON.getJSONObject("dependencies");
+							if (dependenciesJSON.has("serverscript"))
+							{
+								scripts.add(dependenciesJSON.getString("serverscript"));
+							}
+						}
+					}
+					scripts.forEach((String path) -> {
+						String serverScriptPath = path.substring(path.lastIndexOf("/") + 1);
+						File serverScriptFile = new File(file.getParentFile(), serverScriptPath);
+						File newServerScriptFile = new File(destDir, serverScriptPath);
+						try
+						{
+							copyFile(serverScriptFile, newServerScriptFile);
+						}
+						catch (ExportException e)
+						{
+							ServoyLog.logError(e);
+						}
+						writtenFiles.add(serverScriptFile);
+					});
+				}
 			}
 		}
 	}
