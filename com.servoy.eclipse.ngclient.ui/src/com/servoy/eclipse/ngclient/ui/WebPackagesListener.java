@@ -935,17 +935,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										writeConsole(console, "Package.json in " + packageFolder + " did not exists installing this package");
 									}
 									// check/copy the dist folder to the target packages location
-									if (!WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()) || !packageFolder.exists() ||
+									if (!WebPackagesListener.watchCreated.containsKey(packageFolder) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
 									{
-										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
+										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageFolder);
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
-										writeConsole(console, "Deleted folder: " + packageFolder);
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
-										writeConsole(console, "Copied folder: " + srcDir + " to " + packageFolder);
-										WebPackagesListener.watchCreated.put(packageReader.getPackageName(), new DirectorySync(srcDir, packageFolder, null));
+										writeConsole(console, "Updated SPM target folder: " + packageFolder + " from source package dir: " + srcDir);
+										WebPackagesListener.watchCreated.put(packageFolder, new DirectorySync(srcDir, packageFolder, null));
 
 										Optional<File> srcMax = FileUtils.listFiles(packageFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
 											.max((file1, file2) -> {
@@ -1013,9 +1012,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// if we previously had a project reference and now we switched back to the zip we need to remove what was generated for it
 					try
 					{
-						if (WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()))
+						if (WebPackagesListener.watchCreated.containsKey(packageFolder))
 						{
-							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageReader.getPackageName());
+							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageFolder);
 							if (directorySync != null) directorySync.destroy();
 							if (packageFolder.exists()) FileUtils.deleteQuietly(packageFolder);
 
@@ -1113,7 +1112,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final AtomicInteger scheduled = new AtomicInteger(0); // 0 == no jobs, 1 == job scheduled, 2  or 3 == job running, 3 == run again.
 	private static final AtomicBoolean cleanInstall = new AtomicBoolean(false);
 
-	private static final ConcurrentMap<String, DirectorySync> watchCreated = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<File, DirectorySync> watchCreated = new ConcurrentHashMap<>();
 
 	public WebPackagesListener()
 	{
