@@ -55,7 +55,7 @@ export class AddAttributeDirective implements OnChanges {
         }
         if (changes.svyContainerStyle && this.svyContainerStyle && this.svyContainerStyle.cssPositionContainer) {
             this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
-            this.renderer.setStyle(this.el.nativeElement, 'height', JSON.parse(this.svyContainerAttributes.size).height + 'px');
+            this.renderer.setStyle(this.el.nativeElement, 'height', this.svyContainerAttributes.size.height + 'px');
         }
     }
 
