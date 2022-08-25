@@ -388,6 +388,7 @@ export class WindowService {
                 this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
                 if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false) {
                     // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
+                    const state = this.platformLocation.getState();
                     if (state && state['navigationId'])
                         this.platformLocation.replaceState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
                     else  this.platformLocation.pushState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
