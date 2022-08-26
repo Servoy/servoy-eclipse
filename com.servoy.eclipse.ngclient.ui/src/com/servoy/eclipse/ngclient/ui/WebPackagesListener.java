@@ -662,27 +662,31 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						return result;
 					};
 
-					SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
+					if (projectListing != null && rootListing != null)
+					{
+						SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
 
-					mainDirs.forEach(file -> {
-						if (file.isDirectory())
-						{
-							if (new File(file, "package.json").exists())
+						mainDirs.forEach(file -> {
+							if (file.isDirectory())
 							{
-								// this is already the package (root of node modules, like rxjs)
-								FileUtils.deleteQuietly(file);
-							}
-							else
-							{
-								// sub dirs are the package, this is a group dir like angular/aggrid
-								SortedList<File> nestedResult = filterFunction.apply(file.listFiles(), new File(rootNodeModules, file.getName()).listFiles());
-								nestedResult.forEach(nested -> {
-									if (nested.isDirectory() && new File(nested, "package.json").exists()) FileUtils.deleteQuietly(nested);
-								});
-							}
+								if (new File(file, "package.json").exists())
+								{
+									// this is already the package (root of node modules, like rxjs)
+									FileUtils.deleteQuietly(file);
+								}
+								else
+								{
+									// sub dirs are the package, this is a group dir like angular/aggrid
+									SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
+										new File(rootNodeModules, file.getName()).listFiles());
+									nestedResult.forEach(nested -> {
+										if (nested.isDirectory() && new File(nested, "package.json").exists()) FileUtils.deleteQuietly(nested);
+									});
+								}
 
-						}
-					});
+							}
+						});
+					}
 
 					writeConsole(console,
 						"None NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) + "s");
