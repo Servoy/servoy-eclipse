@@ -421,17 +421,18 @@ export class WebsocketSession {
         let message_data = message.data;
         let hideIndicator = false;
         try {
-            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server: ' + JSON.stringify(message))));
 
             const separator = message_data.indexOf('#');
             if (separator >= 0 && separator < 5) {
                 // the json is prefixed with a message number: 123#{bla: "hello"}
                 this.websocketService.setLastServerMessageNumber(message_data.substring(0, separator));
+                this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message number: ' + message_data.substring(0, separator))));
                 message_data = message_data.substr(separator + 1);
             }
             // else message has no seq-no
 
             obj = JSON.parse(message_data);
+            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
 
 			if(obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
 				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
