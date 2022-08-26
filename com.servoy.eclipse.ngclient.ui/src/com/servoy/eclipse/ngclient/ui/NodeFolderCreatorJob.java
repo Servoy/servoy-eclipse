@@ -107,6 +107,7 @@ public class NodeFolderCreatorJob extends Job
 						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
 					});
 				Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+					.filter(file -> !file.getName().equals("package-lock.json"))
 					.max((file1, file2) -> {
 						long tm = file1.lastModified() - file2.lastModified();
 						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
