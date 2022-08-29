@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
@@ -70,13 +69,6 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	}
 
 	@Override
-	public IWizardPage getNextPage()
-	{
-		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		return super.getNextPage();
-	}
-
-	@Override
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_services");
@@ -86,5 +78,11 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	protected void restoreUsedFromModel()
 	{
 		componentsUsed = exportModel.getExportedServices();
+	}
+
+	@Override
+	protected void updateExportModel()
+	{
+		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
 	}
 }

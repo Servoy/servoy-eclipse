@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -273,5 +274,15 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage impleme
 		availableComponents = getAvailableItems();
 		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));
 	}
+	
+	@Override
+	public IWizardPage getNextPage()
+	{
+		updateExportModel();
+		return super.getNextPage();
+	}
+
+	protected abstract void updateExportModel();
+
 
 }
