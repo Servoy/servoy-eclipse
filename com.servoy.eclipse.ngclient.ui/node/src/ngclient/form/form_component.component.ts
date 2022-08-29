@@ -49,7 +49,7 @@ export abstract class AbstractFormComponent {
                 if (container) {
                     let classesToRemove = this._containers.added[containername];
                     if (containers.added[containername]) {
-                        const stillToAdd = this._containers.added[containername];
+                        const stillToAdd = containers.added[containername];
                         classesToRemove = classesToRemove.filter((value: string) => stillToAdd.indexOf(value) === -1);
                     }
                     classesToRemove.forEach((cls: string) => this.renderer.removeClass(container, cls));
@@ -68,7 +68,7 @@ export abstract class AbstractFormComponent {
                 if (container) {
                     let classesToAddBackIn = this._containers.removed[containername];
                     if (containers.removed[containername]) {
-                        const stillToRemove = this._containers.removed[containername];
+                        const stillToRemove = containers.removed[containername];
                         classesToAddBackIn = classesToAddBackIn.filter((value: string) => stillToRemove.indexOf(value) === -1);
                     }
                     classesToAddBackIn.forEach((cls: string) => this.renderer.addClass(container, cls));
