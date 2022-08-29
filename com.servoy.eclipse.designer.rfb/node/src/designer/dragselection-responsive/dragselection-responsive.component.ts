@@ -89,7 +89,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         if (!this.dragStartEvent || event.buttons !== 1 || !this.dragNode) return;
         if (!this.editorSession.getState().dragging) {
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
-                this.editorSession.getState().dragging = true;
+                this.editorSession.setDragging( true );
                 this.dragCopy = event.ctrlKey || event.metaKey;
                 this.editorContentService.sendMessageToIframe({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id"), dragCopy: this.dragCopy });
                 this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
@@ -195,7 +195,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         this.editorSession.stopAutoscroll();
 
         this.dragStartEvent = null;
-        this.editorSession.getState().dragging = false;
+        this.editorSession.setDragging( false );
         this.editorContentService.getGlassPane().style.cursor = "default";
         this.dragNode = null;
         this.dropHighlight = null;

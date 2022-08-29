@@ -360,6 +360,11 @@ export class EditorSessionService implements ServiceProvider {
         this.stateListener.next('anchoringIndicator');
     }
 
+    setDragging(dragging : boolean){
+        this.state.dragging = dragging;
+        this.stateListener.next('dragging');
+    }
+    
     getState(): State {
         return this.state;
     }

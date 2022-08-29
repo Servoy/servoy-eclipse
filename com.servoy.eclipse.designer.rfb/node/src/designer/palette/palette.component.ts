@@ -102,14 +102,14 @@ export class PaletteComponent {
 
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
-            this.editorSession.getState().dragging = true;
+            this.editorSession.setDragging(true);
             this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
         }
     }
 
     onMouseUp = (event: MouseEvent) => {
         if (this.dragItem.paletteItemBeingDragged) {
-            this.editorSession.getState().dragging = false;
+            this.editorSession.setDragging( false );
             this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;

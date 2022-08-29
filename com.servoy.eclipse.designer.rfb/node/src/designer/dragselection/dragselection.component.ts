@@ -78,7 +78,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           this.editorSession.updateSelection(this.editorSession.getSelection(), false, true);
       }
       this.selectionToDrag = null;
-      this.editorSession.getState().dragging = false;
+      this.editorSession.setDragging(false);
       this.currentElementInfo = null;
       this.dragCopy = false;
   }
@@ -114,7 +114,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           if (!this.dragStartEvent)  return;
               if (!this.editorSession.getState().dragging) {
                   if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
-                    this.editorSession.getState().dragging = true;
+                    this.editorSession.setDragging( true );
                     this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
                   } else return;
               }
