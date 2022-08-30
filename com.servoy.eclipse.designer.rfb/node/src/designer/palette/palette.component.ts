@@ -1,5 +1,5 @@
 import { Component, Pipe, PipeTransform, Renderer2 } from '@angular/core';
-import { EditorSessionService, Package, PaletteComp } from '../services/editorsession.service';
+import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -10,14 +10,17 @@ import { EditorContentService } from '../services/editorcontent.service';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent {
+export class PaletteComponent implements ISupportAutoscroll{
 
     public searchText: string;
     public activeIds: Array<string>;
 
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
-
+    
+    autoscrollAreasEnabled: boolean;
+    autoscrollElementClientBounds: Array<DOMRect>;
+    
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
         let layoutType: string;
@@ -104,6 +107,7 @@ export class PaletteComponent {
         if (!ghost) {
             this.editorSession.setDragging(true);
             this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
+            this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
         }
     }
 
@@ -172,7 +176,12 @@ export class PaletteComponent {
                 this.editorSession.createComponent(component);
             }
 
-             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+            this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+             
+             //disable mouse events on the autoscroll
+            this.editorSession.getState().pointerEvents = 'none'; 
+            this.autoscrollAreasEnabled = false;
+            this.editorSession.stopAutoscroll();
         }
     }
 
@@ -183,6 +192,7 @@ export class PaletteComponent {
         }
 
         if (this.dragItem.paletteItemBeingDragged) {
+           
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
@@ -246,6 +256,11 @@ export class PaletteComponent {
                     }
                 }
             }
+             // enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
+            if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
+                this.autoscrollAreasEnabled = true;
+                this.editorSession.startAutoscroll(this);
+            }
 
         }
     }
@@ -266,6 +281,10 @@ export class PaletteComponent {
 
     getPackages(): Array<Package> {
         return this.editorSession.getState().packages;
+    }
+    
+    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
+        return null;
     }
 }
 
