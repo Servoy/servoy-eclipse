@@ -26,7 +26,7 @@ export class EditorSessionService implements ServiceProvider {
 
     private bIsDirty = false;
     
-    openPopoverTriggered = new EventEmitter<{component: PaletteComp}>();
+    openPopoverTrigger = new EventEmitter<{component: PaletteComp}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {

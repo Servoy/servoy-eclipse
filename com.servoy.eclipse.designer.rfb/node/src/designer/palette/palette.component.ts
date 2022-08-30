@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
-import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import { WindowRefService } from '@servoy/public';
 
 @Component({
     selector: 'designer-palette',
@@ -18,11 +18,16 @@ export class PaletteComponent {
 	
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean }; 
-    
-    popover: NgbPopover;
+    variantPackageName: string;
+    variantComponentName: string;
+    variantComponentType: string;
+    variantStyleClass: string;
+    variantPaletteElement: Element = null;
      
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
-        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
+        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
+        private windowRef: WindowRefService) {
+
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = 'Absolute-Layout';
@@ -66,6 +71,15 @@ export class PaletteComponent {
             }
             this.editorSession.getState().packages = packages;
         });
+        this.windowRef.nativeWindow.addEventListener('message', (event) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (event.data.id === 'onVariantMouseDown') {//element
+				this.onVariantMouseDown(event.data.pageX, event.data.pageY, event.data.model);
+			}
+            if (event.data.id === 'onVariantMouseUp') {//element
+				this.onVariantMouseUp();
+			}
+        });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
     }
@@ -75,60 +89,71 @@ export class PaletteComponent {
     }
 
     onClick(component: PaletteComp) {
-        if (event.target) {
-			//variants and PreviewForm has separate handlers
-			if ((event.target as Element).getAttribute("name") === "variants")
-				return;
-		}
         component.isOpen = !component.isOpen;
     }
     
-    
-    /*onPreviewReady(component: PaletteComp) {
-		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
-		this.editorContentService.sendMessageToPreview({ 
-			id: 'createVariants', 
-			variants: component.styleVariants, 
-			model: component.model, 
-			name: this.convertToJSName(component.name), 
-			type: 'component',
-			margin: this.margin,
-			columns: columns
-		});
-	}*/
-	
-	/*getPreviewFormSize(component: PaletteComp) {
-		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
-		const size = (JSON.parse(JSON.stringify(component.model))['size']) as {width: number, height: number}; 
-		const rows = Math.round(component.styleVariants.length / columns ) + 1;
-		return {width: columns * (size.width + 15) + size.width / 2,
-				height: rows * (size.height + 15)};
-	}*/
-	
-	/*onVariantsClick(event: MouseEvent, popover: NgbPopover, component: PaletteComp) {
-        event.stopPropagation();
-        if (popover.isOpen()) {
-          	popover.close();
-        } else {	  
-	        this.editorSession.getStyleVariantFor(component.styleVariantCategory)
-	            .then((result) => {
-					component.styleVariants = result;
-					const size = this.getPreviewFormSize(component) as {width: number, height: number};
-					//TODO: set width & height for popover from computed sizes
-					popover.open({ comp: component, popOv: popover, width: size.width + "px", height: size.height + "px"});
-				}).catch((err) => {
-					console.log(err);
-				});
-        }         
-    }*/
-    
-    onVariantClick(popover: NgbPopover, component: PaletteComp) {
-		this.editorSession.openPopoverTriggered.emit({component: component});
+    onVariantClick(event: MouseEvent, component: PaletteComp, packageName: string) {
+        this.variantPackageName = packageName;
+        this.variantComponentName = component.name;
+        this.variantComponentType = component.componentType;
+        let targetElement: HTMLElement = (event.target as HTMLElement).parentElement;
+        while (targetElement.nodeName.toUpperCase() != 'LI') {
+            if (!targetElement.parentElement || targetElement.parentElement.nodeName.toUpperCase() == 'UL') break;
+            targetElement = targetElement.parentElement;
+        }
+        this.variantPaletteElement = targetElement.cloneNode(true) as Element;
+       
+        Array.from(this.variantPaletteElement.children).forEach(child => {
+            if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT') {
+                this.variantPaletteElement.removeChild(child);
+            }
+        });
+		this.editorSession.openPopoverTrigger.emit({component: component});
 	}
+
+    getListItemId(packageName, componentName: string) {
+        return packageName + ':' + componentName;
+    }
+
+    onVariantMouseDown(pageX, pageY: number, model: {[property: string]: string }) {
+        this.variantStyleClass = model.styleClass;
+        this.dragItem.paletteItemBeingDragged = this.variantPaletteElement;
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', this.editorContentService.getTopPositionIframe(true) + pageX + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', this.editorContentService.getTopPositionIframe(true) + pageY + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
+        this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
+	
+        this.dragItem.elementName = this.variantComponentName;
+        this.dragItem.packageName = this.variantPackageName;
+        this.dragItem.ghost = null;
+        this.dragItem.propertyName = null;
+        this.dragItem.propertyValue = null;
+        this.dragItem.topContainer = null;
+    
+        this.dragItem.componentType = this.variantComponentType;
+        this.dragItem.layoutName = null;
+        this.dragItem.attributes = null;
+	
+        this.canDrop = { dropAllowed: false };
+        this.editorSession.getState().dragging = true;
+        this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(this.dragItem.elementName), 
+            model: model, type: this.dragItem.componentType, attributes: this.dragItem.attributes, children: null });
+    }
+
+    onVariantMouseUp() {
+        if (this.dragItem.paletteItemBeingDragged) {
+            this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
+            this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+            this.dragItem.paletteItemBeingDragged = null;
+            this.dragItem.contentItemBeingDragged = null;
+            this.variantPaletteElement = null;   
+        }
+    }
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         if (event.target && (event.target as Element).getAttribute("name") === "variants") {
-			return; // it has a separate handler in a more nested elem)
+			return; // it has a separate handler
 		}
 				
 		event.stopPropagation();
@@ -180,6 +205,7 @@ export class PaletteComponent {
             // do we also need to set size here ?
             component.x = component.x - this.editorContentService.getLeftPositionIframe();
             component.y = component.y - this.editorContentService.getTopPositionIframe();
+            component.styleClass = this.variantStyleClass;
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -228,6 +254,10 @@ export class PaletteComponent {
             }
 
              this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+        }
+
+        if (this.variantPaletteElement) {
+            this.variantPaletteElement = null;
         }
     }
 

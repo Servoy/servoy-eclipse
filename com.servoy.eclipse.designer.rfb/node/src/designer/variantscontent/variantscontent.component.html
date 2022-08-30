@@ -1,25 +1,23 @@
-<!--<div class="content" [ngStyle]="contentStyle" #element>  
-    <iframe [id]="formName" class="contentframe" [src]="clientURL"></iframe>
-</div>-->
-
 <button name="variants" type="button" class="btn btn-light btn-sm" 
- 	triggers="manual" #popover="ngbPopover" [ngbPopover]="popoverContent" (click)="onVariantClick(popover, component)">
+ 	triggers="manual" #popover="ngbPopover" [ngbPopover]="popoverContent" (click)="onVariantClick(popover)">
 	<i name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
 </button>
 <ng-template #popoverContent let-cmp="comp" let-popOv="popOv" let-width="width" let-height="height" let-clientURL="clientURL">
 	<div class="modal-body" [ngStyle]="{'display': 'block', 'width': width, 'height': height}">
-		<iframe id="PreviewForm" class="contentframe" [src]="clientURL"></iframe>
+		<iframe id="VariantsForm" class="contentframe" [src]="clientURL"></iframe>
 	</div>
 	<div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
 		<button name="variants" type="button" 
-	    	class="btn btn-outline-dark btn-sm" >
-	    	<i name="variants" class="fa fa-plus" aria-hidden="true"></i>
-	        	Add
-	    </button>
-	    <button name="variants" type="button" 
-	    	class="btn btn-outline-dark btn-sm" >
-	        <i name="variants" class="fa fa-pen" aria-hidden="true"></i>
-	        Edit
-	    </button>
+			class="btn btn-outline-dark btn-sm" 
+			(click)="onAddVariant($event, cmp)">
+			<i name="variants" class="fa fa-plus" aria-hidden="true"></i>
+				Add
+		</button>
+		<button name="variants" type="button" 
+			class="btn btn-outline-dark btn-sm" 
+			(click)="onEditVariant($event, cmp)">
+			<i name="variants" class="fa fa-pen" aria-hidden="true"></i>
+			Edit
+		</button>
 	</div>
 </ng-template>  

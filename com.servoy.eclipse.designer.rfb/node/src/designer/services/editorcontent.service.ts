@@ -53,13 +53,13 @@ export class EditorContentService {
         return this.frameElement.contentWindow.document.querySelector(".svy-form");
     }
 
-    getTopPositionIframe(): number {
-        this.initIFrame();
+    getTopPositionIframe(variants?: boolean): number {
+        this.initIFrame(variants);
         return this.topPositionIframe;
     }
 
-    getLeftPositionIframe(): number {
-        this.initIFrame();
+    getLeftPositionIframe(variants?: boolean): number {
+        this.initIFrame(variants);
         return this.leftPositionIframe;
     }
 
@@ -113,8 +113,8 @@ export class EditorContentService {
         this.frameElement.contentWindow.postMessage(message, '*');
     }
 
-    getContentElementById(id: string): HTMLElement {
-        this.initIFrame();
+    getContentElementById(id: string, variants?: boolean): HTMLElement {
+        this.initIFrame(variants);
         return this.frameElement.contentWindow.document.getElementById(id);
     }
 
@@ -141,18 +141,27 @@ export class EditorContentService {
         this.contentMessageListeners.splice(this.contentMessageListeners.indexOf(listener), 1);
     }
 
-   private initIFrame() {
-        if (!this.frameElement) {
-			const frames = this.document.getElementsByTagName('iframe');
-			if (frames[0] && frames[0].id != 'PreviewForm') {
-				this.frameElement = frames[0];
-			} else {
-				this.frameElement = frames[1];
-			}       
-            const frameRect = this.frameElement.getBoundingClientRect();
-            this.topPositionIframe = frameRect.top;
-            this.leftPositionIframe = frameRect.left;
-        }
+   private initIFrame(variants?: boolean) {
+        if (variants) {
+            if (!this.frameElement || this.frameElement.id != 'VariantsForm') {
+                const frames = this.document.getElementsByTagName('iframe');
+                if (frames[0] && frames[0].id === 'VariantsForm') {
+                    this.frameElement = frames[0];
+                } else if (frames.length > 0 ){//true when variants form is rendered
+                    this.frameElement = frames[1];
+                }   
+            }
+        } else {//!variants
+            const frames = this.document.getElementsByTagName('iframe');
+                if (frames[0] && frames[0].id != 'VariantsForm') {
+                    this.frameElement = frames[0];
+                } else if (frames.length > 0 ){//true when preview
+                    this.frameElement = frames[1];
+                }
+        } 
+        const frameRect = this.frameElement.getBoundingClientRect();
+        this.topPositionIframe = frameRect.top;
+        this.leftPositionIframe = frameRect.left;
     }
 }
 
