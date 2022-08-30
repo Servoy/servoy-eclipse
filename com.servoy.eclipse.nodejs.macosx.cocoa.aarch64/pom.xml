@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.9.0.3800_rc</version>
+		<version>2022.12.0.3820_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</artifactId>
 	<version>16.17.0</version>
