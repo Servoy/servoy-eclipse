@@ -253,7 +253,7 @@ export class ApplicationService {
         return this.userProperties;
     }
 
-    private  getServerURL() {
+    private getServerURL() {
         // current remote address including the context (includes leading /)
         const context = this.doc.getElementsByTagName ('base')[0].getAttribute('href');
         return this.windowRefService.nativeWindow.location.protocol + '//' + this.windowRefService.nativeWindow.location.host + context;

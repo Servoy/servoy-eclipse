@@ -22,7 +22,7 @@ export class DefaultNavigator {
   }
 
   setIndex(newIndex: any) {
-    let i = parseInt(newIndex);
+    let i = parseInt(newIndex, 10);
     if (!i) {
       i = 1;
     }

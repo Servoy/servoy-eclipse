@@ -1,237 +1,421 @@
-import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { LoggerService, LoggerFactory, ViewportRowUpdates, IChangeAwareValue, instanceOfChangeAwareValue, FoundsetChangeEvent } from '@servoy/public';
-import { FoundsetViewportState, ViewportService } from '../services/viewport.service';
-import { FoundsetConverter } from './foundset_converter';
-import { FoundsetLinkedConverter } from './foundsetLinked_converter';
+import { IParentAccessForSubpropertyChanges, ConverterService, isChanged, IChangeAwareValue,
+            instanceOfChangeAwareValue, ChangeListenerFunction } from '../../sablo/converter.service';
+import { LoggerService, LoggerFactory, IFoundset, ViewportChangeEvent, ViewportChangeListener, IChildComponentPropertyValue } from '@servoy/public';
+import { FoundsetViewportState, ViewportService, IPropertyContextCreatorForRow, ISomePropertiesInRowAreNotFoundsetLinked,
+            ConversionInfoFromServerForViewport, RowUpdate } from '../services/viewport.service';
 import { ComponentCache } from '../types';
 import { SabloService } from '../../sablo/sablo.service';
+import { TypesRegistry, IType, IPropertyContext, PushToServerEnum, IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
+import { FormService } from '../form.service';
 
-export class ComponentConverter implements IConverter {
+export class ComponentType implements IType<ChildComponentPropertyValue> {
 
-    static readonly PROPERTY_UPDATES_KEY = 'propertyUpdates';
-    static readonly MODEL_KEY = 'model';
-    static readonly MODEL_VIEWPORT_KEY = 'model_vp';
-    static readonly MODEL_VIEWPORT_CHANGES_KEY = 'model_vp_ch';
-    static readonly MODEL_VIEWPORT = 'modelViewport';
-    static readonly PROPERTY_NAME_KEY = 'pn';
-    static readonly VALUE_KEY = 'v';
-    static readonly NO_OP = 'n';
-    static readonly RECORD_BASED_PROPERTIES = 'recordBasedProperties';
+    public static readonly TYPE_NAME = 'component';
 
     private log: LoggerService;
 
-    constructor(private converterService: ConverterService, private viewportService: ViewportService, 
-        private sabloService: SabloService,logFactory: LoggerFactory) {
+    constructor(private converterService: ConverterService, private readonly typesRegistry: TypesRegistry, logFactory: LoggerFactory,
+                    private viewportService: ViewportService, private readonly sabloService: SabloService) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
-    fromServerToClient(serverSentData: any, currentClientData: ComponentModel, propertyContext: PropertyContext): ComponentModel {
-        let newValue = currentClientData;
+    public fromServerToClient(serverSentData: IServerSentData, currentClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext): ChildComponentPropertyValue {
+        let newValue: ChildComponentPropertyValue = currentClientValue;
 
-        // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
-        const hasListeners = (currentClientData && currentClientData.getStateHolder().viewportChangeListeners.length > 0);
-        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ? {} : undefined;
-
-        if (serverSentData && serverSentData[ComponentConverter.PROPERTY_UPDATES_KEY]) {
+        if (serverSentData && serverSentData.propertyUpdates) {
             // granular updates received
-            const componentModel = currentClientData;
-            const beanUpdate = serverSentData[ComponentConverter.PROPERTY_UPDATES_KEY];
-
-            const modelBeanUpdate = beanUpdate[ComponentConverter.MODEL_KEY];
-            const wholeViewportUpdate = beanUpdate[ComponentConverter.MODEL_VIEWPORT_KEY];
-            const viewportUpdate = beanUpdate[ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY];
-            let done = false;
-
-            if (modelBeanUpdate) {
-                const beanModel = componentModel.model;
-
-                // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
-                const beanLayout = componentModel.layout;
-
-                const modelUpdateConversionInfo = modelBeanUpdate[ConverterService.TYPES_KEY] ? this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY)
-                    : this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
-
-                this.applyBeanData(beanModel, beanLayout, modelBeanUpdate, componentModel,
-                    modelUpdateConversionInfo, modelBeanUpdate[ConverterService.TYPES_KEY], propertyContext);
-                done = true;
-            }
-
-            // if component is linked to a foundset, then record - dependent property values are sent over as as viewport representing values for the foundset property's viewport
-            if (wholeViewportUpdate) {
-                const oldRows = componentModel.modelViewport;
-                if (oldRows === undefined) componentModel[ComponentConverter.MODEL_VIEWPORT] = [];
-
-                componentModel.modelViewport = this.viewportService.updateWholeViewport(componentModel.modelViewport,
-                    componentModel.getStateHolder(), wholeViewportUpdate, beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] ?
-                    beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
-                if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: currentClientData[ComponentConverter.MODEL_VIEWPORT] };
-                done = true;
-            } else if (viewportUpdate) {
-                this.viewportService.updateViewportGranularly(componentModel.modelViewport, componentModel.getStateHolder(), viewportUpdate,
-                    beanUpdate[ConverterService.TYPES_KEY] && beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] ?
-                        beanUpdate[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_CHANGES_KEY] : undefined, propertyContext, false);
-                if (hasListeners) {
-                    const upd: ViewportRowUpdates = viewportUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS];
-                    notificationParamForListeners.viewportRowsUpdated = upd; // viewPortUpdate[UPDATE_PREFIX + ROWS] was alre
-                }
-
-                done = true;
-            }
-
-            if (!done) {
-                this.log.error('Can\'t interpret component server update correctly: ' + JSON.stringify(serverSentData, undefined, 2));
-            }
-        } else if (serverSentData === undefined || !serverSentData[ComponentConverter.NO_OP]) {
+            currentClientValue.getInternalState().updateFromServerArrived(serverSentData.propertyUpdates);
+        } else if (serverSentData === undefined || !serverSentData.n) { // .n means NO OPERATION
+            // full contents received
             if (serverSentData) {
-                // full contents received
-                const componentModel = new ComponentModel(
-                    serverSentData.name,
-                    serverSentData.componentDirectiveName,
-                    serverSentData.model,
-                    serverSentData.handlers,
-                    serverSentData.position,
-                    serverSentData.forFoundset,
-                    serverSentData.foundsetConfig,
-                    serverSentData.model_vp);
-                newValue = componentModel;
-
-                if (serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] !== undefined) {
-                    // if it's linked to a foundset, keep that info in internal state; viewport.js needs it
-                    const forFoundsetPropertyName = serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
-                    componentModel[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] = () => propertyContext(forFoundsetPropertyName);
-                    delete serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
-                }
-
-                // private impl
-                componentModel.getStateHolder().requests = [];
-
-                // even if it's a completely new value, keep listeners from old one if there is an old value
-                componentModel.getStateHolder().viewportChangeListeners = (currentClientData && currentClientData.getStateHolder() ? currentClientData.getStateHolder().viewportChangeListeners : []);
-
-                /**
-                 * Adds a change listener that will get triggered when server sends granular or full modelViewport changes for this component.
-                 *
-                 * @see $webSocket.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this same foundset
-                 * get their changes applied you can use $webSocket.addIncomingMessageHandlingDoneTask.
-                 * @param listener the listener to register.
-                 */
-                //                newValue.addViewportChangeListener = function(listener) {
-                //                    internalState.viewportChangeListeners.push(listener);
-                //                    return  function() {
-                //                     return newValue.removeViewportChangeListener(listener);
-                //                    };
-                //                };
-
-                //                newValue.removeViewportChangeListener = function(listener) {
-                //                    const index = internalState.viewportChangeListeners.indexOf(listener);
-                //                    if (index > -1) {
-                //                        internalState.viewportChangeListeners.splice(index, 1);
-                //                    }
-                //                };
-                // calling applyBeanData initially to make sure any needed conversions are done on model's properties
-                const beanData = serverSentData[ComponentConverter.MODEL_KEY];
-                const beanModel: any = {};
-                serverSentData[ComponentConverter.MODEL_KEY] = beanModel;
-
-                const currentConversionInfo = beanData[ConverterService.TYPES_KEY] ?
-                    this.converterService.getOrCreateInDepthProperty(componentModel, ConverterService.TYPES_KEY) :
-                    this.converterService.getInDepthProperty(componentModel, ConverterService.TYPES_KEY);
-
-                this.applyBeanData(beanModel, componentModel.layout, beanData, componentModel,
-                    currentConversionInfo, beanData[ConverterService.TYPES_KEY], propertyContext);
-
-                // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
-                const wholeViewport = serverSentData[ComponentConverter.MODEL_VIEWPORT_KEY];
-                delete serverSentData[ComponentConverter.MODEL_VIEWPORT_KEY];
-                serverSentData[ComponentConverter.MODEL_VIEWPORT] = [];
-
-                if (wholeViewport) {
-                    serverSentData[ComponentConverter.MODEL_VIEWPORT] = this.viewportService.updateWholeViewport(serverSentData[ComponentConverter.MODEL_VIEWPORT],
-                        componentModel.getStateHolder(), wholeViewport, serverSentData[ConverterService.TYPES_KEY] ?
-                        serverSentData[ConverterService.TYPES_KEY][ComponentConverter.MODEL_VIEWPORT_KEY] : undefined, propertyContext);
-                }
-                if (serverSentData[ConverterService.TYPES_KEY] !== undefined) delete serverSentData[ConverterService.TYPES_KEY];
-
-                if (!serverSentData.api) serverSentData.api = {};
-                if (serverSentData.handlers) {
-                    for (const key of Object.keys(serverSentData.handlers)) {
-                        componentModel.mappedHandlers.set(key, this.generateWrapperHandler(key, componentModel));
-                    }
-                }
-            }
-
-        }
-
-        if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
-            // if (this.log.debugEnabled && this.log.debugLevel === this.log.SPAM)
-            // this.log.debug("svy component * firing founset listener notifications: " + JSON.stringify(Object.keys(notificationParamForListeners)));
-            // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
-            currentClientData.getStateHolder().fireChanges(notificationParamForListeners);
+                newValue = new ChildComponentPropertyValue(serverSentData, currentClientValue, propertyContext,
+                        this.converterService, this.sabloService, this.viewportService, this.typesRegistry, this.log);
+            } else newValue = undefined;
         }
 
         return newValue;
     }
 
-    fromClientToServer(newClientData: ComponentModel, oldClientData: ComponentModel): any {
-        let retValue = [];
+    public fromClientToServer(newClientData: ChildComponentPropertyValue, _oldClientData: ChildComponentPropertyValue, _propertyContext: IPropertyContext): [any, ChildComponentPropertyValue] | null {
         if (newClientData) {
-            const internalState = newClientData.getStateHolder();
+            const internalState: ComponentTypeInternalState = newClientData.getInternalState();
             if (internalState.hasChanges()) {
-                retValue = internalState.requests;
+                const tmp = internalState.requests;
                 internalState.requests = [];
+                return [tmp, newClientData];
             }
-            let added = false;
-            const propChange = { propertyChanges: {} };
-            const conversionInfo = newClientData.model.svy_types;
-            internalState.changes.forEach((change) => {
-                let value = change.value;
-                if (conversionInfo && conversionInfo[change.dp])
-                    value = this.converterService.convertFromClientToServer(value, conversionInfo[change.dp], change.oldValue);
-                else value = this.converterService.convertClientObject(value);
-                if (change.dataprovider) {
-                    const apply = { svyApply: {} };
-                    if (change.rowId) apply.svyApply[ViewportService.ROW_ID_COL_KEY] = change.rowId;
-                    apply.svyApply[ComponentConverter.PROPERTY_NAME_KEY] = change.dp;
-                    apply.svyApply[ComponentConverter.VALUE_KEY] = value;;
-
-                    retValue.push(apply);
-                } else {
-                    propChange.propertyChanges[change.dp] = value;
-                    if (!added) {
-                        retValue.push(propChange);
-                        added = true;
-                    }
-                }
-            });
-            internalState.changes = [];
         }
-        return retValue;
+        return [[], newClientData];
     }
 
-    private generateWrapperHandler(handler: string, state: ComponentModel) {
-        const executeHandler = (type, args, row, name, model) => {
+}
+
+export class ChildComponentPropertyValue extends ComponentCache implements IChangeAwareValue, IChildComponentPropertyValue {
+
+    name: string;
+
+    ///** this is the shared part of the model; you might want to use modelViewport (which uses this as prototype) instead if the child component has foundset-linked properties */
+    //model: any; // already declared in parent class
+
+    //handlers: any; // already declared in parent class
+
+    api: any;
+    foundsetConfig?: {
+        recordBasedProperties?: Array<string>;
+        apiCallTypes?: Array<any>;
+    };
+
+    /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
+    modelViewport: { [property: string]: any }[];
+
+    /**
+     * This function has to be set/provided by the ng2 component that uses this child "component" typed property, because
+     * that one controls the UI of the child components represented by this property (or child components in case of
+     * foundset linked components like in list form component for example). Then when there are changes comming from server, the 'component'
+     * property type will call this function as needed.
+     */
+    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], rowIndex: number) => void;
+
+    /**
+     * This gives a way to trigger handlers.
+     *
+     * In case this component is not foundset-linked, use mappedHandlers directly (which is a function).
+     * In case this component is foundset-linked, use mappedHandlers.selectRecordHandler(rowId) to trigger the handler for the component of the correct row in the foundset.
+     */
+    public readonly mappedHandlers = new Map<string, { (): Promise<any>; selectRecordHandler(rowId: any): () => Promise<any> }>();
+
+    private __internalState: ComponentTypeInternalState;
+
+    constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
+                    sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, log: LoggerService) {
+
+        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.handlers, serverSentData.position, typesRegistry, {
+
+                shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.__internalState.ignoreChanges,
+
+                changeNeedsToBePushedToServer: (_key: string, _oldValue: any, _doNotPushNow?: boolean) => {
+//                    // this is not really needed; it is already called via the @Output emitter from the component's property that calls datachange()
+//                    // from the scope it is given in template - and that should call sendChanges(...)
+//                    if (!doNotPushNow) {
+//                        // rowId is undefined because this is a non-fs-linked property (it's from this.model not this.modelViewport); see comment
+//                        // from changeListenerGeneratorForSmartNonFSLinkedProps as well about rowId
+//                        this.__internalState.sendChanges(key, this.model[key], oldValue, undefined, false); // deep/shallow watches always trigger
+//                                             // dataPush not applyDP currently so we give false here
+//                    } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+//                      // nested values towards this root prop; so nothing to do here then
+                }
+
+            } as IParentAccessForSubpropertyChanges<string>);
+
+        const forFoundsetPropertyName = serverSentData.forFoundset;
+
+        const componentSpecification = typesRegistry.getComponentSpecification(this.type);
+        this.__internalState = new ComponentTypeInternalState(this, oldClientValue?.__internalState, componentSpecification, converterService,
+                viewportService, sabloService, log, () => propertyContext.getProperty(forFoundsetPropertyName));
+
+        this.__internalState.initializeFullValueFromServer(serverSentData);
+    }
+
+    // what is needed to give servoyApi to components follows (startEdit and sendChanges (for apply));
+    // we don't need to give any of the others, as all those can be forwarded by the parent component from it's own servoyApi:
+    // formWillShow, hideForm, getFormUrl, isInDesigner, ...
+
+    // if you are wondering why there a two kinds of rowIds used below: we need to work with both component rowId and property inside component rowId if we have this scenario
+    // listFormComponent
+    //   - foundset property
+    //   - childCompProperty of 'component' type (to which someTableCompThatCanEditCells is assigned) - that is foundset linked
+    //       - foundsetProp - a prop that is linked to parent foundset of list form component (a related foundset)
+    //       - columns[1].dp - that would be a dataprovider property that if foundset linked to the foundsetProp - so to the related foundset
+    //
+    // when a someTableCompThatCanEditCells in some list form component row calls startEdit or applyDataprovider on it's columns[1].dp,
+    // the component type needs to send to server both the rowId in listFormComponent's foundset - that identifies correctly the
+    // component's row on server as well as the rowId for the dataprovider columns[1].dp inside the related foundsetProp - so we know
+    // what row in the related foundset is affected by that startEdit or applyDataprovider
+
+    startEdit(propertyName: string, rowId?: any) {
+        /** rowId is only needed if the component is linked to a foundset */
+        FormService.pushEditingStarted(this.__internalState.getActualComponentModel(rowId), propertyName,
+            (foundsetLinkedRowId: string, propertyNameToSend: string) => {
+                const req: IOutgoingStartEdit = { svyStartEdit: { pn: propertyNameToSend } };
+
+                if (rowId) req.svyStartEdit[ViewportService.ROW_ID_COL_KEY] = rowId; // rowId that identifies which component it is in the viewport of foundset linked components
+                if (foundsetLinkedRowId) req.svyStartEdit._svyRowIdOfProp = foundsetLinkedRowId; // rowId that identifies the row inside the component
+                                                // for the foundset linked DP of the component (that is linked to another property of type foundset inside the component itself)
+
+                this.__internalState.requests.push(req);
+                this.__internalState.notifyChangeListener();
+            });
+    }
+
+    sendChanges(propertyName: string, newValue: any, oldValue: any, rowId?: string, isDataprovider?: boolean) {
+        /** rowId is only needed if the component is linked to a foundset */
+        this.__internalState.sendChanges(propertyName, newValue, oldValue, rowId, isDataprovider);
+    }
+
+    /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState() {
+        return this.__internalState;
+    }
+
+    /**
+     * Adds a change listener that will get triggered when server sends granular or full modelViewport changes for this component.
+     *
+     * @see SabloService.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this same
+     *          foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask
+     * @param viewportChangeListener the listener to register.
+     *
+     * @return a listener unregister function.
+     */
+    public addViewportChangeListener(viewportChangeListener: ViewportChangeListener): () => void {
+        this.__internalState.changeListeners.push(viewportChangeListener);
+        return () => this.removeViewportChangeListener(viewportChangeListener);
+    }
+
+    public removeViewportChangeListener(viewportChangeListener: ViewportChangeListener): void {
+        const index = this.__internalState.changeListeners.indexOf(viewportChangeListener);
+        if (index > -1) {
+            this.__internalState.changeListeners.splice(index, 1);
+        }
+    }
+
+}
+
+class ComponentTypeInternalState extends FoundsetViewportState implements ISomePropertiesInRowAreNotFoundsetLinked {
+
+    // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
+    beanLayout: any = {}; // not really useful right now; just to be able to reuse existing form code
+
+    modelUnwatch: (() => void)[] = null;
+
+    public readonly propertyContextCreatorForRow: IPropertyContextCreatorForRow;
+
+    private readonly changeListenerGeneratorForSmartNonFSLinkedProps: (propertyName: string, propValue: any) => ChangeListenerFunction;
+
+    constructor(private readonly componentValue: ChildComponentPropertyValue,
+                    oldClientValueInternalState: ComponentTypeInternalState,
+                    public readonly componentSpecification: IWebObjectSpecification,
+                    public readonly converterService: ConverterService,
+                    private readonly viewportService: ViewportService,
+                    public readonly sabloService: SabloService,
+                    log: LoggerService,
+                    forFoundset?: () => IFoundset) {
+
+        super(forFoundset, log);
+
+        this.propertyContextCreatorForRow = {
+            withRowValueAndPushToServerFor: (rowValue: any, propertyName: string) => ({
+                // this does retrieve props from componentValue[ComponentType.MODEL_KEY] as well, see ComponentType.getRowModelCreatorFor(...) which constructs this 'rowValue'
+                getProperty: (otherPropertyName: string) => rowValue[otherPropertyName],
+
+                getPushToServerCalculatedValue: () =>
+                    // getPropertyPushToServer not getPropertyDeclaredPushToServer
+                    this.componentSpecification ? this.componentSpecification.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT
+
+            } as IPropertyContext)
+        } as IPropertyContextCreatorForRow;
+
+        // even if it's a completely new value, keep listeners from old one if there is an old value
+        if (oldClientValueInternalState && oldClientValueInternalState.changeListeners) this.changeListeners = oldClientValueInternalState.changeListeners;
+
+        // changeListenerForSmartNonFSLinkedProps is only for model properties, viewport properties are handled in viewport.service.ts
+        this.changeListenerGeneratorForSmartNonFSLinkedProps = (propertyName: string, propValue: IChangeAwareValue) => ((doNotPushNow?: boolean) => {
+            if (! doNotPushNow) {
+                // so smart property - no watch involved (it notifies itself as changed)
+
+                // TODO we don't know here the rowId, as it's a non-fs-linked prop; so sendChanges will use shared model only as model, not the actual model of comp
+                // so if in the future fromClientToServer will need to use a row model (props. depending on each other, in this case a non-fs-linked prop depending on
+                // a fs. linked prop) we have to have here a rowId as well to be able to identify the correct row's component model; but this is unlikely to be needed
+                this.componentValue.sendChanges(propertyName, propValue, propValue, undefined, false); // we know currently DPs are not smart props, so use false there
+            }  // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+               // nested values towards this root prop; so nothing to do here then
+        });
+    }
+
+    initializeFullValueFromServer(serverSentData: IServerSentData): void {
+        FormService.updateComponentModelPropertiesFromServer(serverSentData.model, this.componentValue,
+                        this.componentSpecification, this.converterService,
+                        this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
+                        (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
+                            this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1));
+
+        // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
+        const wholeViewportUpdateFromServer = serverSentData.model_vp;
+        this.componentValue.modelViewport = [];
+
+        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
+            if (wholeViewportUpdateFromServer) {
+                this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
+                        this, wholeViewportUpdateFromServer, serverSentData._T,
+                        this.componentSpecification, this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
+                            cellUpdatedFromServerListener);
+            }
+
+            if (serverSentData.handlers)
+                for (const handlerName of Object.keys(serverSentData.handlers))
+                    this.componentValue.mappedHandlers.set(handlerName, this.generateWrapperHandler(handlerName));
+
+            // restore smart watches and proxy notifiers; server side send changes are now applied
+            this.ignoreChanges = false;
+        });
+    }
+
+    updateFromServerArrived(granularUpdateFromServer: IGranularUpdatesFromServer): void {
+        // remove smart notifiers and proxy notification effects for changes that come from server
+        this.ignoreChanges = true;
+
+        // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
+        const hasListeners = this.changeListeners.length > 0;
+        const notificationParamForListeners: ViewportChangeEvent = hasListeners ? { } : undefined;
+
+        const nonFSLinkedModelUpdates = granularUpdateFromServer.model;
+        const wholeViewportUpdate = granularUpdateFromServer.model_vp;
+        const viewportUpdate = granularUpdateFromServer.model_vp_ch;
+
+        let done = false;
+
+        if (nonFSLinkedModelUpdates) {
+            // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
+            FormService.updateComponentModelPropertiesFromServer(nonFSLinkedModelUpdates, this.componentValue,
+                            this.componentSpecification, this.converterService,
+                            this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
+                            (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
+                                this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1));
+            done = true;
+        }
+
+        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
+            if (wholeViewportUpdate) {
+                const oldRows = this.componentValue.modelViewport;
+
+                this.componentValue.modelViewport = this.viewportService.updateWholeViewport(oldRows,
+                        this, wholeViewportUpdate, granularUpdateFromServer._T,
+                        this.componentSpecification,
+                        this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
+                        cellUpdatedFromServerListener);
+                if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: this.componentValue.modelViewport };
+                done = true;
+            } else if (viewportUpdate) {
+                this.viewportService.updateViewportGranularly(this.componentValue.modelViewport, this, viewportUpdate,
+                        this.componentSpecification, this.propertyContextCreatorForRow,
+                        false, this.getRowModelCreator(), cellUpdatedFromServerListener);
+                if (hasListeners) {
+                    notificationParamForListeners.viewportRowsUpdated = viewportUpdate; // viewPortUpdate was already prepared for listeners by $viewportModule.updateViewportGranularly
+                }
+                done = true;
+            }
+            if (!done) {
+                this.log.error('svy component * Can\'t interpret component server update correctly: ' + JSON.stringify(granularUpdateFromServer, undefined, 2));
+            }
+
+            // restore smart watches and proxy notifiers; server side send changes are now applied
+            this.ignoreChanges = false;
+
+            if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
+                this.log.spam(this.log.buildMessage(() => ('svy component * Firing founset listener notifications: ' + JSON.stringify(Object.keys(notificationParamForListeners)))));
+
+                // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
+                this.fireChanges(notificationParamForListeners);
+            }
+        });
+    }
+
+    /** Works for both model properties and viewport model properties */
+    getClientSideType(propertyName: string, rowId: any): IType<any> {
+        let clientSideType: IType<any> = this.getClientSideTypeOfModelProp(propertyName);
+        if (!clientSideType) clientSideType = this.viewportService.getClientSideTypeFor(rowId, propertyName, this); // try viewport dynamic types
+
+        return clientSideType;
+    }
+
+    /** Only for model properties, viewport properties are handled in viewport.ts. */
+    getChangeListenerGeneratorForSmartNonFSLinkedProps(): (propertyName: string, propValue: any) => ChangeListenerFunction {
+        return this.changeListenerGeneratorForSmartNonFSLinkedProps;
+    }
+
+    isFoundsetLinkedProperty(propertyName: string): boolean {
+        return !!this.componentValue.foundsetConfig?.recordBasedProperties?.find(recBasedProp => (recBasedProp === propertyName));
+    }
+
+    sendChanges(propertyName: string, newValue: any, oldValue: any, rowId?: string, isDataprovider?: boolean) {
+        /** rowId is only needed if the component is linked to a foundset */
+        const clientSideType = this.getClientSideType(propertyName, rowId);
+        const rowComponentModelValue = this.getActualComponentModel(rowId);
+
+        if (isDataprovider) {
+            let req: IOutgoingDataproviderApply;
+            FormService.pushApplyDataprovider(rowComponentModelValue, propertyName, clientSideType,
+                newValue, this.componentSpecification, this.converterService, oldValue,
+                (foundsetLinkedDPRowId: string, propertyNameToSend: string, valueToSend: any) => {
+                    req = { svyApply: { pn: propertyNameToSend, v: valueToSend } };
+
+                    if (rowId) req.svyApply[ViewportService.ROW_ID_COL_KEY] = rowId; // rowId that identifies which component it is in the viewport of foundset linked components
+                    if (foundsetLinkedDPRowId) req.svyApply._svyRowIdOfProp = foundsetLinkedDPRowId; // rowId that identifies the row inside the
+                                            //component for the foundset linked DP of the component (that is linked to another property of type foundset inside the component itself)
+                });
+            this.requests.push(req);
+            this.notifyChangeListener();
+        } else if (!rowId) {
+            // non - foundset linked prop. to send
+            if (!isChanged(newValue, oldValue)) {
+                this.log.spam(this.log.buildMessage(() => ('svy component * dataPush nfsl (sendChanges) denied; no changes detected between new and old value!')));
+            } else {
+                const req: IOutgoingPropertyPush = { propertyChanges: {} };
+                // even if clientSideType is still undefined, do the default conversion
+                const converted: [any, any] = this.converterService.convertFromClientToServer(newValue, clientSideType, oldValue,
+                    this.propertyContextCreatorForRow.withRowValueAndPushToServerFor(rowComponentModelValue, propertyName) // TODO will this ever need to look inside 'component' type real merged
+                                                        // model viewport as well (so some properties to search for
+                                                        // foundset linked properties on which they depend... I think currently this is not needed)? if yes then the parent component should provide
+                                                        // a way to get to the actual model values per rowId or rowIndex and then we'd use that to generate property context generators per row
+                );
+                rowComponentModelValue[propertyName] = converted[1];
+                if (instanceOfChangeAwareValue(converted[1])) {
+                    converted[1].getInternalState().setChangeListener(this.getChangeListenerGeneratorForSmartNonFSLinkedProps()(propertyName, converted[1]));
+                }
+
+                req.propertyChanges[propertyName] = converted[0];
+                this.requests.push(req);
+                this.notifyChangeListener();
+            }
+        } else {
+            // component code 'manually' requested a send change for some value in the modelViewport; handle that just as viewport does
+            this.viewportService.sendCellChangeToServerBasedOnRowId(this.componentValue.modelViewport, this, undefined, rowId, propertyName,
+                this.propertyContextCreatorForRow, this.componentSpecification, newValue, oldValue);
+        }
+    }
+
+    getActualComponentModel(rowId: string) {
+        return rowId ?
+                this.componentValue.modelViewport[this.forFoundset().viewPort.rows.findIndex((foundsetRow) => foundsetRow._svyRowId === rowId)] // model of a
+                                                                                                        // foundset linked component for one row of the foundset
+                : this.componentValue.model; // component is not foundset linked or rowId is not known to caller (probably dealing with a non-fs-linked property)
+    }
+
+    private generateWrapperHandler(handlerName: string) {
+        const executeHandler = (args: IArguments, rowId: string) => {
             // TODO implement $uiBlocker
-            // if ($uiBlocker.shouldBlockDuplicateEvents(name, model, type, row))
+            // if ($uiBlocker.shouldBlockDuplicateEvents(name, componentModel, type, row))
             // {
             //     // reject execution
             //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
             //     return $q.resolve(null);
             // }
             const deferred = this.sabloService.createDeferredWSEvent();
-            const newargs = this.converterService.getEventArgs(args, type);
-            state.getStateHolder().requests.push({
+            const handlerSpec = this.componentSpecification?.getHandler(handlerName);
+            const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec);
+            this.requests.push({
                 handlerExec: {
-                    eventType: type,
+                    eventType: handlerName,
                     args: newargs,
-                    rowId: row,
+                    rowId,
                     defid: deferred.cmsgid
                 }
             });
-            state.getStateHolder().notifyChangeListener();
-            // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
-            return deferred.deferred.promise;
+            this.notifyChangeListener();
+            // defered.defered.promise.finally(function(){$uiBlocker.eventExecuted(name, componentModel, type, row);});
+            return deferred.deferred.promise.then((retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
+                       undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
         };
-        const eventHandler = (args: any, rowId: any) => executeHandler(handler, args, rowId, state.name, state.model);
+        const eventHandler = (args: any, rowId: any) => executeHandler(args, rowId);
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         const wrapper = function() {
             return eventHandler(arguments, null);
@@ -244,90 +428,106 @@ export class ComponentConverter implements IConverter {
         return wrapper;
     }
 
-    private applyBeanData(beanModel: any, beanLayout: any, beanData: any, component: ComponentModel, beanConversionInfo: any, newConversionInfo: any, propertyContext: PropertyContext) {
-        if (newConversionInfo) { // then means beanConversionInfo should also be defined - we assume that
-            // beanConversionInfo will be granularly updated in the loop below
-            // (to not drop other property conversion info when only one property is being applied granularly to the bean)
-            beanData = this.converterService.convertFromServerToClient(beanData, newConversionInfo, beanModel, propertyContext);
-        }
+    private getRowModelCreator(): () => any {
+        return () => {
+            // the actual models for foundset linked components need to be 1 model per foundset row
+            // all rows will have the non-foundset-linked properties from compValue.model which is set as prototype (so those are property values common to all of the components)
+            // and we make sure any assignments or deletes for non-foundset-linked properties on such a model is applied to the shared compValue.model directly
 
-        // apply the new values and conversion info
-        for (const key of Object.keys(beanData)) {
-            const oldModelValueForKey = beanModel[key];
-            if (oldModelValueForKey === beanModel[key] && newConversionInfo && newConversionInfo[key] && component.nestedPropertyChange) {
-                // this was a nested updated
-                component.nestedPropertyChange(key, oldModelValueForKey);
+            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+            function ModelInSpecificRow() {
             }
-            beanModel[key] = beanData[key];
+            ModelInSpecificRow.prototype = this.componentValue.model;
 
-            // remember conversion info for when it will be sent back to server - it might need special conversion as well
-            if (newConversionInfo && newConversionInfo[key]) {
-                const oldConversionInfoForKey = beanConversionInfo[key];
-                beanConversionInfo[key] = newConversionInfo[key];
+            return new Proxy(new ModelInSpecificRow(), {
+                set: (row: any, prop: any, v: any) => {
+                    if (!this.isFoundsetLinkedProperty(prop)) {
+                        delete row[prop]; // should always be undefined as it's not record linked but do make sure
+                        return Reflect.set(this.componentValue.model, prop, v); // forward non record based prop. assignments to shared model
+                    } else return Reflect.set(row, prop, v);
+                },
 
-                // if the value changed and it wants to be in control of it's changes, or if the conversion info for this value changed
-                // (thus possibly preparing an old value for being change-aware without changing the value reference)
-                if ((oldModelValueForKey !== beanData[key] || oldConversionInfoForKey !== newConversionInfo[key])
-                    && beanData[key] && instanceOfChangeAwareValue(beanData[key])) {
-                    // setChangeNotifier can be called now after the new conversion info and value are set (changeNotifierGenerator(key) will probably use the values in model
-                    //  and that has to point to the new value if reference was changed)
-                    // as setChangeNotifier on smart property types might end up calling the change notifier right away to announce it already has changes (because for example
-                    // the convertFromServerToClient on that property type above might have triggered some listener to the component that uses it which then requested
-                    // another thing from the property type and it then already has changes...) // TODO should we decouple this scenario?  if we are still processing server to client changes
-                    // when change notifier is called we could trigger the change notifier later/async for sending changes back to server...
-                    beanData[key].getStateHolder().setChangeListener(() => {
-                        component.getStateHolder().notifyChangeListener();
-                    });
-                    // we check for changes anyway in case a property type doesn't do it itself as described in the comment above
-                    if (beanData[key].getStateHolder().hasChanges()) component.getStateHolder().notifyChangeListener();
+                deleteProperty: (row: any, prop: any) => {
+                    if (!this.isFoundsetLinkedProperty(prop)) {
+                        delete row[prop]; // should always be undefined as it's not record linked but do make sure
+                        return Reflect.deleteProperty(this.componentValue.model, prop);
+                    } else return Reflect.deleteProperty(row, prop);
                 }
-            } else if (beanConversionInfo && beanConversionInfo[key] !== undefined) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
+            });
+        };
+    }
+
+    /** Works only for model properties, not for viewport model properties. */
+    private getClientSideTypeOfModelProp(propertyName: string): IType<any> {
+        let clientSideType: IType<any> = this.componentValue.dynamicClientSideTypes[propertyName]; // try dynamic types for non-viewport props.
+        if (!clientSideType) { // try static types for props.
+            if (this.componentSpecification) clientSideType = this.componentSpecification.getPropertyType(propertyName);
         }
+
+        return clientSideType;
     }
+
+    private applyUpdatesAndHandleCellChangesThatAreNotByRef(applyUpdatesFunction: (
+                    cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => void) {
+
+        const cellsChangedButNotByRef: { rowIndex: number; propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any }[] } []  = [];
+        const cellUpdatedFromServerListener = (rowIndex: number, columnName: string, oldValue: any, newValue: any) => {
+            if (oldValue === newValue) {
+                let lastIdxChangedButNotByRefEntries = cellsChangedButNotByRef.length > 0 ? cellsChangedButNotByRef[cellsChangedButNotByRef.length - 1] : undefined;
+                if (!lastIdxChangedButNotByRefEntries || lastIdxChangedButNotByRefEntries.rowIndex !== rowIndex) {
+                    lastIdxChangedButNotByRefEntries = { rowIndex, propertiesChangedButNotByRef: [] };
+                    cellsChangedButNotByRef.push(lastIdxChangedButNotByRefEntries);
+                }
+                lastIdxChangedButNotByRefEntries.propertiesChangedButNotByRef.push({ propertyName: columnName, newPropertyValue: newValue });
+            }
+        };
+
+        applyUpdatesFunction(cellUpdatedFromServerListener);
+
+        // trigger ngOnChanges for properties that had updates but the ref remained the same (as those will not automatically be triggered by root detectChanges())
+        cellsChangedButNotByRef.forEach((rowEntriesChangedButNotByRef) =>
+                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.rowIndex));
+    }
+
 }
 
-export class ComponentModel extends ComponentCache implements IChangeAwareValue {
-
-    public nestedPropertyChange: (property: string, value: any) => void;
-    public readonly mappedHandlers = new Map<string, { (): Promise<any>; selectRecordHandler(rowId: any): () => Promise<any> }>();
-    private readonly stateHolder = new ComponentState();
-
-    constructor(
-        name: string,
-        type: string,
-        model: { [property: string]: any },
-        handlers: Array<string>,
-        layout: { [property: string]: string },
-        public readonly forFoundset: string,
-        public readonly foundsetConfig: any,
-        public modelViewport: any[]) {
-        super(name, type, model, handlers, layout);
-    }
-
-    getStateHolder(): ComponentState {
-        return this.stateHolder;
-    }
-
-    startEdit(property: string, rowId: any) {
-        const req = { svyStartEdit: {} };
-        if (rowId) req.svyStartEdit[ViewportService.ROW_ID_COL_KEY] = rowId;
-        req.svyStartEdit[ComponentConverter.PROPERTY_NAME_KEY] = property;
-        this.stateHolder.requests.push(req);
-        this.stateHolder.notifyChangeListener();
-    }
-
-    sendChanges(dp: string, value: any, oldValue: any, rowId: any, dataprovider?: boolean) {
-        this.stateHolder.changes.push({ dp, value, oldValue, dataprovider, rowId });
-        this.stateHolder.notifyChangeListener();
-    }
+interface IServerSentData {
+    propertyUpdates?: IGranularUpdatesFromServer;
+    n?: boolean;
+    name?: string;
+    componentDirectiveName?: string;
+    handlers?: Array<string>;
+    position?: { [property: string]: string };
+    forFoundset?: string;
+    model?: Record<string, any>;
+    model_vp?: any[];
+    _T?: ConversionInfoFromServerForViewport;
 }
 
-class ComponentState extends FoundsetViewportState {
-    changes: Array<{ dp: string; value: any; oldValue: any; dataprovider: boolean; rowId?: any }> = [];
-    viewportChangeListeners: Array<(any) => void>;
-    fireChanges(viewportChanges: any) {
-        this.viewportChangeListeners.forEach(listener => listener(viewportChanges));
+interface IGranularUpdatesFromServer {
+    model: Record<string, any>;
+    model_vp?: any[];
+    model_vp_ch?: RowUpdate[];
+    _T?: ConversionInfoFromServerForViewport;
+}
+
+interface IOutgoingStartEdit {
+    svyStartEdit: {
+        _svyRowId?: string;
+        _svyRowIdOfProp?: string;
+        pn: string;
     };
-
 }
 
+interface IOutgoingDataproviderApply {
+    svyApply: {
+        _svyRowId?: string;
+        _svyRowIdOfProp?: string;
+        pn: string;
+        v: any;
+    };
+}
+
+interface IOutgoingPropertyPush {
+    propertyChanges: Record<string, any>; // actually it's currently only 1 change at a time, but key is property name there
+}

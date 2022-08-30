@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred, IChangeAwareValue, IComponentCache, instanceOfChangeAwareValue } from '@servoy/public';
-import { ConverterService } from '../sablo/converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
+import { LoggerService, LoggerFactory, Deferred } from '@servoy/public';
+import { ConverterService, IParentAccessForSubpropertyChanges, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
-import { get } from 'lodash-es';
+import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
 import { ClientFunctionService } from './services/clientfunction.service';
+import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
+import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 
 @Injectable({
   providedIn: 'root'
@@ -17,59 +17,200 @@ export class FormService {
 
     private formsCache: Map<string, FormCache>;
     private log: LoggerService;
-    private formComponentCache: Map<string, IFormComponent | Deferred<any>>;
+    private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy form components
     //    private touchedForms:Map<String,boolean>;
 
+    /**
+     * Set this to true before updating form/component models with changes/values from server, and set it to false when you are done updating.
+     * When this is set to true, Proxy triggers of any SHALLOW/DEEP (property pushToServer) properties will be ignored as they are not client side generated changes.
+     */
+    private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
-        servoyService: ServoyService, private clientFunctionService: ClientFunctionService) {
+        servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
+
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
         this.formComponentCache = new Map();
 
         websocketService.getSession().then((session) => {
-            session.onMessageObject((msg, conversionInfo) => {
+            session.onMessageObject((msg) => {
                 if (msg.forms) {
                     for (const formname in msg.forms) {
                         // if form is loaded
                         if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)) {
-                            this.formMessageHandler(this.formsCache.get(formname), formname, msg, conversionInfo, servoyService);
+                            this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
                         } else {
                             if (!this.formComponentCache.has(formname)) {
                                 this.formComponentCache.set(formname, new Deferred<any>());
                             }
                             const deferred = this.formComponentCache.get(formname) as Deferred<any>;
                             deferred.promise.then(() =>
-                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, conversionInfo, servoyService)
+                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
                             );
                         }
                     }
                 }
                 if (msg.call) {
-                    // if form is loaded just call the api
-                    if (this.formComponentCache.has(msg.call.form) && !(this.formComponentCache.get(msg.call.form) instanceof Deferred)) {
-                        const formComponent = this.formComponentCache.get(msg.call.form) as IFormComponent;
-                        const retValue = formComponent.callApi(msg.call.bean, msg.call.api, msg.call.args, msg.call.propertyPath);
+                    // this is a component API call; execute it
+                    // {"call":{"form":"product","element":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 }
+                    const componentCall = msg.call;
+
+                    this.log.spam(this.log.buildMessage(() => ('sbl * Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                        + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath : componentCall.bean))));
+
+                    const callItNow = ((doReturnTheRetVal: boolean): any => {
+                        const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
+                        const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
                         formComponent.detectChanges();
-                        return retValue;
+                        if (doReturnTheRetVal) return retValue;
+                    });
+
+                    // if form is loaded just call the api
+                    if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
+                        return callItNow(true);
                     }
-                    if (!msg.call.delayUntilFormLoads) {
+                    if (!componentCall.delayUntilFormLoads) {
                         // form is not loaded yet, api cannot wait; i think this should be an error
-                        this.log.error(this.log.buildMessage(() => ('calling api ' + msg.call.api + ' in form ' + msg.call.form + ' on component '
-                            + msg.call.bean + '. Form not loaded and api cannot be delayed. Api call was skipped.')));
+                        this.log.error(this.log.buildMessage(() => ('calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
+                            + componentCall.bean + '. Form not loaded and api cannot be delayed. Api call was skipped.')));
                         return;
                     }
-                    if (!this.formComponentCache.has(msg.call.form)) {
-                        this.formComponentCache.set(msg.call.form, new Deferred<any>());
+                    if (!this.formComponentCache.has(componentCall.form)) {
+                        this.formComponentCache.set(componentCall.form, new Deferred<any>());
                     }
-                    const deferred = this.formComponentCache.get(msg.call.form) as Deferred<any>;
-                    deferred.promise.then(function() {
-                        const formComponent = this.formComponentCache.get(msg.call.form) as IFormComponent;
-                        formComponent.callApi(msg.call.bean, msg.call.api, msg.call.args);
-                        formComponent.detectChanges();
-                    });
+                    const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
+                    deferred.promise.then(callItNow(false));
                 }
             });
         });
+    }
+
+    public static updateComponentModelPropertiesFromServer(newComponentProperties: any, comp: ComponentCache, componentSpec: IWebObjectSpecification,
+                        converterService: ConverterService,
+                        smartPropertyChangeListenerGenerator: (propertyName: string, newPropertyValue: any) => ChangeListenerFunction,
+                        triggerNgOnChangesWithSameRefDueToNestedPropUpdate: (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) => void) {
+
+        const propertyContextCreator = new RootPropertyContextCreator(
+                (propertyName: string) => (comp.model ? comp.model[propertyName] : undefined),
+                componentSpec);
+
+        // prepare to remember any dynamically-set-from-server client side types
+        const componentDynamicTypesHolder = comp.dynamicClientSideTypes;
+        const propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[] = [];
+
+        for (const propertyName of Object.keys(newComponentProperties)) {
+            let newPropertyValue = newComponentProperties[propertyName];
+            const propertyType = componentSpec?.getPropertyType(propertyName); // get static client side type if any
+            const oldValueOfProperty = comp.model[propertyName];
+
+            comp.model[propertyName] = newPropertyValue = converterService.convertFromServerToClient(newPropertyValue, propertyType, oldValueOfProperty,
+                    componentDynamicTypesHolder, propertyName, propertyContextCreator.withPushToServerFor(propertyName));
+
+            if (instanceOfChangeAwareValue(newPropertyValue)) {
+                newPropertyValue.getInternalState().setChangeListener(smartPropertyChangeListenerGenerator(propertyName, newPropertyValue));
+            }
+
+            if (oldValueOfProperty === newPropertyValue) {
+                propertiesChangedButNotByRef.push({propertyName, newPropertyValue});
+                // this value didn't realy change but it was changed internally
+                // but we want to let the component know that this is still a (nested) change.
+            }
+        }
+
+        // after all props of this component have been updated, fire ngOnChanges (which will fire svyOnChanges) for properties that are changed but not by reference
+        // so for those properties that will not generate ngOnChanges automatically due to detectChanges() on parent
+        if (propertiesChangedButNotByRef.length > 0) triggerNgOnChangesWithSameRefDueToNestedPropUpdate(propertiesChangedButNotByRef);
+    }
+
+    public static pushEditingStarted(componentModel: { [property: string]: any }, propertyName: string,
+                                        sendStartEditFunc: (foundsetLinkedRowId: string, propertyNameToSend: string) => void) {
+
+        // detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
+        // TODO this is a big hack - see comment in pushApplyDataprovider below
+        const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyName, componentModel);
+        let foundsetLinkedRowId: string;
+        let propertyNameToSend = propertyName;
+        if (foundsetLinkedDPInfo) {
+            if (foundsetLinkedDPInfo.rowId) foundsetLinkedRowId = foundsetLinkedDPInfo.rowId;
+            propertyNameToSend = foundsetLinkedDPInfo.propertyNameForServer;
+        }
+
+        sendStartEditFunc(foundsetLinkedRowId, propertyNameToSend);
+    }
+
+    public static pushApplyDataprovider(componentModel: { [property: string]: any }, propertyName: string, propertyType: IType<any>,
+                                            newValue: any, componentSpec: IWebObjectSpecification, converterService: ConverterService, oldValue: any,
+                                            sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void) {
+        let valueToSendToServer: any;
+
+        let fslRowID = null;
+        let converted: [any, any];
+        if (propertyType) {
+            // I think this never happens currently except for simple date dataproviders; because other simple dataproviders don't have a client-side type (either static or dynamic)
+            // and foundset linked dataproviders would be an array of values and applyDataprovider would be called with a propertyName like ...pathToFSLinkedDP[15]
+            // for which no propertyType will be found directly in spec - due to the index or any dots
+            const propertyContext = {
+                getProperty: (otherPropertyName: string) => componentModel[otherPropertyName],
+                getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT)
+            };
+            converted = converterService.convertFromClientToServer(newValue, propertyType, oldValue, propertyContext);
+            valueToSendToServer = converted[0];
+            componentModel[propertyName] = converted[1];
+        } else {
+            // foundset linked stuff or a simple dataprovider with no dynamic client side type
+
+            if (propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) {
+                // TODO this is a big hack - it would be nicer in the future if we move
+                // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
+                // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
+                // then we can get rid of all the custom apply code on server as well as all this custom code in applyDataprovider on client
+                // Without this . and [ impl, it could go though custom array/custom object/fs linked... property types instead? that are aware of types and push-to-server for the prop. path
+
+                // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
+                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyName, componentModel);
+                if (foundsetLinkedDPInfo) {
+                    fslRowID = foundsetLinkedDPInfo.rowId;
+                    propertyName = foundsetLinkedDPInfo.propertyNameForServer;
+                }
+            }
+
+            // apply default conversion if needed as we don't search for/generate client side type, property context etc. for props nested with . and [
+            // see TODO above if the lack of type/property context causes problems
+            converted = converterService.convertFromClientToServer(newValue, undefined, undefined, undefined);
+            valueToSendToServer = converted[0];
+            set(componentModel, propertyName, converted[1]);
+        }
+
+        sendApplyDataproviderFunc(fslRowID, propertyName, valueToSendToServer);
+    }
+
+    private static getFoundsetLinkedDPInfo(propertyName: string, componentModel: { [property: string]: any }): { propertyNameForServer: string; rowId?: string } {
+        let propertyNameForServerAndRowID: { propertyNameForServer: string; rowId?: string };
+
+        if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith(']')) {
+            // TODO this is a big hack - see comment in applyDataprovider
+
+            // now detect somehow if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
+            const lastIndexOfOpenBracket = propertyName.lastIndexOf('[');
+            const indexInLastArray = parseInt(propertyName.substring(lastIndexOfOpenBracket + 1, propertyName.length - 1), 10);
+            const dpPathWithoutArray = propertyName.substring(0, lastIndexOfOpenBracket);
+            const foundsetLinkedDPValueCandidate = get(componentModel, dpPathWithoutArray);
+
+            if (foundsetLinkedDPValueCandidate instanceof FoundsetLinkedValue) {
+                // get the corresponding rowID from the foundset property that it uses;
+                // strip the last index as we now identify the record via rowId and server has no use for it anyway (on server side it's just a foundsetlinked property value,
+                // not an array, so property name should not contain that last index)
+                propertyNameForServerAndRowID = { propertyNameForServer: dpPathWithoutArray };
+
+                const foundset = foundsetLinkedDPValueCandidate.getInternalState().forFoundset();
+                if (foundset) {
+                    propertyNameForServerAndRowID.rowId = foundset.viewPort.rows[indexInLastArray]._svyRowId;
+                }
+            }
+        }
+
+        return propertyNameForServerAndRowID;
     }
 
     public getFormCacheByName(formName: string): FormCache {
@@ -92,9 +233,15 @@ export class FormService {
         return this.formsCache.has(name);
     }
 
-    public createFormCache(formName: string, jsonData,  url: string) {
-        const formCache = new FormCache(formName, jsonData.size, url);
-        this.walkOverChildren(jsonData.children, formCache);
+    public createFormCache(formName: string, jsonData: any,  url: string) {
+        const formCache = new FormCache(formName, jsonData.size, url, this.typesRegistry);
+        try {
+            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
+            this.walkOverChildren(jsonData.children, formCache);
+        } finally {
+            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+        }
+
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
             const formComponent = this.formComponentCache.get(formName);
@@ -126,18 +273,20 @@ export class FormService {
         return loadedState;
     }
 
-    public executeEvent(formname: string, beanname: string, handler: string, args: IArguments | Array<any>, async?: boolean) {
-        this.log.debug(this.log.buildMessage(() => (formname + ',' + beanname + ', executing: ' + handler + ' with values: ' + JSON.stringify(args))));
+    public executeEvent(formName: string, componentName: string, handlerName: string, args: IArguments | Array<any>, async?: boolean): Promise<any> {
+        this.log.debug(this.log.buildMessage(() => (formName + ',' + componentName + ', executing: ' + handlerName + ' with values: ' + JSON.stringify(args))));
 
-        const newargs = this.converterService.getEventArgs(args, handler);
-        const data = {};
-        //        if (property) {
-        //            data[property] = formState.model[beanName][property];
-        //        }
-        const cmd = { formname, beanname, event: handler, args: newargs, changes: data };
-        //        if (rowId)
-        //            cmd['rowId'] = rowId;
-        return this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false);
+        const handlerSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getHandler(handlerName);
+
+        const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec); // this will do the needed handler arg conversions from client to server
+        const cmd = { formname: formName, beanname: componentName, event: handlerName, args: newargs, changes: {} };
+
+        // call handler
+        return this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false).then(
+                // convert return value from server to client
+                (retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
+                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
+        );
     }
 
     public formWillShow(formname: string, notifyFormVisibility?: boolean, parentForm?: string, beanName?: string, relationname?: string, formIndex?: number): Promise<boolean> {
@@ -165,6 +314,7 @@ export class FormService {
         // dummy promise
         return Promise.resolve(true);
     }
+
     public hideForm(formname: string, parentForm?: string, beanName?: string, relationname?: string, formIndex?: number,
         formnameThatWillBeShown?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number): Promise<boolean> {
         if (!formname) {
@@ -176,31 +326,46 @@ export class FormService {
         });
     }
 
-    public pushEditingStarted(formname: string, beanname: string, propertyname: string) {
-        const messageForServer = { formname, beanname, property: propertyname };
+    public pushEditingStarted(formName: string, componentName: string, propertyName: string) {
+        FormService.pushEditingStarted(this.formsCache.get(formName).getComponent(componentName).model, propertyName,
+            (foundsetLinkedRowId: string, propertyNameToSend: string) => {
+                const messageForServer = { formName, componentName, property: propertyNameToSend };
+                if (foundsetLinkedRowId) messageForServer['fslRowID'] = foundsetLinkedRowId; // if it was a foundset linked DP we give the row identifier as well
 
-        // // detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
-        // // TODO this is a big hack - see comment in pushDPChange below
-        const formState = this.formsCache.get(formname);
-        const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyname, formState.getComponent(beanname));
-        if (foundsetLinkedDPInfo) {
-            if (foundsetLinkedDPInfo.rowId) messageForServer['fslRowID'] = foundsetLinkedDPInfo.rowId;
-            messageForServer.property = foundsetLinkedDPInfo.propertyNameForServer;
-        }
-
-        this.sabloService.callService('formService', 'startEdit', messageForServer, true);
+                this.sabloService.callService('formService', 'startEdit', messageForServer, true);
+            });
     }
 
     public goToForm(formname: string) {
         this.sabloService.callService('formService', 'gotoform', { formname });
     }
 
-    public callComponentServerSideApi(formname: string, beanname: string, methodName: string, args: Array<any>) {
-        return this.sabloService.callService('formService', 'callServerSideApi', { formname, beanname, methodName, args });
+    public callComponentServerSideApi(formName: string, componentName: string, methodName: string, args: Array<any>): Promise<any> {
+        // see if args and/or return value need client side conversions
+        const apiSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getApiFunction(methodName);
+
+        if (args && args.length) for (let i = 0; i < args.length; i++) {
+            args[i] = this.converterService.convertFromClientToServer(args[i], apiSpec?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
+        }
+
+        return this.sabloService.callService('formService', 'callServerSideApi', { formname: formName, beanname: componentName, methodName, args })
+                    .then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+                                     undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
     }
 
-    public callServiceServerSideApi(servicename: string, methodName: string, args: Array<any>) {
-        return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: servicename, methodName, args });
+    public callServiceServerSideApi(serviceName: string, methodName: string, args: Array<any>): Promise<any> {
+        const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
+
+        // convert args as needed
+        if (args && args.length) for (let i = 0; i < args.length; i++) {
+            args[i] = this.converterService.convertFromClientToServer(args[i], apiSpec?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
+        }
+
+        // convert return value as needed
+        return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args })
+                    .then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+                    // in case of a reject/errorCallback we just let it propagete to caller;
     }
 
     public sendChanges(formname: string, beanname: string, property: string, value: any, oldvalue: any, dataprovider?: boolean) {
@@ -211,116 +376,124 @@ export class FormService {
         }
     }
 
-    private dataPush(formname: string, beanname: string, property: string, value: any, oldvalue: any) {
-        const formState = this.formsCache.get(formname);
-        const conversionInfo = formState.getConversionInfo(beanname);
+    private setChangeListenerIfSmartProperty(propertyValue: any, formName: string, componentName: string, propertyName: string) {
+        if (instanceOfChangeAwareValue(propertyValue)) {
+            // setChangeListener can be called now after the new client side type was applied (which already happened before this method was called)
+            const changeListenerFunction = this.createChangeListenerForSmartValue(formName, componentName, propertyName, propertyValue);
+
+            // TODO should we decouple this scenario? if we are still processing server to client changes when change notifier is called we could trigger
+            // the change notifier later/async for sending changes back to server...
+            propertyValue.getInternalState().setChangeListener(changeListenerFunction);
+
+            // as setChangeListener on smart property types might end up calling the change notifier right away to announce it already has changes (because for example
+            // the convertFromServerToClient on that property type above might have triggered some listener to the component that uses it which then requested
+            // another thing from the property type and it then already has changes...)
+
+            // we check for changes anyway in case a property type doesn't do it itself (to notify) in the situation described in the comment above
+            if (propertyValue.getInternalState().hasChanges()) changeListenerFunction();
+        }
+    }
+
+    private dataPush(formName: string, componentName: string, propertyName: string, newValue: any, oldValue: any) {
+        if (!isChanged(newValue, oldValue)) {
+            this.log.spam(this.log.buildMessage(() => ('form service * dataPush (sendChanges) denied; no changes detected between new and old value!')));
+            return;
+        }
+
+        const formState = this.formsCache.get(formName);
+        const propertyType = formState.getClientSideType(componentName, propertyName);
+        const componentModel = formState.getComponent(componentName).model;
+        const componentSpec = formState.getComponentSpecification(componentName);
+        const propertyContext = {
+            getProperty: (otherPropertyName: string) => componentModel[otherPropertyName],
+            getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT)
+        };
+
         const changes = {};
+        if (!propertyName) throw new Error('propertyName should not be null here!');
 
-        if (conversionInfo && conversionInfo[property]) {
-            changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
-            this.sabloService.callService('formService', 'dataPush', { formname, beanname, changes }, true);
+        const converted = this.converterService.convertFromClientToServer(newValue, propertyType, oldValue, propertyContext);
+        changes[propertyName] = converted[0];
+
+        // set/update change notifier just in case a new full value was set into a smart property type that needs a changeListener for that specific property
+        this.setChangeListenerIfSmartProperty(converted[1], formName, componentName, propertyName);
+        componentModel[propertyName] = converted[1];
+
+        if (propertyType) {
+            this.sabloService.callService('formService', 'dataPush', { formname: formName, beanname: componentName, changes }, true);
         } else {
-            changes[property] = this.converterService.convertClientObject(value);
-            const oldvalues = {};
-            oldvalues[property] = this.converterService.convertClientObject(oldvalue);
-            this.sabloService.callService('formService', 'dataPush', { formname, beanname, changes, oldvalues }, true);
+            // if this is a simple property change without any special client side type - then push the old value as well
+            const oldValues = {};
+            oldValues[propertyName] = this.converterService.convertFromClientToServer(oldValue, undefined, undefined, propertyContext)[0]; // just for any default conversions
+            this.sabloService.callService('formService', 'dataPush', { formname: formName, beanname: componentName, changes, oldvalues: oldValues }, true);
         }
     }
 
-    private applyDataprovider(formname: string, beanname: string, property: string, value: any, oldvalue: any) {
-        const formState = this.formsCache.get(formname);
-        const changes = {};
-
-        const conversionInfo = formState.getConversionInfo(beanname);
-        let fslRowID = null;
-        if (conversionInfo && conversionInfo[property]) {
-            changes[property] = this.converterService.convertFromClientToServer(value, conversionInfo[property], oldvalue);
-        } else {
-            // foundset linked stuff.
-            let dpValue = null;
-
-            if (property.indexOf('.') > 0 || property.indexOf('[') > 0) {
-                // TODO this is a big hack - it would be nicer in the future if we have type info for all properties on the client and move
-                // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
-                // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
-                // then we can get rid of all the custom apply code on server as well as all this pushDPChange on client
-
-                // nested property; get the value correctly
-                dpValue = get(formState.getComponent(beanname).model, property);
-
-                // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-                const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
-                if (foundsetLinkedDPInfo) {
-                    fslRowID = foundsetLinkedDPInfo.rowId;
-                    property = foundsetLinkedDPInfo.propertyNameForServer;
+    private applyDataprovider(formName: string, componentName: string, propertyName: string, newValue: any, oldValue: any) {
+        const formState = this.formsCache.get(formName);
+        FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, formState.getClientSideType(componentName, propertyName),
+            newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
+            (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => {
+                const changes = {};
+                changes[propertyNameToSend] = valueToSend;
+                const dpChange = { formname: formName, beanname: componentName, property: propertyNameToSend, changes };
+                if (foundsetLinkedRowId) {
+                    dpChange['fslRowID'] = foundsetLinkedRowId;
                 }
-            } else {
-                dpValue = formState.getComponent(beanname).model[property];
-            }
 
-            changes[property] = this.converterService.convertClientObject(value);
-        }
-
-        const dpChange = { formname, beanname, property, changes };
-        if (fslRowID) {
-            dpChange['fslRowID'] = fslRowID;
-        }
-
-        this.sabloService.callService('formService', 'svyPush', dpChange, true);
+                this.sabloService.callService('formService', 'svyPush', dpChange, true);
+            });
     }
 
-    private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
-        const formComponent = this.formComponentCache.get(formname) as IFormComponent;
-        const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
-        const formData = msg.forms[formname];
-        let newFormProperties = formData['']; // form properties
-        if (newFormProperties) {
-            if (formConversion && formConversion['']) {
-                newFormProperties = this.converterService.convertFromServerToClient(newFormProperties, formConversion[''], formComponent,
-                  (propertyName: string) => formComponent ? formComponent[propertyName] : formComponent);
-            }
-            for (var p in newFormProperties) {
-                formComponent[p] = newFormProperties[p];
-            }
-        }
-        for (const beanname of Object.keys(formData)) {
-            if (beanname === '') continue; // skip form properties
-            let comp: IComponentCache = formCache.getComponent(beanname);
-            if (!comp) { // is it a form component?
-                comp = formCache.getFormComponent(beanname);
-            }
-            if (!comp) {
-                this.log.debug(this.log.buildMessage(() => ('got message for ' + beanname + ' of form ' + formname + ' but that component is not in the cache')));
-                continue;
-            }
-            const beanConversion = formConversion ? formConversion[beanname] : null;
-            for (const property of Object.keys(formData[beanname])) {
-                let value = formData[beanname][property];
-                if (beanConversion && beanConversion[property]) {
-                    value = this.converterService.convertFromServerToClient(value, beanConversion[property], comp.model[property],
-                        (prop: string) => comp.model ? comp.model[prop] : comp.model);
-                    if (instanceOfChangeAwareValue(value)) {
-                        value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, beanname, property, value));
-                    }
-                    if (comp.model[property] === value) {
-                        // this value didn't realy change but it was changed internally
-                        // but we want to let the component know that this is still a (nested) change.
-                        formComponent.propertyChanged(beanname, property, value);
-                    }
+    private formMessageHandler(formCache: FormCache, formName: string, msg: any, servoyService: ServoyService) {
+        const formComponent = this.formComponentCache.get(formName) as IFormComponent;
+        try {
+            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
+
+            const newFormData = msg.forms[formName];
+            const newFormProperties = newFormData['']; // properties of the form itself
+
+            if (newFormProperties) {
+                // properties of the form itself were received
+                // currently what server side sends for the form itself doesn't need client side conversions
+                for (const p of Object.keys(newFormProperties)) {
+                    formComponent[p] = newFormProperties[p];
                 }
-                comp.model[property] = value;
             }
-            if (beanname === '') {
-                servoyService.setFindMode(formname, formData[beanname]['findmode']);
+
+            for (const componentName of Object.keys(newFormData)) {
+                if (componentName === '') {
+                    servoyService.setFindMode(formName, !!newFormData['']['findmode']);
+                    continue; // skip other form properties; they were already handled/updated above
+                }
+                let comp: ComponentCache = formCache.getComponent(componentName);
+                if (!comp) { // is it a form component?
+                    comp = formCache.getFormComponent(componentName);
+                }
+                if (!comp) {
+                    this.log.debug(this.log.buildMessage(() => ('got message for ' + componentName + ' of form ' + formName + ' but that component is not in the cache')));
+                    continue;
+                }
+                // get static client side types for this component - if it has any
+                const componentSpec: IWebObjectSpecification = formCache.getComponentSpecification(componentName);
+
+                // apply any client side type conversions and update the properties received from server
+                const newComponentProperties = newFormData[componentName];
+                FormService.updateComponentModelPropertiesFromServer(newComponentProperties, comp, componentSpec, this.converterService,
+                                (propertyName: string, newPropertyValue: any) => this.createChangeListenerForSmartValue(formCache.formname, componentName, propertyName, newPropertyValue),
+                                (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
+                                    formComponent.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
             }
+        } finally {
+            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
         }
-        formComponent.detectChanges();
+        formComponent.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
     }
 
-    private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
+    private walkOverChildren(children: any[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes);
+                const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);
@@ -329,8 +502,17 @@ export class FormService {
                 if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
                     parent.addChild(structure);
                 }
-            } else
+            } else if (elem.part === true) {
+                const part = new PartCache(elem.classes, elem.layout);
+                this.walkOverChildren(elem.children, formCache, part);
+                formCache.addPart(part);
+            } else {
+                // either a simple component or a component that has servoy-form-component properties in it
+                // prepare to remember any dynamically-set-from-server client side types
+                const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.type);
+
                 if (elem.formComponent) {
+                    // component that also has servoy-form-component properties
                     const classes: Array<string> = new Array();
                     if (elem.model.styleClass) {
                         classes.push(elem.model.styleClass);
@@ -348,18 +530,13 @@ export class FormService {
                             layout.width = width + 'px';
                         }
                     }
-                    if (elem.model[ConverterService.TYPES_KEY] != null) {
-                        this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => elem.model ? elem.model[property] : elem.model);
-                        for (const prop of Object.keys(elem.model)) {
-                            const value = elem.model[prop];
-                            if (instanceOfChangeAwareValue(value)) {
-                                value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, elem.name, prop, value));
-                            }
-                        }
-                        formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
-                    }
+
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                    const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
+                    const fcc = new FormComponentCache(elem.name, elem.type, elem.handlers, elem.responsive, elem.position, formComponentProperties,
+                                        !!elem.model.foundset, this.typesRegistry, this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
+
+                    this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
+
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child], formCache, fcc);
                     });
@@ -367,67 +544,64 @@ export class FormService {
                     if (parent != null) {
                         parent.addChild(fcc);
                     }
-                } else
-                    if (elem.part === true) {
-                        const part = new PartCache(elem.classes, elem.layout);
-                        this.walkOverChildren(elem.children, formCache, part);
-                        formCache.addPart(part);
-                    } else {
-                        if (elem.model[ConverterService.TYPES_KEY] != null) {
-                            this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
-                                (property: string) => elem.model ? elem.model[property] : elem.model);
-                            // eslint-disable-next-line guard-for-in
-                            for (const prop in elem.model) {
-                                const value = elem.model[prop];
-                                if (instanceOfChangeAwareValue(value)) {
-                                    value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, elem.name, prop, value));
-                                }
-                            }
-                            formCache.addConversionInfo(elem.name, elem.model[ConverterService.TYPES_KEY]);
-                        }
-                        const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
-                        formCache.add(comp);
-                        if (parent != null) {
-                            parent.addChild(comp);
-                        }
+                } else {
+                    // simple component
+                    const comp = new ComponentCache(elem.name, elem.type, elem.handlers, elem.position, this.typesRegistry,
+                                                        this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
+                    this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
+
+                    formCache.add(comp);
+                    if (parent != null) {
+                        parent.addChild(comp);
                     }
+                }
+            }
         });
     }
 
-    private createChangeListener(formname: string, beanname: string, property: string, value: IChangeAwareValue) {
-        return () => {
-            this.sendChanges(formname, beanname, property, value, value);
+    private createParentAccessForSubpropertyChanges(_formName: string, _componentName: string): IParentAccessForSubpropertyChanges<number | string> {
+        // this is needed to handle subproperty change-by-reference for pushToServer SHALLOW or DEEP subproperties
+        return  {
+            shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied,
+
+            changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {
+//                if (! doNotPushNow) {
+//                    // this is not really needed; it is already done via the @Output emitter from the component's property that calls FormComponent.datachange()
+//                    const formState = this.formsCache.get(formName);
+//                    const componentModel = formState?.getComponent(componentName)?.model;
+//
+//                    this.dataPush(formName, componentName, key as string, componentModel?.[key], oldValue);
+//                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+//                  // nested values towards this root prop; so nothing to do here then
+            }
         };
     }
 
-    private getFoundsetLinkedDPInfo(propertyName: string, beanModel): { propertyNameForServer: string; rowId?: string } {
-        let propertyNameForServerAndRowID: { propertyNameForServer: string; rowId?: string };
+    private handleComponentModelConversionsAndChangeListeners(jsonFromServerForComponent: any, componentCache: ComponentCache,
+                componentSpec: IWebObjectSpecification, formCache: FormCache) {
+        // handle model conversions of this component (that has some servoy-form-component properties as well)
+        const componentDynamicTypesHolder = componentCache.dynamicClientSideTypes;
+        const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => componentCache.model?.[propertyName], componentSpec);
 
-        if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith(']')) {
-            // TODO this is a big hack - see comment in pushDPChange below
+        for (const propName of Object.keys(jsonFromServerForComponent.model)) {
+            const propValue = componentCache.model[propName] = this.converterService.convertFromServerToClient(jsonFromServerForComponent.model[propName],
+                                    componentSpec?.getPropertyType(propName), null,
+                                    componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
 
-            // now detect somehow if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-            const lastIndexOfOpenBracket = propertyName.lastIndexOf('[');
-            const indexInLastArray = parseInt(propertyName.substring(lastIndexOfOpenBracket + 1, propertyName.length - 1), 10);
-            const dpPathWithoutArray = propertyName.substring(0, lastIndexOfOpenBracket);
-            const foundsetLinkedDPValueCandidate = get(beanModel, dpPathWithoutArray);
-            if (foundsetLinkedDPValueCandidate && foundsetLinkedDPValueCandidate.state
-                && foundsetLinkedDPValueCandidate.state.forFoundset) {
-
-                // it's very likely a foundsetLinked DP: it has the internals that that property type uses; get the corresponding rowID from the foundset property that it uses
-                // strip the last index as we now identify the record via rowId and server has no use for it anyway (on server side it's just a foundsetlinked property value,
-                // not an array, so property name should not contain that last index)
-                propertyNameForServerAndRowID = { propertyNameForServer: dpPathWithoutArray };
-
-                const foundset = foundsetLinkedDPValueCandidate.state.forFoundset();
-                if (foundset) {
-                    propertyNameForServerAndRowID.rowId = foundset.viewPort.rows[indexInLastArray]._svyRowId;
-                }
+            if (instanceOfChangeAwareValue(propValue)) {
+                propValue.getInternalState().setChangeListener(
+                    this.createChangeListenerForSmartValue(formCache.formname, jsonFromServerForComponent.name, propName, componentCache.model[propName]));
             }
         }
+    }
 
-        return propertyNameForServerAndRowID;
+    private createChangeListenerForSmartValue(formName: string, componentName: string, propertyName: string, value: IChangeAwareValue): ChangeListenerFunction {
+        return (doNotPushNow?: boolean) => {
+            if (!doNotPushNow) {
+                this.dataPush(formName, componentName, propertyName, value, value);
+            }  // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+               // nested values towards this root prop; so nothing to do here then
+        };
     }
 
 }
-

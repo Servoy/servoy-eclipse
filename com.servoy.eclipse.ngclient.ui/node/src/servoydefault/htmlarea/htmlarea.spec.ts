@@ -27,7 +27,7 @@ describe('HtmlareaComponent', () => {
       declarations: [ ServoyDefaultHtmlarea],
       imports: [EditorModule, ServoyTestingModule, FormsModule, HttpClientModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, ServoyService,ClientFunctionService,
-        , I18NProvider, FormService, { provide:ServerDataService, useValue: {init: ()=>{}}} , ViewportService, ApplicationService,  
+        , I18NProvider, FormService, { provide:ServerDataService, useValue: {init: ()=>{}}} , ViewportService, ApplicationService,
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }]
     })
     .compileComponents();

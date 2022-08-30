@@ -1,17 +1,18 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren,
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
         TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties, IFormComponent } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
+import { LoggerService, LoggerFactory, ServoyBaseComponent } from '@servoy/public';
 
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
 import { DOCUMENT } from '@angular/common';
-import { ServoyBaseComponent } from '@servoy/public';
+import { ConverterService } from '../../sablo/converter.service';
+import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
 
 @Component({
     // eslint-disable-next-line
@@ -81,7 +82,10 @@ import { ServoyBaseComponent } from '@servoy/public';
    /* eslint-enable max-len */
 })
 
-export class FormComponent implements OnDestroy, OnChanges {
+/**
+ * This is the definition of a angular component that represents servoy forms.
+ */
+export class FormComponent implements OnDestroy, OnChanges, IFormComponent {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     // structure viewchild template generate start
     // structure viewchild template generate end
@@ -118,9 +122,10 @@ export class FormComponent implements OnDestroy, OnChanges {
 
     // component viewchild template generate end
 
-
-
     @Input() name: string;
+
+    //** "injectedComponentRefs" is used for being able to inject some test component templates inside Karma/Jasmine unit tests */
+    @Input() injectedComponentRefs: Record<string, TemplateRef<any>>;
 
     formClasses: string[];
 
@@ -132,15 +137,38 @@ export class FormComponent implements OnDestroy, OnChanges {
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
-    private _containers: { added: any; removed: any; };
-    private _cssstyles: { [x: string]: any; };
+    private _containers: { added: any; removed: any };
+    private _cssstyles: { [x: string]: any };
 
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
                 private el: ElementRef, private renderer: Renderer2,
+                private converterService: ConverterService,
                 @Inject(DOCUMENT) private document: Document) {
         this.log = logFactory.getLogger('FormComponent');
+    }
+
+    public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
+                        converterService: ConverterService, log: LoggerService): Promise<any> {
+        const callSpec = componentSpec?.getApiFunction(apiName);
+
+        // convert args
+        // api args do not keep dynamic types, have no previous value and should not be relative to a property context in their impl
+        (args as any[])?.forEach((val: any, i: number) =>
+            args[i] = converterService.convertFromServerToClient(val, callSpec?.getArgumentType(i),
+                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+
+        const proto = Object.getPrototypeOf(comp);
+        if (proto[apiName]) {
+            // also convert the return value
+            return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
+                converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
+            ); // I think we don't need to define an error callback as well as there is nothing to convert then
+        } else {
+            log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
+            return null;
+        }
     }
 
     public detectChanges() {
@@ -156,12 +184,14 @@ export class FormComponent implements OnDestroy, OnChanges {
         return this.formCache;
     }
 
-    propertyChanged(componentName: string, property: string, value: any): void {
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void {
         const comp = this.componentCache[componentName];
         if (comp) {
-            const change = {};
-            change[property] = new SimpleChange(value,value,false);
-            comp.ngOnChanges(change);
+            const changes = {};
+            propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
+                changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
+            });
+            comp.ngOnChanges(changes);
             // this is kind of like a push so we should trigger this.
             comp.detectChanges();
         }
@@ -241,10 +271,15 @@ export class FormComponent implements OnDestroy, OnChanges {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
-            if (this[item.type] === undefined && item.type !== undefined) {
+            let componentRef = this[item.type];
+
+            // "injectedComponentRefs" is used only for being able to inject some TEST component templates inside Karma/Jasmine unit tests
+            if (!componentRef) componentRef = this.injectedComponentRefs[item.type];
+
+            if (componentRef === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return this[item.type];
+            return componentRef;
         }
     }
 
@@ -285,8 +320,7 @@ export class FormComponent implements OnDestroy, OnChanges {
         }
 
         if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null)
-            {
+            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
                 // see svyFormstyle from ng1
                 this.absolutFormPosition['minWidth'] = formData.model.size.width + 'px';
                 this.absolutFormPosition['minHeight'] = formData.model.size.height + 'px';
@@ -300,10 +334,10 @@ export class FormComponent implements OnDestroy, OnChanges {
         return this.formservice.hasFormCacheEntry(name);
     }
 
-    datachange(component: ComponentCache, property: string, value, dataprovider: boolean) {
+    datachange(component: ComponentCache, property: string, value: any, dataprovider: boolean) {
         const model = this.formCache.getComponent(component.name).model;
         const oldValue = model[property];
-        this.formCache.getComponent(component.name).model[property] = value;
+        model[property] = value;
         this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
     }
 
@@ -342,29 +376,24 @@ export class FormComponent implements OnDestroy, OnChanges {
         return api;
     }
 
-    public callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
+    public callApi(componentName: string, apiName: string, args: any[], path?: string[]): any {
         if (path && path.length > 0) {
-            const comp = this.componentCache[path[0]];
+            // an api call to a component nested inside a list form component like component (so with nested fs linked 'component' typed properties)?
+            const comp = this.componentCache[path[0]]; // first thing in path is always component name I think
             if (instanceOfApiExecutor(comp)) {
-                comp.callApi(path[1], apiName, args, path.slice(2));
+                return comp.callApi(path[1], apiName, args, path.slice(2));
             } else {
                 this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
                  ', but comp: ' + (comp == null?' is not found':comp.name + ' doesnt implement IApiExecutor') );
             }
-
+            return null;
         } else {
-            const comp = this.componentCache[componentName];
-            const proto = Object.getPrototypeOf(comp);
-            if (proto[apiName]) {
-                return proto[apiName].apply(comp, args);
-            } else {
-                this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
-                return null;
-            }
+            return FormComponent.doCallApiOnComponent(this.componentCache[componentName], this.formCache.getComponentSpecification(componentName),
+                                    apiName, args, this.converterService, this.log);
         }
     }
 
-    private getContainerByName(containername: string) : Element {
+    private getContainerByName(containername: string): Element {
        return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
     }
 }

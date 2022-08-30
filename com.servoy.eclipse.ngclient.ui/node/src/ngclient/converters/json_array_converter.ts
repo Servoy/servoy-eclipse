@@ -1,164 +1,192 @@
-import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
+import { ConverterService, INTERNAL_STATE_PROP_NAME, IChangeAwareValue, instanceOfChangeAwareValue, isChanged,
+            ChangeListenerFunction } from '../../sablo/converter.service';
+import { IType, IPropertyContext, ITypeFactory, PushToServerEnum,
+            PushToServerEnumServerValue, ICustomTypesFromServer, ITypeFromServer, ITypesRegistryForTypeFactories,
+            PushToServerUtils, PropertyContext } from '../../sablo/types_registry';
+import { BaseCustomObjectState } from './json_object_converter';
+import { ICustomArrayValue } from '@servoy/public';
 
-import { IterableDiffers } from '@angular/core';
+export class CustomArrayTypeFactory implements ITypeFactory<CustomArrayValue<any>> {
 
-import { SpecTypesService, ArrayState, ICustomArray, instanceOfChangeAwareValue, instanceOfCustomArray } from '@servoy/public';
+    public static readonly TYPE_FACTORY_NAME = 'JSON_arr';
 
-export class JSONArrayConverter implements IConverter {
-    /* eslint-disable */
-    private static readonly GRANULAR_UPDATES = "g";
-    private static readonly GRANULAR_UPDATE_DATA = "d";
-    private static readonly OP_ARRAY_START_END_TYPE = "op";
-    private static readonly CHANGED = 0;
-    private static readonly INSERT = 1;
-    private static readonly DELETE = 2;
-        
-    private static readonly UPDATES = 'u';
-    private static readonly INDEX = 'i';
-    private static readonly INITIALIZE = 'in';
-    private static readonly VALUE = 'v';
-    private static readonly PUSH_TO_SERVER = 'w'; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
-    private static readonly CONTENT_VERSION = 'vEr'; // server side sync to make sure we don't end up granular updating something that has changed meanwhile server-side
-    private static readonly NO_OP = 'n';
-    /* eslint-enable */
+    private customArrayTypes: Map<IType<any>, Map<PushToServerEnum, CustomArrayType<any>>> = new Map(); // allows any keys, even undefined
 
-    constructor(private converterService: ConverterService, private specTypesService: SpecTypesService, private iterableDiffers: IterableDiffers) {
+    constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
+            private readonly converterService: ConverterService) {}
+
+    getOrCreateSpecificType(specificElementInfo: ITypeFromServer | { t: ITypeFromServer; s: PushToServerEnumServerValue }, webObjectSpecName: string): CustomArrayType<any> {
+        const elementTypeWithNoPushToServer = (specificElementInfo instanceof Array || typeof specificElementInfo == 'string') || specificElementInfo === null;
+        const elementTypeFromSrv: ITypeFromServer = (elementTypeWithNoPushToServer) ?
+                    specificElementInfo as ITypeFromServer : (specificElementInfo as { t: ITypeFromServer; s: PushToServerEnumServerValue }).t;
+        const pushToServer: PushToServerEnum = (elementTypeWithNoPushToServer) ?
+                    undefined : PushToServerUtils.valueOf((specificElementInfo as { t: ITypeFromServer; s: PushToServerEnumServerValue }).s);
+
+        // a custom array could have an element type that is not a client side type; but it still needs to be an array type
+        const staticElementType = (elementTypeFromSrv ? this.typesRegistry.processTypeFromServer(elementTypeFromSrv, webObjectSpecName) : undefined);
+
+        let cachedArraysByType = this.customArrayTypes.get(staticElementType);
+        if (!cachedArraysByType) {
+            cachedArraysByType = new Map();
+            this.customArrayTypes.set(staticElementType, cachedArraysByType);
+        }
+        let cachedArraysByTypeAndPushToServerOnElem = cachedArraysByType.get(pushToServer);
+        if (!cachedArraysByTypeAndPushToServerOnElem) {
+            cachedArraysByTypeAndPushToServerOnElem = new CustomArrayType<any>(staticElementType, pushToServer, this.converterService);
+            cachedArraysByType.set(pushToServer, cachedArraysByTypeAndPushToServerOnElem);
+        }
+
+        return cachedArraysByTypeAndPushToServerOnElem;
     }
 
-    fromServerToClient(serverJSONValue: any, currentClientValue?: ICustomArray<any>, propertyContext?: PropertyContext) {
-        let newValue = currentClientValue;
-        let state: ArrayState = null;
+    registerDetails(_details: ICustomTypesFromServer, _webObjectSpecName: string) {
+        // arrays don't need to pre-register stuff
+    }
+
+}
+
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
+export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
+
+    constructor(private readonly staticElementType: IType<any>,
+                private readonly pushToServerForElements: PushToServerEnum,
+                private converterService: ConverterService) {
+    }
+
+    fromServerToClient(serverJSONValue: ICATDataFromServer, currentClientValue: CustomArrayValue<T>, propertyContext: IPropertyContext): CustomArrayValue<T> {
+        let newValue: CustomArrayValue<T> = currentClientValue;
+        let internalState: ArrayState = null;
+
+        const elemPropertyContext = propertyContext ? new PropertyContext(propertyContext.getProperty,
+                PushToServerUtils.combineWithChildStatic(propertyContext.getPushToServerCalculatedValue(), this.pushToServerForElements)) : undefined;
 
         try {
-            if (serverJSONValue && serverJSONValue[JSONArrayConverter.VALUE]) {
+            if (instanceOfFullValueFromServer(serverJSONValue)) {
                 // full contents
-                newValue = serverJSONValue[JSONArrayConverter.VALUE];
-                const newValueCA = this.specTypesService.enhanceArrayType(newValue, this.iterableDiffers);
-                state = newValueCA.getStateHolder();
-                state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION];
-                if (typeof serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER] !== 'undefined') state[JSONArrayConverter.PUSH_TO_SERVER] = serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER];
+                newValue = this.initArrayValue(serverJSONValue.v, serverJSONValue.vEr, propertyContext?.getPushToServerCalculatedValue());
+                internalState = newValue.getInternalState();
+                internalState.ignoreChanges = true;
 
-                if (newValue.length) {
-                    for (let c = 0; c < newValue.length; c++) {
-                        let elem = newValue[c];
-                        let conversionInfo = null;
-                        if (serverJSONValue[ConverterService.TYPES_KEY]) {
-                            conversionInfo = serverJSONValue[ConverterService.TYPES_KEY][c];
-                        }
-
-                        if (conversionInfo) {
-                            state.conversionInfo[c] = conversionInfo;
-                            newValue[c] = elem = this.converterService.convertFromServerToClient(elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, propertyContext);
-                        }
-
-                        if (instanceOfChangeAwareValue(elem)) {
-                            // child is able to handle it's own change mechanism
-                            elem.getStateHolder().setChangeListener(() => {
-                                state.getChangedKeys().add(c);
-                                state.notifyChangeListener();
-                            });
+                // remove change listeners from any smart el. values that are now obsolete
+                if (currentClientValue) {
+                    for (const obsoleteElemValue of currentClientValue) {
+                        if (instanceOfChangeAwareValue(obsoleteElemValue)) {
+                            obsoleteElemValue.getInternalState().setChangeListener(undefined);
                         }
                     }
                 }
-            } else if (serverJSONValue && serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
+
+                // convert value received from server, store and add change listeners if needed for elements
+                if (newValue.length) {
+                    for (let c = 0; c < newValue.length; c++) {
+                        let elem = newValue[c];
+
+                        newValue[c] = elem = this.converterService.convertFromServerToClient(elem, this.staticElementType, currentClientValue ? currentClientValue[c] : undefined,
+                                internalState.dynamicPropertyTypesHolder, '' + c, elemPropertyContext);
+
+                        if (instanceOfChangeAwareValue(elem)) {
+                            // child is able to handle it's own change mechanism
+                            elem.getInternalState().setChangeListener(this.getChangeListener(newValue, c));
+                        }
+                    }
+                }
+            } else if (instanceOfGranularUpdatesFromServer(serverJSONValue)) {
                 // granular updates received;
+                internalState = currentClientValue.getInternalState();
+                internalState.ignoreChanges = true;
 
-                state = currentClientValue.getStateHolder();
-
-                if (serverJSONValue[JSONArrayConverter.INITIALIZE])
-                    state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION];
+                // for example if a custom object value is initially received through a return value from server side api/handler call and
+                // not as a normal model property and then the component/service assigns it to model, the push to server of it might have
+                // changed; use the one received here as arg
+                internalState.calculatedPushToServerOfWholeProp = propertyContext?.getPushToServerCalculatedValue();
+                if (!internalState.calculatedPushToServerOfWholeProp) internalState.calculatedPushToServerOfWholeProp = PushToServerEnum.REJECT;
 
                 // if something changed browser-side, increasing the content version thus not matching next expected version,
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is
                 // leading/has priority because not all server side values might support being recreated from client values)
-                if (state[JSONArrayConverter.CONTENT_VERSION] === serverJSONValue[JSONArrayConverter.CONTENT_VERSION]) {
-                    let i;
-                    for (const granularOp of serverJSONValue[JSONArrayConverter.GRANULAR_UPDATES]) {
-                        const startIndex_endIndex_opType = granularOp[JSONArrayConverter.OP_ARRAY_START_END_TYPE]; // it's an array of 3 elements in the order given in name
+                if (internalState.contentVersion === serverJSONValue.vEr) {
+                    let i: number;
+                    for (const granularOp of serverJSONValue.g) {
+                        const startIndex_endIndex_opType = granularOp.op; // it's an array of 3 elements in the order given in name
                         const startIndex: number = startIndex_endIndex_opType[0];
                         const endIndex: number = startIndex_endIndex_opType[1];
                         const opType: number = startIndex_endIndex_opType[2];
 
-                        if (opType === JSONArrayConverter.CHANGED) {
-                            const granularOpConversionInfo = granularOp[ConverterService.TYPES_KEY];
-                            const changedData = granularOp[JSONArrayConverter.GRANULAR_UPDATE_DATA];
+                        if (opType === ICATOpTypeEnum.CHANGED) {
+                            const changedData = granularOp.d;
                             for (i = startIndex; i <= endIndex; i++) {
                                 const relIdx = i - startIndex;
+                                // remove change listeners from any smart el. values that are now obsolete
+                                const oldElemValue = currentClientValue[i];
+                                if (instanceOfChangeAwareValue(oldElemValue)) {
+                                    // child is able to handle it's own change mechanism
+                                    oldElemValue.getInternalState().setChangeListener(undefined);
+                                }
 
                                 // apply the conversions, update value and kept conversion info for changed indexes
-                                state.conversionInfo[i] = granularOpConversionInfo ? granularOpConversionInfo[relIdx] : undefined;
-                                if (state.conversionInfo[i]) {
-                                    currentClientValue[i] = this.converterService.convertFromServerToClient(changedData[relIdx], state.conversionInfo[i],
-                                                                                currentClientValue[i], propertyContext);
-                                } else currentClientValue[i] = changedData[relIdx];
+                                currentClientValue[i] = this.converterService.convertFromServerToClient(changedData[relIdx], this.staticElementType,
+                                                            currentClientValue[i], internalState.dynamicPropertyTypesHolder, '' + i, elemPropertyContext);
 
                                 const val = currentClientValue[i];
                                 if (instanceOfChangeAwareValue(val)) {
                                     // child is able to handle it's own change mechanism
-                                    val.getStateHolder().setChangeListener(() => {
-                                        state.getChangedKeys().add(i);
-                                        state.notifyChangeListener();
-                                    });
+                                    val.getInternalState().setChangeListener(this.getChangeListener(currentClientValue, i));
                                 }
                             }
-                        } else if (opType === JSONArrayConverter.INSERT) {
-                            const granularOpConversionInfo = granularOp[ConverterService.TYPES_KEY];
-                            let changedData = granularOp[JSONArrayConverter.GRANULAR_UPDATE_DATA];
-                            const numberOfInsertedRows = changedData.length;
-                            const oldLength = currentClientValue.length;
+                        } else if (opType === ICATOpTypeEnum.INSERT) {
+                            const insertedData = granularOp.d;
+                            const numberOfInsertedRows = insertedData.length;
+
+                            // shift right by "numberOfInsertedRows" all dynamicTypes after or equal to idx as we are going to insert new values there
+                            for (let idxToShift = currentClientValue.length - 1; idxToShift >= startIndex; idxToShift--)
+                                if (internalState.dynamicPropertyTypesHolder['' + idxToShift]) {
+                                    internalState.dynamicPropertyTypesHolder['' + (idxToShift + numberOfInsertedRows)] = internalState.dynamicPropertyTypesHolder['' + idxToShift];
+                                    delete internalState.dynamicPropertyTypesHolder['' + idxToShift];
+                                } else delete internalState.dynamicPropertyTypesHolder['' + (idxToShift + numberOfInsertedRows)];
 
                             // apply conversions
-                            if (granularOpConversionInfo) changedData = this.converterService.convertFromServerToClient(changedData, granularOpConversionInfo, undefined, propertyContext);
-
-                            // shift conversion info after insert to the right
-                            if (state.conversionInfo) {
-                                for (i = oldLength - 1; i >= startIndex; i--) {
-                                    state.conversionInfo[i + numberOfInsertedRows] = state.conversionInfo[i];
-                                    delete state.conversionInfo[i];
-                                }
-                            }
-
-                            // do insert the new data, remember conversion info
-                            currentClientValue.splice.apply(currentClientValue, [startIndex, 0].concat(changedData));
-                            if (granularOpConversionInfo) {
-                                for (i = 0; i < changedData.length ; i++) {
-                                    if (granularOpConversionInfo[i]) state.conversionInfo[startIndex + i] = granularOpConversionInfo[i];
-                                }
+                            for (i = numberOfInsertedRows - 1; i >= 0 ; i--) {
+                                const addedRow = this.converterService.convertFromServerToClient(insertedData[i], this.staticElementType, undefined,
+                                                internalState.dynamicPropertyTypesHolder, '' + (startIndex + i), elemPropertyContext);
+                                currentClientValue.splice(startIndex, 0, addedRow);
                             }
 
                             // update any affected change notifiers
                             for (i = startIndex; i < currentClientValue.length; i++) {
-                                if (instanceOfChangeAwareValue(currentClientValue[i])) {
+                                const childEl = currentClientValue[i];
+                                if (instanceOfChangeAwareValue(childEl)) {
                                     // child is able to handle it's own change mechanism
-                                    currentClientValue[i].getStateHolder().setChangeListener(() => {
-                                        state.getChangedKeys().add(i);
-                                        state.notifyChangeListener();
-                                    });
+                                    childEl.getInternalState().setChangeListener(this.getChangeListener(currentClientValue, i));
                                 }
                             }
-                        } else if (opType === JSONArrayConverter.DELETE) {
-                            const oldLength = currentClientValue.length;
+                        } else if (opType === ICATOpTypeEnum.DELETE) {
                             const numberOfDeletedRows = endIndex - startIndex + 1;
 
-                            if (state.conversionInfo) {
-                                // delete conversion info for deleted rows and shift left what is after deletion
-                                for (i = startIndex; i <= endIndex; i++)
-                                    delete state.conversionInfo[i];
-                                for (i = endIndex + 1; i < oldLength; i++) {
-                                    state.conversionInfo[i - numberOfDeletedRows] = state.conversionInfo[i];
-                                    delete state.conversionInfo[i];
+                            // shift left by "numberOfDeletedRows" all dynamicTypes after "startIndex + numberOfDeletedRows" as we are going to delete that interval
+                            for (let idxToShift = startIndex + numberOfDeletedRows; idxToShift < currentClientValue.length; idxToShift++)
+                                if (internalState.dynamicPropertyTypesHolder['' + idxToShift]) {
+                                    internalState.dynamicPropertyTypesHolder['' + (idxToShift - numberOfDeletedRows)] = internalState.dynamicPropertyTypesHolder['' + idxToShift];
+                                    delete internalState.dynamicPropertyTypesHolder['' + idxToShift];
+                                } else delete internalState.dynamicPropertyTypesHolder['' + (idxToShift - numberOfDeletedRows)];
+
+                            // remove change listeners from any smart el. values that are now obsolete
+                            for (let c = startIndex; c <= endIndex; c++) {
+                                const deletedElem = currentClientValue[c];
+                                if (instanceOfChangeAwareValue(deletedElem)) {
+                                    deletedElem.getInternalState().setChangeListener(undefined);
                                 }
                             }
+
+                            // actual delete
                             currentClientValue.splice(startIndex, numberOfDeletedRows);
 
                             // update any affected change notifiers
                             for (i = startIndex; i < currentClientValue.length; i++) {
-                                if (instanceOfChangeAwareValue(currentClientValue[i])) {
+                                const childEl = currentClientValue[i];
+                                if (instanceOfChangeAwareValue(childEl)) {
                                     // child is able to handle it's own change mechanism
-                                    currentClientValue[i].getStateHolder().setChangeListener(() => {
-                                        state.getChangedKeys().add(i);
-                                        state.notifyChangeListener();
-                                    });
+                                    childEl.getInternalState().setChangeListener(this.getChangeListener(currentClientValue, i));
                                 }
                             }
                         }
@@ -168,78 +196,384 @@ export class JSONArrayConverter implements IConverter {
                 // else we got an update from server for a version that was already bumped by changes in browser; ignore that, as browser changes were sent to server
                 // and server will detect the problem and send back a full update
                 // }
-            } else if (serverJSONValue && serverJSONValue[JSONArrayConverter.INITIALIZE]) {
-                // only content version update - this happens when a full array value is set on this property client side; it goes to server
-                // and then server sends back the version and we initialize / prepare the existing newValue for being watched/handle child conversions
-                state = currentClientValue.getStateHolder();
-                state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION]; // here we can count on not having any 'smart' values cause if we had
-                // updates would have been received with this initialize as well (to initialize child elements as well to have the setChangeNotifier and internal things)
-            } else if (!serverJSONValue || !serverJSONValue[JSONArrayConverter.NO_OP])
+            } else if (!instanceOfNoOpFromServer(serverJSONValue))
                 // anything else would not be supported... // TODO how to handle null values (special watches/complete array set from client)?
                 // if null is on server and something is set on client or the other way around?
                 newValue = null;
         } finally {
-            state.clearChanges();
+            if (internalState) internalState.ignoreChanges = false;
         }
 
         return newValue;
     }
 
-    fromClientToServer(newClientData: ICustomArray<any>, oldClientData?) {
+    fromClientToServer(newClientData: any, oldClientData: CustomArrayValue<any>, propertyContext: IPropertyContext): [ICATDataToServer, CustomArrayValue<any>] | null {
 
-        // test if this was an array created fully on the client.
-        if (!instanceOfCustomArray(newClientData)) {
-            this.specTypesService.enhanceArrayType(newClientData, this.iterableDiffers);
-        }
+        const elemPropertyContext = propertyContext ? new PropertyContext(propertyContext.getProperty,
+                PushToServerUtils.combineWithChildStatic(propertyContext.getPushToServerCalculatedValue(), this.pushToServerForElements)) : undefined;
+        let newClientDataInited: CustomArrayValue<any>;
+
         let internalState: ArrayState;
-        if (newClientData && (internalState = newClientData.getStateHolder())) {
-            const arrayChanges = internalState.getChangedKeys();
-            if (arrayChanges.size > 0 || internalState.allChanged) {
-                const changes = {};
+        try {
+            if (newClientData) {
+                // test if this was an array created fully on the client.
+                if (!instanceOfCustomArray(newClientData)) {
+                    // this can happen when an array value was set completely in browser
+                    // any 'smart' child elements will initialize in their fromClientToServer conversion;
+                    // set it up, make it 'smart' and mark it as all changed to be sent to server...
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                              propertyContext?.getPushToServerCalculatedValue());
+                    internalState = newClientDataInited.getInternalState();
+                    internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
+                } else if (newClientData !== oldClientData) {
+                    // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
-                if (internalState[JSONArrayConverter.CONTENT_VERSION]) changes[JSONArrayConverter.CONTENT_VERSION] = internalState[JSONArrayConverter.CONTENT_VERSION];
-                if (internalState.allChanged) {
-                    // structure might have changed; increase version number
-                    ++internalState[JSONArrayConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
-                    // send all
-                    const toBeSentArray = changes[JSONArrayConverter.VALUE] = [];
-                    for (let idx = 0; idx < newClientData.length; idx++) {
-                        const val = newClientData[idx];
-                        if (instanceOfChangeAwareValue(val)) {
-                            val.getStateHolder().markAllChanged(false);
-                        }
-                        toBeSentArray[idx] = this.convert(val, internalState.conversionInfo[idx]);
-                    }
+                    // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location
+                    newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
+
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                              propertyContext?.getPushToServerCalculatedValue());
+                    internalState = newClientDataInited.getInternalState();
+                    internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else {
-                    // send only changed indexes
-                    const changedElements = changes[JSONArrayConverter.UPDATES] = [];
-                    arrayChanges.forEach((idx) => {
-                        const newVal = newClientData[idx];
-                        const ch = {};
-                        ch[JSONArrayConverter.INDEX] = idx;
-                        ch[JSONArrayConverter.VALUE] = this.convert(newVal, internalState.conversionInfo[idx]);
-                        changedElements.push(ch);
-                    });
+                    newClientDataInited = newClientData; // it was already initialized in the past (not a new client side created value)
+                    internalState = newClientData.getInternalState();
+                    internalState.ignoreChanges = true;
+
+                    // for example if a custom array value is initially received through a return value from server side api/handler call and not as a
+                    // normal model property and then the component/service assigns it to model, the push to server of it might have changed; use the one
+                    // received here as arg
+                    internalState.calculatedPushToServerOfWholeProp = propertyContext?.getPushToServerCalculatedValue();
+                    if (!internalState.calculatedPushToServerOfWholeProp) internalState.calculatedPushToServerOfWholeProp = PushToServerEnum.REJECT;
                 }
-                internalState.clearChanges();
-                return changes;
-            } else if (newClientData === oldClientData) { // TODO do we need to compare differently?
-                // if (angular.equals(newClientData, oldClientData)) {
-                const x = {}; // no changes
-                x[JSONArrayConverter.NO_OP] = true;
-                return x;
+            } else newClientDataInited = newClientData; // null/undefined
+
+            if (newClientDataInited) {
+                const arrayChanges = internalState.changedKeys;
+                if (arrayChanges.size > 0 || internalState.allChanged) {
+                    const changes = {} as (ICATFullArrayToServer | ICATGranularUpdatesToServer);
+                    changes.vEr = internalState.contentVersion;
+
+                    if (internalState.allChanged) {
+                        const fullChange = changes as ICATFullArrayToServer;
+                        // structure might have changed; increase version number
+                        ++internalState.contentVersion; // we also increase the content version number - server should only be expecting updates for the next version number
+                        // send all
+                        const toBeSentArray = fullChange.v = [];
+                        for (let idx = 0; idx < newClientDataInited.length; idx++) {
+                            const val = newClientDataInited[idx];
+                            if (instanceOfChangeAwareValue(val)) {
+                                // even if child value has only partial changes that we want to send, do send the full value as we are sending full array value here
+                                val.getInternalState().markAllChanged(false);
+                            }
+                            const converted = this.converterService.convertFromClientToServer(val, this.getElementType(internalState, idx),
+                                                    undefined, elemPropertyContext);
+
+                            if (val !== converted[1]) newClientDataInited[idx] = converted[1];
+                            // if it's a nested obj/array or other smart prop that just got smart in convertFromClientToServer call in line above,
+                            // do attach the change notifier to it
+                            if (instanceOfChangeAwareValue(converted[1]))
+                                converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
+
+
+                            // do not send to server if elem pushToServer is reject
+                            if (!elemPropertyContext || elemPropertyContext.getPushToServerCalculatedValue() > PushToServerEnum.REJECT) toBeSentArray[idx] = converted[0];
+                        }
+
+                        if (internalState.calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
+                            // if whole value is reject, don't sent anything
+                            internalState.clearChanges(); // they are never going to be sent anyway so clear them
+                            return [{ n: true }, newClientDataInited];
+                        }
+                    } else {
+                        const granularUpdateChanges = changes as ICATGranularUpdatesToServer;
+                        // send only changed indexes
+                        const changedElements = granularUpdateChanges.u = [] as ICATGranularOpToServer[];
+
+                        for (const [idx, oldVal] of arrayChanges) {
+                            const newVal = newClientDataInited[idx];
+
+                            let changed = (newVal !== oldVal);
+
+                            if (!changed) {
+                                if (instanceOfChangeAwareValue(newVal)) changed = newVal.getInternalState().hasChanges();
+                                // else it's a dumb value change but we do not know the oldVal (it was marked as changed
+                                // via markElementAsHavingDeepChanges probably (doesn't know old value), because proxies (if >= SHALLOW)
+                                // know the oldValue and do check for changes in case of dumb values and don't mark it as changed if it was not)
+                                // (assume the caller of markElementAsHavingDeepChanges knows what he is doing)
+                                else changed = true;
+                            }
+
+                            if (changed) {
+                               const ch = {} as ICATGranularOpToServer;
+                               ch.i = idx;
+
+                                const wasSmartBeforeConversion = instanceOfChangeAwareValue(newVal);
+                                const converted = this.converterService.convertFromClientToServer(newVal, this.getElementType(internalState, idx), oldVal, elemPropertyContext);
+                                ch.v = converted[0];
+                                if (newVal !== converted[1]) newClientDataInited[idx] = converted[1];
+
+                                if (!wasSmartBeforeConversion && instanceOfChangeAwareValue(converted[1]))
+                                    // if it was a new object/array set at this index which was initialized by convertFromClientToServer call, do add the change notifier to it
+                                    converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
+
+                                changedElements.push(ch);
+                            }
+                        }
+                    }
+
+                    internalState.clearChanges();
+                    return [changes, newClientDataInited];
+                } else {
+                    return [{ n: true }, newClientDataInited];
+                }
             }
+        } finally {
+            internalState.ignoreChanges = false;
         }
 
-        return newClientData;
+        return null; // newClientDataInitedshould be undefined / null if we reach this code
     }
 
-    private convert(newVal, conversionInfo) {
-        if (!conversionInfo) {
-            conversionInfo = this.specTypesService.guessType(newVal);
-        }
-        if (conversionInfo) return this.converterService.convertFromClientToServer(newVal, conversionInfo);
-        return this.converterService.convertClientObject(newVal);
+    private getChangeListener(arrayVal: CustomArrayValue<T>, c: number): ChangeListenerFunction {
+        return (doNotPushNow?: boolean) => {
+            const internalState = arrayVal.getInternalState();
+            internalState.changedKeys.set(c, arrayVal[c]);
+            internalState.notifyChangeListener(doNotPushNow);
+        };
+    }
+
+    private getElementType(internalState: ArrayState, idx: number | string) {
+        return this.staticElementType ? this.staticElementType : internalState.dynamicPropertyTypesHolder['' + idx];
+    }
+
+    private initArrayValue(array: Array<any>, contentVersion: number,
+                                pushToServerCalculatedValue: PushToServerEnum): CustomArrayValue<T> {
+
+        let proxiedArray: CustomArrayValue<T>;
+        if (!instanceOfCustomArray(array)) {
+            Object.defineProperty(array, INTERNAL_STATE_PROP_NAME, {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value: new ArrayState(array)
+            });
+            Object.defineProperty(array, BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME, {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value() {
+                    return this[INTERNAL_STATE_PROP_NAME];
+                }
+            });
+
+            const internalState: ArrayState = array[INTERNAL_STATE_PROP_NAME];
+
+            // now make it implement ICustomArrayValue<T>
+            Object.defineProperty(array, 'markElementAsHavingDeepChanges', {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value: (index: number): void => {
+                    // markElementAsHavingDeepChanges (this can be called by user for >= ALLOW pushToServer combined with 'object' type,
+                    // so simple JSON elements, that change by content, not reference)
+                    const pushToServerOnElements = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
+                                    this.pushToServerForElements);
+
+                    if (pushToServerOnElements >= PushToServerEnum.ALLOW) {
+                        internalState.changedKeys.set(index, array[index]); // we do not really know what the old value was...
+
+                        // notify parent that changes are present, but trigger an actual push-to-server only if pushToServer is DEEP
+                        // SHALLOW will work/trigger push-to-server automatically through proxy array impl., and ALLOW doesn't need to trigger push right away
+                        internalState.notifyChangeListener(pushToServerOnElements <= PushToServerEnum.SHALLOW);
+                    }
+                }
+            });
+
+            internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+            internalState.calculatedPushToServerOfWholeProp = (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT);
+            internalState.dynamicPropertyTypesHolder = {};
+
+            // if elements have SHALLOW or DEEP pushToServer (either inherited from parent, anyway not REJECT), add a Proxy obj to intercept client side changes by ref to array elements
+            // and send them to server;
+            // the proxy is added in case of ALLOW as well but it will not trigger a send to server right away when it detects a change but it will just remember the changes
+            // and tell parent to do the same for a later time, when it is possible that a manual dataChange/emit(for component/service root prop) is requested
+            if (PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) >= PushToServerEnum.ALLOW) {
+                // TODO should we add the proxy in all cases? just in order to detect reference changes for any smart children and make sure we update their changeListener?;
+                //      but that would only be needed if ppl. start moving around properties with APIs (like foundsets) that are nested in arrays/objects - and have REJECT
+
+                const proxyRevoke = Proxy.revocable(array as CustomArrayValue<T>, this.getProxyHandler(internalState));
+                proxiedArray = proxyRevoke.proxy;
+                internalState.proxyRevokerFunc = proxyRevoke.revoke;
+            } else proxiedArray = array as CustomArrayValue<T>;
+        } else proxiedArray = array as CustomArrayValue<T>;
+
+        return proxiedArray;
+    }
+
+    /**
+     * Handler for the Proxy object that will detect reference changes in the array where it is needed + any add/remove operations.
+     * This implements the shallow PushToServer behavior.
+     */
+    private getProxyHandler(internalState: ArrayState) {
+        // note - if a proxy was set, we know push to server for elements is ALLOW or higher, otherwise the proxy handler would not be registered
+        return {
+            set: (underlyingArray: CustomArrayValue<T>, prop: any, v: any) => {
+                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingArray, prop, v);
+
+                // eslint-disable-next-line radix
+                const i = Number.parseInt(prop);
+                if (Number.isInteger(i)) {
+                    const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
+                    if (i >= underlyingArray.length) {
+                        const ret = Reflect.set(underlyingArray, prop, v);
+                        // TODO make this smarter to be able to send this as well as granular updates - so a javascript port of java class ArrayGranularChangeKeeper
+                        internalState.markAllChanged(true, dontPushNow); // element added
+                        return ret;
+                    } else {
+                        internalState.setPropertyAndHandleChanges(underlyingArray, i, v, dontPushNow); // 1 element has changed by ref
+                        return true;
+                    }
+                } else if ('length' === prop && underlyingArray.length !== v) {
+                    // TODO make this smarter to be able to send this as well as granular updates - so a javascript port of java class ArrayGranularChangeKeeper
+                    const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
+                    const ret = Reflect.set(underlyingArray, prop, v);
+                    internalState.markAllChanged(true, dontPushNow); // length of array changed
+                    return ret;
+                }
+
+                return Reflect.set(underlyingArray, prop, v);
+            },
+
+            deleteProperty: (underlyingArray: CustomArrayValue<T>, prop: any) => {
+                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingArray, prop);
+
+                // eslint-disable-next-line radix
+                const i = Number.parseInt(prop);
+                if (Number.isInteger(i) && i < underlyingArray.length) {
+                    // in JS, delete arr[4] for example will not modify the length of the array, just set it to undefined...
+                    const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
+                    internalState.setPropertyAndHandleChanges(underlyingArray, i, undefined, dontPushNow); // 1 element deleted
+                    return true;
+                }
+
+                return Reflect.deleteProperty(underlyingArray, prop);
+            }
+        };
     }
 
 }
+
+export class ArrayState extends BaseCustomObjectState<number, Array<any>> {
+
+}
+
+const instanceOfCustomArray = <T>(obj: any): obj is CustomArrayValue<T> =>
+    instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof ArrayState;
+
+
+interface CustomArrayValue<T> extends ICustomArrayValue<T>, IChangeAwareValue {
+
+    /** do not call this methods from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState(): ArrayState;
+
+}
+
+// ------------------- typed JSON that will be received from server - START -------------------
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter type. Do not use. CAT abbrev. comes from CustomArrayType */
+export type ICATDataFromServer = ICATFullValueFromServer | ICATGranularUpdatesFromServer | ICATNoOpFromServer;
+
+const instanceOfFullValueFromServer = (obj: any): obj is ICATFullValueFromServer =>
+            (obj && !!((obj as ICATFullValueFromServer).v));
+
+const instanceOfGranularUpdatesFromServer = (obj: any): obj is ICATGranularUpdatesFromServer =>
+            (obj && !!((obj as ICATGranularUpdatesFromServer).g));
+
+const instanceOfNoOpFromServer = (obj: any): obj is ICATNoOpFromServer =>
+            (obj && !!((obj as ICATNoOpFromServer).n));
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATNoOpFromServer {
+    /** NO_OP */
+    n: boolean;
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATFullValueFromServer {
+
+    /** VALUE */
+    v: any[];
+
+    /** CONTENT_VERSION */
+    vEr: number;
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATGranularUpdatesFromServer {
+
+    /** GRANULAR_UPDATES */
+    g: ICATGranularOpFromServer[];
+
+    /** CONTENT_VERSION */
+    vEr: number;
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATGranularOpFromServer {
+
+    /** OP_ARRAY_START_END_TYPE an array of these three values */
+    op: [startIndex: number, endIndex: number, opType: ICATOpTypeEnum];
+
+    /** GRANULAR_UPDATE_DATA **/
+    d: any[];
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter enum. Do not use. CAT abbrev. comes from CustomArrayType */
+export enum ICATOpTypeEnum {
+    CHANGED = 0,
+    INSERT = 1,
+    DELETE = 2
+}
+// ------------------- typed JSON that will be received from server - END -------------------
+
+// ------------------- typed JSON that will be sent to server - START -------------------
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter type. Do not use. CAT abbrev. comes from CustomArrayType */
+export type ICATDataToServer = ICATFullArrayToServer | ICATGranularUpdatesToServer | ICATNoOpToServer;
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATFullArrayToServer {
+    /** VALUE */
+    v: any[];
+
+    /** CONTENT_VERSION server side <-> client side sync to make sure we don't end up granular updating something that has changed meanwhile */
+    vEr: number;
+}
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATGranularUpdatesToServer {
+    /** CONTENT_VERSION server side <-> client side sync to make sure we don't end up granular updating something that has changed meanwhile */
+    vEr: number;
+
+    /** UPDATES */
+    u: ICATGranularOpToServer[];
+}
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICATNoOpToServer {
+    /** NO_OP */
+    n: boolean;
+}
+interface ICATGranularOpToServer {
+
+    /** INDEX */
+    i: number;
+
+    /** VALUE */
+    v: any;
+
+}
+// ------------------- typed JSON that will be sent to server - END -------------------
+

@@ -11,7 +11,7 @@ export class SabloService {
     private locale: { language: string; country: string; full: string } = null;
     private wsSession: WebsocketSession;
     private currentServiceCallCallbacks = [];
-    private currentServiceCallDone;
+    private currentServiceCallDone: boolean;
     private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts;
     private log: LoggerService;
@@ -42,11 +42,8 @@ export class SabloService {
 
         this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
 
-        this.wsSession.onMessageObject((msg, conversionInfo) => {
+        this.wsSession.onMessageObject((msg) => {
             // data got back from the server
-
-            if (conversionInfo && conversionInfo.call) msg.call = this.converterService.convertFromServerToClient(msg.call, conversionInfo.call, undefined, undefined);
-
             if (msg.clientnr) {
                 this.sessionStorage.set('clientnr', msg.clientnr);
             }
@@ -139,6 +136,14 @@ export class SabloService {
         }
     }
 
+    public sendServiceChangesJSON(serviceName: string, changes: any) {
+        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
+    }
+
+    public addIncomingMessageHandlingDoneTask(func: () => any) {
+        this.wsSession.addIncomingMessageHandlingDoneTask(func);
+    }
+
     private callServiceCallbacksWhenDone() {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
             this.currentServiceCallWaiting = 0;
@@ -168,39 +173,29 @@ export class SabloService {
             return Promise.reject(arg);
         });
     }
-
-    public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
-        const changes = {};
-        changes[propertyName] = this.converterService.convertClientObject(value);
-        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
-    }
-
-    public addIncomingMessageHandlingDoneTask(func: () => any) {
-        this.wsSession.addIncomingMessageHandlingDoneTask(func);
-    }
-
-
-    private getAPICallFunctions(call, formState) {
-        let funcThis;
-        if (call.viewIndex != undefined) {
-            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if it want to allow calling API on non-selected rows, but it is not used
-            funcThis = formState.api[call.bean][call.viewIndex];
-        } else if (call.propertyPath != undefined) {
-            // handle nested components; the property path is an array of string or int keys going
-            // through the form's model starting with the root bean name, then it's properties (that could be nested)
-            // then maybe nested child properties and so on
-            let obj = formState.model;
-            let pn;
-            for (pn in call.propertyPath) obj = obj[call.propertyPath[pn]];
-            funcThis = obj.api;
-        } else {
-            funcThis = formState.api[call.bean];
-        }
-        return funcThis;
-    }
+//
+//    private getAPICallFunctions(call, formState) {
+//        let funcThis: Record<string, () => any>;
+//        if (call.viewIndex !== undefined) {
+//            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
+//            // it wants to allow calling API on non-selected rows, but it is not used
+//            funcThis = formState.api[call.bean][call.viewIndex];
+//        } else if (call.propertyPath !== undefined) {
+//            // handle nested components; the property path is an array of string or int keys going
+//            // through the form's model starting with the root bean name, then it's properties (that could be nested)
+//            // then maybe nested child properties and so on
+//            let obj = formState.model;
+//            for (const pp of call.propertyPath) obj = obj[pp];
+//            funcThis = obj.api;
+//        } else {
+//            funcThis = formState.api[call.bean];
+//        }
+//        return funcThis;
+//    }
 
     private clearSabloInfo() {
         this.sessionStorage.remove('windownr');
         this.sessionStorage.remove('clientnr');
     }
+
 }

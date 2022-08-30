@@ -1,202 +1,609 @@
-import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
+import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue, isChanged, INTERNAL_STATE_PROP_NAME,
+            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction } from '../../sablo/converter.service';
+import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
+            ICustomTypesFromServer, ITypesRegistryForTypeFactories,
+            PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
+import { LoggerFactory, LoggerService  } from '@servoy/public';
+import { ICustomObjectValue } from '@servoy/public';
 
-import { BaseCustomObject, SpecTypesService, instanceOfChangeAwareValue } from '@servoy/public';
+export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
 
-export class JSONObjectConverter implements IConverter {
-    /* eslint-disable */
-    private static readonly UPDATES = "u";
-    private static readonly KEY = "k";
-    private static readonly INITIALIZE = "in";
-    private static readonly VALUE = "v";
-    private static readonly PUSH_TO_SERVER = "w"; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
-    private static readonly CONTENT_VERSION = "vEr"; // server side sync to make sure we don't end up granular updating something that has changed meanwhile server-side
-    private static readonly NO_OP = "n";
-    private static readonly REAL_TYPE = "rt";
-    /* eslint-enable */
+    public static readonly TYPE_FACTORY_NAME = 'JSON_obj';
 
-    constructor(private converterService: ConverterService, private specTypesService: SpecTypesService) {
+    private customTypesBySpecName: {
+        [webObjectSpecName: string]: {
+            [customTypeName: string]: CustomObjectType;
+        };
+    } = {};
+    private readonly logger: LoggerService;
+
+    constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
+            private readonly converterService: ConverterService,
+            logFactory: LoggerFactory) {
+        this.logger = logFactory.getLogger('CustomObjectTypeFactory');
     }
 
-    fromServerToClient(serverJSONValue, currentClientValue?: BaseCustomObject, propertyContext?: PropertyContext) {
-        let newValue = currentClientValue;
+    getOrCreateSpecificType(specificTypeInfo: string, webObjectSpecName: string): CustomObjectType {
+        const customTypesForThisSpec = this.customTypesBySpecName[webObjectSpecName];
+        if (customTypesForThisSpec) {
+            const coType = customTypesForThisSpec[specificTypeInfo];
+            if (!coType) this.logger.error('[CustomObjectTypeFactory] cannot find custom object client side type "'
+                + specificTypeInfo + '" for spec "' + webObjectSpecName
+                + '"; no such custom object type was registered for that spec.; ignoring...');
+            return coType;
+        } else {
+            this.logger.error('[CustomObjectTypeFactory] cannot find custom object client side type "'
+                + specificTypeInfo + '" for spec "' + webObjectSpecName
+                + '"; that spec. didn\'t register any client side types; ignoring...');
+            return undefined;
+        }
+    }
+
+    registerDetails(details: ICustomTypesFromServer, webObjectSpecName: string) {
+        // ok we got the custom types section of a .spec file in details; do it similarly to what we do server-side:
+        //   - first create empty shells for all custom types (because they might need to reference each other)
+        //   - go through each custom type's sub-properties and assign the correct type to them (could be one of the previously created "empty shells")
+
+        this.customTypesBySpecName[webObjectSpecName] = {};
+        const customTypesForThisSpec = this.customTypesBySpecName[webObjectSpecName];
+
+        // create empty CustomObjectType instances for all custom types in this .spec
+        for (const customTypeName of Object.keys(details)) {
+             // create just an empty type reference that will be populated below with child property types
+            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService);
+        }
+
+        // set the sub-properties of each CustomObjectType to the correct IType
+        for (const customTypeName of Object.keys(details)) {
+            const customTypeDetails = details[customTypeName];
+            const properties: { [propName: string]: IPropertyDescription } = {};
+            for (const propertyName of Object.keys(customTypeDetails)) {
+                properties[propertyName] = this.typesRegistry.processPropertyDescriptionFromServer(customTypeDetails[propertyName], webObjectSpecName);
+            }
+            customTypesForThisSpec[customTypeName].setPropertyDescriptions(properties);
+        }
+    }
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
+export class CustomObjectType implements IType<CustomObjectValue> {
+
+    private propertyDescriptions: { [propName: string]: IPropertyDescription };
+
+    constructor(private converterService: ConverterService) {}
+
+    // this will always get called once with a non-null param before the CustomObjectType is used for conversions;
+    // it can't be given in constructor as types might depend on each other and they are all created before being 'linked'; see factory code above
+    setPropertyDescriptions(propertyDescriptions: { [propertyName: string]: IPropertyDescription } ): void {
+        this.propertyDescriptions = propertyDescriptions;
+    }
+
+    fromServerToClient(serverJSONValue: ICOTDataFromServer, currentClientValue: CustomObjectValue, propertyContext: PropertyContext): CustomObjectValue {
+        let newValue: CustomObjectValue = currentClientValue;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
-        // TODO  removeAllWatches(currentClientValue);
-        if (serverJSONValue && serverJSONValue[JSONObjectConverter.VALUE]) {
-            // full contents
-            newValue = serverJSONValue[JSONObjectConverter.VALUE];
-            const customObjectPropertyContext = this.getCustomObjectPropertyContext(newValue, propertyContext);
-            const clientObject = this.specTypesService.createType(serverJSONValue[JSONObjectConverter.REAL_TYPE]);
-            const internalState = clientObject.getStateHolder();
-            internalState.ignoreChanges = true;
-            if (typeof serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER] !== 'undefined') internalState[JSONObjectConverter.PUSH_TO_SERVER] = serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER];
-            internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
+        let internalState: CustomObjectState = null;
 
-            for (const c of Object.keys(newValue)) {
-                let elem = newValue[c];
-                let conversionInfo = null;
-                if (serverJSONValue[ConverterService.TYPES_KEY]) {
-                    conversionInfo = serverJSONValue[ConverterService.TYPES_KEY][c];
-                }
-
-                if (conversionInfo) {
-                    internalState.conversionInfo[c] = conversionInfo;
-                    newValue[c] = elem = this.converterService.convertFromServerToClient(elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, customObjectPropertyContext);
-                }
-                if (instanceOfChangeAwareValue(elem)) {
-                    // child is able to handle it's own change mechanism
-                    elem.getStateHolder().setChangeListener(() => {
-                        internalState.getChangedKeys().add(c);
-                        internalState.notifyChangeListener();
-                    });
-                }
-                clientObject[c] = elem;
-            }
-            internalState.ignoreChanges = false;
-            internalState.clearChanges();
-            newValue = clientObject;
-        } else if (serverJSONValue && serverJSONValue[JSONObjectConverter.UPDATES]) {
-            // granular updates received;
-
-            const internalState = currentClientValue.getStateHolder();
-            const customObjectPropertyContext = this.getCustomObjectPropertyContext(currentClientValue, propertyContext);
-
-            // this can happen when an object value was set completely in browser and the child values need to instrument their browser values as well
-            // in which case the server sends 'initialize' updates for both this array and 'smart' child values
-            if (serverJSONValue[JSONObjectConverter.INITIALIZE]) internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
-
-            // if something changed browser-side, increasing the content version thus not matching next expected version,
-            // we ignore this update and expect a fresh full copy of the object from the server (currently server value is leading/has priority
-            // because not all server side values might support being recreated from client values)
-            if (internalState[JSONObjectConverter.CONTENT_VERSION] === serverJSONValue[JSONObjectConverter.CONTENT_VERSION]) {
+        try {
+            if (instanceOfFullValueFromServer(serverJSONValue)) {
+                // full contents
+                newValue = this.initCustomObjectValue(serverJSONValue.v, serverJSONValue.vEr, propertyContext?.getPushToServerCalculatedValue());
+                internalState = newValue.getInternalState();
                 internalState.ignoreChanges = true;
-                const updates = serverJSONValue[JSONObjectConverter.UPDATES];
-                const conversionInfos = serverJSONValue[ConverterService.TYPES_KEY];
-                for (const i of Object.keys(updates)) {
-                    const update = updates[i];
-                    const key = update[JSONObjectConverter.KEY];
-                    let val = update[JSONObjectConverter.VALUE];
 
-                    let conversionInfo = null;
-                    if (conversionInfos && conversionInfos[i] && conversionInfos[i][JSONObjectConverter.VALUE]) {
-                        conversionInfo = conversionInfos[i][JSONObjectConverter.VALUE];
-                    }
+                const propertyContextCreator = new ChildPropertyContextCreator(
+                        this.getCustomObjectPropertyContextGetter(newValue, propertyContext),
+                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
 
-                    if (conversionInfo) {
-                        internalState.conversionInfo[key] = conversionInfo;
-                        currentClientValue[key] = val = this.converterService.convertFromServerToClient(val, conversionInfo, currentClientValue[key], customObjectPropertyContext);
-                    } else currentClientValue[key] = val;
+                internalState.contentVersion = serverJSONValue.vEr;
 
-                    if (instanceOfChangeAwareValue(currentClientValue[key])) {
-                        // child is able to handle it's own change mechanism
-                        currentClientValue[key].getStateHolder().setChangeListener(() => {
-                            internalState.getChangedKeys().add(key);
-                            internalState.notifyChangeListener();
-                        });
+                // remove change listeners from any smart subprop. values that are now obsolete
+                if (currentClientValue) {
+                    for (const k of Object.keys(currentClientValue)) {
+                        const obsoleteSubProp = currentClientValue[k];
+                        if (instanceOfChangeAwareValue(obsoleteSubProp)) {
+                            obsoleteSubProp.getInternalState().setChangeListener(undefined);
+                        }
                     }
                 }
-                internalState.ignoreChanges = false;
-                internalState.clearChanges();
-            }
-            //else {
-            // else we got an update from server for a version that was already bumped by changes in browser; ignore that, as browser changes were sent to server
-            // and server will detect the problem and send back a full update
-            //}
-        } else if (serverJSONValue && serverJSONValue[JSONObjectConverter.INITIALIZE]) {
-            // only content version update - this happens when a full object value is set on this property client side; it goes to server
-            // and then server sends back the version
-            newValue.getStateHolder()[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
-            // here we can count on not having any 'smart' values cause if we had
-            // updates would have been received with this initialize as well (to initialize child elements as well to have the setChangeNotifier and internal things)
-        } else if (!serverJSONValue || !serverJSONValue[JSONObjectConverter.NO_OP])
-            // anything else would not be supported... // TODO how to handle null values (special watches/complete object set from client)?
-            // if null is on server and something is set on client or the other way around?
-            newValue = null;
+
+                // convert value received from server, store and add change listeners if needed for subproperties
+                for (const c of Object.keys(newValue)) {
+                    let subPropValue = newValue[c];
+
+                    // if it is a typed prop. use the type to convert it, if it is a dynamic type prop (for example dataprovider of type date) do the same and store the type
+                    newValue[c] = subPropValue = this.converterService.convertFromServerToClient(subPropValue, this.getStaticPropertyType(c), currentClientValue ? currentClientValue[c] : undefined,
+                            internalState.dynamicPropertyTypesHolder, c, propertyContextCreator.withPushToServerFor(c));
+
+                    if (instanceOfChangeAwareValue(subPropValue)) {
+                        // child is able to handle it's own change mechanism
+                        subPropValue.getInternalState().setChangeListener(this.getChangeListener(newValue, c));
+                    }
+                }
+            } else if (instanceOfGranularUpdatesFromServer(serverJSONValue)) {
+                // granular updates received;
+                internalState = currentClientValue.getInternalState();
+                internalState.ignoreChanges = true;
+
+                // for example if a custom object value is initially received through a return value from server side api/handler call
+                // and not as a normal model property and then the component/service assigns it to model, the push to server of it might have changed; use the one received here as arg
+                internalState.calculatedPushToServerOfWholeProp = propertyContext?.getPushToServerCalculatedValue();
+                if (!internalState.calculatedPushToServerOfWholeProp) internalState.calculatedPushToServerOfWholeProp = PushToServerEnum.REJECT;
+
+                // if something changed browser-side, increasing the content version thus not matching next expected version,
+                // we ignore this update and expect a fresh full copy of the object from the server (currently server value is leading/has priority
+                // because not all server side values might support being recreated from client values)
+                if (internalState.contentVersion === serverJSONValue.vEr) {
+                    const updates = serverJSONValue.u;
+
+                    const propertyContextCreator = new ChildPropertyContextCreator(
+                            this.getCustomObjectPropertyContextGetter(currentClientValue, propertyContext),
+                            this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
+
+                    for (const update of updates) {
+                        const key = update.k;
+                        let val = update.v;
+
+                        // remove change listeners from any smart el. values that are now obsolete
+                        const oldElemValue = currentClientValue[key];
+                        if (instanceOfChangeAwareValue(oldElemValue)) {
+                            // child is able to handle it's own change mechanism
+                            oldElemValue.getInternalState().setChangeListener(undefined);
+                        }
+
+                        currentClientValue[key] = val = this.converterService.convertFromServerToClient(val, this.getStaticPropertyType(key), currentClientValue[key],
+                                internalState.dynamicPropertyTypesHolder, key, propertyContextCreator.withPushToServerFor(key));
+
+                        if (instanceOfChangeAwareValue(val)) {
+                            // child is able to handle it's own change mechanism
+                            val.getInternalState().setChangeListener(this.getChangeListener(newValue, key));
+                        }
+                    }
+                }
+                //else {
+                // else we got an update from server for a version that was already bumped by changes in browser; ignore that, as browser changes were sent to server
+                // and server will detect the problem and send back a full update
+                //}
+            } else if (!instanceOfNoOpFromServer(serverJSONValue))
+                // anything else would not be supported...
+                newValue = null;
+        } finally {
+            if (internalState) internalState.ignoreChanges = false;
+        }
 
         return newValue;
     }
 
-    fromClientToServer(newClientData: BaseCustomObject, oldClientData?: BaseCustomObject) {
+    fromClientToServer(newClientData: CustomObjectValue, oldClientData: CustomObjectValue, propertyContext: IPropertyContext): [ICOTDataToServer, CustomObjectValue] | null {
+        let internalState: CustomObjectState;
+        let newClientDataInited: CustomObjectValue;
 
-        // TODO how to handle null values (special watches/complete array set from client)? if null is on server and something is set on client or the other way around?
+        try {
+            if (newClientData) {
+                if (!instanceOfCustomObject(newClientData)) {
+                    // this can happen when a new obj. value was set completely in browser
+                    // any 'smart' child elements will initialize in their fromClientToServer conversion;
+                    // set it up, make it 'smart' and mark it as all changed to be sent to server...
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                              propertyContext?.getPushToServerCalculatedValue());
+                    internalState = newClientDataInited.getInternalState();
+                    internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
+                } else if (newClientData !== oldClientData) {
+                    // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
-        if (newClientData) {
-            const internalState = newClientData.getStateHolder();
-            if (internalState.getChangedKeys().size > 0 || internalState.allChanged) {
-                const changes = {};
+                    // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location
+                    newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
 
-                let noContentVersionYet = false; // if we have changed keys on an object that was fully set from client but it didn't get a CONTENT_VERSION back from server
-                // (it's probably pending) we have to send a full value again to server beacuse it will be treated as such anyway
-
-                if (internalState[JSONObjectConverter.CONTENT_VERSION]) changes[JSONObjectConverter.CONTENT_VERSION] = internalState[JSONObjectConverter.CONTENT_VERSION];
-                else noContentVersionYet = true;
-
-                if (internalState.allChanged || noContentVersionYet) {
-                    // structure might have changed; increase version number
-                    if (!noContentVersionYet)
-                        ++internalState[JSONObjectConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
-                    // send all
-                    const toBeSentObj = changes[JSONObjectConverter.VALUE] = {};
-                    let specProperties = newClientData.getWatchedProperties();
-                    if (!specProperties) specProperties = Object.keys(newClientData);
-                    specProperties.forEach((key) => {
-                        const val = newClientData[key];
-
-                        if (internalState.conversionInfo[key]) {
-                            if (instanceOfChangeAwareValue(val)) val.getStateHolder().markAllChanged(false);
-                            toBeSentObj[key] = this.converterService.convertFromClientToServer(val, internalState.conversionInfo[key], oldClientData ? oldClientData[key] : undefined);
-                        } else {
-                            // no conversion info, but this could still be a JSON_obj or JSON_array ....
-                            const guessedType: string = this.specTypesService.guessType(val);
-                            if (guessedType != null) {
-                                if (instanceOfChangeAwareValue(val)) val.getStateHolder().markAllChanged(false);
-                                toBeSentObj[key] = this.converterService.convertFromClientToServer(val, guessedType, oldClientData ? oldClientData[key] : undefined);
-                            } else toBeSentObj[key] = this.converterService.convertClientObject(val); // default conversion
-                        }
-                    });
-                    internalState.clearChanges();
-                    return changes;
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                              propertyContext?.getPushToServerCalculatedValue());
+                    internalState = newClientDataInited.getInternalState();
+                    internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else {
-                    // send only changed keys
-                    const changedElements = changes[JSONObjectConverter.UPDATES] = [];
-                    internalState.getChangedKeys().forEach((key) => {
-                        const newVal = newClientData[key];
-                        const oldVal = oldClientData ? oldClientData[key] : undefined;
-                        const ch = {};
-                        ch[JSONObjectConverter.KEY] = key;
+                    // new the same as old and already initialized
+                    newClientDataInited = newClientData;
+                    internalState = newClientDataInited.getInternalState();
+                    internalState.ignoreChanges = true;
 
-                        if (internalState.conversionInfo[key]) ch[JSONObjectConverter.VALUE] = this.converterService.convertFromClientToServer(newVal, internalState.conversionInfo[key], oldVal);
-                        else {
-                            // no conversion info, but this could still be a JSON_obj or JSON_array ....
-                            const guessedType: string = this.specTypesService.guessType(newVal);
+                    // for example if a custom array value is initially received through a return value from server side api/handler call and not as a
+                    // normal model property and then the component/service assigns it to model, the push to server of it might have changed; use the one
+                    // received here as arg
+                    internalState.calculatedPushToServerOfWholeProp = propertyContext?.getPushToServerCalculatedValue();
+                    if (!internalState.calculatedPushToServerOfWholeProp) internalState.calculatedPushToServerOfWholeProp = PushToServerEnum.REJECT;
+                }
+            } else newClientDataInited = newClientData; // null/undefined
 
-                            if (guessedType != null) ch[JSONObjectConverter.VALUE] = this.converterService.convertFromClientToServer(newVal, guessedType, oldVal);
-                            else ch[JSONObjectConverter.VALUE] = this.converterService.convertClientObject(newVal); // default conversion
+            if (newClientDataInited) {
+                const propertyContextCreator = new ChildPropertyContextCreator(
+                        this.getCustomObjectPropertyContextGetter(newClientDataInited, propertyContext),
+                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
+
+                if (internalState.hasChanges()) {
+                    const changes = {} as ICOTFullObjectToServer | ICOTGranularUpdatesToServer;
+                    changes.vEr = internalState.contentVersion;
+                    if (internalState.allChanged) {
+                        const fullChange = changes as ICOTFullObjectToServer;
+                        // structure might have changed; increase version number
+                        ++internalState.contentVersion; // we also increase the content version number - server will bump version number on full value update
+                        // send all
+                        const toBeSentObj = fullChange.v = {};
+                        for (const key of Object.keys(newClientDataInited)) {
+                            const val = newClientDataInited[key];
+                            if (instanceOfChangeAwareValue(val)) val.getInternalState().markAllChanged(false); // we are sending a full value to server so subprops must be full as well
+
+                            const converted = this.converterService.convertFromClientToServer(val, this.getPropertyType(internalState, key),
+                                                undefined, propertyContextCreator.withPushToServerFor(key));
+                            toBeSentObj[key] = converted[0];
+
+                            if (val !== converted[1]) newClientDataInited[key] = converted[1];
+                            // if it's a nested obj/array or other smart prop that just got smart in convertFromClientToServer, attach the change notifier
+                            if (instanceOfChangeAwareValue(converted[1]))
+                                converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, key));
+
+                            if (PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.propertyDescriptions[key]?.getPropertyDeclaredPushToServer())
+                                 === PushToServerEnum.REJECT) delete toBeSentObj[key]; // don't send to server pushToServer reject keys
                         }
 
-                        changedElements.push(ch);
-                    });
-                    internalState.clearChanges();
-                    return changes;
+                        internalState.clearChanges();
+
+                        if (internalState.calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
+                            // if whole value is reject, don't sent anything
+                            return [{ n: true }, newClientDataInited];
+                        } else return [changes, newClientDataInited];
+                    } else {
+                        const granularUpdateChanges = changes as ICOTGranularUpdatesToServer;
+                        // send only changed keys
+                        const changedElements = granularUpdateChanges.u = [] as ICOTGranularOpToServer[];
+                        for (const key of internalState.changedKeys.keys()) {
+                            const newVal = newClientDataInited[key];
+                            const oldVal = internalState.changedKeys.get(key);
+
+                            let changed = (newVal !== oldVal);
+                            if (!changed) {
+                                if (instanceOfChangeAwareValue(newVal)) changed = newVal.getInternalState().hasChanges();
+                                // else it's a dumb value change but we do not know the oldVal (it was marked as changed
+                                // via markSubPropertyAsHavingDeepChanges probably (doesn't know old value), because proxies (if >= SHALLOW)
+                                // know the oldValue and do check for changes in case of dumb values and don't mark it as changed if it was not)
+                                // (assume the caller of markSubPropertyAsHavingDeepChanges knows what he is doing)
+                                else changed = true;
+                            }
+
+                            if (changed) {
+                                const ch = {} as ICOTGranularOpToServer;
+                                ch.k = key;
+
+                                const wasSmartBeforeConversion = instanceOfChangeAwareValue(newVal);
+                                const converted = this.converterService.convertFromClientToServer(newVal, this.getPropertyType(internalState, key), oldVal,
+                                                        propertyContextCreator.withPushToServerFor(key));
+
+                                ch.v = converted[0];
+                                if (newVal !== converted[1]) newClientDataInited[key] = converted[1];
+                                if (!wasSmartBeforeConversion && instanceOfChangeAwareValue(converted[1]))
+                                    // if it was a new object/array set in this key, which was initialized by convertFromClientToServer call above, do add the change notifier to it
+                                    converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, key));
+
+                                changedElements.push(ch);
+                            }
+                        }
+                        internalState.clearChanges();
+                        return [changes, newClientDataInited];
+                    }
+                } else {
+                    // no changes
+                    return [{ n: true }, newClientDataInited];
                 }
-            } else if (newClientData === oldClientData) {
-                // TODO angular equals?? if (angular.equals(newClientData, oldClientData)) { // can't use === because oldClientData is an angular clone not the same ref.
-                const x = {}; // no changes
-                x[JSONObjectConverter.NO_OP] = true;
-                return x;
             }
+        } finally {
+            if (internalState) internalState.ignoreChanges = false;
         }
 
-        // except if newClientData is undefined/null we should never reach this code in case of property type-script usage; some object that is of the wrong type was set to this property;
-        // it would probably work if it's some JSON who's structure matches what is expected by server but most of the time this happens due to unintended ERRORS
-        return newClientData;
-
+        return null; // newClientDataInited should be undefined / null if we reach this code
     }
 
-    getCustomObjectPropertyContext(currentClientValue: BaseCustomObject, parentPropertyContext: PropertyContext): any {
-        // property context that we pass here should search first in the current custom object value and only fallback to "parentPropertyContext" if needed
-        return (propertyName: string) => {
-            if (currentClientValue.hasOwnProperty(propertyName)) return currentClientValue[propertyName]; // can even be null or undefined as long as it is set on this object
-            else return parentPropertyContext ? parentPropertyContext(propertyName) : undefined; // fall back to parent object nesting context
+    private getChangeListener(customObject: CustomObjectValue, prop: string | number): ChangeListenerFunction {
+        return (doNotPushNow?: boolean) => {
+            const internalState = customObject.getInternalState();
+            internalState.changedKeys.set(prop, customObject[prop]);
+            internalState.notifyChangeListener(doNotPushNow);
         };
     }
+
+    private getCustomObjectPropertyContextGetter(customObjectValue: CustomObjectValue, parentPropertyContext: IPropertyContext): IPropertyContextGetterMethod {
+        // property context that we pass here should search first in the current custom object value and only fallback to "parentPropertyContext" if needed
+        return (propertyName) => {
+            if (customObjectValue.hasOwnProperty(propertyName)) return customObjectValue[propertyName]; // can even be null or undefined as long as it is set on this object
+            else return parentPropertyContext ? parentPropertyContext.getProperty(propertyName) : undefined; // fall back to parent object nesting context
+        };
+    }
+
+    private getStaticPropertyType(propertyName: string) {
+        return this.propertyDescriptions[propertyName]?.getPropertyType();
+    }
+
+    private getPropertyType(internalState: CustomObjectState, propertyName: string) {
+        let propType = this.getStaticPropertyType(propertyName);
+        if (!propType) propType = internalState.dynamicPropertyTypesHolder[propertyName];
+        return propType;
+    }
+
+    private initCustomObjectValue(object: any, contentVersion: number,
+                                pushToServerCalculatedValue: PushToServerEnum): CustomObjectValue {
+
+        let proxiedCustomObject: CustomObjectValue;
+        if (!instanceOfChangeAwareValue(object)) {
+            Object.defineProperty(object, INTERNAL_STATE_PROP_NAME, {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value: new CustomObjectState(object)
+            });
+            Object.defineProperty(object, BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME, {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value() {
+                    return this[INTERNAL_STATE_PROP_NAME];
+                }
+            });
+            const internalState: CustomObjectState = object[INTERNAL_STATE_PROP_NAME];
+
+            // now make it implement ICustomObjectValue<T>
+            Object.defineProperty(object, 'markSubPropertyAsHavingDeepChanges', {
+                configurable: true,
+                enumerable: false,
+                writable: false,
+                value: (subPropertyName: string): void => {
+                    // markSubPropertyAsHavingDeepChanges (this can be called by user for >= ALLOW pushToServer combined with 'object' type,
+                    // so simple JSON subproperties, that change by content, not reference)
+                    const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
+                                                                this.propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
+
+                    if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
+                        internalState.changedKeys.set(subPropertyName, object[subPropertyName]);
+
+                        // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
+                        // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
+                        internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
+                    }
+                }
+            });
+
+            internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+            internalState.calculatedPushToServerOfWholeProp = (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT);
+            internalState.dynamicPropertyTypesHolder = {};
+
+            // if object & elements have SHALLOW or DEEP pushToServer, add a Proxy obj to intercept client side changes to object and send them to server;
+            // the proxy is added in case of ALLOW or higher on the object itself as well because:
+            //     - even for ALLOW it needs to be aware of what changed; but it will not trigger a send to server right away when it detects a change for
+            //       an (just) ALLOW subprop, only for higher pushToServer; for ALLOW it will just remember the changes and tell parent to do the same
+            //     - subProperties that have for example 'object' type and no declared pushToServer in .spec are not sent from server in client-side-spec, but
+            //       they are still sendable to server as they inherit the pushToServer >= ALLOW from the custom object itself
+            if (this.hasSubPropsWithAllowOrShallowOrDeep(internalState.calculatedPushToServerOfWholeProp)) {
+                // TODO should we add the proxy in all cases? just in order to detect reference changes for any smart children and make sure we update their changeListener?;
+                //      but that would only be needed if ppl. start moving around properties with APIs (like foundsets) that are nested in arrays/objects - and have REJECT
+
+                const proxyRevoke = Proxy.revocable(object as CustomObjectValue, this.getProxyHandler(internalState));
+                proxiedCustomObject = proxyRevoke.proxy;
+                internalState.proxyRevokerFunc = proxyRevoke.revoke;
+            } else proxiedCustomObject = object as CustomObjectValue;
+        } else proxiedCustomObject = object as CustomObjectValue;
+
+        return proxiedCustomObject;
+    }
+
+    private hasSubPropsWithAllowOrShallowOrDeep(pushToServerCalculatedValue: PushToServerEnum): boolean {
+        return pushToServerCalculatedValue >= PushToServerEnum.ALLOW;
+
+        // see comment above, in initCustomObjectValue; it is possible that server doesn't send any subprop from spec because they have neither client side
+        // type nor subprop-level pushToServer; but still, those do inherit from parent custom object and we cannot check only the client-side-known subprops;
+        // so it is enough here to check only the custom object pushToServer calculated value in order to decide if it needs a proxy or not
+        // if (pushToServerCalculatedValue === PushToServerEnum.REJECT) return false;
+        // for (const propertyDescription of Object.values(this.propertyDescriptions)) {
+        //     if (PushToServerUtils.combineWithChildStatic(pushToServerCalculatedValue,
+        //             propertyDescription.getPropertyDeclaredPushToServer()) >= PushToServerEnum.ALLOW) return true;
+        // }
+        // return false;
+    }
+
+    /**
+     * Handler for the Proxy object that will detect reference changes in the object where it is needed
+     * This implements the shallow PushToServer behavior.
+     */
+    private getProxyHandler(internalState: CustomObjectState) {
+        return {
+            set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any) => {
+                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingCustomObject, prop, v);
+
+                const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
+                                                                    this.propertyDescriptions[prop]?.getPropertyDeclaredPushToServer());
+                if (subPropCalculatedPushToServer > PushToServerEnum.REJECT) {
+                    const dontPushNow = subPropCalculatedPushToServer === PushToServerEnum.ALLOW;
+                    internalState.setPropertyAndHandleChanges(underlyingCustomObject, prop, v, dontPushNow); // 1 element has changed by ref
+                    return true;
+                } else return Reflect.set(underlyingCustomObject, prop, v);
+            },
+
+            deleteProperty: (underlyingCustomObject: CustomObjectValue, prop: any) => {
+                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingCustomObject, prop);
+
+                const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
+                                                                    this.propertyDescriptions[prop]?.getPropertyDeclaredPushToServer());
+                if (subPropCalculatedPushToServer > PushToServerEnum.REJECT) {
+                    const dontPushNow = subPropCalculatedPushToServer === PushToServerEnum.ALLOW;
+                    internalState.setPropertyAndHandleChanges(underlyingCustomObject, prop, undefined, dontPushNow); // 1 element deleted
+                    return true;
+                } else return Reflect.deleteProperty(underlyingCustomObject, prop);
+            }
+        };
+    }
+
 }
+
+const instanceOfCustomObject = (obj: any): obj is CustomObjectValue =>
+    instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof CustomObjectState;
+
+/** implementers of this interface are generated via initCustomObjectValue */
+interface CustomObjectValue extends IChangeAwareValue, ICustomObjectValue {
+
+    /** do not call this methods from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState(): CustomObjectState;
+
+}
+
+export class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState implements IParentAccessForSubpropertyChanges<KeyT> {
+
+    public static readonly INTERNAL_STATE_GETTER_NAME = 'getInternalState';
+
+    public contentVersion: number;
+
+    public calculatedPushToServerOfWholeProp: PushToServerEnum;
+    public dynamicPropertyTypesHolder: Record<string, any>;
+    public ignoreChanges = false;
+
+    public changedKeys = new Map<KeyT, any>(); // changed key/index -> oldValue of that subprop
+    public proxyRevokerFunc?: () => void;
+
+    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(this);
+
+    constructor(private readonly originalNonProxiedInstanceOfCustomObject: VT) {
+        super();
+    }
+
+    hasChanges() {
+        return super.hasChanges() || this.changedKeys.size > 0;
+    }
+
+    /**
+     * @param doNotPushNow if this is true, then the change notification is not meant to trigger the push to server right away (but just notify that there are changes
+     *                  in case the implementor needs to know that). Otherwise, if it is false of undefined, it should trigger an actual push to server as well.
+     */
+    markAllChanged(notifyListener: boolean, doNotPushNow?: boolean) {
+        if (!this.ignoreChanges) super.markAllChanged(notifyListener, doNotPushNow);
+    }
+
+    public clearChanges() {
+        super.clearChanges();
+        this.changedKeys.clear();
+    }
+
+    public destroyAndDeleteMeAndGetNonProxiedValueOfProp(): VT {
+        delete this.originalNonProxiedInstanceOfCustomObject[INTERNAL_STATE_PROP_NAME];
+        delete this.originalNonProxiedInstanceOfCustomObject[BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME];
+
+        // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
+        if (this.proxyRevokerFunc) this.proxyRevokerFunc();
+
+        return this.originalNonProxiedInstanceOfCustomObject;
+    }
+
+    public shouldIgnoreChangesBecauseFromOrToServerIsInProgress(): boolean {
+        return this.ignoreChanges;
+    }
+
+    public changeNeedsToBePushedToServer(key: KeyT, oldValue: any, doNotPushNow?: boolean): void {
+        if (!this.changedKeys.has(key)) {
+            this.changedKeys.set(key, oldValue);
+            this.notifyChangeListener(doNotPushNow);
+        }
+    }
+
+    public setPropertyAndHandleChanges(customObjectOrArray: any, propertyName: KeyT, value: any, doNotPushNow?: boolean) {
+        this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(customObjectOrArray, propertyName, value, doNotPushNow);
+    }
+
+}
+
+class CustomObjectState extends BaseCustomObjectState<any, any> {
+
+}
+
+// ------------------- typed JSON that will be received from server - START -------------------
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter type. Do not use. COT abbrev. comes from CustomObjectType */
+export type ICOTDataFromServer = ICOTFullValueFromServer | ICOTGranularUpdatesFromServer | ICOTNoOpFromServer;
+
+const instanceOfFullValueFromServer = (obj: any): obj is ICOTFullValueFromServer =>
+            (obj && !!((obj as ICOTFullValueFromServer).v));
+
+const instanceOfGranularUpdatesFromServer = (obj: any): obj is ICOTGranularUpdatesFromServer =>
+            (obj && !!((obj as ICOTGranularUpdatesFromServer).u));
+
+const instanceOfNoOpFromServer = (obj: any): obj is ICOTNoOpFromServer =>
+            (obj && !!((obj as ICOTNoOpFromServer).n));
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter interface. Do not use. COT abbrev. comes from CustomObjectType */
+export interface ICOTNoOpFromServer {
+    /** NO_OP */
+    n: boolean;
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter interface. Do not use. COT abbrev. comes from CustomObjectType */
+export interface ICOTFullValueFromServer {
+
+    /** VALUE */
+    v: Record<string, any>;
+
+    /** CONTENT_VERSION */
+    vEr: number;
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter interface. Do not use. COT abbrev. comes from CustomObjectType */
+export interface ICOTGranularUpdatesFromServer {
+
+    /** GRANULAR_UPDATES */
+    u: ICOTGranularOpFromServer[];
+
+    /** CONTENT_VERSION */
+    vEr: number;
+
+}
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter interface. Do not use. COT abbrev. comes from CustomObjectType */
+export interface ICOTGranularOpFromServer {
+
+    /** KEY */
+    k: string;
+
+    /** VALUE **/
+    v: any;
+
+}
+
+// ------------------- typed JSON that will be received from server - END -------------------
+
+// ------------------- typed JSON that will be sent to server - START -------------------
+type ICOTDataToServer = ICOTFullObjectToServer | ICOTGranularUpdatesToServer | ICOTNoOpToServer;
+
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICOTFullObjectToServer {
+    /** VALUE */
+    v: Record<string, any>;
+
+    /** CONTENT_VERSION server side <-> client side sync to make sure we don't end up granular updating something that has changed meanwhile */
+    vEr: number;
+}
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICOTGranularUpdatesToServer {
+    /** CONTENT_VERSION server side <-> client side sync to make sure we don't end up granular updating something that has changed meanwhile */
+    vEr: number;
+
+    /** UPDATES */
+    u: ICOTGranularOpToServer[];
+}
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use. CAT abbrev. comes from CustomArrayType */
+export interface ICOTNoOpToServer {
+    /** NO_OP */
+    n: boolean;
+}
+/** This is exported just in order to be useful in unit tests. Otherwise it's an internal json object converter interface. Do not use. COT abbrev. comes from CustomObjectType */
+export interface ICOTGranularOpToServer {
+
+    /** KEY */
+    k: string;
+
+    /** VALUE */
+    v: any;
+
+}
+// ------------------- typed JSON that will be sent to server - END -------------------

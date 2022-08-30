@@ -37,17 +37,16 @@ class TestSabloDeferHelper extends SabloDeferHelper {
 @Injectable()
 export class TestWebsocketService extends WebsocketService {
   constructor(private _windowRef: WindowRefService,
-        private _services: ServicesService,
         private _converterService: ConverterService,
         private _logFactory: LoggerFactory,
         private _loadingIndicatorService: LoadingIndicatorService,
         private _ngZone: NgZone,
         private _testability: TestabilityService) {
-     super(_windowRef, _services, _converterService, _logFactory, _loadingIndicatorService,_ngZone, _testability);
+     super(_windowRef, _converterService, _logFactory, _loadingIndicatorService,_ngZone, _testability);
     }
 
   connect(): WebsocketSession {
-      return new WebsocketSession({} as ReconnectingWebSocket, this, this._services,
+      return new WebsocketSession({} as ReconnectingWebSocket, this,
         this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._testability, this._logFactory );
   }
   disconnect() {

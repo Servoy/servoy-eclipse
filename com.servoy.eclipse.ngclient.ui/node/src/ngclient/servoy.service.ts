@@ -3,26 +3,27 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { SpecTypesService, WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
+import { TypesRegistry } from '../sablo/types_registry';
+import { WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
-import { DateConverter } from './converters/date_converter';
-import { JSONObjectConverter } from './converters/json_object_converter';
-import { JSONArrayConverter } from './converters/json_array_converter';
-import { ValuelistConverter } from './converters/valuelist_converter';
-import { FoundsetConverter } from './converters/foundset_converter';
-import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter';
+import { DateType } from './converters/date_converter';
+import { CustomObjectTypeFactory } from './converters/json_object_converter';
+import { CustomArrayTypeFactory } from './converters/json_array_converter';
+import { ValuelistType } from './converters/valuelist_converter';
+import { FoundsetType } from './converters/foundset_converter';
+import { FoundsetRefType } from './converters/foundset_ref_converter';
+import { RecordRefType } from './converters/record_ref_converter';
+import { DatasetType } from './converters/dataset_converter';
+import { FoundsetLinkedType } from './converters/foundsetLinked_converter';
 import { ViewportService } from './services/viewport.service';
-
-import { IterableDiffers } from '@angular/core';
-
-
-import { FormcomponentConverter } from './converters/formcomponent_converter';
-import { ComponentConverter } from './converters/component_converter';
+import { FormcomponentType } from './converters/formcomponent_converter';
+import { ComponentType } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
-import { ClientFunctionConverter } from './converters/clientfunction_converter';
+import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
+import { ObjectType } from './converters/object_converter';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -83,26 +84,30 @@ export class ServoyService {
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
         converterService: ConverterService,
-        specTypesService: SpecTypesService,
+        typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
-        iterableDiffers: IterableDiffers,
         logFactory: LoggerFactory,
         viewportService: ViewportService) {
 
         this.uiProperties = new UIProperties(sessionStorageService);
-        const dateConverter = new DateConverter();
-        converterService.registerCustomPropertyHandler('svy_date', dateConverter);
-        converterService.registerCustomPropertyHandler('Date', dateConverter);
-        converterService.registerCustomPropertyHandler('JSON_obj', new JSONObjectConverter(converterService, specTypesService));
-        converterService.registerCustomPropertyHandler('JSON_arr', new JSONArrayConverter(converterService, specTypesService, iterableDiffers));
-        converterService.registerCustomPropertyHandler('valuelist', new ValuelistConverter(sabloService, sabloDeferHelper));
-        converterService.registerCustomPropertyHandler('foundset',
-            new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, logFactory));
-        converterService.registerCustomPropertyHandler('fsLinked',
-            new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
-        converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
-        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, this.sabloService, logFactory));
-        converterService.registerCustomPropertyHandler('clientfunction', new ClientFunctionConverter(this.windowRefService));
+        const dateType = new DateType();
+        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
+        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
+        typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService)); // used for 'object' type as well as for the default conversions
+
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
+
+        typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
+        typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, logFactory));
+        typesRegistry.registerGlobalType(RecordRefType.TYPE_NAME, new RecordRefType());
+        typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
+        typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, logFactory));
+        typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
+        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService));
+
+        typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
     }
 
     public connect() {

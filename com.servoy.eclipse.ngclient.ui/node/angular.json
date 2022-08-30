@@ -61,6 +61,14 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           }
         },
@@ -89,7 +97,7 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "codeCoverage": true,
+            "codeCoverage": false,
             "styles": [
               "src/styles.css"
             ],
@@ -97,7 +105,8 @@
               "src/assets",
               "src/favicon.ico",
               { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
-            ]
+            ],
+            "sourceMap": true
           }
         },
         "lint": {
@@ -159,7 +168,8 @@
             "main": "projects/servoy-public/src/test.ts",
             "tsConfig": "projects/servoy-public/tsconfig.spec.json",
             "karmaConfig": "projects/servoy-public/karma.conf.js",
-            "codeCoverage": true
+            "codeCoverage": false,
+            "sourceMap": true
           }
         },
         "lint": {

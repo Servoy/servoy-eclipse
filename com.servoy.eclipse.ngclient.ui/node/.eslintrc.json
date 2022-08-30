@@ -42,13 +42,9 @@
             "type": "element",
             "prefix": [
               "servoydefault",
-              "bootstrapcomponents",
-              "bootstrapextracomponents",
-              "svychartjs",
               "servoycore",
-              "servoyextra",
               "svy",
-              "aggrid"
+              "testcomponents"
             ],
             "style": "kebab-case"
           }

@@ -32,7 +32,7 @@ import {ServoyDefaultSpinner} from './spinner/spinner';
 import {ChoiceElementDirective} from './basechoice';
 
 import { SabloModule } from '../sablo/sablo.module';
-import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 
@@ -111,8 +111,4 @@ import { I18NProvider } from '../ngclient/services/i18n_provider.service';
   ]
 })
 export class ServoyDefaultComponentsModule {
-    constructor( specTypesService: SpecTypesService ) {
-        specTypesService.registerType('servoydefault-tabpanel.tab', Tab);
-        specTypesService.registerType('servoydefault-splitpane.tab', Tab);
-    }
 }

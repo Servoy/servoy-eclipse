@@ -4,16 +4,17 @@ import {
 } from '@angular/core';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ComponentConverter, ComponentModel } from '../../ngclient/converters/component_converter';
 import { ServoyBaseComponent } from '@servoy/public';
-import { FormComponentState } from '../../ngclient/converters/formcomponent_converter';
+import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
-import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset  } from '@servoy/public';
+import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset, IChildComponentPropertyValue  } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
 import { ServoyApi } from '../../ngclient/servoy_api';
+import { TypesRegistry } from '../../sablo/types_registry';
+import { ConverterService } from '../../sablo/converter.service';
 
 @Component({
     selector: 'servoycore-listformcomponent',
@@ -58,7 +59,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
-    @Input() containedForm: FormComponentState;
+    @Input() containedForm: FormComponentValue;
     @Input() foundset: IFoundset;
     @Input() selectionClass: string;
     @Input() styleClass: string;
@@ -79,17 +80,19 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     page = 0;
     numberOfCells = 0;
     selectionChangedByKey = false;
-    removeListenerFunction: () => void;
     cache: FormComponentCache;
+    removeListenerFunction: () => void;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
-    private rowItems: Array<ComponentModel | FormComponentCache>;
+    private rowItems: Array<IChildComponentPropertyValue | FormComponentCache>;
 
-    private waitingForLoad = false;  
+    private waitingForLoad = false;
 
     constructor(protected readonly renderer: Renderer2,
         private formservice: FormService,
         private servoyService: ServoyService,
+        private typesRegistry: TypesRegistry,
+        private converterService: ConverterService,
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
         @Inject(FormComponent) private parent: FormComponent,
@@ -159,33 +162,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         this.cache = this.parent.getFormCache().getFormComponent(this.name);
         this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
             if (event.viewportRowsUpdated) {
-                // copy the viewport data over to the cell
-                // TODO this only is working for "updates", what happens with deletes or inserts?
                 const changes = event.viewportRowsUpdated;
                 let insertOrDeletes = false;
                 changes.forEach(change => {
-                    if (change.type === ChangeType.ROWS_CHANGED) {
-                        const vpRows = this.foundset.viewPort.rows;
-                        for (let row = change.startIndex; row <= change.endIndex; row++) {
-                            const cache = vpRows[row]._cache;
-                            if (!cache) continue;
-                            this.containedForm.childElements.forEach(cm => {
-                                const cell: Cell = cache.get(cm.name);
-                                if (cell) {
-                                    const mvp = cm.modelViewport[row];
-                                    for (const key of Object.keys(mvp)) {
-                                        cell.model[key] = mvp[key];
-                                    }
-                                }
-                            });
-                        }
-                    } else insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
+                    insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                 });
-                if (insertOrDeletes)   this.calculateCells();
+                if (insertOrDeletes) this.calculateCells();
             } else {
-                if (event.serverFoundsetSizeChanged) {
+                if (event.serverFoundsetSizeChanged)
                     this.updatePagingControls();
-                }
 
                 if (event.viewportRowsCompletelyChanged) {
                     this.calculateCells();
@@ -281,7 +266,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.removeListenerFunction = null;
         }
         if (this.containedForm.childElements) {
-            this.containedForm.childElements.forEach(component => component.nestedPropertyChange = null);
+            this.containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
     }
 
@@ -299,7 +284,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowHeight(): number {
-        return this.containedForm.getStateHolder().formHeight;
+        return this.containedForm.formHeight;
     }
 
     getRowWidth(): string {
@@ -309,10 +294,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (!this.containedForm.absoluteLayout) {
             return null;
         }
-        return this.containedForm.getStateHolder().formWidth + 'px';
+        return this.containedForm.formWidth + 'px';
     }
 
-    getRowItems(): Array<ComponentModel | FormComponentCache> {
+    getRowItems(): Array<IChildComponentPropertyValue | FormComponentCache> {
         return this.rowItems;
     }
 
@@ -349,9 +334,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
         }
-        let cm: ComponentModel = null;
+        let cm: IChildComponentPropertyValue = null;
         if (item instanceof ComponentCache) {
-            cm = this.getRowItems().find(elem => elem.name === item.name) as ComponentModel;
+            cm = this.getRowItems().find(elem => elem.name === item.name) as IChildComponentPropertyValue;
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
@@ -365,33 +350,29 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             cm.model.servoyAttributes['data-svy-name'] = item?.model?.servoyAttributes['data-svy-name'];
         }
 
-        if (!cm.nestedPropertyChange) {
-            cm.nestedPropertyChange = (property: string, value: any) => {
-                // should we really see if this was a foundset based property so for the selected index?
-                this.componentCache.forEach(rowObject => {
+        if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
+            cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], indexOfRow: number) => {
+                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({[property: string]: ServoyBaseComponent<any>})) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
-                        const change = {};
-                        change[property] = new SimpleChange(value, value, false);
-                        ui.ngOnChanges(change);
+                        const changes = {};
+                        propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
+                            changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
+                        });
+                        ui.ngOnChanges(changes);
+                        // no use to call detect changes here because it will be called in root parent form - because this is a result of a incomming server change for a child 'component' property
                     }
-                });
+                };
+
+                if (indexOfRow === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
+                else triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[indexOfRow]);
             };
         }
-        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        function Model() {
-        }
-        Model.prototype = cm.model;
 
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
-        const model = new Model();
         const handlers = {};
-        const rowItem = new Cell(cm, model, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
-        if (cm.foundsetConfig && cm.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] instanceof Array) {
-            (cm.foundsetConfig[ComponentConverter.RECORD_BASED_PROPERTIES] as Array<string>).forEach((p) => {
-                rowItem.model[p] = cm[ComponentConverter.MODEL_VIEWPORT][rowIndex][p];
-            });
-        }
+        const rowItem = new Cell(cm, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
+
         cm.mappedHandlers.forEach((value, key) => {
             rowItem.handlers[key] = value.selectRecordHandler(rowId);
         });
@@ -401,7 +382,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return rowItem;
     }
 
-    callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
+    callApi(componentName: string, apiName: string, args: any[], path?: string[]): any {
         if (path && componentName === 'containedForm' && path[0] === 'childElements') {
             const compModel = this.containedForm.childElements[parseInt(path[1], 10)];
             const selectedIndex = this.foundset.selectedRowIndexes[0];
@@ -409,6 +390,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             if (!row) {
                 this.log.warn('calling api ' + apiName + ' on' + componentName + ' in LFC:' + this.name + ' but selected record ' + selectedIndex +
                     '  is not in the view' + this.foundset.viewPort + ' fallback to the nearest visible row');
+                // TODO is this a good idea? what if requestFocus() is called for example with the intention of showing and starting edit on selected row?
                 let closestIndex = selectedIndex;
                 let difference = Number.MAX_VALUE;
                 Object.keys(this.componentCache).forEach(key => {
@@ -424,12 +406,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             const uiComp = row[compModel.name];
             if (path.length > 2) {
                 if (instanceOfApiExecutor(uiComp)) {
-                    uiComp.callApi(path[3], apiName, args, path.slice(3));
+                    return uiComp.callApi(path[3], apiName, args, path.slice(3));
                 } else {
                     this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
                         ', but comp: ' + (uiComp == null ? ' is not found' : uiComp.name + ' doesnt implement IApiExecutor'));
                 }
             } else {
+                FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
+                                                        apiName, args, this.converterService, this.log);
                 const proto = Object.getPrototypeOf(uiComp);
                 if (proto[apiName]) {
                     return proto[apiName].apply(uiComp, args);
@@ -469,8 +453,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             if (this.servoyApi.isInAbsoluteLayout()) {
                 const parentWidth = this.elementRef.nativeElement.offsetWidth;
                 const parentHeight = this.elementRef.nativeElement.offsetHeight;
-                const height = this.containedForm.getStateHolder().formHeight;
-                const width = this.containedForm.getStateHolder().formWidth;
+                const height = this.containedForm.formHeight;
+                const width = this.containedForm.formWidth;
                 const numberOfColumns = (this.pageLayout === 'listview') ? 1 : Math.floor(parentWidth / width);
                 const numberOfRows = Math.floor(parentHeight / height);
                 this.numberOfCells = numberOfRows * numberOfColumns;
@@ -550,9 +534,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 class Cell {
     api: ServoyApi;
     name: string;
-    constructor(public readonly state: ComponentModel, public readonly model: any,
-        public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
+    /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
+    readonly model: any;
+
+    constructor(public readonly state: IChildComponentPropertyValue,
+                    public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
+
         this.name = state.name;
+        this.model = state.modelViewport[rowIndex];
     }
 
 }
@@ -580,16 +569,25 @@ class ListFormComponentServoyApi extends ServoyApi {
     getMarkupId(): string {
         return this.markupId;
     }
-    startEdit(property: string) {
-        this.cell.state.startEdit(property, this.cell.rowId);
+
+    startEdit(propertyName: string) {
+        this.cell.state.startEdit(propertyName, this.cell.rowId); // this will automatically change selection to this row server-side as well if needed
+        this.fireOnSelectionChangeIfNeeded();
+    }
+
+    apply(propertyName: string, value: any) {
+        this.cell.state.sendChanges(propertyName, value, this.cell.model[propertyName],
+                    this.cell.rowId, true); // this will automatically change selection to this row server-side as well if needed
+        this.fireOnSelectionChangeIfNeeded();
+    }
+
+    private fireOnSelectionChangeIfNeeded(): void {
         if (this.fc.onSelectionChanged) {
-            let fire = true;
             const selected = this.fc.foundset.selectedRowIndexes;
-            if (selected) {
-                fire = selected.indexOf(this.cell.rowIndex) === -1;
+            if (!selected || selected.indexOf(this.cell.rowIndex) === -1) {
+                this.fc.onSelectionChanged(new CustomEvent('SelectionChanged'));
             }
-            if (fire) this.fc.onSelectionChanged(new CustomEvent('SelectionChanged'));
         }
     }
-}
 
+}

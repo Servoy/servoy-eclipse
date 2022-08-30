@@ -1,10 +1,9 @@
 import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
-import { ServoyBaseComponent } from '@servoy/public';
-import { ComponentCache } from './types';
+import { ServoyBaseComponent, IComponentCache } from '@servoy/public';
 
 export class ServoyApi {
-    constructor( private item: ComponentCache,
+    constructor( private item: IComponentCache,
                  private formname: string,
                  private absolute: boolean,
                  private formservice: FormService,
@@ -36,8 +35,6 @@ export class ServoyApi {
         return this.formservice.callComponentServerSideApi(this.formname, this.item.name, methodName, args);
     }
 
-    public getFormComponentElements( _propertyName: string, _formComponentValue: any ) { }
-
     public isInDesigner() {
         return false;
     }
@@ -68,12 +65,13 @@ export class ServoyApi {
     public unRegisterComponent(_component: ServoyBaseComponent<any>) {
         // these are overwritten by components that needs this.
     }
-    
-    public getClientProperty(key){
+
+    public getClientProperty(key: string): any{
         if ( this.item.model && this.item.model.clientProperty ) {
             return this.item.model.clientProperty[key];
         }
         return null;
     }
+
 }
 

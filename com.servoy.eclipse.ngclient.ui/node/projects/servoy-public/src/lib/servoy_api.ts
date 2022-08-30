@@ -26,5 +26,5 @@ export abstract class ServoyApi {
 
     public abstract unRegisterComponent(component: ServoyBaseComponent<any>);
 
-    public abstract getClientProperty(key);
+    public abstract getClientProperty(key: string): any;
 }

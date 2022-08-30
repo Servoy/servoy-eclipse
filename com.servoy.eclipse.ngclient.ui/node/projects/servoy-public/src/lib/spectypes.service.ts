@@ -1,138 +1,186 @@
 import { Injectable } from '@angular/core';
 
-import { IterableDiffers, IterableDiffer } from '@angular/core';
 import { Observable } from 'rxjs';
+import { IComponentCache } from './services/servoy_public.service';
 import { LoggerFactory, LoggerService } from './logger.service';
 
-
+/**
+ * This service is DEPRECATED, as now, more .spec info about components/services is being sent to client (types + pushToServer info), and
+ * for pushToServer SHALLOW or DEEP in .spec file (for custom objects/custom arrays), a proxy object will be used
+ * on client to automatically detect reference changes and send them to server as needed.
+ *
+ * So there isn't a need anymore to provide 'watched' properties list by extending BaseCustomObject or manually pushing them. Just make sure that, if it
+ * has pushToServer > ALLOW and if you assign a new full value (array or obj) to the property on client, read it back from the model (as that will be
+ * updated to a proxy of your new value) and use it instead.
+ *
+ * @deprecated
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class SpecTypesService {
 
-    private registeredTypes = new Map<string, typeof BaseCustomObject>();
     private log: LoggerService;
 
     constructor(logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SpecTypesService');
     }
-    createType(name: string): BaseCustomObject {
-        const classRef = this.registeredTypes.get(name);
-        if (classRef) {
-            return new classRef();
-        }
-        this.log.warn('returning just the basic custom object for  ' + name + ' none of the properties will be monitored');
-        return new BaseCustomObject();
-    }
 
-    enhanceArrayType<T>(array: Array<T>, iterableDiffers: IterableDiffers): ICustomArray<T> {
-        if (!instanceOfChangeAwareValue(array)) {
-            array['stateHolder'] = new ArrayState(array, iterableDiffers);
-            Object.defineProperty(array, 'getStateHolder', {
-                enumerable: false,
-                value() {
-                    return this.stateHolder;
-                }
-            });
-            Object.defineProperty(array, 'markForChanged', {
-                enumerable: false,
-                value() {
-                    this.stateHolder.notifyChangeListener();
-                }
-            });
-            array['stateHolder'].initDiffer();
-        }
-        return array as ICustomArray<T>;
-    }
-
+    /**
+     * DEPRECATED. See jsDoc/comment from SpecTypesService.
+     *
+     * @deprecated
+     */
     registerType(name: string, classRef: typeof BaseCustomObject) {
-        this.registeredTypes.set(name, classRef);
+        this.log.info(this.log.buildMessage(() => ('SpecTypesService * SpecTypesService.registerTypeupdates and extending BaseCustomObject is no longer necessary. Code that registers it for "'
+                                                        + name + '", "' + classRef + '" should be safe to remove/clean up (as long as the servoy component definition .spec file is ok).')));
     }
 
-    guessType(val: any): string {
-        let guess = null;
+//  the old methods
+//    enhanceArrayType(...)
+//        and
+//    createType(...)
+//  were public but as far as I can tell they were never meant to be called by component impl. code; only the custom array/object converter used them actually
+//  so that is why they are removed completely, not deprecated
 
-        if (instanceOfCustomArray(val)) {
-            guess = 'JSON_arr';
-        } else if (instanceOfBaseCustomObject(val)) {
-            guess = 'JSON_obj';
-        } // else TODO do any other types need guessing?
-        //        else { // try to find it in types?
-        //            this.registeredTypes.forEach(function(typeConstructorValue, typeNameKey) {
-        //                if (val instanceof typeConstructorValue) guess = typeNameKey; // this wouldn't return the converter name like 'JSON_obj' but rather the actual name from spec
-        //                of the custom type like "(...).tab"
-        //            });
-        //        }
-        return guess;
+}
+
+/**
+ * This type is DEPRECATED (you can remove extends BaseCustomObject from any custom types you have and even make them interfaces).
+ * You can even turn your custom types into interfaces (that can also implement ICustomObjectValue - if you need that; see details below). The system
+ * will automatically generate the correct object for that interface (as long as it follows what is defined in the .spec file for this custom
+ * object) - and you can use it.
+ *
+ * Now, more .spec info about components/services is being sent to client (types + pushToServer info), and
+ * for pushToServer SHALLOW or DEEP in .spec file (for custom objects/custom arrays), a proxy object will be used
+ * on client to automatically detect reference changes in subproperties and send them to server as needed (note: for deep nested JSON changes
+ * in plain 'object' subproperties - if any - you need to use ICustomObjectValue interface in order to tell the system that it changed, but
+ * that is probably rarely needed).
+ *
+ * So there isn't a need anymore to provide 'watched' properties list by extending BaseCustomObject or to manually push them to server by using
+ * getter/setter pair; that is done automatically via use of Proxy objects. Just make sure that, if it has pushToServer >= ALLOW, and if you assign
+ * a new full value (full custom object value - although it is the same for arrays from .spec as well) to the property on client-side, you read it
+ * back from the model when you need to use it (as that reference will be updated to a newly created Proxy of your new value - after being sent to server)
+ * and use the new reference instead.
+ *
+ * @deprecated
+ */
+export class BaseCustomObject {
+
+    /**
+     * DEPRECATED: See class jsdoc for more information.
+     *
+     * @deprecated
+     */
+    getStateHolder(): BaseCustomObjectState {
+        return new BaseCustomObjectState(); // dummy; just not to generate compile errors for older code
     }
+
 }
 
-export function isChanged(now, prev, conversionInfo) {
-    if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && instanceOfChangeAwareValue(now)) {
-        return now.getStateHolder().hasChanges();
+/**
+ * DEPRECATED: See BaseCustomObject jsdoc for more information.
+ *
+ * @deprecated
+ */
+export class BaseCustomObjectState {
+
+    /**
+     * DEPRECATED: See BaseCustomObject jsdoc for more information.
+     *
+     * @deprecated
+     */
+    getChangedKeys(): Set<string | number> {
+        return new Set<string | number>(); // dummy; just not to generate compile errors for older code
     }
 
-    if (now === prev) return false;
-    if (now && prev) {
-        if (now instanceof Array) {
-            if (prev instanceof Array) {
-                if (now.length !== prev.length) return true;
-            } else {
-                return true;
-            }
-        }
-        if (now instanceof Date) {
-            if (prev instanceof Date) {
-                return now.getTime() !== prev.getTime();
-            }
-            return true;
-        }
+    /**
+     * DEPRECATED: See BaseCustomObject jsdoc for more information.
+     *
+     * @deprecated
+     */
+    markAllChanged(_notifyListener: boolean): void {}
 
-        if ((now instanceof Object) && (prev instanceof Object)) {
-            // first build up a list of all the properties both have.
-            const fulllist = this.getCombinedPropertyNames(now, prev);
-            for (const prop in fulllist) {
-                // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
-                if (prev[prop] !== now[prop]) {
-                    if (prop === '$$hashKey') continue;
-                    if (typeof now[prop] === 'object') {
-                        if (isChanged(now[prop], prev[prop], conversionInfo ? conversionInfo[prop] : undefined)) {
-                            return true;
-                        }
-                    } else {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+    /**
+     * DEPRECATED: See BaseCustomObject jsdoc for more information.
+     *
+     * @deprecated
+     */
+    setPropertyAndHandleChanges(thisBaseCustoomObject: any, internalPropertyName: any, _propertyName: any, value: any) {
+        thisBaseCustoomObject[internalPropertyName] = value;
     }
-    return true;
+
+    /**
+     * DEPRECATED: See BaseCustomObject jsdoc for more information.
+     *
+     * @deprecated
+     */
+    notifyChangeListener(): void {}
+
 }
 
-export const instanceOfChangeAwareValue = (obj: any): obj is IChangeAwareValue =>
-    obj != null && (obj).getStateHolder instanceof Function;
+/** Value present for properties in model of Servoy components/services if they are declared in the .spec file as arrays. (someType[]) */
+export interface ICustomArrayValue<T> extends Array<T> {
 
+    /**
+     * Calling this method is (rarely) only needed if both:
+     *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is > ALLOW)
+     *   2. AND you store in the array simple json values that are nested, and type elements simply as 'object' in the .spec file. So if the array
+     *      is declared in the .spec file as 'object[]' and you change an element/index in it client-side not by reference, but
+     *      by content nested inside the array element value (e.g. myArray[5].subProp = 15) instead. Calling this method is not needed if you do
+     *      for example myArray[5] = { subProp: 14, otherSubProp: true }, so a change by reference of index 5.
+     *
+     * In these case (1 and 2), in order for the updated element value to be marked as needing to be sent to server, call this method.
+     *
+     * Calling this is generally not needed because, if pushToServer is ALLOW or greater (SHALLOW / DEEP) on elements, the array will mark (as needing
+     * to be sent to server) automatically any inserts/deletes and changes by reference in the array. It will mark an element as changed as well in case of
+     * nested changes that happen in other array or custom object types ONLY if they are declared as such in the component/service Servoy .spec file
+     * (so they are not typed as simple 'object'). That is why you do not need to call this method for those situations. Call it only for
+     * nested JSON element values typed as 'object' in the .spec file, that have changes in them but are not changed by reference.
+     *
+     * These marked elements, if they have ALLOW pushToServer, not higher, will not be sent to server right away, but whenever a send of the
+     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered via
+     * FormComponent.datachange(..., rootPropertyName, ...) or automatically by some other SHALLOW or DEEP pushToServer value change somewhere else
+     * in the same root property.
+     *
+     * IMPORTANT: This method is available for custom arrays received from server and for ones created client - side by components, but, for the latter, only after
+     * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
+     * DO NOT add this method yourself in newly created custom array instances client-side, as that will not help!
+     */
+    markElementAsHavingDeepChanges(index: number): void;
 
-export const instanceOfCustomArray = <T>(obj: any): obj is ICustomArray<T> =>
-    instanceOfChangeAwareValue(obj) && (obj as ICustomArray<T>).markForChanged instanceof Function;
-
-
-export const instanceOfBaseCustomObject = (obj: any): obj is BaseCustomObject =>
-    instanceOfChangeAwareValue(obj) && (obj).getStateHolder() instanceof BaseCustomObjectState;
-
-
-export interface IChangeAwareValue {
-    getStateHolder(): ChangeAwareState;
 }
 
-export interface ICustomObject extends IChangeAwareValue {
-    getStateHolder(): BaseCustomObjectState;
-}
+/** Value present for properties in model of Servoy components/services if they are declared in the .spec file as custom types. (in the 'types' section) */
+export interface ICustomObjectValue extends Record<string, any> {
 
-export interface ICustomArray<T> extends Array<T>, IChangeAwareValue {
-    getStateHolder(): ArrayState;
-    markForChanged(): void;
+    /**
+     * Calling this method is (rarely) only needed if both:
+     *   1. you want to send client side changes back to the server manually (calculated pushToServer .spec config for the elements of this array is > ALLOW)
+     *   2. AND you store in the object simple json values that are nested, and type subproperties simply as 'object' in the .spec file. So if the
+     *      subprop. is declared in the .spec file as 'object' and you change that subproperty in it client-side not by reference, but
+     *      by content nested inside the subproperty value (e.g. myCustomObject.subProp[3].x = 15) instead. Calling this method is not needed if you do
+     *      for example myCustomObject.subProp = [ { x: [14, 0], y: true } ], so a change by reference of index 5.
+     *
+     * In that case (1 and 2), in order for the updated subproperty value to be marked as needing to be sent to server, call this method.
+     *
+     * Calling this is generally not needed because, if pushToServer is ALLOW or greater (SHALLOW / DEEP) on a subproperty, the custom object will mark
+     * automatically as needing to be sent to server any new/deleted subproperties and changes by reference in the object. It will mark an element as changed
+     * as well in case of  nested changes that happen in other array or custom object types ONLY if they are declared as such in the .spec file (so not
+     * simple 'object's), so you do not need to call this method for those situations. Only for nested JSON subproperty values that change, are typed as 'object' in
+     * the component/service .spec file, but are not changed by reference.
+     *
+     * These marked subproperties, if they have ALLOW pushToServer, not higher, will not be sent to server right away, but whenever a send of the
+     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered via
+     * FormComponent.datachange(..., rootPropertyName, ...) or automatically by some other SHALLOW or DEEP pushToServer value change somewhere else
+     * in the same root property.
+     *
+     * IMPORTANT: This method is available for custom objects received from server and for ones created client - side by components, but, for the latter, only after
+     * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
+     * DO NOT add this method yourself in newly created custom object instances client-side, as that will not help!
+     */
+    markSubPropertyAsHavingDeepChanges?(subPropertyName: string): void;
+
 }
 
 export interface IValuelist extends Array<{ displayValue: string; realValue: any }> {
@@ -145,13 +193,17 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
 export interface IFoundsetFieldsOnly {
 
     /**
-     * An identifier that allows you to use this foundset via the 'foundsetRef' type;
-     * when a 'foundsetRef' type sends a foundset from server to client (for example
-     * as a return value of callServerSideApi) it will translate to this identifier
-     * on client (so you can use it to find the actual foundset property in the model if
-     * server side script put it in the model as well); internally when sending a
-     * 'foundset' typed property to server through a 'foundsetRef' typed argument or prop,
-     * it will use this foundsetId as well to find it on server and give a real Foundset
+     * An identifier that allows you to use this foundset via the 'foundsetRef' and
+     * 'record' types.
+     *
+     * 'record' and 'foundsetRef' .spec types use it to be able to send RowValue
+     * and FoundsetValue instances as record/foundset references on server (so
+     * if an argument or property is typed as one of those in .spec file).
+     *
+     * In reverse, if a 'foundsetRef' type sends a foundset from server to client
+     * (for example as a return value of callServerSideApi) it will translate to
+     * this identifier on client (so you can use it to find the actual foundset
+     * property in the model, if server side script put it in the model as well).
      */
     foundsetId: number;
 
@@ -202,14 +254,17 @@ export interface IFoundsetFieldsOnly {
      * browser yourself; keys are the dataprovider names and values are objects that contain
      * the format contents
      */
-    columnFormats: Record<string, any>;
+    columnFormats?: Record<string, any>;
 }
 
+/**
+ * Interface for client side values of 'foundset' typed properties in .spec files.
+ */
 export interface IFoundset extends IFoundsetFieldsOnly {
 
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
-     * asynchronously in 'viewPort'
+     * asynchronously in 'viewPort'.
      *
      * @param startIndex the index that you request the first record in "viewPort.rows" to have in
      *                   the real foundset (so the beginning of the viewPort).
@@ -278,7 +333,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *
      * @param sortColumns an array of JSONObjects { name : dataprovider_id,
      *                    direction : sortDirection }, where the sortDirection can be "asc" or "desc".
-     * @return (added in Servoy 8.2.1) a promise that will get resolved when the new sort
+     * @return a promise that will get resolved when the new sort
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
      */
@@ -296,6 +351,33 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
      */
     requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
+
+    /**
+     * It will send a data update for a cell (a column in a row) in the foundset to the server.
+     * Please make sure to adjust the viewport value as well not just call this method.
+     *
+     * This method is useful if you do not want to use push-to-server SHALLOW in .spec file but do it manually instead, or if
+     * you have nested JSON object/arrays as cell values and you need to tell the foundset that something nested has changed (DEEP watches are not available in NG2) or
+     * if you just need a promise to know when the change was done or failed on server.
+     *
+     * The calculated pushToServer for the foundset property should be set to 'allow' if you use this method. Then the server will accept
+     * data changes from this property, but there will be no automatic proxies to detect the changes-by-reference to cell values, so the component uses this call
+     * to send cell changes instead.
+     *
+     * @param rowID the _svyRowId column of the client side row
+     * @param columnName the name of the column to be updated on server (in that row).
+     * @param newValue the new data in that cell
+     * @param oldValue the old data that used to be in that cell
+     * @return (first versions of this method didn't return anything; more recent ones return this) a promise that will get resolved when the new cell value
+     *                   update is done server-side (resolved if ok, rejected if it failed). As with any promise you can register success, error
+     *                   and finally callbacks.
+     */
+    columnDataChangedByRowId(rowID: string, columnName: string, newValue: any, oldValue: any): Promise<any>;
+
+    /**
+     * Convenience method that does exactly what #columnDataChangedByRowId does, but based on a row index from the viewport not on that row's ID.
+     */
+    columnDataChanged(rowIndex: number, columnName: string, newValue: any, oldValue: any): Promise<any>;
 
     /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
@@ -325,47 +407,15 @@ export interface IFoundset extends IFoundsetFieldsOnly {
     setPreferredViewportSize(preferredSize: number, sendViewportWithSelection?: boolean, centerViewportOnSelected?: boolean): void;
 
     /**
-     * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
-     * and gives a Record reference, an object
-     * which can be resolved server side to the exact Record via the 'record' property type;
-     * for example if you call a handler or a servoyapi.callServerSideApi(...) and want
-     * to give it a Record as parameter and you have the rowID and foundset in your code,
-     * you can use this method. E.g: servoyapi.callServerSideApi("doSomethingWithRecord",
-     *                     [this.myFoundsetProperty.getRecordRefByRowID(clickedRowId)]);
-     *
-     * NOTE: if in your component you know the whole row (so myFoundsetProp.viewPort.rows[idx])
-     * already - not just the rowID - that you want to send you can just give that directly to the
-     * handler/serverSideApi; you do not need to use this method in that case. E.g:
-     * // if you have the index inside the viewport
-     * servoyapi.callServerSideApi("doSomethingWithRecord",
-     *           [this.myFoundsetProperty.viewPort.rows[clickedRowIdx]]);
-     * // or if you have the row directly
-     * servoyapi.callServerSideApi("doSomethingWithRecord", [clickedRow]);
-     *
-     * This method has been added in Servoy 8.3.
-     */
-    getRecordRefByRowID(rowId: string): void;
-
-    /**
      * Adds a change listener that will get triggered when server sends changes for this foundset.
      *
      * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset
                  get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
      * @param changeListener the listener to register.
+     * @return a function to unregister the listener
      */
     addChangeListener(changeListener: FoundsetChangeListener): () => void;
     removeChangeListener(changeListener: FoundsetChangeListener): void;
-
-    /**
-     * Mark the foundset data as changed on the client.
-     * If push to server is allowed for this foundset then the changes will be sent to the server, othwerwise the changes are ignored.
-     *
-     * @param index is the row index (relative to the viewport) where the data change occurred
-     * @param columnID the name of the column
-     * @param newValue the new value
-     * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
-     */
-    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any): void;
 
 }
 
@@ -373,6 +423,7 @@ export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
+
     viewportRowsCompletelyChanged?: { oldValue: any[]; newValue: any[] };
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
@@ -399,15 +450,16 @@ export interface FoundsetChangeEvent extends ViewportChangeEvent {
     serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
     hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
     multiSelectChanged?: { oldValue: boolean; newValue: boolean };
-    columnFormatsChanged?: { oldValue: Record<string, object>; newValue: Record<string, object> };
+    columnFormatsChanged?: { oldValue: Record<string, Record<string, unknown>>; newValue: Record<string, Record<string, unknown>> };
     sortColumnsChanged?: { oldValue: string; newValue: string };
     selectedRowIndexesChanged?: { oldValue: number[]; newValue: number[] };
     viewPortStartIndexChanged?: { oldValue: number; newValue: number };
     viewPortSizeChanged?: { oldValue: number; newValue: number };
+    viewportRowsCompletelyChanged?: { oldValue: ViewPortRow[]; newValue: ViewPortRow[] };
     userSetSelection?: boolean;
 }
 
-export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
+export type ViewportChangeListener = (changeEvent: ViewportChangeEvent) => void;
 export type FoundsetChangeListener = (changeEvent: FoundsetChangeEvent) => void;
 
 export interface ViewportRowUpdate { type: ChangeType; startIndex: number; endIndex: number }
@@ -437,26 +489,6 @@ export enum ChangeType  {
     ROWS_DELETED
 }
 
-export class BaseCustomObject implements ICustomObject {
-    private state = new BaseCustomObjectState();
-
-    constructor() {
-        this.state.allChanged = true;
-    }
-
-    public getStateHolder() {
-        return this.state;
-    }
-
-    /**
-     *  subclasses can override this to give back the properties that needs to be watched.
-     */
-    getWatchedProperties(): Array<string> {
-        return null;
-    }
-
-}
-
 export interface ViewPort {
     startIndex: number;
     size: number;
@@ -468,182 +500,62 @@ export interface ViewPortRow extends Record<string, any> {
     _cache?: Map<string, any>;
 }
 
-export class ChangeAwareState {
+/**
+ * Interface for client side values of 'component' typed properties in .spec files. (so used as child components within the .spec of a component)
+ */
+export interface IChildComponentPropertyValue extends IComponentCache {
 
-    public allChanged = false;
+    name: string;
+    /** this is the shared part of the model; you might want to use modelViewport (which uses this as prototype) instead if the child component has foundset-linked properties */
+    model: { [property: string]: any };
+    handlers: any;
+    foundsetConfig?: {
+        recordBasedProperties?: Array<string>;
+        apiCallTypes?: Array<any>;
+    };
 
-    private changeListener: () => void;
-    private inNotify = false;
+    /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
+    modelViewport: any[];
 
-    markAllChanged(notifyListener: boolean): void {
-        this.allChanged = true;
-        if (notifyListener) this.notifyChangeListener();
-    }
+    /**
+     * This function has to be set/provided by the ng2 component that uses this child "component" typed property, because
+     * that one controls the UI of the child components represented by this property (or child components in case of
+     * foundset linked components like in list form component for example). Then when there are changes comming from server, the 'component'
+     * property type will call this function as needed.
+     */
+    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], rowIndex: number) => void;
 
-    hasChanges(): boolean {
-        return this.allChanged || this.inNotify;
-    }
+    /**
+     * This gives a way to trigger handlers.
+     *
+     * In case this component is not foundset-linked, use mappedHandlers directly (which is a function).
+     * In case this component is foundset-linked, use mappedHandlers.selectRecordHandler(rowId) to trigger the handler for the component of the correct row in the foundset.
+     */
+    mappedHandlers: Map<string, { (): Promise<any>; selectRecordHandler(rowId: any): () => Promise<any> }>;
 
-    setChangeListener(callback: () => void): void {
-        this.changeListener = callback;
-    }
+    /**
+     * Parent components that use this child 'component' typed value will need to give a svyServoyApi to the actual child components (whether it's a viewport of them
+     * for this child component value (foundset linked components similar to list form component child usage) or only one). They can use this startEdit to provide
+     * that to child components based on specific rows in the foundset (via rowId param).
+     */
+    startEdit(propertyName: string, rowId: any): void;
 
-    public notifyChangeListener(): void {
-        this.inNotify = true;
-        if (this.changeListener) this.changeListener();
-        this.inNotify = false;
-    }
+    /**
+     * Parent components that use this child 'component' typed value will need to give a svyServoyApi to the actual child components (whether it's a viewport of them
+     * for this child component value (foundset linked components similar to list form component child usage) or only one). They can use this sendChanges to provide
+     * 'apply' of dataproviders to child components based on specific rows in the foundset (via rowId param) or even in order to provide non-dataprovider send change
+     * API or emit() implementation based on specific rows in the foundset (via rowId param).
+     */
+    sendChanges(propertyName: string, modelOfComponent: Record<string, any>, oldValue: any, rowId: any, isDataprovider?: boolean): void;
 
-}
-
-export class BaseCustomObjectState extends ChangeAwareState {
-
-    // provide a hash that lets arrays that contain custom objects know that the object has changed or not
-    private static counter = 0;
-
-    public conversionInfo = {};
-    public ignoreChanges = false;
-
-
-    private change = 0;
-    private hash = BaseCustomObjectState.counter++;
-
-    private changedKeys = new Set<string | number>();
-
-    hasChanges() {
-        return super.hasChanges() || this.getChangedKeys().size > 0; // leave this as a method call as some subclasses might compute the changedKeys inside getChangedKeys()
-    }
-
-    public setPropertyAndHandleChanges(_thisBaseCustoomObject, internalPropertyName, propertyName, value) {
-        const oldValue = _thisBaseCustoomObject[internalPropertyName];
-
-        // if the value of this property is changed, mark it as such and notify if needed
-        this.markIfChanged(propertyName, value, oldValue);
-
-        // unregister as listener to old value if needed
-        this.setChangeListenerToSubValueIfNeeded(oldValue, undefined);
-
-        _thisBaseCustoomObject[internalPropertyName] = value;
-
-        // register as listener to new value if needed
-        this.setChangeListenerToSubValueIfNeeded(value, () => {
-            this.markIfChanged(propertyName, value, value);
-        });
-
-        // this value has changed by reference; so it needs to be fully sent to server - except for when it now arrived from the server and is being set (in which case ignoreChanges is true)
-        if (!this.ignoreChanges && instanceOfChangeAwareValue(value)) value.getStateHolder().markAllChanged(false);
-    }
-
-    public getChangedKeys(): Set<string | number> {
-        return this.changedKeys;
-    }
-
-    public clearChanges() {
-        this.changedKeys.clear();
-        this.allChanged = false;
-    }
-
-    public getHashKey(): string {
-        return this.hash + '_' + this.change;
-    }
-
-    protected markIfChanged(propertyName: string | number, newObject: any, oldObject: any) {
-        if (this.testChanged(propertyName, newObject, oldObject)) {
-            this.pushChange(propertyName);
-            return true;
-        }
-        return false;
-    }
-
-    private setChangeListenerToSubValueIfNeeded(value: any, changeListener: () => void): void {
-        if (instanceOfChangeAwareValue(value)) {
-            // child is able to handle it's own change mechanism
-            value.getStateHolder().setChangeListener(changeListener);
-        }
-    }
-
-    private pushChange(propertyName) {
-        if (this.ignoreChanges) return;
-        if (this.changedKeys.size === 0) this.change++;
-
-        if (!this.changedKeys.has(propertyName)) {
-            this.changedKeys.add(propertyName);
-            this.notifyChangeListener();
-        }
-    }
-
-    private testChanged(propertyName: string | number, newObject: any, oldObject: any) {
-        if (newObject !== oldObject) return true;
-        if (typeof newObject == 'object') {
-            if (instanceOfChangeAwareValue(newObject)) {
-                return newObject.getStateHolder().hasChanges();
-            } else {
-                return isChanged(newObject, oldObject, this.conversionInfo[propertyName]);
-            }
-        }
-        return false;
-    }
-}
-
-export class ArrayState extends BaseCustomObjectState {
-    private differ: IterableDiffer<Array<any>>;
-
-    constructor(private array: Array<any>, private iterableDiffers: IterableDiffers) {
-        super();
-        this.allChanged = true;
-    }
-
-    public initDiffer() {
-        this.differ = this.iterableDiffers.find(this.array).create((index: number, item: any) => {
-            if (instanceOfBaseCustomObject(item)) {
-                return item.getStateHolder().getHashKey();
-            }
-            return item;
-        });
-        this.differ.diff(this.array);
-    }
-
-    public clearChanges() {
-        super.clearChanges();
-        this.initDiffer();
-    }
-
-    public getChangedKeys(): Set<string | number> {
-        let changes = super.getChangedKeys();
-        const arrayChanges = this.differ.diff(this.array);
-        if (arrayChanges) {
-            let addedOrRemoved = 0;
-            arrayChanges.forEachAddedItem((record) => {
-                addedOrRemoved++;
-                changes.add(record.currentIndex);
-            });
-            arrayChanges.forEachRemovedItem((record) => {
-                addedOrRemoved--;
-                changes.add(record.previousIndex);
-            });
-
-            arrayChanges.forEachMovedItem((record) => {
-                if (instanceOfChangeAwareValue(record.item)) {
-                    return record.item.getStateHolder().markAllChanged(false);
-                }
-            });
-            if (addedOrRemoved !== 0) {
-                // size changed, for now send whole array
-                this.markAllChanged(false);
-            } else {
-                const changesArray = Array.from(changes);
-                changesArray.sort((a: number, b: number) => a - b);
-                changes = new Set(changesArray);
-            }
-        }
-        return changes;
-    }
+    /**
+     * Adds a change listener that will get triggered when server sends granular or full modelViewport changes for this component.
+     *
+     * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this same foundset
+     *              get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
+     * @param viewportChangeListener the listener to register.
+     */
+    addViewportChangeListener(viewportChangeListener: ViewportChangeListener): () => void;
+    removeViewportChangeListener(viewportChangeListener: ViewportChangeListener): void;
 
 }
-
-export interface ColumnRef {
-    _svyRowId: string;
-    dp: string;
-    value: string;
-};
-

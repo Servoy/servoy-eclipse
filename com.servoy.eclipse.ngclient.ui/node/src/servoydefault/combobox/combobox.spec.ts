@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicModule } from '@servoy/public';
-import { Format, SpecTypesService, ServoyApi } from '@servoy/public';
+import { ServoyPublicModule, ServoyBaseComponent, Format, ServoyApi } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConverterService } from '../../sablo/converter.service';
-import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper } from '../../sablo/defer.service';
-import { ValuelistConverter } from '../../ngclient/converters/valuelist_converter';
+import { ValuelistType } from '../../ngclient/converters/valuelist_converter';
 import { ServicesService } from '../../sablo/services.service';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TypesRegistry, IPropertyContext, PushToServerEnum } from '../../sablo/types_registry';
 
 const mockData = [
   {
@@ -26,7 +25,7 @@ const mockData = [
   {
     realValue: 3,
     displayValue: 'Cluj'
-  },
+  }
 ];
 
 function createDefaultValuelist() {
@@ -39,33 +38,75 @@ function createDefaultValuelist() {
 describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
-  let servoyApi;
+  let servoyApi: ServoyApi;
   let combobox: DebugElement;
   let converterService: ConverterService;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
+
+    // the following construct does nothing but make sure that an error is generated at compile-time if ServoyApi changes
+    // so that when that happens we can update the jasmine.createSpyObj below which is based on strings only
+    class _X extends ServoyApi {
+        formWillShow(_fn: string, _rn?: string, _fi?: number): Promise<boolean> { return undefined; }
+        hideForm(_fn: string, _rn?: string, _fi?: number, _fntws?: string, _rntwbs?: string, _fitwbs?: number): Promise<boolean> { return undefined; }
+        startEdit(_p: string) {}
+        apply(_propertyName: string, _value: any) {}
+        callServerSideApi(_methodName: string, _args: Array<any>) {}
+        getFormComponentElements(_propertyName: string, _formComponentValue: any) {}
+        isInDesigner(): boolean { return false }
+        trustAsHtml(): boolean { return false }
+        isInAbsoluteLayout(): boolean { return false }
+        getMarkupId(): string  { return undefined; }
+        getFormName(): string  { return undefined; }
+        registerComponent(_component: ServoyBaseComponent<any>) {}
+        unRegisterComponent(_component: ServoyBaseComponent<any>) {}
+        getClientProperty(_key:string): any { return undefined; }
+    };
+    new _X(); // just to remove unused class warning
+
+    servoyApi = jasmine.createSpyObj( 'ServoyApi', [
+        'formWillShow',
+        'hideForm',
+        'startEdit',
+        'apply',
+        'callServerSideApi',
+        'getFormComponentElements',
+        'isInDesigner',
+        'trustAsHtml',
+        'isInAbsoluteLayout',
+        'getMarkupId',
+        'getFormName',
+        'registerComponent',
+        'unRegisterComponent',
+        'getClientProperty'
+    ]);
 
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCombobox],
-      providers: [ ValuelistConverter,  ServicesService ],
-      imports: [ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule]
+        declarations: [ ServoyDefaultCombobox ],
+        providers: [ ServicesService ],
+        imports: [ ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    const sabloService: SabloService = TestBed.inject( SabloService );
     const sabloDeferHelper = TestBed.inject( SabloDeferHelper );
+    const typesRegistry = TestBed.inject(TypesRegistry);
     converterService = TestBed.inject( ConverterService );
-    converterService.registerCustomPropertyHandler( 'valuelist', new ValuelistConverter( sabloService, sabloDeferHelper) );
+
+    typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper), true);
 
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
     component = fixture.componentInstance;
-    component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(), 'valuelist');
+    const propertyContext = {
+            getProperty: (_propertyName: string) => undefined,
+            getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
+        } as IPropertyContext;
+    component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(),
+                     new ValuelistType(sabloDeferHelper) , undefined, undefined, undefined, propertyContext);
     component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
     component.dataProviderID = 3;
     component.format = new Format();
