@@ -28,8 +28,8 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     mainForm: string;
     solutionName: string;
     private wsSession: WebsocketSession;
-    previewRequested: boolean;
-    previewFormTemplate = '{ "PreviewForm": { "responsive": false, "size": { "width": "100%", "height": "100%" }, "children": [ { "name": "", "model": { "borderType": { "type": "BevelBorder", "borderStyle": { "borderColor": "null null null null", "borderWidth": "2px", "borderStyle": "outset" } }, "designSize": { "width": "100%", "height": "100%" }, "size": { "width": "100%", "height": "100%" }, "addMinSize": true, "useCssPosition": {}, "absoluteLayout": { "": true }, "hasExtraParts": false } }, { "part": true, "classes": [ "svy-body" ], "layout": { "position": "absolute", "left": "0px", "right": "0px", "top": "0px", "bottom": "0px", "overflow-x": "auto", "overflow-y": "auto" }, "children": [] } ] } }';
+    variantsRequested: boolean;
+    vaeiantsFormTemplate = '{ "VariantsForm": { "responsive": false, "size": { "width": "100%", "height": "100%" }, "children": [ { "name": "", "model": { "borderType": { "type": "BevelBorder", "borderStyle": { "borderColor": "null null null null", "borderWidth": "2px", "borderStyle": "outset" } }, "designSize": { "width": "100%", "height": "100%" }, "size": { "width": "100%", "height": "100%" }, "addMinSize": true, "useCssPosition": {}, "absoluteLayout": { "": true }, "hasExtraParts": false } }, { "part": true, "classes": [ "svy-body" ], "layout": { "position": "absolute", "left": "0px", "right": "0px", "top": "0px", "bottom": "0px", "overflow-x": "auto", "overflow-y": "auto" }, "children": [] } ] } }';
 
     constructor(private windowRef: WindowRefService,
         private websocketService: WebsocketService,
@@ -45,13 +45,13 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         let path: string = this.windowRef.nativeWindow.location.pathname;
         let formStart = path.indexOf('/form/') + 6;
         let formName = path.substring(formStart, path.indexOf('/', formStart));
-        this.previewRequested = (formName == "PreviewForm");
+        this.variantsRequested = (formName == "VariantsForm");
         this.solutionName = path.substring(path.indexOf('/solution/') + 10, path.indexOf('/form/'));
         let clientnr = path.substring(path.indexOf('/clientnr/') + 10);
         this.websocketService.setPathname('/rfb/angular/content/');
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
-        if (this.previewRequested) {
-			const formState = JSON.parse(this.previewFormTemplate)[formName];
+        if (this.variantsRequested) {
+			const formState = JSON.parse(this.vaeiantsFormTemplate)[formName];
 	        this.formService.createFormCache(formName, formState, null);
 	        this.mainForm = formName;
 		} else {
@@ -79,8 +79,8 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
 		            if (path.indexOf('resources/fs/') >= 0) link.setAttribute('svy-stylesheet', path);
 		        }
 		    }
-		    if (this.previewRequested) {
-				 this.windowRef.nativeWindow.parent.postMessage({ id: 'previewReady'}, '*');
+		    if (this.variantsRequested) {
+				 this.windowRef.nativeWindow.parent.postMessage({ id: 'variantsReady'}, '*');
 			}
 		});
 
