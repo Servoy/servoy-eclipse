@@ -513,13 +513,13 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		columnTooltips.add("Ctrl+click in a cell to open data provider dialog");
 
 		TableColumn opColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_OP);
-		opColumn.setText("op");
+		opColumn.setText("Op");
 		TableViewerColumn opViewerColumn = new TableViewerColumn(tableViewer, opColumn);
 		opViewerColumn.setEditingSupport(new OperatorEditingSupport(this, tableViewer));
 		columnTooltips.add("Relation operator");
 
 		TableColumn maskColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_MASK);
-		maskColumn.setText("modifier");
+		maskColumn.setText("Modifier");
 		TableViewerColumn maskViewerColumn = new TableViewerColumn(tableViewer, maskColumn);
 		maskViewerColumn.setEditingSupport(new OperatorMaskEditingSupport(this, tableViewer));
 		columnTooltips.add(OperatorMaskEditingSupport.getTooltip());

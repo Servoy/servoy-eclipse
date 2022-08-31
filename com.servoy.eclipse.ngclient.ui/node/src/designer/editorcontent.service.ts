@@ -33,6 +33,7 @@ export class EditorContentService {
                     redrawDecorators = true;
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
+                    container.layout = elem.position;
                     const parentUUID = data.childParentMap[container.id].uuid;
                     if (container.parent) {
                         let newParent = container.parent;

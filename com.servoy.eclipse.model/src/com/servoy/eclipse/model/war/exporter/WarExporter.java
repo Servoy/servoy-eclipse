@@ -39,11 +39,13 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,6 +90,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.Version;
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
@@ -160,8 +163,7 @@ public class WarExporter
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
-		/* "org.apache.httpcomponents.client5.httpclient5_*.jar", "org.apache.httpcomponents.core5.httpcore5_*.jar" */ };
+		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
@@ -194,6 +196,8 @@ public class WarExporter
 		}
 	}
 
+	private static final SimpleDateFormat SDF = new SimpleDateFormat("HH:mm:ss:S");
+
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
 	private SpecProviderState servicesSpecProviderState;
@@ -223,7 +227,7 @@ public class WarExporter
 		File tmpWarDir = createTempDir();
 		monitor.worked(2);
 		String appServerDir = exportModel.getServoyApplicationServerDir();
-		monitor.subTask("Copy root webapp files");
+		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy beans");
@@ -235,7 +239,7 @@ public class WarExporter
 		monitor.subTask("Copy lafs");
 		copyLafs(tmpWarDir, appServerDir);
 		monitor.worked(2);
-		monitor.subTask("Copy all standard libraries");
+		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
 		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy Drivers");
@@ -261,7 +265,7 @@ public class WarExporter
 		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
-			monitor.subTask("Copy the active solution");
+			monitor.subTask("Copy the active solution (" + SDF.format(new Date()) + ")");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
 			compileLessResources(tmpWarDir);
@@ -274,17 +278,17 @@ public class WarExporter
 		{
 			if (exportModel.exportNG1())
 			{
-				monitor.subTask("Copying NGClient components/services...");
+				monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
 				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
 				if (monitor.isCanceled()) return;
 				monitor.setWorkRemaining(6);
-				monitor.subTask("Copy exported components");
+				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
-				monitor.subTask("Grouping JS and CSS resources");
+				monitor.subTask("Grouping JS and CSS resources (" + SDF.format(new Date()) + ")");
 				copyMinifiedAndGrouped(tmpWarDir, monitor);
 				if (monitor.isCanceled()) return;
-				monitor.subTask("Compile less resources");
+				monitor.subTask("Compile less resources (" + SDF.format(new Date()) + ")");
 				monitor.worked(1);
 			}
 			else
@@ -297,9 +301,9 @@ public class WarExporter
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
 			}
-			if (exportModel.exportNG2Mode() != null && !exportModel.exportNG2Mode().equals("false"))
+			if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 			{
-				monitor.subTask("Copy Titanium NGClient resources");
+				monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
 				try
 				{
 					copyNGClient2(tmpWarDir, monitor);
@@ -323,10 +327,10 @@ public class WarExporter
 			throw new ExportException("Could not copy the libs " + Arrays.toString(WAR_LIBS) + ", " + pluginFiles, e);
 		}
 		monitor.worked(1);
-		monitor.subTask("Creating deploy properties");
+		monitor.subTask("Creating deploy properties (" + SDF.format(new Date()) + ")");
 		createDeployPropertiesFile(tmpWarDir);
 		monitor.worked(1);
-		monitor.subTask("Checking war for duplicate jars");
+		monitor.subTask("Checking war for duplicate jars (" + SDF.format(new Date()) + ")");
 		if (monitor.isCanceled()) return;
 		// first check,remove duplicate jars from the plugins dir.
 		checkDuplicateJars(tmpWarDir);
@@ -372,11 +376,12 @@ public class WarExporter
 
 		monitor.worked(1);
 		if (monitor.isCanceled()) return;
-		monitor.subTask("Creating/zipping the WAR file");
+		monitor.subTask("Creating/zipping the WAR file (" + SDF.format(new Date()) + ")");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
 		deleteDirectory(tmpWarDir);
 		monitor.worked(1);
+		monitor.subTask("Done (" + SDF.format(new Date()) + ")");
 		monitor.done();
 	}
 
@@ -530,6 +535,13 @@ public class WarExporter
 			public File getExportLocation()
 			{
 				return tmpWarDir;
+			}
+
+			public String getSolutionName()
+			{
+				IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+				FlattenedSolution solution = servoyModel.getFlattenedSolution();
+				return solution.getName();
 			}
 		});
 	}
@@ -1095,6 +1107,43 @@ public class WarExporter
 				if (fl.getName().endsWith(".html"))
 				{
 					allTemplates.put(dirName + "/" + je.getName(), fl);
+				}
+				if (specFilesOnly && je.getName().endsWith(".spec"))
+				{
+					JSONObject json = new JSONObject(Utils.getTXTFileContent(jarfile.getInputStream(je), Charset.forName("UTF8"), true));
+					List<String> scripts = new ArrayList<String>();
+					if (json.has("serverscript"))
+					{
+						scripts.add(json.getString("serverscript"));
+					}
+					if (json.has("ng2Config"))
+					{
+						JSONObject configJSON = json.getJSONObject("ng2Config");
+						if (configJSON.has("dependencies"))
+						{
+							JSONObject dependenciesJSON = configJSON.getJSONObject("dependencies");
+							if (dependenciesJSON.has("serverscript"))
+							{
+								scripts.add(dependenciesJSON.getString("serverscript"));
+							}
+						}
+					}
+					scripts.forEach((String path) -> {
+						String serverScriptName = path.substring(path.lastIndexOf("/") + 1);
+						ZipEntry serverScriptEntry = jarfile.getEntry(path);
+						File destScriptFile = new File(destdir, serverScriptName);
+						try (InputStream is = jarfile.getInputStream(serverScriptEntry); FileOutputStream fo = new FileOutputStream(destScriptFile))
+						{
+							while (is.available() > 0)
+							{
+								fo.write(is.read());
+							}
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					});
 				}
 			}
 		}
@@ -2340,6 +2389,41 @@ public class WarExporter
 					allTemplates.put(path, newFile);
 				}
 				writtenFiles.add(file);
+				if (specFilesOnly && file.getName().endsWith(".spec"))
+				{
+					JSONObject json = new JSONObject(Utils.getTXTFileContent(file));
+					List<String> scripts = new ArrayList<String>();
+					if (json.has("serverscript"))
+					{
+						scripts.add(json.getString("serverscript"));
+					}
+					if (json.has("ng2Config"))
+					{
+						JSONObject configJSON = json.getJSONObject("ng2Config");
+						if (configJSON.has("dependencies"))
+						{
+							JSONObject dependenciesJSON = configJSON.getJSONObject("dependencies");
+							if (dependenciesJSON.has("serverscript"))
+							{
+								scripts.add(dependenciesJSON.getString("serverscript"));
+							}
+						}
+					}
+					scripts.forEach((String path) -> {
+						String serverScriptPath = path.substring(path.lastIndexOf("/") + 1);
+						File serverScriptFile = new File(file.getParentFile(), serverScriptPath);
+						File newServerScriptFile = new File(destDir, serverScriptPath);
+						try
+						{
+							copyFile(serverScriptFile, newServerScriptFile);
+						}
+						catch (ExportException e)
+						{
+							ServoyLog.logError(e);
+						}
+						writtenFiles.add(serverScriptFile);
+					});
+				}
 			}
 		}
 	}

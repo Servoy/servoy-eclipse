@@ -36,6 +36,14 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                 this.anchoringIndicator = this.editorSession.getState().anchoringIndicator;
                 if (!this.anchoringIndicator) this.indicator = null;
             }
+            if (id == 'dragging'){
+                if (this.editorSession.getState().dragging){
+                    this.indicator = null;
+                }
+                else{
+                    this.selectionChanged(this.editorSession.getSelection());
+                }
+            }
         });
     }
 

@@ -268,6 +268,20 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
+		if (getContainer().getCurrentPage() instanceof FileSelectionPage)
+		{
+			//if finish was pressed on the first page, then we need to make sure the currently used components are exported
+			if (!exportModel.isReady())
+			{
+				runSetupComponents(true);
+			}
+			else
+			{
+				componentsSelectionPage.updateExportModel();
+				servicesSelectionPage.updateExportModel();
+			}
+		}
+
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
@@ -324,14 +338,52 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			getContainer().run(true, true, job);
 		}
-		catch (
-
-		Exception e)
+		catch (Exception e)
 		{
 			Debug.error(e);
 			return false;
 		}
 		return !errorFlag;
+	}
+
+	private void runSetupComponents(boolean update)
+	{
+		try
+		{
+			getContainer().run(true, true, new IRunnableWithProgress()
+			{
+				public void run(IProgressMonitor monitor) throws InterruptedException
+				{
+					monitor.beginTask("Searching for used components and services", 100);
+					while (!exportModel.isReady())
+					{
+						Thread.sleep(100);
+						monitor.worked(1);
+					}
+					Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							setupComponentsPages();
+							if (update)
+							{
+								componentsSelectionPage.updateExportModel();
+								servicesSelectionPage.updateExportModel();
+							}
+						}
+					});
+					monitor.done();
+				}
+			});
+		}
+		catch (InvocationTargetException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 
@@ -483,37 +535,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			if (!exportModel.isReady())
 			{
-				try
-				{
-					getContainer().run(true, true, new IRunnableWithProgress()
-					{
-						public void run(IProgressMonitor monitor) throws InterruptedException
-						{
-							monitor.beginTask("Searching for used components and services", 100);
-							while (!exportModel.isReady())
-							{
-								Thread.sleep(100);
-								monitor.worked(1);
-							}
-							Display.getDefault().syncExec(new Runnable()
-							{
-								public void run()
-								{
-									setupComponentsPages();
-								}
-							});
-							monitor.done();
-						}
-					});
-				}
-				catch (InvocationTargetException e)
-				{
-					ServoyLog.logError(e);
-				}
-				catch (InterruptedException e)
-				{
-					ServoyLog.logError(e);
-				}
+				runSetupComponents(false);
 			}
 			else
 			{

@@ -19,7 +19,7 @@ import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
 import { RowRenderer } from './row-renderer.component';
 import { AgGridAngular } from '@ag-grid-community/angular';
-import _ from 'lodash';
+
 
 const AGGRID_CACHE_BLOCK_SIZE = 10;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
@@ -209,7 +209,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     svyOnInit() {
         super.svyOnInit();
 
-        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-scroll') !== -1;
+        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-scroll') !== -1 && !this.servoyApi.isInDesigner();
         if(this.useScrolling) {
             if(!this.containedForm.absoluteLayout) {
                 this.log.error('ListFormComponent ' + this.name + ' can not be used in scrolling mode because its containedForm is a responsive form');
@@ -622,7 +622,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getServoyApi(cell: Cell) {
         if (cell.api == null) {
-            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm.absoluteLayout, this.formservice, this.servoyService, this);
+            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm.absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi.isInDesigner());
         }
         return cell.api;
     }
@@ -769,8 +769,9 @@ class ListFormComponentServoyApi extends ServoyApi {
         absolute: boolean,
         formservice: FormService,
         servoyService: ServoyService,
-        private fc: ListFormComponent) {
-        super(cell.state, formname, absolute, formservice, servoyService, false);
+        private fc: ListFormComponent,
+        isdesigner : boolean) {
+        super(cell.state, formname, absolute, formservice, servoyService, isdesigner);
         this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }
 

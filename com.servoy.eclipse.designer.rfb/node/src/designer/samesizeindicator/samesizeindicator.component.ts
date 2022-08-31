@@ -26,6 +26,14 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
                 this.sameSizeIndicator = this.editorSession.getState().sameSizeIndicator;
                 if (!this.sameSizeIndicator) this.indicators = [];
             }
+            if (id == 'dragging'){
+                if (this.editorSession.getState().dragging){
+                    this.indicators = null;
+                }
+                else{
+                    this.selectionChanged(this.editorSession.getSelection());
+                }
+            }
         });
     }
 

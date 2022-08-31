@@ -24,18 +24,23 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -45,7 +50,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -76,6 +83,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -102,44 +110,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final class PackageCheckerJob extends Job
 	{
 		private final IWarExportModel warExportModel;
+		private final File projectFolder;
 
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name, IWarExportModel warExportModel)
+		private PackageCheckerJob(String name, File projectFolder, IWarExportModel warExportModel)
 		{
 			super(name);
 			this.warExportModel = warExportModel;
+			this.projectFolder = projectFolder;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
-			if (warExportModel == null)
-			{
-				Display.getDefault().asyncExec(() -> {
-					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
-					{
-						IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-						for (IEditorReference editorRef : editorRefs)
-						{
-							IEditorPart editor = editorRef.getEditor(false);
-							if (editor instanceof IEditorRefresh)
-							{
-								((IEditorRefresh)editor).refresh();
-							}
-						}
-					}
-				});
-			}
 			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 			try
 			{
 				scheduled.incrementAndGet();
 				long time = System.currentTimeMillis();
 				writeConsole(console, "---- Starting Titanium NGClient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
-				File projectFolder = Activator.getInstance().getProjectFolder();
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
 				Set<String> packageToInstall = new HashSet<>();
@@ -290,6 +281,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						ServoyLog.logError(e);
 					}
 				}
+
 
 				// adjust the allservices.sevice.ts
 				try
@@ -585,8 +577,26 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					ServoyLog.logError(e);
 				}
-				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get() || warExportModel != null)
+				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
+					if (warExportModel == null)
+					{
+						Display.getDefault().asyncExec(() -> {
+							if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
+							{
+								IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+								for (IEditorReference editorRef : editorRefs)
+								{
+									IEditorPart editor = editorRef.getEditor(false);
+									if (editor instanceof IEditorRefresh)
+									{
+										((IEditorRefresh)editor).refresh();
+									}
+								}
+							}
+						});
+					}
 					// first exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
 					// or if there are really packages to install.
@@ -594,7 +604,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("--legacy-peer-deps");
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(command);
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
 						npmCommand.runCommand(monitor);
@@ -606,7 +616,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (cleanInstall.get())
 					{
 						cleanInstall.set(false);
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("ci", "--legacy-peer-deps"));
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("ci", "--legacy-peer-deps"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -618,7 +628,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("update", "--legacy-peer-deps"));
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("update", "--legacy-peer-deps"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -628,7 +638,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							ServoyLog.logError(e);
 						}
 					}
-					npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("dedup"));
+					npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("dedup"));
 					try
 					{
 						npmCommand.runCommand(monitor);
@@ -637,13 +647,57 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						ServoyLog.logError(e);
 					}
+					long dedupTime = System.currentTimeMillis();
+					// after dedup we have to run our own dedup, but then compared to the root node_modules
+					File projectNodeModules = new File(this.projectFolder, "node_modules");
+					File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
+
+					File[] projectListing = projectNodeModules.listFiles();
+					File[] rootListing = rootNodeModules.listFiles();
+
+					BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
+						Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
+						SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
+						result.retainAll(Arrays.asList(list2));
+						return result;
+					};
+
+					if (projectListing != null && rootListing != null)
+					{
+						SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
+
+						mainDirs.forEach(file -> {
+							if (file.isDirectory())
+							{
+								if (new File(file, "package.json").exists())
+								{
+									// this is already the package (root of node modules, like rxjs)
+									FileUtils.deleteQuietly(file);
+								}
+								else
+								{
+									// sub dirs are the package, this is a group dir like angular/aggrid
+									SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
+										new File(rootNodeModules, file.getName()).listFiles());
+									nestedResult.forEach(nested -> {
+										if (nested.isDirectory() && new File(nested, "package.json").exists()) FileUtils.deleteQuietly(nested);
+									});
+								}
+
+							}
+						});
+					}
+
+					writeConsole(console,
+						"None NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) + "s");
+
 					if (SOURCE_DEBUG)
 					{
 						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(Arrays.asList("run",
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run",
 							warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
 								: "build_debug_nowatch"));
 						try
@@ -783,7 +837,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// test if this internal package should be ignored:
 					if (isDefaultPackageEnabled(packageName))
 					{
-						File projectFolder = Activator.getInstance().getProjectFolder();
 						File packageFolder = new File(projectFolder, entryPoint);
 						File tsConfig = new File(projectFolder, "tsconfig.json");
 						try
@@ -843,7 +896,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								IFile sourcePath = project.getFile(".sourcepath");
 								if (sourcePath.exists())
 								{
-									File projectFolder = Activator.getInstance().getProjectFolder();
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
@@ -856,22 +908,63 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									String location = packageFolder.getCanonicalPath();
 									File packageJson = new File(packageFolder, "package.json");
 									boolean packageJsonChanged = !packageJson.exists();
+									long timestamp = 0;
 									if (!packageJsonChanged)
 									{
 										// this only works once at startup, after that the DirectorySync already pushed a new value before this check
 										packageJsonChanged = file.getFile("package.json").getLocation().toFile().lastModified() -
 											packageJson.lastModified() > 1000;
+
+										if (!packageJsonChanged)
+										{
+											File timestampFile = new File(packageFolder, ".timestamp");
+											if (timestampFile.exists())
+											{
+												try
+												{
+													timestamp = Long.parseLong(FileUtils.readFileToString(timestampFile, "UTF8"));
+												}
+												catch (Exception e)
+												{
+												}
+											}
+										}
+										else
+										{
+											writeConsole(console, "The source of the package.json in " + packageFolder + " was modified");
+										}
+									}
+									else
+									{
+										writeConsole(console, "Package.json in " + packageFolder + " did not exists installing this package");
 									}
 									// check/copy the dist folder to the target packages location
-									if (!WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()) || !packageFolder.exists() ||
+									if (!WebPackagesListener.watchCreated.containsKey(packageFolder) || !packageFolder.exists() ||
 										(apiFile != null && !apiFile.exists()))
 									{
-										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageReader.getPackageName());
+										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageFolder);
 										if (directorySync != null) directorySync.destroy();
 										FileUtils.deleteQuietly(packageFolder);
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
-										WebPackagesListener.watchCreated.put(packageReader.getPackageName(), new DirectorySync(srcDir, packageFolder, null));
+										writeConsole(console, "Updated SPM target folder: " + packageFolder + " from source package dir: " + srcDir);
+										WebPackagesListener.watchCreated.put(packageFolder, new DirectorySync(srcDir, packageFolder, null));
+
+										Optional<File> srcMax = FileUtils.listFiles(packageFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+											.max((file1, file2) -> {
+												long tm = file1.lastModified() - file2.lastModified();
+												return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+											});
+
+										long tm = srcMax.isPresent() ? srcMax.get().lastModified() : 0;
+
+										if (tm != timestamp)
+										{
+											writeConsole(console, "Source Package project changed " + project.getName() + " current timestamp: " +
+												new Date(tm) + " compared to the stored timestamp " + new Date(timestamp));
+											packageJsonChanged = true;
+										}
+										FileUtils.writeStringToFile(new File(packageFolder, ".timestamp"), Long.toString(tm), "UTF8");
 									}
 									// also add if this is a src thing to the ts config
 									if (sourcePathJson != null)
@@ -917,16 +1010,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 
 					// this has an entry point in the zip, extract this package.
-					File projectFolder = Activator.getInstance().getProjectFolder();
 					File packagesFolder = new File(projectFolder, "packages");
 					File packageFolder = new File(packagesFolder, packageName);
 
 					// if we previously had a project reference and now we switched back to the zip we need to remove what was generated for it
 					try
 					{
-						if (WebPackagesListener.watchCreated.containsKey(packageReader.getPackageName()))
+						if (WebPackagesListener.watchCreated.containsKey(packageFolder))
 						{
-							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageReader.getPackageName());
+							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageFolder);
 							if (directorySync != null) directorySync.destroy();
 							if (packageFolder.exists()) FileUtils.deleteQuietly(packageFolder);
 
@@ -1024,18 +1116,40 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final AtomicInteger scheduled = new AtomicInteger(0); // 0 == no jobs, 1 == job scheduled, 2  or 3 == job running, 3 == run again.
 	private static final AtomicBoolean cleanInstall = new AtomicBoolean(false);
 
-	private static final ConcurrentMap<String, DirectorySync> watchCreated = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<File, DirectorySync> watchCreated = new ConcurrentHashMap<>();
 
 	public WebPackagesListener()
 	{
-		if (WebServiceSpecProvider.isLoaded())
-			checkPackages(false);
+		if (WebServiceSpecProvider.isLoaded() && ServoyModelFinder.getServoyModel().getActiveProject() != null)
+			createNodeFolderAndCheckPackages();
 	}
 
 	@Override
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		checkPackages(false);
+		if (changeReason == CHANGE_REASON.ACTIVE_PROJECT_CHANGED && ServoyModelFinder.getServoyModel().getActiveProject() != null)
+		{
+			createNodeFolderAndCheckPackages();
+		}
+		else checkPackages(false);
+	}
+
+	/**
+	 *
+	 */
+	protected void createNodeFolderAndCheckPackages()
+	{
+		Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
+		NodeFolderCreatorJob job = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), true, false);
+		job.addJobChangeListener(new JobChangeAdapter()
+		{
+			@Override
+			public void done(IJobChangeEvent event)
+			{
+				checkPackages(false);
+			}
+		});
+		job.schedule();
 	}
 
 	public static boolean isBuildRunning()
@@ -1076,7 +1190,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// only schedule 1 and a bit later to relax first the system
 		if (scheduled.compareAndSet(0, 1))
 		{
-			Job job = new PackageCheckerJob("Checking/Installing Titanium NG Components and Services", null);
+			Job job = new PackageCheckerJob("Checking/Installing Titanium NG Components and Services", Activator.getInstance().getSolutionProjectFolder(),
+				null);
 			job.schedule(5000);
 		}
 		else if (scheduled.get() == 2)
@@ -1098,11 +1213,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 		try
 		{
-			File distFolder = new File(activator.getProjectFolder(), "dist/app_prod");
-			FileUtils.deleteQuietly(distFolder);
+			File distributionSource = new File(activator.getMainTargetFolder(), model.getSolutionName() + "_dist");
+			new NodeFolderCreatorJob(distributionSource, false, false).run(model.getProgressMonitor());
 			// create the production build
-			new PackageCheckerJob("production_build", model.getModel()).run(model.getProgressMonitor());
+			new PackageCheckerJob("production_build", distributionSource, model.getModel()).run(model.getProgressMonitor());
 			// copy the production build
+			File distFolder = new File(distributionSource, "dist/app");
 			if (distFolder.exists())
 			{
 				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
@@ -1111,7 +1227,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 			else
 			{
-				throw new RuntimeException("NGClient2 production resources not generated, see log");
+				throw new RuntimeException("NGClient2 production resources not generated, see the log or the Titanium NGClient build console");
 			}
 		}
 		catch (IOException e)

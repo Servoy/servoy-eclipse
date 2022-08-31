@@ -6,8 +6,6 @@ import { WindowRefService } from '@servoy/public';
 export class EditorContentService {
 
     private frameElement: HTMLIFrameElement;
-    private topPositionIframe: number;
-    private leftPositionIframe: number;
     private contentAreaElement: HTMLElement;
     private contentElement: HTMLElement;
     private glassPaneElement: HTMLElement;
@@ -50,17 +48,19 @@ export class EditorContentService {
 
     getContentForm(): HTMLElement {
         this.initIFrame();
-        return this.frameElement.contentWindow.document.querySelector(".svy-form");
+        return this.frameElement.contentWindow.document.querySelector('.svy-form');
     }
 
     getTopPositionIframe(variants?: boolean): number {
         this.initIFrame(variants);
-        return this.topPositionIframe;
+        const frameRect = this.frameElement.getBoundingClientRect();
+        return frameRect.top;
     }
 
     getLeftPositionIframe(variants?: boolean): number {
         this.initIFrame(variants);
-        return this.leftPositionIframe;
+        const frameRect = this.frameElement.getBoundingClientRect();
+        return frameRect.left;
     }
 
     getContentArea(): HTMLElement {
@@ -158,15 +158,12 @@ export class EditorContentService {
                 } else if (frames.length > 0 ){//true when preview
                     this.frameElement = frames[1];
                 }
-        } 
-        const frameRect = this.frameElement.getBoundingClientRect();
-        this.topPositionIframe = frameRect.top;
-        this.leftPositionIframe = frameRect.left;
+        }
     }
 }
 
 export interface IContentMessageListener {
 
-    contentMessageReceived(id: string, data: { [key: string] : any }): void;
+    contentMessageReceived(id: string, data: { [key: string]: any }): void;
 
 }

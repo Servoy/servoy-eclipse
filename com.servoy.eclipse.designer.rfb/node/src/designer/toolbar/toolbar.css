@@ -193,6 +193,10 @@
     border-radius: 3px;
 }
 
+.toolbar-action .btn:disabled {
+	border-style: none;
+}
+
 .toolbar .dropdown-toggle::after {
     display:none;
 }

@@ -45,9 +45,11 @@ import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
+import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.types.FormFoundsetSelectionFilter;
 import com.servoy.eclipse.ui.property.types.FoundsetDesignToChooserConverter;
 import com.servoy.eclipse.ui.property.types.FoundsetPropertyEditor;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
@@ -57,6 +59,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 
@@ -118,6 +121,7 @@ public class DataproviderPropertiesSelector
 		ITable formTable = frm != null && frm.getDataSource() != null
 			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(frm.getDataSource()) : null;
 		dataSourceViewer.setInput(FoundsetPropertyEditor.getFoundsetInputOptions(formTable, null, false));
+		dataSourceViewer.setSelectionFilter(new FormFoundsetSelectionFilter(null));
 		GridData data = new GridData(SWT.FILL, SWT.NONE, true, false);
 		data.horizontalAlignment = GridData.FILL;
 		dataSourceViewer.getControl().setLayoutData(data);
@@ -192,10 +196,12 @@ public class DataproviderPropertiesSelector
 					JSONObject value = converter.convertFromChooserValueToJSONValue(tw, null);
 					component.setProperty(fsProperty, value);
 				}
+				dataSourceViewer.setValid(true);
 			}
 			else
 			{
 				MessageDialog.openError(shell, "Datasource not found", "The datasource '" + tw.getDataSource() + "' was not found.");
+				dataSourceViewer.setValid(false);
 			}
 		}
 	}
@@ -207,6 +213,13 @@ public class DataproviderPropertiesSelector
 		{
 			Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
 			String dataSource = frm != null ? frm.getDataSource() : null;
+			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
+		}
+		else if (selection.getFirstElement() instanceof RelationsWrapper)
+		{
+			RelationsWrapper relationsWrapper = (RelationsWrapper)selection.getFirstElement();
+			Relation relation = relationsWrapper.relations[relationsWrapper.relations.length - 1];
+			String dataSource = relation != null ? relation.getForeignDataSource() : null;
 			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
 		}
 		return (IDataSourceWrapper)selection.getFirstElement();

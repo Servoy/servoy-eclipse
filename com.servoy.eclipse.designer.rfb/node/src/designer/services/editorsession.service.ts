@@ -3,6 +3,7 @@ import { Inject, Injectable, EventEmitter } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
+import { EditorContentService } from './editorcontent.service';
 
 interface CallbackFunction {
     event: string,
@@ -11,7 +12,7 @@ interface CallbackFunction {
 
 @Injectable()
 export class EditorSessionService implements ServiceProvider {
- 
+
     private wsSession: WebsocketSession;
     private inlineEdit: boolean;
     private state = new State();
@@ -21,7 +22,7 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
-    private allowedChildren: unknown;
+    private allowedChildren = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
@@ -29,17 +30,17 @@ export class EditorSessionService implements ServiceProvider {
     openPopoverTrigger = new EventEmitter<{component: PaletteComp}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
-        @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {
+        @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject(null);
     }
 
-   public getService(name: string) {
-            if (name == '$editorService') {
-                return this;
-            }
-            return null;
+    public getService(name: string) {
+        if (name == '$editorService') {
+            return this;
+        }
+        return null;
     }
     connect() {
         //if (deferred) return deferred.promise;
@@ -57,7 +58,9 @@ export class EditorSessionService implements ServiceProvider {
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
                 this.allowedChildren = JSON.parse(result);
-                this.sendState('allowedChildren', this.allowedChildren);
+                this.editorContentService.executeOnlyAfterInit(() => {
+                    this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
+                });
             }).catch(e => console.log(e));
         }
         this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
@@ -69,7 +72,7 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'activated')
     }
 
-    keyPressed(event: {ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number}) {
+    keyPressed(event: { ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number }) {
         // remove selection if backspace or delete key was pressed
         if (event.keyCode == 8 || event.keyCode == 46) {
             this.updateSelection([], true, true);
@@ -124,7 +127,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     openConfigurator(property: string) {
-        return this.wsSession.callService('formeditor', 'openConfigurator', {name: property}, false);
+        return this.wsSession.callService('formeditor', 'openConfigurator', { name: property }, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -158,13 +161,13 @@ export class EditorSessionService implements ServiceProvider {
             'sameSizeIndicator': true
         }, false)
     }
-    
+
     showAnchoringIndicator() {
         return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
             'anchoringIndicator': true
         }, false)
     }
-    
+
     toggleShowWireframe() {
         const res = this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
             'show': 'showWireframeInDesigner'
@@ -204,10 +207,10 @@ export class EditorSessionService implements ServiceProvider {
             'showI18NValuesInDesigner': true
         }, false)
     }
-    
+
     toggleShowI18NValues() {
         return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
-            'show':  'showI18NValuesInDesigner'
+            'show': 'showI18NValuesInDesigner'
         }, false);
     }
 
@@ -221,7 +224,7 @@ export class EditorSessionService implements ServiceProvider {
         }, true)
     }
 
-    updateFieldPositioner(location: {x: number;y: number}) {
+    updateFieldPositioner(location: { x: number; y: number }) {
         void this.wsSession.callService('formeditor', 'updateFieldPositioner', {
             location: location
         }, true)
@@ -231,7 +234,7 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', action, params, true);
     }
 
-    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean) {
+    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean) {
         this.selection = ids;
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
@@ -284,7 +287,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getShortcuts() {
-        return this.wsSession.callService< { [key: string]: string; }>('formeditor', 'getShortcuts');
+        return this.wsSession.callService<{ [key: string]: string; }>('formeditor', 'getShortcuts');
     }
 
     toggleHighlight() {
@@ -317,14 +320,14 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'openPackageManager', null, true);
     }
 
-    getAllowedChildrenForContainer(container:string): string[] {
+    getAllowedChildrenForContainer(container: string): string[] {
         if (this.allowedChildren) {
             return this.allowedChildren[container ? container : 'topContainer'];
         }
         return null;
     }
 
-    getWizardProperties(spec:string): string[] {
+    getWizardProperties(spec: string): string[] {
         if (this.wizardProperties) {
             return this.wizardProperties[spec];
         }
@@ -335,20 +338,20 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService<Array<string>>('formeditor', 'getSuperForms');
     }
 
-    setCssAnchoring(selection: Array<string>, anchors: {top:string;left:string;bottom:string;right:string}) {
+    setCssAnchoring(selection: Array<string>, anchors: { top: string; left: string; bottom: string; right: string }) {
         void this.wsSession.callService('formeditor', 'setCssAnchoring', { 'selection': selection, 'anchors': anchors }, true);
     }
 
     getFormFixedSize() {
-        return this.wsSession.callService<{width:string;height:string}>('formeditor', 'getFormFixedSize');
+        return this.wsSession.callService<{ width: string; height: string }>('formeditor', 'getFormFixedSize');
     }
 
-    setFormFixedSize(args: {width:string;height?:string}) {
+    setFormFixedSize(args: { width: string; height?: string }) {
         return this.wsSession.callService('formeditor', 'setFormFixedSize', args);
     }
 
     getZoomLevel() {
-       return this.wsSession.callService<number>('formeditor', 'getZoomLevel', {}, false);
+        return this.wsSession.callService<number>('formeditor', 'getZoomLevel', {}, false);
     }
 
     setZoomLevel(value: number) {
@@ -357,19 +360,24 @@ export class EditorSessionService implements ServiceProvider {
         }, false)
     }
 
-    setStatusBarText(text:string) {
+    setStatusBarText(text: string) {
         this.state.statusText = text;
         this.stateListener.next('statusText');
     }
 
-    setSameSizeIndicator(flag:boolean) {
+    setSameSizeIndicator(flag: boolean) {
         this.state.sameSizeIndicator = flag;
         this.stateListener.next('sameSizeIndicator');
     }
-    
-    setAnchoringIndicator(flag:boolean) {
+
+    setAnchoringIndicator(flag: boolean) {
         this.state.anchoringIndicator = flag;
         this.stateListener.next('anchoringIndicator');
+    }
+
+    setDragging(dragging : boolean){
+        this.state.dragging = dragging;
+        this.stateListener.next('dragging');
     }
     
     getState(): State {
@@ -383,18 +391,17 @@ export class EditorSessionService implements ServiceProvider {
     sameSize(width: boolean) {
         const selection = this.getSelection();
         if (selection && selection.length > 1) {
-            const obj: { [key: string]: {width:number; height:number} ; } = {};
-            let firstSize: {width:number; height:number} = null;
-            const frameElem = this.doc.querySelector('iframe');
+            const obj: { [key: string]: { width: number; height: number }; } = {};
+            let firstSize: { width: number; height: number } = null;
             for (let i = 0; i < selection.length; i++) {
                 const nodeid = selection[i];
-                const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                const element = this.editorContentService.getContentElement(nodeid);
                 if (element) {
                     const elementRect = element.getBoundingClientRect();
                     if (firstSize == null) {
                         firstSize = { width: elementRect.width, height: elementRect.height };
                     } else {
-                        let newSize:  {width:number; height:number};
+                        let newSize: { width: number; height: number };
                         if (width) {
                             newSize = {
                                 width: firstSize.width,
@@ -418,31 +425,19 @@ export class EditorSessionService implements ServiceProvider {
         return this.bIsDirty;
     }
 
-    setDirty(dirty : boolean){
-        this.bIsDirty = dirty;    
-    }
-    
-    sendState(key: string, result: unknown): void {
-        const iframe = this.doc.querySelector('iframe');
-        const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0) {
-            setTimeout(() => this.sendState(key, result), 400);
-            return;
-        }
-        else {
-            iframe.contentWindow.postMessage({ id: key, value: result }, '*');
-        }
+    setDirty(dirty: boolean) {
+        this.bIsDirty = dirty;
     }
 
-    startAutoscroll(scrollComponent: ISupportAutoscroll){
-        if ( this.autoscrollBehavior == null) {
+    startAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.autoscrollBehavior == null) {
             this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
-        }  else {
+        } else {
             this.autoscrollBehavior.next(scrollComponent);
         }
     }
 
-    stopAutoscroll(){
+    stopAutoscroll() {
         this.autoscrollBehavior.next(null);
     }
 
@@ -452,7 +447,7 @@ export class EditorSessionService implements ServiceProvider {
             if (event.metaKey || event.ctrlKey) {
                 //several Meta/Ctrl + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
                 keyCode = 0;
-            } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') { 
+            } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') {
                 //avoid sending the specials key codes by themselfs - they always must be part of a combination
                 keyCode = 0;
             }
@@ -465,15 +460,15 @@ export class EditorSessionService implements ServiceProvider {
             metaKey: event.metaKey
         }
     }
-    
-    isAbsoluteFormLayout() : boolean{
+
+    isAbsoluteFormLayout(): boolean {
         return this.urlParser.isAbsoluteFormLayout();
     }
 }
 
 export interface ISelectionChangedListener {
 
-    selectionChanged(selection: Array<string>, redrawDecorators?:boolean, designerChange?:boolean): void;
+    selectionChanged(selection: Array<string>, redrawDecorators?: boolean, designerChange?: boolean): void;
 
 }
 
@@ -487,19 +482,19 @@ class State {
     showWireframe: boolean;
     showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
-    sameSizeIndicator : boolean;
-    anchoringIndicator : boolean;
+    sameSizeIndicator: boolean;
+    anchoringIndicator: boolean;
     statusText: string;
     maxLevel: number;
     dragging = false;
     pointerEvents = 'none';
-    packages : Array<Package>;
+    packages: Array<Package>;
     drop_highlight: string;
 }
 
 export class PaletteComp {
     name: string;
-    displayName : string;
+    displayName: string;
     packageName: string;
     x: number;
     y: number;
@@ -508,17 +503,17 @@ export class PaletteComp {
     styleVariantCategory: string;
     styleVariants: Array<string>;
     lastChosenVariant: string;
-    dropTargetUUID?: string; 
+    dropTargetUUID?: string;
     isOpen: boolean;
     propertyName: string; // ghost
     components: Array<PaletteComp>;
     properties: Array<string>;
-    isAbsoluteCSSPositionMix ?:boolean; // formcomponent property
-    icon? : string;
-    model? : {property : any};
-    types? : Array<PaletteComp>; // the ghosts
-    multiple? : boolean; //ghost property
-    propertyValue?: {property : string}; // formcomponents
+    isAbsoluteCSSPositionMix?: boolean; // formcomponent property
+    icon?: string;
+    model?: { property: any };
+    types?: Array<PaletteComp>; // the ghosts
+    multiple?: boolean; //ghost property
+    propertyValue?: { property: string }; // formcomponents
     componentType?: string;
     topContainer: boolean;
     layoutName?: string;
@@ -531,10 +526,10 @@ export class PaletteComp {
 export class Package {
     id: string;
     packageName: string;
-    packageDisplayname : string;
+    packageDisplayname: string;
     components: Array<PaletteComp>;
     propertyValues?: Array<PaletteComp>;
-    categories?: {property :  Array<PaletteComp>};
+    categories?: { property: Array<PaletteComp> };
 }
 
 export interface ISupportAutoscroll {

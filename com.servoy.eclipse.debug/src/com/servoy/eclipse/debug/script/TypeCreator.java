@@ -1410,7 +1410,7 @@ public class TypeCreator extends TypeCache
 			property.setName("dataset");
 			property.setDescription(
 				"Get or Set the current dataset of this valuelist,</br>Assign a JSDataSet to it when you want to change the values, setting is only possible for a CustomValueList");
-			property.setType(getTypeRef(context, "JSDataSet<{display_values:string,real_values:object}>"));
+			property.setType(getTypeRef(context, "JSDataSet"));
 			members.add(property);
 			return TypeUtil.ref(valueListType);
 		}

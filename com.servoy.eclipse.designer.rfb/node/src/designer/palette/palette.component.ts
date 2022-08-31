@@ -1,5 +1,5 @@
 import { Component, Pipe, PipeTransform, Renderer2 } from '@angular/core';
-import { EditorSessionService, Package, PaletteComp } from '../services/editorsession.service';
+import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -11,13 +11,17 @@ import { WindowRefService } from '@servoy/public';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent {
+export class PaletteComponent implements ISupportAutoscroll{
 
     public searchText: string;
     public activeIds: Array<string>;
-	
+
     dragItem: DragItem = {};
-    canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean }; 
+    canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
+    
+    autoscrollAreasEnabled: boolean;
+    autoscrollElementClientBounds: Array<DOMRect>;
+    
     variantPackageName: string;
     variantComponentName: string;
     variantComponentType: string;
@@ -27,7 +31,7 @@ export class PaletteComponent {
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
         private windowRef: WindowRefService) {
-
+        
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = 'Absolute-Layout';
@@ -169,7 +173,7 @@ export class PaletteComponent {
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
         this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
-	
+
         this.dragItem.elementName = elementName;
         this.dragItem.packageName = packageName;
         this.dragItem.ghost = ghost;
@@ -179,17 +183,18 @@ export class PaletteComponent {
         this.dragItem.componentType = componentType;
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
-	
+
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
-            this.editorSession.getState().dragging = true;
+            this.editorSession.setDragging(true);
             this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
+            this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
         }
     }
 
     onMouseUp = (event: MouseEvent) => {
         if (this.dragItem.paletteItemBeingDragged) {
-            this.editorSession.getState().dragging = false;
+            this.editorSession.setDragging( false );
             this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
@@ -205,7 +210,9 @@ export class PaletteComponent {
             // do we also need to set size here ?
             component.x = component.x - this.editorContentService.getLeftPositionIframe();
             component.y = component.y - this.editorContentService.getTopPositionIframe();
-            component.styleClass = this.variantStyleClass;
+            if (this.variantStyleClass) {
+                component.styleClass = this.variantStyleClass;
+            }
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -253,11 +260,17 @@ export class PaletteComponent {
                 this.editorSession.createComponent(component);
             }
 
-             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+            this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+             
+             //disable mouse events on the autoscroll
+            this.editorSession.getState().pointerEvents = 'none'; 
+            this.autoscrollAreasEnabled = false;
+            this.editorSession.stopAutoscroll();
         }
 
         if (this.variantPaletteElement) {
             this.variantPaletteElement = null;
+            this.variantStyleClass = null;
         }
     }
 
@@ -268,6 +281,7 @@ export class PaletteComponent {
         }
 
         if (this.dragItem.paletteItemBeingDragged) {
+           
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
@@ -331,6 +345,11 @@ export class PaletteComponent {
                     }
                 }
             }
+             // enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
+            if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
+                this.autoscrollAreasEnabled = true;
+                this.editorSession.startAutoscroll(this);
+            }
 
         }
     }
@@ -351,6 +370,10 @@ export class PaletteComponent {
 
     getPackages(): Array<Package> {
         return this.editorSession.getState().packages;
+    }
+    
+    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
+        return null;
     }
 }
 
@@ -390,7 +413,7 @@ export class DragItem {
     packageName?: string;
     ghost?: PaletteComp; // should this be Ghost object or are they they same
     propertyName?: string;
-    propertyValue?: any;
+    propertyValue?: { [property: string]: string };
     componentType?: string;
     topContainer?: boolean = false;
     layoutName?: string;

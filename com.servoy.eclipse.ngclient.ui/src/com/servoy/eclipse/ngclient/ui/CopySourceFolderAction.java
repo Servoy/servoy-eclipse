@@ -56,11 +56,11 @@ public class CopySourceFolderAction extends Action
 		if (choice == 1)
 		{
 			Job.createSystem("delete .angular and packages cache", (monitor) -> {
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), ".angular"));
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), "packages"));
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getSolutionProjectFolder(), ".angular"));
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getSolutionProjectFolder(), "packages"));
 			}).schedule();
 		}
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override

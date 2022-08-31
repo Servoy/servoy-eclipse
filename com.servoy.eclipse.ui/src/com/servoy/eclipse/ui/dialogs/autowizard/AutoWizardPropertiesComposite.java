@@ -64,7 +64,6 @@ import com.servoy.j2db.FlattenedSolution;
  */
 public class AutoWizardPropertiesComposite
 {
-	//private final AutoWizardConfigurationViewer tableViewer;
 	private List<Map<String, Object>> treeInput = new ArrayList<>();
 
 	private final PersistContext persistContext;
@@ -86,12 +85,9 @@ public class AutoWizardPropertiesComposite
 		this.persistContext = persistContext;
 		this.propertiesConfigurator = configurator;
 
-//		tableViewer = createTableViewer(parent, configurator.getTable());
 		this.natTable = null;
 		this.propertyNames = null;
 		if (configurator.getInput() != null) setInputProperties(configurator.getInput());
-//		tableViewer.setInput(treeInput);
-
 		setupNatTable(parent, configurator);
 	}
 
@@ -157,28 +153,6 @@ public class AutoWizardPropertiesComposite
 		treeInput = childrenProperties;
 	}
 
-//	private AutoWizardConfigurationViewer createTableViewer(Composite parent, ITable table)
-//	{
-//		final Composite container = new Composite(parent, SWT.NONE);
-//		// define layout for the viewer
-//
-//		GridData gridData = new GridData();
-//		gridData.verticalAlignment = GridData.FILL;
-//		gridData.horizontalSpan = 1;
-//		gridData.verticalSpan = 1;
-//		gridData.grabExcessHorizontalSpace = true;
-//		gridData.grabExcessVerticalSpace = true;
-//		gridData.horizontalAlignment = GridData.FILL;
-//		gridData.minimumWidth = 250;
-//
-//		container.setLayoutData(gridData);
-//
-//		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table,
-//			propertiesConfigurator,
-//			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION, propertiesConfigurator.getAutoPropertyName());
-//		return viewer;
-//	}
-
 	public List<Map<String, Object>> getResult()
 	{
 		@SuppressWarnings("unchecked")
@@ -186,7 +160,6 @@ public class AutoWizardPropertiesComposite
 
 		if (propertiesConfigurator.getPrefillProperties().size() > 0)
 		{
-			//TODO filter out the rows which already have the property set
 			returnValue.forEach(row -> {
 				propertiesConfigurator.getPrefillProperties().forEach(pd -> {
 					if (row.get(pd.getName()) == null || row.get(pd.getName()).equals(pd.getDefaultValue()))
@@ -226,24 +199,19 @@ public class AutoWizardPropertiesComposite
 		return !rows.stream().filter(r -> value.equals(r.get(pd.getName()))).findAny().isPresent();
 	}
 
-//	public AutoWizardConfigurationViewer getViewer()
-//	{
-//		return tableViewer;
-//	}
-
+	@SuppressWarnings("unchecked")
 	public void setInput(List<Map<String, Object>> list)
 	{
-		treeInput = list;
-//		getViewer().setInput(list);
-//		getViewer().refresh();
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().clear();
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().addAll(list);
+		natTable.refresh(true);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addNewRow(Map<String, Object> row)
 	{
-		treeInput.add(row);
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().add(row);
 		natTable.refresh(true);
-//		getViewer().setInput(treeInput);
-//		getViewer().refresh();
 	}
 
 	public List<Map<String, Object>> getInput()

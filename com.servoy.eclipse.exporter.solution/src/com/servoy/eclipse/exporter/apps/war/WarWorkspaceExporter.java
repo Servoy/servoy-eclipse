@@ -622,7 +622,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				}
 			});
 			Activator.getInstance().extractNode();
-			Activator.getInstance().copyNodeFolder(false, true);
 		}
 		super.checkAndExportSolutions(configuration);
 	}
