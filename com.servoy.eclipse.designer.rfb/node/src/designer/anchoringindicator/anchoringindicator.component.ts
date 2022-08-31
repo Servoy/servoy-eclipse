@@ -24,7 +24,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     anchoringIndicator: boolean;
     editorStateSubscription: Subscription;
     indicator: SameSizeIndicator;
-
+    
     constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService, protected urlParser: URLParserService,) {
         this.editorSession.addSelectionChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
@@ -141,7 +141,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                             }
                         }
                     }
-                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getTopPositionIframe() + elementRect.top + 1, elementRect.left + this.editorContentService.getLeftPositionIframe() + elementRect.width + 2);
+                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + elementRect.top + 1, elementRect.left + this.editorContentService.getGlasspaneLeftDistance() + elementRect.width + 2);
                 }
             });
         }
