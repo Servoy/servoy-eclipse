@@ -268,18 +268,15 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
-		if (getContainer().getCurrentPage() instanceof FileSelectionPage)
+		//make sure the currently used components are exported in case the user didn't go through the components selection pages
+		if (!exportModel.isReady())
 		{
-			//if finish was pressed on the first page, then we need to make sure the currently used components are exported
-			if (!exportModel.isReady())
-			{
-				runSetupComponents(true);
-			}
-			else
-			{
-				componentsSelectionPage.updateExportModel();
-				servicesSelectionPage.updateExportModel();
-			}
+			runSetupComponents(true);
+		}
+		else
+		{
+			componentsSelectionPage.updateExportModel();
+			servicesSelectionPage.updateExportModel();
 		}
 
 		exportModel.saveSettings(getDialogSettings());
