@@ -125,7 +125,7 @@ public class AutoWizardPropertiesComposite
 
 		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration();
 		natTable.addConfiguration(
-			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution, parent.getShell()));
+			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution));
 		natTable.addConfiguration(linkClickConfiguration);
 		composeLayer.addConfiguration(new AbstractLayerConfiguration<AbstractLayer>()
 		{
