@@ -7,6 +7,7 @@ import { MnemonicletterFilterPipe, NotNullOrEmptyPipe, HtmlFilterPipe, TrustAsHt
 import { FormatFilterPipe } from './format/format.pipe';
 import { EmptyValueFilterPipe } from './format/emptyvalue.pipe';
 import { StartEditDirective } from './directives/startedit.directive';
+import { TabFixDirective } from './directives/tabfix.directive';
 import { ImageMediaIdDirective } from './directives/imagemediaid.directive';
 import {AutosaveDirective } from './directives/autosave.directive';
 import { UploadDirective } from './directives/upload.directive';
@@ -18,7 +19,8 @@ import { WindowRefService } from './services/windowref.service';
 import { SpecTypesService } from './spectypes.service';
 
 @NgModule({
-    declarations: [ TooltipDirective,
+    declarations: [ TabFixDirective,
+                    TooltipDirective,
                     MnemonicletterFilterPipe,
                     NotNullOrEmptyPipe,
                     HtmlFilterPipe,
@@ -34,7 +36,8 @@ import { SpecTypesService } from './spectypes.service';
                     TrustAsHtmlPipe
                   ],
     imports: [],
-    exports: [TooltipDirective,
+    exports: [TabFixDirective,
+              TooltipDirective,
               MnemonicletterFilterPipe,
               NotNullOrEmptyPipe,
               HtmlFilterPipe,
