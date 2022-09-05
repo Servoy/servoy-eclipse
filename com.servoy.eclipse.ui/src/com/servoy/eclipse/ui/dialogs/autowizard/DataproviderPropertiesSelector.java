@@ -140,7 +140,10 @@ public class DataproviderPropertiesSelector
 			lastDatasourceValue = getTableWrapper();
 		}
 		dataproviderTreeViewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
-			new DataProviderContentProvider(persistContext, flattenedSolution, table), configurator.getDataproviderOptions(), true, true,
+			new DataProviderContentProvider(persistContext, flattenedSolution,
+				lastDatasourceValue != null ? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(lastDatasourceValue.getDataSource())
+					: table),
+			configurator.getDataproviderOptions(), true, true,
 			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
