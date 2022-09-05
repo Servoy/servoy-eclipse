@@ -66,6 +66,13 @@ public class PropertyWizardDialog extends Dialog
 	}
 
 	@Override
+	protected void okPressed()
+	{
+		tableComposite.commitAndCloseActiveCellEditor();
+		super.okPressed();
+	}
+
+	@Override
 	protected boolean isResizable()
 	{
 		return true;

@@ -288,4 +288,9 @@ public class AutoWizardPropertiesComposite
 			setUnderlyingLayer(rowHeaderLayer);
 		}
 	}
+
+	public void commitAndCloseActiveCellEditor()
+	{
+		natTable.commitAndCloseActiveCellEditor();
+	}
 }
