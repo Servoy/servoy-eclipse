@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.apps.war;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -85,6 +87,20 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public boolean getStartRMI()
 		{
+			String servoyPropertiesFileName = getServoyPropertiesFileName();
+			if (servoyPropertiesFileName != null)
+			{
+				try (FileInputStream fis = new FileInputStream(new File(servoyPropertiesFileName)))
+				{
+					Properties prop = new Properties();
+					prop.load(fis);
+					return Utils.getAsBoolean(prop.getProperty("servoy.server.start.rmi", "false"));
+				}
+				catch (IOException e)
+				{
+					// just ignore and return false
+				}
+			}
 			return false;
 		}
 
