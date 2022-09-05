@@ -266,7 +266,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 
 					boolean propertiesFileFieldWasCleared = false;
 					// this is the same as in com.servoy.j2db.server.main.ApplicationServer.startRMIRegistry()
-					boolean startRMI = Utils.getAsBoolean(prop.getProperty("servoy.server.start.rmi", "true"));
+					boolean startRMI = Utils.getAsBoolean(prop.getProperty("servoy.server.start.rmi", "false"));
 					// just make sure the model is now set to follow the given servoy properties file
 					exportModel.setStartRMI(startRMI);
 					String rmiServerFactory = prop.getProperty("SocketFactory.rmiServerFactory");
