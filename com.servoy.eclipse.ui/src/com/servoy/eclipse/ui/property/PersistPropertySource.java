@@ -2188,7 +2188,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 																					 * not a bean property
 																					 */)
 			{
-				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+				clearAbstractBaseProperty(beanPropertyDescriptor, id, (AbstractBase)persistContext.getPersist());
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
 					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
 					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
@@ -2245,6 +2245,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), false);
 		}
+	}
+
+	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
+	{
+		((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 	}
 
 	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)
