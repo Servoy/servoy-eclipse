@@ -38,7 +38,7 @@ Table, Tree {
 	cell-background-color:  #e7f1ff;
 	padding: 2;
 	render-grid-lines: false;
-	row-height: auto;
+	row-height: 30px;
 	color: #4C4E52;
 	/* text-align: center; */
 }
