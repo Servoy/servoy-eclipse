@@ -20,9 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,6 +33,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
@@ -38,12 +42,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.Messages;
@@ -73,12 +79,14 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			return "click to add";
 		}
 	};
+	private final boolean addDialogCellEditor;
 
-	public MapEntriesPropertyController(Object id, String displayName, Map<String, PropertyDescription> map)
+	public MapEntriesPropertyController(Object id, String displayName, Map<String, PropertyDescription> map, boolean addDialogCellEditor)
 	{
 		super(id, displayName);
 		setLabelProvider(CLICK_TO_ADD);
 		this.attributesMap = map;
+		this.addDialogCellEditor = addDialogCellEditor;
 	}
 
 	@Override
@@ -435,14 +443,89 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			addSelectionListener();
 			button.setEnabled(false);
 
+			Button openDialogButton = null;
+			if (addDialogCellEditor)
+			{
+				openDialogButton = new Button(composite, SWT.DOWN);
+				openDialogButton.setText("...");
+				openDialogButton.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent event)
+					{
+						Shell shell = new Shell(parent.getDisplay());
+						InputDialog dialog = new InputDialog(shell, "Edit JSON",
+							"JSON Editor", new JSONObject(value).toString(), new IInputValidator()
+							{
+
+								@Override
+								public String isValid(String newText)
+								{
+									try
+									{
+										new JSONObject(newText);
+									}
+									catch (Exception ex)
+									{
+										return "Invalid json, cannot be parsed!";
+									}
+									return null;
+								}
+
+							})
+						{
+
+							@Override
+							protected int getInputTextStyle()
+							{
+								return SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
+							}
+
+							@Override
+							protected Control createDialogArea(Composite parent)
+							{
+								Control result = super.createDialogArea(parent);
+
+								Text text = getText(); // The input text
+
+								GridData data = new GridData(SWT.FILL, SWT.TOP, true, false);
+								data.heightHint = convertHeightInCharsToPixels(30); // number of rows
+								text.setLayoutData(data);
+
+								return result;
+							}
+
+						};
+						if (dialog.open() != Window.OK)
+							return;
+						JSONObject json = new JSONObject(dialog.getValue());
+						value = new HashMap<String, Object>();
+						for (String key : json.keySet())
+						{
+							value.put(key, json.get(key));
+						}
+						markDirty();
+						fireApplyEditorValue();
+					}
+				});
+			}
+
 			// layout
 			GroupLayout groupLayout = new GroupLayout(composite);
 			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
 			sequentialGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
 			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
+			if (openDialogButton != null)
+			{
+				sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(openDialogButton);
+			}
 			groupLayout.setHorizontalGroup(sequentialGroup);
 
 			ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
+			if (openDialogButton != null)
+			{
+				parallelGroup.add(openDialogButton, 0, 0, Integer.MAX_VALUE);
+			}
 			parallelGroup.add(button, 0, 0, Integer.MAX_VALUE);
 			parallelGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
 			groupLayout.setVerticalGroup(parallelGroup);

@@ -116,7 +116,7 @@ public class PDPropertySource extends PersistPropertySource
 				new PropertyDescriptionBuilder().withName(IContentSpecConstants.PROPERTY_ATTRIBUTES).withConfig(
 					new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(new MapEntriesPropertyController(
 						IContentSpecConstants.PROPERTY_ATTRIBUTES, RepositoryHelper.getDisplayName(IContentSpecConstants.PROPERTY_ATTRIBUTES, Form.class),
-						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
+						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null, false)
 					{ /*
 						 * (non-Javadoc)
 						 *
