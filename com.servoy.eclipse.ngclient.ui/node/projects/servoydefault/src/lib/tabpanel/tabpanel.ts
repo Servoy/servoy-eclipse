@@ -14,7 +14,9 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
-
+    
+    containerStyle = { position: 'relative', overflow: 'auto' };
+    
     constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( windowRefService, log, renderer, cdRef );
     }
@@ -28,5 +30,10 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
                 return;
             }
         }
+    }
+    
+    getContainerStyle(element: HTMLElement) : { [property: string]: any }{
+       this.containerStyle['height'] = 'calc(100% - ' + element.clientHeight + 'px)';
+       return this.containerStyle;
     }
 }
