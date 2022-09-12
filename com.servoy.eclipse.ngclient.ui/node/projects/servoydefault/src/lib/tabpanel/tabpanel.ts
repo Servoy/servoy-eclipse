@@ -33,7 +33,8 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     }
     
     getContainerStyle(element: HTMLElement) : { [property: string]: any }{
-       this.containerStyle['height'] = 'calc(100% - ' + element.clientHeight + 'px)';
+        const tabs = element.querySelector('ul');
+        this.containerStyle['height'] = 'calc(100% - ' + tabs.clientHeight + 'px)';
        return this.containerStyle;
     }
 }
