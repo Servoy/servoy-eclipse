@@ -34,6 +34,7 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -140,6 +141,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		myScrolledComposite.setExpandVertical(true);
 
 		Composite comp = new Composite(myScrolledComposite, SWT.NONE);
+		comp.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 		myScrolledComposite.setContent(comp);
 
 		Label nameLabel;
