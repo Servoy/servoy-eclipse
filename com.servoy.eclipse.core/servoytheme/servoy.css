@@ -33,6 +33,13 @@
 	background-color: #FFFFFF;
 }
 
+#svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, #svyeditor > * > * > Label {
+	background-color: #FAFAFA;
+}
+#svyeditor > Text, #svyeditor > * > Text, #svyeditor > * > CCombo, #svyeditor > * > Table {
+	background-color: #FFFFFF;
+}
+
 Button[style~='SWT.PUSH']  {
     background-color: unset;
     color: unset;
