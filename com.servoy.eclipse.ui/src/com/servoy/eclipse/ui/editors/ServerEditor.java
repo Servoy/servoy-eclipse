@@ -1599,8 +1599,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			boolean isUpdateForDifferenServer = oldServerConfig != null && currentServerEditorInput != null &&
 				oldServerConfig.getServerName() != currentServerEditorInput.getServerConfig().getServerName();
 
-			// if it is an update for a diff server or it is a delete (newServerConfig == null), skip ui update
-			if (isUpdateForDifferenServer || newServerConfig == null) return;
+			// if it is an update for a diff server or it is a delete (newServerConfig == null) or a new one (oldServerConfig == null), skip ui update
+			if (isUpdateForDifferenServer || newServerConfig == null || oldServerConfig == null) return;
 
 			setInput(new ServerEditorInput(newServerConfig, currentServerEditorInput.getServerSettings()));
 			initDataBindings();
