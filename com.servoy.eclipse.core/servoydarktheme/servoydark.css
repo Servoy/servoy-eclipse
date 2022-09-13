@@ -13,3 +13,47 @@ Text {
 Table, Tree {
 	swt-lines-visible: false;
 }
+
+.svyNatTable {
+	min-height: 300px;
+	text-trim: false;
+	text-wrap: true;
+	
+	cell-background-color: #2F2F2F;
+	color: #F8F8F8;
+	invert-icons: true;
+}
+
+.svyNatTable > .styleClass,  .svyNatTable > .headertext{
+	text-align: center;
+}
+
+.svyNatTable:select {
+    painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+}
+
+.svyNatTable > .COLUMN_HEADER {
+	painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+	padding: 2;
+	render-grid-lines: false;
+	row-height: 30px;
+	color: #4C4E52;
+	/* text-align: center; */
+}
+
+.svyNatTable > .COLUMN_0 {
+	padding-left: 5px;
+	text-align: left;
+}
+
+.svyNatTable > .containedForm {
+	column-width: 150px;
+	text-trim: false;
+}
+
+.svyNatTable > .relationName {
+	column-width: auto;
+	text-trim: false;
+}

@@ -493,15 +493,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				ArrayList<IPersist> result = new ArrayList<IPersist>();
 				Form f = (Form)parentElement;
-				if (showMembersAction.isChecked())
-				{
-					IPersist child = findChild(f, listSelection);
-					if (child != null)
-					{
-						result.add(child);
-					}
-				}
-
 				List<Form> directChildren = getActiveSolution().getDirectlyInheritingForms(f);
 				if (showMembersAction.isChecked() && listSelection != null)
 				{
@@ -529,8 +520,17 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						result.addAll(directChildren);
 					}
 				}
-
 				result.sort(NameComparator.INSTANCE);
+
+				if (showMembersAction.isChecked())
+				{
+					IPersist child = findChild(f, listSelection);
+					if (child != null)
+					{
+						result.add(0, child);
+					}
+				}
+
 				return result.toArray();
 			}
 			return new Object[0];

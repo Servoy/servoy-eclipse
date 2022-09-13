@@ -84,7 +84,8 @@ Require-Bundle: org.eclipse.ui,
  com.equo.chromium;resolution:=optional,
  org.eclipse.nebula.widgets.nattable.core,
  org.eclipse.nebula.widgets.nattable.extension.nebula,
- org.eclipse.e4.ui.css.swt
+ org.eclipse.e4.ui.css.swt,
+ org.eclipse.nebula.widgets.nattable.extension.e4
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

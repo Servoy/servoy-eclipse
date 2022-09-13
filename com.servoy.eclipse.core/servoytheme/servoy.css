@@ -42,10 +42,10 @@ Table, Tree {
 	swt-lines-visible: false;
 }
 
-
 .svyNatTable {
 	min-height: 300px;
-	min-width: 600px;
+	text-trim: false;
+	text-wrap: true;
 }
 
 .svyNatTable > .styleClass,  .svyNatTable > .headertext{
@@ -62,17 +62,25 @@ Table, Tree {
 	cell-background-color:  #e7f1ff;
 	padding: 2;
 	render-grid-lines: false;
-	row-height: auto;
-	text-trim: false;
+	row-height: 30px;
 	color: #4C4E52;
-	/* column-width: auto; */
+	text-trim: false;
 	text-align: center;
 }
-
 
 .svyNatTable > .COLUMN_0 {
 	padding-left: 5px;
 	text-align: left;
+}
+
+.svyNatTable > .containedForm {
+	column-width: 150px;
+	text-trim: false;
+}
+
+.svyNatTable > .relationName{
+	column-width: auto;
+	text-trim: false;
 }
 
 Button  {

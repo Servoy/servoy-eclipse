@@ -13,8 +13,11 @@ export class EditorContentService {
     private afterInitCallbacks: Array<() => void> = new Array<() => void>();
     private contentMessageListeners: Array<IContentMessageListener> = new Array<IContentMessageListener>();
     private contentWasInit = false;
-
-    constructor(@Inject(DOCUMENT) private document: Document, windowRefService: WindowRefService) {
+    
+    private topAdjust: number;
+    private leftAdjust: number;
+    
+    constructor(@Inject(DOCUMENT) private document: Document, private windowRefService: WindowRefService) {
         windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string }>) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'afterContentInit') {
@@ -141,6 +144,16 @@ export class EditorContentService {
         this.contentMessageListeners.splice(this.contentMessageListeners.indexOf(listener), 1);
     }
 
+    getGlasspaneTopDistance(){
+        this.initAdjustments();
+        return this.topAdjust;
+    }
+    
+    getGlasspaneLeftDistance(){
+        this.initAdjustments();
+        return this.leftAdjust;
+    }
+    
    private initIFrame(variants?: boolean) {
         if (variants) {
             if (!this.frameElement || this.frameElement.id != 'VariantsForm') {
@@ -158,6 +171,15 @@ export class EditorContentService {
                 } else if (frames.length > 0 ){//true when preview
                     this.frameElement = frames[1];
                 }
+        }
+    }
+    
+    private initAdjustments(){
+         if (!this.topAdjust) {
+            const content = this.getContentArea();
+            const computedStyle = this.windowRefService.nativeWindow.getComputedStyle(content, null)
+            this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
+            this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
         }
     }
 }

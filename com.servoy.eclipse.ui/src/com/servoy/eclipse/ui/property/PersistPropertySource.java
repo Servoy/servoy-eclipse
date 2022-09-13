@@ -219,6 +219,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
@@ -1461,9 +1462,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					resultingPropertyDescriptor = createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
 				}
-				else if (propertyType == MapPropertyType.INSTANCE)
+				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
-					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null);
+					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE);
 					resultingPropertyDescriptor = new PropertyController<JSONObject, Object>(id, displayName,
 						new ChainedPropertyConverter<JSONObject, Map<String, Object>, Object>(new IPropertyConverter<JSONObject, Map<String, Object>>()
 						{
@@ -2188,7 +2189,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 																					 * not a bean property
 																					 */)
 			{
-				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+				clearAbstractBaseProperty(beanPropertyDescriptor, id, (AbstractBase)persistContext.getPersist());
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
 					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
 					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
@@ -2245,6 +2246,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), false);
 		}
+	}
+
+	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
+	{
+		((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 	}
 
 	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)

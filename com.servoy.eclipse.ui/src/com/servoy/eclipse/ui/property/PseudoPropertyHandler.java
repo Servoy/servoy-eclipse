@@ -54,7 +54,7 @@ public class PseudoPropertyHandler implements IPropertyHandler
 	// null type: use property controller internally
 	public static final PropertyDescription DESIGN_PROPERTIES_DESCRIPTION = new PropertyDescriptionBuilder().withName("designTimeProperties").withConfig(
 		new CustomPropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
-			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class), null)
+			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class), null, false)
 			{
 				@Override
 				protected ComplexPropertyConverter<Map<String, Object>> createConverter()
@@ -115,7 +115,7 @@ public class PseudoPropertyHandler implements IPropertyHandler
 	public static final PropertyDescription ATTRIBUTES_PROPERTY_DESCRIPTION = new PropertyDescriptionBuilder().withName(
 		StaticContentSpecLoader.PROPERTY_ATTRIBUTES).withConfig(
 			new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(
-				new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null)
+				new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null, false)
 				{
 
 					@Override

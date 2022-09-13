@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
@@ -45,7 +46,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.Activator;
@@ -53,6 +53,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
+import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
@@ -77,7 +78,7 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 	public PainterConfiguration(PropertyWizardDialogConfigurator propertiesConfig, LinkClickConfiguration linkClickConfiguration,
 		IDataProvider bodyDataProvider,
-		PersistContext context, FlattenedSolution flattenedSolution, Shell shell)
+		PersistContext context, FlattenedSolution flattenedSolution)
 	{
 		super();
 		this.propertiesConfig = propertiesConfig;
@@ -232,8 +233,7 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	private void registerRelationColumn(IConfigRegistry configRegistry, PropertyDescription dp)
 	{
 		final RelationDisplayConverter relationDisplayConverter = new RelationDisplayConverter(flattenedSolution);
-		NatTextDialogCellEditor dialogCellEditor = new NatListDialogCellEditor("Select relation",
-			com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("relation.png"),
+		NatListDialogCellEditor dialogCellEditor = new NatListDialogCellEditor("Select relation",
 			new RelationContentProvider(ModelUtils.getEditingFlattenedSolution(context.getPersist(), context.getContext()),
 				context.getContext()),
 			new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, context.getContext()),
@@ -241,30 +241,27 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			SWT.NONE, "Select relation")
 		{
 			@Override
-			public DisplayConverter getDisplayConverter()
+			protected Object getCanonicalValue(Object value)
 			{
-				return new DisplayConverter()
-				{
-					@Override
-					public Object canonicalToDisplayValue(Object canonicalValue)
-					{
-						return canonicalValue != null ? relationDisplayConverter.canonicalToDisplayValue(canonicalValue) : "";
-					}
-
-					@Override
-					public Object displayToCanonicalValue(Object displayValue)
-					{
-						return Strings.isEmpty((String)displayValue) ? relationDisplayConverter.displayToCanonicalValue(displayValue) : null;
-					}
-				};
-			}
-
-			@Override
-			public Object getCanonicalValue(Object value)
-			{
-				return value;
+				return relationDisplayConverter.canonicalToDisplayValue(value);
 			}
 		};
+		dialogCellEditor.setDisplayConverter(relationDisplayConverter);
+		dialogCellEditor.setSelectionFilter(new IFilter()
+		{
+			public boolean select(Object toTest)
+			{
+				if (toTest == RelationContentProvider.NONE)
+				{
+					return true;
+				}
+				if (toTest instanceof RelationsWrapper && ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0)
+				{
+					return true;
+				}
+				return false;
+			}
+		});
 
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
@@ -286,6 +283,24 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.DISPLAY_CONVERTER,
+			new DisplayConverter()
+			{
+				@Override
+				public Object canonicalToDisplayValue(Object canonicalValue)
+				{
+					return canonicalValue != null ? relationDisplayConverter.canonicalToDisplayValue(canonicalValue) : "";
+				}
+
+				@Override
+				public Object displayToCanonicalValue(Object displayValue)
+				{
+					return Strings.isEmpty((String)displayValue) ? relationDisplayConverter.displayToCanonicalValue(displayValue) : null;
+				}
+			}, DisplayMode.EDIT,
+			dp.getName());
+
+		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
 			dialogCellEditor, DisplayMode.EDIT,
 			dp.getName());
@@ -300,43 +315,14 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	{
 		final FormDisplayConverter formDisplayConverter = new FormDisplayConverter(context);
 
-		NatTextDialogCellEditor dialogCellEditor = new NatListDialogCellEditor("Select form dialog",
-			com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("form.png"),
+		NatListDialogCellEditor dialogCellEditor = new NatListDialogCellEditor("Select form dialog",
 			new FormContentProvider(flattenedSolution, null /* persist is solution */), new FormLabelProvider(flattenedSolution, false),
 			new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null,
 				true, false, false, false, null),
 			SWT.NONE, "Select form")
 		{
 			@Override
-			public DisplayConverter getDisplayConverter()
-			{
-				return new DisplayConverter()
-				{
-					@Override
-					public Object canonicalToDisplayValue(Object canonicalValue)
-					{
-						if (canonicalValue instanceof String)
-						{
-							IPersist persist = flattenedSolution.searchPersist((String)canonicalValue);
-							if (persist instanceof AbstractBase)
-							{
-								return new Integer(persist.getID());
-							}
-						}
-						return new Integer(-1);
-					}
-
-					@Override
-					public Object displayToCanonicalValue(Object displayValue)
-					{
-						Form frm = flattenedSolution.getForm(((Integer)displayValue).intValue());
-						return (frm == null) ? "" : frm.getName();
-					}
-				};
-			}
-
-			@Override
-			public Object getCanonicalValue(Object value)
+			protected Object getCanonicalValue(Object value)
 			{
 				return formDisplayConverter.displayToCanonicalValue(value);
 			}
@@ -344,32 +330,37 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
-		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.CELL_STYLE,
-			style,
-			DisplayMode.NORMAL,
-			dp.getName());
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, dp.getName());
 
-		configRegistry.registerConfigAttribute(
-			EditConfigAttributes.CELL_EDITOR,
-			dialogCellEditor, DisplayMode.NORMAL,
-			dp.getName());
+		configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, dialogCellEditor, DisplayMode.NORMAL, dp.getName());
 
-		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.DISPLAY_CONVERTER,
-			formDisplayConverter,
-			DisplayMode.NORMAL,
-			dp.getName());
+		configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, formDisplayConverter, DisplayMode.NORMAL, dp.getName());
+		configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, new DisplayConverter()
+		{
+			@Override
+			public Object canonicalToDisplayValue(Object canonicalValue)
+			{
+				if (canonicalValue instanceof String)
+				{
+					IPersist persist = flattenedSolution.searchPersist((String)canonicalValue);
+					if (persist instanceof AbstractBase)
+					{
+						return Integer.valueOf(persist.getID());
+					}
+				}
+				return Integer.valueOf(-1);
+			}
 
-		configRegistry.registerConfigAttribute(
-			EditConfigAttributes.CELL_EDITOR,
-			dialogCellEditor, DisplayMode.EDIT,
-			dp.getName());
+			@Override
+			public Object displayToCanonicalValue(Object displayValue)
+			{
+				Form frm = flattenedSolution.getForm(((Integer)displayValue).intValue());
+				return (frm == null) ? "" : frm.getName();
+			}
+		}, DisplayMode.EDIT, dp.getName());
+		configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, dialogCellEditor, DisplayMode.EDIT, dp.getName());
 
-		configRegistry.registerConfigAttribute(
-			EditConfigAttributes.CELL_EDITABLE_RULE,
-			IEditableRule.ALWAYS_EDITABLE, DisplayMode.EDIT,
-			dp.getName());
+		configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITABLE_RULE, IEditableRule.ALWAYS_EDITABLE, DisplayMode.EDIT, dp.getName());
 	}
 
 	private void registerColumnHeaderStyle(IConfigRegistry configRegistry)

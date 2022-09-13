@@ -1141,7 +1141,7 @@ public class WarExporter
 						}
 						catch (Exception ex)
 						{
-							ServoyLog.logError(ex);
+							ServoyLog.logError("error extracting serverside script " + path + " from jar/zip: " + file, ex);
 						}
 					});
 				}

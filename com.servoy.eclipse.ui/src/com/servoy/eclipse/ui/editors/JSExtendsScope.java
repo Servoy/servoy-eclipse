@@ -40,12 +40,15 @@ public class JSExtendsScope implements IJsExtendsScope
 
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		Form myForm = servoyProject.getEditingFlattenedSolution().getForm(scopeName);
-		Form extendsForm = myForm.getExtendsForm();
-		if (extendsForm != null)
+		if (myForm != null)
 		{
-			return extendsForm.getName();
-		}
+			Form extendsForm = myForm.getExtendsForm();
+			if (extendsForm != null)
+			{
+				return extendsForm.getName();
+			}
+		} // else scopeName is not a form, but for example a global scope
+
 		return null;
 	}
-
 }
