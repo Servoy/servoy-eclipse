@@ -33,7 +33,8 @@
 	background-color: #FFFFFF;
 }
 
-#svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, #svyeditor > * > * > Label {
+#svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, 
+#svyeditor > * > * > Label, #svyeditor > * > * > XLControl, #svyeditor > * > * > FormText  {
 	background-color: #FAFAFA;
 }
 #svyeditor > Text, #svyeditor > * > Text, #svyeditor > * > CCombo, #svyeditor > * > Table {

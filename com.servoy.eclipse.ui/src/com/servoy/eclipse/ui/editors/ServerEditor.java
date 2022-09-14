@@ -41,6 +41,7 @@ import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -174,6 +175,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	public void createPartControl(final Composite parent)
 	{
 		this.parentControl = parent;
+		parentControl.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 
 		GridData tmpGD;
 
@@ -377,6 +379,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
 
 		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
+		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("advanced_serverproperties.png"));
 		collapsableItem.setControl(advancedSettingsComposite);
 
