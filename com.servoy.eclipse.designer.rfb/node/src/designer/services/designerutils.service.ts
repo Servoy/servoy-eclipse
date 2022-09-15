@@ -63,9 +63,9 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
-        if (type == "layout" || (type == "component" && !this.editorSession.isAbsoluteFormLayout())) {
+        if (type == "layout" || (type == "component" && !absoluteLayout)) {
             const realName = layoutName ? layoutName : "component";
 
             dropTarget = this.getNode(event, true, skipNodeId);
@@ -193,6 +193,10 @@ export class DesignerUtilsService {
                     return {
                         dropAllowed: false
                     }; // the drop target doesn't support this component
+            }
+            if (absoluteLayout && dropTarget && dropTarget.closest('.svy-responsivecontainer')){
+                // we must find the drop target in responsive mode
+                return this.getDropNode(false, type, topContainer, layoutName, event, componentName, skipNodeId);
             }
         }
         return {
