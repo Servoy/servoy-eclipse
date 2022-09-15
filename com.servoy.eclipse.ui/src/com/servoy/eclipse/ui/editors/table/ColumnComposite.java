@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -111,19 +110,19 @@ public class ColumnComposite extends Composite
 	public ColumnComposite(TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
 		super(parent, style);
+		parent.getShell().setBackgroundMode(SWT.INHERIT_FORCE);
 
 		this.setLayout(new FillLayout());
-		final ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL);
+		final ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		final Composite container = new Composite(myScrolledComposite, SWT.NONE);
-		container.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		final Composite container = new Composite(myScrolledComposite, SWT.TRANSPARENT);
 		myScrolledComposite.setContent(container);
 
 		final ITable t = te.getTable();
 		boolean isViewFoundsetTable = t instanceof ViewFoundsetTable;
-		tableContainer = new Composite(container, SWT.NONE);
+		tableContainer = new Composite(container, SWT.INHERIT_DEFAULT);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);

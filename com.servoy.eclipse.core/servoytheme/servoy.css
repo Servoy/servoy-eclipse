@@ -34,8 +34,9 @@
 }
 
 #svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, 
-#svyeditor > * > * > Label, #svyeditor > * > * > XLControl, #svyeditor > * > * > FormText  {
-	background-color: #FAFAFA;
+#svyeditor > * > * > Label, #svyeditor > * > * > XLControl, #svyeditor > * > * > FormText, 
+#svyeditor > * > * > * > ExpandBarWidthAware, #svyeditor > * > * > * > ExpandBarWidthAware > ExpandBar  {
+	background-color: #F0F0F0;
 }
 #svyeditor > Text, #svyeditor > * > Text, #svyeditor > * > CCombo, #svyeditor > * > Table {
 	background-color: #FFFFFF;
@@ -48,6 +49,14 @@ Button[style~='SWT.PUSH']  {
 
 Table, Tree {
 	swt-lines-visible: false;
+}
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Composite> Tree {
+	swt-lines-visible: true;
+}
+
+#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree {
+	swt-lines-visible: true;
 }
 
 .svyNatTable {
