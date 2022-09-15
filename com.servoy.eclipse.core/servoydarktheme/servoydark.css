@@ -2,7 +2,11 @@
 	background-color: #2F2F2F;
 }
 
- * , #PerspectiveSpacer, ScalingHyperlink {
+#PerspectiveSwitcher {
+	eclipse-perspective-keyline-color: #2F2F2F #2F2F2F;
+}
+
+ * , #PerspectiveSpacer, ScalingHyperlink, .MToolBar, .MToolControl, .MTrimBar, Shell, Composite, Label {
 	background-color: #2F2F2F;
 }
 
@@ -12,6 +16,10 @@ Text {
 
 Table, Tree {
 	swt-lines-visible: false;
+}
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Composite> Tree {
+	swt-lines-visible: true;
 }
 
 .svyNatTable {
@@ -35,11 +43,10 @@ Table, Tree {
 
 .svyNatTable > .COLUMN_HEADER {
 	painter-resolution: true;
-	cell-background-color:  #e7f1ff;
 	padding: 2;
 	render-grid-lines: false;
 	row-height: 30px;
-	color: #4C4E52;
+	color: #AAAAAA;
 	/* text-align: center; */
 }
 
