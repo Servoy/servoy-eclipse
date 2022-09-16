@@ -14,20 +14,28 @@ import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 })
 export class VariantsContentComponent implements OnInit {
 
+    @Input() component: PaletteComp;
+    @ViewChild('popover') popover: NgbPopover;
+
     clientURL: SafeResourceUrl;
-    popover: NgbPopover;
-    component: PaletteComp;
     margin = 15;
 	variantItemBeingDragged: Node;
 	variantsIFrame: HTMLIFrameElement;
 	size: {width: number, height: number};
+	activeVariant = false;
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService,
         private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
 	
 		this.editorSession.openPopoverTrigger.subscribe((value) => {
-			this.previewStylesForComponent(value.component);
+			if (this.component == value.component) {
+			     this.activeVariant = true;
+			     this.previewStylesForComponent();
+			 }
+			 else{
+			     this.activeVariant = false;
+			 }
 		});
     }
 
@@ -35,47 +43,38 @@ export class VariantsContentComponent implements OnInit {
         this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        	if (event.data.id === 'variantsReady') {
-                this.sendStylesToVariantsForm(this.component);
-            }
-			if (event.data.id === 'onVariantMouseDown') {
-                this.onVariantMouseDown(event.data.pageX, event.data.pageY);
+            if ( this.activeVariant)
+            {
+                if (event.data.id === 'variantsReady') {
+                    this.sendStylesToVariantsForm();
+                }
+                if (event.data.id === 'onVariantMouseDown') {
+                    this.onVariantMouseDown(event.data.pageX, event.data.pageY);
+                }
             }
         });
     }
     
-    onVariantClick(popover: NgbPopover) {
-		this.popover = popover;
-	}
-	
-    
-    previewStylesForComponent(component: PaletteComp) {
+    previewStylesForComponent() {
         if (this.popover.isOpen()) {
           	this.popover.close(true);
         } else {	  
-	        this.editorSession.getStyleVariantFor(component.styleVariantCategory)
-	            .then((result) => {
-					component.styleVariants = result;
-					this.component = component;
-					this.size = this.getVariantsFormSize(component) as {width: number, height: number};
-					//TODO: set width & height for popover from computed sizes
-					this.popover.open({ comp: component, popOv: this.popover, width: this.size.width + "px", height: this.size.height + "px", clientURL: this.clientURL});
-				}).catch((err) => {
-					console.log(err);
-				});
+			this.size = this.getVariantsFormSize() as {width: number, height: number};
+			//TODO: set width & height for popover from computed sizes
+			this.popover.open({ comp: this.component, popOv: this.popover, width: this.size.width + "px", height: this.size.height + "px", clientURL: this.clientURL});
         }    
 	}
 	
 	
-	sendStylesToVariantsForm(component: PaletteComp) {
+	sendStylesToVariantsForm() {
 		//variants form is already created, now waiting styles
-		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
+		const columns = this.component.styleVariants.length > 8 ? 3 : this.component.styleVariants.length > 3 ? 2 : 1;
 		this.variantsIFrame = this.doc.getElementById('VariantsForm') as HTMLIFrameElement;
 		const message = { 
 			id: 'createVariants', 
-			variants: component.styleVariants, 
-			model: component.model, 
-			name: this.convertToJSName(component.name), 
+			variants: this.component.styleVariants, 
+			model: this.component.model, 
+			name: this.convertToJSName(this.component.name), 
 			type: 'component',
 			margin: this.margin,
 			columns: columns
@@ -87,11 +86,11 @@ export class VariantsContentComponent implements OnInit {
 
 	}
 	
-	getVariantsFormSize(component: PaletteComp) {
+	getVariantsFormSize() {
 		//TODO: render the size based on the real component and not the model
-		const columns = component.styleVariants.length > 8 ? 3 : component.styleVariants.length > 3 ? 2 : 1;
-		const size = (JSON.parse(JSON.stringify(component.model))['size']) as {width: number, height: number}; 
-		const rows = Math.round(component.styleVariants.length / columns ) + 1;
+		const columns = this.component.styleVariants.length > 8 ? 3 : this.component.styleVariants.length > 3 ? 2 : 1;
+		const size = (JSON.parse(JSON.stringify(this.component.model))['size']) as {width: number, height: number}; 
+		const rows = Math.round(this.component.styleVariants.length / columns ) + 1;
 		return {width: (columns) * (size.width + this.margin),
 				height: rows * (size.height + this.margin)};
 	}
@@ -110,13 +109,13 @@ export class VariantsContentComponent implements OnInit {
         return name;    
     }
 
-	onAddVariant(event: MouseEvent, component: PaletteComp) {
+	onAddVariant(event: MouseEvent) {
 		//TODO: add iplementation
 		event.stopPropagation();
 		console.log('Add variant clicked');
 	}
 
-	onEditVariant(event: MouseEvent, component: PaletteComp) {
+	onEditVariant(event: MouseEvent) {
 		//TODO: add implementation
 		event.stopPropagation();
 		console.log('Edit variant clicked');

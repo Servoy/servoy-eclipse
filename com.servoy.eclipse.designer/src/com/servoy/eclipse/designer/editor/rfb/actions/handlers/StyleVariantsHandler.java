@@ -17,14 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import java.util.ArrayList;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
 /**
@@ -42,18 +38,6 @@ public class StyleVariantsHandler implements IServerService
 		String variantCategory = args.optString("p");
 		if ("addStyleVariantFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("addVariantFor=" + variantCategory);
 		else if ("editStyleVariantsFor".equals(methodName)) EditorUtil.openComponentVariantsEditor("editVariantsFor=" + variantCategory);
-		else if ("getStyleVariantsFor".equals(methodName))
-		{
-			JSONArray variantsForCategory = ServoyModelManager.getServoyModelManager().getServoyModel().getExistingVariants(variantCategory);
-			ArrayList<String> variantNames = new ArrayList<>(variantsForCategory.length());
-			variantsForCategory.forEach((variantDetails) -> {
-				variantNames.add(((JSONObject)variantDetails).getString("name"));
-			});
-			return variantNames.toArray(new String[variantNames.size()]);
-//			return new String[] { variantCategory + "1", variantCategory + "2", variantCategory + "3", "btn-primary" };
-		}
-		// TODO use the manager
-
 		return null;
 	}
 

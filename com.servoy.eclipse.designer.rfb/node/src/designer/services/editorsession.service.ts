@@ -98,10 +98,6 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
-    getStyleVariantFor(variantCategory: string): Promise<string[]> {
-        return this.wsSession.callService('formeditor', 'getStyleVariantsFor', { p: variantCategory }, false);
-    }
-
     addStyleVariantFor(variantCategory: string) {
         void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true);
     }

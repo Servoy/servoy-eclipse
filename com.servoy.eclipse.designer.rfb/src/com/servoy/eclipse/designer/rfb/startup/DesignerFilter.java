@@ -373,6 +373,17 @@ public class DesignerFilter implements Filter
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
 									componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());
+									if (spec.getStyleVariantCategory() != null)
+									{
+										JSONArray variantsForCategory = ServoyModelManager.getServoyModelManager().getServoyModel()
+											.getExistingVariants(spec.getStyleVariantCategory());
+										ArrayList<String> variantNames = new ArrayList<>(variantsForCategory.length());
+										variantsForCategory.forEach((variantDetails) -> {
+											variantNames.add(((JSONObject)variantDetails).getString("name"));
+										});
+										componentJson.put("styleVariants", variantNames);
+										// TODO use the manager
+									}
 
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())

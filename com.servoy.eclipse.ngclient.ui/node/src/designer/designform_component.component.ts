@@ -275,7 +275,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         event.stopPropagation();
 		this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: item.model}, '*');
 	}
-
+    
+    ngAfterViewInit() {
+        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
+    }
+    
     public detectChanges() {
         this.changeHandler.markForCheck();
     }

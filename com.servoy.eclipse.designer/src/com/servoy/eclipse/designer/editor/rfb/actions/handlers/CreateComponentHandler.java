@@ -375,6 +375,10 @@ public class CreateComponentHandler implements IServerService
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					CSSPositionUtils.setLocation(gc, x, y);
 					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-label".equals(name))
@@ -383,6 +387,10 @@ public class CreateComponentHandler implements IServerService
 					gc.setText(args.has("text") ? args.getString("text") : "label");
 					CSSPositionUtils.setLocation(gc, x, y);
 					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-combobox".equals(name))
