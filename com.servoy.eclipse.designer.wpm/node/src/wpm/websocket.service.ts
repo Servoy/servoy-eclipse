@@ -29,6 +29,7 @@ export interface Package {
   description: string;
   displayName: string;
   icon: string;
+  invertIcon?: boolean;
   installed: string;
   installedIsWPA: boolean;
   installing: boolean;

@@ -143,4 +143,8 @@ export class PackagesComponent implements OnChanges {
     needsActiveSolution(p: Package): boolean {
         return p.packageType != PACKAGE_TYPE_SOLUTION;
     }
+    
+    invertIcon(p: Package): boolean {
+        return this.wpmService.isDarkTheme() && p.invertIcon;
+    }
 }
