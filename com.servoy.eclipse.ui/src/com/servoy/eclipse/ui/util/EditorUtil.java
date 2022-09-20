@@ -72,7 +72,6 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.resource.ComponentVariantsEditorInput;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
@@ -680,8 +679,12 @@ public class EditorUtil
 	{
 		try
 		{
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
-				"com.servoy.eclipse..designer.editor.componentvariantseditor");
+			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
+			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
+			IFile styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
+				.getFile(new Path("medias/styles_wizard.less"));
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("styles_wizard.less");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(styles_wizard), desc.getId(), true);
 		}
 		catch (PartInitException e)
 		{
