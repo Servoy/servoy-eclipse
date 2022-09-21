@@ -1180,6 +1180,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		if (!ignore) checkPackages(false);
 	}
 
+	public static void setIgnoreAndCheck(boolean ignore, boolean check)
+	{
+		WebPackagesListener.ignore.set(ignore);
+		if (!ignore && check) checkPackages(false);
+	}
+
 	public static void checkPackages(boolean ci)
 	{
 		if (ServoyModelFinder.getServoyModel().getActiveProject() == null || ignore.get())
