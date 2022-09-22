@@ -794,7 +794,7 @@ public class SolutionSerializer
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
 		// don't replace object types see SolutionDeserializer.parseJSFile()
-		if (jsType == null || !jsType.startsWith("{{"))
+		if (jsType == null || (!jsType.contains("{{") && !jsType.contains("Array<{")))
 		{
 			if (argumentType != ArgumentType.Object)
 			{
