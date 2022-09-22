@@ -427,10 +427,15 @@ export class WindowService {
             const interval = setInterval(() => {
                 if (this.webSocketService.isConnected()) {
                     clearInterval(interval);
-                    let counter = 0;
-                    let windowCounterReset = false;
+                    
+                    let windowsToRestore: any[] = [];
+                    let counter = 0; 
                     while (this.sessionStorageService.get('window' + counter)) {
-                        const window = this.sessionStorageService.get('window' + counter);
+                        windowsToRestore.push(this.sessionStorageService.get('window' + counter));
+                        counter++;
+                    }
+                    let windowCounterReset = false;
+                    windowsToRestore.forEach( window =>  {
                         // server call for getting form's data (send data from server to client)
                         // call a couple of methods that will create and display the window
                         this.create(window.name, window.type);
@@ -453,9 +458,8 @@ export class WindowService {
                           this.show(window.name, window.showForm, window.showTitle);
                           this.windowCounter++;
                         });
-                        counter++;
                         this.windowCounter++;
-                }
+                });
                 }
             }, 1000);
         }
