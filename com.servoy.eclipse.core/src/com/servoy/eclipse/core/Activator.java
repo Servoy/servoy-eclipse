@@ -1150,7 +1150,7 @@ public class Activator extends Plugin
 					return new DebugWebClientSession(request);
 				}
 			});
-			ss.start(false);
+			ss.start(false, true);
 			ss.startWebServer();
 
 			checkApplicationServerVersion(ss.getApplicationServer());
