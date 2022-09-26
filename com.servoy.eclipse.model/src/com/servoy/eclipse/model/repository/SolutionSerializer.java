@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
@@ -794,7 +795,7 @@ public class SolutionSerializer
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
 		// don't replace object types see SolutionDeserializer.parseJSFile()
-		if (jsType == null || (!jsType.contains("{{") && !jsType.contains("Array<{")))
+		if (jsType == null || !jsType.contains("{{"))
 		{
 			if (argumentType != ArgumentType.Object)
 			{
