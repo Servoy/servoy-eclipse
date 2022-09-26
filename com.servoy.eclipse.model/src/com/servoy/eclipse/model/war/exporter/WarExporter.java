@@ -2429,7 +2429,7 @@ public class WarExporter
 
 	private static void copyFile(File sourceFile, File destFile) throws ExportException
 	{
-		if (!sourceFile.exists())
+		if (!sourceFile.exists() || sourceFile.length() == 0)
 		{
 			return;
 		}
