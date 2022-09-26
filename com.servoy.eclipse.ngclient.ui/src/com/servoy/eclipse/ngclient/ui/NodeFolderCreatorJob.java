@@ -83,7 +83,7 @@ public class NodeFolderCreatorJob extends Job
 				createFolder(nodeFolder);
 			}
 			boolean codeChanged = true;
-			File packageJsonFile = new File(nodeFolder, "package_original.json");
+			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
@@ -118,19 +118,8 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (codeChanged)
 			{
-				try
-				{
-					// create the package_original.json
-					FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
-
-					// delete the source dirs so we start clean
-					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
-					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
+				// delete the source dirs so we start clean
+				FileUtils.deleteQuietly(nodeFolder.getParentFile());
 
 				writeConsole(console, "Tested package.json which is changed, starting to copy " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 				time = System.currentTimeMillis();
@@ -142,7 +131,7 @@ public class NodeFolderCreatorJob extends Job
 
 				try
 				{
-					FileUtils.copyFile(new File(nodeFolder, "package.json"), new File(nodeFolder.getParent(), "package.json"));
+					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
 
 					executeNpmInstall = true;
