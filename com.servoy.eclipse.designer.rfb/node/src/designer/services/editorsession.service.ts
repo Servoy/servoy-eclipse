@@ -439,15 +439,12 @@ export class EditorSessionService implements ServiceProvider {
 
     getFixedKeyEvent(event: KeyboardEvent) {
         let keyCode = event.keyCode;
-        if ((event.target as Element).className == 'inlineEdit') {
-            if (event.metaKey || event.ctrlKey) {
-                //several Meta/Ctrl + key combinations are creating unexpected behaviour (far from users intention) so .... disable for now 
-                keyCode = 0;
-            } else if (event.key == 'Meta' || event.key == 'Control' || event.key == 'Shift' || event.key == 'Alt') {
-                //avoid sending the specials key codes by themselfs - they always must be part of a combination
-                keyCode = 0;
-            }
-        }
+        if ((event.metaKey && event.key == 'Meta') || (event.ctrlKey && event.key == 'Control') || (event.altKey && event.key == 'Alt')) { 
+            //standalone special keys have a javascript keyCode (91 = Meta, 17 = Ctrl, 18 = Alt) which may be wrongly interpreted in the KeyPressHandler (server side)
+            //they must produce no action by themselves
+            keyCode = 0
+        } 
+ 
         return {
             keyCode: keyCode,
             ctrlKey: event.ctrlKey,

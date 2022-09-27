@@ -288,31 +288,32 @@ export class PaletteComponent implements ISupportAutoscroll{
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
-                if (!this.urlParser.isAbsoluteFormLayout() || this.urlParser.isShowingContainer()) {
-                    this.canDrop = this.designerUtilsService.getDropNode( this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
-                    if (!this.canDrop.dropAllowed) {
-                        this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
+                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                if (!this.canDrop.dropAllowed) {
+                    this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
+                }
+                else {
+                    this.editorContentService.getGlassPane().style.cursor = 'pointer';
+                }
+
+                if (this.dragItem.contentItemBeingDragged) {
+                    if (this.canDrop.dropAllowed) {
+                        //TODO do we need to optimize the calls to insert the dragged component?
+                        this.editorContentService.sendMessageToIframe({
+                            id: 'insertDraggedComponent',
+                            dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
+                            insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
+                        });
                     }
-                    else {
-                        this.editorContentService.getGlassPane().style.cursor = 'pointer';
+                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout() ))
+                    {
+                        // hide the dragged item and rely on inserted item at specific parent 
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
+                    } else 
+                    {
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
                     }
 
-                    if (this.dragItem.contentItemBeingDragged) {
-                        if (this.editorContentService.getGlassPane().style.cursor === "pointer") {
-                            //TODO do we need to optimize the calls to insert the dragged component?
-                            if (this.canDrop.dropAllowed) {
-                                this.editorContentService.sendMessageToIframe({
-                                    id: 'insertDraggedComponent',
-                                    dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
-                                    insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
-                                });
-                            }
-                            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
-                        } else {
-                            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
-                        }
-
-                    }
                 }
             }
             else {

@@ -1026,6 +1026,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().setUserProperty(name, value);
 	}
 
+	public void removeUserProperty(String name)
+	{
+		getClient().removeUserProperty(name);
+	}
+
+	public void removeAllUserProperties()
+	{
+		getClient().removeAllUserProperties();
+	}
+
 	public JComponent getEditLabel()
 	{
 		return ((J2DBClient)getClient()).getEditLabel();

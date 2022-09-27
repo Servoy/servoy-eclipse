@@ -1129,9 +1129,9 @@ public class WarExporter
 						}
 					}
 					scripts.forEach((String path) -> {
-						String serverScriptName = path.substring(path.lastIndexOf("/") + 1);
-						ZipEntry serverScriptEntry = jarfile.getEntry(path);
-						File destScriptFile = new File(destdir, serverScriptName);
+						String serverScriptPath = path.substring(path.indexOf("/") + 1);
+						ZipEntry serverScriptEntry = jarfile.getEntry(serverScriptPath);
+						File destScriptFile = new File(destdir, serverScriptPath);
 						try (InputStream is = jarfile.getInputStream(serverScriptEntry); FileOutputStream fo = new FileOutputStream(destScriptFile))
 						{
 							while (is.available() > 0)
@@ -2410,9 +2410,8 @@ public class WarExporter
 						}
 					}
 					scripts.forEach((String path) -> {
-						String serverScriptPath = path.substring(path.lastIndexOf("/") + 1);
-						File serverScriptFile = new File(file.getParentFile(), serverScriptPath);
-						File newServerScriptFile = new File(destDir, serverScriptPath);
+						File serverScriptFile = new File(file.getParentFile(), path.substring(path.lastIndexOf("/") + 1));
+						File newServerScriptFile = new File(destDir, path.substring(path.indexOf("/") + 1));
 						try
 						{
 							copyFile(serverScriptFile, newServerScriptFile);
@@ -2430,7 +2429,7 @@ public class WarExporter
 
 	private static void copyFile(File sourceFile, File destFile) throws ExportException
 	{
-		if (!sourceFile.exists())
+		if (!sourceFile.exists() || sourceFile.length() == 0)
 		{
 			return;
 		}

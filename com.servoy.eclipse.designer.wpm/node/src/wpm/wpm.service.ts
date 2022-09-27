@@ -37,6 +37,7 @@ export class WpmService {
 
   packageLists: BehaviorSubject<PackageList[]>;
   packageToBeRemoved: BehaviorSubject<Package>;
+ url: URL;
 
   needRefresh = false;
 
@@ -44,6 +45,7 @@ export class WpmService {
 
   constructor(wsService: WebsocketService) {
     const loc = window.location;
+    this.url = new URL(loc.href);
     const uri = 'ws://'+loc.host+'/wpm/angular2/websocket';
     //const uri = "ws://localhost:8080/wpm/angular2/websocket";
     const webSocketConnection = wsService.connect(uri);
@@ -264,6 +266,10 @@ export class WpmService {
     }
 
     return 0;
+  }
+  
+  isDarkTheme(): boolean {
+      return this.url.searchParams.get('darkTheme') === 'true';
   }
   
 }

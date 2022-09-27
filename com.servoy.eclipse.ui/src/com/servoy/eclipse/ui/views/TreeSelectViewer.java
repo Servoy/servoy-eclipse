@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
@@ -182,7 +183,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		}
 		else
 		{
-			textForeground = text.getForeground();
+			textForeground = com.servoy.eclipse.ui.Activator.getDefault().isDarkThemeSelected()
+				? PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get("org.eclipse.ui.workbench.DARK_FOREGROUND")
+				: text.getForeground();
 
 			text.addFocusListener(new FocusAdapter()
 			{

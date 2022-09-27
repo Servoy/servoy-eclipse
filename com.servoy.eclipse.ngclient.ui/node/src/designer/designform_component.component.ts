@@ -214,6 +214,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'insertDraggedComponent') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                this.insertedCloneParent = null;
                 let beforeChild = null;
                 if (event.data.insertBefore) {
                     beforeChild = this.formCache.getComponent(event.data.insertBefore);
@@ -223,7 +224,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 if (event.data.dropTarget) {
                     this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
                 }
-                else {
+                else if (!this.formCache.absolute){
                     if (this.formCache.mainStructure == null) {
                         this.formCache.mainStructure = new StructureCache(null, null);
                     }
@@ -231,7 +232,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
-                this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                if (this.insertedCloneParent) this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
             }
             if (event.data.id === 'removeDragCopy') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
