@@ -29,8 +29,6 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
@@ -47,7 +45,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -78,7 +75,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
@@ -86,11 +82,11 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ScrollableDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ImageLoader;
-import com.servoy.j2db.util.Pair;
 
 /**
  * Utility class that offers all kinds of utilities (UI related functionality).
@@ -558,93 +554,6 @@ public class UIUtils
 		}
 	}
 
-
-	public static class ScrollableDialog extends TitleAreaDialog
-	{
-		private final String title;
-		private final String text;
-		private final String scrollableText;
-		//ex IMessageProvider.ERROR
-		private final int messageIcon;
-		private List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
-
-		public ScrollableDialog(Shell parentShell, int messageIcon, String title, String text, String scrollableText)
-		{
-			super(parentShell);
-			this.messageIcon = messageIcon;
-			this.title = title;
-			this.text = text;
-			this.scrollableText = scrollableText;
-			// add default ok button
-			buttonsAndLabels.add(new Pair<Integer, String>(OK, "OK"));
-		}
-
-		/**
-		 * Use this function if you want extra buttons besides standard OK button
-		 * @param buttonsAndLabels alist of pairs of Button ID and label , for ex: IDialogConstants.YES_TO_ALL_ID  , "Overwrite all" , this code will be returned code for myDlgVar.open()
-		 */
-		public void setCustomBottomBarButtons(List<Pair<Integer, String>> buttonsAndLabels)
-		{
-			this.buttonsAndLabels = buttonsAndLabels;
-		}
-
-		@Override
-		protected Control createDialogArea(Composite parent)
-		{
-			Composite composite = (Composite)super.createDialogArea(parent); // Let the dialog create the parent composite
-
-			GridData gridData = new GridData();
-			gridData.grabExcessHorizontalSpace = true;
-			gridData.horizontalAlignment = GridData.FILL;
-			gridData.grabExcessVerticalSpace = true; // Layout vertically, too!
-			gridData.verticalAlignment = GridData.FILL;
-
-			Text scrollable = new Text(composite, SWT.BORDER | SWT.V_SCROLL | SWT.READ_ONLY);
-			scrollable.setLayoutData(gridData);
-			scrollable.setText(scrollableText);
-
-			return composite;
-		}
-
-		@Override
-		public void create()
-		{
-			super.create();
-
-			// This is not necessary; the dialog will become bigger as the text grows but at the same time,
-			// the user will be able to see all (or at least more) of the error message at once
-			//getShell ().setSize (300, 300);
-			setTitle(title);
-			setMessage(text, messageIcon);
-
-		}
-
-		@Override
-		protected void createButtonsForButtonBar(Composite parent)
-		{
-			for (Pair<Integer, String> buttonAndLabel : buttonsAndLabels)
-			{
-				Button button = createButton(parent, buttonAndLabel.getLeft(), buttonAndLabel.getRight(), true);
-				final int dialogReturnCode = buttonAndLabel.getLeft();
-				button.addSelectionListener(new SelectionAdapter()
-				{
-
-					@Override
-					public void widgetSelected(SelectionEvent e)
-					{
-						setReturnCode(dialogReturnCode);
-						close();
-					}
-				});
-			}
-		}
-
-		@Override
-		protected boolean isResizable()
-		{
-			return true; // Allow the user to change the dialog size!
-		}
-	}
 
 	/**
 	 * grows automatically until screen height - taskbar , if the shell size is not set

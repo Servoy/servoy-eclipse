@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -802,5 +803,26 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public boolean allowImportEmptySolution()
 	{
 		return true;
+	}
+
+	@Override
+	public void displayWarningMessage(String title, String message, boolean scrollableDialog)
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				if (scrollableDialog)
+				{
+					UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title,
+						message);
+				}
+				else
+				{
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), title,
+						message);
+				}
+			}
+		});
 	}
 }
