@@ -121,7 +121,11 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public void info(String message, int priority)
 		{
-			if (priority < ILogLevel.ERROR)
+			if (priority == ILogLevel.DEBUG)
+			{
+				outputExtra(message);
+			}
+			else if (priority < ILogLevel.ERROR)
 			{
 				output(message);
 			}
