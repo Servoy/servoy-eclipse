@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.9.0.3802_rc3</version>
+		<version>2022.9.0.3803</version>
 	</parent>
 	
 	<artifactId>com.servoy.eclipse.jre.linux.x86_64</artifactId>
