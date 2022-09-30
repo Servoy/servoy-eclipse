@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,10 +32,13 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.IExportedPreferences;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.ui.css.swt.theme.ITheme;
 import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
@@ -43,6 +47,7 @@ import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -68,6 +73,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -94,6 +100,7 @@ public class Activator extends AbstractUIPlugin
 
 	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
 	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
+	private static final String SCRIPT_EDITOR_PLUGIN_ID = "org.eclipse.dltk.javascript.ui";
 
 	/**
 	 *
@@ -297,10 +304,19 @@ public class Activator extends AbstractUIPlugin
 							IconPreferences.getInstance().save(true);
 							ServoyModelManager.getServoyModelManager().getServoyModel()
 								.addDoneListener(() -> {
-									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-										label + " theme was detected",
+									MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
+										label + " theme was detected", null,
 										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?"))
+											" theme preferences to be applied. Would you like to restart now?",
+										"Setup script editor preferences for the selected theme (might overwrite exising values).", true,
+										MessageDialog.QUESTION,
+										new String[] { "Yes", "No" }, 0);
+									dialog.open();
+									if (dialog.isChecked())
+									{
+										setThemePreferences(it.getId());
+									}
+									if (dialog.getReturnCode() == 0)
 									{
 										PlatformUI.getWorkbench().restart();
 									}
@@ -328,6 +344,39 @@ public class Activator extends AbstractUIPlugin
 		listenForThemeChanges();
 	}
 
+	private void setThemePreferences(final String themeID)
+	{
+		try (InputStream is = getClass().getResourceAsStream("dark_editor_preferences.epf"))
+		{
+			IPreferencesService preferencesService = Platform.getPreferencesService();
+			IExportedPreferences prefs = preferencesService
+				.readPreferences(is);
+			if (ECLIPSE_DARK_THEME_ID.equals(themeID))
+			{
+				IStatus status = preferencesService.applyPreferences(prefs);
+				if (!status.isOK())
+				{
+					org.eclipse.jface.dialogs.MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Could not import theme preferences",
+						"Please check the Servoy wiki and import the theme preferences manually.\n" +
+							status.getMessage());
+				}
+			}
+			else
+			{
+				IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(SCRIPT_EDITOR_PLUGIN_ID);
+				for (String pref : prefs.node("instance").node(SCRIPT_EDITOR_PLUGIN_ID).keys())
+				{
+					preferences.remove(pref);
+				}
+				preferences.flush();
+			}
+		}
+		catch (Exception e)
+		{
+			getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+		}
+	}
+
 	private void listenForThemeChanges()
 	{
 		themeChangedListener = (PreferenceChangeEvent event) -> {
@@ -337,6 +386,13 @@ public class Activator extends AbstractUIPlugin
 				IconPreferences iconPreferences = IconPreferences.getInstance();
 				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
 				iconPreferences.save();
+
+				if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+					"Import theme preferences automatically",
+					"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
+				{
+					setThemePreferences((String)event.getNewValue());
+				}
 			}
 		};
 		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).addPreferenceChangeListener(themeChangedListener);
