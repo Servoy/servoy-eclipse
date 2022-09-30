@@ -460,6 +460,7 @@
         <setEntry value="sj.jsonschemavalidation@default:default"/>
         <setEntry value="slf4j.api@default:true"/>
         <setEntry value="tus-java-server@default:default"/>
+        <setEntry value="xstream@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="aggrid@default:default"/>
