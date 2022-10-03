@@ -64,6 +64,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -304,22 +305,32 @@ public class Activator extends AbstractUIPlugin
 							IconPreferences.getInstance().save(true);
 							ServoyModelManager.getServoyModelManager().getServoyModel()
 								.addDoneListener(() -> {
-									MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
-										label + " theme was detected", null,
+									if (checkOverwriteThemePreferences(it.getId().equals(ECLIPSE_DARK_THEME_ID)))
+									{
+										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
+											label + " theme was detected", null,
+											"It is strongly recommended to restart the developer for the " + label +
+												" theme preferences to be applied. Would you like to restart now?",
+											"Setup script editor preferences for the selected theme (might overwrite exising values).", true,
+											MessageDialog.QUESTION,
+											new String[] { "Yes", "No" }, 0);
+										dialog.open();
+										if (dialog.isChecked())
+										{
+											setThemePreferences(it.getId());
+										}
+										if (dialog.getReturnCode() == 0)
+										{
+											PlatformUI.getWorkbench().restart();
+										}
+									}
+									else if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										label + " theme was detected",
 										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?",
-										"Setup script editor preferences for the selected theme (might overwrite exising values).", true,
-										MessageDialog.QUESTION,
-										new String[] { "Yes", "No" }, 0);
-									dialog.open();
-									if (dialog.isChecked())
-									{
-										setThemePreferences(it.getId());
-									}
-									if (dialog.getReturnCode() == 0)
-									{
-										PlatformUI.getWorkbench().restart();
-									}
+											" theme preferences to be applied. Would you like to restart now?"))
+								{
+									PlatformUI.getWorkbench().restart();
+								}
 								});
 						}
 					}
@@ -377,6 +388,40 @@ public class Activator extends AbstractUIPlugin
 		}
 	}
 
+	private boolean checkOverwriteThemePreferences(boolean dark)
+	{
+		try (InputStream is = getClass().getResourceAsStream("dark_editor_preferences.epf"))
+		{
+			IPreferencesService preferencesService = Platform.getPreferencesService();
+			IExportedPreferences prefs = preferencesService.readPreferences(is);
+			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(SCRIPT_EDITOR_PLUGIN_ID);
+			Preferences scriptPreferences = prefs.node("instance").node(SCRIPT_EDITOR_PLUGIN_ID);
+			for (String pref : scriptPreferences.keys())
+			{
+				if (dark)
+				{
+					//we want to switch to dark but we have a non-default value for one of the script editor prefs
+					if (preferences.get(pref, null) != null && !preferences.get(pref, null).equals(scriptPreferences.get(pref, null)))
+					{
+						return true;
+					}
+				}
+				else
+				{
+					//we want to switch to light but we have a different value than the value which is in the dark theme prefs file
+					String darkVal = scriptPreferences.get(pref, "");
+					String actualVal = preferences.get(pref, "");
+					if (!darkVal.equals(actualVal)) return true;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+		}
+		return false;
+	}
+
 	private void listenForThemeChanges()
 	{
 		themeChangedListener = (PreferenceChangeEvent event) -> {
@@ -386,10 +431,18 @@ public class Activator extends AbstractUIPlugin
 				IconPreferences iconPreferences = IconPreferences.getInstance();
 				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
 				iconPreferences.save();
-
-				if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-					"Import theme preferences automatically",
-					"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
+				if (checkOverwriteThemePreferences(themeid.equals(ECLIPSE_DARK_THEME_ID)))
+				{
+					Display.getDefault().asyncExec(() -> {
+						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+							"Import theme preferences",
+							"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
+						{
+							setThemePreferences((String)event.getNewValue());
+						}
+					});
+				}
+				else
 				{
 					setThemePreferences((String)event.getNewValue());
 				}
