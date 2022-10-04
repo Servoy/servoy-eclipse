@@ -421,11 +421,8 @@ public class SolutionSerializer
 				}
 			});
 
-			//write all object files
-			Iterator<Map.Entry<Pair<String, String>, Map<IPersist, Object>>> it = projectContents.entrySet().iterator();
-			while (it.hasNext())
+			for (Entry<Pair<String, String>, Map<IPersist, Object>> elem : projectContents.entrySet())
 			{
-				Map.Entry<Pair<String, String>, Map<IPersist, Object>> elem = it.next();
 				Pair<String, String> filepathname = elem.getKey();
 
 				String fname = filepathname.getRight();
@@ -1190,7 +1187,7 @@ public class SolutionSerializer
 						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);
 						Map<String, Object> persistProperties = getPersistAsValueMap(child, repository, true);
 						boolean equals = persistProperties.entrySet().stream().filter(p -> !"uuid".equals(p) && !"extendsID".equals(p))
-							.allMatch(e -> e.getValue().equals(parentProperties.get(e.getKey())));
+							.allMatch(e -> Utils.equalObjects(e.getValue(), parentProperties.get(e.getKey())));
 						if (equals) continue; //do not serialize persist if it is the same as its parent persist
 					}
 					itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey, valueFilter));
