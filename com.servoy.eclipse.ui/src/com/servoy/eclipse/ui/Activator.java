@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,22 +31,13 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
-import org.eclipse.core.runtime.preferences.IExportedPreferences;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.ui.css.swt.theme.ITheme;
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
-import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -64,7 +54,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -74,7 +63,6 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -98,11 +86,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-
-	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
-	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
-	private static final String SCRIPT_EDITOR_PLUGIN_ID = "org.eclipse.dltk.javascript.ui";
-
 	/**
 	 *
 	 */
@@ -134,8 +117,6 @@ public class Activator extends AbstractUIPlugin
 	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
-
-	private IPreferenceChangeListener themeChangedListener;
 
 	private static BundleContext context;
 
@@ -283,173 +264,9 @@ public class Activator extends AbstractUIPlugin
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
 
-		final BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		final ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			final IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				final Display d = Display.getDefault();
-				final IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					final ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						String label = it.getLabel();
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
-						{
-							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
-							IconPreferences.getInstance().save(true);
-							ServoyModelManager.getServoyModelManager().getServoyModel()
-								.addDoneListener(() -> {
-									if (checkOverwriteThemePreferences(it.getId().equals(ECLIPSE_DARK_THEME_ID)))
-									{
-										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
-											label + " theme was detected", null,
-											"It is strongly recommended to restart the developer for the " + label +
-												" theme preferences to be applied. Would you like to restart now?",
-											"Setup script editor preferences for the selected theme (might overwrite exising values).", true,
-											MessageDialog.QUESTION,
-											new String[] { "Yes", "No" }, 0);
-										dialog.open();
-										if (dialog.isChecked())
-										{
-											setThemePreferences(it.getId());
-										}
-										if (dialog.getReturnCode() == 0)
-										{
-											PlatformUI.getWorkbench().restart();
-										}
-									}
-									else if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-										label + " theme was detected",
-										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?"))
-								{
-									PlatformUI.getWorkbench().restart();
-								}
-								});
-						}
-					}
-					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
-					{
-						IconPreferences.getInstance().setUseDarkThemeIcons(false);
-						IconPreferences.getInstance().save(true);
-						ServoyModelManager.getServoyModelManager().getServoyModel()
-							.addDoneListener(() -> {
-								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-									"Theming is disabled",
-									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
-								{
-									PlatformUI.getWorkbench().restart();
-								}
-							});
-					}
-				}
-			}
-		}
-
-		listenForThemeChanges();
+		EclipseCSSThemeListener.getInstance().initThemeListener();
 	}
 
-	private void setThemePreferences(final String themeID)
-	{
-		try (InputStream is = getClass().getResourceAsStream("dark_editor_preferences.epf"))
-		{
-			IPreferencesService preferencesService = Platform.getPreferencesService();
-			IExportedPreferences prefs = preferencesService
-				.readPreferences(is);
-			if (ECLIPSE_DARK_THEME_ID.equals(themeID))
-			{
-				IStatus status = preferencesService.applyPreferences(prefs);
-				if (!status.isOK())
-				{
-					org.eclipse.jface.dialogs.MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Could not import theme preferences",
-						"Please check the Servoy wiki and import the theme preferences manually.\n" +
-							status.getMessage());
-				}
-			}
-			else
-			{
-				IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(SCRIPT_EDITOR_PLUGIN_ID);
-				for (String pref : prefs.node("instance").node(SCRIPT_EDITOR_PLUGIN_ID).keys())
-				{
-					preferences.remove(pref);
-				}
-				preferences.flush();
-			}
-		}
-		catch (Exception e)
-		{
-			getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
-		}
-	}
-
-	private boolean checkOverwriteThemePreferences(boolean dark)
-	{
-		try (InputStream is = getClass().getResourceAsStream("dark_editor_preferences.epf"))
-		{
-			IPreferencesService preferencesService = Platform.getPreferencesService();
-			IExportedPreferences prefs = preferencesService.readPreferences(is);
-			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(SCRIPT_EDITOR_PLUGIN_ID);
-			Preferences scriptPreferences = prefs.node("instance").node(SCRIPT_EDITOR_PLUGIN_ID);
-			for (String pref : scriptPreferences.keys())
-			{
-				if (dark)
-				{
-					//we want to switch to dark but we have a non-default value for one of the script editor prefs
-					if (preferences.get(pref, null) != null && !preferences.get(pref, null).equals(scriptPreferences.get(pref, null)))
-					{
-						return true;
-					}
-				}
-				else
-				{
-					//we want to switch to light but we have a different value than the value which is in the dark theme prefs file
-					String darkVal = scriptPreferences.get(pref, "");
-					String actualVal = preferences.get(pref, "");
-					if (!darkVal.equals(actualVal)) return true;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
-		}
-		return false;
-	}
-
-	private void listenForThemeChanges()
-	{
-		themeChangedListener = (PreferenceChangeEvent event) -> {
-			if (event.getKey().equals("themeid"))
-			{
-				String themeid = (String)event.getNewValue();
-				IconPreferences iconPreferences = IconPreferences.getInstance();
-				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
-				iconPreferences.save();
-				if (checkOverwriteThemePreferences(themeid.equals(ECLIPSE_DARK_THEME_ID)))
-				{
-					Display.getDefault().asyncExec(() -> {
-						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-							"Import theme preferences",
-							"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
-						{
-							setThemePreferences((String)event.getNewValue());
-						}
-					});
-				}
-				else
-				{
-					setThemePreferences((String)event.getNewValue());
-				}
-			}
-		};
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).addPreferenceChangeListener(themeChangedListener);
-	}
 
 	/**
 	 *
@@ -561,8 +378,7 @@ public class Activator extends AbstractUIPlugin
 			provisioningAgent.stop();
 		}
 
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
-
+		EclipseCSSThemeListener.getInstance().removeListener();
 		plugin = null;
 		super.stop(context);
 	}
@@ -799,33 +615,5 @@ public class Activator extends AbstractUIPlugin
 		}
 
 		return provisioningAgent;
-	}
-
-	public boolean isDarkThemeSelected()
-	{
-		boolean IS_DARK_THEME = false;
-		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				Display d = Display.getDefault();
-				IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()))
-						{
-							IS_DARK_THEME = true;
-						}
-					}
-				}
-			}
-		}
-		return IS_DARK_THEME;
 	}
 }
