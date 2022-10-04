@@ -142,6 +142,10 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
+export interface IPopupSupportComponent {
+    closePopup();
+}
+
 /**
  * Besides working like a normal Promise that you can use to get notified when some action is done (success/error/finally), chain etc., this promise also
  * contains field "requestInfo" which can be set by the user and could later be reported in some listener events back to the user (in case this same action

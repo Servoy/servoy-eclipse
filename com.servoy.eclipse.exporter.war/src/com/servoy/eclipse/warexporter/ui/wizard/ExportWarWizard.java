@@ -268,6 +268,17 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
+		//make sure the currently used components are exported in case the user didn't go through the components selection pages
+		if (!exportModel.isReady())
+		{
+			runSetupComponents(true);
+		}
+		else
+		{
+			componentsSelectionPage.updateExportModel();
+			servicesSelectionPage.updateExportModel();
+		}
+
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
@@ -276,8 +287,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			{
 				try
 				{
-					exportModel.setUserChannel(new EclipseExportUserChannel(exportModel, monitor));
-					final WarExporter exporter = new WarExporter(exportModel);
+					final WarExporter exporter = new WarExporter(exportModel, new EclipseExportUserChannel(exportModel, monitor));
 					final boolean[] cancel = new boolean[] { false };
 					Display.getDefault().syncExec(new Runnable()
 					{
@@ -324,14 +334,52 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			getContainer().run(true, true, job);
 		}
-		catch (
-
-		Exception e)
+		catch (Exception e)
 		{
 			Debug.error(e);
 			return false;
 		}
 		return !errorFlag;
+	}
+
+	private void runSetupComponents(boolean update)
+	{
+		try
+		{
+			getContainer().run(true, true, new IRunnableWithProgress()
+			{
+				public void run(IProgressMonitor monitor) throws InterruptedException
+				{
+					monitor.beginTask("Searching for used components and services", 100);
+					while (!exportModel.isReady())
+					{
+						Thread.sleep(100);
+						monitor.worked(1);
+					}
+					Display.getDefault().syncExec(new Runnable()
+					{
+						public void run()
+						{
+							setupComponentsPages();
+							if (update)
+							{
+								componentsSelectionPage.updateExportModel();
+								servicesSelectionPage.updateExportModel();
+							}
+						}
+					});
+					monitor.done();
+				}
+			});
+		}
+		catch (InvocationTargetException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 
@@ -483,37 +531,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			if (!exportModel.isReady())
 			{
-				try
-				{
-					getContainer().run(true, true, new IRunnableWithProgress()
-					{
-						public void run(IProgressMonitor monitor) throws InterruptedException
-						{
-							monitor.beginTask("Searching for used components and services", 100);
-							while (!exportModel.isReady())
-							{
-								Thread.sleep(100);
-								monitor.worked(1);
-							}
-							Display.getDefault().syncExec(new Runnable()
-							{
-								public void run()
-								{
-									setupComponentsPages();
-								}
-							});
-							monitor.done();
-						}
-					});
-				}
-				catch (InvocationTargetException e)
-				{
-					ServoyLog.logError(e);
-				}
-				catch (InterruptedException e)
-				{
-					ServoyLog.logError(e);
-				}
+				runSetupComponents(false);
 			}
 			else
 			{
@@ -664,6 +682,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 		appendToBuilder(sb, " -ng2", exportModel.exportNG2Mode());
+		appendToBuilder(sb, " -ng1", exportModel.exportNG1());
 		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());

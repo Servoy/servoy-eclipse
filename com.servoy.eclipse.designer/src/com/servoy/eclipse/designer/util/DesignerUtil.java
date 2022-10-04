@@ -60,6 +60,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -533,6 +534,10 @@ public class DesignerUtil
 				tag.append("\"");
 			}
 		}
+		if (layout instanceof CSSPositionLayoutContainer)
+		{
+			tag.append(" [ResponsiveContainer]");
+		}
 		tag.append(">");
 		if (layout.getName() != null)
 		{
@@ -630,8 +635,9 @@ public class DesignerUtil
 		return false;
 	}
 
-	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj)
+	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj, Form form)
 	{
+		if (parent instanceof LayoutContainer && !form.isResponsiveLayout()) return true;
 		if (parent instanceof LayoutContainer)
 		{
 			Set<String> allowed = getAllowedChildren().get(

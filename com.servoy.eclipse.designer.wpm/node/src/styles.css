@@ -58,3 +58,57 @@ mat-select.repository .mat-select-arrow {
 .cdk-overlay-pane {
   display: block;
 }
+
+
+/* DARK THEME*/
+html, body {
+    height: 100%;
+}
+
+.dark .content {
+    background: #262626;
+    color: #ffffff;
+    height: 100%;
+}
+
+.dark .mat-select-value, 
+.dark .mat-select-arrow, 
+.dark .mat-option {
+    color: #ffffff;
+}
+
+.dark .mat-select-disabled .mat-select-value, 
+.dark .mat-select-disabled .mat-select-arrow, 
+.dark .mat-primary .mat-option.mat-selected:not(.mat-option-disabled) {
+	color: #c1c1c161
+}
+
+.dark .mat-form-field-infix {
+	border-top: 1px solid;
+    border-color: #ffffff;
+}
+.dark .mat-form-field-underline {
+	background: #ffffff
+}
+
+.dark .wpm-package-selected {
+	background: #1e1d1d !important;
+}
+
+.dark .wpm-package-description .mat-card-content{
+	background: #1a1a1a !important;
+}
+
+.dark .table-package tr th div, 
+.dark .mat-select-panel {
+    background: #3c3c3c;
+    color: #ffffff;
+}
+
+.dark .mat-form-field-label {
+	color: #ffffff;
+}
+
+.dark .column-fitwidth {
+    height: 80px;
+}

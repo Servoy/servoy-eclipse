@@ -26,24 +26,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.StringBody;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +67,8 @@ public class PhoneGapConnector
 	private static final String URL_PHONEGAP_CLOUD = "https://build.phonegap.com/api/v1/apps";
 
 	private ServoyJSONObject jsonContent;
-	private final DefaultHttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpClientBuilder.create().build();
+	private HttpClientContext context;
 	private JSONArray iosCertificates;
 	private JSONArray androidCertificates;
 	private JSONArray blackberryCertificates;
@@ -97,8 +100,9 @@ public class PhoneGapConnector
 			URL _url = new URL(URL_PHONEGAP_CLOUD);
 
 			BasicCredentialsProvider bcp = new BasicCredentialsProvider();
-			bcp.setCredentials(new AuthScope(_url.getHost(), _url.getPort()), new UsernamePasswordCredentials(username, password));
-			client.setCredentialsProvider(bcp);
+			bcp.setCredentials(new AuthScope(_url.getHost(), _url.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
+			context = HttpClientContext.create();
+			context.setCredentialsProvider(bcp);
 
 			return loadPhoneGapAccount();
 		}
@@ -110,15 +114,15 @@ public class PhoneGapConnector
 
 	private ServoyJSONObject getJSONResponse(HttpUriRequest method) throws Exception
 	{
-		HttpResponse response = client.execute(method);
-		int status = response.getStatusLine().getStatusCode();
+		CloseableHttpResponse response = client.execute(method, context);
+		int status = response.getCode();
 		String content = EntityUtils.toString(response.getEntity());
 
 		if (status != HttpStatus.SC_OK)
 		{
 			String errorMsg = null;
-			Header contentType = response.getEntity().getContentType();
-			if (contentType != null && contentType.getValue().contains("json"))
+			String contentType = response.getEntity().getContentType();
+			if (contentType != null && contentType.contains("json"))
 			{
 				try
 				{
@@ -141,7 +145,7 @@ public class PhoneGapConnector
 			if (errorMsg != null)
 			{
 				String reason = "Status code " + status +
-					(response.getStatusLine().getReasonPhrase() != null ? " " + response.getStatusLine().getReasonPhrase() : "");
+					(response.getReasonPhrase() != null ? " " + response.getReasonPhrase() : "");
 				EntityUtils.consumeQuietly(response.getEntity());
 				throw new HttpException(errorMsg + " " + reason);
 			}
@@ -308,7 +312,7 @@ public class PhoneGapConnector
 
 			PhoneGapApplication existingApplication = getApplication(application.getTitle());
 			int appId = -1;
-			HttpEntityEnclosingRequestBase request;
+			HttpUriRequestBase request;
 			if (existingApplication != null)
 			{
 				appId = existingApplication.getId();
@@ -334,8 +338,8 @@ public class PhoneGapConnector
 				JSONObject json = new JSONObject(selectedCertificates);
 				application.setSelectedCertificates(json);
 			}
-			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			entity.addPart("data", new StringBody(application.getJSON()));
+			MultipartEntityBuilder entity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.LEGACY);
+			entity.addPart("data", new StringBody(application.getJSON(), ContentType.TEXT_PLAIN));
 
 			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
 			if (!configFile.exists())
@@ -353,7 +357,7 @@ public class PhoneGapConnector
 			exportedFile = mobileExporter.doExport(true);
 			entity.addPart("file", new FileBody(exportedFile));
 
-			request.setEntity(entity);
+			request.setEntity(entity.build());
 
 			ServoyJSONObject jsonResponse = getJSONResponse(request);
 			appId = jsonResponse.getInt("id");
@@ -365,9 +369,9 @@ public class PhoneGapConnector
 				{
 					url = URL_PHONEGAP_CLOUD + "/" + appId + "/icon";
 					request = new HttpPost(getURL(url));
-					entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+					entity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.LEGACY);
 					entity.addPart("icon", new FileBody(file));
-					request.setEntity(entity);
+					request.setEntity(entity.build());
 					jsonResponse = getJSONResponse(request);
 				}
 			}

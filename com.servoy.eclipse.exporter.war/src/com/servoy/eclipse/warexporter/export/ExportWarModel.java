@@ -37,13 +37,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
-import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -77,7 +73,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String startRMIPort = "1099";
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
-	private String exportNG2;
+	private String exportNG2 = "true";
+	private boolean exportNG1 = false;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -120,7 +117,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private Set<String> exportedComponentPackages = new HashSet<>();
 	private Set<String> exportedServicePackages = new HashSet<>();
 	private String contextFileName;
-	private EclipseExportUserChannel userChannel;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
@@ -173,6 +169,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNG2 = settings.get("export.ng2");
+		exportNG1 = Utils.getAsBoolean(settings.get("export.legacyng"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -370,6 +367,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.ng2", exportNG2Mode());
+		settings.put("export.legacyng", exportNG1());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -600,6 +598,17 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void setExportNG2Mode(String exportNG2)
 	{
 		this.exportNG2 = exportNG2;
+	}
+
+	@Override
+	public boolean exportNG1()
+	{
+		return exportNG1;
+	}
+
+	public void setExportNG1(boolean exportNG1)
+	{
+		this.exportNG1 = exportNG1;
 	}
 
 	public List<String> getPlugins()
@@ -1069,22 +1078,5 @@ public class ExportWarModel extends AbstractWarExportModel
 		return Stream.of(exportedComponentPackages, exportedServicePackages, exportedLayoutPackages) //
 			.flatMap(Set::stream) //
 			.collect(Collectors.toSet());
-	}
-
-	public void setUserChannel(EclipseExportUserChannel eclipseExportUserChannel)
-	{
-		this.userChannel = eclipseExportUserChannel;
-	}
-
-	@Override
-	public void displayWarningMessage(String title, String message)
-	{
-		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title, message);
-			}
-		});
 	}
 }

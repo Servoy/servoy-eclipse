@@ -95,8 +95,11 @@ public class NGPackageManager extends BaseNGPackageManager
 
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
-					clearReferencedNGPackageProjectsCache();
-					reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
+					if (activeProject != null && !activeProject.getProject().getName().startsWith("import_placeholder"))
+					{
+						clearReferencedNGPackageProjectsCache();
+						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
+					}
 				}
 			};
 			// update this before build runs

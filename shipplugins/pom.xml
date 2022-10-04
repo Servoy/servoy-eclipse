@@ -9,8 +9,8 @@
 
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.17.2</log4j-version>
-        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.23/</eclipse.url>
+        <log4j-version>2.18.0</log4j-version>
+        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.24/</eclipse.url>
     </properties>
 
     <repositories>
@@ -156,6 +156,11 @@
             <version>${log4j-version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
+            <version>${log4j-version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.servoy</groupId>
             <artifactId>org.sweetlemonade.eclipse.json</artifactId>
             <version>1.0.5</version>
@@ -190,7 +195,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.9</version>
+            <version>1.12.12</version>
         </dependency>
 
         <dependency>
@@ -213,10 +218,15 @@
             <artifactId>org.maven.ide.eclipse.grouplayout</artifactId>
             <version>1.1.0.201005260935</version>
         </dependency>
+		<dependency>
+		  <groupId>com.thoughtworks.xstream</groupId>
+		  <artifactId>xstream</artifactId>
+		  <version>1.4.19</version>
+		</dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.14.3</version>
+            <version>1.15.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
@@ -226,7 +236,7 @@
         <dependency>
             <groupId>org.apache.aries.spifly</groupId>
             <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-            <version>1.3.4</version>
+            <version>1.3.5</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -309,14 +319,9 @@
             <version>2.0.0.s2</version>
         </dependency>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>9.2</version>
+            <version>9.3</version>
         </dependency>
     </dependencies>
 </project>

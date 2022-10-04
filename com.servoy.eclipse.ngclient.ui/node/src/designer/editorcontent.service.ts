@@ -18,65 +18,67 @@ export class EditorContentService {
     }
 
     updateFormData(updates) {
-        let data = JSON.parse(updates);
-        let formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
-        let refresh = false;
+        const data = JSON.parse(updates);
+        const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
+        const reorderLayoutContainers: Array<StructureCache> = new Array();
+        const orphanLayoutContainers: Array<StructureCache> = new Array();
+        let renderGhosts = false;
         let redrawDecorators = false;
+        let refresh = false;
         let reorderPartComponents: boolean;
-        let reorderLayoutContainers: Array<StructureCache> = new Array();
-        let orphanLayoutContainers: Array<StructureCache> = new Array();
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
                 if (container) {
+                    redrawDecorators = true;
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
+                    container.layout = elem.position;
                     const parentUUID = data.childParentMap[container.id].uuid;
-                    let newParent = container.parent;
-                    if (parentUUID) {
-                        newParent = formCache.getLayoutContainer(parentUUID);
+                    if (container.parent) {
+                        let newParent = container.parent;
+                        if (parentUUID) {
+                            newParent = formCache.getLayoutContainer(parentUUID);
+                        } else {
+                            newParent = formCache.mainStructure;
+                        }
+                        if (container?.parent?.id !== newParent?.id) {
+                            // we moved it to another parent
+                            container.parent.removeChild(container);
+                            newParent.addChild(container);
+                        } else if (newParent?.items.indexOf(container) < 0){
+                            newParent.addChild(container);
+                        }
+                        if (reorderLayoutContainers.indexOf(newParent) < 0) {
+                            // existing layout container in parent layout container , make sure is inserted in correct position
+                            reorderLayoutContainers.push(newParent);
+                        }
                     }
-                    else {
-                        newParent = formCache.mainStructure
-                    }
-                    if (container.parent.id != newParent.id) {
-                        // we moved it to another parent
-                        container.parent.removeChild(container);
-                        newParent.addChild(container);
-                    }
-                    else if (newParent.items.indexOf(container) < 0){
-                        newParent.addChild(container);
-                    }
-                    if (reorderLayoutContainers.indexOf(newParent) < 0) {
-                        // existing layout container in parent layout container , make sure is inserted in correct position
-                        reorderLayoutContainers.push(newParent);
-                    }
-                }
-                else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
+                } else {
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                     formCache.addLayoutContainer(container);
+                    redrawDecorators = true;
                     const parentUUID = data.childParentMap[container.id].uuid;
                     if (parentUUID) {
-                        let parent = formCache.getLayoutContainer(parentUUID);
+                        const parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
                             parent.addChild(container);
                             if (reorderLayoutContainers.indexOf(parent) < 0) {
                                 // new layout container in parent layout container , make sure is inserted in correct position
                                 reorderLayoutContainers.push(parent);
                             }
-                        }
-                        else {
-                            let fc = formCache.getFormComponent(parentUUID);
+                        } else {
+                            const fc = formCache.getFormComponent(parentUUID);
                             if (fc) {
                                 fc.addChild(container);
-                            }
-                            else {
+                            } else {
                                 // parent is not created yet, look for it later
                                 orphanLayoutContainers.push(container);
                             }
                         }
-                    }
-                    else {
+                    } else if (formCache.absolute) {
+                         formCache.partComponentsCache.push(container);
+                    } else {
                         // dropped directly on form
                         if (formCache.mainStructure == null) {
                             formCache.mainStructure = new StructureCache(null, null);
@@ -93,21 +95,24 @@ export class EditorContentService {
         }
         if (data.ng2components) {
             data.ng2components.forEach((elem) => {
-                let component = formCache.getComponent(elem.name);
+                const component = formCache.getComponent(elem.name);
                 if (component) {
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     // existing component updated, make sure it is in correct position relative to its sibblings
                     if (component instanceof ComponentCache && component.parent) {
+                        const currentParent = data.childParentMap[component.name];
+                        if (currentParent && component.parent.id !== currentParent.uuid) {
+                            component.parent.removeChild(component);
+                            formCache.getLayoutContainer(currentParent.uuid).addChild(component);
+                        }
                         redrawDecorators = true;
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
                             reorderLayoutContainers.push(component.parent);
                         }
-                    }
-                    else if (formCache.absolute) {
+                    } else if (formCache.absolute) {
                         reorderPartComponents = true;
                     }
-                }
-                else if (formCache.getFormComponent(elem.name) == null) {
+                } else if (formCache.getFormComponent(elem.name) == null) {
                     redrawDecorators = true;
                     if (elem.model[ConverterService.TYPES_KEY] != null) {
                         this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
@@ -132,7 +137,7 @@ export class EditorContentService {
 
                             if (minHeight) {
                                 layout['min-height'] = minHeight + 'px';
-                                if (!continingFormIsResponsive) layout['height'] = "100%"; // allow anchoring to bottom in anchored form + anchored form component
+                                if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
                             }
                             if (minWidth) {
                                 layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
@@ -148,37 +153,31 @@ export class EditorContentService {
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
                         formCache.addFormComponent(fcc);
-                        if (!formCache.absolute) {
-                            let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
-                            if (parentUUID) {
-                                let parent = formCache.getLayoutContainer(parentUUID);
-                                if (parent) {
-                                    parent.addChild(fcc);
-                                    if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                        // new component in layout container , make sure is inserted in correct position
-                                        reorderLayoutContainers.push(parent);
-                                    }
+                        const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
+                        if (parentUUID) {
+                            const parent = formCache.getLayoutContainer(parentUUID);
+                            if (parent) {
+                                parent.addChild(fcc);
+                                if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                    // new component in layout container , make sure is inserted in correct position
+                                    reorderLayoutContainers.push(parent);
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else {
                         const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
                         formCache.add(comp);
-                        if (!formCache.absolute) {
-                            let parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
-                            if (parentUUID) {
-                                let parent = formCache.getLayoutContainer(parentUUID);
-                                if (parent) {
-                                    parent.addChild(comp);
-                                    if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                        // new component in layout container , make sure is inserted in correct position
-                                        reorderLayoutContainers.push(parent);
-                                    }
+                        const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
+                        if (parentUUID) {
+                            const parent = formCache.getLayoutContainer(parentUUID);
+                            if (parent) {
+                                parent.addChild(comp);
+                                if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                    // new component in layout container , make sure is inserted in correct position
+                                    reorderLayoutContainers.push(parent);
                                 }
                             }
-                        }
-                        else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
+                        } else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
                             formCache.partComponentsCache.push(comp);
                             reorderPartComponents = true;
                         }
@@ -187,12 +186,12 @@ export class EditorContentService {
             });
             data.ng2components.forEach((elem) => {
                 //FORM COMPONENTS
-                let component = formCache.getFormComponent(elem.name);
+                const component = formCache.getFormComponent(elem.name);
                 if (component) {
                     if (data.updatedFormComponentsDesignId) {
-                        var fixedName = elem.name.replace(/-/g, "_");
+                        let fixedName = elem.name.replace(/-/g, '_');
                         if (!isNaN(fixedName[0])) {
-                            fixedName = "_" + fixedName;
+                            fixedName = '_' + fixedName;
                         }
                         if ((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1) {
                             refresh = true;
@@ -224,8 +223,10 @@ export class EditorContentService {
                     }
                     redrawDecorators = this.updateComponentProperties(component, elem) || redrawDecorators;
                     if (!component.model.containedForm && component.items && component.items.length > 0) {
-                        this.removeChildrenRecursively(component, formCache)
+                        this.removeChildrenRecursively(component, formCache);
                         component.items = [];
+                        // how can we know if the old components had ghosts or not
+                        renderGhosts = true;
                     }
                 }
 
@@ -237,12 +238,14 @@ export class EditorContentService {
         if (data.updatedFormComponentsDesignId) {
             for (var index in data.updatedFormComponentsDesignId) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
-                const fc = formCache.getFormComponent(fcname.replace(/_/g, "-"));
+                const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
                 //delete components of the old form component
                 const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) == -1));
                 if (found) {
                     found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
                     toDelete.push(...found);
+                    // how can we know if the old components had ghosts or not
+                    renderGhosts = true;
                 }
             }
         }
@@ -256,9 +259,10 @@ export class EditorContentService {
                     formCache.removeComponent(elem);
                     if (!formCache.absolute) {
                         this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                    } else if (comp.parent) {
+                        comp.parent.removeChild(comp);
                     }
-                }
-                else {
+                } else {
                     const fc = formCache.getFormComponent(elem);
                     if (fc) {
                         formCache.removeFormComponent(elem);
@@ -269,32 +273,34 @@ export class EditorContentService {
                 }
             });
             refresh = true;
+            redrawDecorators = true;
         }
         if (data.deletedContainers) {
             data.deletedContainers.forEach((elem) => {
                 const container = formCache.getLayoutContainer(elem);
                 if (container) {
                     formCache.removeLayoutContainer(elem);
-                    this.removeChildFromParentRecursively(container, formCache.mainStructure);
-                    this.removeChildrenRecursively(container, formCache)
+                    if (formCache.mainStructure) this.removeChildFromParentRecursively(container, formCache.mainStructure);
+                    else if (container.parent) container.parent.removeChild(container);
+                    this.removeChildrenRecursively(container, formCache);
                 }
             });
             refresh = true;
+            redrawDecorators = true;
         }
         if (reorderPartComponents) {
             // make sure the order of components in absolute layout is correct, based on formindex
             this.sortChildren(formCache.partComponentsCache);
         }
 
-        for (let container of orphanLayoutContainers) {
+        for (const container of orphanLayoutContainers) {
             const parentUUID = data.childParentMap[container.id].uuid;
             if (parentUUID) {
-                let parent = formCache.getLayoutContainer(parentUUID);
+                const parent = formCache.getLayoutContainer(parentUUID);
                 if (parent) {
                     parent.addChild(container);
-                }
-                else {
-                    let fc = formCache.getFormComponent(parentUUID);
+                } else {
+                    const fc = formCache.getFormComponent(parentUUID);
                     if (fc) {
                         fc.addChild(container);
                     }
@@ -302,11 +308,11 @@ export class EditorContentService {
             }
         }
 
-        for (let container of reorderLayoutContainers) {
+        for (const container of reorderLayoutContainers) {
             // make sure the order of components in responsive layout containers is correct, based on location
             this.sortChildren(container.items);
         }
-        if (data.renderGhosts) {
+        if (data.renderGhosts || renderGhosts) {
             this.designFormCallback.renderGhosts();
         }
         if (refresh) {
@@ -328,7 +334,9 @@ export class EditorContentService {
                     (prop: string) => component.model ? component.model[prop] : component.model);
             }
             if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
-                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y)) {
+                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y) ||
+                property === 'anchors' && component.model[property] != value || 
+                property === 'cssPosition' && (component.model[property].top !== value.top || component.model[property].bottom !== value.bottom || component.model[property].left !== value.left || component.model[property].right !== value.right) ) {
                 redrawDecorators = true;
             }
             component.model[property] = value;
@@ -348,7 +356,7 @@ export class EditorContentService {
         }*/
         this.designFormCallback.updateForm(width, height);
     }
-    
+
     contentRefresh() {
         this.designFormCallback.contentRefresh();
     }
@@ -379,11 +387,9 @@ export class EditorContentService {
                 if (elem instanceof StructureCache) {
                     formCache.removeLayoutContainer(elem.id);
                     this.removeChildrenRecursively(elem, formCache);
-                }
-                else if (elem instanceof ComponentCache) {
+                } else if (elem instanceof ComponentCache) {
                     formCache.removeComponent(elem.name);
-                }
-                else if (elem instanceof FormComponentCache) {
+                } else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
                 }
             });
@@ -393,8 +399,8 @@ export class EditorContentService {
     private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (items) {
             items.sort((comp1, comp2): number => {
-                let priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes["svy-priority"]) : parseInt(comp1.model.servoyAttributes["svy-priority"]);
-                let priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes["svy-priority"]) : parseInt(comp2.model.servoyAttributes["svy-priority"]);
+                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority']) : parseInt(comp1.model.servoyAttributes['svy-priority']);
+                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority']) : parseInt(comp2.model.servoyAttributes['svy-priority']);
                 // priority is location in responsive form and formindex in absolute form
                 if (priocomp2 > priocomp1) {
                     return -1;

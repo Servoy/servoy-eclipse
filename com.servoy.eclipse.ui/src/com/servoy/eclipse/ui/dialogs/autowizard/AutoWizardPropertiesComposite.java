@@ -18,29 +18,66 @@
 package com.servoy.eclipse.ui.dialogs.autowizard;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.config.AbstractLayerConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
+import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
+import org.eclipse.nebula.widgets.nattable.edit.command.EditCellCommandHandler;
+import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditBindings;
+import org.eclipse.nebula.widgets.nattable.edit.event.InlineCellEditEventHandler;
+import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
+import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
+import org.eclipse.nebula.widgets.nattable.layer.AbstractLayer;
+import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
+import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
+import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.ui.dialogs.autowizard.nattable.AutoWizardTableColumnPropertyAccessor;
+import com.servoy.eclipse.ui.dialogs.autowizard.nattable.LinkClickConfiguration;
+import com.servoy.eclipse.ui.dialogs.autowizard.nattable.PainterConfiguration;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.ITable;
 
 /**
  * @author emera
  */
 public class AutoWizardPropertiesComposite
 {
-	private final AutoWizardConfigurationViewer tableViewer;
 	private List<Map<String, Object>> treeInput = new ArrayList<>();
 
 	private final PersistContext persistContext;
 	private final FlattenedSolution flattenedSolution;
 	private final PropertyWizardDialogConfigurator propertiesConfigurator;
+
+	private NatTable natTable;
+	private HashMap<String, String> propertyToLabels;
+	private List<String> propertyNames;
+
+	private IDataProvider bodyDataProvider;
+	private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 
 
 	public AutoWizardPropertiesComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
@@ -50,9 +87,77 @@ public class AutoWizardPropertiesComposite
 		this.persistContext = persistContext;
 		this.propertiesConfigurator = configurator;
 
-		tableViewer = createTableViewer(parent, configurator.getTable());
+		this.natTable = null;
+		this.propertyNames = null;
 		if (configurator.getInput() != null) setInputProperties(configurator.getInput());
-		tableViewer.setInput(treeInput);
+		setupNatTable(parent, configurator);
+	}
+
+	/**
+	 * @param parent
+	 * @param configurator
+	 */
+	private void setupNatTable(final Composite parent, PropertyWizardDialogConfigurator configurator)
+	{
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 1;
+		parent.setLayout(gridLayout);
+		this.propertyNames = propertiesConfigurator.getOrderedProperties().stream().filter(pd -> !propertiesConfigurator.getPrefillProperties().contains(pd))
+			.map(pd -> pd.getName()).collect(Collectors.toList());
+		if (configurator.getDataproviderProperties().size() > 0) propertyNames.add(0, configurator.getAutoPropertyName());
+		this.propertyToLabels = new HashMap<>();
+		for (String prop : propertyNames)
+		{
+			propertyToLabels.put(prop, prop.toUpperCase());
+		}
+		DefaultColumnHeaderDataProvider colHeaderDataProvider = new DefaultColumnHeaderDataProvider(
+			propertyNames.toArray(new String[propertyNames.size()]), propertyToLabels);
+		this.bodyDataProvider = setupBodyDataProvider();
+
+		BodyLayerStack bodyLayer = new BodyLayerStack(bodyDataProvider);
+		ColumnHeaderLayerStack columnHeaderLayer = new ColumnHeaderLayerStack(
+			colHeaderDataProvider, bodyLayer);
+		CompositeLayer composeLayer = new CompositeLayer(1, 2);
+		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
+		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer, 0, 1);
+		natTable = new NatTable(parent, SWT.NONE, composeLayer, false);
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		natTable.setLayoutData(gridData);
+		ConfigRegistry configRegistry = new ConfigRegistry();
+		natTable.setConfigRegistry(configRegistry);
+		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.RENDER_GRID_LINES,
+			Boolean.FALSE);
+		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		natTable.setLayerPainter(new HorizontalGridLineCellLayerPainter());
+
+		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration();
+		natTable.addConfiguration(
+			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution));
+		natTable.addConfiguration(linkClickConfiguration);
+		composeLayer.addConfiguration(new AbstractLayerConfiguration<AbstractLayer>()
+		{
+			@Override
+			public void configureTypedLayer(AbstractLayer layer)
+			{
+				layer.registerCommandHandler(new EditCellCommandHandler());
+				layer.registerEventHandler(new InlineCellEditEventHandler(layer));
+			}
+		});
+		composeLayer.addConfiguration(new DefaultEditBindings());
+		natTable.setData(CSS_CLASS_NAME_KEY, "svyNatTable");
+		natTable.configure();
+		natTable.refresh();
+	}
+
+	private IDataProvider setupBodyDataProvider()
+	{
+		return new ListDataProvider<>(treeInput,
+			new AutoWizardTableColumnPropertyAccessor(this.propertiesConfigurator));
 	}
 
 	private void setInputProperties(List<Map<String, Object>> childrenProperties)
@@ -60,63 +165,144 @@ public class AutoWizardPropertiesComposite
 		treeInput = childrenProperties;
 	}
 
-	private AutoWizardConfigurationViewer createTableViewer(Composite parent, ITable table)
-	{
-		final Composite container = new Composite(parent, SWT.NONE);
-		// define layout for the viewer
-
-		GridData gridData = new GridData();
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 1;
-		gridData.verticalSpan = 1;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.minimumWidth = 250;
-
-		container.setLayoutData(gridData);
-
-		AutoWizardConfigurationViewer viewer = new AutoWizardConfigurationViewer(container, persistContext, flattenedSolution, table,
-			propertiesConfigurator,
-			SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION, propertiesConfigurator.getAutoPropertyName());
-		return viewer;
-	}
-	
 	public List<Map<String, Object>> getResult()
 	{
-		List<Map<String, Object>> returnValue = treeInput;
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> returnValue = ((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList();
+
 		if (propertiesConfigurator.getPrefillProperties().size() > 0)
 		{
 			returnValue.forEach(row -> {
 				propertiesConfigurator.getPrefillProperties().forEach(pd -> {
-					row.put(pd.getName(), row.get((((JSONObject)pd.getTag("wizard")).get("prefill"))));
+					if (row.get(pd.getName()) == null || row.get(pd.getName()).equals(pd.getDefaultValue()))
+					{
+						row.put(pd.getName(), getUniquePrefillValue(pd, returnValue, row));
+					}
 				});
 			});
 		}
 		return returnValue;
 	}
 
-	public AutoWizardConfigurationViewer getViewer()
+	private Object getUniquePrefillValue(PropertyDescription pd, List<Map<String, Object>> rows, Map<String, Object> row)
 	{
-		return tableViewer;
+		Object value = row.get(((JSONObject)pd.getTag("wizard")).get("prefill"));
+		if (value == null)
+		{
+			value = pd.getName() + rows.indexOf(row);
+		}
+		int count = rows.indexOf(row) + 1;
+		while (!isUniqueValue(pd, rows, value))
+		{
+			if (value instanceof String)
+			{
+				value = value + "" + count++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return value;
 	}
 
+	private boolean isUniqueValue(PropertyDescription pd, List<Map<String, Object>> rows, Object value)
+	{
+		return !rows.stream().filter(r -> value.equals(r.get(pd.getName()))).findAny().isPresent();
+	}
+
+	@SuppressWarnings("unchecked")
 	public void setInput(List<Map<String, Object>> list)
 	{
-		treeInput = list;
-		getViewer().setInput(list);
-		getViewer().refresh();
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().clear();
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().addAll(list);
+		natTable.refresh(true);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addNewRow(Map<String, Object> row)
 	{
-		treeInput.add(row);
-		getViewer().setInput(treeInput);
-		getViewer().refresh();
+		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().add(row);
+		natTable.refresh(true);
 	}
 
 	public List<Map<String, Object>> getInput()
 	{
 		return treeInput;
+	}
+
+	public class BodyLayerStack extends AbstractLayerTransform
+	{
+
+		private final SelectionLayer selectionLayer;
+		public static final String DELETE_LABEL = "delete";
+
+		public BodyLayerStack(IDataProvider dataProvider)
+		{
+			DataLayer bodyDataLayer = new DataLayer(dataProvider);
+			bodyDataLayer.setDefaultRowHeight(40);
+
+			AggregateConfigLabelAccumulator accumulator = new AggregateConfigLabelAccumulator();
+			// create the ColumnLabelAccumulator with IDataProvider to be able to
+			// tell the CSS engine about the added labels
+			accumulator.add(new ColumnLabelAccumulator(dataProvider));
+
+			final ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(bodyDataLayer);
+			bodyDataLayer.setConfigLabelAccumulator(columnLabelAccumulator);
+			registerColumnLabels(columnLabelAccumulator);
+
+			accumulator.add(columnLabelAccumulator);
+			bodyDataLayer.setConfigLabelAccumulator(accumulator);
+
+			ColumnReorderLayer columnReorderLayer = new ColumnReorderLayer(
+				bodyDataLayer);
+			ColumnHideShowLayer columnHideShowLayer = new ColumnHideShowLayer(
+				columnReorderLayer);
+			this.selectionLayer = new SelectionLayer(columnHideShowLayer);
+			ViewportLayer viewportLayer = new ViewportLayer(this.selectionLayer);
+			setUnderlyingLayer(viewportLayer);
+			setUnderlyingLayer(bodyDataLayer);
+		}
+
+		private void registerColumnLabels(ColumnOverrideLabelAccumulator columnLabelAccumulator)
+		{
+			for (int i = 0; i < propertyNames.size(); i++)
+			{
+				columnLabelAccumulator.registerColumnOverrides(i, propertyNames.get(i));
+			}
+			columnLabelAccumulator.registerColumnOverrides(propertyNames.size(), DELETE_LABEL, LinkClickConfiguration.LINK_CELL_LABEL);
+		}
+
+		public SelectionLayer getSelectionLayer()
+		{
+			return this.selectionLayer;
+		}
+	}
+
+	public class ColumnHeaderLayerStack extends AbstractLayerTransform
+	{
+		public ColumnHeaderLayerStack(IDataProvider dataProvider, BodyLayerStack bodyLayer)
+		{
+			DataLayer dataLayer = new DataLayer(dataProvider);
+			ColumnHeaderLayer colHeaderLayer = new ColumnHeaderLayer(dataLayer,
+				bodyLayer, bodyLayer.getSelectionLayer());
+			setUnderlyingLayer(colHeaderLayer);
+		}
+	}
+
+	public class RowHeaderLayerStack extends AbstractLayerTransform
+	{
+		public RowHeaderLayerStack(IDataProvider dataProvider, BodyLayerStack bodyLayer)
+		{
+			DataLayer dataLayer = new DataLayer(dataProvider, 50, 20);
+			RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(dataLayer,
+				bodyLayer, bodyLayer.getSelectionLayer());
+			setUnderlyingLayer(rowHeaderLayer);
+		}
+	}
+
+	public void commitAndCloseActiveCellEditor()
+	{
+		natTable.commitAndCloseActiveCellEditor();
 	}
 }

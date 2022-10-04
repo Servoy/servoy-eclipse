@@ -10,7 +10,7 @@
       <tr [ngClass]="isPackageSelected(package) ? 'wpm-package-selected' : ''">
         <td>
           <div class="wpm-clickable" matTooltip="{{ getDescriptionTooltip(package) }}" matTooltipDisabled="{{ !package.description }}" (click)="togglePackageSelection($event, package)">
-            <img  [src]="package.icon" class="md-avatar" />
+            <img  [src]="package.icon" [ngStyle]="{'filter': invertIcon(package) ? 'invert(1)' : 'invert(0)' }" class="md-avatar" />
             <span>{{ package.displayName }}</span>
             <mat-icon *ngIf="package.description">{{ isSelectedAndWithDescriptionExpanded(package) ? "arrow_drop_up" : "arrow_drop_down" }}</mat-icon>
           </div>

@@ -36,6 +36,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction.Va
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -147,6 +148,7 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 						editingNode.setDefaultValue(askUserDialog.getVariableDefaultValue());
 						editingNode.updateName(nameValidator, askUserDialog.getVariableName());
 						editingNode.setVariableType(askUserDialog.getVariableType());
+						editingNode.setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
 						servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 					}
 					catch (RepositoryException e)

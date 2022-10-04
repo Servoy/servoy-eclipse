@@ -52,6 +52,7 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -207,7 +208,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					{
 						zoomedInContainer = (LayoutContainer)((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 					}
-					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS();
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS(new ServoyDataConverterContext(fs,
+						Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? ServoyModelFinder.getServoyModel().getMessagesManager() : null));
 				}
 				else
 				{
@@ -332,10 +335,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 		for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 		{
-			List<String> libs = entry.getNg2CssDesignLibrary();
-			if (libs != null)
+			Object responsiveLib = entry.getManifest().getMainAttributes().getValue("Responsive-Layout");
+			if (form.isResponsiveLayout() && "True".equals(responsiveLib))
 			{
-				designCssLibs.addAll(libs);
+				List<String> libs = entry.getNg2CssDesignLibrary();
+				if (libs != null)
+				{
+					designCssLibs.addAll(libs);
+				}
 			}
 		}
 		// also add the solution css
@@ -491,8 +498,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				ghost = true;
 			}
-			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
+			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), containers, childParentMap);
+			if (fcGhosts) ghost = fcGhosts;
 		}
 		else
 		{
@@ -724,7 +732,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : containersList)
 			{
 				writer.object();
-				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, true);
+				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
 				writer.endObject();
 			}
 			writer.endArray();
@@ -821,9 +829,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return writer.toString();
 	}
 
-	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
+	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
 		FlattenedSolution fs, HashSet<String> forms, List<LayoutContainer> containers, Map<String, String> childParentMap)
 	{
+		boolean ghost = false;
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
 		{
@@ -846,7 +855,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers, childParentMap);
+						if (element.getPersistIfAvailable() instanceof ISupportsIndexedChildren &&
+							((ISupportsIndexedChildren)element.getPersistIfAvailable()).getAllObjects().hasNext())
+						{
+							ghost = true;
+						}
+						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers,
+							childParentMap);
+						if (fcGhosts) ghost = fcGhosts;
 					}
 					if (frm.isResponsiveLayout())
 					{
@@ -855,15 +871,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							LayoutContainer container = it.next();
 							childParentMap.put(container.getUUID().toString(), formElement.getPersistIfAvailable().getUUID().toString());
-							checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents, formComponentsComponents,
+							boolean fcGhosts = checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents,
+								formComponentsComponents,
 								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs, childParentMap,
 								true);
+							if (fcGhosts) ghost = fcGhosts;
 						}
 					}
 					forms.remove(frm.getName());
 				}
 			}
 		}
+		return ghost;
 	}
 
 	private IFormElement getFormComponentElement(FlattenedSolution fs, IFormElement formComponent, String elementName)

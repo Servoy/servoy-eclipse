@@ -30,14 +30,18 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.osgi.framework.Bundle;
 
 import com.servoy.j2db.util.Utils;
 
@@ -63,55 +67,104 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		boolean executeNpmInstall = false;
 		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 		try
 		{
+			if (new File(nodeFolder.getParent(), "src").exists())
+			{
+				FileUtils.deleteQuietly(nodeFolder.getParentFile());
+			}
 			long startTime = System.currentTimeMillis();
 			long time = startTime;
-			writeConsole(console, "---- Start to copy the Titanium NG sources");
+			writeConsole(console, "---- Start to check to copy the Titanium NG sources");
 			if (!nodeFolder.exists())
 			{
 				createFolder(nodeFolder);
 			}
-			boolean packageJsonChanged = true;
-			File packageJsonFile = new File(nodeFolder, "package_original.json");
-			URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
+			boolean codeChanged = true;
+			boolean mainPackageJsonChanged = false;
+			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
+			Bundle bundle = Activator.getInstance().getBundle();
+			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
 			if (packageJsonFile.exists() && !force)
 			{
 				try
 				{
 					String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
-					packageJsonChanged = !fileContent.equals(bundleContent);
+					codeChanged = !fileContent.equals(bundleContent);
+					mainPackageJsonChanged = codeChanged;
 				}
 				catch (IOException e)
 				{
 					e.printStackTrace();
 				}
 			}
-			if (packageJsonChanged)
+			if (!codeChanged)
 			{
-				try
+				if (new File(nodeFolder, "src").exists())
 				{
-					// create the package_original.json
-					FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
+					Optional<File> srcMax = FileUtils.listFiles(new File(nodeFolder, "src"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+						.max((file1, file2) -> {
+							long tm = file1.lastModified() - file2.lastModified();
+							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+						});
+					Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+						.max((file1, file2) -> {
+							long tm = file1.lastModified() - file2.lastModified();
+							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+						});
 
-					// delete the source dirs so we start clean
+					long timestamp = Math.max(srcMax.isPresent() ? srcMax.get().lastModified() : 0,
+						projectsMax.isPresent() ? projectsMax.get().lastModified() : 0);
+
+					codeChanged = checkForHigherTimestamp("/node", false, timestamp, console);
+				}
+				else
+				{
+					// this is a new soluton dir just make sure we copy it
+					codeChanged = true;
+				}
+			}
+			if (codeChanged)
+			{
+				// delete the full parent dir because the main package json is changed
+				if (mainPackageJsonChanged)
+				{
+
+					FileUtils.deleteQuietly(nodeFolder.getParentFile());
+					writeConsole(console, "Deleted the main target folder because the root package.json is changed " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+				}
+				else
+				{
+					// delete only the source dirs so we start clean
 					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
 					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					writeConsole(console, "The resources of the solution was changed started to copy the new sources " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 				}
 
-				writeConsole(console, "Tested package.json which is changed, starting to copy " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 				time = System.currentTimeMillis();
 
 				// copy over the latest resources
 				// first level do findEntries(.. false) to avoid a long running operation in case a node_modules or dist is present in sources (when running from sources)
 				// then after first level contents were ignored, look deep in remaining subdirs with findEntries(.. true)
 				copyAllEntries("/node", false);
+
+				try
+				{
+					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
+					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
+
+					executeNpmInstall = true;
+				}
+				catch (IOException e)
+				{
+					writeConsole(console, "Exception when creating node/ng folder when moving the package json files: " + e.getMessage());
+					e.printStackTrace();
+				}
 
 				writeConsole(console, "Copied all the sources " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 			}
@@ -125,7 +178,17 @@ public class NodeFolderCreatorJob extends Job
 		}
 		finally
 		{
-			Activator.getInstance().countDown();
+			if (executeNpmInstall) try
+			{
+				// now do an npm install on the main, parent folder
+				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
+			}
+			catch (IOException | InterruptedException e1)
+			{
+				writeConsole(console, "Exception when caling install on the parent root folder: " + e1.getMessage());
+				e1.printStackTrace();
+			}
+
 			try
 			{
 				console.close();
@@ -146,6 +209,44 @@ public class NodeFolderCreatorJob extends Job
 		catch (IOException e2)
 		{
 		}
+	}
+
+	private boolean checkForHigherTimestamp(String entryPath, boolean deepFindEntries, long timestamp, StringOutputStream console)
+	{
+		boolean higherFound = false;
+		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries(entryPath, "*", deepFindEntries);
+		while (entries.hasMoreElements() && !higherFound)
+		{
+			URL entry = entries.nextElement();
+			String filename = entry.getFile();
+			if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
+			else filename = filename.substring("node".length());
+			if (!ignoredResource(filename) && !filename.endsWith("package-lock.json"))
+			{
+				try
+				{
+					if (filename.endsWith("/"))
+					{
+						// if it was not a deep findEntries then sub-entries must be deep-checked
+						if (!deepFindEntries) higherFound = checkForHigherTimestamp(entry.getFile(), true, timestamp, console);
+					}
+					else
+					{
+						long lm = entry.openConnection().getLastModified();
+						if (lm > timestamp)
+						{
+							writeConsole(console, "core source changed: " + entry.getFile() + " , build will be triggered");
+							higherFound = true;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					Activator.getInstance().getLog().error("Error checking timestamp for  file " + filename + "for node folder " + nodeFolder, e);
+				}
+			}
+		}
+		return higherFound;
 	}
 
 	private void copyAllEntries(String entryPath, boolean deepFindEntries)

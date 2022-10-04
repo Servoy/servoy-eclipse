@@ -177,8 +177,8 @@ public class DesignerPreferences
 
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
-	public static final boolean LAUNCH_NG2_DEFAULT = false;
-	public static final boolean NG2_DESIGNER_DEFAULT = false;
+	public static final boolean LAUNCH_NG2_DEFAULT = true;
+	public static final boolean NG2_DESIGNER_DEFAULT = true;
 	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
 
 

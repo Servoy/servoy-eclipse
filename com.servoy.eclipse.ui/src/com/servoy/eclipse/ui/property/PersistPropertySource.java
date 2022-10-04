@@ -73,6 +73,7 @@ import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.specification.property.types.InsetsPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.ObjectPropertyType;
 import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
@@ -186,6 +187,7 @@ import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -217,6 +219,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
@@ -1459,9 +1462,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					resultingPropertyDescriptor = createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
 				}
-				else if (propertyType == MapPropertyType.INSTANCE)
+				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
-					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null);
+					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE);
 					resultingPropertyDescriptor = new PropertyController<JSONObject, Object>(id, displayName,
 						new ChainedPropertyConverter<JSONObject, Map<String, Object>, Object>(new IPropertyConverter<JSONObject, Map<String, Object>>()
 						{
@@ -1510,6 +1513,28 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						propertyType == LabelForPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
+							new ICellEditorFactory()
+							{
+								public CellEditor createPropertyEditor(Composite parent)
+								{
+									return new TextCellEditor(parent);
+								}
+							});
+					}
+					else if (propertyType == ObjectPropertyType.INSTANCE)
+					{
+						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
+						{
+							public Object convertProperty(Object id, Object value)
+							{
+								return value == null ? "" : value;
+							}
+
+							public Object convertValue(Object id, Object value)
+							{
+								return "".equals(value) ? null : value;
+							}
+						}, null,
 							new ICellEditorFactory()
 							{
 								public CellEditor createPropertyEditor(Composite parent)
@@ -1693,21 +1718,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
 				}
 			};
+			String tooltipText = null;
 			Object config = propertyDescription.getConfig();
 			if (config instanceof JSONObject)
 			{
 				// this is for when WebObjectFunctionDefinition.getAsPropertyDescription is given here as PD (for custom web components)
 				// then the config is the actual json definition of that in the spec file it seems
-				String tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
 			}
 			else
 			{
 				// config is probably a boolean - created in case of legacy component event handlers
 				// but then the tooltip should be in tags as for normal properties see PersistPropertyHandler.getPropertyDescription() for events
-				String tooltipText = propertyDescription.getDocumentation();
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = propertyDescription.getDocumentation();
 			}
+			if (tooltipText == null && !(persistContext.getPersist() instanceof IBasicWebObject))
+			{
+				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(ScriptMethod.class, propertyDescription.getName());
+				if (legacyMethodTemplate != null) tooltipText = legacyMethodTemplate.getDescription();
+			}
+			if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
 		}
 		return methodPropertyController;
 	}
@@ -2159,7 +2189,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 																					 * not a bean property
 																					 */)
 			{
-				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+				clearAbstractBaseProperty(beanPropertyDescriptor, id, (AbstractBase)persistContext.getPersist());
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
 					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
 					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
@@ -2216,6 +2246,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), false);
 		}
+	}
+
+	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
+	{
+		((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 	}
 
 	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)

@@ -113,7 +113,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 				new AccesCheckingContextDelegateLabelProvider(
 					new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)),
 				new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
-				new MethodListOptions(false, true, false, true, DataSourceUtils.getViewDataSourceName(table.getDataSource()) == null, table));
+				new MethodListOptions(true, false, false, true, DataSourceUtils.getViewDataSourceName(table.getDataSource()) == null, table));
 		}
 		return editor;
 	}

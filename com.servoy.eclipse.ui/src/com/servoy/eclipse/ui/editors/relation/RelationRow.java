@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.editors.relation;
 
+import static com.servoy.base.query.IBaseSQLCondition.OPERATOR_MASK;
+
 import com.servoy.j2db.persistence.LiteralDataprovider;
 
 /**
@@ -25,9 +27,9 @@ import com.servoy.j2db.persistence.LiteralDataprovider;
  */
 public class RelationRow
 {
-
 	private String ci_from;
-	private Integer operator;
+	private int maskedOperator;
+	private int mask;
 	private String ci_to;
 
 	/**
@@ -36,10 +38,11 @@ public class RelationRow
 	 * @param ci_to
 	 * @param object
 	 */
-	public RelationRow(String ci_from, Integer operator, String ci_to, Object object)
+	public RelationRow(String ci_from, int operator, String ci_to, Object object)
 	{
 		this.ci_from = ci_from;
-		this.operator = operator;
+		this.maskedOperator = operator & OPERATOR_MASK;
+		this.mask = operator & ~OPERATOR_MASK;
 		this.ci_to = ci_to;
 	}
 
@@ -80,19 +83,40 @@ public class RelationRow
 	}
 
 	/**
-	 * @return
+	 * @return the maskedOperator
 	 */
-	public Integer getOperator()
+	public int getMaskedOperator()
 	{
-		return operator;
+		return maskedOperator;
 	}
 
 	/**
-	 * @param valueOf
+	 * @param maskedOperator the maskedOperator to set
 	 */
-	public void setOperator(Integer op)
+	public void setMaskedOperator(int maskedOperator)
 	{
-		operator = op;
+		this.maskedOperator = maskedOperator;
+	}
+
+	/**
+	 * @param mask the mask to set
+	 */
+	public void setMask(int mask)
+	{
+		this.mask = mask;
+	}
+
+	/**
+	 * @return the mask
+	 */
+	public int getMask()
+	{
+		return mask;
+	}
+
+	public int getOperator()
+	{
+		return maskedOperator | mask;
 	}
 
 	public String getRawCIFrom()

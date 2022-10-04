@@ -249,6 +249,8 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 		updateButtons();
 
+		composite.pack();
+
 		// Return results.
 		return composite;
 	}

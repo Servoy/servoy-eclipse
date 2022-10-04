@@ -1,6 +1,6 @@
 import {
-    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
+    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, AfterViewInit, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
@@ -83,7 +83,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -141,8 +141,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
-                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
-                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, null, false, model_inserted);
+                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
                     if (event.data.children) {
                         event.data.children.forEach(child => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
@@ -184,6 +184,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'insertDraggedComponent') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                this.insertedCloneParent = null;
                 let beforeChild = null;
                 if (event.data.insertBefore) {
                     beforeChild = this.formCache.getComponent(event.data.insertBefore);
@@ -193,7 +194,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 if (event.data.dropTarget) {
                     this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
                 }
-                else {
+                else if (!this.formCache.absolute){
                     if (this.formCache.mainStructure == null) {
                         this.formCache.mainStructure = new StructureCache(null, null);
                     }
@@ -201,7 +202,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
-                this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                if (this.insertedCloneParent) this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
             }
             if (event.data.id === 'removeDragCopy') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
@@ -224,7 +225,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const changed = this.showWireframe != event.data.value;
                 this.showWireframe = event.data.value;
                 if (changed) {
-                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                    // how can we detect the style is completely applied before redraw ?
+                    setTimeout(() => {
+                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                        this.windowRefService.nativeWindow.parent.postMessage({ id: 'redrawDecorators' }, '*');
+                    }, 200);
                 }
             }
             if (event.data.id === 'maxLevel') {
@@ -239,6 +244,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             this.detectChanges();
         })
+    }
+
+    ngAfterViewInit() {
+        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
     }
 
     public detectChanges() {

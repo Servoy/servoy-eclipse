@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -46,9 +45,11 @@ import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
+import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.types.FormFoundsetSelectionFilter;
 import com.servoy.eclipse.ui.property.types.FoundsetDesignToChooserConverter;
 import com.servoy.eclipse.ui.property.types.FoundsetPropertyEditor;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
@@ -56,7 +57,9 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 
@@ -114,9 +117,11 @@ public class DataproviderPropertiesSelector
 		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter));
 		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), converter));
 
-		ITable formTable = ((Form)persistContext.getContext()).getDataSource() != null
-			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Form)persistContext.getContext()).getDataSource()) : null;
+		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+		ITable formTable = frm != null && frm.getDataSource() != null
+			? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(frm.getDataSource()) : null;
 		dataSourceViewer.setInput(FoundsetPropertyEditor.getFoundsetInputOptions(formTable, null, false));
+		dataSourceViewer.setSelectionFilter(new FormFoundsetSelectionFilter(null));
 		GridData data = new GridData(SWT.FILL, SWT.NONE, true, false);
 		data.horizontalAlignment = GridData.FILL;
 		dataSourceViewer.getControl().setLayoutData(data);
@@ -135,7 +140,10 @@ public class DataproviderPropertiesSelector
 			lastDatasourceValue = getTableWrapper();
 		}
 		dataproviderTreeViewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
-			new DataProviderContentProvider(persistContext, flattenedSolution, table), configurator.getDataproviderOptions(), true, true,
+			new DataProviderContentProvider(persistContext, flattenedSolution,
+				lastDatasourceValue != null ? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(lastDatasourceValue.getDataSource())
+					: table),
+			configurator.getDataproviderOptions(), true, true,
 			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
@@ -151,7 +159,7 @@ public class DataproviderPropertiesSelector
 		dataproviderTreeViewer.addSelectionChangedListener(event -> moveDataproviderSelection());
 		dataproviderTreeViewer.addOpenListener(event -> moveDataproviderSelection());
 
-		dataproviderTreeViewer.getViewer().getTree().setToolTipText("Select the dataprovders for which you want to place fields");
+		dataproviderTreeViewer.getViewer().getTree().setToolTipText("Select the dataproviders for which you want to place fields");
 
 		dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
@@ -191,10 +199,12 @@ public class DataproviderPropertiesSelector
 					JSONObject value = converter.convertFromChooserValueToJSONValue(tw, null);
 					component.setProperty(fsProperty, value);
 				}
+				dataSourceViewer.setValid(true);
 			}
 			else
 			{
 				MessageDialog.openError(shell, "Datasource not found", "The datasource '" + tw.getDataSource() + "' was not found.");
+				dataSourceViewer.setValid(false);
 			}
 		}
 	}
@@ -204,7 +214,15 @@ public class DataproviderPropertiesSelector
 		IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
 		if (selection.getFirstElement() == FormFoundsetEntryContentProvider.FORM_FOUNDSET)
 		{
-			String dataSource = ((Form)persistContext.getContext()).getDataSource();
+			Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+			String dataSource = frm != null ? frm.getDataSource() : null;
+			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
+		}
+		else if (selection.getFirstElement() instanceof RelationsWrapper)
+		{
+			RelationsWrapper relationsWrapper = (RelationsWrapper)selection.getFirstElement();
+			Relation relation = relationsWrapper.relations[relationsWrapper.relations.length - 1];
+			String dataSource = relation != null ? relation.getForeignDataSource() : null;
 			return dataSource != null ? DataSourceWrapperFactory.getWrapper(dataSource) : null;
 		}
 		return (IDataSourceWrapper)selection.getFirstElement();

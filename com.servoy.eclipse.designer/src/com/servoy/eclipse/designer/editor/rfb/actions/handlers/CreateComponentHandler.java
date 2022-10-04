@@ -83,6 +83,8 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
@@ -179,6 +181,7 @@ public class CreateComponentHandler implements IServerService
 		{
 			public void run()
 			{
+				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
 				editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
 				{
 					private IPersist[] newPersist;
@@ -196,9 +199,8 @@ public class CreateComponentHandler implements IServerService
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 								if (!args.optBoolean("keepOldSelection", false))
 								{
-									IStructuredSelection structuredSelection = new StructuredSelection(
+									newSelection[0] = new StructuredSelection(
 										newPersist.length > 0 ? PersistContext.create(newPersist[0], editorPart.getForm()) : newPersist);
-									selectionProvider.setSelection(structuredSelection);
 								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
@@ -245,6 +247,8 @@ public class CreateComponentHandler implements IServerService
 					}
 
 				});
+
+				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
 		});
 		return null;
@@ -620,59 +624,7 @@ public class CreateComponentHandler implements IServerService
 								}
 								if ("autoshow".equals(property.getTag("wizard")))
 								{
-									// prop type should be an array of a custom type..
-									IPropertyType< ? > propType = property.getType();
-									if (propType instanceof CustomJSONArrayType< ? , ? >)
-									{
-
-										CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
-											.getCustomJSONTypeDefinition().getType();
-										PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
-										Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
-										if (wizardProperties.size() > 0)
-										{
-											// feed this wizardProperties into the wizard
-											System.err.println(wizardProperties);
-											Display current = Display.getCurrent();
-											if (current == null) current = Display.getDefault();
-
-											PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
-											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-											ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-												.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
-
-											PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
-												context,
-												flattenedSolution, property).withTable(table).withProperties(wizardProperties);
-											if (dialogConfigurator.open() == Window.OK)
-											{
-												List<Map<String, Object>> result = dialogConfigurator.getResult();
-												String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
-												for (int i = 0; i < result.size(); i++)
-												{
-													Map<String, Object> row = result.get(i);
-													String customTypeName = typeName + "_" + id.incrementAndGet();
-													while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
-													{
-														customTypeName = typeName + "_" + id.incrementAndGet();
-													}
-													WebCustomType bean = AddContainerCommand.addCustomType(webComponent, propertyName, customTypeName, i, null);
-													row.forEach((key, value) -> bean.setProperty(key, value));
-												}
-											}
-										}
-										else
-										{
-											ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
-												"\nhas no wizard properties\n" + propType, null);
-										}
-									}
-									else
-									{
-										ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
-											" that is not an custom array type " + propType, null);
-									}
-
+									autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 								}
 							}
 						}
@@ -697,7 +649,8 @@ public class CreateComponentHandler implements IServerService
 									if (!overridePersist.getUUID().equals(child.getUUID()))
 									{
 										parent.removeChild(child);
-										parent.addChild(overridePersist);
+										// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
+										//parent.addChild(overridePersist);
 									}
 								}
 							}
@@ -741,7 +694,7 @@ public class CreateComponentHandler implements IServerService
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
 								Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
-								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p.x,
+								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p,
 									specifications, args.optString("packageName"));
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -840,6 +793,64 @@ public class CreateComponentHandler implements IServerService
 		}
 
 		return null;
+	}
+
+	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
+		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
+	{
+
+		// prop type should be an array of a custom type..
+		IPropertyType< ? > propType = property.getType();
+		if (propType instanceof CustomJSONArrayType< ? , ? >)
+		{
+
+			CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+				.getCustomJSONTypeDefinition().getType();
+			PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+			Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+			if (wizardProperties.size() > 0)
+			{
+				// feed this wizardProperties into the wizard
+				System.err.println(wizardProperties);
+				Display current = Display.getCurrent();
+				if (current == null) current = Display.getDefault();
+
+				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+					context,
+					flattenedSolution, property).withTable(table).withProperties(wizardProperties);
+				if (dialogConfigurator.open() == Window.OK)
+				{
+					List<Map<String, Object>> result = dialogConfigurator.getResult();
+					String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
+					for (int i = 0; i < result.size(); i++)
+					{
+						Map<String, Object> row = result.get(i);
+						String customTypeName = typeName + "_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+						{
+							customTypeName = typeName + "_" + id.incrementAndGet();
+						}
+						WebCustomType bean = AddContainerCommand.addCustomType(webComponent, property.getName(), customTypeName, i, null);
+						row.forEach((key, value) -> bean.setProperty(key, value));
+					}
+				}
+			}
+			else
+			{
+				ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+					"\nhas no wizard properties\n" + propType, null);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+				" that is not an custom array type " + propType, null);
+		}
 	}
 
 	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException
@@ -963,17 +974,28 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected List<IPersist> createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
-		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		JSONObject config, Point location, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
+		throws RepositoryException, JSONException
 	{
 		List<IPersist> newPersists = new ArrayList<IPersist>();
+		int type = parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) == null && layoutSpec.getName().equals("servoycore-responsivecontainer")
+			? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
-			IRepository.LAYOUTCONTAINERS);
+			type);
 		container.setSpecName(layoutSpec.getName());
 		container.setPackageName(packageName);
 		parent.addChild(container);
-		container.setLocation(new Point(index, index));
+		if (container instanceof CSSPositionLayoutContainer)
+		{
+			((CSSPositionLayoutContainer)container)
+				.setCssPosition(new CSSPosition(Integer.toString(location.y), "-1", "-1", Integer.toString(location.x), "200", "200"));
+		}
+		else
+		{
+			container.setLocation(new Point(location.x, location.x));
+			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
+		}
 		newPersists.add(container);
-		if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
@@ -995,7 +1017,8 @@ public class CreateComponentHandler implements IServerService
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
 							newPersists.addAll(
-								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName));
+								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), new Point(i + 1, i + 1), specifications,
+									packageName));
 						}
 						else if (jsonObject.has("componentName"))
 						{

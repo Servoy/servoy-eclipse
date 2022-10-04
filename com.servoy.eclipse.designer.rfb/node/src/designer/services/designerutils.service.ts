@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
 import { EditorSessionService } from './editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 @Injectable()
 export class DesignerUtilsService {
 
-    constructor(protected readonly editorSession: EditorSessionService) {
+    constructor(protected readonly editorSession: EditorSessionService, protected readonly editorContentService: EditorContentService) {
     }
 
     public adjustElementRect(node: Element, position: DOMRect) {
         if (position.width == 0 || position.height == 0) {
+            if (node.parentElement.classList.contains('svy-layoutcontainer')) {
+                // if the parent element is a responsive container then height or width can be nust null
+                return;
+            }
             let correctWidth = position.width;
             let correctHeight = position.height;
             let currentNode = node.parentElement;
@@ -21,21 +26,27 @@ export class DesignerUtilsService {
             if (position.width == 0) position.width = correctWidth;
             if (position.height == 0) position.height = correctHeight;
         } else if (node.getAttribute('svy-id') != null) {
-            let currentNode = null;
+            if (node.parentElement.classList.contains('svy-layoutcontainer')) {
+                return;
+            }
+            let currentNode: Element = null;
             if (node.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement;
             }
             if (!currentNode && node.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement;
             }
+            if (!currentNode && node.parentElement.parentElement.classList.contains('svy-layoutcontainer')) {
+                return;
+            }
             if (!currentNode && node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement.parentElement;
             }
-            if (currentNode){
+            if (currentNode) {
                 // take position from wrapper div if available, is more accurate
-                 const parentPosition = currentNode.getBoundingClientRect();
-                 position.width = parentPosition.width;
-                 position.height = parentPosition.height;
+                const parentPosition = currentNode.getBoundingClientRect();
+                position.width = parentPosition.width;
+                position.height = parentPosition.height;
             }
         }
     }
@@ -52,14 +63,14 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(doc: Document, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
-        let dropTarget = null;
-        if (type == "layout" || (type == "component" && !this.editorSession.isAbsoluteFormLayout())) {
+    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+        let dropTarget: Element = null;
+        if (type == "layout" || (type == "component" && !absoluteLayout)) {
             const realName = layoutName ? layoutName : "component";
 
-            dropTarget = this.getNode(doc, event, true, skipNodeId);
+            dropTarget = this.getNode(event, true, skipNodeId);
             if (!dropTarget) {
-                const content = doc.querySelector('.contentframe');
+                const content = this.editorContentService.getContentArea();
                 const formRect = content.getBoundingClientRect();
                 //it can be hard to drop on bottom, so just allow it to the end
                 const isForm = event.clientX > formRect.left && event.clientX < formRect.right &&
@@ -70,12 +81,12 @@ export class DesignerUtilsService {
                         dropAllowed: false
                     };
                 }
-                let beforeNode = null;
-                dropTarget = doc.querySelector('iframe').contentWindow.document.body.querySelector('.svy-form');
+                let beforeNode: Element = null;
+                dropTarget = this.editorContentService.getContentForm();
                 //droptarget is the form but has no svy-id
                 for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
                     const node = dropTarget.childNodes[i];
-                    if (node && node.getAttribute && node.getAttribute('svy-id')) {
+                    if (node instanceof Element && node.getAttribute('svy-id')) {
                         const clientRec = node.getBoundingClientRect();
                         const absolutePoint = //this.convertToAbsolutePoint(doc, 
                         {
@@ -98,7 +109,7 @@ export class DesignerUtilsService {
                     beforeChild: beforeNode
                 };
             } else {
-                let realDropTarget = this.getParent(dropTarget, realName);
+                const realDropTarget = this.getParent(dropTarget, realName);
                 if (realDropTarget == null) {
                     return {
                         dropAllowed: false
@@ -108,7 +119,7 @@ export class DesignerUtilsService {
                     const clientRec = drop.getBoundingClientRect();
                     const bottomPixels = (clientRec.bottom - clientRec.top) * 0.3;
                     const rightPixels = (clientRec.right - clientRec.left) * 0.3;
-                    const absolutePoint = this.convertToAbsolutePoint(doc, {
+                    const absolutePoint = this.convertToAbsolutePoint({
                         x: clientRec.right,
                         y: clientRec.bottom
                     });
@@ -139,12 +150,12 @@ export class DesignerUtilsService {
                 }
                 else {
                     // we drop directly on the node, try to determine its position between children
-                    let beforeNode = null;
+                    let beforeNode: Element = null;
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
                         const node = dropTarget.childNodes[i];
-                        if (node && node.getAttribute && node.getAttribute('svy-id')) {
+                        if (node instanceof Element && node.getAttribute('svy-id')) {
                             const clientRec = node.getBoundingClientRect();
-                            const absolutePoint = this.convertToAbsolutePoint(doc, {
+                            const absolutePoint = this.convertToAbsolutePoint({
                                 x: clientRec.right,
                                 y: clientRec.bottom
                             });
@@ -166,7 +177,7 @@ export class DesignerUtilsService {
                 }
             }
         } else if (type != "component" && type != "template") {
-            dropTarget = this.getNode(doc, event);
+            dropTarget = this.getNode(event);
             if (dropTarget && dropTarget.getAttribute("svy-types")) {
                 if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
                     return {
@@ -176,12 +187,16 @@ export class DesignerUtilsService {
                 dropAllowed: false
             }; // ghost has no drop target or the drop target doesn't support any types
         } else {
-            dropTarget = this.getNode(doc, event, true);
+            dropTarget = this.getNode(event, true);
             if (componentName !== undefined && dropTarget && dropTarget.getAttribute("svy-forbidden-components")) {
                 if (dropTarget.getAttribute("svy-forbidden-components").indexOf(componentName) > 0)
                     return {
                         dropAllowed: false
                     }; // the drop target doesn't support this component
+            }
+            if (absoluteLayout && dropTarget && dropTarget.closest('.svy-responsivecontainer')){
+                // we must find the drop target in responsive mode
+                return this.getDropNode(false, type, topContainer, layoutName, event, componentName, skipNodeId);
             }
         }
         return {
@@ -192,10 +207,13 @@ export class DesignerUtilsService {
 
     public getParent(dt: Element, realName?: string): Element {
         if (!dt) return null;
-        let allowedChildren: any = this.editorSession.getAllowedChildrenForContainer(dt.getAttribute("svy-layoutname"));
+        let allowedChildren = this.editorSession.getAllowedChildrenForContainer(dt.getAttribute("svy-layoutname"));
         if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
             // maybe this is a component that has svy-types instead of svy-allowed-childrent
-            allowedChildren = dt.getAttribute("svy-types");
+            const svytypes = dt.getAttribute("svy-types");
+            if (svytypes) {
+                allowedChildren = svytypes.split(',');
+            }
             if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
                 let parent = dt;
                 while (parent !== null && !parent.hasAttribute('svy-id') && parent.parentElement && parent.classList.contains('svy-layoutcontainer')) {
@@ -207,8 +225,8 @@ export class DesignerUtilsService {
         return dt;
     }
 
-    convertToAbsolutePoint(doc: Document, point: { x: number; y: number; }) {
-        const frameRect = doc.querySelector('.content').getBoundingClientRect()
+    convertToAbsolutePoint(point: { x: number; y: number; }) {
+        const frameRect = this.editorContentService.getContent().getBoundingClientRect()
         if (isFinite(point.x) && isFinite(point.y)) {
             point.x = point.x + frameRect.left;
             point.y = point.y + frameRect.top;
@@ -216,43 +234,44 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getNode(doc: Document, event: any, topContainer?: boolean, skipNodeId?: string): Element {
-        let point = { x: event.pageX, y: event.pageY };
-        let frameElem = doc.querySelector('iframe');
-        let frameRect = frameElem.getBoundingClientRect();
-        point.x = point.x - frameRect.left;
-        point.y = point.y - frameRect.top;
-        let elements = Array.from(frameElem.contentWindow.document.querySelectorAll('[svy-id]'));
+    getNode(event: MouseEvent, topContainer?: boolean, skipNodeId?: string): HTMLElement {
+        const point = { x: event.pageX, y: event.pageY };
+        point.x = point.x - this.editorContentService.getLeftPositionIframe();
+        point.y = point.y - this.editorContentService.getTopPositionIframe();
+        let elements = this.editorContentService.getAllContentElements();
         if (skipNodeId) {
-           elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="'+skipNodeId+'"]'));
+            elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="' + skipNodeId + '"]'));
         }
-        let found = elements.reverse().find((node) => {
-            let position = node.getBoundingClientRect();
+        const found = elements.reverse().find((node) => {
+            const position = node.getBoundingClientRect();
             this.adjustElementRect(node, position);
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 return node;
             }
-            else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ":before").height) > 0) {
+            else if (node['offsetParent'] !== null) {
                 const computedStyle = window.getComputedStyle(node, ":before");
-                //the top and left positions of the before pseudo element are computed as the sum of:
-                //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
-                const top = position.top + parseInt(window.getComputedStyle(node).paddingTop) + parseInt(computedStyle.marginTop);
-                const left = position.left + parseInt(window.getComputedStyle(node).paddingLeft) + parseInt(computedStyle.marginLeft);
-                const height = parseInt(computedStyle.height);
-                const width = parseInt(computedStyle.width);
-                if (point.y >= top && point.x >= left && point.y <= top + height && point.x <= left + width) {
-                    return node;
+                if (parseInt(computedStyle.height) > 0) {
+                    //the top and left positions of the before pseudo element are computed as the sum of:
+                    //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
+                    const nodeComputedStyle = window.getComputedStyle(node);
+                    const top = position.top + parseInt(nodeComputedStyle.paddingTop) + parseInt(computedStyle.marginTop);
+                    const left = position.left + parseInt(nodeComputedStyle.paddingLeft) + parseInt(computedStyle.marginLeft);
+                    const height = parseInt(computedStyle.height);
+                    const width = parseInt(computedStyle.width);
+                    if (point.y >= top && point.x >= left && point.y <= top + height && point.x <= left + width) {
+                        return node;
+                    }
                 }
             }
         });
         return found;
     }
 
-    isTopContainer(layoutName: any) {
+    isTopContainer(layoutName: string) {
         const packages = this.editorSession.getState().packages;
-        for (var i = 0; i < packages.length; i++) {
+        for (let i = 0; i < packages.length; i++) {
             if (packages[i].components[0] && packages[i].components[0].componentType === "layout") {
-                for (var j = 0; j < packages[i].components.length; j++) {
+                for (let j = 0; j < packages[i].components.length; j++) {
                     if (packages[i].components[j].topContainer && packages[i].packageName + "." + packages[i].components[j].layoutName === layoutName) {
                         return true;
                     }
@@ -274,16 +293,16 @@ export class DesignerUtilsService {
         return inside;
     }
 
-    getAutoscrollElementClientBounds(doc: Document): Array<DOMRect> {
-        const bottomAutoscrollArea: HTMLElement = doc.querySelector('.bottomAutoscrollArea');
+    getAutoscrollElementClientBounds(): Array<DOMRect> {
+        const bottomAutoscrollArea = this.editorContentService.querySelector('.bottomAutoscrollArea');
 
         let autoscrollElementClientBounds: Array<DOMRect>;
         if (bottomAutoscrollArea) {
             autoscrollElementClientBounds = [];
             autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();
-            autoscrollElementClientBounds[1] = doc.querySelector('.rightAutoscrollArea').getBoundingClientRect();
-            autoscrollElementClientBounds[2] = doc.querySelector('.leftAutoscrollArea').getBoundingClientRect();
-            autoscrollElementClientBounds[3] = doc.querySelector('.topAutoscrollArea').getBoundingClientRect();
+            autoscrollElementClientBounds[1] = this.editorContentService.querySelector('.rightAutoscrollArea').getBoundingClientRect();
+            autoscrollElementClientBounds[2] = this.editorContentService.querySelector('.leftAutoscrollArea').getBoundingClientRect();
+            autoscrollElementClientBounds[3] = this.editorContentService.querySelector('.topAutoscrollArea').getBoundingClientRect();
         }
         return autoscrollElementClientBounds;
     }

@@ -147,7 +147,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		catch (Exception e)
 		{
-			Debug.log("illegal value in bean, ignoring it: " + value);
+			Debug.log("illegal value in web component, ignoring it: " + value);
 		}
 		return value;
 	}

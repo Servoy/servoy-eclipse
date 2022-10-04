@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
-import java.io.File;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -53,22 +51,39 @@ public class CopySourceFolderAction extends Action
 
 		if (choice < 0 || choice == 2) return; // cancel
 
+		Job deleteJob = null;
 		if (choice == 1)
 		{
-			Job.createSystem("delete .angular and packages cache", (monitor) -> {
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), ".angular"));
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), "packages"));
-			}).schedule();
+			deleteJob = Job.createSystem("delete .angular and packages cache", (monitor) -> {
+				WebPackagesListener.setIgnore(true);
+				FileUtils.deleteQuietly(Activator.getInstance().getMainTargetFolder());
+			});
 		}
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
+				if (choice == 1) WebPackagesListener.setIgnoreAndCheck(false, false);
 				WebPackagesListener.checkPackages(choice == 1);
 			}
 		});
-		copySources.schedule();
+		if (choice == 1)
+		{
+			deleteJob.addJobChangeListener(new JobChangeAdapter()
+			{
+				@Override
+				public void done(IJobChangeEvent event)
+				{
+					copySources.schedule();
+				}
+			});
+			deleteJob.schedule();
+		}
+		else
+		{
+			copySources.schedule();
+		}
 	}
 }

@@ -1,19 +1,17 @@
-import { Injectable, Inject, ComponentFactoryResolver, Injector, ApplicationRef, EmbeddedViewRef, ComponentRef } from '@angular/core';
+import { Injectable, Inject, ComponentRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
-import { PopupForm } from '@servoy/public';
+import { MainViewRefService, PopupForm } from '@servoy/public';
 
 @Injectable()
 export class PopupFormService {
 
     formPopupComponent: ComponentRef<ServoyFormPopupComponent>;
 
-    constructor(private componentFactoryResolver: ComponentFactoryResolver,
-        private _applicationRef: ApplicationRef,
-        private _injector: Injector,
+    constructor(private mainViewRefService: MainViewRefService,
         private formService: FormService,
         private servoyService: ServoyService,
         private utils: SvyUtilsService,
@@ -82,11 +80,8 @@ export class PopupFormService {
                 this.showPopup(popup, counter);
             }, 50);
         } else {
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ServoyFormPopupComponent);
-            this.formPopupComponent = componentFactory.create(this._injector);
+            this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
             this.formPopupComponent.instance.setPopupForm(popup);
-            this._applicationRef.attachView(this.formPopupComponent.hostView);
-            this.doc.body.appendChild((this.formPopupComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
             setTimeout(() => {
                 this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
             }, 300);

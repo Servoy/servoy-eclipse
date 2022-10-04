@@ -17,12 +17,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.pde.api.tools.annotations.NoReference;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 
 /**
  * A LRU based ResourceManager Wrapper. Not to be used by clients.
  */
+@NoReference
 public class LazyResourceManager extends ResourceManager {
 	/**
 	 * This LRU Map only holds the DeviceResourceDescriptors which are not

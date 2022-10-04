@@ -355,16 +355,21 @@ export class FormService {
     private walkOverChildren(children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer);
+                const structure = new StructureCache(elem.tagname ,elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);
                     formCache.mainStructure = parent;
                 }
-                if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
+                if (parent instanceof StructureCache || parent instanceof FormComponentCache ) {
                     parent.addChild(structure);
                 }
-               formCache.addLayoutContainer(structure);
+
+                if (parent instanceof PartCache) {
+                    // this is a absolute form where a layout container is added to a part, make sure the form knows about this main "component"
+                     formCache.add(structure, parent);
+                }
+                formCache.addLayoutContainer(structure);
             } else
                 if (elem.formComponent) {
                     const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();

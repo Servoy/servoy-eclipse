@@ -34,4 +34,6 @@ public interface ING2WarExportModel
 	File getExportLocation();
 
 	IProgressMonitor getProgressMonitor();
+
+	String getSolutionName();
 }

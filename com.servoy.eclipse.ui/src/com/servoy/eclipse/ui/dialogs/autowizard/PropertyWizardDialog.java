@@ -66,6 +66,13 @@ public class PropertyWizardDialog extends Dialog
 	}
 
 	@Override
+	protected void okPressed()
+	{
+		tableComposite.commitAndCloseActiveCellEditor();
+		super.okPressed();
+	}
+
+	@Override
 	protected boolean isResizable()
 	{
 		return true;
@@ -83,6 +90,8 @@ public class PropertyWizardDialog extends Dialog
 		c.setLayout(new FillLayout());
 		SashForm form = new SashForm(c, SWT.HORIZONTAL);
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
+		SashForm form3 = new SashForm(form, SWT.VERTICAL | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		form.setWeights(40, 60);
 
 		if (configurator.getDataproviderProperties().size() > 0)
 		{
@@ -101,10 +110,10 @@ public class PropertyWizardDialog extends Dialog
 		if (configurator.getFormProperties().size() > 0)
 		{
 			formPropertiesSelector = new FormPropertiesSelector(this, form2, configurator.getFormProperties(), configurator.getRelationProperties(),
-				persistContext, settings);
+				persistContext, settings, flattenedSolution);
 		}
 
-		tableComposite = new AutoWizardPropertiesComposite(form, persistContext, flattenedSolution,
+		tableComposite = new AutoWizardPropertiesComposite(form3, persistContext, flattenedSolution,
 			configurator);
 		return area;
 	}

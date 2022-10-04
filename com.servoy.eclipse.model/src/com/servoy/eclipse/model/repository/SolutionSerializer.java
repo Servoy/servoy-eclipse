@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
@@ -420,11 +421,8 @@ public class SolutionSerializer
 				}
 			});
 
-			//write all object files
-			Iterator<Map.Entry<Pair<String, String>, Map<IPersist, Object>>> it = projectContents.entrySet().iterator();
-			while (it.hasNext())
+			for (Entry<Pair<String, String>, Map<IPersist, Object>> elem : projectContents.entrySet())
 			{
-				Map.Entry<Pair<String, String>, Map<IPersist, Object>> elem = it.next();
 				Pair<String, String> filepathname = elem.getKey();
 
 				String fname = filepathname.getRight();
@@ -794,7 +792,7 @@ public class SolutionSerializer
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
 		// don't replace object types see SolutionDeserializer.parseJSFile()
-		if (jsType == null || !jsType.startsWith("{{"))
+		if (jsType == null || !jsType.contains("{{"))
 		{
 			if (argumentType != ArgumentType.Object)
 			{
@@ -821,7 +819,7 @@ public class SolutionSerializer
 					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 				}
 			}
-			else if (jsType != null && ArgumentType.isGeneratedType(jsType))
+			else if (jsType == null || ArgumentType.isGeneratedType(jsType))
 			{
 				// remove existing object type when generated from columnn type, do not touch others
 				int index = sb.lastIndexOf(TYPEKEY);
@@ -1189,7 +1187,7 @@ public class SolutionSerializer
 						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);
 						Map<String, Object> persistProperties = getPersistAsValueMap(child, repository, true);
 						boolean equals = persistProperties.entrySet().stream().filter(p -> !"uuid".equals(p) && !"extendsID".equals(p))
-							.allMatch(e -> e.getValue().equals(parentProperties.get(e.getKey())));
+							.allMatch(e -> Utils.equalObjects(e.getValue(), parentProperties.get(e.getKey())));
 						if (equals) continue; //do not serialize persist if it is the same as its parent persist
 					}
 					itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey, valueFilter));

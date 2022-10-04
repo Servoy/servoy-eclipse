@@ -73,7 +73,7 @@ public class IndexPageFilter implements Filter
 
 			return;
 		}
-		File projectFolder = Activator.getInstance().getProjectFolder();
+		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		File distFolder = new File(projectFolder, "dist/app");
 		if (distFolder.exists())
 		{

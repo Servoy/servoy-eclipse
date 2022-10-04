@@ -62,7 +62,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
-	private Button exportNG2;
+	private Button exportNG1LegacyMode;
 	private Button exportActiveSolution;
 	private Button exportSomeNonActiveSolutions;
 	private Button allRowsRadioButton;
@@ -118,16 +118,16 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
 
-		exportNG2 = new Button(composite, SWT.CHECK);
-		exportNG2.setText("Export NG2 resources");
-		exportNG2.setEnabled(exportModel.isNGExport());
-		exportNG2.setSelection(exportModel.exportNG2Mode() != null);
-		exportNG2.addSelectionListener(new SelectionAdapter()
+		exportNG1LegacyMode = new Button(composite, SWT.CHECK);
+		exportNG1LegacyMode.setText("Export NG1 Client resources (by default only Titanium Client will be exported)");
+		exportNG1LegacyMode.setEnabled(exportModel.isNGExport());
+		exportNG1LegacyMode.setSelection(exportModel.exportNG1());
+		exportNG1LegacyMode.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setExportNG2Mode(exportNG2.getSelection() ? "true" : null);
+				exportModel.setExportNG1(exportNG1LegacyMode.getSelection());
 			}
 		});
 
@@ -648,7 +648,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportSomeNonActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
 		exportActiveSolution.setSelection(true);
-		exportNG2.setSelection(false);
+		exportNG1LegacyMode.setSelection(false);
 		exportModel.setExportActiveSolution(true);
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);

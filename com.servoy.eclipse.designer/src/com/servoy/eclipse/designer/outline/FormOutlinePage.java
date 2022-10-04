@@ -227,7 +227,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					{
 						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
-						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject))
+						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject) &&
+							!(inputPersist.getParent() instanceof LayoutContainer))
 						{
 							// in absolute layout only drag ghost components
 							return false;
@@ -323,7 +324,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							boolean doAllow = true;
 							for (IPersist p : dragObjects)
 							{
-								doAllow = DesignerUtil.isDropAllowed((AbstractContainer)targetLayoutContainer, p);
+								doAllow = DesignerUtil.isDropAllowed((AbstractContainer)targetLayoutContainer, p, form);
 								if (!doAllow) return false;
 							}
 							if (doAllow)

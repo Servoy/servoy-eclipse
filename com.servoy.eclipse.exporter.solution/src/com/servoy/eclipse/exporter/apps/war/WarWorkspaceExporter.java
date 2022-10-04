@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.apps.war;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -35,7 +37,9 @@ import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.AbstractEclipseExportUserChannel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
@@ -48,8 +52,10 @@ import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .war format.
@@ -57,6 +63,84 @@ import com.servoy.j2db.util.Utils;
  */
 public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentChest>
 {
+
+	public class CommandLineExportProgressMonitor implements IProgressMonitor
+	{
+		@Override
+		public void worked(int work)
+		{
+		}
+
+		@Override
+		public void subTask(String name)
+		{
+			outputExtra(name);
+		}
+
+		@Override
+		public void setTaskName(String name)
+		{
+			outputExtra(name);
+		}
+
+		@Override
+		public void setCanceled(boolean value)
+		{
+		}
+
+		@Override
+		public boolean isCanceled()
+		{
+			return false;
+		}
+
+		@Override
+		public void internalWorked(double work)
+		{
+		}
+
+		@Override
+		public void done()
+		{
+		}
+
+		@Override
+		public void beginTask(String name, int totalWork)
+		{
+			outputExtra(name);
+		}
+	}
+
+	public class CommandLineExportUserChannel extends AbstractEclipseExportUserChannel
+	{
+		public CommandLineExportUserChannel(IExportSolutionModel exportModel, IProgressMonitor monitor)
+		{
+			super(exportModel, monitor);
+		}
+
+		@Override
+		public void info(String message, int priority)
+		{
+			if (priority == ILogLevel.DEBUG)
+			{
+				outputExtra(message);
+			}
+			else if (priority < ILogLevel.ERROR)
+			{
+				output(message);
+			}
+			else
+			{
+				outputError(message);
+			}
+		}
+
+		@Override
+		public void displayWarningMessage(String title, String message, boolean scrollableDialog)
+		{
+			output(title + " " + message);
+		}
+	}
 
 	private final class CommandLineWarExportModel extends AbstractWarExportModel
 	{
@@ -85,6 +169,20 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public boolean getStartRMI()
 		{
+			String servoyPropertiesFileName = getServoyPropertiesFileName();
+			if (servoyPropertiesFileName != null)
+			{
+				try (FileInputStream fis = new FileInputStream(new File(servoyPropertiesFileName)))
+				{
+					Properties prop = new Properties();
+					prop.load(fis);
+					return Utils.getAsBoolean(prop.getProperty("servoy.server.start.rmi", "false"));
+				}
+				catch (IOException e)
+				{
+					// just ignore and return false
+				}
+			}
 			return false;
 		}
 
@@ -323,6 +421,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public boolean exportNG1()
+		{
+			return configuration.exportNG1();
+		}
+
+		@Override
 		public boolean isExportMetaData()
 		{
 			return configuration.shouldExportMetadata();
@@ -535,12 +639,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 			return exportedPackages;
 		}
-
-		@Override
-		public void displayWarningMessage(String title, String message)
-		{
-			System.out.println(title + ": " + message);
-		}
 	}
 
 	@Override
@@ -599,7 +697,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void checkAndExportSolutions(WarArgumentChest configuration)
 	{
-		if (configuration.exportNG2Mode() != null)
+		if (configuration.exportNG2Mode() != null && !configuration.exportNG2Mode().equals("false"))
 		{
 			WebPackagesListener.setIgnore(true);
 			Activator.getInstance().setConsole(() -> new StringOutputStream()
@@ -616,7 +714,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				}
 			});
 			Activator.getInstance().extractNode();
-			Activator.getInstance().copyNodeFolder(false, true);
 		}
 		super.checkAndExportSolutions(configuration);
 	}
@@ -636,61 +733,28 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
 			checkAndAutoUpgradeLicenses(exportModel);
-
-			WarExporter warExporter = new WarExporter(exportModel);
-
-			warExporter.doExport(new IProgressMonitor()
-			{
-				@Override
-				public void worked(int work)
-				{
-				}
-
-				@Override
-				public void subTask(String name)
-				{
-					outputExtra(name);
-				}
-
-				@Override
-				public void setTaskName(String name)
-				{
-					outputExtra(name);
-				}
-
-				@Override
-				public void setCanceled(boolean value)
-				{
-				}
-
-				@Override
-				public boolean isCanceled()
-				{
-					return false;
-				}
-
-				@Override
-				public void internalWorked(double work)
-				{
-				}
-
-				@Override
-				public void done()
-				{
-				}
-
-				@Override
-				public void beginTask(String name, int totalWork)
-				{
-					outputExtra(name);
-				}
-			});
+			CommandLineExportProgressMonitor monitor = new CommandLineExportProgressMonitor();
+			CommandLineExportUserChannel userChannel = new CommandLineExportUserChannel(exportModel, monitor);
+			checkMissingPlugins(exportModel, userChannel);
+			WarExporter warExporter = new WarExporter(exportModel, userChannel);
+			warExporter.doExport(monitor);
 		}
 		catch (ExportException ex)
 		{
 			ServoyLog.logError("Failed to export solution.", ex);
 			outputError("Exception while exporting solution: " + ex.getMessage() + ".  EXPORT FAILED for this solution. Check workspace log for more info.");
 			exitCode = EXIT_EXPORT_FAILED;
+		}
+	}
+
+	private void checkMissingPlugins(CommandLineWarExportModel exportModel, IXMLExportUserChannel userChannel)
+	{
+		List<String> plugins = exportModel.getPlugins();
+		boolean noConvertorsOrValidators = !plugins.contains("converters.jar") || !plugins.contains("default_validators.jar");
+		if (noConvertorsOrValidators)
+		{
+			// print to system out for the command line exporter.
+			userChannel.info("converter.jar or default_validators.jar not exported so column converters or validators don't work", ILogLevel.WARNING);
 		}
 	}
 }

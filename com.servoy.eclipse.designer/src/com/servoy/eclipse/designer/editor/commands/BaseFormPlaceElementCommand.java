@@ -559,6 +559,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 	{
 		if (parent instanceof LayoutContainer)
 		{
+			if (((LayoutContainer)parent).getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null) return true;
 			Set<String> allowed = DesignerUtil.getAllowedChildren().get(
 				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
 			if (component instanceof LayoutContainer)

@@ -1,25 +1,35 @@
-import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-highlight',
     templateUrl: './highlight.component.html',
     styleUrls: ['./highlight.component.css']
 })
-export class HighlightComponent implements IShowHighlightChangedListener, OnInit {
+export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {
     highlightedComponent: Node;
     showPermanentHighlight = false;
-    onMoveTimer:  ReturnType<typeof setTimeout>;
+    onMoveTimer: ReturnType<typeof setTimeout>;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, private readonly renderer: Renderer2, private urlParser: URLParserService) {
+    constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2, private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.editorSession.addHighlightChangedListener(this);
+        this.editorContentService.addContentMessageListener(this);
     }
 
     ngOnInit(): void {
-        const content = this.doc.querySelector('.content-area');
-        content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+        this.editorContentService.getContentArea().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+    }
+
+    ngOnDestroy(): void {
+        this.editorContentService.removeContentMessageListener(this);
+    }
+
+    contentMessageReceived(id: string, data: { property: string }) {
+        if (id === 'redrawDecorators') {
+            this.highlightChanged(this.showPermanentHighlight);
+        }
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -35,11 +45,9 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
     private drawHighlightOnMove(event: MouseEvent) {
         let statusBarTxt = '';
         const point = { x: event.pageX, y: event.pageY };
-        const frameElem = this.doc.querySelector('iframe');
-        const frameRect = frameElem.getBoundingClientRect();
-        point.x = point.x - frameRect.left;
-        point.y = point.y - frameRect.top;
-        const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
+        point.x = point.x - this.editorContentService.getLeftPositionIframe();
+        point.y = point.y - this.editorContentService.getTopPositionIframe();
+        const elements = this.editorContentService.getAllContentElements();
         const found = Array.from(elements).reverse().find((node) => {
             const position = node.getBoundingClientRect();
             if (position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
@@ -77,16 +85,16 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
 
     highlightChanged(showHighlight: boolean): void {
         this.showPermanentHighlight = showHighlight;
-        const frameElem = this.doc.querySelector('iframe');
-        const elements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0) setTimeout(() => this.highlightChanged(showHighlight), 400);
-        Array.from(elements).forEach((node) => {
-            if (showHighlight) {
-                this.renderer.addClass(node, 'highlight_element');
-            }
-            else {
-                this.renderer.removeClass(node, 'highlight_element');
-            }
+        this.editorContentService.executeOnlyAfterInit(() => {
+            const elements = this.editorContentService.getAllContentElements();
+            Array.from(elements).forEach((node) => {
+                if (showHighlight) {
+                    this.renderer.addClass(node, 'highlight_element');
+                }
+                else {
+                    this.renderer.removeClass(node, 'highlight_element');
+                }
+            });
         });
     }
 }

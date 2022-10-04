@@ -3286,22 +3286,7 @@ public class SolutionExplorerView extends ViewPart
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package",
-			UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, this);
-		IAction deleteLayoutPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package",
-			UserNodeType.LAYOUT_NONPROJECT_PACKAGE, this);
-		IAction deleteServicePackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package",
-			UserNodeType.SERVICES_NONPROJECT_PACKAGE, this);
-		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
-			UserNodeType.COMPONENTS_PROJECT_PACKAGE, this);
-		IAction deleteLayoutProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package project",
-			UserNodeType.LAYOUT_PROJECT_PACKAGE, this);
-		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
-			UserNodeType.SERVICES_PROJECT_PACKAGE, this);
-		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
-			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, this);
-		DeleteComponentOrServiceOrPackageResourceAction deleteWebObjectFolder = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete folder",
-			UserNodeType.WEB_OBJECT_FOLDER, this);
+		IAction deleteWebPackagesAndOrTheirContentsAction = new DeleteComponentOrServiceOrPackageResourceAction(shell, this);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 		upgradeComponentPackageAction = new WebPackageUpgradeAction(this, shell, "Upgrade to Titanum NGClient package", Package.IPackageReader.WEB_COMPONENT);
@@ -3309,7 +3294,6 @@ public class SolutionExplorerView extends ViewPart
 //		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
 //		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
 //		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
-		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -3325,7 +3309,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
-		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
+		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteWebPackagesAndOrTheirContentsAction);
 		deleteActionInList.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInList.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 
@@ -3370,19 +3354,19 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
-		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteComponentPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteLayoutPackage);
-		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteServicePackage);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteComponentProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteProjectPackage);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteWebPackagesAndOrTheirContentsAction);
 //		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
-		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
+		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteWebPackagesAndOrTheirContentsAction);
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
@@ -3488,7 +3472,6 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(newComponentFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newServiceFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newLayoutFolderInWebPackageAction);
-		addTreeSelectionChangedListener(deleteWebObjectFolder);
 		addTreeSelectionChangedListener(newComponentResource);
 		addTreeSelectionChangedListener(fRefreshAction);
 

@@ -3,15 +3,15 @@
   "version": "2021.12.0",
   "peerDependencies": {
     "@servoy/public": "*",
-    "@angular/animations": "^13",
-    "@angular/common": "^13",
-    "@angular/core": "^13",
-    "@angular/forms": "^13",
+    "@angular/animations": "^14",
+    "@angular/common": "^14",
+    "@angular/core": "^14",
+    "@angular/forms": "^14",
      "rxjs": "^7"
   },
   "dependencies": {
-    "@angular/material": "^13",
-    "@angular/cdk": "^13",
+    "@angular/material": "^14",
+    "@angular/cdk": "^14",
     "tslib": "*"
   },
   "license": "MIT",

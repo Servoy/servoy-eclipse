@@ -1,44 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
 <target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
-    <locations>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.06/"/>
-            <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
-            <unit id="com.sun.activation.javax.activation" version="1.2.0"/>
-            <unit id="com.sun.mail.javax.mail" version="1.6.2"/>
-            <unit id="de.inetsoftware.jlessc" version="1.10.0.s4"/>
-            <unit id="jabsorb" version="1.3.2.s6"/>
-            <unit id="javax.servlet.jsp-api" version="2.3.6"/>
-            <unit id="javax.persistence-api" version="2.2.0"/>
-            <unit id="javax.transaction" version="1.1.0"/>
-            <unit id="javax.websocket" version="1.1.0"/>
-            <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.4"/>
-            <unit id="org.apache.aries.util" version="1.1.3"/>
-            <unit id="org.apache.commons.commons-collections4" version="4.4.0"/>
-            <unit id="org.apache.commons.commons-dbcp2" version="2.9.0"/>
-            <unit id="org.apache.commons.commons-fileupload" version="1.4.0"/>
-            <unit id="org.apache.commons.commons-pool2" version="2.11.1"/>
-            <unit id="org.apache.commons.commons-text" version="1.9.0"/>
-            <unit id="org.apache.commons.lang3" version="3.12.0"/>
-            <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
-            <unit id="org.apache.logging.log4j.api" version="2.17.2"/>
-            <unit id="org.apache.logging.log4j.core" version="2.17.2"/>
-            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.17.2"/>
-            <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
-            <unit id="org.jboss.logging.jboss-logging" version="3.4.3.Final"/>
-            <unit id="net.bytebuddy.byte-buddy" version="1.12.9"/>
-            <unit id="org.jsoup" version="1.14.3"/>
-            <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
-            <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
-            <unit id="org.sweetlemonade.eclipse.json" version="1.0.5"/>
-            <unit id="org.yaml.snakeyaml" version="1.30.0"/>
-            <unit id="sj.jsonschemavalidation" version="2.0.1"/>
-            <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
-            <unit id="tus-java-server" version="2.0.0.s2"/>
-            <unit id="org.apache.commons.commons-codec" version="1.14.0"/>
-            <unit id="org.objectweb.asm.commons" version="9.2.0"/>
-        </location>    
+    <locations>    
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
@@ -64,25 +27,71 @@
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2022-03/"/>
-            <unit id="org.eclipse.egit.feature.group" version="6.1.0.202203080745-r"/>
-            <unit id="org.eclipse.emf.sdk.feature.group" version="2.29.0.v20220226-1304"/>
-            <unit id="org.eclipse.jgit.feature.group" version="6.1.0.202203080745-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.1.0.202203080745-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.1.0.202203080745-r"/>
-            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.25.0.v202201160257"/>
+            <repository location="https://download.eclipse.org/eclipse/updates/4.24/"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1700.v20220509-0833"/>
+            <unit id="org.eclipse.sdk.ide" version="4.24.0.I20220607-0700"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/88"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="88.0.6.202205201415"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="88.0.6.202205201415"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="88.0.6.202205201430"/>
+            <repository location="https://download.eclipse.org/releases/2022-06/"/>
+            <unit id="org.eclipse.egit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.emf.sdk.feature.group" version="2.30.0.v20220516-1117"/>
+            <unit id="org.eclipse.jgit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.26.0.v202204042240"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.23/"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1500.v20220210-1108"/>
-            <unit id="org.eclipse.sdk.ide" version="4.23.0.I20220308-0310"/>
+            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.12/"/>
+            <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
+            <unit id="com.sun.activation.javax.activation" version="1.2.0"/>
+            <unit id="com.sun.mail.javax.mail" version="1.6.2"/>
+            <unit id="de.inetsoftware.jlessc" version="1.10.0.s4"/>
+            <unit id="jabsorb" version="1.3.2.s6"/>
+            <unit id="javax.persistence-api" version="2.2.0"/>
+            <unit id="javax.servlet.jsp-api" version="2.3.6"/>
+            <unit id="javax.transaction" version="1.1.0"/>
+            <unit id="javax.websocket" version="1.1.0"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.12.12"/>
+            <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.5"/>
+            <unit id="org.apache.aries.util" version="1.1.3"/>
+            <unit id="org.apache.commons.commons-collections4" version="4.4.0"/>
+            <unit id="org.apache.commons.commons-dbcp2" version="2.9.0"/>
+            <unit id="org.apache.commons.commons-fileupload" version="1.4.0"/>
+            <unit id="org.apache.commons.commons-pool2" version="2.11.1"/>
+            <unit id="org.apache.commons.commons-text" version="1.9.0"/>
+            <unit id="org.apache.commons.lang3" version="3.12.0"/>
+            <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
+            <unit id="org.apache.logging.log4j.api" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.core" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.jcl" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.18.0"/>
+            <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
+            <unit id="org.jboss.logging.jboss-logging" version="3.4.3.Final"/>
+            <unit id="org.jsoup" version="1.15.2"/>
+            <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
+            <unit id="org.objectweb.asm.commons" version="9.3.0"/>
+            <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
+            <unit id="org.sweetlemonade.eclipse.json" version="1.0.5"/>
+            <unit id="org.yaml.snakeyaml" version="1.30.0"/>
+            <unit id="sj.jsonschemavalidation" version="2.0.1"/>
+            <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
+            <unit id="tus-java-server" version="2.0.0.s2"/>
+            <unit id="xstream" version="1.4.19"/>
         </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.3.202208172219"/>
+        </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="http://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.source.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.source.feature.feature.group" version="2.0.3.202208090440"/>
+	    </location>
     </locations>
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>

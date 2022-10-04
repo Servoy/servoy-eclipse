@@ -44,7 +44,7 @@ import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 
 /**
  * Edit properties in form editor, cell editor is same one as used in the properties view.
- * 
+ *
  * @author rgansevles
  */
 
@@ -164,7 +164,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 			getCellEditor().activate();
 			if (getCellEditor() instanceof TextDialogCellEditor)
 			{
-				((TextDialogCellEditor)getCellEditor()).setIgnoreFocusLost(false);
+				((TextDialogCellEditor)getCellEditor()).setAlwaysLooseFocus(true);
 			}
 			cellEditorLocator.relocate(getCellEditor());
 			getCellEditor().getControl().setVisible(true);
@@ -214,7 +214,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 	 * <p>
 	 * Gets the property value of the property specified by the property. It should be as the editable property value because it will go straight into the
 	 * appropriate cell editor.
-	 * 
+	 *
 	 * @param property
 	 * @return a String value
 	 */
@@ -222,7 +222,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 	{
 		// retrieve the property's value from the model
 		Object value = null;
-		IPropertySource ps = (IPropertySource)getEditPart().getAdapter(IPropertySource.class);
+		IPropertySource ps = getEditPart().getAdapter(IPropertySource.class);
 		if (ps.isPropertySet(property.getId()))
 		{
 			value = ps.getPropertyValue(property.getId());
@@ -239,7 +239,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 	 */
 	public static IPropertyDescriptor getPropertyDescriptor(EditPart editPart, Object propertyId)
 	{
-		IPropertySource ps = (IPropertySource)editPart.getAdapter(IPropertySource.class);
+		IPropertySource ps = editPart.getAdapter(IPropertySource.class);
 		if (ps != null)
 		{
 			for (IPropertyDescriptor pd : ps.getPropertyDescriptors())

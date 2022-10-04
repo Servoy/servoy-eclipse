@@ -12,7 +12,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "preserveSymlinks": true,
-             "sourceMap": {
+            "sourceMap": {
               "scripts": true,
               "styles": true,
               "vendor": false
@@ -38,7 +38,7 @@
           },
           "configurations": {
             "production": {
-              "outputPath": "dist/app_prod",
+              "outputPath": "dist/app",
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -229,7 +229,7 @@
         }
       }
     },
-     "@servoy/window": {
+    "@servoy/window": {
       "projectType": "library",
       "root": "projects/window",
       "sourceRoot": "projects/window/src",
@@ -259,7 +259,7 @@
         }
       }
     },
-     "@servoy/servoydefault": {
+    "@servoy/servoydefault": {
       "projectType": "library",
       "root": "projects/servoydefault",
       "sourceRoot": "projects/servoydefault/src",
@@ -290,7 +290,6 @@
       }
     }
   },
-  "defaultProject": "ngclient2",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",

@@ -37,3 +37,12 @@ html, body
 .palette > input::placeholder {
    font-style: italic;
 }
+
+.accordion-button {
+    padding: 8px;
+    font-size: 0.8rem;
+}
+
+.accordion-body {
+    padding: 0.6rem;
+}

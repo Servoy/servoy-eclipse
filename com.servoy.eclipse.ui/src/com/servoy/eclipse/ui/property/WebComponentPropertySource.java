@@ -32,6 +32,7 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -69,14 +70,15 @@ public class WebComponentPropertySource extends PDPropertySource
 				}
 			}
 
-			info = java.beans.Introspector.getBeanInfo(LayoutContainer.class);
+			info = java.beans.Introspector.getBeanInfo(CSSPositionLayoutContainer.class);
 			for (PropertyDescriptor desc : info.getPropertyDescriptors())
 			{
 				if (StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName().equals(desc.getName()))
 				{
 					BEAN_PROPERTIES.put(desc.getName(), desc);
 				}
-				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()))
+				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()) ||
+					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(desc.getName()))
 				{
 					CONTAINER_PROPERTIES.put(desc.getName(), desc);
 				}
@@ -148,7 +150,10 @@ public class WebComponentPropertySource extends PDPropertySource
 				props.add(new BeanPropertyHandler(beanPropertyDescriptor));
 			}
 		}
-
+		if (persist instanceof CSSPositionLayoutContainer)
+		{
+			props.add(new BeanPropertyHandler(CONTAINER_PROPERTIES.get("cssPosition")));
+		}
 		if (propertyDescription instanceof WebObjectSpecification)
 		{
 			for (WebObjectFunctionDefinition desc : ((WebObjectSpecification)propertyDescription).getHandlers().values())

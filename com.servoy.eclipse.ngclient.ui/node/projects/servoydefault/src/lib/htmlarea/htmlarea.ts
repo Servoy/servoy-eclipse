@@ -13,14 +13,11 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     tinyValue: any;
     tinyConfig: RawEditorOptions = {
-        base_url: '/tinymce',
         suffix: '.min',
         height: '100%',
         menubar: false,
         statusbar: false,
         readonly: false,
-        plugins: 'tabfocus',
-        tabfocus_elements: ':prev,:next',
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
 
@@ -51,6 +48,8 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         super.ngOnInit(); 
         
         this.tinyConfig['language'] = this.servoyService.getLocale();
+
+        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
 
         // app level configuration
         let defaultConfiguration = this.servoyService.getUIProperty('config');

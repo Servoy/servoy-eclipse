@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
-Bundle-Version: 2022.9.0.3800_rc
+Bundle-Version: 2022.12.0.3820_rc
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: servoy_shared,
@@ -22,7 +22,8 @@ Require-Bundle: servoy_shared,
  org.eclipse.swt,
  org.eclipse.jface,
  com.servoy.eclipse.ngclient,
- j2db_server
+ j2db_server,
+ org.apache.commons.lang3
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.export,

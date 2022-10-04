@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2022.9.0.3800_rc
+Bundle-Version: 2022.12.0.3820_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -72,8 +72,8 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
- org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore,
+ org.apache.httpcomponents.client5.httpclient5,
+ org.apache.httpcomponents.core5.httpcore5,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
@@ -81,7 +81,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.equinox.security,
  com.servoy.eclipse.ngclient.ui,
  org.eclipse.e4.ui.css.swt.theme,
- com.equo.chromium;resolution:=optional
+ com.equo.chromium;resolution:=optional,
+ org.eclipse.nebula.widgets.nattable.core,
+ org.eclipse.nebula.widgets.nattable.extension.nebula,
+ org.eclipse.e4.ui.css.swt,
+ org.eclipse.nebula.widgets.nattable.extension.e4
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

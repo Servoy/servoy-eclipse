@@ -10,7 +10,6 @@ import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
 import { LoggerService, LogLevel, LoggerFactory } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
-import { TestabilityService } from './testability.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,8 +30,7 @@ export class WebsocketService {
         private converterService: ConverterService,
         private logFactory: LoggerFactory,
         private loadingIndicatorService: LoadingIndicatorService,
-        private ngZone: NgZone,
-        private testability: TestabilityService) {
+        private ngZone: NgZone) {
         this.log = logFactory.getLogger('WebsocketService');
     }
 
@@ -50,7 +48,7 @@ export class WebsocketService {
             const websocket = new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']), this.logFactory);
 
-            this.wsSession = new WebsocketSession(websocket, this, this.services, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.testability, this.logFactory );
+            this.wsSession = new WebsocketSession(websocket, this, this.services, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory);
             // todo should we just merge $websocket and $services into $sablo that just has all
             // the public api of sablo (like connect, conversions, services)
         });
@@ -214,7 +212,6 @@ export class WebsocketSession {
         private converterService: ConverterService,
         private loadingIndicatorService: LoadingIndicatorService,
         private ngZone: NgZone,
-        private testability: TestabilityService,
         logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('WebsocketSession');
         this.websocket.onopen = (evt) => {
@@ -256,7 +253,6 @@ export class WebsocketSession {
             }
         };
         this.websocket.onmessage = (message) => this.handleHeartbeat(message) || this.ngZone.run(() => this.handleMessage(message));
-        testability.setEventList(this.deferredEvents);
     }
 
     public  createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
@@ -272,7 +268,6 @@ export class WebsocketSession {
                 delete this.deferredEvents[cmsgid];
                 if (success) deferred.resolve(argument);
                 else deferred.reject(argument);
-                this.testability.testEvents();
             }
     }
 
@@ -426,17 +421,18 @@ export class WebsocketSession {
         let message_data = message.data;
         let hideIndicator = false;
         try {
-            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server: ' + JSON.stringify(message))));
 
             const separator = message_data.indexOf('#');
             if (separator >= 0 && separator < 5) {
                 // the json is prefixed with a message number: 123#{bla: "hello"}
                 this.websocketService.setLastServerMessageNumber(message_data.substring(0, separator));
+                this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message number: ' + message_data.substring(0, separator))));
                 message_data = message_data.substr(separator + 1);
             }
             // else message has no seq-no
 
             obj = JSON.parse(message_data);
+            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
 
 			if(obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
 				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
@@ -505,16 +501,8 @@ export class WebsocketSession {
                 }
             }
             if (obj && obj.smsgid) {
-                if (responseValue instanceof Promise) {
-                    // the server wants a response, this could be a promise so a dialog could be shown
-                    // then just let protractor go through.
-                    this.testability.increaseEventLoop();
-                }
                 // server wants a response; responseValue may be a promise
                 Promise.resolve(responseValue).then((ret) => {
-                    if (responseValue instanceof Promise) {
-                        this.testability.decreaseEventLoop();
-                    }
                     // success
                     const response = {
                         smsgid: obj.smsgid
@@ -527,7 +515,6 @@ export class WebsocketSession {
                     }
                     this.sendMessageObject(response);
                 }, (reason) => {
-                    if (responseValue instanceof Promise) this.testability.decreaseEventLoop();
                     // server wants a response; send failure so that browser side script doesn't hang
                     const response = {
                         smsgid: obj.smsgid,
@@ -558,7 +545,6 @@ export class WebsocketSession {
                     }
                 } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
                 delete this.deferredEvents[obj.cmsgid];
-                this.testability.testEvents();
                 this.loadingIndicatorService.hideLoading();
             }
         } catch (e) {

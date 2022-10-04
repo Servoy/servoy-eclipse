@@ -88,6 +88,7 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 				customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
 				previousItemsUUIDS.remove(uuid); //it was updated, remove it from the set
 			}
+			row.remove("svyUUID");
 			row.forEach((key, value) -> customType.setProperty(key, value));
 		}
 

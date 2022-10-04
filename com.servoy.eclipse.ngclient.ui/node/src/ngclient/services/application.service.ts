@@ -1,9 +1,9 @@
-import { Injectable, Inject, ComponentFactoryResolver, Injector, ApplicationRef, EmbeddedViewRef } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 import { ServoyService } from '../servoy.service';
 
-import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService } from '@servoy/public';
+import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService, MainViewRefService } from '@servoy/public';
 
 import { SabloService } from '../../sablo/sablo.service';
 
@@ -23,14 +23,12 @@ export class ApplicationService {
         private localStorageService: LocalStorageService,
         private localeService: LocaleService,
         private windowRefService: WindowRefService,
+        private mainViewRefService: MainViewRefService,
         private sabloService: SabloService,
         @Inject(DOCUMENT) private doc: Document,
         private bsWindowManager: BSWindowManager,
         private serverData: ServerDataService,
-        logFactory: LoggerFactory,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private _applicationRef: ApplicationRef,
-        private _injector: Injector) {
+        logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('ApplicationService');
     }
 
@@ -63,6 +61,26 @@ export class ApplicationService {
         const userProps = this.getUserProperties();
         if (value == null) delete userProps[key];
         else userProps[key] = value;
+        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
+    public removeUserProperty(key: string) {
+        const userProps = this.getUserProperties();
+        delete userProps[key];
+        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
+    public removeAllUserProperties() {
+        const userProps = this.getUserProperties();
+        const userPropsToDelete = [];
+        Object.keys(userProps).forEach(prop => {
+			if (prop.includes('user.properties.')) {
+				userPropsToDelete.push(prop);
+			}
+		});
+		userPropsToDelete.forEach(key => {
+			delete userProps[key];
+		});
         this.localStorageService.set('userProperties', JSON.stringify(userProps));
     }
 
@@ -201,25 +219,26 @@ export class ApplicationService {
         if (!url) {
             url = this.generateUploadUrl(null, null, null);
         }
-        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(FileUploadWindowComponent);
-        const defaultLoginWindowComponent = componentFactory.create(this._injector);
-        this._applicationRef.attachView(defaultLoginWindowComponent.hostView);
+        const fileUploadWindowComponent = this.mainViewRefService.mainContainer.createComponent(FileUploadWindowComponent);
 
-        defaultLoginWindowComponent.instance.url = url;
-        defaultLoginWindowComponent.instance.title = title;
-        defaultLoginWindowComponent.instance.multiselect = multiselect;
-        defaultLoginWindowComponent.instance.filter = acceptFilter;
+        fileUploadWindowComponent.instance.url = url;
+        fileUploadWindowComponent.instance.title = title;
+        fileUploadWindowComponent.instance.multiselect = multiselect;
+        fileUploadWindowComponent.instance.filter = acceptFilter;
 
         const opt: BSWindowOptions = {
             id: 'svyfileupload',
-            fromElement: defaultLoginWindowComponent.location.nativeElement.childNodes[0],
-            title: "",
+            fromElement: fileUploadWindowComponent.location.nativeElement.childNodes[0],
+            title: '',
             resizable: false,
             isModal: true
         };
 
         const bsWindowInstance = this.bsWindowManager.createWindow(opt);
-        defaultLoginWindowComponent.instance.setOnCloseCallback(() => bsWindowInstance.close());
+        fileUploadWindowComponent.instance.setOnCloseCallback(() => {
+            bsWindowInstance.close();
+            fileUploadWindowComponent.destroy();
+        });
         bsWindowInstance.setActive(true);
     }
 
@@ -263,17 +282,14 @@ export class ApplicationService {
     public getClipboardContent(): Promise<string> {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
-    
+
     public replaceUrlState() {
         history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
     }
 
     private showDefaultLoginWindow() {
-        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DefaultLoginWindowComponent);
-        const defaultLoginWindowComponent = componentFactory.create(this._injector);
-        this._applicationRef.attachView(defaultLoginWindowComponent.hostView);
+        const defaultLoginWindowComponent = this.mainViewRefService.mainContainer.createComponent(DefaultLoginWindowComponent);
         defaultLoginWindowComponent.instance.setOnLoginCallback(() => defaultLoginWindowComponent.destroy());
-        this.doc.body.appendChild((defaultLoginWindowComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
     }
 
     private getUserProperties() {

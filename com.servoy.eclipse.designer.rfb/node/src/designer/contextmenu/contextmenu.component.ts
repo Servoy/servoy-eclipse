@@ -1,7 +1,7 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 
 export enum SHORTCUT_IDS {
@@ -34,8 +34,8 @@ export class ContextMenuComponent implements OnInit {
     selection: string[];
     selectionAnchor = 0;
 
-    constructor(protected readonly editorSession: EditorSessionService,
-        protected urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
+        protected urlParser: URLParserService) {
     }
 
     ngOnInit(): void {
@@ -48,10 +48,9 @@ export class ContextMenuComponent implements OnInit {
 
     private setup(shortcuts: { [key: string]: string; }, superForms: Array<string>): void {
         this.createItems(shortcuts, superForms);
-        const contentArea = this.doc.querySelector('.content-area');
+        const contentArea = this.editorContentService.getContentArea();
         contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
-            const frameElem = this.doc.querySelector('iframe');
             const selectionChanged = this.selection !== this.editorSession.getSelection();
             this.selection = this.editorSession.getSelection();
             if (this.selection && this.selection.length == 1) {
@@ -61,13 +60,13 @@ export class ContextMenuComponent implements OnInit {
                     event.stopPropagation();
                     return;
                 }
-                node = frameElem.contentWindow.document.querySelector("[svy-id='" + this.selection[0] + "']");
+                node = this.editorContentService.getContentElement(this.selection[0]);
                 if (node && node.hasAttribute('svy-anchors')) {
                     this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
                 }
             }
             if (!node) {
-                node = frameElem.contentWindow.document.querySelector('.svy-form');
+                node = this.editorContentService.getContentForm();
             }
             if (node) {
                 for (let i = 0; i < this.menuItems.length; i++) {
@@ -104,11 +103,12 @@ export class ContextMenuComponent implements OnInit {
                                             }
                                             component = this.convertToContentPoint(component) as PaletteComp;
                                             this.editorSession.createComponent(component);
+                                            return false;
                                         });
                                     this.menuItems[i].subMenu.push(submenuItem);
                                 }
                             for (const type of typesArray) {
-                                const submenuItem = new ContextmenuItem(type.type + ' for ' + type.property,
+                                const submenuItem = new ContextmenuItem(type.type + ' -> ' + type.property,
                                     () => {
                                         this.hide();
                                         let component: PaletteComp = {} as PaletteComp;
@@ -166,12 +166,12 @@ export class ContextMenuComponent implements OnInit {
             event.stopPropagation();
         });
         // for some reason click event is not always triggered
-        this.doc.body.addEventListener('mouseup', (event: MouseEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('mouseup', (event: MouseEvent) => {
             if (event.button == 0) {
                 setTimeout(() => this.hide(), 200);
             }
         });
-        this.doc.body.addEventListener('keyup', (event: KeyboardEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
                 this.hide();
@@ -217,7 +217,7 @@ export class ContextMenuComponent implements OnInit {
             this.element.nativeElement.style.top = top + 'px';
         }
         else {
-            const submenu = this.doc.querySelector('.dropdown-submenu:hover');
+            const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
             if (submenu) {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
                 //the submenu can only be displayed on the right or left side of the contextmenu
@@ -273,6 +273,12 @@ export class ContextMenuComponent implements OnInit {
             }
             return ''
         };
+        this.menuItems.push(entry);
+
+        entry = new ContextmenuItem(
+            'Add',
+            null
+        );
         this.menuItems.push(entry);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
@@ -460,6 +466,7 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = anchoringActions;
@@ -537,18 +544,13 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = arrangeActions;
             this.menuItems.push(entry);
 
         } else { //this is an Responsive Layout
-            entry = new ContextmenuItem(
-                'Add',
-                null
-            );
-            this.menuItems.push(entry);
-
             entry = new ContextmenuItem(
                 'Zoom in',
                 () => {
@@ -680,6 +682,18 @@ export class ContextMenuComponent implements OnInit {
         return false;
     }
 
+    private isInResponsiveContainer(): boolean {
+        if (this.selection && this.selection.length > 0) {
+            for (const selection of this.selection) {
+                const node = this.editorContentService.getContentElement(selection );
+                if (node && node.parentElement.closest('.svy-responsivecontainer')) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private isAnchored(anchor: number): boolean {
         if (this.selection && this.selection.length == 1) {
             if (this.selectionAnchor == 0)
@@ -695,8 +709,7 @@ export class ContextMenuComponent implements OnInit {
         if (this.selection && this.selection.length == 1) {
             const obj = {};
             const nodeid = this.selection[0];
-            const frameElem = this.doc.querySelector('iframe');
-            const node = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+            const node = this.editorContentService.getContentElement(this.selection[0] );
             if (node && node.hasAttribute('svy-anchors')) {
                 let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
                 if (beanAnchor == 0)
@@ -756,7 +769,7 @@ export class ContextMenuComponent implements OnInit {
     }
 
     private convertToContentPoint(point: { x?: number; y?: number; left?: number; top?: number }) {
-        const glasspane = this.doc.querySelector('.contentframe-overlay');
+        const glasspane = this.editorContentService.getGlassPane();
         const frameRect = glasspane.getBoundingClientRect();
 
         if (point.x && point.y) {
@@ -779,6 +792,11 @@ export class ContextmenuItem {
 
     constructor(
         public text: string,
-        public execute: () => void) {
+        private functionToExecute: () => void) {
+    }
+    
+    public execute() {
+        this.functionToExecute();
+        return false;
     }
 }

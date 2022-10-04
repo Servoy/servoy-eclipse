@@ -23,6 +23,12 @@
 	<bundle id="org.apache.logging.log4j.core">
 		<category name="bundles" />
 	</bundle>
+	<bundle id="org.apache.logging.log4j.jcl" >
+		<category name="bundles" />
+	</bundle>
+	<bundle id="xstream" >
+		<category name="bundles" />
+	</bundle>
 	<bundle id="org.jsoup" >
 		<category name="bundles" />
 	</bundle>
@@ -62,9 +68,6 @@
 	<bundle id="org.apache.commons.commons-text">
 		<category name="bundles" />
 	</bundle>
-    <bundle id="org.apache.commons.commons-codec">
-        <category name="bundles" />
-    </bundle>
 	<bundle id="org.freemarker.freemarker">
 		<category name="bundles" />
 	</bundle>
