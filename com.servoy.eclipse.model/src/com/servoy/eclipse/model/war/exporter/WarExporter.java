@@ -2406,8 +2406,9 @@ public class WarExporter
 						}
 					}
 					scripts.forEach((String path) -> {
-						File serverScriptFile = new File(file.getParentFile(), path.substring(path.lastIndexOf("/") + 1));
-						File newServerScriptFile = new File(destDir, path.substring(path.indexOf("/") + 1));
+						String fileName = path.substring(path.lastIndexOf("/") + 1);
+						File serverScriptFile = new File(file.getParentFile(), fileName);
+						File newServerScriptFile = new File(destDir, fileName);
 						try
 						{
 							copyFile(serverScriptFile, newServerScriptFile);
