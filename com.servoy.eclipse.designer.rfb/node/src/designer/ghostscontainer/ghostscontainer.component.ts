@@ -332,7 +332,7 @@ class GhostContainer {
     style: CSSStyleDeclaration;
     parentCompBounds: { left?: number, top?: number; width?: number; height?: number };
     containerPositionInComp: number;
-    totalGhostContainersOfComp: number;;
+    totalGhostContainersOfComp: number;
     ghosts: Array<Ghost>;
 }
 
