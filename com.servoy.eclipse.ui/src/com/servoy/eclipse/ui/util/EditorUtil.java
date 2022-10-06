@@ -681,10 +681,10 @@ public class EditorUtil
 		{
 			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
 			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
-			IFile styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-				.getFile(new Path("medias/styles_wizard.less"));
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("styles_wizard.less");
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(styles_wizard), desc.getId(), true);
+			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
+				.getFile(new Path("medias/variants.less"));
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
 		}
 		catch (PartInitException e)
 		{

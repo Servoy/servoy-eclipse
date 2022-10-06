@@ -16,17 +16,13 @@ export class PaletteComponent implements ISupportAutoscroll{
     public searchText: string;
     public activeIds: Array<string>;
 
+    draggedVariant: DraggedVariant = {};
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     
     autoscrollAreasEnabled: boolean;
     autoscrollElementClientBounds: Array<DOMRect>;
-    
-    variantPackageName: string;
-    variantComponentName: string;
-    variantComponentType: string;
-    variantStyleClass: string;
-    variantPaletteElement: Element = null;
+
      
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
@@ -97,19 +93,19 @@ export class PaletteComponent implements ISupportAutoscroll{
     }
     
     onVariantClick(event: MouseEvent, component: PaletteComp, packageName: string) {
-        this.variantPackageName = packageName;
-        this.variantComponentName = component.name;
-        this.variantComponentType = component.componentType;
+        this.draggedVariant.packageName = packageName;
+        this.draggedVariant.name = component.name;
+        this.draggedVariant.type = component.componentType;
         let targetElement: HTMLElement = (event.target as HTMLElement).parentElement;
         while (targetElement.nodeName.toUpperCase() != 'LI') {
             if (!targetElement.parentElement || targetElement.parentElement.nodeName.toUpperCase() == 'UL') break;
             targetElement = targetElement.parentElement;
         }
-        this.variantPaletteElement = targetElement.cloneNode(true) as Element;
+        this.draggedVariant.element = targetElement.cloneNode(true) as Element;
        
-        Array.from(this.variantPaletteElement.children).forEach(child => {
+        Array.from(this.draggedVariant.element.children).forEach(child => {
             if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT') {
-                this.variantPaletteElement.removeChild(child);
+                this.draggedVariant.element.removeChild(child);
             }
         });
 		this.editorSession.openPopoverTrigger.emit({component: component});
@@ -119,23 +115,25 @@ export class PaletteComponent implements ISupportAutoscroll{
         return packageName + ':' + componentName;
     }
 
-    onVariantMouseDown(pageX, pageY: number, model: {[property: string]: string }) {
-        this.variantStyleClass = model.styleClass;
-        this.dragItem.paletteItemBeingDragged = this.variantPaletteElement;
+    onVariantMouseDown(pageX, pageY: number, model: {[property: string]: any }) {
+        this.draggedVariant.styleClass = model.styleClass;
+        this.draggedVariant.size = model.size as {width: number, height: number};
+        
+        this.dragItem.paletteItemBeingDragged = this.draggedVariant.element;
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', this.editorContentService.getTopPositionIframe(true) + pageX + 'px');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', this.editorContentService.getTopPositionIframe(true) + pageY + 'px');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
         this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
 	
-        this.dragItem.elementName = this.variantComponentName;
-        this.dragItem.packageName = this.variantPackageName;
+        this.dragItem.elementName = this.draggedVariant.name;
+        this.dragItem.packageName = this.draggedVariant.packageName;
         this.dragItem.ghost = null;
         this.dragItem.propertyName = null;
         this.dragItem.propertyValue = null;
         this.dragItem.topContainer = null;
     
-        this.dragItem.componentType = this.variantComponentType;
+        this.dragItem.componentType = this.draggedVariant.type;
         this.dragItem.layoutName = null;
         this.dragItem.attributes = null;
 	
@@ -151,7 +149,7 @@ export class PaletteComponent implements ISupportAutoscroll{
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
-            this.variantPaletteElement = null;   
+            this.draggedVariant.element = null;   
         }
     }
 
@@ -206,12 +204,15 @@ export class PaletteComponent implements ISupportAutoscroll{
 
             component.x = event.pageX;
             component.y = event.pageY;
+            component.w = this.draggedVariant.size.width;
+            component.h = this.draggedVariant.size.height;
+
 
             // do we also need to set size here ?
             component.x = component.x - this.editorContentService.getLeftPositionIframe();
             component.y = component.y - this.editorContentService.getTopPositionIframe();
-            if (this.variantStyleClass) {
-                component.styleClass = this.variantStyleClass;
+            if (this.draggedVariant.styleClass) {
+                component.styleClass = this.draggedVariant.styleClass;
             }
 
             if (this.urlParser.isAbsoluteFormLayout()) {
@@ -268,9 +269,9 @@ export class PaletteComponent implements ISupportAutoscroll{
             this.editorSession.stopAutoscroll();
         }
 
-        if (this.variantPaletteElement) {
-            this.variantPaletteElement = null;
-            this.variantStyleClass = null;
+        if (this.draggedVariant.element) {
+            this.draggedVariant.element = null;
+            this.draggedVariant.styleClass = null;
         }
     }
 
@@ -419,4 +420,16 @@ export class DragItem {
     topContainer?: boolean = false;
     layoutName?: string;
     attributes?: { [property: string]: string };
+}
+
+export class DraggedVariant {
+    packageName?: string;
+    name?: string;
+    type?: string;
+    styleClass?: string;
+    element?: Element;
+    size?: {
+        width: number,
+        height: number
+    }
 }

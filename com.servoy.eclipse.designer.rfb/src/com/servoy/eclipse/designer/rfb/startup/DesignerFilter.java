@@ -377,11 +377,7 @@ public class DesignerFilter implements Filter
 									{
 										JSONArray variantsForCategory = ServoyModelManager.getServoyModelManager().getServoyModel()
 											.getExistingVariants(spec.getStyleVariantCategory());
-										ArrayList<String> variantNames = new ArrayList<>(variantsForCategory.length());
-										variantsForCategory.forEach((variantDetails) -> {
-											variantNames.add(((JSONObject)variantDetails).getString("name"));
-										});
-										componentJson.put("styleVariants", variantNames);
+										componentJson.put("styleVariants", variantsForCategory);
 										// TODO use the manager
 									}
 

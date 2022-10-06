@@ -596,7 +596,7 @@ public class CreateComponentHandler implements IServerService
 						CSSPositionUtils.setLocation(webComponent, x, y);
 						CSSPositionUtils.setSize(webComponent, w, h);
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-						if (description != null && description.getDefaultValue() instanceof JSONObject)
+						if ((w == 0 && h == 0) && description != null && description.getDefaultValue() instanceof JSONObject)
 						{
 							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
 								((JSONObject)description.getDefaultValue()).optInt("height", 80));

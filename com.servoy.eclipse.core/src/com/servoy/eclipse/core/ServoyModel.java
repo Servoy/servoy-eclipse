@@ -212,14 +212,14 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
 public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
 
-	class MyJSonObject
+	class Variant
 	{
 		public String type;
-		public JSONObject jsonObj;
+		public JSONObject variantJson;
 	}
 
-	private IFile styles_wizard;
-	private List<MyJSonObject> list_style_wizard = new ArrayList<MyJSonObject>();
+	private IFile variantsFile;
+	private List<Variant> variantsList = new ArrayList<Variant>();
 
 
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
@@ -1412,50 +1412,68 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void initStylesWizard()
 	{
-		list_style_wizard.clear();
-		styles_wizard = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-			.getFile(new Path("medias/styles_wizard.less"));
-		if (styles_wizard.exists())
+		variantsList.clear();
+		variantsFile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
+			.getFile(new Path("medias/variants.less"));
+		if (variantsFile.exists())
 		{
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(styles_wizard.getContents())))
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(variantsFile.getContents())))
 			{
 				String line;
-				MyJSonObject myJsonObj = null;
+				Variant variant = null;
 				boolean nameFound = false;
 				boolean typeFound = false;
-				JSONObject jsonObj = null;
-				List<String> myClasses = null;
+				JSONObject variantJson = null;
+				List<String> variantClasses = null;
+				int width = 0;
+				int height = 0;
 				;
 				while ((line = br.readLine()) != null)
 				{
-					int typePos = line.indexOf("@type:");
-					if (typePos > 0)
+					int pos = line.indexOf("@type:");
+					if (pos > 0)
 					{
 						typeFound = true;
-						myJsonObj = new MyJSonObject();
-						myJsonObj.type = line.substring(typePos + 6).trim();
+						variant = new Variant();
+						variant.type = line.substring(pos + 6).trim();
+					}
+					pos = line.indexOf("@width:");
+					if (pos > 0)
+					{
+						width = Integer.parseInt(line.substring(pos + 7).trim());
+					}
+					pos = line.indexOf("@height:");
+					if (pos > 0)
+					{
+						height = Integer.parseInt(line.substring(pos + 8).trim());
 					}
 					int startBracketPos = line.indexOf("{");
 					if (typeFound && (line.startsWith(".") && startBracketPos > 0))
 					{
 						nameFound = true;
-						jsonObj = new JSONObject();
+						variantJson = new JSONObject();
 						String name = line.substring(1, startBracketPos).trim();
-						jsonObj.put("name", name);
-						myClasses = new ArrayList<String>();
+						variantJson.put("name", name);
+						JSONObject variantSize = new JSONObject();
+						variantSize.put("width", width);
+						variantSize.put("height", height);
+						variantJson.put("size", variantSize);
+						variantClasses = new ArrayList<String>();
 					}
 					int semicolonPos = line.indexOf("();");
 					if (nameFound && (line.trim().startsWith(".") && semicolonPos > 0))
 					{
-						myClasses.add(line.substring(0, semicolonPos).trim().substring(1));
+						variantClasses.add(line.substring(0, semicolonPos).trim().substring(1));
 					}
-					if (line.startsWith("}"))
+					if (line.trim().startsWith("}"))
 					{//end of the object detected
-						jsonObj.put("classes", myClasses);
-						myJsonObj.jsonObj = jsonObj;
-						list_style_wizard.add(myJsonObj);
+						variantJson.put("classes", variantClasses);
+						variant.variantJson = variantJson;
+						variantsList.add(variant);
 						typeFound = false;
 						nameFound = false;
+						width = 0;
+						height = 0;
 
 					}
 				}
@@ -4205,32 +4223,32 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	public void setVariantsFor(String variantCategoryName, String jsonArrayString)
 	{
 		JSONArray myJsonArray = new JSONArray(jsonArrayString);
-		List<MyJSonObject> tmp_list_style_wizard = new ArrayList<MyJSonObject>();
+		List<Variant> tmp_variantsList = new ArrayList<Variant>();
 
-		for (MyJSonObject myObject : list_style_wizard)
+		for (Variant variant : variantsList)
 		{
-			if (!myObject.type.equals(variantCategoryName))
+			if (!variant.type.equals(variantCategoryName))
 			{
-				tmp_list_style_wizard.add(myObject);
+				tmp_variantsList.add(variant);
 			}
 		}
 		for (int index = 0; index < myJsonArray.length(); index++)
 		{
-			JSONObject myObject = myJsonArray.getJSONObject(index);
-			MyJSonObject myJson = new MyJSonObject();
-			myJson.type = variantCategoryName;
-			myJson.jsonObj = myObject;
-			tmp_list_style_wizard.add(myJson);
+			JSONObject variantJson = myJsonArray.getJSONObject(index);
+			Variant variant = new Variant();
+			variant.type = variantCategoryName;
+			variant.variantJson = variantJson;
+			tmp_variantsList.add(variant);
 		}
-		list_style_wizard = tmp_list_style_wizard;
+		variantsList = tmp_variantsList;
 
 		String myStyleString = getStyleString();
 
-		//write list style wizard to the file
+		//write variants list to the file
 		InputStream source = new ByteArrayInputStream(myStyleString.getBytes());
 		try
 		{
-			styles_wizard.setContents(source, true, false, null);
+			variantsFile.setContents(source, true, false, null);
 		}
 		catch (CoreException e)
 		{
@@ -4242,10 +4260,10 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private String getStyleString()
 	{
 		String result = "";
-		for (MyJSonObject myObject : list_style_wizard)
+		for (Variant variant : variantsList)
 		{
-			result += "/*\n* @type:" + myObject.type + "\n*/\n." + myObject.jsonObj.getString("name") + " {\n";
-			JSONArray myArray = myObject.jsonObj.getJSONArray("classes");
+			result += "/*\n* @type:" + variant.type + "\n*/\n." + variant.variantJson.getString("name") + " {\n";
+			JSONArray myArray = variant.variantJson.getJSONArray("classes");
 			for (int arrIndex = 0; arrIndex < myArray.length(); arrIndex++)
 			{
 				result += "   ." + myArray.getString(arrIndex) + "();\n";
@@ -4261,11 +4279,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		JSONArray myArray = new JSONArray();
 
-		for (MyJSonObject myObject : list_style_wizard)
+		for (Variant variant : variantsList)
 		{
-			if (myObject.type.equals(variantCategoryName))
+			if (variant.type.equals(variantCategoryName))
 			{
-				myArray.put(myObject.jsonObj);
+				myArray.put(variant.variantJson);
 			}
 		}
 

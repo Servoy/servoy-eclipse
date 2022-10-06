@@ -491,10 +491,20 @@ export class PaletteComp {
     packageName: string;
     x: number;
     y: number;
+    w: number;
+    h: number;
     type: string;
     ghostPropertyName: string;
     styleVariantCategory: string;
-    styleVariants: Array<string>;
+    styleVariants: Array<
+        {
+            name: string, 
+            size: {
+                width: number, 
+                height: number
+            }
+        }
+    >;
     lastChosenVariant: string;
     dropTargetUUID?: string;
     isOpen: boolean;

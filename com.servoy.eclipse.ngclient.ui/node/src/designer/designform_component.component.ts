@@ -162,27 +162,52 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = true;
             }
             if (event.data.id === 'createVariants') {
-				const elWidth = event.data.model.size ? event.data.model.size.width : 80;
-                const elHeight = event.data.model.size ? event.data.model.size.height : 30;
-                const columns = event.data.columns;
-                const margin = event.data.margin;
+                let margin = 5;
+
+			    const variants = event.data.variants;
+			    const rowInterspace= event.data.rowInterspace;
+			    const columnInterspace= event.data.columnInterspace;
+			    const maxFormSize= event.data.maxFormSize;
+   
+                let modelTop = margin;
+                let columnsWidth = [0, 0];
+                let columnsHeight = [0, 0];
+                let maxRowIndex = [0, 0];
                 let columnIndex = 0;
-                let rowIndex = 0;
-                
-                
-                event.data.variants.forEach((variant) => {
-					const model = { width: elWidth + 'px', height: elHeight + 'px' };
-					model['left'] = (columnIndex * (elWidth + margin) + 10) + 'px' ;
-					model['top'] = (rowIndex * (elHeight + margin) + 10) + 'px';
-					columnIndex++;
-					if (columnIndex % columns == 0) {
-						columnIndex = 0;
-						rowIndex++;
-					}
-					const eventModel = JSON.parse(JSON.stringify(event.data.model).slice());
-					eventModel.styleClass = variant;
-                	this.variantElements.push(new ComponentCache('variant_element', event.data.name, eventModel, [], model));
-				});
+
+                maxRowIndex[0] = Math.floor(variants.length / 2) + variants.length % 2;
+                maxRowIndex[1] = variants.length - maxRowIndex[0]; 
+
+                for(let index = 0; index < variants.length; index++) {
+                    let variant = variants[index];
+                    const model = { width: variant.size.width + 'px', height: variant.size.height + 'px' };
+                    if (variants.length > 4 && columnIndex == 0 && index >= maxRowIndex[0]) {
+                        columnsHeight[columnIndex] = columnsHeight[columnIndex] - rowInterspace + margin;
+                        columnIndex = 1; 
+                        modelTop = margin;
+                    }
+                    columnsWidth[columnIndex] = Math.max(columnsWidth[columnIndex], variant.size.width);
+					model['left'] =  margin + columnIndex * (columnsWidth[0] + columnInterspace) + 'px' ;
+					model['top'] = modelTop + 'px';
+					modelTop += variant.size.height + rowInterspace;
+                    columnsHeight[columnIndex] = modelTop;
+					const componentModel = JSON.parse(JSON.stringify(event.data.model).slice());
+					componentModel.styleClass = variant.name;
+                    componentModel.size.width = variant.size.width;
+                    componentModel.size.height = variant.size.height;
+                	this.variantElements.push(
+                    new ComponentCache(
+                      "variant_element",
+                      event.data.name,
+                      componentModel,
+                      [],
+                      model
+                    )
+                  );
+                };
+                let formWidth = margin + columnsWidth[0] + (columnsWidth[1] > 0 ? columnInterspace : 0) + columnsWidth[1] + margin;
+                //we need at least 150px in order to display variants Add and Edit buttons
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'resizePopover', popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width), popoverHeight: Math.min(columnsHeight[0], maxFormSize.height)}, '*');
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
 			}
