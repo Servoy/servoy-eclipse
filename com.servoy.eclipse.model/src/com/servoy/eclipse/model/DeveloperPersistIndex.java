@@ -279,6 +279,11 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			if (duplicates == null || duplicates.size() <= 1)
 			{
 				duplicatesUUIDs.remove(persist.getUUID());
+				if (duplicates.size() == 1 && !uuidToPersist.containsKey(persist.getUUID().toString()))
+				{
+					// fix the cache, put the other one in
+					this.putInCache(duplicates.get(0));
+				}
 			}
 		}
 	}

@@ -41,7 +41,7 @@
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.26.0.v202204042240"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.09/"/>
+            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.12/"/>
             <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
             <unit id="com.sun.activation.javax.activation" version="1.2.0"/>
             <unit id="com.sun.mail.javax.mail" version="1.6.2"/>
@@ -76,6 +76,7 @@
             <unit id="sj.jsonschemavalidation" version="2.0.1"/>
             <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
             <unit id="tus-java-server" version="2.0.0.s2"/>
+            <unit id="xstream" version="1.4.19"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>

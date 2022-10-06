@@ -353,6 +353,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
+         id="xstream"
+         download-size="0"
+         install-size="0"
+         version="1.4.19"
+         unpack="false"/>
+
+   <plugin
          id="org.jsoup"
          download-size="0"
          install-size="0"

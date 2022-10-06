@@ -104,7 +104,7 @@ export class JSONObjectConverter implements IConverter {
         } else if (serverJSONValue && serverJSONValue[JSONObjectConverter.INITIALIZE]) {
             // only content version update - this happens when a full object value is set on this property client side; it goes to server
             // and then server sends back the version
-            newValue.getStateHolder()[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
+            if (newValue/*client might have changed it meanwhile again*/) newValue.getStateHolder()[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
             // here we can count on not having any 'smart' values cause if we had
             // updates would have been received with this initialize as well (to initialize child elements as well to have the setChangeNotifier and internal things)
         } else if (!serverJSONValue || !serverJSONValue[JSONObjectConverter.NO_OP])

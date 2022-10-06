@@ -8,6 +8,7 @@ import { SameSizeIndicatorComponent } from './samesizeindicator/samesizeindicato
 import { AnchoringIndicatorComponent } from './anchoringindicator/anchoringindicator.component';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
+import { ResizeEditorWidthComponent } from './resizeeditorwidth/resizeeditorwidth.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
 import { MouseSelectionComponent, PositionMenuDirective } from './mouseselection/mouseselection.component';
 import { HighlightComponent } from './highlight/highlight.component';
@@ -46,6 +47,7 @@ import { VariantsContentComponent } from './variantscontent/variantscontent.comp
     AnchoringIndicatorComponent,
     PaletteComponent,
     ResizerComponent,
+    ResizeEditorWidthComponent,
     ContextMenuComponent,
     MouseSelectionComponent,
     HighlightComponent,

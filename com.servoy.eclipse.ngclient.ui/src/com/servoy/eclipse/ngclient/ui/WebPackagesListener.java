@@ -820,13 +820,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 		}
 
-		/**
-		 * @param packageToInstall
-		 * @param dependencies
-		 * @param packageName
-		 * @param packageReader
-		 * @param entryPoint
-		 */
 		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();

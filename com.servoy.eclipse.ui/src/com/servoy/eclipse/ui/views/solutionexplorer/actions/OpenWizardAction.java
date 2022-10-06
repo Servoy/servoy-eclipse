@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
@@ -90,7 +91,18 @@ public class OpenWizardAction extends Action
 			wizard.init(PlatformUI.getWorkbench(), selection);
 			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
-			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
+			Shell parentShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Shell[] shells = Display.getDefault().getShells();
+			for (Shell shell : shells)
+			{
+				boolean isSelectFormOpen = "Select form".equals(shell.getShell().getText()); //$NON-NLS-1$
+				if (isSelectFormOpen)
+				{
+					parentShell = shell;
+					break;
+				}
+			}
+			WizardDialog dialog = new WizardDialog(parentShell, wizard)
 			{
 				private Button restoreDefault = null;
 				private Button copyWarToCmd = null;

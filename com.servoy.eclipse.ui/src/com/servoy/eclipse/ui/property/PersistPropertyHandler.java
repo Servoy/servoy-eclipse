@@ -533,6 +533,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				persistContext.getContext());
 			PropertyDescriptor pd = new PropertyDescriptor(name, displayName)
 			{
+				final ILabelProvider formLabelProviderWithDefaultAsText = new SolutionContextDelegateLabelProvider(
+					new FormLabelProvider(flattenedEditingSolution, false, true),
+					persistContext.getContext());
+
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
@@ -540,6 +544,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					boolean isMobile = form.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form),
 						formLabelProvider,
+						formLabelProviderWithDefaultAsText,
 						new FormValueEditor(flattenedEditingSolution), false,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
 							null),

@@ -162,7 +162,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	// IXMLExportUserChannel methods:
 
 	@Override
-	public void displayWarningMessage(String title, String message)
+	public void displayWarningMessage(String title, String message, boolean scrollableDialog)
 	{
 		System.out.println("WARNING: " + title + " " + message);
 	}
