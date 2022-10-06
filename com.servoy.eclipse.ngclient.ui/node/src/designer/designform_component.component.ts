@@ -162,6 +162,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = true;
             }
             if (event.data.id === 'createVariants') {
+                 // For up to 4 - variants will be displayed in a single column otherwise tw columns will be used
+
                 let margin = 5;
 
 			    const variants = event.data.variants;
@@ -192,9 +194,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 					modelTop += variant.size.height + rowInterspace;
                     columnsHeight[columnIndex] = modelTop;
 					const componentModel = JSON.parse(JSON.stringify(event.data.model).slice());
-					componentModel.styleClass = variant.name;
+					componentModel.styleClass = variant.styleClass;
                     componentModel.size.width = variant.size.width;
-                    componentModel.size.height = variant.size.height;
+                    componentModel.size.height = variant.size.height
+                    componentModel.text = variant.name;
                 	this.variantElements.push(
                     new ComponentCache(
                       "variant_element",
