@@ -214,7 +214,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	class Variant
 	{
-		public String type;
+		public String category;
 		public JSONObject variantJson;
 	}
 
@@ -1421,21 +1421,26 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			{
 				String line;
 				Variant variant = null;
-				boolean nameFound = false;
-				boolean typeFound = false;
+				boolean classFound = false;
+				boolean variantFound = false;
 				JSONObject variantJson = null;
 				List<String> variantClasses = null;
 				int width = 0;
 				int height = 0;
-				;
+				String variantName = null;
 				while ((line = br.readLine()) != null)
 				{
-					int pos = line.indexOf("@type:");
+					int pos = line.indexOf("@category:");
 					if (pos > 0)
 					{
-						typeFound = true;
+						variantFound = true;
 						variant = new Variant();
-						variant.type = line.substring(pos + 6).trim();
+						variant.category = line.substring(pos + 10).trim();
+					}
+					pos = line.indexOf("@name:");
+					if (pos > 0)
+					{
+						variantName = line.substring(pos + 6).trim();
 					}
 					pos = line.indexOf("@width:");
 					if (pos > 0)
@@ -1448,20 +1453,21 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						height = Integer.parseInt(line.substring(pos + 8).trim());
 					}
 					int startBracketPos = line.indexOf("{");
-					if (typeFound && (line.startsWith(".") && startBracketPos > 0))
+					if (variantFound && (line.startsWith(".") && startBracketPos > 0))
 					{
-						nameFound = true;
+						classFound = true;
 						variantJson = new JSONObject();
-						String name = line.substring(1, startBracketPos).trim();
-						variantJson.put("name", name);
+						String styleClass = line.substring(1, startBracketPos).trim();
+						variantJson.put("name", variantName);
 						JSONObject variantSize = new JSONObject();
 						variantSize.put("width", width);
 						variantSize.put("height", height);
 						variantJson.put("size", variantSize);
+						variantJson.put("styleClass", styleClass);
 						variantClasses = new ArrayList<String>();
 					}
 					int semicolonPos = line.indexOf("();");
-					if (nameFound && (line.trim().startsWith(".") && semicolonPos > 0))
+					if (classFound && (line.trim().startsWith(".") && semicolonPos > 0))
 					{
 						variantClasses.add(line.substring(0, semicolonPos).trim().substring(1));
 					}
@@ -1470,11 +1476,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						variantJson.put("classes", variantClasses);
 						variant.variantJson = variantJson;
 						variantsList.add(variant);
-						typeFound = false;
-						nameFound = false;
+						variantFound = false;
+						classFound = false;
 						width = 0;
 						height = 0;
-
+						variantName = null;
 					}
 				}
 			}
@@ -4227,7 +4233,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		for (Variant variant : variantsList)
 		{
-			if (!variant.type.equals(variantCategoryName))
+			if (!variant.category.equals(variantCategoryName))
 			{
 				tmp_variantsList.add(variant);
 			}
@@ -4236,7 +4242,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			JSONObject variantJson = myJsonArray.getJSONObject(index);
 			Variant variant = new Variant();
-			variant.type = variantCategoryName;
+			variant.category = variantCategoryName;
 			variant.variantJson = variantJson;
 			tmp_variantsList.add(variant);
 		}
@@ -4262,7 +4268,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		String result = "";
 		for (Variant variant : variantsList)
 		{
-			result += "/*\n* @type:" + variant.type + "\n*/\n." + variant.variantJson.getString("name") + " {\n";
+			result += "/*\n* @type:" + variant.category + "\n*/\n." + variant.variantJson.getString("name") + " {\n";
 			JSONArray myArray = variant.variantJson.getJSONArray("classes");
 			for (int arrIndex = 0; arrIndex < myArray.length(); arrIndex++)
 			{
@@ -4281,7 +4287,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		for (Variant variant : variantsList)
 		{
-			if (variant.type.equals(variantCategoryName))
+			if (variant.category.equals(variantCategoryName))
 			{
 				myArray.put(variant.variantJson);
 			}

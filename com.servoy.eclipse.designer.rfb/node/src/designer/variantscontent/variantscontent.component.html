@@ -2,20 +2,22 @@
  	triggers="manual" #popover="ngbPopover" [ngbPopover]="popoverContent">
 	<i name="variants" class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
 </button>
-<ng-template id="variantsPopover" #popoverContent let-popOv="popOv" let-clientURL="clientURL">
-	<div class="modal-body" [ngStyle]="{'display': 'block'}">
+<ng-template #popoverContent let-popOv="popOv" let-clientURL="clientURL">
+	<div class="modal-body">
 		<iframe id="VariantsForm" class="contentframe" [src]="clientURL"></iframe>
 	</div>
 	<div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
 		<button name="variants" type="button" 
 			class="btn btn-outline-dark btn-sm" 
-			(click)="onAddVariant($event)">
+			(click)="onAddVariant($event)" 
+			disabled>
 			<i name="variants" class="fa fa-plus" aria-hidden="true"></i>
 				Add
 		</button>
 		<button name="variants" type="button" 
 			class="btn btn-outline-dark btn-sm" 
-			(click)="onEditVariant($event)">
+			(click)="onEditVariant($event)" 
+			disabled>
 			<i name="variants" class="fa fa-pen" aria-hidden="true"></i>
 			Edit
 		</button>

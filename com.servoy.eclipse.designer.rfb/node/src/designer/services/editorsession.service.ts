@@ -493,6 +493,7 @@ export class PaletteComp {
     y: number;
     w: number;
     h: number;
+    text: string;
     type: string;
     ghostPropertyName: string;
     styleVariantCategory: string;

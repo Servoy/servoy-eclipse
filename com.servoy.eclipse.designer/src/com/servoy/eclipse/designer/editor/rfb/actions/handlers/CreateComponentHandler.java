@@ -584,7 +584,12 @@ public class CreateComponentHandler implements IServerService
 							Portal portal = (Portal)parentSupportingElements;
 							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
 								IRepository.WEBCOMPONENTS);
-							webComponent.setProperty("text", compName);
+							webComponent.setProperty("text", compName); //default
+							if (args.has("text"))
+							{
+								webComponent.setProperty("text", args.getString("text"));
+							}
+
 							webComponent.setTypeName(name);
 							portal.addChild(webComponent);
 						}
