@@ -268,15 +268,18 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
-		//make sure the currently used components are exported in case the user didn't go through the components selection pages
-		if (!exportModel.isReady())
+		if (isNGExport)
 		{
-			runSetupComponents(true);
-		}
-		else
-		{
-			componentsSelectionPage.updateExportModel();
-			servicesSelectionPage.updateExportModel();
+			//make sure the currently used components are exported in case the user didn't go through the components selection pages
+			if (!exportModel.isReady())
+			{
+				runSetupComponents(true);
+			}
+			else
+			{
+				componentsSelectionPage.updateExportModel();
+				servicesSelectionPage.updateExportModel();
+			}
 		}
 
 		exportModel.saveSettings(getDialogSettings());

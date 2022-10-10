@@ -149,6 +149,10 @@ public class ExportWarModel extends AbstractWarExportModel
 			job.setUser(false);
 			job.schedule();
 		}
+		else
+		{
+			ready = true;
+		}
 
 		Cipher desCipher = null;
 		try

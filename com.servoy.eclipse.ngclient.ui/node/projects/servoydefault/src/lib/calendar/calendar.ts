@@ -8,9 +8,10 @@ import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
-import { TempusDominus, DateTime, Namespace, Options} from '@servoy/tempus-dominus';
-import { ChangeEvent } from '@servoy/tempus-dominus/types/utilities/event-types';
-import Dates from '@servoy/tempus-dominus/types/dates';
+import { TempusDominus, DateTime, Namespace} from '@eonasdan/tempus-dominus';
+import { ChangeEvent } from '@eonasdan/tempus-dominus/types/utilities/event-types';
+import  Options from '@eonasdan/tempus-dominus/types/utilities/options';
+import Dates from '@eonasdan/tempus-dominus/types/dates';
 
 @Component({
     selector: 'servoydefault-calendar',
@@ -46,7 +47,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 today: true,
                 close: true,
                 clear: true,
-            }
+            },
+            theme: 'light'
         },
         restrictions: {
         },
@@ -205,7 +207,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             language = locale.substring(0, index);
         }
         language = language.toLowerCase();
-        import(`@servoy/tempus-dominus/dist/locales/${language}.js`).then(
+        import(`@eonasdan/tempus-dominus/dist/locales/${language}.js`).then(
             (module: { localization: { [key: string]: string } }) => {
                 this.config.localization = module.localization;
                 if (this.picker !== null) this.picker.updateOptions(this.config);
