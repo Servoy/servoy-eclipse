@@ -6,6 +6,7 @@ import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'designer-variantscontent',
@@ -30,7 +31,7 @@ export class VariantsContentComponent implements OnInit {
 
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService,
+        @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig,
         private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
 	
 		this.editorSession.openPopoverTrigger.subscribe((value) => {
@@ -42,6 +43,9 @@ export class VariantsContentComponent implements OnInit {
 			     this.activeVariant = false;
 			 }
 		});
+
+		popoverCfgRef.autoClose = false;
+		popoverCfgRef.triggers = 'manual';
     }
 
     ngOnInit() {
