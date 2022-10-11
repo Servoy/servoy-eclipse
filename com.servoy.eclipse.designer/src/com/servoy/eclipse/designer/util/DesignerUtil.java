@@ -57,6 +57,7 @@ import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -162,6 +163,26 @@ public class DesignerUtil
 					}
 					if (Utils.isInheritedFormElement(formElement, context)) return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	public static boolean containsFormComponentElement(List selectedEditParts)
+	{
+		if (selectedEditParts != null && !selectedEditParts.isEmpty())
+		{
+			for (Object selectedEditPart : selectedEditParts)
+			{
+				IPersist formElement = null;
+				if (selectedEditPart instanceof PersistContext)
+				{
+					PersistContext persistContext = (PersistContext)selectedEditPart;
+					formElement = persistContext.getPersist();
+
+				}
+				if (formElement != null && (formElement instanceof WebFormComponentChildType || formElement.getParent() instanceof WebFormComponentChildType))
+					return true;
 			}
 		}
 		return false;

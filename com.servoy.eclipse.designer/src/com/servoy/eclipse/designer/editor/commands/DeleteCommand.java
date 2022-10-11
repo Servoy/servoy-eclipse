@@ -32,7 +32,8 @@ public class DeleteCommand extends ContentOutlineCommand
 	@Override
 	public boolean isEnabled()
 	{
-		return getSelection().size() > 0 && !DesignerUtil.containsInheritedElement(getSelectionList());
+		return getSelection().size() > 0 && !DesignerUtil.containsInheritedElement(getSelectionList()) &&
+			!DesignerUtil.containsFormComponentElement(getSelectionList());
 	}
 
 }
