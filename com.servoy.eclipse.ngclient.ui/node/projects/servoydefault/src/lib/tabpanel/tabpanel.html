@@ -3,7 +3,7 @@
 	[class]='styleClass' [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq"
 	[sabloTabseqConfig]="{container: true, reservedGap: 50}">
 	<li *ngFor="let tab of tabs" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId"
-		[id]="tab._id">
+		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
 		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
 			<img ng-hide="tab.imageMediaID == ''" ng-src='tab.imageMediaID' />
 			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
