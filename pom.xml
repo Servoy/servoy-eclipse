@@ -175,6 +175,13 @@
 								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>com.servoy.eclipse.model</id>
+							<restrictTo>
+								<version>${project.parent.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
 					<includePackedArtifacts>true</includePackedArtifacts>
 				</configuration>
