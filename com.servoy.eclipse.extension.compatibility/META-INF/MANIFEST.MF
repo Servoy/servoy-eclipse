@@ -10,28 +10,27 @@ Require-Bundle: servoy_shared,
  servoy_ngclient,
  org.eclipse.core.runtime,
  com.servoy.eclipse.model,
- slf4j.api,
  org.eclipse.dltk.javascript.rhino,
- org.apache.logging.log4j.slf4j18-impl,
  org.apache.logging.log4j.api,
  org.apache.logging.log4j.core,
  org.apache.commons.logging,
- com.sun.mail.javax.mail,
- com.sun.activation.javax.activation,
  org.apache.httpcomponents.client5.httpclient5,
  org.apache.httpcomponents.core5.httpcore5,
  org.apache.commons.commons-pool2,
  j2db_server,
  org.apache.commons.codec,
- org.apache.commons.io,
  org.apache.commons.commons-collections4,
  sablo,
  javax.websocket,
  org.apache.commons.commons-fileupload,
- org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.1.2"
+ org.apache.httpcomponents.core5.httpcore5-h2,
+ org.apache.commons.commons-io,
+ com.sun.mail.jakarta.mail,
+ com.sun.activation.jakarta.activation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
- javax.servlet.http;version="[4.0.0,5.0.0)"
+ javax.servlet.http;version="[4.0.0,5.0.0)",
+ org.slf4j;version="1.8.0.beta3-SNAPSHOT"
 Automatic-Module-Name: com.servoy.eclipse.extension.compatibility
