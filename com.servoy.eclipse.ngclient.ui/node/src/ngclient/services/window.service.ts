@@ -24,6 +24,7 @@ export class WindowService {
     private instances: { [property: string]: SvyWindow } = {};
     private windowCounter: number;
     private windowsRestored = false;
+    private dialogShown = false;
     private renderer2: Renderer2;
 
     constructor(private formService: FormService,
@@ -74,6 +75,7 @@ export class WindowService {
     }
 
     public show(name: string, form: string, title: string) {
+        this.dialogShown = true;
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.showForm) {
@@ -422,7 +424,8 @@ export class WindowService {
 
     private restoreWindows() {
         const window0 = this.sessionStorageService.get('window0');
-        if (window0 && window0.showForm) {
+        // a dialog was shown and we are after a tab refresh; restore from storage
+        if (window0 && window0.showForm && !this.dialogShown) {
             // wait until the server is connected
             const interval = setInterval(() => {
                 if (this.webSocketService.isConnected()) {
