@@ -98,6 +98,10 @@ export class EditorContentService {
         return this.document.body;
     }
 
+    getDocument(): Document {
+        return this.document;
+    }
+
     getContentBodyElement(): HTMLElement {
         this.initIFrame();
         return this.frameElement.contentWindow.document.body;

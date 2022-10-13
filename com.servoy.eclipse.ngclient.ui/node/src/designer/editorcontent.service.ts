@@ -18,8 +18,10 @@ export class EditorContentService {
     }
 
     updateFormData(updates) {
-        const data = JSON.parse(updates);
         const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
+        if (formCache.formname === 'VariantsForm') return;
+
+        const data = JSON.parse(updates);
         const reorderLayoutContainers: Array<StructureCache> = new Array();
         const orphanLayoutContainers: Array<StructureCache> = new Array();
         let renderGhosts = false;

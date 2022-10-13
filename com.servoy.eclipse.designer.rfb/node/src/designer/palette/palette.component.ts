@@ -125,6 +125,7 @@ export class PaletteComponent implements ISupportAutoscroll {
     component: PaletteComp,
     packageName: string
   ) {
+    
     this.draggedVariant.packageName = packageName;
     this.draggedVariant.name = component.name;
     this.draggedVariant.type = component.componentType;
@@ -148,7 +149,11 @@ export class PaletteComponent implements ISupportAutoscroll {
         this.draggedVariant.element.removeChild(child);
       }
     });
-    this.editorSession.openPopoverTrigger.emit({ component: component });
+    let variantBtn = this.editorContentService.getDocument().elementFromPoint(event.pageX, event.pageY) as HTMLButtonElement;
+    if (variantBtn.type != 'button') { //clicked on the inner element
+      variantBtn = variantBtn.parentElement as HTMLButtonElement;
+    }
+    this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
   }
 
   getListItemId(packageName, componentName: string) {
@@ -243,6 +248,7 @@ export class PaletteComponent implements ISupportAutoscroll {
     }
 
     event.stopPropagation();
+    this.editorSession.variantsTrigger.emit({show: false});
 
     this.dragItem.paletteItemBeingDragged = (
       event.target as HTMLElement
@@ -407,6 +413,7 @@ export class PaletteComponent implements ISupportAutoscroll {
     if (this.draggedVariant.element) {
       this.draggedVariant.element = null;
       this.draggedVariant.styleClass = null;
+      this.editorSession.variantsTrigger.emit({show: false});
     }
   };
 

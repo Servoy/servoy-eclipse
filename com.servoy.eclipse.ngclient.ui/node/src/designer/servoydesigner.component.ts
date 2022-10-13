@@ -29,7 +29,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     solutionName: string;
     private wsSession: WebsocketSession;
     variantsRequested: boolean;
-    vaeiantsFormTemplate = '{ "VariantsForm": { "responsive": false, "size": { "width": "100%", "height": "100%" }, "children": [ { "name": "", "model": { "borderType": { "type": "BevelBorder", "borderStyle": { "borderColor": "null null null null", "borderWidth": "2px", "borderStyle": "outset" } }, "designSize": { "width": "100%", "height": "100%" }, "size": { "width": "100%", "height": "100%" }, "addMinSize": true, "useCssPosition": {}, "absoluteLayout": { "": true }, "hasExtraParts": false } }, { "part": true, "classes": [ "svy-body" ], "layout": { "position": "absolute", "left": "0px", "right": "0px", "top": "0px", "bottom": "0px", "overflow-x": "auto", "overflow-y": "auto" }, "children": [] } ] } }';
+    variantsFormTemplate = '{ "VariantsForm": { "responsive": false, "size": { "width": "100%", "height": "100%" }, "children": [ { "name": "", "model": { "borderType": { "type": "BevelBorder", "borderStyle": { "borderColor": "null null null null", "borderWidth": "2px", "borderStyle": "outset" } }, "designSize": { "width": "100%", "height": "100%" }, "size": { "width": "100%", "height": "100%" }, "addMinSize": true, "useCssPosition": {}, "absoluteLayout": { "": true }, "hasExtraParts": false } }, { "part": true, "classes": [ "svy-body" ], "layout": { "position": "absolute", "left": "0px", "right": "0px", "top": "0px", "bottom": "0px", "overflow-x": "auto", "overflow-y": "auto" }, "children": [] } ] } }';
 
     constructor(private windowRef: WindowRefService,
         private websocketService: WebsocketService,
@@ -51,7 +51,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         this.websocketService.setPathname('/rfb/angular/content/');
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
         if (this.variantsRequested) {
-			const formState = JSON.parse(this.vaeiantsFormTemplate)[formName];
+			const formState = JSON.parse(this.variantsFormTemplate)[formName];
 	        this.formService.createFormCache(formName, formState, null);
 	        this.mainForm = formName;
 		} else {

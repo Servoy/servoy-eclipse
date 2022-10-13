@@ -162,14 +162,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = true;
             }
             if (event.data.id === 'createVariants') {
-                 // For up to 4 - variants will be displayed in a single column otherwise tw columns will be used
 
                 let margin = 5;
 
-			    const variants = event.data.variants;
-			    const rowInterspace= event.data.rowInterspace;
-			    const columnInterspace= event.data.columnInterspace;
-			    const maxFormSize= event.data.maxFormSize;
+			                const variants = event.data.variants;
+			                const rowInterspace= event.data.rowInterspace;
+                const columnInterspace= event.data.columnInterspace;
+			                const maxFormSize= event.data.maxFormSize;
    
                 let modelTop = margin;
                 let columnsWidth = [0, 0];
@@ -180,7 +179,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 maxRowIndex[0] = Math.floor(variants.length / 2) + variants.length % 2;
                 maxRowIndex[1] = variants.length - maxRowIndex[0]; 
 
+                this.variantElements.splice(0);
+
                 for(let index = 0; index < variants.length; index++) {
+                   
                     let variant = variants[index];
                     const model = { width: variant.size.width + 'px', height: variant.size.height + 'px' };
                     if (variants.length > 4 && columnIndex == 0 && index >= maxRowIndex[0]) {

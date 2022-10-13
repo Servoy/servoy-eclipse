@@ -34,6 +34,7 @@ import { DragselectionResponsiveComponent } from './dragselection-responsive/dra
 import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
 import { VariantsContentComponent } from './variantscontent/variantscontent.component'
+import { VariantsPreviewComponent } from './variantspreview/variantspreview.component'
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { VariantsContentComponent } from './variantscontent/variantscontent.comp
     DragselectionComponent,
     DragselectionResponsiveComponent,
     InlineEditComponent,
-    VariantsContentComponent
+    VariantsContentComponent,
+    VariantsPreviewComponent
   ],
   imports: [
     BrowserModule,

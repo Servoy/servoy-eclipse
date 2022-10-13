@@ -30,7 +30,7 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/AdoptOpenJDK 15 [15]"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/CDC-1.0%Foundation-1.0"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dservoy.application_server.dir=&quot;${servoy_install}/application_server/&quot; -XstartOnFirstThread -Xms200m -Xmx2G"/>
@@ -96,7 +96,6 @@
         <setEntry value="org.apache.batik.i18n@default:default"/>
         <setEntry value="org.apache.batik.util@default:default"/>
         <setEntry value="org.apache.commons.codec@default:default"/>
-        <setEntry value="org.apache.commons.commons-codec@default:default"/>
         <setEntry value="org.apache.commons.commons-collections4@default:default"/>
         <setEntry value="org.apache.commons.commons-dbcp2@default:default"/>
         <setEntry value="org.apache.commons.commons-fileupload@default:default"/>
@@ -138,6 +137,7 @@
         <setEntry value="org.eclipse.ant.core@default:default"/>
         <setEntry value="org.eclipse.ant.launching@default:default"/>
         <setEntry value="org.eclipse.ant.ui@default:default"/>
+        <setEntry value="org.eclipse.collections@default:default"/>
         <setEntry value="org.eclipse.compare.core@default:default"/>
         <setEntry value="org.eclipse.compare@default:default"/>
         <setEntry value="org.eclipse.core.commands@default:default"/>
@@ -378,6 +378,12 @@
         <setEntry value="org.eclipse.jst.standard.schemas@default:default"/>
         <setEntry value="org.eclipse.ltk.core.refactoring@default:default"/>
         <setEntry value="org.eclipse.ltk.ui.refactoring@default:default"/>
+        <setEntry value="org.eclipse.nebula.cwt@default:default"/>
+        <setEntry value="org.eclipse.nebula.widgets.cdatetime@default:default"/>
+        <setEntry value="org.eclipse.nebula.widgets.nattable.core@default:default"/>
+        <setEntry value="org.eclipse.nebula.widgets.nattable.extension.e4@default:default"/>
+        <setEntry value="org.eclipse.nebula.widgets.nattable.extension.nebula@default:default"/>
+        <setEntry value="org.eclipse.nebula.widgets.richtext@default:default"/>
         <setEntry value="org.eclipse.osgi.compatibility.state@default:false"/>
         <setEntry value="org.eclipse.osgi.services@default:default"/>
         <setEntry value="org.eclipse.osgi.util@default:default"/>
@@ -542,6 +548,12 @@
         <setEntry value="org.objectweb.asm.util@default:default"/>
         <setEntry value="org.objectweb.asm@default:default"/>
         <setEntry value="org.opentest4j@default:default"/>
+        <setEntry value="org.osgi.service.prefs@default:default"/>
+        <setEntry value="org.osgi.util.function@default:default"/>
+        <setEntry value="org.osgi.util.measurement@default:default"/>
+        <setEntry value="org.osgi.util.position@default:default"/>
+        <setEntry value="org.osgi.util.promise@default:default"/>
+        <setEntry value="org.osgi.util.xml@default:default"/>
         <setEntry value="org.sat4j.core@default:default"/>
         <setEntry value="org.sat4j.pb@default:default"/>
         <setEntry value="org.skyscreamer.jsonassert@default:default"/>
@@ -557,6 +569,7 @@
         <setEntry value="sj.jsonschemavalidation@default:default"/>
         <setEntry value="slf4j.api@default:true"/>
         <setEntry value="tus-java-server@default:default"/>
+        <setEntry value="xstream@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="com.servoy.eclipse.core@default:default"/>
