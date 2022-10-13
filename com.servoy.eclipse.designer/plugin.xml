@@ -898,7 +898,18 @@
                name="Template"
                optional="true">
          </commandParameter>
-      </command>      
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ConfigureCustomTypeCommand"
+            id="com.servoy.eclipse.designer.rfb.config"
+            name="ShowAutowizard">
+         <commandParameter
+               id="com.servoy.eclipse.designer.editor.rfb.menu.config.type"
+               name="Autowizard Property Name"
+               optional="true">
+         </commandParameter>
+      </command>
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler"
             id="com.servoy.eclipse.designer.rfb.openscripteditor"
@@ -1307,6 +1318,30 @@
                </visibleWhen>
             </menu>
             <menu
+                  label="Configure">
+               <dynamic
+                     class="com.servoy.eclipse.designer.editor.rfb.menu.AutowizardPropertyContributionItem"
+                     id="com.servoy.eclipse.designer.rfb.AutowizardPropertyContributionItem">
+               </dynamic>
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.isWizardable">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>
+                  </with>
+               </visibleWhen>
+            </menu>
+            <menu
                   label="Sizing">
                <visibleWhen
                      checkEnabled="false">
@@ -1616,4 +1651,14 @@
                type="java.lang.Object">
          </propertyTester>
       </extension>
+    <extension
+          point="org.eclipse.core.expressions.propertyTesters">
+       <propertyTester
+             class="com.servoy.eclipse.designer.editor.rfb.menu.IsWizardablePropertyTester"
+             id="com.servoy.eclipse.designer.editor.rfb.isWizardable"
+             namespace="com.servoy.eclipse.designer.editor.rfb"
+             properties="isWizardable"
+             type="java.lang.Object">
+       </propertyTester>
+    </extension>
 </plugin>
