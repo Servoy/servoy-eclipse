@@ -7,9 +7,9 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.WebComponent;
 
-public class IsWizardablePropertyTester extends PropertyTester
+public class HasWizardPropertiesPropertyTester extends PropertyTester
 {
-	public IsWizardablePropertyTester()
+	public HasWizardPropertiesPropertyTester()
 	{
 	}
 
@@ -25,7 +25,7 @@ public class IsWizardablePropertyTester extends PropertyTester
 					.getWebComponentSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
 				return spec.getAllPropertiesNames().stream()//
 					.filter(prop -> spec.getProperty(prop) != null && "autoshow".equals(spec.getProperty(prop).getTag("wizard")))//
-					.findAny().isPresent();
+					.count() > 1;
 			}
 		}
 		return false;
