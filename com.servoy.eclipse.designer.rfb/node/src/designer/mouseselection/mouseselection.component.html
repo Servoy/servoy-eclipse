@@ -39,6 +39,22 @@
                 </a>
             </li>
             </ul>
-     </div>    
+     </div>
+     <div class="menubar" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1">
+     	<span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
+     </div>   
+     <div class="menubar" style="margin-top: -13px;" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length > 1" [positionMenu]="node">
+        <span #menuOpen (mouseenter)="onEnter($event)">
+        	<i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>
+        	<i class="fas fa-caret-down fa-xs" style="color:black;"></i>
+        </span>
+        <ul id="dropdownMenu" class="dropdown-menu" style="display:none;" (mouseleave)="onLeave($event)">
+        	<li *ngFor="let wizardProperty of node.autowizardProperties">
+        		<a tabindex="-1" href="#" (mousedown)="openWizardAction($event, wizardProperty)" class="dropdown-item containerActionWithText">
+                    <span style="text-decoration: none;">Configure {{wizardProperty}}</span>    
+                </a>
+        	</li>
+      	</ul>
+     </div>  
  </div>
 <div class="lasso" #lasso></div>
