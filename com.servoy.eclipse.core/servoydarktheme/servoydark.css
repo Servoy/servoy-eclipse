@@ -6,7 +6,7 @@
 	eclipse-perspective-keyline-color: #2F2F2F #2F2F2F;
 }
 
- * , #PerspectiveSpacer, ScalingHyperlink, .MToolBar, .MToolControl, .MTrimBar, Shell, Composite, Label {
+ * , #PerspectiveSpacer, ScalingHyperlink, .MToolBar, .MToolControl, .MTrimBar, Shell, Composite, Label, Button {
 	background-color: #2F2F2F;
 }
 
