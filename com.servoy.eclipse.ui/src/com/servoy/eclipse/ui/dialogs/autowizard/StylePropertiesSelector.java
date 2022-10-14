@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +39,7 @@ import org.sablo.specification.PropertyDescription;
  */
 public class StylePropertiesSelector
 {
-	public ListViewer stylePropertiesViewer;
+	public TableViewer stylePropertiesViewer;
 	private List<PropertyDescription> styleProperties;
 	private PropertyWizardDialog wizard;
 
@@ -69,7 +70,7 @@ public class StylePropertiesSelector
 			gridData.minimumWidth = 300;
 			gridData.heightHint = 250;
 
-			stylePropertiesViewer = new ListViewer(listParent);
+			stylePropertiesViewer = new TableViewer(listParent);
 			stylePropertiesViewer.getControl().setLayoutData(gridData);
 			stylePropertiesViewer.setContentProvider(JSONContentProvider.INSTANCE);
 			stylePropertiesViewer.setLabelProvider(new LabelProvider()
@@ -82,6 +83,18 @@ public class StylePropertiesSelector
 						return ((JSONObject)element).getString("name");
 					}
 					return "";
+				}
+
+				@Override
+				public Image getImage(Object element)
+				{
+					if (element instanceof JSONObject)
+					{
+						String cls = ((JSONObject)element).optString("cls", "");
+						Image img = getFaImage(cls);
+						return img;
+					}
+					return null;
 				}
 			});
 			stylePropertiesViewer.setInput(tag);
@@ -102,5 +115,11 @@ public class StylePropertiesSelector
 			map.put(propertyDescription.getName(), styleClass);
 			wizard.addNewRow(map);
 		}
+	}
+
+	public static Image getFaImage(String cls)
+	{
+		String cls_ = cls.replace(" ", "-");
+		return com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("wizards/" + cls_ + ".png");
 	}
 }

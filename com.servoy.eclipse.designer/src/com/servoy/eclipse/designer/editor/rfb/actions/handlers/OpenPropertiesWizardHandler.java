@@ -17,38 +17,26 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.CustomJSONArrayType;
-import org.sablo.specification.property.CustomJSONObjectType;
-import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
+import com.servoy.eclipse.designer.editor.commands.ConfigureCustomTypeCommand;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IChildWebObject;
-import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author emera
@@ -56,11 +44,9 @@ import com.servoy.j2db.persistence.WebCustomType;
 public class OpenPropertiesWizardHandler implements IServerService
 {
 	private final ISelectionProvider selectionProvider;
-	private final BaseVisualFormEditor editorPart;
 
-	public OpenPropertiesWizardHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public OpenPropertiesWizardHandler(ISelectionProvider selectionProvider)
 	{
-		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
 	}
 
@@ -74,95 +60,21 @@ public class OpenPropertiesWizardHandler implements IServerService
 		}
 		if (selection.length >= 1 && args.has("name"))
 		{
-			PersistContext persistContext = selection[0];
-			WebComponent webComponent = (WebComponent)persistContext.getPersist();
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-				.getWebComponentSpecification(webComponent.getTypeName());
 			String propertyName = args.getString("name");
-			PropertyDescription property = spec.getProperty(propertyName);
-			if (property != null)
+			Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(ConfigureCustomTypeCommand.COMMAND_ID);
+			ExecutionEvent executionEvent = null;
+			try
 			{
-				if ("autoshow".equals(property.getTag("wizard")))
-				{
-					// prop type should be an array of a custom type..
-					IPropertyType< ? > propType = property.getType();
-					if (propType instanceof CustomJSONArrayType< ? , ? >)
-					{
-
-						CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
-							.getCustomJSONTypeDefinition().getType();
-						PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
-						Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
-						if (wizardProperties.size() > 0)
-						{
-							// feed this wizardProperties into the wizard
-							System.err.println(wizardProperties);
-							Display current = Display.getCurrent();
-							if (current == null) current = Display.getDefault();
-
-							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-							ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-								.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
-
-							List<Map<String, Object>> input = new ArrayList<>();
-							Object prop = webComponent.getProperty(propertyName);
-							Set<Object> previousColumns = new HashSet<>();
-							if (prop instanceof IChildWebObject[])
-							{
-								IChildWebObject[] arr = (IChildWebObject[])prop;
-								for (IChildWebObject obj : arr)
-								{
-									if (obj instanceof WebCustomType)
-									{
-										WebCustomType wct = (WebCustomType)obj;
-										JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
-										Map<String, Object> map = getAsMap(object);
-										previousColumns.add(object.get("svyUUID"));
-										input.add(map);
-									}
-								}
-							}
-
-							PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
-								persistContext,
-								flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
-							if (dialogConfigurator.open() != Window.OK) return null;
-							List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
-
-							Display.getDefault().asyncExec(() -> {
-								editorPart.getCommandStack()
-									.execute(new SetCustomArrayPropertiesCommand(propertyName, persistContext, newProperties, previousColumns, editorPart));
-							});
-						}
-						else
-						{
-							ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
-								"\nhas no wizard properties\n" + propType, null);
-						}
-					}
-					else
-					{
-						ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
-							" that is not an custom array type " + propType, null);
-					}
-
-				}
+				Map<String, String> parameters = new HashMap<>();
+				parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.config.type", propertyName);
+				executionEvent = new ExecutionEvent(command, parameters, new Event(), null);
+				command.executeWithChecks(executionEvent);
+			}
+			catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e)
+			{
+				Debug.log(e);
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * @param object
-	 * @return
-	 */
-	private Map<String, Object> getAsMap(JSONObject object)
-	{
-		Map<String, Object> map = new HashMap<String, Object>();
-		for (String key : object.keySet())
-		{
-			map.put(key, JSONObject.NULL.equals(object.get(key)) ? null : object.get(key));
-		}
-		return map;
 	}
 }

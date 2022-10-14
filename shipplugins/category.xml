@@ -11,7 +11,7 @@
 	<bundle id="org.apache.aries.spifly.dynamic.bundle">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="slf4j.api" version="1.8.0.beta3-SNAPSHOT">
+	<bundle id="slf4j.api">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.slf4j18-impl">
@@ -75,10 +75,10 @@
 		version="1.1.0.201005260935">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="com.sun.activation.javax.activation" version="1.2.0">
+	<bundle id="com.sun.activation.jakarta.activation" >
 		<category name="bundles" />
 	</bundle>
-	<bundle id="com.sun.mail.javax.mail" version="1.6.2">
+	<bundle id="com.sun.mail.jakarta.mail">
 		<category name="bundles" />
 	</bundle>
 	<bundle id='sj.jsonschemavalidation' version='2.0.1'>
