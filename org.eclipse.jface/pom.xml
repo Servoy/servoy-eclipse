@@ -17,7 +17,7 @@
 		<artifactId>servoy-eclipse</artifactId>
 		<version>2022.12.0.3820_rc</version>
 	</parent>
-  <groupId>com.servoy</groupId>
+  <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
   <version>3.27.0.v20220817-1444</version>
   <packaging>eclipse-plugin</packaging>
@@ -43,15 +43,15 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>com.servoy</groupId>
+									<groupId>eclipse.platform.ui</groupId>
 									<artifactId>org.eclipse.jface</artifactId>
 									<version>${project.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
 								</artifactItem>
-								<artifactItem>
-									<groupId>com.servoy</groupId>
+<!--								<artifactItem>
+									<groupId>eclipse.platform.ui</groupId>
 									<artifactId>org.eclipse.jface</artifactId>
 									<version>${project.version}</version>
 									<type>xml</type>
@@ -59,6 +59,7 @@
 									<overWrite>true</overWrite>
 									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
 								</artifactItem>
+-->
 							</artifactItems>
 						</configuration>
 					</execution>
