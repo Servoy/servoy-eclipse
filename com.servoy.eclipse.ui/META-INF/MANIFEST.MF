@@ -113,5 +113,5 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.wizards.exportsolution.pages
 Import-Package: org.apache.commons.io;version="2.11.0"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.ui
