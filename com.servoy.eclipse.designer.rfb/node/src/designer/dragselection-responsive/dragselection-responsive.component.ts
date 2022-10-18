@@ -138,13 +138,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
         this.dragStartEvent = event;
 
-        if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-            this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
-        }
-
         if (this.editorContentService.getGlassPane().style.cursor === "pointer") {
-            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentNode && this.canDrop.beforeChild === this.dragNode.nextElementSibling) {
-                this.canDrop.dropAllowed = false; //it does not make sense to drop exactly where it is
+            if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
+               this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
+               return; //preview position not changed, return here
+            }
+            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement.closest("[svy-id]") && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
+                return; //preview position not changed, return here
             }
             if (this.canDrop.dropAllowed) {
                 this.renderer.setStyle(this.dragNode, 'opacity', '1');
@@ -166,11 +166,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             const obj = (event.ctrlKey || event.metaKey) ? [] : {};
 
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
-                this.canDrop.beforeChild = this.dragNode.nextElementSibling;
+                this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.dragNode);
             }
 
             if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-                this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
+                this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop.beforeChild);
             }
 
             const key = (event.ctrlKey || event.metaKey) && this.dragCopy ? 0 : this.dragNode.getAttribute("svy-id");
@@ -234,7 +234,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
         return canDrop;
     }
-
+    
     getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
         return null;
     }
