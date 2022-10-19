@@ -332,6 +332,7 @@
 		<profile>
 			<id>product</id>
 			<modules>
+                <module>org.eclipse.jface</module>
 				<module>com.servoy.eclipse.jre.linux.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.aarch64</module>
