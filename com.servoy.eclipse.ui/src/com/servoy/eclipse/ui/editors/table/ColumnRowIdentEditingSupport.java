@@ -23,10 +23,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.util.DataSourceUtils;
 
 public class ColumnRowIdentEditingSupport extends EditingSupport
 {
@@ -43,13 +45,13 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 
 	private String[] getItems()
 	{
-		if (table != null && table.getExistInDB())
+		if (table != null && table.getExistInDB() && DataSourceUtils.getDBServernameTablename(table.getDataSource()) != null)
 		{
-			rowIdents = new String[Column.allDefinedRowIdents.length - 1];
+			rowIdents = new String[IBaseColumn.allDefinedRowIdents.length - 1];
 			int j = 0;
-			for (int el : Column.allDefinedRowIdents)
+			for (int el : IBaseColumn.allDefinedRowIdents)
 			{
-				if (el != Column.PK_COLUMN)
+				if (el != IBaseColumn.PK_COLUMN)
 				{
 					rowIdents[j++] = Column.getFlagsString(el);
 				}
@@ -57,10 +59,10 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 		}
 		else
 		{
-			rowIdents = new String[Column.allDefinedRowIdents.length];
+			rowIdents = new String[IBaseColumn.allDefinedRowIdents.length];
 			for (int i = 0; i < rowIdents.length; i++)
 			{
-				rowIdents[i] = Column.getFlagsString(Column.allDefinedRowIdents[i]);
+				rowIdents[i] = Column.getFlagsString(IBaseColumn.allDefinedRowIdents[i]);
 			}
 		}
 		return rowIdents;
@@ -75,7 +77,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 			int index = Integer.parseInt(value.toString());
 			String rowIdent = rowIdents[index];
 			int type = 0;
-			for (int element2 : Column.allDefinedRowIdents)
+			for (int element2 : IBaseColumn.allDefinedRowIdents)
 			{
 				if (Column.getFlagsString(element2).equals(rowIdent))
 				{
@@ -134,10 +136,11 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null && element instanceof Column && editor != null)
 		{
 			Column c = (Column)element;
+			// for in mem and view foundsets this will always be false..
 			if (c.getExistInDB())
 			{
 				// pk never allowed to change, we do allow for user_ident on nullable column
-				return c.getRowIdentType() != Column.PK_COLUMN;
+				return c.getRowIdentType() != IBaseColumn.PK_COLUMN;
 			}
 			else
 			{

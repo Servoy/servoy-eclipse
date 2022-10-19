@@ -1,4 +1,7 @@
+@import "~@fortawesome/fontawesome-free/css/all.css";
 @import "~bootstrap/dist/css/bootstrap.min.css";
+@import url("designer/toolbar/toolbar.css");
+@import url("designer/contextmenu/contextmenu.component.css");
 
 html, body
 {
@@ -33,4 +36,13 @@ html, body
 
 .palette > input::placeholder {
    font-style: italic;
+}
+
+.accordion-button {
+    padding: 8px;
+    font-size: 0.8rem;
+}
+
+.accordion-body {
+    padding: 0.6rem;
 }

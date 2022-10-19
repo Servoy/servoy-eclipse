@@ -33,7 +33,7 @@ public class ExportNGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected boolean isDefaultPackageEnabled(String packageName)
+	public boolean isDefaultPackageEnabled(String packageName)
 	{
 		// TODO this should be implemented for command line war export (equivalent to developer's PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable."))
 		return true;

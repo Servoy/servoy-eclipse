@@ -39,7 +39,6 @@ import org.json.JSONException;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
-import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
@@ -165,10 +164,6 @@ final public class ExportSolutionJob extends WorkspaceJob
 					{
 						ServoyLog.logError(ex);
 					}
-				}
-				for (ServoyNGPackageProject ngPackageProject : moduleProject.getNGPackageProjects())
-				{
-					webPackages.add(ngPackageProject.getProject().getLocation().toFile());
 				}
 				if (webPackages.size() > 0)
 				{

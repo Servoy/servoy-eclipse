@@ -50,7 +50,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 {
 	public static final Object NONE = new Object();
 
-	private final FlattenedSolution flattenedSolution;
+	protected final FlattenedSolution flattenedSolution;
 	private RelationListOptions options;
 	private final IPersist context;
 	private final Map<ITable, List<Relation>> relationCache = new HashMap<ITable, List<Relation>>();
@@ -127,8 +127,8 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			}
 			ITable relationFT = dsm.getDataSource(relation.getForeignDataSource());
 			if (!relationNames.contains(relation.getName()) //
-			&& (!excludeGlobalRelations || !relation.isGlobal()) //
-			&& //
+				&& (!excludeGlobalRelations || !relation.isGlobal()) //
+				&& //
 				(foreignTable == null || //
 					foreignTable.equals(relationFT) || //
 					(recursive && canReachTable(relation, relationFT, dsm))))

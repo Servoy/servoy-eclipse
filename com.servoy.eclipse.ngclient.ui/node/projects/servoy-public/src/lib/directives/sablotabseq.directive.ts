@@ -250,8 +250,13 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     }
 
     setDOMTabIndex(tabindex): void {
-        this.tabindex = tabindex;
-        this.cdRef.detectChanges();
+        if(this.config && this.config.tabSeqSetter) {
+            this.config.tabSeqSetter.setTabIndex(tabindex);
+        }
+        else {
+            this.tabindex = tabindex;
+            this.cdRef.detectChanges();
+        }
     }
 
     trigger(target, event: string, arg): void {

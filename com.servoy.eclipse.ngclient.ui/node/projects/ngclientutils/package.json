@@ -1,0 +1,17 @@
+{
+  "name": "@servoy/ngclientutils",
+  "version": "2021.12.0",
+  "peerDependencies": {
+    "@servoy/public": "*",
+    "@angular/common": "^14",
+    "@angular/core": "^14"
+  },
+  "dependencies": {
+    "tslib": "*"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Servoy/servoy-eclipse/tree/master/com.servoy.eclipse.ngclient.ui/node/projects/ngutils"
+  }
+}

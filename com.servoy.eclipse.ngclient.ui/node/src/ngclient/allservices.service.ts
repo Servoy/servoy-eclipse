@@ -5,17 +5,11 @@ import { Injectable } from '@angular/core';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 
 import { ApplicationService } from './services/application.service';
+import { ClientDesignService } from './services/clientdesign.service';
 import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import {PopupFormService} from './services/popupform.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
-import { WindowService as WindowPlugin} from '../window_service/window.service';
-
-// TODO move to generated
-import { WindowServiceModule} from '../window_service/windowservice.module';
-import { DialogModule } from '../dialogservice/dialog.module';
-import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
-import { DialogService } from '../dialogservice/dialogs.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
 // generated imports start
@@ -32,14 +26,11 @@ import { SabloService } from '../sablo/sablo.service';
 export class AllServiceService implements ServiceProvider {
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
+        private clientdesign: ClientDesignService,
         private $windowService: WindowService,
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
         private $sabloService: SabloService,
-        // TODO move to generated
-        private ngclientutils: NGUtilsService,
-        private window: WindowPlugin,
-        private dialogs: DialogService,
         // generated services start
         // generated services end
         private clientFunctionService: ClientFunctionService,
@@ -51,24 +42,23 @@ export class AllServiceService implements ServiceProvider {
     }
 
     init() {
-        // just here is it can be called on.
+        Object.keys(this).forEach(key => {
+            if (typeof this[key].init === 'function') {
+                this[key].init();
+            }
+        });
     }
 
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService, SessionService, PopupFormService,
-                // TODO move to generated
-                NGUtilsService,
+    providers: [AllServiceService, ApplicationService, ClientDesignService, WindowService, SessionService, PopupFormService,
                 // generated providers start
                 // generated providers end
-                ClientFunctionService
                 ],
     imports: [
-                DialogModule,
                 // generated modules start
                 // generated modules end
-                WindowServiceModule
                 ]
 } )
 export class AllServicesModules { }

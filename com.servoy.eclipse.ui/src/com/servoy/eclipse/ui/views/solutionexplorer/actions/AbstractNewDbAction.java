@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -72,6 +73,13 @@ public abstract class AbstractNewDbAction extends Action
 	public void run()
 	{
 		HashMap<String, ServerConfig> serverMap = getServerMap();
+
+		if (serverMap.isEmpty())
+		{
+			MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "No existing database connection, at least one is needed to create a new one.");
+			return;
+		}
+
 		String dbSelection = getDbServerSelection(serverMap);
 		if (dbSelection == null) return;
 
@@ -153,7 +161,7 @@ public abstract class AbstractNewDbAction extends Action
 		return state;
 	}
 
-	private HashMap<String, ServerConfig> getServerMap()
+	protected HashMap<String, ServerConfig> getServerMap()
 	{
 		ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
 		HashMap<String, ServerConfig> serverMap = new HashMap<String, ServerConfig>();
@@ -164,11 +172,6 @@ public abstract class AbstractNewDbAction extends Action
 			{
 				serverMap.put(serverURL, sc);
 			}
-		}
-
-		if (serverMap.isEmpty())
-		{
-			MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "No existing database connection, at least one is needed to create a new one.");
 		}
 		return serverMap;
 	}
@@ -242,13 +245,15 @@ public abstract class AbstractNewDbAction extends Action
 	/**
 	 * Try to save the default server config. If no errors occur, open server editor.
 	 * @param origConfig
+	 * @param serverSettings
 	 * @param serverUrl
 	 * @param serverManager
 	 * @param configName
 	 */
-	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, String serverUrl, final IServerManagerInternal serverManager, String configName)
+	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, ServerSettings serverSettings, String serverUrl, IServerManagerInternal serverManager,
+		String configName)
 	{
-		final ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
+		ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
 			origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
 			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
 			origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
@@ -260,14 +265,20 @@ public abstract class AbstractNewDbAction extends Action
 				try
 				{
 					serverManager.saveServerConfig(null, serverConfig);
+					serverManager.saveServerSettings(configName, serverSettings);
 				}
 				catch (Exception e)
 				{
 					ServoyLog.logError(e);
 				}
-				EditorUtil.openServerEditor(serverConfig);
+				EditorUtil.openServerEditor(serverConfig, serverSettings);
 			}
 		});
+	}
+
+	public boolean isVisible()
+	{
+		return true;
 	}
 
 }

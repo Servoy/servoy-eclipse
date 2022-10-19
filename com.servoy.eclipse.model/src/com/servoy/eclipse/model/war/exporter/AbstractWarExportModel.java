@@ -404,10 +404,13 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 				SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
 		}
 
-		// these are always required
+		// these core components are always required
 		componentsNeededUnderTheHood.add("servoycore-defaultLoadingIndicator");
 		componentsNeededUnderTheHood.add("servoycore-errorbean");
 		componentsNeededUnderTheHood.add("servoycore-portal");
+		componentsNeededUnderTheHood.add("servoycore-formcomponent");
+		componentsNeededUnderTheHood.add("servoycore-formcontainer");
+		componentsNeededUnderTheHood.add("servoycore-listformcomponent");
 
 		// NOTE: this currently won't include any sablo content as all needed sablo js files are referenced staticly from the page when serving ng clients.
 		servicesNeededUnderTheHood.addAll(servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices").getSpecifications().keySet());
@@ -727,7 +730,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			String password = sc.getPassword();
 			try
 			{
-				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password);
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password != null ? password : "");
 			}
 			catch (Exception e)
 			{
@@ -750,6 +753,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
 			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
+			properties.put("server." + i + ".clientOnlyConnections", "" + sc.isClientOnlyConnections());
 			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)

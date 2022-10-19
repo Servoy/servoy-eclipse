@@ -174,7 +174,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected boolean isDefaultPackageEnabled(String packageName)
+	public boolean isDefaultPackageEnabled(String packageName)
 	{
 		return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
 	}

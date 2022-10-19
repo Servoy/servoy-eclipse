@@ -109,7 +109,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 		});
 	}
 
-	protected static ITreeContentProvider getFoundsetContentProvider(PersistContext persistContext)
+	public static ITreeContentProvider getFoundsetContentProvider(PersistContext persistContext)
 	{
 		// @formatter:off
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist());
@@ -160,10 +160,15 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 
 	}
 
-	protected static Object getFoundsetInputOptions(ITable primaryTableForRelation, ITable foreignTableForRelation)
+	public static Object getFoundsetInputOptions(ITable primaryTableForRelation, ITable foreignTableForRelation)
+	{
+		return getFoundsetInputOptions(primaryTableForRelation, foreignTableForRelation, true);
+	}
+
+	public static Object getFoundsetInputOptions(ITable primaryTableForRelation, ITable foreignTableForRelation, boolean includeNone)
 	{
 		// @formatter:off
-		return new CombinedTreeOptions(null, true,
+		return new CombinedTreeOptions(null, includeNone,
 			new Object[] { null, new CombinedTreeOptions(new String[] { "Related foundset", "Separate foundset (random table)" }, false,
 				new Object[] { new RelationContentProvider.RelationListOptions(primaryTableForRelation, foreignTableForRelation, false,
 					true), new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false) }), null });

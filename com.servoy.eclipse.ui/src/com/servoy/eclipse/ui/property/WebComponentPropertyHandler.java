@@ -27,6 +27,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -130,12 +131,18 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
+				// if null is coming from parent, return it
+				if (webObject.getParentComponent().getExtendsID() > 0) return value;
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{
 					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription);
 				}
 				return defaultValue;
+			}
+			if (value != null && type instanceof StringPropertyType)
+			{
+				value = value.toString();
 			}
 		}
 		catch (Exception e)
@@ -223,7 +230,15 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 	public boolean shouldShow(PersistContext persistContext)
 	{
-		if (propertyDescription.isDeprecated()) return false;
+		if (propertyDescription.isDeprecated())
+		{
+			IBasicWebObject webObject = (IBasicWebObject)persistContext.getPersist();
+			if (webObject == null || webObject.getProperty(getName()) == null)
+			{
+				// if a value is set show it, unset may be needed
+				return false;
+			}
+		}
 		if (propertyDescription.getType() instanceof ComponentPropertyType)
 		{
 			return false;

@@ -17,10 +17,10 @@
 
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,6 +57,7 @@ import com.servoy.eclipse.ui.wizards.NewSolutionWizard.SolutionPackageInstallInf
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea
@@ -93,7 +94,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 			final String selectedSolution = isMainSolutionInstall ? pck.getString("name") : pck.optString("activeSolution", null) != null
 				? pck.optString("activeSolution", null) : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 			Map<String, SolutionPackageInstallInfo> solutionsWithDependencies = new LinkedHashMap<String, SolutionPackageInstallInfo>();
-			Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
+			Map<String, Pair<String, File>> webpackagesWithDependencies = new HashMap<String, Pair<String, File>>();
 			Map<String, String> packagesInstalledResources = new HashMap<String, String>();
 			getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies,
 				packagesInstalledResources,
@@ -156,7 +157,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 			for (String packageName : webpackagesWithDependencies.keySet())
 			{
 				String installedResource = packagesInstalledResources.get(packageName);
-				importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
+				importZipFileComponent(componentsFolder, new FileInputStream(webpackagesWithDependencies.get(packageName).getRight()), packageName,
+					installedResource);
 			}
 
 			if (isMainSolutionInstall)
@@ -172,7 +174,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 	}
 
 	private static void getPackageWithDependencies(JSONObject pck, String selectedVersion, String selectedSolution,
-		Map<String, SolutionPackageInstallInfo> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
+		Map<String, SolutionPackageInstallInfo> solutionsWithDependencies, Map<String, Pair<String, File>> webpackagesWithDependencies,
 		Map<String, String> packagesInstalledResources, List<String> installActions, boolean isMainSolutionInstall)
 		throws IOException
 	{
@@ -217,16 +219,37 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 		if (urlString != null)
 		{
-			URL url = new URL(urlString);
-			URLConnection conn = url.openConnection();
+			File dataFile = null;
+			try
+			{
+
+				dataFile = Utils.downloadUrlPackage(urlString);
+				if (dataFile == null)
+				{
+					throw new IOException("Download error: " + urlString.substring(urlString.lastIndexOf("/") + 1));
+				}
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+				Display.getDefault().syncExec(new Runnable()
+				{
+					public void run()
+					{
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+					}
+				});
+				throw e;
+			}
+
 			if ("Solution".equals(packageType) || "Solution-Main".equals(packageType))
 			{
 				solutionsWithDependencies.put(packageName,
-					new SolutionPackageInstallInfo(pckVersion, conn.getInputStream(), "Solution-Main".equals(packageType), true));
+					new SolutionPackageInstallInfo(pckVersion, dataFile, "Solution-Main".equals(packageType), true));
 			}
 			else
 			{
-				webpackagesWithDependencies.put(packageName, new Pair<String, InputStream>(pckVersion, conn.getInputStream()));
+				webpackagesWithDependencies.put(packageName, new Pair<String, File>(pckVersion, dataFile));
 			}
 			String installedResource = pck.optString("installedResource", null);
 			if (installedResource != null) packagesInstalledResources.put(packageName, installedResource);

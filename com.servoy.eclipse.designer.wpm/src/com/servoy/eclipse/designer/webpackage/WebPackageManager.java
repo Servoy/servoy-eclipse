@@ -2,6 +2,7 @@ package com.servoy.eclipse.designer.webpackage;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -9,6 +10,7 @@ import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.browser.BrowserFactory;
 import com.servoy.eclipse.ui.browser.IBrowser;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -51,6 +53,7 @@ public class WebPackageManager extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
+		boolean darkTheme = Activator.getDefault().isDarkThemeSelected();
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
 		{
@@ -58,17 +61,29 @@ public class WebPackageManager extends EditorPart
 			if (solutionName != null)
 			{
 				url += "?solution=" + solutionName;
+				url += "&darkTheme=" + darkTheme;
+			}
+			else
+			{
+				url += "?darkTheme=" + darkTheme;
 			}
 		}
+		else
+		{
+			url += "?darkTheme=" + darkTheme;
+		}
 		browser = BrowserFactory.createBrowser(parent);
-		try
-		{
-			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError("couldn't load the package manager: " + url, ex);
-		}
+		String finalUrl = url;
+		Display.getDefault().asyncExec(() -> {
+			try
+			{
+				browser.setUrl(finalUrl, null, new String[] { "Cache-Control: no-cache" });
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("couldn't load the package manager: " + finalUrl, ex);
+			}
+		});
 	}
 
 	@Override

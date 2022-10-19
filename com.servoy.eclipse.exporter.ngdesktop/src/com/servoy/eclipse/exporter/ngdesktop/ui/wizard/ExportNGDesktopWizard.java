@@ -6,19 +6,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpHostConnectException;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -29,16 +31,19 @@ import org.eclipse.swt.SWT;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.debug.handlers.StartNGDesktopClientHandler;
 import com.servoy.eclipse.exporter.ngdesktop.Activator;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.ImageLoader;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gboros
@@ -91,12 +96,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 			return false;
 		}
-
-		final String[] loginToken = { logIn() };
-		if (loginToken[0] == null)
+		final String loginToken = logIn();
+		if (Utils.stringIsEmpty(loginToken))
 			return false; //no login
 
-		exportSettings.put("login_token", loginToken[0]);
+		exportSettings.put("login_token", loginToken);
+
 		final boolean result[] = { false };
 
 		errorMsg.delete(0, errorMsg.length());
@@ -106,9 +111,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 			try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
 			{
-				final int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
-				final String reasonPhrase = httpResponse.getStatusLine().getReasonPhrase().trim().length() > 0 ? httpResponse.getStatusLine().getReasonPhrase()
-					: getReasonPhrase(httpResponse);
+				final int httpStatusCode = httpResponse.getCode();
 
 				switch (httpStatusCode)
 				{
@@ -116,10 +119,16 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						result[0] = true; //at least one platform has been delivered succesfully
 						break;
 					default :
+						String reasonPhrase = httpResponse.getReasonPhrase();
+						if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
 						errorMsg
-							.append(String.format("%s: %d %s", platform, httpStatusCode, reasonPhrase));
+							.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
 						break;
 				}
+			}
+			catch (final HttpHostConnectException | UnknownHostException e)
+			{
+				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
 			}
 			catch (final IOException e)
 			{
@@ -129,14 +138,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 		else
 		{
-			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be send to the provided address ...";
+			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
 			MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
 		}
 		return result[0];
 	}
 
 	//fail to customize reason phrase into Spring - so extract from the
-	private String getReasonPhrase(HttpResponse response) throws IOException
+	private String getReasonPhrase(CloseableHttpResponse response) throws IOException
 	{
 		if (response != null) try (BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent())))
 		{
@@ -144,13 +153,22 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
 				sb.append(output);
-			final JSONObject jsonObj = new JSONObject(sb.toString());
-			return jsonObj.optString("statusMessage", "Unexpected error");
+			try
+			{
+				final JSONObject jsonObj = new JSONObject(sb.toString());
+				return jsonObj.optString("statusMessage", "Unexpected error");
+			}
+			catch (final JSONException e)
+			{
+				//Unexpected http response?
+				return "Internal server error: " + response.getReasonPhrase();
+
+			}
 		}
 		return "Internal server error";//not sure what happen ...
 	}
 
-	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException
+	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
 	{
 		final String srvAddress = System.getProperty("ngclient.service.address");
 		final UrlValidator urlValidator = new UrlValidator();
@@ -173,22 +191,22 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			final JSONObject jsonObj = new JSONObject();
 			jsonObj.put("platform", settings.get("platform"));
-			if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("icon_path")))
 				jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
-			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("image_path")))
 				jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("copyright")))
 				jsonObj.put("copyright", settings.get("copyright"));
-			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("app_url")))
 				jsonObj.put("url", settings.get("app_url"));
-			if (settings.get("ngdesktop_width") != null && settings.get("ngdesktop_width").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_width")))
 				jsonObj.put("width", settings.get("ngdesktop_width"));
-			if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_height")))
 				jsonObj.put("height", settings.get("ngdesktop_height"));
-			if (settings.get("ngdesktop_version") != null && settings.get("ngdesktop_version").trim().length() > 0)
-				jsonObj.put("version", settings.get("ngdesktop_version"));
+			if (!Utils.stringIsEmpty(settings.get("ngdesktop_version")))
+				jsonObj.put("version", getNgDesktopVersion(settings.get("ngdesktop_version")));
 			jsonObj.put("includeUpdate", settings.getBoolean("include_update"));
-			if (settings.get("update_url") != null && settings.get("update_url").trim().length() > 0)
+			if (!Utils.stringIsEmpty(settings.get("update_url")))
 				jsonObj.put("updateUrl", settings.get("update_url"));
 			jsonObj.put("loginToken", settings.get("login_token"));
 			jsonObj.put("applicationName", settings.get("application_name"));
@@ -196,8 +214,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			jsonObj.put("emailAddress", settings.get("email_address"));
 			jsonObj.put("storageTimeout", settings.getBoolean("store_data") ? STORE_TIMEOUT * 24 : 0); //convert to hours
 
-			final StringEntity input = new StringEntity(jsonObj.toString());
-			input.setContentType("application/json");
+			final StringEntity input = new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 			return input;
 		}
 		catch (final IOException e)
@@ -205,6 +222,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			//
 		}
 		return null;
+	}
+
+	private String getNgDesktopVersion(String selectedVersion)
+	{
+		return StartNGDesktopClientHandler.getNgDesktopVersion(selectedVersion);
 	}
 
 	private String logIn()
@@ -229,48 +251,43 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final boolean winPlatform = settings.getBoolean("win_export");
 		final boolean osxPlatform = settings.getBoolean("osx_export");
 		final boolean linuxPlatform = settings.getBoolean("linux_export");
-		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected");
+		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected\n");
 
 		String strValue = settings.get("icon_path");
 		if (strValue != null && strValue.trim().length() > 0)
 		{
 			final File myFile = new File(strValue);
-			if (!myFile.exists())
+			if (!myFile.exists() || !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + "doesn't exist");
+				errorMsg.append(myFile.getName() + " doesn't exist. Is a directory?\n");
 				return errorMsg;
 			}
-			if (myFile.isFile())
+			if (myFile.length() > LOGO_SIZE * 1024)
 			{
-
-				if (myFile.length() > LOGO_SIZE * 1024)
-				{
-					errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
-					return errorMsg;
-				}
-
-				final Dimension iconSize = ImageLoader.getSize(myFile);
-				if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
-				{
-					errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")");
-					return errorMsg;
-				}
+				errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length() + "\n");
+				return errorMsg;
 			}
 
+			final Dimension iconSize = ImageLoader.getSize(myFile);
+			if (iconSize.getWidth() < 512 || iconSize.getHeight() < 512)
+			{
+				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")\n");
+				return errorMsg;
+			}
 		}
 
 		strValue = settings.get("image_path");
 		if (strValue != null && strValue.trim().length() > 0)
 		{
 			final File myFile = new File(strValue);
-			if (myFile != null && !myFile.exists())
+			if (!myFile.exists() && !myFile.isFile())
 			{
-				errorMsg.append(myFile.getName() + "doesn't exist");
+				errorMsg.append(myFile.getName() + "  doesn't exist. Is a directory?\n");
 				return errorMsg;
 			}
-			if (myFile.exists() && myFile.isFile() && myFile.length() > IMG_SIZE * 1024)
+			if (myFile.length() > IMG_SIZE * 1024)
 			{
-				errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
+				errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length() + "\n");
 				return errorMsg;
 			}
 		}
@@ -279,7 +296,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		strValue = settings.get("copyright");
 		if (strValue != null && strValue.trim().length() > 0 && strValue.toCharArray().length > COPYRIGHT_LENGTH)
 		{
-			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length);
+			errorMsg.append("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + strValue.toCharArray().length + "\n");
 			return errorMsg;
 		}
 
@@ -292,7 +309,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid width size: " + strValue);
+					errorMsg.append("Invalid width size: " + strValue + "\n");
 					return errorMsg;
 				}
 			}
@@ -302,14 +319,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				intValue = Integer.parseInt(strValue);
 				if (intValue <= 0)
 				{
-					errorMsg.append("Invalid height size: " + strValue);
+					errorMsg.append("Invalid height size: " + strValue + "\n");
 					return errorMsg;
 				}
 			}
 		}
 		catch (final NumberFormatException e)
 		{
-			errorMsg.append("NumberFormatException: " + e.getMessage());
+			errorMsg.append("NumberFormatException: " + e.getMessage() + "\n");
 			return errorMsg;
 
 		}
@@ -320,27 +337,33 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			final UrlValidator urlValidator = new UrlValidator();
 			if (!urlValidator.isValid(strValue))
 			{
-				errorMsg.append("Invalid URL: " + strValue);
-				return errorMsg;
+				final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
+					"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);
+				if (!result)
+				{
+					errorMsg.append("Invalid URL: " + strValue + "\n");
+					return errorMsg;
+				}
 			}
 		}
 
 		strValue = settings.get("application_name");
 		if (strValue == null || strValue.trim().length() == 0)
 		{
-			errorMsg.append("Provide a name for the application ...");
+			errorMsg.append("Provide a name for the application ...\n");
 			return errorMsg;
 		}
 		if (strValue.toCharArray().length > APP_NAME_LENGTH)
 		{
-			errorMsg.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length);
+			errorMsg
+				.append("Application name string exceeds the maximum allowed limit (" + APP_NAME_LENGTH + " chars): " + strValue.toCharArray().length + "\n");
 			return errorMsg;
 		}
 
 		strValue = settings.get("email_address");
 		if (strValue == null || strValue.trim().length() == 0)
 		{
-			errorMsg.append("Email address is missing ...");
+			errorMsg.append("Email address is missing ...\n");
 			return errorMsg;
 		}
 		final String regex = "^(.+)@(.+)$";
@@ -349,7 +372,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final Matcher matcher = pattern.matcher(strValue);
 		if (!matcher.find())
 		{
-			errorMsg.append("Email address is not valid: " + strValue);
+			errorMsg.append("Email address is not valid: " + strValue + "\n");
 			return errorMsg;
 		}
 		return errorMsg;

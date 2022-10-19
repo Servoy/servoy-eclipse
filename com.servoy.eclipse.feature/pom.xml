@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2021.9.0.3700_rc</version>
+		<version>2022.12.0.3820_rc</version>
 	</parent>
 
 	<groupId>com.servoy</groupId>
 	<artifactId>com.servoy.eclipse.feature</artifactId>
-	<version>2021.9.0.3700_rc</version>
+	<version>2022.12.0.3820_rc</version>
 	<packaging>eclipse-feature</packaging>
 
 </project>

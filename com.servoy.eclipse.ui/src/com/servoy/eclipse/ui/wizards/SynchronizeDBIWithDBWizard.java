@@ -90,7 +90,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -318,7 +318,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		final List<Pair<IServerInternal, String>> foundMissingTables = new ArrayList<Pair<IServerInternal, String>>();
 		for (final IServerInternal s : servers)
 		{
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(s.getName());
+			IFolder serverInformationFolder = dmm.getServerInformationFolder(s.getName());
 			if (serverInformationFolder.exists())
 			{
 				try
@@ -375,7 +375,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		List<Pair<IServerInternal, String>> foundSupplementalTables = new ArrayList<Pair<IServerInternal, String>>();
 		for (IServerInternal s : servers)
 		{
-			IFolder serverInformationFolder = dmm.getDBIFileContainer(s.getName());
+			IFolder serverInformationFolder = dmm.getServerInformationFolder(s.getName());
 			try
 			{
 				for (String tableName : s.getTableAndViewNames(true))
@@ -557,8 +557,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									InputStream is = file.getContents(true);
 									String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 									Utils.closeInputStream(is);
-									String problems = DatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
-										dbiFileContent, false, false);
+									String problems = EclipseDatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
+										dbiFileContent, EclipseDatabaseUtils.UPDATE_NOW, false);
 									if (problems != null)
 									{
 										StringTokenizer st = new StringTokenizer(problems, "\n");

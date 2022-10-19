@@ -16,8 +16,14 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import static com.servoy.j2db.persistence.SortingNullprecedence.databaseDefault;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.stream;
+
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.SortingNullprecedence;
 
 /**
  *
@@ -32,7 +38,6 @@ public class ColumnInfoBean
 	{
 		this.columnInfo = columnInfo;
 	}
-
 
 	public void setColumnInfo(ColumnInfo columnInfo)
 	{
@@ -334,5 +339,46 @@ public class ColumnInfoBean
 		columnInfo.flagChanged();
 	}
 
+	public String getSortIgnorecase()
+	{
+		return BooleanTristate.valueOf(columnInfo.getSortIgnorecase()).name();
+	}
+
+	public void setSortIgnorecase(String sortIgnorecaseDisplay)
+	{
+		columnInfo.setSortIgnorecase(BooleanTristate.valueOf(sortIgnorecaseDisplay).value);
+		columnInfo.flagChanged();
+	}
+
+	public String getSortingNullprecedence()
+	{
+		SortingNullprecedence sortingNullprecedence = columnInfo.getSortingNullprecedence();
+		return (sortingNullprecedence == null ? databaseDefault : sortingNullprecedence).display();
+	}
+
+	public void setSortingNullprecedence(String sortingNullprecedenceDisplay)
+	{
+		SortingNullprecedence sortingNullprecedence = SortingNullprecedence.fromDisplay(sortingNullprecedenceDisplay).orElse(null);
+		columnInfo.setSortingNullprecedence(sortingNullprecedence == databaseDefault ? null : sortingNullprecedence);
+		columnInfo.flagChanged();
+	}
+
+	public static enum BooleanTristate
+	{
+		Default(null), True(TRUE), False(FALSE);
+
+		final Boolean value;
+
+		BooleanTristate(Boolean value)
+		{
+			this.value = value;
+		}
+
+		static BooleanTristate valueOf(Boolean b)
+		{
+			return stream(values()).filter(triState -> triState.value == b).findAny().get();
+		}
+
+	}
 
 }

@@ -91,7 +91,6 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	private final IDebugClient state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
-
 	public JSDeveloperSolutionModel(IDebugClient state)
 	{
 		this.state = state;

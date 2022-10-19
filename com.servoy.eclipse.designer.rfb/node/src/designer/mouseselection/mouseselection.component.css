@@ -1,0 +1,133 @@
+.decorationOverlay {
+    /* pointer-events: none; */
+    box-sizing: border-box;
+    position: absolute;
+    border: 1px solid #0099FF;
+}
+
+.decorationOverlay.showWireframe::before {
+  content				  : attr(svytitle);
+  background-color		  : var(--svyBackgroundColor);
+  border                  : 1px solid #0099FF;
+  border-bottom           : none;
+  border-top-left-radius  : 5px;
+  border-top-right-radius : 5px;
+  font					  : 12px Arial, sans-serif;
+  margin-top			  : -20px;
+  margin-left			  : 20px;
+  padding                 : 2px 10px 3px 10px;
+  position				  : absolute;
+}
+
+.lasso {
+    position:absolute;
+    left: 0px;
+    top: 0px;
+    height:0px;
+    width:0px;
+    border-style:dashed;
+    border-width: 1px;
+    display: block;
+}
+
+.knob {
+    box-sizing: border-box;
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border: 1px solid #808080;
+    border-radius: 4px
+}
+
+.knob.t.l,
+.knob.t,
+.knob.t.r
+    {
+    top: 0px;
+    margin-top: -4px;
+}
+
+.knob.t.r,
+.knob.r,
+.knob.b.r
+    {
+    left: auto;
+    right: 0px;
+    margin-right: -4px;
+}
+
+.knob.b.l,
+.knob.b,
+.knob.b.r
+    {
+    top: auto;
+    bottom: 0px;
+    margin-bottom: -4px;
+}
+
+.knob.t.l,
+.knob.l,
+.knob.b.l
+    {
+    left: 0px;
+    margin-left: -4px;
+}
+
+.knob.l,
+.knob.r {
+    top: 50%;
+    margin-top: -4px;
+    cursor: e-resize
+}
+
+.knob.t,
+.knob.b {
+    left: 50%;
+    margin-left: -4px;
+    cursor: s-resize
+}
+
+.knob.t.l,
+.knob.b.r {
+    cursor: se-resize
+}
+
+.knob.t.r,
+.knob.b.l {
+    cursor: ne-resize
+}
+
+.knob.hidden {display:none}
+
+.menubar {
+    color: white;
+    position: relative;
+    height: 16px;
+    top: -10px;
+    width: auto;
+    float:right;
+    pointer-events: auto;
+    cursor: pointer;
+    display:inline;
+    white-space:nowrap;
+    z-index: 10000;
+}
+
+.containerAction{
+    display: inline-block;
+    background-color: #606060;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    width: 20px;
+    height: 18px;
+}
+.containerActionWithText{
+     background-position: left center;
+     background-repeat: no-repeat;
+}
+.decorator {
+    pointer-events: auto;
+    z-index: 1000;
+}

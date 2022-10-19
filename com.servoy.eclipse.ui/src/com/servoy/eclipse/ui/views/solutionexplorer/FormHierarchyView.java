@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -88,6 +90,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -500,7 +503,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				}
 
 				List<Form> directChildren = getActiveSolution().getDirectlyInheritingForms(f);
-				if (showMembersAction.isChecked())
+				if (showMembersAction.isChecked() && listSelection != null)
 				{
 					for (Form directChild : directChildren)
 					{
@@ -704,7 +707,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		fParent = parent;
 		fDialogSettings = Activator.getDefault().getDialogSettings();
-		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null) fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
 		fSplitter = new SashForm(fParent, SWT.NONE);
@@ -787,13 +789,31 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			@Override
 			public void run()
 			{
-				if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+				fDialogSettings = Activator.getDefault().getDialogSettings();
+				if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null)
 				{
-					openFormEditor.run();
+					IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+					String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+						SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+					if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+					{
+						openFormEditor.run();
+					}
+					else
+					{
+						openScriptEditor.run();
+					}
 				}
 				else
 				{
-					openScriptEditor.run();
+					if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+					{
+						openFormEditor.run();
+					}
+					else
+					{
+						openScriptEditor.run();
+					}
 				}
 			}
 		});
@@ -932,7 +952,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		treeProvider.setSelection(persist);
 
-		tree.getTree().setRedraw(false);
 		tree.refresh();
 		expandTreePaths(persist);
 		try
@@ -1105,7 +1124,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			super(text, AS_RADIO_BUTTON);
 			this.selectionValue = selectionValue;
 			setImageDescriptor(Activator.loadImageDescriptorFromBundle(image));
-			setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
+			if (fDialogSettings.get(OPEN_FORM_PREFERENCE) != null) setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
 		}
 
 		@Override
@@ -1319,7 +1338,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						if (r instanceof IFile)
 						{
 							IFile resource = (IFile)r;
-							if (SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
+							if (resource.getFileExtension() != null && SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
 							{
 								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
 									resource.getProject().getName());

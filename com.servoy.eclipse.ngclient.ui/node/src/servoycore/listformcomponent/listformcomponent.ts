@@ -1,20 +1,28 @@
+/* eslint-disable max-len */
 import {
     Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges
+    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector
 } from '@angular/core';
-import { FormComponent } from '../../ngclient/form/form_component.component';
+import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
+import { DesignFormComponent } from '../../designer/designform_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyBaseComponent } from '@servoy/public';
 import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
-import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset, IChildComponentPropertyValue  } from '@servoy/public';
+import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset, IChildComponentPropertyValue } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
 import { ServoyApi } from '../../ngclient/servoy_api';
+import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
+import { RowRenderer } from './row-renderer.component';
+import { AgGridAngular } from '@ag-grid-community/angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
+
+const AGGRID_CACHE_BLOCK_SIZE = 10;
+const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 
 @Component({
     selector: 'servoycore-listformcomponent',
@@ -22,29 +30,38 @@ import { ConverterService } from '../../sablo/converter.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
-    <div *ngIf="containedForm.absoluteLayout">
-        <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-            <div *ngFor="let item of cache.items" [svyContainerStyle]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
-                <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
+    <ng-container *ngIf="useScrolling">
+        <ag-grid-angular #aggrid
+            [gridOptions]="agGridOptions"
+            [ngStyle]="getAGGridStyle()">
+        </ag-grid-angular>
+    </ng-container>
+
+    <ng-container *ngIf="!useScrolling">
+        <div *ngIf="containedForm.absoluteLayout">
+            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                    <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
+                </div>
             </div>
         </div>
-    </div>
-    <div *ngIf="!containedForm.absoluteLayout">
-        <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
-            <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
+        <div *ngIf="!containedForm.absoluteLayout">
+            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+                <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
+            </div>
         </div>
-    </div>
-    <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
+        <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
+    </ng-container>
 </div>
 
 <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" class="svy-layoutcontainer">
+    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
 </ng-template>
 <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
-          <div [svyContainerStyle]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
                </div>
           </div>
@@ -63,6 +80,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() foundset: IFoundset;
     @Input() selectionClass: string;
     @Input() styleClass: string;
+    @Input() rowStyleClass: string;
+    @Input() rowStyleClassDataprovider: string;
     @Input() responsivePageSize: number;
     @Input() pageLayout: string;
     @Input() onSelectionChanged: (event: any) => void;
@@ -73,19 +92,37 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     // structure viewchild template generate start
     // structure viewchild template generate end
     @ViewChild('element', { static: true }) elementRef: ElementRef;
-    @ViewChild('firstelement', { static: true }) elementFirstRef: ElementRef;
-    @ViewChild('leftelement', { static: true }) elementLeftRef: ElementRef;
-    @ViewChild('rightelement', { static: true }) elementRightRef: ElementRef;
 
+    // used for paging
+    @ViewChild('firstelement', { static: false }) elementFirstRef: ElementRef;
+    @ViewChild('leftelement', { static: false }) elementLeftRef: ElementRef;
+    @ViewChild('rightelement', { static: false }) elementRightRef: ElementRef;
+
+    // used for scrolling with AGGGrid
+    @ViewChild('aggrid', { static: false }) agGrid: AgGridAngular;
+
+    // TODO: remove this when switching completely to scrollable LFC
+    useScrolling = false;
+
+    // used for scrolling with AGGGrid
+    parent: AbstractFormComponent;
+    agGridOptions: GridOptions;
+    numberOfColumns = 1;
+
+    // used for paging
     page = 0;
     numberOfCells = 0;
     selectionChangedByKey = false;
+
     cache: FormComponentCache;
     removeListenerFunction: () => void;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
     private rowItems: Array<IChildComponentPropertyValue | FormComponentCache>;
 
+    private designerViewportRows = [{} as ViewPortRow];
+
+    // used for paging
     private waitingForLoad = false;
 
     constructor(protected readonly renderer: Renderer2,
@@ -95,9 +132,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         private converterService: ConverterService,
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
-        @Inject(FormComponent) private parent: FormComponent,
+        private _injector: Injector,
         @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
+        try {
+            this.parent = this._injector.get<FormComponent>(FormComponent);
+        } catch (e) {
+            //ignore
+        }
+
+        if (!this.parent) {
+            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+        }
         this.log = logFactory.getLogger('ListFormComponent');
     }
 
@@ -106,16 +152,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (!this.foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             let selectedRowIndex = this.foundset.selectedRowIndexes[0];
             if (event.key === 'ArrowUp') {
-                // move to the previous page if the first element (not from the first page) is selected
-                if (this.page !== 0 && selectedRowIndex / (this.page) === this.numberOfCells) {
-                    this.moveLeft();
+                if(!this.useScrolling) {
+                    // move to the previous page if the first element (not from the first page) is selected
+                    if (this.page !== 0 && selectedRowIndex / (this.page) === this.numberOfCells) {
+                        this.moveLeft();
+                    }
                 }
                 selectedRowIndex--;
             } else if (event.key === 'ArrowDown') { // keydown
                 selectedRowIndex++;
-                // move to the next page if the last element (not from the last page) is selected
-                if (selectedRowIndex / (this.page + 1) === this.numberOfCells) {
-                    this.moveRight();
+                if(!this.useScrolling) {
+                    // move to the next page if the last element (not from the last page) is selected
+                    if (selectedRowIndex / (this.page + 1) === this.numberOfCells) {
+                        this.moveRight();
+                    }
                 }
             }
             // do not move the selection for the first or last element
@@ -147,11 +197,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     ngOnChanges(changes: SimpleChanges) {
         super.ngOnChanges(changes);
-        if (changes.containedForm) {
+        if (this.containedForm && this.containedForm.childElements) {
             this.rowItems = [];
             this.containedForm.childElements.forEach(elem => {
                 if (elem.type === 'servoycore-formcomponent')
-                     this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
+                    this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
                 else this.rowItems.push(elem);
             });
         }
@@ -159,105 +209,184 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     svyOnInit() {
         super.svyOnInit();
-        this.cache = this.parent.getFormCache().getFormComponent(this.name);
-        this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-            if (event.viewportRowsUpdated) {
-                const changes = event.viewportRowsUpdated;
-                let insertOrDeletes = false;
-                changes.forEach(change => {
-                    insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
-                });
-                if (insertOrDeletes) this.calculateCells();
-            } else {
-                if (event.serverFoundsetSizeChanged)
-                    this.updatePagingControls();
 
-                if (event.viewportRowsCompletelyChanged) {
-                    this.calculateCells();
-                    return;
-                } else if (event.fullValueChanged) {
-                    this.foundset = event.fullValueChanged.newValue;
-                    this.calculateCells();
-                    return;
-                }
-
-                let viewportSizeAfterShiftingIsDone = this.foundset.viewPort.size;
-                if (event.viewPortStartIndexChanged) {
-                    // an insert/delete before current page made viewport start index no longer match page start index; adjust
-                    const shiftedPageDelta = this.page * this.numberOfCells - this.foundset.viewPort.startIndex; // can be negative (insert) or positive(delete)
-                    if (shiftedPageDelta !== 0) {
-                        const wantedVPSize = this.foundset.viewPort.size;
-                        const wantedVPStartIndex = this.page * this.numberOfCells;
-                        const serverSize = this.foundset.serverSize;
-
-                        // so shifting means loading "shiftedPageDelta" more/less in one end of the viewport and "shiftedPageDelta" less/more at the other end
-
-                        // when load extra would request more records after, there might not be enough records in the foundset (deleted before)
-                        let loadExtraCorrected = shiftedPageDelta;
-                        if (loadExtraCorrected > 0 /*so shift right*/ && wantedVPStartIndex + wantedVPSize > serverSize)
-                            loadExtraCorrected -= (wantedVPStartIndex + wantedVPSize - serverSize);
-                        if (loadExtraCorrected !== 0) {
-                            this.foundset.loadExtraRecordsAsync(loadExtraCorrected, true);
-                            viewportSizeAfterShiftingIsDone += Math.abs(loadExtraCorrected);
-                        }
-
-                        // load less if it happens at the end - might need to let more records slide-in the viewport if available (insert before)
-                        let loadLessCorrected = shiftedPageDelta;
-                        if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) //
-                            loadLessCorrected += Math.min(serverSize - wantedVPStartIndex - wantedVPSize, this.numberOfCells - wantedVPSize);
-                        if (loadLessCorrected !== 0) {
-                            this.foundset.loadLessRecordsAsync(loadLessCorrected, true);
-                            viewportSizeAfterShiftingIsDone -= Math.abs(loadLessCorrected);
-                        }
-                    }
-                    this.updateSelection();
-                }
-
-                if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize)
-                    && this.foundset.viewPort.size === 0 && this.numberOfCells > 0) {
-                    this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
-                    this.calculateCells();
-                    return;
-                }
-
-
-                // ok now we know startIndex is corrected if needed already; check is size needs to be corrected as well
-                if (event.viewPortSizeChanged) {
-                    // see if the new viewport size is larger or smaller then expected
-
-                    // sometimes - due to custom components and services that show forms but they do not properly wait for the formWillShow promise to resolve
-                    // before showing the form in the DOM - list form component might end up showing in a container that changed size so numberOfCells is now different
-                    // (let's say decreased) but having old foundset viewport data (meanwhile solution server side might have changed foundset); then what happened
-                    // is that browser-side list-form-component requested less records based on old foundset data while server-side already had only 1 or 2 records now
-                    // in foundset => it got back a viewport of size 0
-
-                    // so although this would not normally happen (viewport size getting changed incorrectly as if the component requested that) we check this to be
-                    // resilient to such components/services as well; for example popupWindow used to show forms quickly before getting the updates from server before showing
-                    // (a second show of a pop-up window with decreased size and also less records in the foundset); there are other components that could do this for example
-                    // bootstrap tabless panel with waitForData property set to false
-
-                    const vpStartIndexForCurrentCalcs = this.page * this.numberOfCells; // this might have already been requested in previous code; might not be the actual present one in browser
-                    const vpSizeForCurrentCalcs = viewportSizeAfterShiftingIsDone; // this might have already been requested in previous code; might not be the actual present one in browser
-
-                    const deltaSize = this.numberOfCells - vpSizeForCurrentCalcs;
-                    if (deltaSize > 0) {
-                        // we could show more records then currently in viewport; see if more are available
-                        const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs);
-                        if (availableExtraRecords > 0) this.foundset.loadExtraRecordsAsync(Math.min(deltaSize, availableExtraRecords), true);
-                    } else if (deltaSize < 0) {
-                        // we need to show less records
-                        this.foundset.loadLessRecordsAsync(-deltaSize, true);
-                    } // else it's already ok
-                }
-
-                this.foundset.notifyChanged(); // let foundset send it's pending requests to server if any
-                this.cdRef.detectChanges();
+        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-scroll') !== -1;
+        if(this.useScrolling) {
+            if(!this.containedForm.absoluteLayout) {
+                this.log.error('ListFormComponent ' + this.name + ' can not be used in scrolling mode because its containedForm is a responsive form');
+                return;
             }
-        });
+            this.agGridOptions = {
+                context: {
+                    componentParent: this
+                },
+                components: {
+                    'row-renderer': RowRenderer
+                },
+                headerHeight: 0,
+                defaultColDef: {
+                    flex: 1
+                },
+                columnDefs: [
+                  { cellRenderer: 'row-renderer' }
+                ],
+                rowModelType: 'serverSide',
+                serverSideStoreType: 'partial',
+                cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
+                infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
+                //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
+                getRowHeight: (params) => this.getRowHeight(),
+                navigateToNextCell: (params: any) => {
+                    const previousCell = params.previousCellPosition;
+                    const suggestedNextCell = params.nextCellPosition;
+
+                    const KEY_UP = 38;
+                    const KEY_DOWN = 40;
+
+                    let selectedIdx = this.foundset.selectedRowIndexes[0];
+
+                    switch (params.key) {
+                        case KEY_DOWN:
+                            selectedIdx = selectedIdx + 1;
+                            if(selectedIdx >= this.foundset.serverSize) selectedIdx = this.foundset.serverSize - 1;
+                            suggestedNextCell.rowIndex = Math.floor( selectedIdx / this.getNumberOfColumns());
+                            return suggestedNextCell;
+                        case KEY_UP:
+                            selectedIdx = selectedIdx - 1;
+                            if(selectedIdx < 0) selectedIdx = 0;
+                            suggestedNextCell.rowIndex = Math.floor( selectedIdx / this.getNumberOfColumns());
+                            return suggestedNextCell;
+                        default:
+                            return previousCell;
+                    }
+                }
+            };
+        }
+
+        this.cache = this.parent.getFormCache().getFormComponent(this.name);
+
+        if(!this.useScrolling) {
+            this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+                if (event.viewportRowsUpdated) {
+                    const changes = event.viewportRowsUpdated;
+                    let insertOrDeletes = false;
+                    changes.forEach(change => {
+                        insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
+                    });
+                    if (insertOrDeletes) this.calculateCells();
+                } else {
+                    if (event.serverFoundsetSizeChanged)
+                        this.updatePagingControls();
+
+                    if (event.viewportRowsCompletelyChanged) {
+                        this.calculateCells();
+                        return;
+                    } else if (event.fullValueChanged) {
+                        this.foundset = event.fullValueChanged.newValue;
+                        this.calculateCells();
+                        return;
+                    }
+
+                    let viewportSizeAfterShiftingIsDone = this.foundset.viewPort.size;
+                    if (event.viewPortStartIndexChanged) {
+                        // an insert/delete before current page made viewport start index no longer match page start index; adjust
+                        const shiftedPageDelta = this.page * this.numberOfCells - this.foundset.viewPort.startIndex; // can be negative (insert) or positive(delete)
+                        if (shiftedPageDelta !== 0) {
+                            const wantedVPSize = this.foundset.viewPort.size;
+                            const wantedVPStartIndex = this.page * this.numberOfCells;
+                            const serverSize = this.foundset.serverSize;
+
+                            // so shifting means loading "shiftedPageDelta" more/less in one end of the viewport and "shiftedPageDelta" less/more at the other end
+
+                            // when load extra would request more records after, there might not be enough records in the foundset (deleted before)
+                            let loadExtraCorrected = shiftedPageDelta;
+                            if (loadExtraCorrected > 0 /*so shift right*/ && wantedVPStartIndex + wantedVPSize > serverSize)
+                                loadExtraCorrected -= (wantedVPStartIndex + wantedVPSize - serverSize);
+                            if (loadExtraCorrected !== 0) {
+                                this.foundset.loadExtraRecordsAsync(loadExtraCorrected, true);
+                                viewportSizeAfterShiftingIsDone += Math.abs(loadExtraCorrected);
+                            }
+
+                            // load less if it happens at the end - might need to let more records slide-in the viewport if available (insert before)
+                            let loadLessCorrected = shiftedPageDelta;
+                            if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) //
+                                loadLessCorrected += Math.min(serverSize - wantedVPStartIndex - wantedVPSize, this.numberOfCells - wantedVPSize);
+                            if (loadLessCorrected !== 0) {
+                                this.foundset.loadLessRecordsAsync(loadLessCorrected, true);
+                                viewportSizeAfterShiftingIsDone -= Math.abs(loadLessCorrected);
+                            }
+                        }
+                        this.updateSelection();
+                    }
+
+                    if (event.viewPortSizeChanged && this.foundset.serverSize > 0 && (this.page * this.numberOfCells >= this.foundset.serverSize)
+                        && this.foundset.viewPort.size === 0 && this.numberOfCells > 0) {
+                        this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
+                        this.calculateCells();
+                        return;
+                    }
+
+
+                    // ok now we know startIndex is corrected if needed already; check is size needs to be corrected as well
+                    if (event.viewPortSizeChanged) {
+                        // see if the new viewport size is larger or smaller then expected
+
+                        // sometimes - due to custom components and services that show forms but they do not properly wait for the formWillShow promise to resolve
+                        // before showing the form in the DOM - list form component might end up showing in a container that changed size so numberOfCells is now different
+                        // (let's say decreased) but having old foundset viewport data (meanwhile solution server side might have changed foundset); then what happened
+                        // is that browser-side list-form-component requested less records based on old foundset data while server-side already had only 1 or 2 records now
+                        // in foundset => it got back a viewport of size 0
+
+                        // so although this would not normally happen (viewport size getting changed incorrectly as if the component requested that) we check this to be
+                        // resilient to such components/services as well; for example popupWindow used to show forms quickly before getting the updates from server before showing
+                        // (a second show of a pop-up window with decreased size and also less records in the foundset); there are other components that could do this for example
+                        // bootstrap tabless panel with waitForData property set to false
+
+                        const vpStartIndexForCurrentCalcs = this.page * this.numberOfCells; // this might have already been requested in previous code; might not be the actual present one in browser
+                        const vpSizeForCurrentCalcs = viewportSizeAfterShiftingIsDone; // this might have already been requested in previous code; might not be the actual present one in browser
+
+                        const deltaSize = this.numberOfCells - vpSizeForCurrentCalcs;
+                        if (deltaSize > 0) {
+                            // we could show more records then currently in viewport; see if more are available
+                            const availableExtraRecords = this.foundset.serverSize - (vpStartIndexForCurrentCalcs + vpSizeForCurrentCalcs);
+                            if (availableExtraRecords > 0) this.foundset.loadExtraRecordsAsync(Math.min(deltaSize, availableExtraRecords), true);
+                        } else if (deltaSize < 0) {
+                            // we need to show less records; deltaSize is already negative; so it will load less from end of viewport
+                            this.foundset.loadLessRecordsAsync(deltaSize, true);
+                        } // else it's already ok
+                    }
+
+                    this.foundset.notifyChanged(); // let foundset send it's pending requests to server if any
+                    this.cdRef.detectChanges();
+                }
+            });
+        } else {
+            this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+                if (event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) {
+                    return;
+                }
+                if (event.viewportRowsUpdated) {
+                    // copy the viewport data over to the cell
+                    // TODO this only is working for "updates", what happens with deletes or inserts?
+                    const changes = event.viewportRowsUpdated;
+                    let insertOrDeletes = false;
+                    changes.forEach(change => {
+                        insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
+                    });
+                    if (insertOrDeletes) this.agGrid.api.refreshServerSideStore({purge: true});
+                    else this.agGrid.api.refreshCells();
+                } else if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.fullValueChanged) {
+                    this.agGrid.api.refreshServerSideStore({purge: true});
+                }
+            });
+        }
     }
 
     ngAfterViewInit() {
         this.calculateCells();
+        if(this.useScrolling) {
+            this.agGrid.api.setServerSideDatasource(new AGGridDatasource(this));
+        }
     }
 
     ngOnDestroy() {
@@ -271,6 +400,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getViewportRows(): ViewPortRow[] {
+        if (this.servoyApi.isInDesigner()) {
+            return this.designerViewportRows;
+        }
         if (this.numberOfCells === 0) return [];
         return this.foundset.viewPort.rows;
     }
@@ -320,23 +452,42 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
     }
 
-    getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache ): TemplateRef<any> {
+    getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname? this[item.tagname]: this.svyResponsiveDiv;
+            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv;
         }
-         if (item instanceof FormComponentCache) {
+        if (item instanceof FormComponentCache) {
             return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         }
         return this.parent.getTemplateForLFC(item);
     }
 
-    getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache{
+    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache ): IChildComponentPropertyValue {
+        for (const elem of items) {
+            if (elem['name'] === item.name) {
+                return elem as IChildComponentPropertyValue;
+            }
+            if (elem['items']) {
+                const found = this.findElement(elem['items'], item);
+                if (found){
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    getRowItemState(item: StructureCache | FormComponentCache | ComponentCache, row: ViewPortRow, rowIndex: number): Cell | StructureCache | FormComponentCache {
         if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
         }
         let cm: IChildComponentPropertyValue = null;
         if (item instanceof ComponentCache) {
-            cm = this.getRowItems().find(elem => elem.name === item.name) as IChildComponentPropertyValue;
+            if (this.servoyApi.isInDesigner()) {
+                cm = this.findElement(this.cache.items, item) as IChildComponentPropertyValue;
+            } else {
+                cm = this.getRowItems().find(elem => elem.name === item.name) as IChildComponentPropertyValue;
+            }
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
@@ -373,9 +524,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const handlers = {};
         const rowItem = new Cell(cm, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
 
-        cm.mappedHandlers.forEach((value, key) => {
-            rowItem.handlers[key] = value.selectRecordHandler(rowId);
-        });
+        if (cm.mappedHandlers) {
+            cm.mappedHandlers.forEach((value, key) => {
+                rowItem.handlers[key] = value.selectRecordHandler(rowId);
+            });
+        }
 
         if (!row._cache) row._cache = new Map();
         row._cache.set(cm.name, rowItem);
@@ -414,13 +567,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             } else {
                 FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
                                                         apiName, args, this.converterService, this.log);
-                const proto = Object.getPrototypeOf(uiComp);
-                if (proto[apiName]) {
-                    return proto[apiName].apply(uiComp, args);
-                } else {
-                    this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
-                    return null;
-                }
             }
         } else {
             this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);
@@ -448,42 +594,53 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     calculateCells() {
         // if it is still loading then don't calculate it right now again.
         if (this.waitingForLoad) return;
-        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() ? 0 : this.responsivePageSize;
+        if (this.servoyApi.isInDesigner()) {
+            this.numberOfCells = 1;
+            return;
+        }
+        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
-            if (this.servoyApi.isInAbsoluteLayout()) {
+            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout) {
                 const parentWidth = this.elementRef.nativeElement.offsetWidth;
                 const parentHeight = this.elementRef.nativeElement.offsetHeight;
                 const height = this.containedForm.formHeight;
                 const width = this.containedForm.formWidth;
-                const numberOfColumns = (this.pageLayout === 'listview') ? 1 : Math.floor(parentWidth / width);
+                this.numberOfColumns = (this.pageLayout === 'listview') ? 1 : Math.floor(parentWidth / width);
                 const numberOfRows = Math.floor(parentHeight / height);
-                this.numberOfCells = numberOfRows * numberOfColumns;
+                this.numberOfCells = numberOfRows * this.numberOfColumns;
                 // always just render 1
                 if (this.numberOfCells < 1) this.numberOfCells = 1;
             } else {
-                this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                if(!this.servoyApi.isInAbsoluteLayout()) {
+                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                } else if(!this.containedForm.absoluteLayout) {
+                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
+                }
             }
 
         }
-        const startIndex = this.page * this.numberOfCells;
-        const foundset = this.foundset;
-        if (foundset.viewPort.startIndex !== startIndex) {
-            this.waitingForLoad = true;
-            foundset.loadRecordsAsync(startIndex, this.numberOfCells).finally(() => this.waitingForLoad = false);
-        } else {
-            if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
+
+        if(!this.useScrolling) {
+            const startIndex = this.page * this.numberOfCells;
+            const foundset = this.foundset;
+            if (foundset.viewPort.startIndex !== startIndex) {
                 this.waitingForLoad = true;
-                foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size))
-                    .finally(() => this.waitingForLoad = false);
-            } else if (foundset.viewPort.size > this.numberOfCells) {
-                // the (initial) viewport  is bigger then the numberOfCells we have created rows for, adjust the viewport to be smaller.
-                this.waitingForLoad = true;
-                foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size).finally(() => this.waitingForLoad = false);
+                foundset.loadRecordsAsync(startIndex, this.numberOfCells).finally(() => this.waitingForLoad = false);
+            } else {
+                if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
+                    this.waitingForLoad = true;
+                    foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size))
+                        .finally(() => this.waitingForLoad = false);
+                } else if (foundset.viewPort.size > this.numberOfCells) {
+                    // the (initial) viewport  is bigger then the numberOfCells we have created rows for, adjust the viewport to be smaller.
+                    this.waitingForLoad = true;
+                    foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size).finally(() => this.waitingForLoad = false);
+                }
             }
+            this.updatePagingControls();
+            foundset.setPreferredViewportSize(this.numberOfCells);
+            this.cdRef.detectChanges();
         }
-        this.updatePagingControls();
-        foundset.setPreferredViewportSize(this.numberOfCells);
-        this.cdRef.detectChanges();
     }
 
     updatePagingControls() {
@@ -494,12 +651,19 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowClasses(index: number) {
+        let rowClasses = 'svy-listformcomponent-row';
         if (this.selectionClass) {
             if (this.foundset.selectedRowIndexes.indexOf(this.foundset.viewPort.startIndex + index) !== -1) {
-                return 'svy-listformcomponent-row ' + this.selectionClass;
+                rowClasses += ' ' + this.selectionClass;
             }
         }
-        return 'svy-listformcomponent-row';
+        if(this.rowStyleClass) {
+            rowClasses += ' ' + this.rowStyleClass;
+        }
+        if(this.rowStyleClassDataprovider && this.rowStyleClassDataprovider[index]) {
+            rowClasses += ' ' + this.rowStyleClassDataprovider[index];
+        }
+        return rowClasses;
     }
 
     updateSelection() {
@@ -529,6 +693,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             }
         }
     }
+
+    // used for scrolling with AGGGrid
+
+    getNumberOfColumns(): number  {
+        return this.numberOfColumns;
+    }
+
+    getAGGridStyle(): any {
+        if(this.servoyApi.isInAbsoluteLayout()) {
+            return { height: '100%' };
+        } else {
+            return {'height.px': this.getRowHeight() * this.responsivePageSize };
+        }
+    }
 }
 
 class Cell {
@@ -538,8 +716,7 @@ class Cell {
     readonly model: any;
 
     constructor(public readonly state: IChildComponentPropertyValue,
-                    public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
-
+        public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
         this.name = state.name;
         this.model = state.modelViewport[rowIndex];
     }
@@ -547,14 +724,15 @@ class Cell {
 }
 
 class ListFormComponentServoyApi extends ServoyApi {
+
     private markupId: string;
     constructor(private cell: Cell,
-        formname: string,
-        absolute: boolean,
-        formservice: FormService,
-        servoyService: ServoyService,
-        private fc: ListFormComponent) {
-        super(cell.state, formname, absolute, formservice, servoyService);
+            formname: string,
+            absolute: boolean,
+            formservice: FormService,
+            servoyService: ServoyService,
+            private fc: ListFormComponent) {
+        super(cell.state, formname, absolute, formservice, servoyService, false);
         this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }
 
@@ -590,4 +768,106 @@ class ListFormComponentServoyApi extends ServoyApi {
         }
     }
 
+}
+
+class AGGridDatasource implements IServerSideDatasource {
+
+    lfc: ListFormComponent;
+    constructor(lfc: ListFormComponent) {
+        this.lfc = lfc;
+    }
+
+    getRows(params: IServerSideGetRowsParams): void {
+        // load record if endRow is not in viewPort
+        const startIndex = Math.ceil(this.lfc.foundset.viewPort.startIndex / this.lfc.getNumberOfColumns()); // start index of view port (0-based)
+        const endIndex = startIndex + Math.ceil(this.lfc.foundset.viewPort.size / this.lfc.getNumberOfColumns()) ; // end index of the view port (0-based)
+
+        // index in the cached viewPort (0-based);
+        let viewPortStartIndex = params.request.startRow - startIndex;
+        let viewPortEndIndex = params.request.endRow - startIndex;
+
+        if (params.request.startRow < startIndex || (params.request.endRow > endIndex && this.getLastRowIndex() === -1)) {
+            let requestViewPortStartIndex: any;
+            // keep the previous chunk in cache
+            if (params.request.startRow >= AGGRID_CACHE_BLOCK_SIZE && params.request.endRow >= endIndex) {
+                requestViewPortStartIndex = params.request.startRow - AGGRID_CACHE_BLOCK_SIZE;
+            } else {
+                requestViewPortStartIndex = params.request.startRow;
+            }
+
+            const size = (params.request.endRow - requestViewPortStartIndex) * this.lfc.getNumberOfColumns();
+            const promise = this.loadExtraRecordsAsync(requestViewPortStartIndex * this.lfc.getNumberOfColumns(), size);
+            promise.requestInfo = 'AGGridDatasourceGetRows';
+            promise.then(() => {
+                // load complete
+                // get the index of the last row
+                const lastRowIndex = this.getLastRowIndex();
+
+                // update viewPortStatIndex
+                viewPortStartIndex = params.request.startRow - Math.ceil(this.lfc.foundset.viewPort.startIndex / this.lfc.getNumberOfColumns());
+                viewPortEndIndex = params.request.endRow - Math.ceil(this.lfc.foundset.viewPort.startIndex / this.lfc.getNumberOfColumns());
+
+                params.success( {
+                    rowData: this.getViewPortData(viewPortStartIndex, viewPortEndIndex),
+                    rowCount: lastRowIndex
+                });
+            }).catch((e) => {
+                console.log(e);
+            });
+        } else {
+            params.success( {
+                rowData: this.getViewPortData(viewPortStartIndex, viewPortEndIndex),
+                rowCount: this.getLastRowIndex()
+            });
+        }
+    }
+
+    hasMoreRecordsToLoad() {
+        return this.lfc.foundset.hasMoreRows || (this.lfc.foundset.viewPort.startIndex + this.lfc.foundset.viewPort.size) < this.lfc.foundset.serverSize;
+    }
+
+    getLastRowIndex() {
+        if (this.hasMoreRecordsToLoad()) {
+            return -1;
+        } else {
+            return Math.ceil(this.lfc.foundset.serverSize / this.lfc.getNumberOfColumns());
+        }
+    }
+
+    loadExtraRecordsAsync(startIndex: number, size: number) {
+        size = (size * AGGRID_MAX_BLOCKS_IN_CACHE * this.lfc.getNumberOfColumns()) + size;
+        if (this.hasMoreRecordsToLoad() === false) {
+            size = Math.min(size, this.lfc.foundset.serverSize - startIndex);
+        }
+        if (size < 0) {
+            size = 0;
+        }
+
+        return this.lfc.foundset.loadRecordsAsync(startIndex, size);
+    }
+
+    getViewPortData(startIndex: number, endIndex: number) {
+        const result = [];
+        let fsStartIndex = startIndex ? startIndex * this.lfc.getNumberOfColumns() : 0;
+        let fsEndIndex = endIndex * this.lfc.getNumberOfColumns();
+        if(fsEndIndex > this.lfc.foundset.viewPort.rows.length) fsEndIndex = this.lfc.foundset.viewPort.rows.length;
+
+        // index cannot exceed ServerSize
+        fsStartIndex = Math.min(fsStartIndex, this.lfc.foundset.serverSize);
+        fsEndIndex = Math.min(fsEndIndex, this.lfc.foundset.serverSize);
+
+        let line = [];
+        for (let j = fsStartIndex; j < fsEndIndex; j++) {
+            line.push(this.lfc.foundset.viewPort.rows[j]);
+            if(line.length === this.lfc.getNumberOfColumns()) {
+                result.push(line);
+                line = [];
+            }
+        }
+        if(line.length > 0) {
+            result.push(line);
+        }
+
+        return result;
+    }
 }

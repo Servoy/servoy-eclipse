@@ -40,8 +40,11 @@ export class SvyUtilsService {
                 break;
             }
 
-            if (parent.getAttribute('name'))
-                targetElNameChain.push(parent.getAttribute('name'));
+            if ( parent.getAttribute( 'name' ) )
+                targetElNameChain.push( parent.getAttribute( 'name' ) );
+            else if ( parent['svyHostComponent'] && parent['svyHostComponent']['name'] ) {
+                targetElNameChain.push( parent['svyHostComponent']['name'] );
+            }
             parent = parent.parentElement;
         }
 

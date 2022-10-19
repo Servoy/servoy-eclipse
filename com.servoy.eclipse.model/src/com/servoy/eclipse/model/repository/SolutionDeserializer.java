@@ -253,7 +253,7 @@ public class SolutionDeserializer
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
-		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark, false);
+		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark, false, false);
 
 		if (!useFilesForDirtyMark)
 		{
@@ -282,7 +282,7 @@ public class SolutionDeserializer
 	 * @throws RepositoryException
 	 */
 	public List<File> updateSolution(File solutionDir, final Solution solution, List<File> changedFiles, List<IPersist> strayCats, boolean readAll,
-		boolean useFilesForDirtyMark, boolean shouldReset) throws RepositoryException
+		boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting) throws RepositoryException
 	{
 		if (solution == null) return null;
 		try
@@ -306,8 +306,9 @@ public class SolutionDeserializer
 			}
 			Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
 			readObjectFilesFromSolutionDir(solutionDir, solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark,
-				shouldReset);
-			readMediasFromSolutionDir(solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark, shouldReset);
+				shouldReset, testExisting);
+			readMediasFromSolutionDir(solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark, shouldReset,
+				testExisting);
 			completePersist(persist_json_map, useFilesForDirtyMark);
 			solution.acceptVisitor(new IPersistVisitor()
 			{
@@ -351,7 +352,7 @@ public class SolutionDeserializer
 	}
 
 	private void readObjectFilesFromSolutionDir(File solutionDir, File dir, ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
-		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset)
+		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting)
 		throws RepositoryException, JSONException
 	{
 		if (dir != null && dir.exists())
@@ -467,7 +468,8 @@ public class SolutionDeserializer
 				IPersist persist = null;
 				try
 				{
-					persist = deserializePersist(repository, parent, persist_json_map, object, strayCats, file, saved, useFilesForDirtyMark, shouldReset);
+					persist = deserializePersist(repository, parent, persist_json_map, object, strayCats, file, saved, useFilesForDirtyMark, shouldReset,
+						testExisting);
 				}
 				catch (JSONException e)
 				{
@@ -527,7 +529,7 @@ public class SolutionDeserializer
 								try
 								{
 									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
-										useFilesForDirtyMark, shouldReset);
+										useFilesForDirtyMark, shouldReset, testExisting);
 								}
 								catch (JSONException e)
 								{
@@ -586,7 +588,7 @@ public class SolutionDeserializer
 				{
 					ISupportChilds newParent = (subdirPersist instanceof ISupportChilds) ? (ISupportChilds)subdirPersist : parent;
 					readObjectFilesFromSolutionDir(solutionDir, subdir, newParent, persist_json_map, changedFiles, strayCats, readAll, useFilesForDirtyMark,
-						shouldReset);
+						shouldReset, testExisting);
 				}
 			}
 		}
@@ -900,7 +902,7 @@ public class SolutionDeserializer
 	}
 
 	private void readMediasFromSolutionDir(File dir, Solution parent, Map<IPersist, JSONObject> persist_json_map, List<File> changedFiles,
-		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset) throws RepositoryException
+		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting) throws RepositoryException
 	{
 		if (dir != null && dir.exists())
 		{
@@ -935,7 +937,7 @@ public class SolutionDeserializer
 							{
 								boolean newMedia = parent.getMedia(name) == null;
 								IPersist persist = deserializePersist(repository, parent, persist_json_map, obj, strayCats, mediasDir, new HashSet<UUID>(0),
-									useFilesForDirtyMark, shouldReset);
+									useFilesForDirtyMark, shouldReset, testExisting);
 								if (persist instanceof Media)
 								{
 									File mf = new File(mediasDir, name);
@@ -1634,7 +1636,7 @@ public class SolutionDeserializer
 	 * @throws JSONException
 	 */
 	public static IPersist deserializePersist(IDeveloperRepository repository, final ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
-		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark, boolean shouldReset)
+		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting)
 		throws RepositoryException, JSONException
 	{
 		if (!obj.has(SolutionSerializer.PROP_TYPEID))
@@ -1660,7 +1662,8 @@ public class SolutionDeserializer
 				ServoyLog.logError("Could not parse UUID -- generating new uuid", e);
 				uuid = UUID.randomUUID();
 			}
-			existingNode = AbstractRepository.searchPersist(parent, uuid, parent);
+			existingNode = testExisting ? AbstractRepository.searchPersist(parent, uuid, parent)
+				: parent != null && parent.getUUID().equals(uuid) ? parent : null;
 
 			if (existingNode == null)
 			{
@@ -1833,7 +1836,7 @@ public class SolutionDeserializer
 						Utils.getAsBoolean(obj.get(CHANGED_JSON_ATTRIBUTE))) child_obj.put(CHANGED_JSON_ATTRIBUTE, true);
 
 					IPersist newChild = deserializePersist(repository, (ISupportChilds)retval, persist_json_map, child_obj, strayCats, file, saved,
-						useFilesForDirtyMark, shouldReset);
+						useFilesForDirtyMark, shouldReset, testExisting);
 					if (newChild != null) newChildUUIDs.add(newChild.getUUID());
 				}
 			}
@@ -2219,7 +2222,8 @@ public class SolutionDeserializer
 			IProjectNature nature = f.getProject().getNature(ServoyProject.NATURE_ID);
 			if (nature instanceof ServoyProject)
 			{
-				if (!f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT) && !SolutionSerializer.isJSONFile(f.getName()))
+				if (f.getFileExtension() != null && !f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT) &&
+					!SolutionSerializer.isJSONFile(f.getName()))
 				{
 					String[] segments = f.getProjectRelativePath().segments();
 					if (segments.length == 2 && SolutionSerializer.MEDIAS_DIR.equals(segments[0]))
@@ -2228,7 +2232,7 @@ public class SolutionDeserializer
 					}
 				}
 				File file = f.getLocation().toFile();
-				if (f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+				if (f.getFileExtension() != null && f.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
 				{
 					try
 					{

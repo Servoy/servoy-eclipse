@@ -66,7 +66,7 @@ public class DataProviderDialog extends TreeSelectDialog
 		DataProviderOptions input, ISelection selection, int treeStyle, String title)
 	{
 		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, null, null, null, null, treeStyle, title, null, selection, false,
-			TreeSelectDialog.DATAPROVIDER_DIALOG, null);
+			TreeSelectDialog.DATAPROVIDER_DIALOG, null, false);
 		this.labelProvider = labelProvider;
 		this.persistContext = persistContext;
 		this.flattenedSolution = flattenedSolution;

@@ -132,8 +132,7 @@ public class DesignerFilter implements Filter
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
-					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications()
-						.entrySet())
+					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications().entrySet())
 					{
 						PackageSpecification<WebObjectSpecification> value = entry.getValue();
 						for (WebObjectSpecification spec : value.getSpecifications().values())
@@ -150,7 +149,7 @@ public class DesignerFilter implements Filter
 							if (pair == null)
 							{
 								List<WebObjectSpecification> list = new ArrayList<>();
-								pair = new Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>(value, list);
+								pair = new Pair<>(value, list);
 								componentCategories.put(categoryName, pair);
 							}
 							pair.getRight().add(spec);
@@ -220,7 +219,9 @@ public class DesignerFilter implements Filter
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
-							if (!"Absolute-Layout".equals(layoutType))
+							// hard coded that in absolute layout we get the servoycore (responsive container) layout
+							if ((!"servoycore".equals(key) && !"Absolute-Layout".equals(layoutType)) ||
+								("servoycore".equals(key) && "Absolute-Layout".equals(layoutType)))
 							{
 								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
@@ -325,19 +326,36 @@ public class DesignerFilter implements Filter
 								{
 									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec, false).toString());
 								}
+								layoutJson.put("attributes", getLayoutAttributes(config, spec, false));
+								if (config != null && config.has("children"))
+								{
+									layoutJson.put("children", getChildren(config, spec));
+								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
-								PropertyDescription pd = spec.getProperty("size");
-								if (pd != null && pd.getDefaultValue() != null)
+								if ("servoycore-responsivecontainer".equals(spec.getName()))
 								{
-									model.put("size", pd.getDefaultValue());
+									HashMap<String, Number> size = new HashMap<String, Number>();
+									size.put("width", Integer.valueOf(200));
+									size.put("height", Integer.valueOf(200));
+									model.put("size", size);
+									model.put("classes", new String[] { "highlight_element", "svy-responsivecontainer" });
 								}
 								else
 								{
-									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("width", Integer.valueOf(300));
-									model.put("size", size);
+									PropertyDescription pd = spec.getProperty("size");
+									if (pd != null && pd.getDefaultValue() != null)
+									{
+										model.put("size", pd.getDefaultValue());
+									}
+									else
+									{
+										HashMap<String, Number> size = new HashMap<String, Number>();
+										size.put("width", Integer.valueOf(300));
+										model.put("size", size);
+									}
 								}
+								// special code to make the drag from palette have the nice clases so it is drawn what you drop
 								layoutJson.put("model", new JSONObject(model));
 								if (spec.getIcon() != null)
 								{
@@ -514,6 +532,28 @@ public class DesignerFilter implements Filter
 		}
 	}
 
+	private JSONArray getChildren(JSONObject config, WebLayoutSpecification spec)
+	{
+		JSONArray children = config.optJSONArray("children");
+		JSONArray res = new JSONArray();
+		if (children != null)
+		{
+			for (int i = 0; i < children.length(); i++)
+			{
+				JSONObject jsonObject = children.getJSONObject(i);
+				JSONObject childModel = jsonObject.optJSONObject("model");
+				if (childModel != null)
+				{
+					JSONObject c = new JSONObject();
+					c.put("model", childModel);
+					c.put("attributes", getLayoutAttributes(childModel, spec, true));
+					res.put(c);
+				}
+			}
+		}
+		return res;
+	}
+
 
 	private boolean isAccesibleInLayoutType(PackageSpecification< ? > pkg, String layoutType)
 	{
@@ -579,6 +619,16 @@ public class DesignerFilter implements Filter
 			}
 		}
 		return sb.append("</" + tagName + ">");
+	}
+
+	private JSONObject getLayoutAttributes(JSONObject config, WebLayoutSpecification spec, boolean isChild)
+	{
+		JSONObject result = new JSONObject();
+		String value = config != null ? config.optString("class") : null;
+		if (value == null) result.put("svy-title", "<null>");
+		else result.put("svy-title", (value.startsWith("col-") && !isChild ? "md-*" : value));
+		result.put("designclass", spec.getDesignStyleClass());
+		return result;
 	}
 
 	private List<String> getFormComponentPropertyNames(WebObjectSpecification spec)

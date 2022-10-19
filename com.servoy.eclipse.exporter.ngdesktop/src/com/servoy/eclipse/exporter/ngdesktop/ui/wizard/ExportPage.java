@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2017 Servoy BV
+  This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2021 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -32,11 +32,11 @@ import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -69,27 +68,28 @@ public class ExportPage extends WizardPage
 	public static String LINUX_PLATFORM = "linux";
 
 	private Text applicationUrlText;
-	private Group platformGroup;
+	private Composite platformGroup;
 
 	private Text iconPath;
 	private Button browseIconButton;
 	private Text imgPath;
 	private Button browseImgButton;
 	private Text copyrightText;
-	private Group sizeGroup;
+	private Composite sizeGroup;
 	private Text widthText;
 	private Text heightText;
-	private Group versionGroup;
+	private Composite versionGroup;
 	private Combo srcVersionCombo;
 	private Button includeUpdateBtn;
 	private Text appNameText;
 	private Text updateUrlText;
 	private Text emailAddress;
 	private Button storeBtn;
+	private Label deprecatedLabel;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
+	private final String versionsUrl = "https://download.servoy.com/ngdesktop/2022.09.0/ngdesktop-versions-2022.09.txt";
 	private final String FIRST_VERSION_THAT_SUPPORTS_UPDATES = "2020.12";
 	private List<String> remoteVersions = new ArrayList<String>();
 
@@ -103,11 +103,11 @@ public class ExportPage extends WizardPage
 	@Override
 	public void createControl(Composite parent)
 	{
-		final Composite rootComposite = new Composite(parent, SWT.NONE);
-		rootComposite.setLayout(new FormLayout());
+		//final Composite rootComposite = new Composite(parent, SWT.NONE);
+		//rootComposite.setLayout(new FormLayout());
 
 		final GridLayout gridLayout = new GridLayout(3, false);
-		final Composite composite = new Composite(rootComposite, SWT.NONE);
+		final Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
 		final Label applicationUrlLabel = new Label(composite, SWT.NONE);
@@ -122,7 +122,7 @@ public class ExportPage extends WizardPage
 		final Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
 
-		platformGroup = new Group(composite, SWT.NONE);
+		platformGroup = new Composite(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 
 		final Button winBtn = new Button(platformGroup, SWT.CHECK);
@@ -178,7 +178,7 @@ public class ExportPage extends WizardPage
 		iconLabel.setText("Icon path:");
 		iconLabel
 			.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size (KB): " + ExportNGDesktopWizard.LOGO_SIZE +
-				"\nMinimum logo size: 256 x 256 px");
+				"\nMinimum logo size: 512 x 512 px");
 
 		iconPath = new Text(composite, SWT.BORDER);
 		iconPath
@@ -259,10 +259,8 @@ public class ExportPage extends WizardPage
 
 		final Label sizeLabel = new Label(composite, SWT.NONE);
 		sizeLabel.setText("NG Desktop size:");
-		sizeGroup = new Group(composite, SWT.NONE);
-		final RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-		rowLayout.fill = true;
-		sizeGroup.setLayout(rowLayout);
+		sizeGroup = new Composite(composite, SWT.NONE);
+		sizeGroup.setLayout(new GridLayout(4, false));
 
 		widthText = new Text(sizeGroup, SWT.BORDER);
 		value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
@@ -285,17 +283,23 @@ public class ExportPage extends WizardPage
 		srcVersionLabel.setText("Version:");
 		srcVersionLabel.setToolTipText("NG Desktop version");
 
-		versionGroup = new Group(composite, SWT.NONE);
-		versionGroup.setLayout(new GridLayout(2, false));
+		versionGroup = new Composite(composite, SWT.NONE);
+		versionGroup.setLayout(new GridLayout(3, false));
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
+		srcVersionCombo.setToolTipText("NG Desktop version");
 		remoteVersions = getAvailableVersions();
+		srcVersionCombo.add("latest");
+
+		deprecatedLabel = new Label(versionGroup, SWT.NONE);
+		deprecatedLabel.setText("Deprecated: will be removed in the next release");
+		deprecatedLabel.setVisible(false);
 
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
 		});
-		srcVersionCombo.select(getVersionIndex());
+
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -305,10 +309,21 @@ public class ExportPage extends WizardPage
 			}
 		});
 
+		srcVersionCombo.select(getVersionIndex() + 1);
+
+
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
-		includeUpdateBtn.setText("Include update");
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		includeUpdateBtn.setSelection(getIncludeUpdate());
+		GridDataFactory.swtDefaults()//
+			.grab(true, false)//
+			.hint(0, SWT.DEFAULT)// width hint prevents text from expanding to full line
+			.align(SWT.FILL, SWT.CENTER)//
+			.applyTo(includeUpdateBtn);
+		setIncludeUpdateState();
+		includeUpdateBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("include_update")); //initial selection
+
+		gd = new GridData();
+		gd.widthHint = 180;
+		includeUpdateBtn.setLayoutData(gd);
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -337,7 +352,7 @@ public class ExportPage extends WizardPage
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 		updateUrlText.setEditable(true);
 		updateUrlText.setVisible(true);
-		updateUrlText.setEnabled(isUpdateSupported());
+		updateUrlText.setEnabled(isUpdatableVersion());
 		updateUrlText.setText(getUpdateUrl());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -366,21 +381,18 @@ public class ExportPage extends WizardPage
 		storeBtn.setToolTipText("If not checked, artifacts will be deleted after several hours ...");
 		storeBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("store_data"));
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalSpan = 2;
 		gd.horizontalSpan = 2;
 		storeBtn.setLayoutData(gd);
 
-		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
-		emptyLabel.setText("");
-		emptyLabel.setEnabled(false); //set to gray
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.verticalAlignment = GridData.GRAB_VERTICAL;
+		// add 2 more labels so that the default size is correct
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
-		emptyLabel.setLayoutData(gd);
-		emptyLabel.setVisible(true);
+		Label lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(gd);
+		lbl = new Label(composite, SWT.NONE);
+		lbl.setLayoutData(gd);
 
 		setControl(composite);
-		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private String getLoginUsername()
@@ -402,8 +414,14 @@ public class ExportPage extends WizardPage
 
 	private void srcVersionListener(SelectionEvent event)
 	{
-		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		updateUrlText.setEnabled(isUpdateSupported());
+		setIncludeUpdateState();
+		updateUrlText.setEnabled(isUpdatableVersion());
+		deprecatedLabel.setVisible(isDeprecatedVersion());
+	}
+
+	private boolean isDeprecatedVersion()
+	{
+		return srcVersionCombo.getText().startsWith("*");
 	}
 
 	private List<String> getAvailableVersions()
@@ -427,7 +445,10 @@ public class ExportPage extends WizardPage
 						final String devVersion = ClientVersion.getMajorVersion() + "." + ClientVersion.getMiddleVersion();
 						if (SemVerComparator.compare(devVersion, servoyVersion) < 0)
 							return;
-						result.add(((JSONObject)item).getString("ngDesktopVersion"));
+						final String status = ((JSONObject)item).getString("status");
+						String version = ((JSONObject)item).getString("ngDesktopVersion");
+						if ("deprecated".equals(status)) version = "* " + version;
+						result.add(version);
 					});
 					if (result.size() > 0)
 					{
@@ -472,12 +493,7 @@ public class ExportPage extends WizardPage
 		//we need an index from a sorted list
 		final String version = exportElectronWizard.getDialogSettings().get("ngdesktop_version");
 		final int result = remoteVersions.indexOf(version);
-		return result < 0 ? 0 : result;
-	}
-
-	private boolean getIncludeUpdate()
-	{
-		return exportElectronWizard.getDialogSettings().getBoolean("include_update");
+		return result < 0 ? -1 : result;
 	}
 
 	private String getUpdateUrl()
@@ -524,11 +540,15 @@ public class ExportPage extends WizardPage
 		return getInitialImportPath();
 	}
 
-	private Object platformSelectionChangeListener(String selectedPlatform)
+	private void platformSelectionChangeListener(String selectedPlatform)
 	{
 		final int index = selectedPlatforms.indexOf(selectedPlatform);
-		// the return type is different depending on the execution leaf
-		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
+
+		if (index >= 0) selectedPlatforms.remove(index);
+		else selectedPlatforms.add(selectedPlatform);
+
+		setIncludeUpdateState();
+		updateUrlText.setEnabled(isUpdatableVersion());
 	}
 
 	public List<String> getSelectedPlatforms()
@@ -536,17 +556,28 @@ public class ExportPage extends WizardPage
 		return selectedPlatforms;
 	}
 
-	private boolean isUpdateAvailable()
+	private void setIncludeUpdateState()
 	{
-		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		if (result > 0)
-			return true;
-		return false;
+		if (!selectedPlatforms.contains(WINDOWS_PLATFORM))
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		if (!isUpdatableVersion())
+		{
+			includeUpdateBtn.setVisible(false);
+			return;
+		}
+		includeUpdateBtn.setText("Include update");
+		if (selectedPlatforms.size() > 1) includeUpdateBtn.setText("Include update (Windows)");
+		includeUpdateBtn.setVisible(true);
+		if (includeUpdateBtn.getSelection() == true && isUpdatableVersion()) return; //selection is not changing
+		includeUpdateBtn.setSelection(false);
 	}
 
-	private boolean isUpdateSupported()
+	private boolean isUpdatableVersion()
 	{
-		if (!selectedPlatforms.contains(WINDOWS_PLATFORM)) return false;
+		if (selectedPlatforms.size() == 0) return false;
 		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
 		if (result >= 0)
 			return true;
@@ -555,30 +586,24 @@ public class ExportPage extends WizardPage
 
 	public void saveState()
 	{
-		//invalid values are not saved; that's easier for later validation;
+		String ngdesktop_version = srcVersionCombo.getText();
+		if (ngdesktop_version.startsWith("*")) ngdesktop_version = ngdesktop_version.substring(1).trim();
+
 		final IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
 		settings.put("app_url", applicationUrlText.getText().trim());
-		if (iconPath.getText().trim().length() > 0)
-			settings.put("icon_path", iconPath.getText().trim());
-		if (imgPath.getText().trim().length() > 0)
-			settings.put("image_path", imgPath.getText().trim());
-		if (copyrightText.getText().trim().length() > 0)
-			settings.put("copyright", copyrightText.getText());
-		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_height", heightText.getText().trim());
-		if (widthText.getText().trim().length() > 0)
-			settings.put("ngdesktop_height", heightText.getText().trim());
-		settings.put("ngdesktop_version", srcVersionCombo.getText());
-		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
-		if (appNameText.getText().trim().length() > 0)
-			settings.put("application_name", appNameText.getText().trim());
-		if (updateUrlText.getText().trim().length() > 0)
-			settings.put("update_url", updateUrlText.getText().trim());
-		if (emailAddress.getText().trim().length() > 0)
-			settings.put("email_address", emailAddress.getText().trim());
+		settings.put("ngdesktop_version", ngdesktop_version);
+		settings.put("include_update", includeUpdateBtn.isVisible() && includeUpdateBtn.getSelection());
+		settings.put("icon_path", iconPath.getText().trim());
+		settings.put("image_path", imgPath.getText().trim());
+		settings.put("copyright", copyrightText.getText());
+		settings.put("ngdesktop_height", heightText.getText().trim());
+		settings.put("ngdesktop_width", widthText.getText().trim());
+		settings.put("application_name", appNameText.getText().trim());
+		settings.put("update_url", updateUrlText.getText().trim());
+		settings.put("email_address", emailAddress.getText().trim());
 		settings.put("store_data", storeBtn.getSelection());
 	}
 

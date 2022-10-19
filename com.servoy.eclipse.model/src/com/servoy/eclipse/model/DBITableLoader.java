@@ -22,10 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITableLoader;
@@ -37,6 +38,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
+import com.servoy.j2db.util.xmlxport.ServerDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
@@ -51,11 +53,12 @@ public class DBITableLoader implements ITableLoader
 	{
 		try
 		{
-			Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils.getTableDefinitionsFromDBI(server);
+			Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils
+				.getTableDefinitionsFromDBI(server);
 
-			for (Entry<String, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
+			for (Entry<ServerDef, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
 			{
-				if (server.getConfig().getServerName().equals(entry.getKey()))
+				if (server.getConfig().getServerName().equals(entry.getKey().name))
 				{
 					List<TableDef> tableDefList = entry.getValue();
 
@@ -71,7 +74,7 @@ public class DBITableLoader implements ITableLoader
 								if (colInfo.dataProviderID != null) c.setDataProviderID(colInfo.dataProviderID);
 								c.setAllowNull(colInfo.allowNull);
 								//c.setColumnInfo(colInfo);
-								if ((Column.PK_COLUMN & colInfo.flags) > 0) c.setDatabasePK(true);
+								if ((IBaseColumn.PK_COLUMN & colInfo.flags) > 0) c.setDatabasePK(true);
 								c.setFlags(colInfo.flags);
 								table.addColumn(c);
 								//table.a
@@ -99,12 +102,12 @@ public class DBITableLoader implements ITableLoader
 	public void loadAllColumnInfo(Collection<Table> tables, IServerInternal server) throws RepositoryException
 	{
 		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
-		for (Table table : tables)
+		IServerInfoManager[] serverInfoManagers = sm.getServerInfoManagers();
+		if (serverInfoManagers != null && serverInfoManagers.length > 0)
 		{
-			IColumnInfoManager[] colInfoManagers = sm.getColumnInfoManagers(table.getName());
-			if (colInfoManagers != null && colInfoManagers.length > 0)
+			for (Table table : tables)
 			{
-				colInfoManagers[0].loadAllColumnInfo(table);
+				serverInfoManagers[0].loadAllColumnInfo(table);
 			}
 		}
 	}

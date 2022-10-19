@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 import { ServoyCoreFormContainer } from './formcontainer';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('ServoyCoreFormContainer', () => {
   let component: ServoyCoreFormContainer;
@@ -13,7 +13,7 @@ describe('ServoyCoreFormContainer', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyCoreFormContainer ],
-      imports: [NgbModule, ServoyTestingModule, ServoyPublicModule],
+      imports: [ServoyTestingModule, ServoyPublicModule, NoopAnimationsModule],
       providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ]
     })
     .compileComponents();

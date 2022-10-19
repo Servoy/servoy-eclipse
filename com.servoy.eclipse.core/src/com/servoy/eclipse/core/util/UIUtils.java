@@ -1047,7 +1047,7 @@ public class UIUtils
 			d = Display.getDefault();
 		}
 		final Display disp = d;
-		ReturnValueRunnable r = new ReturnValueRunnable()
+		ReturnValueRunnable<Shell> r = new ReturnValueRunnable<Shell>()
 		{
 			public void run()
 			{
@@ -1059,8 +1059,19 @@ public class UIUtils
 					if (returnValue == null)
 					{
 						Shell[] shells = disp.getShells();
-						returnValue = (shells.length > 0) ? shells[0] : null;
+						for (int i = shells.length; --i >= 0;)
+						{
+							if (shells[i].getParent() == null && shells[i].isVisible())
+							{
+								returnValue = shells[i];
+								break;
+							}
+						}
 					}
+				}
+				if (returnValue != null) while (returnValue.getParent() instanceof Shell && returnValue.getParent().isVisible())
+				{
+					returnValue = (Shell)returnValue.getParent();
 				}
 			}
 		};
@@ -1068,12 +1079,12 @@ public class UIUtils
 		{
 			// getActiveShell() throws exception if called from the wrong thread
 			disp.syncExec(r);
-			return (Shell)r.getReturnValue();
+			return r.getReturnValue();
 		}
 		else
 		{
 			r.run();
-			return (Shell)r.getReturnValue();
+			return r.getReturnValue();
 		}
 	}
 

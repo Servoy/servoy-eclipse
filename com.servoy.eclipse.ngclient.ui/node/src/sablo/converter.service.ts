@@ -157,8 +157,8 @@ export class ConverterService {
 
         let ret = args[0];
         if (ret === undefined || ret === null || args.length === 1) return ret;
-        let i;
-        for (i = 1; i < args.length; i++) {
+
+        for (let i = 1; i < args.length; i++) {
             ret = ret[args[i]];
             if (ret === undefined || ret === null) {
                 return i === args.length - 1 ? ret : undefined;

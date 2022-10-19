@@ -358,6 +358,8 @@ public class TreeViewer extends AbstractTreeViewer {
 			updateCode.run();
 			return;
 		}
+		// avoid costly calls to setSelectionToWidget() and getSelection() during
+		// updateCode.run():
 		insidePreservingSelection = true;
 		try {
 			super.preservingSelection(updateCode, reveal);
@@ -422,8 +424,8 @@ public class TreeViewer extends AbstractTreeViewer {
 			final Object element) {
 		if (checkBusy())
 			return;
-		Item[] selectedItems = getSelection(getControl());
-		TreeSelection selection = (TreeSelection) getSelection();
+		Item[] selectedItems = insidePreservingSelection ? null : getSelection(getControl());
+		TreeSelection selection = insidePreservingSelection ? null : (TreeSelection) getSelection();
 		Widget[] itemsToDisassociate;
 		if (parentElementOrTreePath instanceof TreePath) {
 			TreePath elementPath = ((TreePath) parentElementOrTreePath)
@@ -435,7 +437,9 @@ public class TreeViewer extends AbstractTreeViewer {
 		if (internalIsInputOrEmptyPath(parentElementOrTreePath)) {
 			if (index < tree.getItemCount()) {
 				TreeItem item = tree.getItem(index);
-				selection = adjustSelectionForReplace(selectedItems, selection, item, element, getRoot());
+				if (!insidePreservingSelection) {
+					selection = adjustSelectionForReplace(selectedItems, selection, item, element, getRoot());
+				}
 				// disassociate any different item that represents the
 				// same element under the same parent (the tree)
 				for (Widget widget : itemsToDisassociate) {
@@ -462,7 +466,10 @@ public class TreeViewer extends AbstractTreeViewer {
 				TreeItem parentItem = (TreeItem) widget;
 				if (index < parentItem.getItemCount()) {
 					TreeItem item = parentItem.getItem(index);
-					selection = adjustSelectionForReplace(selectedItems, selection, item, element, parentItem.getData());
+					if (!insidePreservingSelection) {
+						selection = adjustSelectionForReplace(selectedItems, selection, item, element,
+								parentItem.getData());
+					}
 					// disassociate any different item that represents the
 					// same element under the same parent (the tree)
 					for (Widget widgetToDisassociate : itemsToDisassociate) {
@@ -805,7 +812,8 @@ public class TreeViewer extends AbstractTreeViewer {
 	public void remove(final Object parentOrTreePath, final int index) {
 		if (checkBusy())
 			return;
-		final List<TreePath> oldSelection = new LinkedList<>(
+		// in case preservingSelection() is nested avoid getSelection():
+		final List<TreePath> oldSelection = insidePreservingSelection ? null : new LinkedList<>(
 				Arrays.asList(((TreeSelection) getSelection()).getPaths()));
 		preservingSelection(() -> {
 			TreePath removedPath = null;
@@ -845,7 +853,7 @@ public class TreeViewer extends AbstractTreeViewer {
 					}
 				}
 			}
-			if (removedPath != null) {
+			if (removedPath != null && oldSelection != null) {
 				boolean removed = false;
 				for (Iterator<TreePath> it = oldSelection.iterator(); it.hasNext();) {
 					TreePath path = it.next();
@@ -945,17 +953,15 @@ public class TreeViewer extends AbstractTreeViewer {
 				TreeItem item = (TreeItem) widget;
 				if (!hasChildren) {
 					item.setItemCount(0);
-				} else {
-					if (!item.getExpanded()) {
-						item.setItemCount(1);
-						TreeItem child = item.getItem(0);
-						if (child.getData() != null) {
-							disassociate(child);
-						}
-						item.clear(0, true);
-					} else {
-						virtualLazyUpdateChildCount(item, item.getItemCount());
+				} else if (!item.getExpanded()) {
+					item.setItemCount(1);
+					TreeItem child = item.getItem(0);
+					if (child.getData() != null) {
+						disassociate(child);
 					}
+					item.clear(0, true);
+				} else {
+					virtualLazyUpdateChildCount(item, item.getItemCount());
 				}
 			}
 		});

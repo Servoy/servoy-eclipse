@@ -21,10 +21,12 @@ import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.chromium.Browser;
-import org.eclipse.swt.chromium.BrowserFunction;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 
+import com.equo.chromium.swt.Browser;
+import com.equo.chromium.swt.BrowserFunction;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -49,41 +51,41 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		try
 		{
-//			boolean[] gained = new boolean[] { false };
-			browser = new Browser(parent, SWT.CHROMIUM);
-//			{
-//				// hack for https://bugs.eclipse.org/bugs/show_bug.cgi?id=567629
-//				// because the internal browser does say "true" but the system didn't really know that that its own view had the focus now
-//				// so the activation of parts and focus is screwed up. if we return false here all the time then SWT will force a focus Control.forceFocus()
-//				@Override
-//				public boolean isFocusControl()
-//				{
-//					// System.err.println("is focus control  " + gained[0] + "," + super.isFocusControl());
-//					if (!gained[0]) return false;
-//					return super.isFocusControl();
-//				}
-//
-//				@Override
-//				protected void checkSubclass()
-//				{
-//				}
-//			};
-//			browser.addFocusListener(new FocusListener()
-//			{
-//
-//				@Override
-//				public void focusLost(FocusEvent e)
-//				{
-//					gained[0] = false;
-//
-//				}
-//
-//				@Override
-//				public void focusGained(FocusEvent e)
-//				{
-//					gained[0] = true;
-//				}
-//			});
+			boolean[] gained = new boolean[] { false };
+			browser = new Browser(parent, SWT.CHROMIUM)
+			{
+				// hack for https://bugs.eclipse.org/bugs/show_bug.cgi?id=567629
+				// because the internal browser does say "true" but the system didn't really know that that its own view had the focus now
+				// so the activation of parts and focus is screwed up. if we return false here all the time then SWT will force a focus Control.forceFocus()
+				@Override
+				public boolean isFocusControl()
+				{
+					// System.err.println("is focus control  " + gained[0] + "," + super.isFocusControl());
+					if (!gained[0]) return false;
+					return super.isFocusControl();
+				}
+
+				@Override
+				protected void checkSubclass()
+				{
+				}
+			};
+			browser.addFocusListener(new FocusListener()
+			{
+
+				@Override
+				public void focusLost(FocusEvent e)
+				{
+					gained[0] = false;
+
+				}
+
+				@Override
+				public void focusGained(FocusEvent e)
+				{
+					gained[0] = true;
+				}
+			});
 		}
 		catch (SWTError e)
 		{

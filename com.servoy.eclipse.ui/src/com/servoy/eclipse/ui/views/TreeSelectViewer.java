@@ -393,7 +393,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	protected TreeSelectDialog createDialog(Control control)
 	{
 		return new TreeSelectDialog(control.getShell(), isShowFilter(), isShowFilterMode(), getDefaultFilterMode(), getContentProvider(), getLabelProvider(),
-			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), false, name, null);
+			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), false, name, null, false);
 	}
 
 	protected IStructuredSelection openDialogBox(Control control)
@@ -569,16 +569,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 					public void modifyText(ModifyEvent e)
 					{
 						textChanged();
-					}
-				};
-				text.addModifyListener(textModifyListener);
-				createContentProposalAdapter();
-
-				text.addFocusListener(new FocusAdapter()
-				{
-					@Override
-					public void focusLost(FocusEvent e)
-					{
 						String contents = text.getText();
 						if (!Strings.isEmpty(contents))
 						{
@@ -590,7 +580,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 							}
 						}
 					}
-				});
+				};
+				text.addModifyListener(textModifyListener);
+				createContentProposalAdapter();
 			}
 		}
 	}

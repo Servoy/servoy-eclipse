@@ -1,83 +1,96 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
 <target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
-    <locations>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
-		    <repository location="http://developer.servoy.com/sqlexplorer/"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.draw2d.feature.group" version="3.10.100.201606061308"/>
-		    <unit id="org.eclipse.gef.feature.group" version="3.11.0.201606061308"/>
-		    <repository location="http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"/>
-	    </location>
+    <locations>    
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.maketechnology.io/chromium-swt-ee/servoy/p2"/>
-            <unit id="org.eclipse.swt.chromium.feature.feature.group" version="76.0.16.202104190340"/>
-            <unit id="com.make.chromium.cef.feature.feature.group" version="76.0.2.202012180206"/>
+            <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
+            <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2021.06/"/>
+            <unit id="org.eclipse.draw2d.feature.group" version="3.10.100.201606061308"/>
+            <unit id="org.eclipse.gef.feature.group" version="3.11.0.201606061308"/>
+            <repository location="https://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
+            <unit id="org.apache.commons.codec" version="1.14.0.v20200818-1422"/>
+            <unit id="org.apache.commons.codec.source" version="1.14.0.v20200818-1422"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository"/>
+            <unit id="org.antlr.runtime" version="3.0.0.v200803061811"/>
+            <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.12/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/eclipse/updates/4.24/"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1700.v20220509-0833"/>
+            <unit id="org.eclipse.sdk.ide" version="4.24.0.I20220607-0700"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/releases/2022-06/"/>
+            <unit id="org.eclipse.egit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.emf.sdk.feature.group" version="2.30.0.v20220516-1117"/>
+            <unit id="org.eclipse.jgit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.26.0.v202204042240"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.09/"/>
             <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
             <unit id="com.sun.activation.javax.activation" version="1.2.0"/>
             <unit id="com.sun.mail.javax.mail" version="1.6.2"/>
             <unit id="de.inetsoftware.jlessc" version="1.10.0.s4"/>
-            <unit id="jabsorb" version="1.3.2.s5"/>
+            <unit id="jabsorb" version="1.3.2.s6"/>
+            <unit id="javax.persistence-api" version="2.2.0"/>
+            <unit id="javax.servlet.jsp-api" version="2.3.6"/>
             <unit id="javax.transaction" version="1.1.0"/>
             <unit id="javax.websocket" version="1.1.0"/>
-            <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.2"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.12.12"/>
+            <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.5"/>
             <unit id="org.apache.aries.util" version="1.1.3"/>
             <unit id="org.apache.commons.commons-collections4" version="4.4.0"/>
-            <unit id="org.apache.commons.commons-dbcp2" version="2.8.0"/>
+            <unit id="org.apache.commons.commons-dbcp2" version="2.9.0"/>
             <unit id="org.apache.commons.commons-fileupload" version="1.4.0"/>
-            <unit id="org.apache.commons.commons-pool2" version="2.9.0"/>
+            <unit id="org.apache.commons.commons-pool2" version="2.11.1"/>
             <unit id="org.apache.commons.commons-text" version="1.9.0"/>
             <unit id="org.apache.commons.lang3" version="3.12.0"/>
             <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
-            <unit id="org.apache.logging.log4j.api" version="2.14.1"/>
-            <unit id="org.apache.logging.log4j.core" version="2.14.1"/>
-            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.14.1"/>
+            <unit id="org.apache.logging.log4j.api" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.core" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.jcl" version="2.18.0"/>
+            <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.18.0"/>
             <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
-            <unit id="org.jsoup" version="1.13.1"/>
+            <unit id="org.jboss.logging.jboss-logging" version="3.4.3.Final"/>
+            <unit id="org.jsoup" version="1.15.2"/>
             <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
+            <unit id="org.objectweb.asm.commons" version="9.3.0"/>
             <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
             <unit id="org.sweetlemonade.eclipse.json" version="1.0.5"/>
-            <unit id="org.yaml.snakeyaml" version="1.28.0"/>
+            <unit id="org.yaml.snakeyaml" version="1.30.0"/>
             <unit id="sj.jsonschemavalidation" version="2.0.1"/>
             <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
-        </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
-		    <unit id="org.apache.commons.codec" version="1.14.0.v20200818-1422"/>
-		    <unit id="org.apache.commons.codec.source" version="1.14.0.v20200818-1422"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository"/>
-		    <unit id="org.antlr.runtime" version="3.0.0.v200803061811"/>
-		    <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/eclipse/updates/4.19/"/>
-		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1100.v20210209-1541"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.19.0.I20210303-1800"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/releases/2021-03/"/>
-			<unit id="org.eclipse.emf.sdk.feature.group" version="2.25.0.v20210114-1734"/>
-    	    <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.21.0.v202101180039"/>
-	    </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/egit/updates-5.11"/>
-            <unit id="org.eclipse.egit.feature.group" version="5.11.0.202103091610-r"/>
-            <unit id="org.eclipse.jgit.feature.group" version="5.11.0.202103091610-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.11.0.202103091610-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="5.11.0.202103091610-r"/>
+            <unit id="tus-java-server" version="2.0.0.s2"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.06/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202104290801"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202104290803"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.3.202208172151"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.3.202208172219"/>
         </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="http://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.source.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.0.3.202208090440"/>
+		    <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.source.feature.feature.group" version="2.0.3.202208090440"/>
+	    </location>
     </locations>
-	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+    <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>

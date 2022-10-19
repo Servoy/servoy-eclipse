@@ -5,6 +5,9 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
 
+/**
+  * Class reflecting a Format object coming from the server (format spec property)
+  */
 export class Format {
     display: string = null;
     uppercase = false;
@@ -20,17 +23,21 @@ export class Format {
     maxLength = 0;
 }
 
-
+/**
+ * This service is able to format/parse/unformat data of different types (dates,numbers) according to the format string of the format spec property.
+ *
+ * Components can use the {@link FormatDirective} that uses this service in the component template: [svyFormat]="format" 
+ */
 @Injectable()
 export class FormattingService {
 
     constructor(private servoyService: ServoyPublicService) {
     }
 
-    // formatting stufff
+    /**
+     * format the data give with the {@link Format} object give, optionally using the display or edit format.
+     */
     public format(data: any, format: Format, useEditFormat: boolean): string {
-        const formatString = useEditFormat ? format.edit : format.display;
-
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
             if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
                 // make sure is always returned with correct type, otherwise compare will not work well
@@ -38,6 +45,7 @@ export class FormattingService {
             }
             return data;
         }
+        const formatString = useEditFormat ? format.edit : format.display;
         if (data === undefined || data === null) return '';
         if ((format.type === 'NUMBER') || (format.type === 'INTEGER')) {
             return this.formatNumbers(data, formatString);
@@ -52,6 +60,9 @@ export class FormattingService {
         return data;
     }
 
+    /**
+     * utility function to test if a certain key is pressed
+     */
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
         let code: number;
 
@@ -62,7 +73,9 @@ export class FormattingService {
         return code === keyCode;
     }
 
-    // test numbers only
+    /**
+     * utility function to test if only numbers ar pressed.
+     */
     public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
@@ -94,8 +107,16 @@ export class FormattingService {
         return true;
     }
 
-    // unformatting stuff
+    /**
+     * calls the { @link #unformat} function for unformatting/parsing the data given
+     */
+    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any): any {
+        return this.unformat(data, (useEditFormat && format.edit && !format.isMask) ? format.edit : format.display, format.type, currentValue);
+    }
 
+    /**
+     * unformats/parse the give data according to the given format and type 
+     */
     public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
@@ -104,8 +125,8 @@ export class FormattingService {
             return data;
         } else if (type === 'DATETIME') {
             if ('' === data) return null;
-           servoyFormat = this.convertFormat(servoyFormat);
-            const d = DateTime.fromFormat(data, servoyFormat, {locale: this.servoyService.getLocale()}).toJSDate();
+            servoyFormat = this.convertFormat(servoyFormat);
+            const d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
             if (currentValue && !isNaN(currentValue.getTime())) {
@@ -216,7 +237,7 @@ export class FormattingService {
         return sel;
     }
 
-    private formatNumbers(data, servoyFormat: string): string {
+    private formatNumbers(data: any, servoyFormat: string): string {
         if (!servoyFormat)
             return data;
         if (data === '')
@@ -226,8 +247,8 @@ export class FormattingService {
         if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
 
         const initialData = data;
-        let patchedFormat = servoyFormat; // patched format for numeraljs format
-        let i; let j;
+        let patchedFormat = servoyFormat; // patched format for numbro format
+        let i: number;
         let prefix = '';
         let sufix = '';
 
@@ -279,8 +300,7 @@ export class FormattingService {
         }
 
         patchedFormat = patchedFormat.substring(numberStart, numberEnd + 1);
-        let ret;
-
+        let ret: string;
 
         prefix = prefix.replace(new RegExp('\'', 'g'), '');
         sufix = sufix.replace(new RegExp('\'', 'g'), '');
@@ -309,65 +329,73 @@ export class FormattingService {
             }
             ret = Number(data).toExponential(integerDigits + fractionalDigits);
         } else {
-            // get min digits
-            let minLen = 0;
-            let optionalDigits = 0;
-            for (i = 0; i < patchedFormat.length; i++) {
-                if (patchedFormat[i] === '0') {
-                    minLen++;
-                } else if (patchedFormat[i] === '#' && minLen === 0) {
-                    optionalDigits++;
-                } else if (patchedFormat[i] === '.') {
+
+            let leftFormat = '';
+            let rightFormat = '';
+
+            if (patchedFormat.indexOf('.') >= 0) {
+                leftFormat = patchedFormat.split('.')[0];
+                rightFormat = patchedFormat.split('.')[1];
+            } else {
+                leftFormat = patchedFormat;
+            }
+
+            let minLenCharacteristic = 0;
+            let minLenCharacteristicAfterZeroFound = 0;
+            let optionalDigitsCharacteristic = 0;
+            let zeroFound = false;
+            for (i = 0; i < leftFormat.length; i++) {
+                if (leftFormat[i] === '0') {
+                    zeroFound = true;
+                    minLenCharacteristic++;
+                } else if (leftFormat[i] === '#') {
+                    optionalDigitsCharacteristic++;
+                }
+                if (leftFormat[i] === '#' && zeroFound) {
+                    minLenCharacteristicAfterZeroFound++;
+                }
+            }
+
+            let minLenMantissa = 0;
+            let optionalDigitsMantissa = 0;
+
+            for (i = rightFormat.length - 1; i >= 0; i--) {
+                if (rightFormat[i] === '0') {
+                    minLenMantissa++;
+                } else if (rightFormat[i] === '#') {
+                    optionalDigitsMantissa++;
+                } else if (rightFormat[i] === '.') {
                     break;
                 }
             }
 
-            patchedFormat = patchedFormat.replace(new RegExp('(#+)', 'g'), '[$1]');
-            patchedFormat = patchedFormat.replace(new RegExp('#', 'g'), '0');
+            let dataAsString = data + '';
 
-            ret = numbro(data).format(patchedFormat);
+            let rightData = '';
 
-            // set min digits
-            if (minLen > 0) {
-                const retSplit = ret.split(numbro.languageData().delimiters.decimal);
-                for (i = 0; i < retSplit[0].length; i++) {
-                    if (retSplit[0][i] < '0' || retSplit[0][i] > '9') continue;
-                    for (j = i; j < retSplit[0].length; j++) {
-                        if (retSplit[0][j] >= '0' && retSplit[0][j] <= '9') continue;
-                        break;
-                    }
-                    const nrMissing0 = minLen - (j - i);
-                    if (nrMissing0 > 0) {
-                        ret = retSplit[0].substring(0, i);
-                        for (j = 0; j < nrMissing0; j++) ret += '0';
-                        ret += retSplit[0].substring(i);
-                        if (retSplit.length > 1) ret += (numbro.languageData().delimiters.decimal + retSplit[1]);
-                    }
-                    break;
-                }
+            if (dataAsString.indexOf('.') >= 0) {
+                rightData = dataAsString.split('.')[1];
             }
-            // fix the optional digits
-            if (patchedFormat.indexOf(',') === -1 && optionalDigits > 0) {
-                let toEliminate = 0;
-                for (i = 0; i < ret.length; i++) {
-                    if (ret.charAt(i) === '0') {
-                        toEliminate++;
-                    } else {
-                        break;
-                    }
-                }
-                if (toEliminate > 0) {
-                    if (toEliminate > optionalDigits) {
-                        toEliminate = optionalDigits;
-                    }
-                    ret = ret.substring(toEliminate);
-                    if (ret.indexOf(numbro.languageData().delimiters.decimal) === 0) {
-                        // we eliminated too much
-                        ret = '0' + ret;
-                    }
-                }
+
+            let rightDataMantissaLength = rightData.length;
+            let mantissaLength = 0;
+            if (rightDataMantissaLength <= minLenMantissa) {
+                mantissaLength = minLenMantissa
+            } else if (rightDataMantissaLength < minLenMantissa + optionalDigitsMantissa) {
+                mantissaLength = rightDataMantissaLength;
+            } else {
+                mantissaLength = minLenMantissa + optionalDigitsMantissa;
             }
+            ret = numbro(data).format({
+                thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
+                mantissa: mantissaLength,
+                optionalMantissa: minLenMantissa === 0,
+                trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
+                characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
+                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
+            });
         }
+
         return prefix + ret + sufix;
     }
 
@@ -433,7 +461,7 @@ export class FormattingService {
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         dateFormat = this.convertFormat(dateFormat);
-        const formatted  = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
         return formatted.trim ? formatted.trim() : formatted;
     }
 
@@ -442,13 +470,14 @@ export class FormattingService {
         // adjust to luxon js formatting (from java simple date format)
         dateFormat = dateFormat.replace(new RegExp('Y', 'g'), 'y');
         dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
-        dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
+        if (dateFormat.indexOf('EE') === -1)
+            dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
         dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
         dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
         // no equivalent for K, just put h for now
-        dateFormat = dateFormat.replace(new RegExp('K','g'), 'h');
-        dateFormat = dateFormat.replace(new RegExp('k','g'), 'H');
-        dateFormat = dateFormat.replace(new RegExp('D','g'), 'o');
+        dateFormat = dateFormat.replace(new RegExp('K', 'g'), 'h');
+        dateFormat = dateFormat.replace(new RegExp('k', 'g'), 'H');
+        dateFormat = dateFormat.replace(new RegExp('D', 'g'), 'o');
         // if week is found then the year must be 'k' for luxon (iso week year)
         if (dateFormat.indexOf('W') !== -1) {
             dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'k');

@@ -23,12 +23,15 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleAttributeAdapter;
 import org.eclipse.swt.accessibility.AccessibleAttributeEvent;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -103,13 +106,15 @@ public class TitleAreaDialog extends TrayDialog {
 
 	private String errorMessage;
 
-	private Label messageLabel;
+	private Text messageLabel;
 
 	private Composite workArea;
 
 	private Label messageImageLabel;
 
 	private Image messageImage;
+
+	private String messageImageTooltip;
 
 	private boolean showingError = false;
 
@@ -118,6 +123,10 @@ public class TitleAreaDialog extends TrayDialog {
 	private int messageLabelHeight;
 
 	private Image titleAreaImage;
+
+	private int xTrim;
+
+	private int yTrim;
 
 	/**
 	 * Instantiate a new title area dialog.
@@ -156,6 +165,11 @@ public class TitleAreaDialog extends TrayDialog {
 		// create the dialog area and button bar
 		dialogArea = createDialogArea(workArea);
 		buttonBar = createButtonBar(workArea);
+
+		// computing trim for later
+		Rectangle rect = messageLabel.computeTrim(0, 0, 100, 100);
+		xTrim = rect.width - 100;
+		yTrim = rect.height - 100;
 
 		// need to react to new size of title area
 		getShell().addListener(SWT.Resize, event -> layoutForNewMessage(true));
@@ -250,11 +264,20 @@ public class TitleAreaDialog extends TrayDialog {
 		// Message image @ bottom, left
 		messageImageLabel = new Label(parent, SWT.CENTER);
 		messageImageLabel.setBackground(background);
+		messageImageLabel.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
+			public void getName(AccessibleEvent event) {
+				if (messageImageTooltip == null) {
+					return;
+				}
+				event.result = messageImageTooltip;
+			}
+		});
 		// Message label @ bottom, center
-		// messageLabel = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
-		messageLabel = new Label(parent, SWT.WRAP);
+		messageLabel = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
 		JFaceColors.setColors(messageLabel, foreground, background);
 		messageLabel.setText(" \n "); // two lines//$NON-NLS-1$
+		messageLabel.setEnabled(false);
 		messageLabel.setFont(JFaceResources.getDialogFont());
 		// Bug 248410 -  This snippet will only work with Windows screen readers.
 		messageLabel.getAccessible().addAccessibleAttributeListener(
@@ -400,6 +423,7 @@ public class TitleAreaDialog extends TrayDialog {
 				message = ""; //$NON-NLS-1$
 			updateMessage(message);
 			messageImageLabel.setImage(messageImage);
+			messageImageLabel.setToolTipText(messageImageTooltip);
 			setImageLabelVisible(messageImage != null);
 		} else {
 			// Add in a space for layout purposes but do not
@@ -470,16 +494,13 @@ public class TitleAreaDialog extends TrayDialog {
 
 		if (forceLayout) {
 			getShell().layout();
-		} else {
-			// Do not layout before the dialog area has been created
-			// to avoid incomplete calculations.
-			if (dialogArea != null)
-				workArea.getParent().layout(true);
-		}
+		} else // Do not layout before the dialog area has been created
+		// to avoid incomplete calculations.
+		if (dialogArea != null)
+			workArea.getParent().layout(true);
 
-		Point messageSize = messageLabel.getSize();
-		int messageLabelUnclippedHeight = messageLabel.computeSize(messageSize.x, SWT.DEFAULT, true).y;
-		boolean messageLabelClipped = messageLabelUnclippedHeight > messageSize.y;
+		int messageLabelUnclippedHeight = messageLabel.computeSize(messageLabel.getSize().x - xTrim, SWT.DEFAULT, true).y;
+		boolean messageLabelClipped = messageLabelUnclippedHeight > messageLabel.getSize().y - yTrim;
 		if (messageLabel.getData() instanceof ToolTip) {
 			ToolTip toolTip = (ToolTip) messageLabel.getData();
 			toolTip.hide();
@@ -499,7 +520,7 @@ public class TitleAreaDialog extends TrayDialog {
 					text.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 					text.setText(messageLabel.getText());
 					GridData gridData = new GridData();
-					gridData.widthHint = messageSize.x;
+					gridData.widthHint = messageLabel.getSize().x;
 					text.setLayoutData(gridData);
 					Dialog.applyDialogFont(result);
 					return result;
@@ -556,22 +577,26 @@ public class TitleAreaDialog extends TrayDialog {
 	 */
 	public void setMessage(String newMessage, int newType) {
 		Image newImage = null;
+		String newImageTooltip = null;
 		if (newMessage != null) {
 			switch (newType) {
 			case IMessageProvider.NONE:
 				break;
 			case IMessageProvider.INFORMATION:
 				newImage = JFaceResources.getImage(DLG_IMG_MESSAGE_INFO);
+				newImageTooltip = JFaceResources.getString("info"); //$NON-NLS-1$
 				break;
 			case IMessageProvider.WARNING:
 				newImage = JFaceResources.getImage(DLG_IMG_MESSAGE_WARNING);
+				newImageTooltip = JFaceResources.getString("warning"); //$NON-NLS-1$
 				break;
 			case IMessageProvider.ERROR:
 				newImage = JFaceResources.getImage(DLG_IMG_MESSAGE_ERROR);
+				newImageTooltip = JFaceResources.getString("error"); //$NON-NLS-1$
 				break;
 			}
 		}
-		showMessage(newMessage, newImage);
+		showMessage(newMessage, newImage, newImageTooltip);
 	}
 
 	/**
@@ -580,7 +605,7 @@ public class TitleAreaDialog extends TrayDialog {
 	 * @param newMessage
 	 * @param newImage
 	 */
-	private void showMessage(String newMessage, Image newImage) {
+	private void showMessage(String newMessage, Image newImage, String newImageTooltip) {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=249915
 		if (newMessage == null)
 			newMessage = ""; //$NON-NLS-1$
@@ -595,10 +620,12 @@ public class TitleAreaDialog extends TrayDialog {
 		// a space to the message for layout purposes
 		String shownMessage = (newImage == null) ? message : " " + message; //$NON-NLS-1$
 		messageImage = newImage;
+		messageImageTooltip = newImageTooltip;
 		if (!showingError) {
 			// we are not showing an error
 			updateMessage(shownMessage);
 			messageImageLabel.setImage(messageImage);
+			messageImageLabel.setToolTipText(messageImageTooltip);
 			setImageLabelVisible(messageImage != null);
 			layoutForNewMessage(false);
 		}
@@ -613,6 +640,7 @@ public class TitleAreaDialog extends TrayDialog {
 	private void updateMessage(String newMessage) {
 		String oldMessage = messageLabel.getText();
 		messageLabel.setText(newMessage);
+		messageLabel.setEnabled(!newMessage.isBlank());
 		// Bug 248410 -  This snippet will only work with Windows screen readers.
 		messageLabel.getAccessible().sendEvent(ACC.EVENT_ATTRIBUTE_CHANGED,
 				null);

@@ -22,7 +22,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
@@ -102,8 +104,6 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		IPackageReader packageReader = (IPackageReader)node.getRealObject();
-		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
-			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		String packageName = packageReader.getPackageName();
 		String displayName = packageReader.getPackageDisplayname();
 		String version = packageReader.getVersion();
@@ -117,7 +117,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		if (code != 0 || (displayName.equals(newName) && Utils.equalObjects(version, newVersion))) return;
 		if (!displayName.equals(newName))
 		{
-			while (!isNameValid(node, newName, componentsNotServices))
+			while (!isNameValid(node, newName))
 			{
 				code = dialog.open();
 				newName = dialog.getSelectedName();
@@ -128,7 +128,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		updatePackageDetails((IContainer)SolutionExplorerTreeContentProvider.getResource(packageReader), newName, newVersion);
 	}
 
-	private boolean isNameValid(SimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
+	private boolean isNameValid(SimpleUserNode node, String packageDisplayName)
 	{
 		if ("".equals(packageDisplayName))
 		{
@@ -136,9 +136,13 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 			return false;
 		}
 
-		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getSpecProviderState()
-			: WebServiceSpecProvider.getSpecProviderState();
-		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
+		List<PackageSpecification< ? extends WebObjectSpecification>> allPackageSpecs = new ArrayList<>(
+			WebServiceSpecProvider.getSpecProviderState().getWebObjectSpecifications().values());
+		SpecProviderState compspecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		allPackageSpecs.addAll(compspecProviderState.getWebObjectSpecifications().values());
+		allPackageSpecs.addAll(compspecProviderState.getLayoutSpecifications().values());
+
+		for (PackageSpecification< ? extends WebObjectSpecification> p : allPackageSpecs)
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))
 			{

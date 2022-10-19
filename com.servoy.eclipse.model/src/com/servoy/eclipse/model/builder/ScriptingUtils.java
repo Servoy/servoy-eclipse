@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.model.builder;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.GetArrayItemExpression;
 import org.eclipse.dltk.javascript.ast.Identifier;
+import org.eclipse.dltk.javascript.ast.NullExpression;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.ObjectInitializerPart;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
@@ -37,6 +39,7 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
+import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 
@@ -161,6 +164,32 @@ public class ScriptingUtils
 				public Object visitStringLiteral(StringLiteral node)
 				{
 					return Integer.valueOf(IColumnTypes.TEXT);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitNullExpression(org.eclipse.dltk.javascript.ast.NullExpression)
+				 */
+				@Override
+				public Object visitNullExpression(NullExpression node)
+				{
+					return Integer.valueOf(Types.NULL);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitUnaryOperation(org.eclipse.dltk.javascript.ast.UnaryOperation)
+				 */
+				@Override
+				public Object visitUnaryOperation(UnaryOperation node)
+				{
+					if (node.getExpression() instanceof DecimalLiteral)
+					{
+						return Integer.valueOf(IColumnTypes.NUMBER);
+					}
+					return super.visitUnaryOperation(node);
 				}
 			});
 		}

@@ -8,6 +8,14 @@ export class RecordRefType implements IType<any> {
 
     private static readonly FOUNDSET_ID = 'foundsetId';
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    static generateRecordRef(rowId: string, foundsetId: number): object {
+        const recordRef = {};
+        recordRef[ViewportService.ROW_ID_COL_KEY] = rowId;
+        recordRef[RecordRefType.FOUNDSET_ID] = foundsetId;
+        return recordRef;
+    }
+
 	fromServerToClient(serverJSONValue: any, _currentClientValue: any, _propertyContext: IPropertyContext): any {
 		// no conversions to be done here; server does support sending records to client but just as references via hashes / and pk hints
 		// that currently are not automatically transformed on client into a RowValue instance...
@@ -15,10 +23,7 @@ export class RecordRefType implements IType<any> {
 	}
 
 	fromClientToServer(newClientData: RowValue, _oldClientData: any, _propertyContext: IPropertyContext): [any, RowValue] {
-		const recordRef = {};
-		recordRef[ViewportService.ROW_ID_COL_KEY] = newClientData.getId();
-		recordRef[RecordRefType.FOUNDSET_ID] = newClientData.getFoundset().getId();
-		return [recordRef, newClientData];
+		return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
 	}
 
 }

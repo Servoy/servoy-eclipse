@@ -1,13 +1,15 @@
 import { FormService } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service';
-import { ServoyBaseComponent, IComponentCache } from '@servoy/public';
+import { ServoyBaseComponent, ServoyApi as Api, IComponentCache } from '@servoy/public';
 
-export class ServoyApi {
+export class ServoyApi extends Api {
     constructor( private item: IComponentCache,
                  private formname: string,
                  private absolute: boolean,
                  private formservice: FormService,
-                 private servoyService: ServoyService) {
+                 private servoyService: ServoyService,
+                 private isDesigner: boolean) {
+                    super();
     }
 
 
@@ -36,7 +38,7 @@ export class ServoyApi {
     }
 
     public isInDesigner() {
-        return false;
+        return this.isDesigner;
     }
 
     public trustAsHtml() {

@@ -52,7 +52,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
-import com.servoy.base.query.IJoinConstants;
+import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.XMLDesignDocsLoader;
@@ -204,8 +204,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 	public static final PropertyDescription JOIN_TYPE_VALUES = new PropertyDescriptionBuilder().withName("joinType").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
-			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IJoinConstants.INNER_JOIN), Integer.valueOf(IJoinConstants.LEFT_OUTER_JOIN) },
-				new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] }))
+			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IQueryConstants.INNER_JOIN), Integer.valueOf(IQueryConstants.LEFT_OUTER_JOIN) },
+				new String[] { ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.LEFT_OUTER_JOIN] }))
 		.build();
 
 	public static final PropertyDescription DISPLAY_TYPE_VALUES = new PropertyDescriptionBuilder().withName(

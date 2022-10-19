@@ -33,7 +33,7 @@ class JavaRuntimeType extends RSimpleType
 	public static final String JAVA_CLASS = "JAVA_CLASS";
 
 	/**
-	 * @param typeSystem 
+	 * @param typeSystem
 	 * @param type
 	 */
 	public JavaRuntimeType(ITypeSystem typeSystem, Type type)
@@ -51,7 +51,7 @@ class JavaRuntimeType extends RSimpleType
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isJavaScriptObject()
 	 */
 	@Override
@@ -62,7 +62,7 @@ class JavaRuntimeType extends RSimpleType
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.JSType2#isAssignableFrom(org.eclipse.dltk.javascript.typeinfo.JSType2)
 	 */
 	@Override
@@ -72,7 +72,7 @@ class JavaRuntimeType extends RSimpleType
 		{
 			Class< ? > cls = (Class< ? >)getTarget().getAttribute(JavaRuntimeType.JAVA_CLASS);
 			Class< ? > other = (Class< ? >)((JavaRuntimeType)runtimeType).getTarget().getAttribute(JavaRuntimeType.JAVA_CLASS);
-			return cls.isAssignableFrom(other) ? TypeCompatibility.TRUE : TypeCompatibility.FALSE;
+			return cls != null && other != null && cls.isAssignableFrom(other) ? TypeCompatibility.TRUE : TypeCompatibility.FALSE;
 		}
 		if (runtimeType instanceof IRSimpleType)
 		{
@@ -88,7 +88,7 @@ class JavaRuntimeType extends RSimpleType
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -103,7 +103,7 @@ class JavaRuntimeType extends RSimpleType
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#transform(org.eclipse.dltk.javascript.typeinfo.IRTypeTransformer)
 	 */
 	@Override

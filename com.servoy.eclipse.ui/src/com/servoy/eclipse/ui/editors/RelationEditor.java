@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import static com.servoy.base.query.IBaseSQLCondition.EQUALS_OPERATOR;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,6 +69,7 @@ import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -74,12 +77,14 @@ import com.servoy.eclipse.ui.StringMatcher;
 import com.servoy.eclipse.ui.editors.relation.DataProviderEditingSupport;
 import com.servoy.eclipse.ui.editors.relation.DatasourceSelectComposite;
 import com.servoy.eclipse.ui.editors.relation.OperatorEditingSupport;
+import com.servoy.eclipse.ui.editors.relation.OperatorMaskEditingSupport;
 import com.servoy.eclipse.ui.editors.relation.OptionsComposite;
 import com.servoy.eclipse.ui.editors.relation.RelationItemLabelProvider;
 import com.servoy.eclipse.ui.editors.relation.RelationRow;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.SWTFakeTableTooltipSupport;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -187,7 +192,6 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					return event.keyCode == '\r';
 				}
 			}, ColumnViewerEditor.KEYBOARD_ACTIVATION | ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR);
-		table.setToolTipText("Ctrl+click in a cell to open data provider dialog");
 
 		table.addMouseListener(new MouseAdapter()
 		{
@@ -202,9 +206,9 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					int index = items.indexOf(item);
 					if (index >= 0)
 					{
-						WritableList oldInput = (WritableList)tableViewer.getInput();
+						WritableList<RelationRow> oldInput = (WritableList<RelationRow>)tableViewer.getInput();
 						oldInput.remove(index);
-						oldInput.add(new RelationRow(null, Integer.valueOf(0), null, null));
+						oldInput.add(new RelationRow(null, EQUALS_OPERATOR, null, null));
 						tableViewer.setInput(oldInput);
 						flagModified(true);
 					}
@@ -218,14 +222,18 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 498,
 				Short.MAX_VALUE).add(GroupLayout.LEADING, optionsComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
-					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
-						groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
-							Short.MAX_VALUE))).addContainerGap()));
+					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE)
+				.add(GroupLayout.LEADING,
+					groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
+						Short.MAX_VALUE)))
+			.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					datasourceSelectComposite).addPreferredGap(LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(optionsComposite).addContainerGap()));
+					datasourceSelectComposite)
+				.addPreferredGap(LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					Short.MAX_VALUE)
+				.addPreferredGap(LayoutStyle.RELATED).add(optionsComposite).addContainerGap()));
 		comp.setLayout(groupLayout);
 
 		createTableColumns();
@@ -308,14 +316,14 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 
 	public void createInput(boolean reuseSource, boolean reuseDestination, boolean autoFill)
 	{
-		input = new ArrayList<RelationRow>();
-		WritableList oldInput = (WritableList)tableViewer.getInput();
+		input = new ArrayList<>();
+		WritableList<RelationRow> oldInput = (WritableList<RelationRow>)tableViewer.getInput();
 		List<IPersist> items = getRelation().getAllObjectsAsList();
 		for (Object element : items)
 		{
 			RelationItem persist = (RelationItem)element;
 			RelationRow row = null;
-			if (oldInput != null) row = (RelationRow)oldInput.get(items.indexOf(element));
+			if (oldInput != null) row = oldInput.get(items.indexOf(element));
 			String ci_from;
 			if (reuseSource && row != null)
 			{
@@ -329,7 +337,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 			String ci_to;
 			if (reuseDestination && row != null) ci_to = row.getCITo();
 			else ci_to = persist.getForeignColumnName();
-			input.add(new RelationRow(ci_from, Integer.valueOf(persist.getOperator()), ci_to, null));
+			input.add(new RelationRow(ci_from, persist.getOperator(), ci_to, null));
 		}
 		String[] oldColumns = null;
 		if (fromCache != null) oldColumns = fromCache.getRight();
@@ -341,10 +349,10 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 				{
 					if (oldInput.size() > i)
 					{
-						RelationRow row = (RelationRow)oldInput.get(i);
+						RelationRow row = oldInput.get(i);
 						if (reuseSource)
 						{
-							input.add(new RelationRow(row.getRawCIFrom(), Integer.valueOf(0), null, null));
+							input.add(new RelationRow(row.getRawCIFrom(), EQUALS_OPERATOR, null, null));
 							continue;
 						}
 						else if (reuseDestination)
@@ -352,9 +360,9 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 							if (row.getCIFrom() != null && oldColumns != null &&
 								(ScopesUtils.isVariableScope(row.getCIFrom()) || row.getRawCIFrom().startsWith(LiteralDataprovider.LITERAL_PREFIX)))
 							{
-								input.add(new RelationRow(row.getRawCIFrom(), Integer.valueOf(0), row.getCITo(), null));
+								input.add(new RelationRow(row.getRawCIFrom(), EQUALS_OPERATOR, row.getCITo(), null));
 							}
-							else input.add(new RelationRow(null, Integer.valueOf(0), row.getCITo(), null));
+							else input.add(new RelationRow(null, EQUALS_OPERATOR, row.getCITo(), null));
 							continue;
 						}
 					}
@@ -364,7 +372,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					ServoyLog.logError(e);
 				}
 			}
-			input.add(new RelationRow(null, Integer.valueOf(0), null, null));
+			input.add(new RelationRow(null, EQUALS_OPERATOR, null, null));
 		}
 		boolean didAutoFill = false;
 		if (autoFill && getRelation().getPrimaryDataSource() != null && getRelation().getForeignDataSource() != null)
@@ -483,43 +491,57 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 				ServoyLog.logError(e);
 			}
 		}
-		tableViewer.setInput(new WritableList(input, null));
+		tableViewer.setInput(new WritableList<>(input, null));
 
 		toCache = null;
 	}
 
 	public static final int CI_FROM = 0;
 	public static final int CI_OP = 1;
-	public static final int CI_TO = 2;
-	public static final int CI_DELETE = 3;
+	public static final int CI_MASK = 2;
+	public static final int CI_TO = 3;
+	public static final int CI_DELETE = 4;
 
 	private void createTableColumns()
 	{
+		List<String> columnTooltips = new ArrayList<>();
+
 		TableColumn fromColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_FROM);
 		fromColumn.setText("From");
 		TableViewerColumn fromViewerColumn = new TableViewerColumn(tableViewer, fromColumn);
 		fromViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_FROM, true));
+		columnTooltips.add("Ctrl+click in a cell to open data provider dialog");
 
 		TableColumn opColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_OP);
-		opColumn.setText("op");
+		opColumn.setText("Op");
 		TableViewerColumn opViewerColumn = new TableViewerColumn(tableViewer, opColumn);
 		opViewerColumn.setEditingSupport(new OperatorEditingSupport(this, tableViewer));
+		columnTooltips.add("Relation operator");
+
+		TableColumn maskColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_MASK);
+		maskColumn.setText("Modifier");
+		TableViewerColumn maskViewerColumn = new TableViewerColumn(tableViewer, maskColumn);
+		maskViewerColumn.setEditingSupport(new OperatorMaskEditingSupport(this, tableViewer));
+		columnTooltips.add(OperatorMaskEditingSupport.getTooltip());
 
 		TableColumn toColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_TO);
 		toColumn.setText("To");
 		TableViewerColumn toViewerColumn = new TableViewerColumn(tableViewer, toColumn);
 		toViewerColumn.setEditingSupport(new DataProviderEditingSupport(this, tableViewer, CI_TO, false));
+		columnTooltips.add("Ctrl+click in a cell to open data provider dialog");
 
 		TableColumn delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
-		delColumn.setToolTipText("Clear row");
+		columnTooltips.add("Clear row");
 
 		TableColumnLayout layout = new TableColumnLayout();
 		tableContainer.setLayout(layout);
-		layout.setColumnData(fromColumn, new ColumnWeightData(10, 50, true));
+		layout.setColumnData(fromColumn, new ColumnWeightData(10, 45, true));
 		layout.setColumnData(opColumn, new ColumnPixelData(100, true));
-		layout.setColumnData(toColumn, new ColumnWeightData(10, 50, true));
+		layout.setColumnData(maskColumn, new ColumnPixelData(100, true));
+		layout.setColumnData(toColumn, new ColumnWeightData(10, 45, true));
 		layout.setColumnData(delColumn, new ColumnPixelData(20, true));
 
+		SWTFakeTableTooltipSupport.enableTooltipFor(tableViewer.getTable(), null, columnTooltips.toArray(new String[0]));
 		tableViewer.setLabelProvider(new RelationItemLabelProvider(this));
 	}
 
@@ -548,7 +570,6 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 			if (from == null || "".equals(from)) break outer;
 			String to = rr.getCITo();
 			if (to == null || "".equals(to)) break outer;
-			if (rr.getOperator() == null) break outer;
 		}
 		return row;
 	}
@@ -609,32 +630,30 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 
 	public String[] getDataProviders(int index)
 	{
-		String[] retval = null;
 		if (index == CI_FROM && fromCache != null && fromCache.getLeft().equals(getRelation().getPrimaryTableName()))
 		{
 			return fromCache.getRight();
 		}
-		else if (index == CI_TO && toCache != null && toCache.getLeft().equals(getRelation().getForeignTableName()))
+		if (index == CI_TO && toCache != null && toCache.getLeft().equals(getRelation().getForeignTableName()))
 		{
 			return toCache.getRight();
 		}
-		if (retval == null)
+
+		Object[] dps = getDataProvidersEx(index);
+		String[] retval = new String[dps.length];
+		for (int i = 0; i < retval.length; i++)
 		{
-			Object[] dps = getDataProvidersEx(index);
-			retval = new String[dps.length];
-			for (int i = 0; i < retval.length; i++)
-			{
-				retval[i] = (dps[i] instanceof IDataProvider ? ((IDataProvider)dps[i]).getDataProviderID() : dps[i].toString());
-			}
-			if (index == CI_FROM)
-			{
-				fromCache = new Pair<String, String[]>(EMPTY + getRelation().getPrimaryTableName(), retval);
-			}
-			else if (index == CI_TO)
-			{
-				toCache = new Pair<String, String[]>(EMPTY + getRelation().getForeignTableName(), retval);
-			}
+			retval[i] = (dps[i] instanceof IDataProvider ? ((IDataProvider)dps[i]).getDataProviderID() : dps[i].toString());
 		}
+		if (index == CI_FROM)
+		{
+			fromCache = new Pair<String, String[]>(EMPTY + getRelation().getPrimaryTableName(), retval);
+		}
+		else if (index == CI_TO)
+		{
+			toCache = new Pair<String, String[]>(EMPTY + getRelation().getForeignTableName(), retval);
+		}
+
 		return retval;
 	}
 
@@ -719,8 +738,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		if (getRowCount() == tableRows)
 		{
 			tableRows++;
-			input.add(new RelationRow(null, Integer.valueOf(0), null, null));
-			tableViewer.setInput(new WritableList(input, null));
+			input.add(new RelationRow(null, EQUALS_OPERATOR, null, null));
+			tableViewer.setInput(new WritableList<>(input, null));
 		}
 		this.getSite().getShell().getDisplay().asyncExec(new Runnable()
 		{
@@ -808,6 +827,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		{
 			checkInconsistency();
 			Relation r = getRelation();
+			FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(r,
+				ServoyModelFinder.getServoyModel().getFlattenedSolution());
 			int count = getRowCount();
 			if (count > 0)
 			{
@@ -850,7 +871,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 						}
 					}
 
-					operators[i] = Utils.getAsInteger(rr.getOperator());
+					operators[i] = rr.getOperator();
 
 				}
 				r.createNewRelationItems(dbp, operators, dbf);
@@ -869,7 +890,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 			{
 				r.setPrimaryDataSource(r.getForeignDataSource());
 			}
-			String errorMessage = r.checkKeyTypes(null);
+			String errorMessage = r.checkKeyTypes(relationFlattenedSolution);
 			if (errorMessage != null && oldDataSource == null)
 			{
 				r.setPrimaryDataSource(oldDataSource);
@@ -1018,15 +1039,19 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 
 	public void unregisterListeners()
 	{
-		ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
-		if (primaryTable != null)
+		Relation relation = getRelation();
+		if (relation != null)
 		{
-			primaryTable.removeIColumnListener(this);
-		}
-		ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
-		if (foreignTable != null)
-		{
-			foreignTable.removeIColumnListener(this);
+			ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getPrimaryDataSource());
+			if (primaryTable != null)
+			{
+				primaryTable.removeIColumnListener(this);
+			}
+			ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+			if (foreignTable != null)
+			{
+				foreignTable.removeIColumnListener(this);
+			}
 		}
 	}
 

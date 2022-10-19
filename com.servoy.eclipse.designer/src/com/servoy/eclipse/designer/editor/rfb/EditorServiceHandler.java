@@ -53,6 +53,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveL
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenPropertiesWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RevertFormCommand;
@@ -66,6 +67,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -252,6 +254,10 @@ public class EditorServiceHandler implements IServerService
 				{
 					String showValue = args.getString("show");
 					Activator.getDefault().toggleShow(showValue);
+					if (Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER.equals(showValue))
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					}
 					return Activator.getDefault().getPreferenceStore().contains(showValue)
 						? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(showValue)) : Boolean.FALSE;
 				}
@@ -298,11 +304,25 @@ public class EditorServiceHandler implements IServerService
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
 					}
+					if (args.has("sameSizeIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowSameSizeFeedback());
+					}
+					if (args.has("anchoringIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowAnchorFeedback());
+					}
 					if (args.has("isHideInherited"))
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
 							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+					}
+					if (args.has("showI18NValues"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
 					}
 				}
 				return Boolean.FALSE;
@@ -488,6 +508,9 @@ public class EditorServiceHandler implements IServerService
 			}
 
 		});
+
+		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(editorPart, selectionProvider));
+		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
 	}
 
 	@Override

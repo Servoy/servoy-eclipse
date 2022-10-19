@@ -260,7 +260,7 @@ public class TutorialView extends ViewPart
 					description.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description"), null));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-					gd.widthHint = widthHint - 70;
+					gd.widthHint = widthHint - 90;
 					description.setLayoutData(gd);
 					descriptor = FontDescriptor.createFrom(description.getFont());
 					descriptor = descriptor.increaseHeight(2);
@@ -762,7 +762,7 @@ public class TutorialView extends ViewPart
 			codeSnippet.setText(codeText);
 			codeSnippet.setBackground(color);
 			GridData gdCode = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gdCode.widthHint = widthHint - 70;
+			gdCode.widthHint = widthHint - 90;
 			codeSnippet.setLayoutData(gdCode);
 			int margin = 5;
 			codeSnippet.setMargins(margin, margin, margin, margin);

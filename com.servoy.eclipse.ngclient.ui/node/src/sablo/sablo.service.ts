@@ -1,5 +1,5 @@
 import { Injectable, } from '@angular/core';
-import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory } from '@servoy/public';
+import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 
@@ -8,7 +8,7 @@ import { ConverterService } from './converter.service';
 })
 export class SabloService {
 
-    private locale: { language: string; country: string; full: string } = null;
+    private locale: Locale = null;
     private wsSession: WebsocketSession;
     private currentServiceCallCallbacks = [];
     private currentServiceCallDone: boolean;
@@ -107,7 +107,7 @@ export class SabloService {
         if (!langAndCountry) langAndCountry = 'en';
         return langAndCountry;
     }
-    public getLocale(): { language: string; country: string; full: string } {
+    public getLocale(): Locale {
         if (!this.locale) {
             const langAndCountry = this.getLanguageAndCountryFromBrowser();
             const array = langAndCountry.split('-');
@@ -116,13 +116,13 @@ export class SabloService {
         return this.locale;
     }
 
-    public setLocale(loc) {
+    public setLocale(loc: Locale) {
         this.locale = loc;
     }
 
     public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
-        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async);
-        return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000]);
+        const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
+        return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
 
     public addToCurrentServiceCall(func: () => void) {
@@ -144,6 +144,10 @@ export class SabloService {
         this.wsSession.addIncomingMessageHandlingDoneTask(func);
     }
 
+    public getCurrentRequestInfo(): any {
+        return this.websocketService.getCurrentRequestInfo();
+    }
+
     private callServiceCallbacksWhenDone() {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
             this.currentServiceCallWaiting = 0;
@@ -156,7 +160,7 @@ export class SabloService {
         }
     }
 
-    private waitForServiceCallbacks(promise: Promise<{}>, times) {
+    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): Promise<T>{
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise;
@@ -165,12 +169,16 @@ export class SabloService {
         this.currentServiceCallDone = false;
         this.currentServiceCallWaiting = times.length;
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
-        return promise.then((arg) => {
-            this.currentServiceCallDone = true;
-            return arg;
-        }, (arg) => {
-            this.currentServiceCallDone = true;
-            return Promise.reject(arg);
+        return Object.defineProperty(promise.then((arg) => {
+                this.currentServiceCallDone = true;
+                return arg;
+            }, (arg) => {
+                this.currentServiceCallDone = true;
+                return Promise.reject(arg);
+            }), 'requestInfo', {
+                			set : (value: any) => {
+                				promise['requestInfo'] = value;
+            			}
         });
     }
 //

@@ -9,7 +9,6 @@ import { ViewportService } from '../services/viewport.service';
 import { DateType } from './date_converter';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { TestabilityService } from '../../sablo/testability.service';
 import { IPropertyContext, PushToServerEnum, TypesRegistry } from '../../sablo/types_registry';
 import { ObjectType } from './object_converter';
 
@@ -32,7 +31,7 @@ describe('FoundsetConverter', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports : [ServoyTestingModule],
-            providers: [ConverterService, TestabilityService, LoggerFactory,
+            providers: [ConverterService, LoggerFactory,
                         WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
         });
 

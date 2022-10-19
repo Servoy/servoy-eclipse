@@ -50,6 +50,7 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -66,9 +67,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property source for form element groups.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class FormElementGroupPropertySource implements IPropertySource, IModelSavePropertySource
 {
@@ -312,7 +313,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		while (elements.hasNext())
 		{
 			IFormElement element = elements.next();
-			Point oldElementLocation = element.getLocation();
+			Point oldElementLocation = CSSPositionUtils.getLocation(element);
 			Point location = new Point(oldElementLocation.x + dx, oldElementLocation.y + dy);
 			setElementProperty(element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
 		}
@@ -333,8 +334,8 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		while (elements.hasNext())
 		{
 			IFormElement element = elements.next();
-			Dimension oldElementSize = element.getSize();
-			Point oldElementLocation = element.getLocation();
+			Dimension oldElementSize = CSSPositionUtils.getSize(element);
+			Point oldElementLocation = CSSPositionUtils.getLocation(element);
 
 			Dimension size = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
 

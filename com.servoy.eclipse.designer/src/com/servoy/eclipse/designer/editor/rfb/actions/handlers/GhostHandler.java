@@ -282,9 +282,14 @@ public class GhostHandler implements IServerService
 					{
 						Entry<String, PropertyDescription> propEntry = propIt.next();
 
+
 						if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
 						{
-							sortedAndDroppableProps.put(propEntry.getKey(), webComponent.getProperty(propEntry.getKey()));
+							Object value = webComponent.getProperty(propEntry.getKey());
+							if (propEntry.getValue().getDeprecated() == null || value != null)
+							{
+								sortedAndDroppableProps.put(propEntry.getKey(), value);
+							}
 						}
 					}
 				}

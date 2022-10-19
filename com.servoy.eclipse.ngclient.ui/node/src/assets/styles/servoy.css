@@ -1,3 +1,7 @@
+@import "~@ag-grid-community/core/dist/styles/ag-grid.css";
+@import "~@ag-grid-community/core/dist/styles/agGridClassicFont.css";
+@import "~@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
+
 /* Default buttons (used in login, file upload)
 -------------------------------------------------- */
 body {
@@ -98,8 +102,13 @@ body {
 }
 .svy-reconnecting
 {
+  color: red;
   background:lightgray;
   opacity: 0.75;
+  z-index: 200000;
+  width: 100%;
+  height: 100%;
+  position:absolute;
 }
 
 #mktipmsg {
@@ -323,11 +332,16 @@ body {
 
 .owl-dt-inline-container {
     box-shadow: none; 
-    width: 14.5em;
+    width: 100%;
 }
 
-.owl-dt-inline-container .owl-dt-calendar, .owl-dt-popup-container .owl-dt-calendar {
-    height: 17.25em;
+.owl-dt-inline .owl-dt-calendar {
+    height:auto;
+}
+
+.owl-dt-inline {
+    display: inline-block;
+    width: 100%;
 }
 
 .btn-default {
@@ -386,4 +400,187 @@ fieldset[disabled] .btn-default.focus {
 
 .svy-main-window-navigator-container {
 	z-index: 0;
+}
+
+.svy-wrapper > * > .svy-container {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+.svy-wrapper > .svy-responsivecontainer {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.svy-wrapper > * >* > .svy-tabcontainer {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    min-height: 0 !important;
+}
+
+/* Default form's height to 100% if responsive form is contained within an anchored form */
+.svy-wrapper > * > .svy-container > .tabcontainer > svy-form >.svy-respform {
+    height: 100%;
+}
+
+/*
+ The DragResize object name is automatically applied to all generated
+ corner resize handles, as well as one of the individual classes below.
+*/
+.dragresize {
+ position: absolute;
+ width: 5px;
+ height: 5px;
+ font-size: 1px;
+ background: #EEE;
+ border: 1px solid #333;
+}
+
+/*
+ Individual corner classes - required for resize support.
+ These are based on the object name plus the handle ID.
+*/
+.dragresize-tl {
+ top: -8px;
+ left: -8px;
+ cursor: nw-resize;
+}
+.dragresize-tm {
+ top: -8px;
+ left: 50%;
+ margin-left: -4px;
+ cursor: n-resize;
+}
+.dragresize-tr {
+ top: -8px;
+ right: -8px;
+ cursor: ne-resize;
+}
+
+.dragresize-ml {
+ top: 50%;
+ margin-top: -4px;
+ left: -8px;
+ cursor: w-resize;
+}
+.dragresize-mr {
+ top: 50%;
+ margin-top: -4px;
+ right: -8px;
+ cursor: e-resize;
+}
+
+.dragresize-bl {
+ bottom: -8px;
+ left: -8px;
+ cursor: sw-resize;
+}
+.dragresize-bm {
+ bottom: -8px;
+ left: 50%;
+ margin-left: -4px;
+ cursor: s-resize;
+}
+.dragresize-br {
+ bottom: -8px;
+ right: -8px;
+ cursor: se-resize;
+}
+
+.loading-i-holder {
+  display: flex;
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
+  left: 0px;
+  align-items: center;
+  justify-content: center;
+}
+
+.lii-shape {
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  margin: 0 2px;
+  
+  background-color: #ef7a23;
+  animation: 2.5s ease-in infinite;
+  opacity : 0;
+}
+
+.lii-1 {
+  animation-name: zoom-in-and-out-1;
+}
+
+.lii-2 {
+  animation-delay: 0.1s;
+  animation-name: zoom-in-and-out-2;
+}
+
+.lii-3 {
+  animation-delay: 0.2s;
+  animation-name: zoom-in-and-out-3;
+}
+
+.lii-4 {
+  animation-delay: 0.3s;
+  animation-name: zoom-in-and-out-4;
+}
+
+.lii-5 {
+  animation-delay: 0.4s;
+  animation-name: zoom-in-and-out-5;
+}
+
+@keyframes zoom-in-and-out-1 {
+      0% { transform: translateX(190px); }
+     25% { transform: translateX(190px); opacity : 0; }
+     35% { opacity : 1; }
+     40% { transform: translateX(0px); }
+     60% { transform: translateX(0px); }
+     65% { opacity : 1; }
+     75% { transform: translateX(-110px); opacity: 0; }
+}
+
+@keyframes zoom-in-and-out-2 {
+      0% { transform: translateX(170px); }
+     25% { transform: translateX(170px); opacity : 0; }
+     35% { opacity : 1; }
+     40% { transform: translateX(0px); }
+     60% { transform: translateX(0px); }
+     65% { opacity : 1; }
+     75% { transform: translateX(-130px); opacity: 0; }
+}
+
+@keyframes zoom-in-and-out-3 {
+      0% { transform: translateX(150px); }
+     25% { transform: translateX(150px); opacity : 0; }
+     35% { opacity : 1; }
+     40% { transform: translateX(0px); }
+     60% { transform: translateX(0px); }
+     65% { opacity : 1; }
+     75% { transform: translateX(-150px); opacity: 0; }
+}
+
+@keyframes zoom-in-and-out-4 {
+      0% { transform: translateX(130px); }
+     25% { transform: translateX(130px); opacity : 0; }
+     35% { opacity : 1; }
+     40% { transform: translateX(0px); }
+     60% { transform: translateX(0px); }
+     65% { opacity : 1; }
+     75% { transform: translateX(-170px); opacity: 0; }
+}
+
+@keyframes zoom-in-and-out-5 {
+      0% { transform: translateX(110px); }
+     25% { transform: translateX(110px); opacity : 0; }
+     35% { opacity : 1; }
+     40% { transform: translateX(0px); }
+     60% { transform: translateX(0px); }
+     65% { opacity : 1; }
+     75% { transform: translateX(-190px); opacity: 0; }
 }

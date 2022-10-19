@@ -1,0 +1,33 @@
+ <div
+     class='input-group date svy-calendar-container input-sm'
+      [id]="servoyApi.getMarkupId()"
+     data-td-target-input='nearest'
+     data-td-target-toggle='nearest'
+     style='height:100%'
+      [svyTooltip]="toolTipText"
+     #element>
+   <input
+      [id]="servoyApi.getMarkupId() + 'input'"
+     type='text'
+     class='svy-calendar form-control form-control-sm input-sm svy-line-height-normal'
+     style='height:100%'
+     data-td-target='#datetimepicker1'
+      [ngModel]="dataProviderID"
+      (ngModelChange)="modelChange($event)"
+      [svyFormat]="format"
+      [svyStartEdit]="'dataProviderID'"
+      [hostComponent]="this"
+      [sabloTabseq]="tabSeq"
+      [disabled]="!enabled"
+      [readonly]="readOnly"
+      [findmode]="findmode"
+      #inputElement/>
+   <span
+     tabindex='-1'
+     class='input-group-text'
+     style='height:100%'
+     data-td-target='#datetimepicker1'
+     data-td-toggle='datetimepicker'
+      [hidden]="readOnly || !enabled || findmode">
+     <span class='fas fa-calendar' ></span></span>
+ </div>

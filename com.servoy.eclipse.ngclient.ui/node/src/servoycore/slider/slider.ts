@@ -1,13 +1,13 @@
 import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
+import { ServoyBaseComponent } from '@servoy/public';
 
-import {ServoyDefaultBaseComponent} from '../../servoydefault/basecomponent';
 
 @Component( {
     selector: 'servoycore-slider',
     templateUrl: './slider.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
-export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElement> {
+export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
     @Input() onChangeMethodID;
     @Input() onCreateMethodID;
     @Input() onSlideMethodID;
@@ -19,6 +19,7 @@ export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElemen
     @Input() orientation;
     @Input() step;
 
+    @Input() dataProviderID: any;
     @Output() dataProviderIDChange = new EventEmitter();
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
@@ -27,7 +28,7 @@ export class ServoyCoreSlider extends ServoyDefaultBaseComponent<HTMLInputElemen
 
     svyOnInit() {
         super.svyOnInit();
-        if (this.orientation == 'vertical') {
+        if (this.orientation === 'vertical') {
             this.renderer.setStyle(this.getNativeElement(), '-webkit-appearance', 'slider-vertical' );
             this.renderer.setAttribute(this.getNativeElement(), 'orient', 'vertical');
         }

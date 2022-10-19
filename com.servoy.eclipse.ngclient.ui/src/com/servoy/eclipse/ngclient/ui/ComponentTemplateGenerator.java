@@ -34,6 +34,7 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -53,7 +54,7 @@ public class ComponentTemplateGenerator
 	 *  right is the viewchild reference value to those components
 	 * @return Pair<String,String>
 	 */
-	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate()
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(IWarExportModel model)
 	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
@@ -71,11 +72,15 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectSpecification spec : specs)
 		{
-			genereateSpec(template, viewChild, spec, spec.getName());
-			if (spec.getName().equals("servoydefault-tabpanel"))
+			if (model == null || model.getExportedComponents().contains(spec.getName()))
 			{
-				// also generate the tabless
-				genereateSpec(template, viewChild, spec, "servoydefault-tablesspanel");
+				genereateSpec(template, viewChild, spec, spec.getName());
+				if (spec.getName().equals("servoydefault-tabpanel"))
+				{
+					// also generate the tabless
+					genereateSpec(template, viewChild, spec, "servoydefault-tablesspanel");
+					genereateSpec(template, viewChild, spec, "servoydefault-accordion");
+				}
 			}
 
 		}

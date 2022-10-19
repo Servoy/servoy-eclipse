@@ -38,6 +38,7 @@ import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.util.MimeTypes;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcomp
@@ -56,14 +57,26 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException
 	{
-		File projectFolder = Activator.getInstance().getProjectFolder();
+		HttpServletRequest request = (HttpServletRequest)servletRequest;
+		HttpServletResponse response = (HttpServletResponse)servletResponse;
+		request.getSession();
+		String requestURI = request.getRequestURI();
+
+		if (requestURI.toLowerCase().endsWith("/index.html") &&
+			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
+		{
+			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/loadingclient.html"));
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/html");
+			response.setContentLengthLong(indexHtml.length());
+			response.getWriter().write(indexHtml);
+
+			return;
+		}
+		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		File distFolder = new File(projectFolder, "dist/app");
 		if (distFolder.exists())
 		{
-			HttpServletRequest request = (HttpServletRequest)servletRequest;
-			HttpServletResponse response = (HttpServletResponse)servletResponse;
-			request.getSession();
-			String requestURI = request.getRequestURI();
 			String solutionName = getSolutionNameFromURI(requestURI);
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||

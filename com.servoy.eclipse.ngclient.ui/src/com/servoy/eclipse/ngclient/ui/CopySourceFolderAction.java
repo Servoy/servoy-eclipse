@@ -17,10 +17,15 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -31,25 +36,39 @@ public class CopySourceFolderAction extends Action
 {
 	public CopySourceFolderAction()
 	{
-		setText("Copy the NGClient2 sources");
+		setText("Copy the Titanium NGClient sources");
 		setToolTipText("Copies the ngclient sources to the workspace/.metadata/.plugins/com.servoy.eclipse.ngclient.ui/target/ folder");
 	}
 
 	@Override
 	public void run()
 	{
-		final boolean cleanInstall = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Should we do a clean install (npm ci)?",
-			"This cleans out the node_modules. A full npm ci is done.\nDo this if there are problems when building (See NGConsole in the console view)");
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
+		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
+			"This action will perform an npm install/ng build as well.\n" +
+				"Should we do a normal install or a clean install (npm ci)?\n\n" +
+
+				"Choosing 'Copy && Build' will copy sources and run a normal ng build.\n" +
+				"Choosing 'Copy && Clean build' will clean out the 'node_modules' dir and do a full npm -ci. (do this if there are problems when building (see 'Titanium NG Build Console' in the 'Console' view).",
+			SWT.NONE, new String[] { "Copy && Build", "Copy && Clean build", "Cancel" });
+
+		if (choice < 0 || choice == 2) return; // cancel
+
+		if (choice == 1)
+		{
+			Job.createSystem("delete .angular and packages cache", (monitor) -> {
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getSolutionProjectFolder(), ".angular"));
+				FileUtils.deleteQuietly(new File(Activator.getInstance().getSolutionProjectFolder(), "packages"));
+			}).schedule();
+		}
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				WebPackagesListener.checkPackages(cleanInstall);
+				WebPackagesListener.checkPackages(choice == 1);
 			}
 		});
 		copySources.schedule();
-
 	}
 }

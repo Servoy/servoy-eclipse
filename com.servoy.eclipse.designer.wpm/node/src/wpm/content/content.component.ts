@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE, Package, WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
+import { Package } from '../websocket.service';
+import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
 
 export interface PackageList {
   title: string;
@@ -27,7 +28,7 @@ export class ContentComponent implements OnInit {
       }
       else {
         if(packageListIdx == -1) {
-          let packageList =  {
+          const packageList =  {
             title: PACKAGE_TYPE_TO_TITLE_MAP[p.packageType],
             type: p.packageType,
             updateCount: this.getUpgradeCount(p.packages),
@@ -40,23 +41,22 @@ export class ContentComponent implements OnInit {
           this.packageLists[packageListIdx].updateCount = this.getUpgradeCount(p.packages);
         }
       }
-    })
+      this.wpmService.setPackageLists(this.packageLists);
+    });
   }
 
   getPackageTabLabel(packageList: PackageList): string {
-    return packageList.updateCount > 0 ? packageList.title + " (" + packageList.updateCount + ")" : packageList.title;
+    return packageList.updateCount > 0 ? packageList.title + ' (' + packageList.updateCount + ')' : packageList.title;
   }
 
   getUpgradeCount(packages: Package[]): number {
     let count = 0;
-    try {
       for (let i = 0; i < packages.length; i++) {
-          let pckg = packages[i];
-          if (pckg.installed && pckg.installed < pckg.releases[0].version) {
+          const pckg = packages[i];
+          if (pckg?.installed && pckg?.releases[0]?.version && this.wpmService.versionCompare(pckg?.installed, pckg?.releases[0]?.version) < 0) {
             count++;
           }
       }
-    } catch (e) {}
     return count;
   }
 

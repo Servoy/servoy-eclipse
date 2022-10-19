@@ -148,12 +148,24 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint = 200;
 		mainSolutionVersion.setLayoutData(gd);
-		mainSolutionVersion.setText(exportSolutionWizard.getActiveSolution().getVersion() != null ? exportSolutionWizard.getActiveSolution().getVersion() : "");
+		Label warnLabel = new Label(comp, SWT.NONE);
+		String version = exportSolutionWizard.getActiveSolution().getVersion();
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-		Label warnLabel = new Label(comp, SWT.NONE);
 		ServoyProject servoyProject = servoyModel.getServoyProject(exportSolutionWizard.getActiveSolution().getName());
 		Solution editingSolution = servoyProject.getEditingSolution();
+		if (version == null || "".equals(version))
+		{
+			version = "1.0"; //default version
+			mainSolutionVersion.setText(version);
+			setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution);
+			updateMessages();
+		}
+		else
+		{
+			mainSolutionVersion.setText(version);
+		}
+
 		mainSolutionVersion.addModifyListener(event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));
 		mainSolutionVersion.addListener(SWT.FocusOut, event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));
 		mainSolutionVersion.addListener(SWT.CR, event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));

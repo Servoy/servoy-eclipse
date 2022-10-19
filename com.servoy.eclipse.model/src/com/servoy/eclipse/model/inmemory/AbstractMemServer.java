@@ -55,11 +55,11 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.dataprocessing.datasource.JSConnectionDefinition;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableChangeHandler;
@@ -77,11 +78,11 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.util.SQLKeywords;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.ServoyJSONObject;
-import com.servoy.j2db.util.keyword.SQLKeywords;
 
 /**
  * @author emera
@@ -89,7 +90,6 @@ import com.servoy.j2db.util.keyword.SQLKeywords;
 public abstract class AbstractMemServer<T extends ITable> implements IServerInternal, IServer
 {
 	private final Map<String, T> tables = new HashMap<>();
-	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
 	private final String datasource;
@@ -112,7 +112,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void init()
 	{
 		tables.clear();
-		sequenceManager = null;
 		Iterator<IPersist> tableNodes = servoyProject.getSolution().getObjects(IRepository.TABLENODES);
 		while (tableNodes.hasNext())
 		{
@@ -313,6 +312,12 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	}
 
 	@Override
+	public ServerSettings getSettings()
+	{
+		return ServerSettings.DEFAULT;
+	}
+
+	@Override
 	public boolean dropTable(Table t) throws SQLException, RepositoryException
 	{
 		return false;
@@ -412,7 +417,9 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			IResource[] resources = folder.members();
 			for (IResource res : resources)
 			{
-				if (res instanceof IFile && (res.getName().equals(t.getName() + ".tbl") || res.getName().startsWith(t.getName() + "_")))
+				if (res instanceof IFile && res.getName().equals(t.getName() + ".tbl") ||
+					res instanceof IFile && res.getName().equals(t.getName() + "_calculations.js") ||
+					res instanceof IFile && res.getName().equals(t.getName() + "_entity.js"))
 				{
 					IFile file = (IFile)res;
 					InputStream is = file.getContents();
@@ -791,18 +798,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#getRepository()
-	 */
-	@Override
-	public IRepository getRepository() throws RepositoryException
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#getRepositoryTable(java.lang.String)
 	 */
 	@Override
@@ -832,12 +827,20 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		T table = createTable(tableName);
 		tables.put(tableName, table);
 
+		DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager());
 		Iterator<Column> it = selectedTable.getColumns().iterator();
 		while (it.hasNext())
 		{
 			Column c = it.next();
-			table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
+			ColumnInfo columnInfo = c.getColumnInfo();
+			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
 				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
+			if (columnInfo != null)
+			{
+				dmm.createNewColumnInfo(newColumn, false);
+				newColumn.getColumnInfo().copyFrom(columnInfo);
+				newColumn.setColumnInfo(newColumn.getColumnInfo()); // update some members of the Column if they were changed in column info
+			}
 		}
 		updateAllColumnInfo(table);
 		return table;
@@ -850,6 +853,18 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 */
 	@Override
 	public boolean isTableListLoaded()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#isTableListLoaded()
+	 */
+	@Override
+	public boolean isTableListLoadedAsync()
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -1238,26 +1253,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void dropClientDatasource(String clientId)
 	{
 	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServer#getSequenceProvider()
-	 */
-	@Override
-	public ISequenceProvider getSequenceProvider()
-	{
-		return sequenceManager;
-	}
-
-	/**
-	 * @param sequenceManager the sequenceManager to set
-	 */
-	public void setSequenceProvider(ISequenceProvider sequenceManager)
-	{
-		this.sequenceManager = sequenceManager;
-	}
-
 
 	/**Checks if the given memTable is different from the stored property of the TableNode that stores this MemTable
 	 * @param abstractMemTable

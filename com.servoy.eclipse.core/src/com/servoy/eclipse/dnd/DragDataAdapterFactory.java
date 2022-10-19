@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -121,7 +121,7 @@ public class DragDataAdapterFactory implements IAdapterFactory
 					else
 					{
 						primaryTableName = cw.getRelations()[0].getPrimaryTableName();
-						relationName = DatabaseUtils.getRelationsString(cw.getRelations());
+						relationName = EclipseDatabaseUtils.getRelationsString(cw.getRelations());
 					}
 
 					return new DataProviderDragData(column.getTable().getName(), column.getTable().getServerName(), column.getDataProviderID(),

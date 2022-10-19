@@ -6,10 +6,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2021.9.0.3700_rc</version>
+		<version>2022.12.0.3820_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.linux.gtk.x86_64</artifactId>
-	<version>16.3.0</version>
+	<version>16.17.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -27,6 +27,27 @@
 					</environments>
 				</configuration>
 			</plugin>
+			 <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                 <version>1.6.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://nodejs.org/dist/v16.17.0/node-v16.17.0-linux-x64.tar.xz</url>
+                            <outputFileName>node.tar.xz</outputFileName>
+                            <unpack>false</unpack>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 </project>
+

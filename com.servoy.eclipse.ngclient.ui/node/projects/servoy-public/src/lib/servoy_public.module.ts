@@ -15,7 +15,6 @@ import { FormattingService } from './format/formatting.service';
 import { ComponentContributor } from './basecomponent';
 import { SabloTabseq } from './directives/sablotabseq.directive';
 import { WindowRefService } from './services/windowref.service';
-import { LoggerFactory } from './logger.service';
 
 @NgModule({
     declarations: [ TooltipDirective,
@@ -49,6 +48,6 @@ import { LoggerFactory } from './logger.service';
               SabloTabseq,
               TrustAsHtmlPipe
              ],
-    providers: [ TooltipService, FormattingService, ComponentContributor, WindowRefService, LoggerFactory ]
+    providers: [ TooltipService, FormattingService, ComponentContributor ]
 })
 export class ServoyPublicModule { }

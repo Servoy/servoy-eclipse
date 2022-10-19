@@ -94,13 +94,13 @@ public class PasteCommand extends AbstractModelsCommand implements ICommandWrapp
 				Object o = ((Object[])clipboardContents)[i];
 				if (parent instanceof TabPanel && (!(o instanceof PersistDragData) || ((PersistDragData)o).type != IRepository.TABS))
 				{
-					// paste something else then a tab into a tabpanel? in stead paste to form 
+					// paste something else then a tab into a tabpanel? in stead paste to form
 					pasteParent = parent.getAncestor(IRepository.FORMS);
 					break;
 				}
 			}
 		}
-
+		if (pasteParent == null) pasteParent = context;
 		return new FormPlaceElementCommand(application, (ISupportChilds)pasteParent, clipboardContents, BaseVisualFormEditor.REQ_PASTE, requestData,
 			fieldPositioner, null, null, context);
 	}

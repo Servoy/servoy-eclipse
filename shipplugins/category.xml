@@ -2,9 +2,6 @@
 <site>
 	<category-def name="bundles" label="Servoy Binary Bundles" />
 	<repository-reference
-		location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.23"
-		enabled="true" />
-	<repository-reference
 		location="http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"
 		enabled="true" />
 
@@ -26,19 +23,31 @@
 	<bundle id="org.apache.logging.log4j.core">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="org.apache.commons.io" version="2.6">
-		<category name="bundles" />
-	</bundle>
+    <bundle id="org.apache.logging.log4j.jcl">
+        <category name="bundles" />
+    </bundle>
 	<bundle id="org.jsoup" >
 		<category name="bundles" />
 	</bundle>
-	<bundle id="jabsorb" version="1.3.2.s5">
+	<bundle id="jabsorb">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="javax.websocket" version="1.1.0">
+	<bundle id="javax.websocket">
 		<category name="bundles" />
 	</bundle>
-	<bundle id="javax.transaction" version="1.1.0">
+    <bundle id="javax.servlet.jsp-api">
+        <category name="bundles" />
+    </bundle>
+	<bundle id="javax.transaction">
+		<category name="bundles" />
+	</bundle>
+	<bundle id="javax.persistence-api">
+		<category name="bundles" />
+	</bundle>
+	<bundle id="org.jboss.logging.jboss-logging">
+		<category name="bundles" />
+	</bundle>
+	<bundle id="net.bytebuddy.byte-buddy">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.commons.lang3">
@@ -94,4 +103,10 @@
 	<bundle id='org.apache.commons.commons-fileupload'>
 		<category name="bundles" />
 	</bundle>
+    <bundle id='tus-java-server'>
+        <category name="bundles" />
+    </bundle>	
+    <bundle id='org.objectweb.asm.commons'>
+        <category name="bundles" />
+    </bundle>   
 </site>

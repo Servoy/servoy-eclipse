@@ -230,7 +230,7 @@ class SingleValueState {
         // add a listener for foundset prop. size to regenerate the viewport when that changes - fill it up again fully with single values
         sabloService.addIncomingMessageHandlingDoneTask(() => { // do it after all incomming properties have been converted so we are sure to have the forFoundset prop. ready
             const fs: IFoundset = iS.forFoundset();
-            this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
+            if (fs) this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
                 if (event.viewPortSizeChanged || event.fullValueChanged) {
                     let newSize = iS.forFoundset()?.viewPort.size;
                     if (newSize === undefined) newSize = 0;

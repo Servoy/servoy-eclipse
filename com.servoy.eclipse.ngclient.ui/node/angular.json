@@ -24,10 +24,7 @@
             "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
-              "src/favicon.ico",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" },
-              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs", "output": "/tinymce/langs" },
-              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs5", "output": "/tinymce/langs5" }
+              "src/favicon.ico"
             ],
             "styles": [
               "src/styles.css"
@@ -41,14 +38,23 @@
           },
           "configurations": {
             "production": {
-              "outputPath": "dist/app_prod",
+              "outputPath": "dist/app",
               "budgets": [
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -103,8 +109,7 @@
             ],
             "assets": [
               "src/assets",
-              "src/favicon.ico",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
+              "src/favicon.ico"
             ],
             "sourceMap": true
           }
@@ -171,23 +176,134 @@
             "codeCoverage": false,
             "sourceMap": true
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+        }
+      }
+    },
+    "@servoy/ngclientutils": {
+      "projectType": "library",
+      "root": "projects/ngclientutils",
+      "sourceRoot": "projects/ngclientutils/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": [
-              "projects/servoy-public/tsconfig.lib.json",
-              "projects/servoy-public/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": "projects/ngclientutils/tsconfig.lib.json",
+            "project": "projects/ngclientutils/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngclientutils/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/ngclientutils/src/test.ts",
+            "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
+            "karmaConfig": "projects/ngclientutils/karma.conf.js",
+            "codeCoverage": false,
+            "sourceMap": true
+          }
+        }
+      }
+    },
+    "@servoy/dialogs": {
+      "projectType": "library",
+      "root": "projects/dialogs",
+      "sourceRoot": "projects/dialogs/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/dialogs/tsconfig.lib.json",
+            "project": "projects/dialogs/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/dialogs/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/dialogs/src/test.ts",
+            "tsConfig": "projects/dialogs/tsconfig.spec.json",
+            "karmaConfig": "projects/dialogs/karma.conf.js",
+            "codeCoverage": false,
+            "sourceMap": true
+          }
+        }
+      }
+    },
+    "@servoy/window": {
+      "projectType": "library",
+      "root": "projects/window",
+      "sourceRoot": "projects/window/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/window/tsconfig.lib.json",
+            "project": "projects/window/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/window/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/window/src/test.ts",
+            "tsConfig": "projects/window/tsconfig.spec.json",
+            "karmaConfig": "projects/window/karma.conf.js",
+            "codeCoverage": false,
+            "sourceMap": true
+          }
+        }
+      }
+    },
+    "@servoy/servoydefault": {
+      "projectType": "library",
+      "root": "projects/servoydefault",
+      "sourceRoot": "projects/servoydefault/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/servoydefault/tsconfig.lib.json",
+            "project": "projects/servoydefault/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/servoydefault/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "preserveSymlinks": true,
+            "main": "projects/servoydefault/src/test.ts",
+            "tsConfig": "projects/servoydefault/tsconfig.spec.json",
+            "karmaConfig": "projects/servoydefault/karma.conf.js",
+            "codeCoverage": false,
+            "sourceMap": true
           }
         }
       }
     }
   },
-  "defaultProject": "ngclient2",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.swt.graphics.Point;
@@ -93,6 +94,7 @@ public class DesignerPreferences
 	public static final String CLOSE_EDITORS_ON_EXIT_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
+	public static final String SHOW_LEGACY_SOLUTION_TYPES_SETTING = "showLegacySolutionTypes";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -108,10 +110,12 @@ public class DesignerPreferences
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
-	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
+	//public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 	public static final String LAUNCH_NG2 = "launchNG2";
+	public static final String NG2_DESIGNER = "ng2Designer";
+	public static final String FORUM_NOTIFICATIONS = "forumNotifications";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -139,6 +143,7 @@ public class DesignerPreferences
 	public static final boolean CLOSE_EDITORS_ON_EXIT_DEFAULT = false;
 	public static final boolean OPEN_FIRST_FORM_DESIGNER_DEFAULT = true;
 	public static final boolean SHOW_COLUMNS_IN_DB_ORDER_DEFAULT = false;
+	public static final boolean SHOW_LEGACY_SOLUTION_TYPES_DEFAULT = false;
 	public static final boolean SHOW_SAME_SIZE_DEFAULT = true;
 	public static final boolean SHOW_ANCHORING_DEFAULT = true;
 	public static final boolean FORM_TOOLS_ON_MAIN_TOOLBAR_DEFAULT = true;
@@ -168,13 +173,13 @@ public class DesignerPreferences
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
 
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true; // Utils.isWindowsOS();
-
 	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
-	public static final boolean LAUNCH_NG2_DEFAULT = false;
+	public static final boolean LAUNCH_NG2_DEFAULT = true;
+	public static final boolean NG2_DESIGNER_DEFAULT = true;
+	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -528,6 +533,16 @@ public class DesignerPreferences
 		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
 	}
 
+	public boolean getShowLegacySolutionTypes()
+	{
+		return getProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
+	}
+
+	public void setShowLegacySolutionTypes(boolean showLegacySolutionTypes)
+	{
+		setProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, showLegacySolutionTypes);
+	}
+
 	public boolean getShowSameSizeFeedback()
 	{
 		return getProperty(SHOW_SAME_SIZE_SETTING, SHOW_SAME_SIZE_DEFAULT);
@@ -858,12 +873,7 @@ public class DesignerPreferences
 
 	public boolean useChromiumBrowser()
 	{
-		return getProperty(USE_CHROMIUM_BROWSER, USE_CHROMIUM_BROWSER_DEFAULT);
-	}
-
-	public void setUseChromiumBrowser(boolean chromium)
-	{
-		setProperty(USE_CHROMIUM_BROWSER, chromium);
+		return Platform.getBundle("com.equo.chromium") != null;
 	}
 
 	public boolean useContextMenuTutorials()
@@ -910,4 +920,23 @@ public class DesignerPreferences
 		setProperty(LAUNCH_NG2, launchNG2);
 	}
 
+	public boolean showNG2Designer()
+	{
+		return getProperty(NG2_DESIGNER, NG2_DESIGNER_DEFAULT);
+	}
+
+	public void setShowNG2Designer(boolean showNG2)
+	{
+		setProperty(NG2_DESIGNER, showNG2);
+	}
+
+	public boolean showForumNotifications()
+	{
+		return getProperty(FORUM_NOTIFICATIONS, FORUM_NOTIFICATIONS_DEFAULT);
+	}
+
+	public void setShowForumNotifications(boolean showForumNotifications)
+	{
+		setProperty(FORUM_NOTIFICATIONS, showForumNotifications);
+	}
 }

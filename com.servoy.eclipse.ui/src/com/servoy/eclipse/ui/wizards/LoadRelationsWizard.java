@@ -53,7 +53,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.base.query.IJoinConstants;
+import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -176,7 +176,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 		if (relation == null)
 		{
 			relation = s.createNewRelation(v, rname, DataSourceUtils.createDBTableDataSource(table.getServerName(), table.getName()),
-				DataSourceUtils.createDBTableDataSource(ft.getServerName(), ft.getName()), IJoinConstants.INNER_JOIN);
+				DataSourceUtils.createDBTableDataSource(ft.getServerName(), ft.getName()), IQueryConstants.INNER_JOIN);
 			relation.setAllowCreationRelatedRecords(true);
 			relation.setExistsInDB(true);
 			Column[] parr = new Column[primaryColumns.size()];

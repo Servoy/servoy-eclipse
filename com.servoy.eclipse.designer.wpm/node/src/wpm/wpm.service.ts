@@ -1,79 +1,31 @@
 import { Injectable } from '@angular/core';
-import { WebsocketService } from './websocket.service';
-import { Subject, Observable, Observer } from 'rxjs';
-import { map, share } from "rxjs/operators";
-import * as Rx from 'rxjs'
+import { Message, Package, PackagesAndRepositories, PackagesInfo, Repository, WebsocketService } from './websocket.service';
+import { Observable, Observer, BehaviorSubject } from 'rxjs';
+import { map, share } from 'rxjs/operators';
+import { PackageList } from './content/content.component';
 
-export const PACKAGE_TYPE_WEB_COMPONENT = "Web-Component";
-export const PACKAGE_TYPE_WEB_SERVICE = "Web-Service";
-export const PACKAGE_TYPE_WEB_LAYOUT = "Web-Layout";
-export const PACKAGE_TYPE_MODULE = "Solution";
-export const PACKAGE_TYPE_SOLUTION = "Solution-Main";
+export const PACKAGE_TYPE_WEB_COMPONENT = 'Web-Component';
+export const PACKAGE_TYPE_WEB_SERVICE = 'Web-Service';
+export const PACKAGE_TYPE_WEB_LAYOUT = 'Web-Layout';
+export const PACKAGE_TYPE_MODULE = 'Solution';
+export const PACKAGE_TYPE_SOLUTION = 'Solution-Main';
 
-export const PACKAGE_TYPE_TO_TITLE_MAP = {
-  "Web-Component": "Components",
-  "Web-Service": "Services",
-  "Web-Layout": "Layouts",
-  "Solution": "Modules",
-  "Solution-Main": "Solutions"
+export const PACKAGE_TYPE_TO_TITLE_MAP: {[key:string]:string;} = {
+  'Web-Component': 'Components',
+  'Web-Service': 'Services',
+  'Web-Layout': 'Layouts',
+  'Solution': 'Modules',
+  'Solution-Main': 'Solutions'
 }
 
 export const ALL_PACKAGE_TYPES = [ PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_MODULE, PACKAGE_TYPE_SOLUTION ];
 
-interface Message {
-  method: string;
-  data?: any;
-  package?: Package;
-  url?: string;
-  solution?: string;
-  name?: string;
-  values?: Repository
-}
-
-export interface Release {
-  servoyVersion?: string;
-  url: string;
-  version: string;
-}
-
-export interface Package {
-  activeSolution: string;
-  description: string;
-  displayName: string;
-  icon: string;
-  installed: string;
-  installedIsWPA: boolean;
-  installing: boolean;
-  name: string;
-  packageType: string;
-  releases: Release[];
-  removing: boolean;
-  selected: string;
-  sourceUrl: string;
-  top: boolean;
-  wikiUrl: string;
-}
-
-export interface PackagesInfo {
-  packageType: string;
-  packages: Package[];
-}
-
-export interface Repository {
-  name: string;
-  selected?: boolean;
-  url?: string;
-}
-
-interface PackagesAndRepositories {
-  packages: Package[];
-  repositories: Repository[];
-}
 
 @Injectable()
 export class WpmService {
 
-  messages: Subject<Message>;
+  messages: Observable<Message>;
+  messageSender: Observer<Message>;
 
   packagesObservable: Observable<PackagesInfo>;
   packagesObserver: Observer<PackagesInfo>;
@@ -83,39 +35,45 @@ export class WpmService {
   repositoriesObservable: Observable<Repository[]>;
   repositoriesObserver: Observer<Repository[]>;
 
-  needRefresh: boolean = false;
+  packageLists: BehaviorSubject<PackageList[]>;
+  packageToBeRemoved: BehaviorSubject<Package>;
 
-  contentAvailable: boolean = true;
+  needRefresh = false;
+
+  contentAvailable = true;
 
   constructor(wsService: WebsocketService) {
     const loc = window.location;
-    const uri = "ws://"+loc.host+"/wpm/angular2/websocket";
+    const uri = 'ws://'+loc.host+'/wpm/angular2/websocket';
     //const uri = "ws://localhost:8080/wpm/angular2/websocket";
     const webSocketConnection = wsService.connect(uri);
     webSocketConnection.open.subscribe(() => {
       this.onConnectionOpen();
     });
-    this.messages = <Subject<Message>>webSocketConnection.messages.pipe(map(
+    this.messages = webSocketConnection.messageObservable.pipe(map(
       (response: MessageEvent): Message => {
-        const data = JSON.parse(response.data);
+        const data = JSON.parse(response.data as string) as {method: string; result: unknown}
         return {
           method: data.method,
           data: data.result
         };
       }));
-
+    this.messageSender = webSocketConnection.messageSender;
     this.messages.subscribe(m => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       this[m.method](m.data);
     });
-
-
-    this.packagesObservable = Rx.Observable.create((obs: Rx.Observer<PackagesInfo>) => {
+    
+    this.packagesObservable = new Observable((obs: Observer<PackagesInfo>) => {
       this.packagesObserver = obs;
     }).pipe(share());
 
-    this.repositoriesObservable = Rx.Observable.create((obs: Rx.Observer<Repository[]>) => {
+    this.repositoriesObservable = new Observable((obs: Observer<Repository[]>) => {
       this.repositoriesObserver = obs;
     }).pipe(share());
+    
+    this.packageLists = new BehaviorSubject([] as Array<PackageList>);
+    this.packageToBeRemoved = new BehaviorSubject({} as Package);
   }
 
   /**
@@ -123,16 +81,17 @@ export class WpmService {
    */
   onConnectionOpen() {
 
-    const requestAllInstalledPackagesCommand: Message = { method: "requestAllInstalledPackages" };
+    const requestAllInstalledPackagesCommand: Message = { method: 'requestAllInstalledPackages' };
     // get solution name
-    const solutionName = decodeURIComponent((new RegExp('[?|&]solution=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+    // eslint-disable-next-line no-sparse-arrays
+    const solutionName = decodeURIComponent((new RegExp('[?|&]solution=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search)||[,''])[1].replace(/\+/g, '%20'))||null;
     if(solutionName) {
       requestAllInstalledPackagesCommand.solution = solutionName;
     }
-    this.messages.next(requestAllInstalledPackagesCommand);
+    this.messageSender.next(requestAllInstalledPackagesCommand);
 
-    this.callRemoteMethod("getSolutionList");
-    this.callRemoteMethod("getRepositories");
+    this.callRemoteMethod('getSolutionList');
+    this.callRemoteMethod('getRepositories');
   }
 
   /**
@@ -142,28 +101,33 @@ export class WpmService {
    */
   callRemoteMethod(method: string) {
     const command: Message = { method: method };
-    this.messages.next(command);
+    this.messageSender.next(command);
   }
 
   getPackages(): Observable<PackagesInfo> {
     return this.packagesObservable;
   }
 
+  setPackageLists(packageLists: PackageList[]) {
+    this.packageLists.next(packageLists);
+  }
+
   install(p: Package) {
     p.installing = true;
-    const command: Message = { method: "install", package: p };
-    this.messages.next(command);
+    const command: Message = { method: 'install', package: p };
+    this.messageSender.next(command);
   }
 
   uninstall(p: Package) {
+    this.packageToBeRemoved.next(p);
     p.removing = true;
-    const command: Message = { method: "remove", package: p };
-    this.messages.next(command);
+    const command: Message = { method: 'remove', package: p };
+    this.messageSender.next(command);
   }
 
   showUrl(url: string) {
-    const command: Message = { method: "showurl", url: url };
-    this.messages.next(command);
+    const command: Message = { method: 'showurl', url: url };
+    this.messageSender.next(command);
   }
 
   getAllSolutions(): string[] {
@@ -175,7 +139,7 @@ export class WpmService {
     if (this.solutions && this.solutions.length) {
       return this.solutions[this.solutions.length - 1];
     }
-    return "";
+    return '';
   }
 
   getAllRepositories(): Observable<Repository[]> {
@@ -191,24 +155,24 @@ export class WpmService {
   }
 
   setNewSelectedRepository(repositoryName: string) {
-    const command: Message = { method: "setSelectedRepository", name: repositoryName };
+    const command: Message = { method: 'setSelectedRepository', name: repositoryName };
     this.clearPackages();
-    this.messages.next(command);
+    this.messageSender.next(command);
   }
 
   addNewRepository(repository: Repository) {
-    const command: Message = { method: "addRepository", values: repository };
-    this.messages.next(command);
+    const command: Message = { method: 'addRepository', values: repository };
+    this.messageSender.next(command);
   }
 
   removeRepositoryWithName(repositoryName: string) {
-    const command: Message = { method: "removeRepository", name: repositoryName };
-    this.messages.next(command);
+    const command: Message = { method: 'removeRepository', name: repositoryName };
+    this.messageSender.next(command);
   }
 
   clearPackages() {
     if(this.packagesObserver) {
-      for(let packageType of ALL_PACKAGE_TYPES) {
+      for(const packageType of ALL_PACKAGE_TYPES) {
         this.packagesObserver.next({ packageType: packageType, packages: [] });  
       }
     }
@@ -232,7 +196,7 @@ export class WpmService {
     if(typeOfPackages.size > 0) {
       if(this.packagesObserver) {
         // fill missing package types so they are refreshed in the view
-        for(let packageType of ALL_PACKAGE_TYPES) {
+        for(const packageType of ALL_PACKAGE_TYPES) {
           if(!typeOfPackages.has(packageType)) {
             typeOfPackages.set(packageType, []);
           }
@@ -252,15 +216,15 @@ export class WpmService {
     this.repositoriesObserver.next(repositoriesArray);
   }
 
-  refreshRemotePackages = function() {
+  refreshRemotePackages = () =>{
 		this.needRefresh = true;
   }
   
-  contentNotAvailable = function() {
+  contentNotAvailable = () => {
     this.contentAvailable = false;
   }
 
-  installError = function() {
+  installError = () => {
     this.contentAvailable = false;
   }
 
@@ -275,6 +239,31 @@ export class WpmService {
 
   setSelectedRepository(newPackages: Package[]) {
     this.requestAllInstalledPackages(newPackages);
+  }
+
+  versionCompare(v1: string, v2: string): number {
+    const av1 = v1.split('.');
+    const av2 = v2.split('.');
+
+    const sizeDiff = av2.length - av1.length;
+    if(sizeDiff) {
+      for(let i = 0; i < Math.abs(sizeDiff); i++) {
+        if(sizeDiff > 0) av1.push('0')
+        else av2.push('0');
+      }
+    }
+
+    for(let i = 0; i < av1.length; i++) {
+      const ival1 = parseInt(av1[i]);
+      const ival2 = parseInt(av2[i]);
+      if(!isNaN(ival1) &&  !isNaN(ival2)) {
+        if(ival1 != ival2) return ival1 - ival2;
+      }
+      else if(av1[i] < av2[i]) return -1;
+      else if(av1[i] > av2[i]) return 1;
+    }
+
+    return 0;
   }
   
 }

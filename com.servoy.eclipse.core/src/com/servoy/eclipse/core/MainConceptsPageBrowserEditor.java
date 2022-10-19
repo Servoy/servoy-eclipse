@@ -41,7 +41,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
- * Editor used to show the Servoy Marketplace.
+ * Editor used to show the Servoy Main Concepts.
  *
  * @author pbakker
  */

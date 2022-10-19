@@ -1,5 +1,6 @@
 <div class="svy-upload">
-	<h4 class="svy-upload-header-txt">{{ title }}</h4>
+	<h4 class="svy-upload-header-txt window-title window-header">{{ title }}</h4>
+	<div class="window-body">
 	<table class="svy-upload-table" *ngIf="isFileSelected()">
 		<caption>{{ i18n_selectedFiles }}</caption>
 		<thead><tr><th>{{ i18n_name }}</th><th></th></tr></thead>
@@ -17,4 +18,6 @@
    {{ getProgress('%') }}
   </div>
   <div><strong>{{ errorText }}</strong></div>
+  </div>
+  <div class="window-footer" style="display: none"></div>
 </div>

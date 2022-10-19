@@ -163,7 +163,11 @@ public interface IWarExportModel extends IExportSolutionModel
 	 */
 	Set<String> getAllExportedServicesWithoutSabloServices();
 
-	public boolean isExportNG2();
+	public String exportNG2Mode();
+
+	public void displayWarningMessage(String string, String message);
+
+	public boolean exportNG1();
 
 	/**
 	 * If a property file {@link #getServoyPropertiesFileName()} was not specified then a properties file will be generated using this method and other

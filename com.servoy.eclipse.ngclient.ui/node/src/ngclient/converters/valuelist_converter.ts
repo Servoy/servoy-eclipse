@@ -155,8 +155,11 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
                 return of(realValue);
             } else {
                 const key = realValue + '';
-                if (this.internalState.realToDisplayCache[key] !== undefined) {
-                    return from(this.internalState.realToDisplayCache[key]);
+                let promiseOrValue = this.internalState.realToDisplayCache[key];
+                if (promiseOrValue !== undefined) {
+                    if (promiseOrValue instanceof Promise) 
+                        return from(promiseOrValue);
+                    return of(promiseOrValue);
                 }
                 this.internalState.diplayValueReq = {
                     getDisplayValue: realValue,
@@ -168,7 +171,10 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
                 });
 
                 this.internalState.notifyChangeListener();
-                return from(this.internalState.realToDisplayCache[key]);
+                promiseOrValue = this.internalState.realToDisplayCache[key];
+                 if (promiseOrValue instanceof Promise) 
+                    return from(promiseOrValue);
+                return of(promiseOrValue); 
             }
         }
         // the real value == null return a promise like function so that not constantly promises are made.

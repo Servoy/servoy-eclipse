@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2021.9.0.3700_rc" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2022.12.0.3820_rc" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -10,7 +10,7 @@
 
 Version: 2021.6.0.3680_rc
 
-Copyright © 1997-2021 Servoy BV. All rights reserved.
+Copyright © 1997-2022 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.
@@ -25,12 +25,15 @@ and will be prosecuted to the maximum extent possible under law.
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xms40m
--Xmx1G
+      <vmArgs>-Xms512m
+-Xmx2G
 --add-modules=ALL-SYSTEM
+--add-exports java.desktop/sun.java2d=ALL-UNNAMED
       </vmArgs>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED
       </vmArgsMac>
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing
+      </vmArgsWin>
    </launcherArgs>
 
    <windowImages i16="icons/windowicon16.png" i32="icons/windowIcon.png" i48="icons/windowIcon48.png" i64="icons/windowIcon64.png" i128="icons/windowIcon128.png" i256="icons/windowIcon256.png"/>
@@ -98,7 +101,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2021.9.0.3700_rc"/>
+      <feature id="com.servoy.eclipse.feature" version="2022.12.0.3820_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -113,18 +116,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <feature id="org.eclipse.ecf.core.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.httpclient45.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature" installMode="root"/>
    </features>
 
    <configurations>
       <plugin id="com.servoy.eclipse.ui.tweaks" autoStart="true" startLevel="3" />
       <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="3" />
       <plugin id="org.apache.aries.util" autoStart="true" startLevel="0" />
       <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
-      <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.logging.log4j.slf4j18-impl" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="3" />
+      <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="3" />
+      <plugin id="org.apache.logging.log4j.jcl" autoStart="true" startLevel="3" />
+      <plugin id="org.apache.logging.log4j.slf4j18-impl" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />

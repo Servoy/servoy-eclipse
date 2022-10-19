@@ -59,15 +59,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button closeEditorOnExitButton;
 	private Button openFirstFormDesignerButton;
 	private Button showColumnsInDbOrderButton;
+	private Button showLegacySolutionTypesButton;
 	private Button showColumnsInAlphabeticOrderButton;
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 	private Button useDarkIconsButton;
-	private Button chromiumButton;
 	private Button contextMenuTutorialsButton;
-	private Button launchNG1Button;
-	private Button launchNG2Button;
+	private Button launchNGButton;
+	private Button showNGDesignerButton;
+	private Button showForumNotificationsButton;
 
 
 	public void init(IWorkbench workbench)
@@ -133,6 +134,9 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
 		showColumnsInDbOrderButton.setText("in database defined order");
 
+		showLegacySolutionTypesButton = new Button(wizardOptionsContainer, SWT.CHECK);
+		showLegacySolutionTypesButton.setText("Show legacy solution types (smart client, web client..)");
+
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
 		formProperties.setText("Form Properties");
@@ -161,16 +165,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		useDarkIconsButton = new Button(appearanceOptionsContainer, SWT.CHECK);
 		useDarkIconsButton.setText("Use dark theme icons (restart required)");
-
-		// use chromium
-		Group chromiumContainer = new Group(rootContainer, SWT.NONE);
-		chromiumContainer.setText("Chromium browser (Form Editor/Servoy Package Mananager)");
-		chromiumContainer.setLayout(new GridLayout(1, false));
-		chromiumContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		chromiumButton = new Button(chromiumContainer, SWT.CHECK);
-		chromiumButton.setText("Use the chromium browser instead of the system one");
-		chromiumButton.setToolTipText("Use the shipped chromium browser instead of the system installed browser, for windows IE");
 
 		// Context menu tutorials
 		Group contextMenuTutorialsContainer = new Group(rootContainer, SWT.NONE);
@@ -204,20 +198,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		testSolutionLoadTimeoutLabelUnits.setToolTipText(tt);
 
 		// launch NG
-		Group launchNGContainer = new Group(rootContainer, SWT.NONE);
-		launchNGContainer.setText("Launch NG Client");
-		launchNGContainer.setLayout(new GridLayout(1, false));
-		launchNGContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		launchNGButton = new Button(rootContainer, SWT.CHECK);
+		launchNGButton.setText("Start NG Client should launch Titanium NGClient");
 
-		Group launchNGGroup = new Group(launchNGContainer, SWT.NONE);
-		launchNGGroup.setText("Start NG Client should launch");
-		launchNGGroup.setLayout(new GridLayout(2, true));
+		// form designer version
+		showNGDesignerButton = new Button(rootContainer, SWT.CHECK);
+		showNGDesignerButton.setText("Open forms with the Titanium NGClient Form Designer");
 
-		launchNG1Button = new Button(launchNGGroup, SWT.RADIO);
-		launchNG1Button.setText("NG1");
-
-		launchNG2Button = new Button(launchNGGroup, SWT.RADIO);
-		launchNG2Button.setText("NG2");
+		// forum notifications
+		showForumNotificationsButton = new Button(rootContainer, SWT.CHECK);
+		showForumNotificationsButton.setText("Show forum notifications (require developer restart)");
 
 		initializeFields();
 
@@ -232,15 +222,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		closeEditorOnExitButton.setSelection(prefs.getCloseEditorOnExit());
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
+		showLegacySolutionTypesButton.setSelection(prefs.getShowLegacySolutionTypes());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
-		chromiumButton.setSelection(prefs.useChromiumBrowser());
 		contextMenuTutorialsButton.setSelection(prefs.useContextMenuTutorials());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
-		launchNG2Button.setSelection(prefs.launchNG2());
-		launchNG1Button.setSelection(!launchNG2Button.getSelection());
+		launchNGButton.setSelection(prefs.launchNG2());
+		showNGDesignerButton.setSelection(prefs.showNG2Designer());
+		showForumNotificationsButton.setSelection(prefs.showForumNotifications());
 	}
 
 	@Override
@@ -251,15 +242,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, DesignerPreferences.CLOSE_EDITORS_ON_EXIT_DEFAULT);
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
+		showLegacySolutionTypesButton.setSelection(DesignerPreferences.SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
-		chromiumButton.setSelection(DesignerPreferences.USE_CHROMIUM_BROWSER_DEFAULT);
 		contextMenuTutorialsButton.setSelection(DesignerPreferences.USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
-		launchNG1Button.setSelection(!launchNG2Button.getSelection());
-		launchNG2Button.setSelection(DesignerPreferences.LAUNCH_NG2_DEFAULT);
+		launchNGButton.setSelection(DesignerPreferences.LAUNCH_NG2_DEFAULT);
+		showNGDesignerButton.setSelection(DesignerPreferences.NG2_DESIGNER_DEFAULT);
+		showForumNotificationsButton.setSelection(DesignerPreferences.FORUM_NOTIFICATIONS_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -283,12 +275,14 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
+		prefs.setShowLegacySolutionTypes(showLegacySolutionTypesButton.getSelection());
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
 		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, Integer.valueOf(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
-		prefs.setUseChromiumBrowser(chromiumButton.getSelection());
 		prefs.setContextMenuTutorials(contextMenuTutorialsButton.getSelection());
-		prefs.setLaunchNG2(launchNG2Button.getSelection());
+		prefs.setLaunchNG2(launchNGButton.getSelection());
+		prefs.setShowNG2Designer(showNGDesignerButton.getSelection());
+		prefs.setShowForumNotifications(showForumNotificationsButton.getSelection());
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();

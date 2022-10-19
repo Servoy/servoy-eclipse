@@ -78,11 +78,12 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -380,7 +381,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					protected ServerConfig createServer(String name, ServerConfig sc)
 					{
 						ServerConfig serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(),
-							DatabaseUtils.getPostgresServerUrl(sc, name),
+							EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
@@ -421,6 +422,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				String title = "Solution imported";
 				String description = null;
 				Status status = null;
+				WebPackagesListener.setIgnore(true);
 				try
 				{
 					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file),
@@ -475,6 +477,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					description = "Import failed";
 					title = "Solution not imported";
 					status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + mymsg, ex);
+				}
+				finally
+				{
+					WebPackagesListener.setIgnore(false);
 				}
 				showDetailsDialog(title, description, status);
 			}
@@ -903,7 +909,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			return false;
 		}
 
-		if (!page.canOverwiteModules(file))
+		File decryptedFile = fileDecryption(file);
+
+		if (!page.canOverwiteModules(decryptedFile))
 		{
 			Display.getDefault().asyncExec(() -> {
 				if (!getShell().isDisposed()) getShell().close();
@@ -916,7 +924,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		final boolean isCleanImport = page.isCleanImport();
 		final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 		final boolean doActivateSolution = page.getActivateSolution();
-		doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
+		doImport(decryptedFile, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
 			page.projectLocationComposite.getProjectLocation(), getContainer(), null, false, false, null);
 
 		return true;

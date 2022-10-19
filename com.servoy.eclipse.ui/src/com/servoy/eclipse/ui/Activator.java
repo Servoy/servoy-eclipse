@@ -32,11 +32,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.e4.ui.css.swt.theme.ITheme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -66,8 +68,6 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
-import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -83,7 +83,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -148,9 +147,7 @@ public class Activator extends AbstractUIPlugin
 
 		// make sure that core is fully initialized; this should also make sure app. server is initialised
 		com.servoy.eclipse.core.Activator.getDefault();
-
-		// warn if incompatible extensions are found
-//		doExtensionRelatedChecks(); disabled for now as marketplace/extensions are not currently in production
+		com.servoy.eclipse.ngclient.ui.Activator.getInstance().extractNode();
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
 		{
@@ -265,6 +262,7 @@ public class Activator extends AbstractUIPlugin
 					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
 					findMissingSpecs.schedule();
 				}
+
 			}
 
 			@Override
@@ -273,8 +271,59 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
+
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
+
+		final BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
+		final ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
+		if (serviceReference != null)
+		{
+			final IThemeManager manager = ctx.getService(serviceReference);
+			if (manager != null)
+			{
+				final Display d = Display.getDefault();
+				final IThemeEngine engine = manager.getEngineForDisplay(d);
+				if (engine != null)
+				{
+					final ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						String label = it.getLabel();
+						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
+							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+						{
+							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
+							IconPreferences.getInstance().save(true);
+							ServoyModelManager.getServoyModelManager().getServoyModel()
+								.addDoneListener(() -> {
+									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										label + " theme was detected",
+										"It is strongly recommended to restart the developer for the " + label +
+											" theme preferences to be applied. Would you like to restart now?"))
+									{
+										PlatformUI.getWorkbench().restart();
+									}
+								});
+						}
+					}
+					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
+					{
+						IconPreferences.getInstance().setUseDarkThemeIcons(false);
+						IconPreferences.getInstance().save(true);
+						ServoyModelManager.getServoyModelManager().getServoyModel()
+							.addDoneListener(() -> {
+								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+									"Theming is disabled",
+									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
+								{
+									PlatformUI.getWorkbench().restart();
+								}
+							});
+					}
+				}
+			}
+		}
 
 		listenForThemeChanges();
 	}
@@ -407,32 +456,6 @@ public class Activator extends AbstractUIPlugin
 
 		plugin = null;
 		super.stop(context);
-	}
-
-	private void doExtensionRelatedChecks()
-	{
-		// see if installed extensions are not out of sync with Servoy version
-		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
-
-		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
-		if (needsExtensionUpdateCheckBecauseOfNewRelease() || applicationServer.hadIncompatibleExtensionsWhenStarted() ||
-			getEclipsePreferences().getBoolean(StartupPreferences.STARTUP_EXTENSION_UPDATE_CHECK, StartupPreferences.DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK))
-		{
-			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
-				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates."));
-			updateCheckJob.setRule(InstalledExtensionsDialog.SERIAL_RULE);
-			updateCheckJob.setUser(false);
-			updateCheckJob.setSystem(false);
-			updateCheckJob.schedule();
-			updateCheckJob.setPriority(applicationServer.hadIncompatibleExtensionsWhenStarted() ? Job.INTERACTIVE : Job.LONG);
-		}
-	}
-
-	private boolean needsExtensionUpdateCheckBecauseOfNewRelease()
-	{
-		String servoyRelease = getPreferenceStore().getString(SERVOY_VERSION);
-		getPreferenceStore().setValue(SERVOY_VERSION, ClientVersion.getBundleVersion()); // shouldn't we do this only if the update check is successful?
-		return servoyRelease == null || "".equals(servoyRelease) || !servoyRelease.equals(ClientVersion.getBundleVersion());
 	}
 
 	/**
@@ -667,5 +690,33 @@ public class Activator extends AbstractUIPlugin
 		}
 
 		return provisioningAgent;
+	}
+
+	public boolean isDarkThemeSelected()
+	{
+		boolean IS_DARK_THEME = false;
+		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
+		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
+		if (serviceReference != null)
+		{
+			IThemeManager manager = ctx.getService(serviceReference);
+			if (manager != null)
+			{
+				Display d = Display.getDefault();
+				IThemeEngine engine = manager.getEngineForDisplay(d);
+				if (engine != null)
+				{
+					ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()))
+						{
+							IS_DARK_THEME = true;
+						}
+					}
+				}
+			}
+		}
+		return IS_DARK_THEME;
 	}
 }

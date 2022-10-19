@@ -80,6 +80,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -168,6 +169,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
@@ -182,11 +184,12 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -224,6 +227,7 @@ import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -366,7 +370,7 @@ public class SolutionExplorerView extends ViewPart
 	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
-	private AddPackageProjectAction addPackageProjectAction;
+	private AddRemovePackageProjectAction addRemovePackageProjectAction;
 
 	private MoveTextAction moveCode;
 
@@ -732,6 +736,17 @@ public class SolutionExplorerView extends ViewPart
 					deprecatedText = "@deprecated " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
+				Object nodeObject = ((SimpleUserNode)element).getRealObject();
+				if (nodeObject instanceof AbstractBase)
+				{
+					String comment = ((AbstractBase)nodeObject).getComment();
+					if (comment != null)
+					{
+						comment = "Comment: " + comment;
+						result = (result != null) ? result += ("\n" + comment) : comment;
+					}
+				}
+
 			}
 			return result;
 		}
@@ -1625,6 +1640,7 @@ public class SolutionExplorerView extends ViewPart
 	private ContextAction createActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
 	private EditWebPackageDetailsAction editWebPackageDetailsAction;
+	private WebPackageUpgradeAction upgradeComponentPackageAction;
 	private ImportZipPackageAsProjectAction importComponentAsProject;
 	private IAction importComponentInSolution;
 	private IntroViewListener introViewListener;
@@ -2673,7 +2689,7 @@ public class SolutionExplorerView extends ViewPart
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase");
 
 			createDBSubmenu.add(newPostgresqlDatabase);
-			createDBSubmenu.add(newSybaseDatabase);
+			if (newSybaseDatabase.isVisible()) createDBSubmenu.add(newSybaseDatabase);
 			manager.add(createDBSubmenu);
 		}
 
@@ -2746,11 +2762,11 @@ public class SolutionExplorerView extends ViewPart
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
 		if (removePackageProjectAction.isEnabled()) manager.add(removePackageProjectAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
-		if (addPackageProjectAction.isEnabled()) manager.add(addPackageProjectAction);
+		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
-		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
+		if (upgradeComponentPackageAction.isEnabled()) manager.add(upgradeComponentPackageAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
@@ -2803,7 +2819,8 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(menuManager);
 		}
 
-		manager.add(new CopySourceFolderAction());
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+			manager.add(new CopySourceFolderAction());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -3107,9 +3124,9 @@ public class SolutionExplorerView extends ViewPart
 		duplicatePersistAction = new DuplicatePersistAction(shell);
 		importComponentInSolution = new ImportZipPackageAsZipAction(this, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		importComponentAsProject = new ImportZipPackageAsProjectAction(this);
-		IAction newComponentAction = new NewWebObjectAction(this, shell, "Component", "Create new component");
-		IAction newLayoutAction = new NewWebObjectAction(this, shell, "Layout", "Create new layout");
-		IAction newServiceAction = new NewWebObjectAction(this, shell, "Service", "Create new service");
+		IAction newComponentAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_COMPONENT, "Create new component");
+		IAction newLayoutAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_LAYOUT, "Create new layout");
+		IAction newServiceAction = new NewWebObjectAction(this, shell, IPackageReader.WEB_SERVICE, "Create new service");
 		IAction newComponentPackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create component package",
 			IPackageReader.WEB_COMPONENT);
 		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction(this, shell, "Create component package project",
@@ -3156,6 +3173,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
+
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS, newFormComponent);
@@ -3165,21 +3183,12 @@ public class SolutionExplorerView extends ViewPart
 
 		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentResource);
-		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newComponentResource);
-		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newComponentResource);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
 		createActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
-		createActionInTree.registerAction(UserNodeType.COMPONENT, newComponentFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.SERVICE, newServiceFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.LAYOUT, newLayoutFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
-		createActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceFolderInWebPackageAction);
-		createActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutFolderInWebPackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -3212,8 +3221,6 @@ public class SolutionExplorerView extends ViewPart
 		NewTableAction newTableAction = new NewTableAction(this);
 		addListSelectionChangedListener(newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
-		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
-		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newComponentResource);
 
@@ -3280,29 +3287,14 @@ public class SolutionExplorerView extends ViewPart
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package",
-			UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, this);
-		IAction deleteLayoutPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package",
-			UserNodeType.LAYOUT_NONPROJECT_PACKAGE, this);
-		IAction deleteServicePackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package",
-			UserNodeType.SERVICES_NONPROJECT_PACKAGE, this);
-		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
-			UserNodeType.COMPONENTS_PROJECT_PACKAGE, this);
-		IAction deleteLayoutProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package project",
-			UserNodeType.LAYOUT_PROJECT_PACKAGE, this);
-		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
-			UserNodeType.SERVICES_PROJECT_PACKAGE, this);
-		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
-			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, this);
-		DeleteComponentOrServiceOrPackageResourceAction deleteWebObjectFolder = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete folder",
-			UserNodeType.WEB_OBJECT_FOLDER, this);
+		IAction deleteWebPackagesAndOrTheirContentsAction = new DeleteComponentOrServiceOrPackageResourceAction(shell, this);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
+		upgradeComponentPackageAction = new WebPackageUpgradeAction(this, shell, "Upgrade to Titanum NGClient package", Package.IPackageReader.WEB_COMPONENT);
 
-		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
-		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
-		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
-		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE, this);
+//		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
+//		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
+//		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -3318,7 +3310,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
-		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
+		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteWebPackagesAndOrTheirContentsAction);
 		deleteActionInList.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInList.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 
@@ -3363,21 +3355,19 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
-		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteComponentPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteLayoutPackage);
-		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteServicePackage);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteComponentProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
-		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteWebPackagesAndOrTheirContentsAction);
+//		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
-		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
+		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebPackagesAndOrTheirContentsAction);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteWebPackagesAndOrTheirContentsAction);
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
@@ -3388,9 +3378,7 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
-		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrService(this, shell, UserNodeType.COMPONENT));
 		renameActionInTree.registerAction(UserNodeType.LAYOUT, new RenameLayoutAction(this, shell, UserNodeType.LAYOUT));
-		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrService(this, shell, UserNodeType.SERVICE));
 		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE,
 			new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.INMEMORY_DATASOURCE));
 		renameActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.VIEW_FOUNDSET));
@@ -3400,7 +3388,7 @@ public class SolutionExplorerView extends ViewPart
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
-		addPackageProjectAction = new AddPackageProjectAction(shell);
+		addRemovePackageProjectAction = new AddRemovePackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
 
@@ -3450,7 +3438,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);
-		addTreeSelectionChangedListener(addPackageProjectAction);
+		addTreeSelectionChangedListener(addRemovePackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);
 		addTreeSelectionChangedListener(replaceServerAction);
@@ -3459,6 +3447,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(duplicateFormAction);
 		addTreeSelectionChangedListener(exportComponentPackage);
 		addTreeSelectionChangedListener(editWebPackageDetailsAction);
+		addTreeSelectionChangedListener(upgradeComponentPackageAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);
@@ -3484,7 +3473,6 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(newComponentFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newServiceFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newLayoutFolderInWebPackageAction);
-		addTreeSelectionChangedListener(deleteWebObjectFolder);
 		addTreeSelectionChangedListener(newComponentResource);
 		addTreeSelectionChangedListener(fRefreshAction);
 
@@ -3593,8 +3581,9 @@ public class SolutionExplorerView extends ViewPart
 					if (server != null)
 					{
 						// re-lookup the server config here, when the server is a duplicate the server is actually the other server object.
-						ServerConfig serverConfig = server.getServerManager().getServerConfig(doubleClickedItem.getName());
-						EditorUtil.openServerEditor(serverConfig);
+						IServerManagerInternal serverManager = server.getServerManager();
+						EditorUtil.openServerEditor(serverManager.getServerConfig(doubleClickedItem.getName()),
+							serverManager.getServerSettings(doubleClickedItem.getName()));
 					}
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
@@ -4094,7 +4083,7 @@ public class SolutionExplorerView extends ViewPart
 							{
 								return new SimpleUserNode[] { cp.getServers() };
 							}
-							else if (segments[1].equals(WorkspaceUserManager.SECURITY_DIR))
+							else if (segments[1].equals(DataModelManager.SECURITY_DIRECTORY))
 							{
 								return new SimpleUserNode[] { cp.getUserGroupSecurityNode() };
 							}
@@ -4118,10 +4107,23 @@ public class SolutionExplorerView extends ViewPart
 							}
 						}
 					}
+					else if (resourcesProject != null && segments[0].equals(resourcesProject.getProject().getName()) &&
+						segments[1].equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+					{
+						String serverName = segments[2];
+						PlatformSimpleUserNode serversNode = cp.getServers();
+						if (serversNode.children != null) for (SimpleUserNode serverNode : serversNode.children)
+						{
+							if (serverNode.getRealObject() instanceof IServerInternal &&
+								serverName.equals(((IServerInternal)serverNode.getRealObject()).getName()))
+							{
+								if (segments.length == 3) return new SimpleUserNode[] { serverNode };
+							}
+						}
+					}
 				}
 				break;
 			case IResource.FILE :
-				// we only handle files under solution/forms
 				if (selectedProject != null)
 				{
 					if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node
@@ -4152,6 +4154,31 @@ public class SolutionExplorerView extends ViewPart
 						if (simpleUserNodes != null && simpleUserNodes.length > 0)
 						{
 							return Arrays.asList(simpleUserNodes).toArray(new SimpleUserNode[simpleUserNodes.length]);
+						}
+					}
+				}
+				else if (resourcesProject != null && segments[0].equals(resourcesProject.getProject().getName()))
+				{
+					if (segments.length == 4 && segments[1].equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+					{
+						String serverName = segments[2];
+						PlatformSimpleUserNode serversNode = cp.getServers();
+						if (serversNode.children != null) for (SimpleUserNode serverNode : serversNode.children)
+						{
+							if (serverNode.getRealObject() instanceof IServerInternal &&
+								serverName.equals(((IServerInternal)serverNode.getRealObject()).getName()))
+							{
+								if (serverNode.children != null) for (SimpleUserNode tableNode : serverNode.children)
+								{
+									String tableName = segments[3]
+										.substring(0, segments[3].length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+									if (tableNode.getRealObject() instanceof IDataSourceWrapper &&
+										tableName.equals(((IDataSourceWrapper)tableNode.getRealObject()).getTableName()))
+									{
+										return new SimpleUserNode[] { tableNode };
+									}
+								}
+							}
 						}
 					}
 				}
@@ -4188,6 +4215,8 @@ public class SolutionExplorerView extends ViewPart
 
 	class ViewLabelDecorator extends LabelDecorator
 	{
+		private final ILabelDecorator defaultSystemDecorator = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+
 		@Override
 		public Image decorateImage(Image image, Object element, IDecorationContext context)
 		{
@@ -4250,6 +4279,26 @@ public class SolutionExplorerView extends ViewPart
 					}
 				}
 			}
+			if (defaultSystemDecorator != null)
+			{
+				if (defaultSystemDecorator instanceof LabelDecorator)
+				{
+					LabelDecorator ld2 = (LabelDecorator)defaultSystemDecorator;
+					Image decorated = ld2.decorateImage(resultImage != null ? resultImage : image, element, DecorationContext.DEFAULT_CONTEXT);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+				else
+				{
+					Image decorated = defaultSystemDecorator.decorateImage(resultImage != null ? resultImage : image, element);
+					if (decorated != null)
+					{
+						return decorated;
+					}
+				}
+			}
 			return resultImage;
 		}
 
@@ -4305,10 +4354,18 @@ public class SolutionExplorerView extends ViewPart
 
 		public void addListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.addListener(listener);
+			}
 		}
 
 		public void dispose()
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.dispose();
+			}
 		}
 
 		public boolean isLabelProperty(Object element, String property)
@@ -4318,6 +4375,10 @@ public class SolutionExplorerView extends ViewPart
 
 		public void removeListener(ILabelProviderListener listener)
 		{
+			if (defaultSystemDecorator != null)
+			{
+				defaultSystemDecorator.removeListener(listener);
+			}
 		}
 
 		@Override

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -7,6 +7,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
+import { MainViewRefService } from '@servoy/public';
 
 @Component({
   selector: 'svy-main',
@@ -25,10 +26,13 @@ export class MainComponent implements OnInit {
           public websocketService: WebsocketService,
           public loadingIndicatorService: LoadingIndicatorService,
           allService: AllServiceService,
-          serverData: ServerDataService) {
+          serverData: ServerDataService,
+          mainViewRefService: MainViewRefService,
+          viewContainerRef: ViewContainerRef) {
+    this.servoyService.connect();
+    mainViewRefService.mainContainer = viewContainerRef;
     allService.init();
     serverData.init();
-    this.servoyService.connect();
   }
 
   ngOnInit() {

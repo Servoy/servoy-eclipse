@@ -8,12 +8,13 @@ export class URLParserService {
     solutionName: string;
     layout: string;
     showingInContainer: string;
-    hideDefault: string;
+    hideDefault: boolean;
     marqueeSelectOuter: string;
     formWidth: number;
     formHeight: number;
     formComponent: string;
-
+    contentClientNr : string;
+    
     constructor(private websocketService: WebsocketService) {
         this.parseURL();
     }
@@ -22,12 +23,13 @@ export class URLParserService {
         this.formName = this.websocketService.getURLParameter('f');
         this.solutionName = this.websocketService.getURLParameter('s');
         this.layout = this.websocketService.getURLParameter('l');
-        this.hideDefault = this.websocketService.getURLParameter("hd");
-        this.marqueeSelectOuter = this.websocketService.getURLParameter("mso");
-        this.formWidth = parseInt(this.websocketService.getURLParameter("w"), 10);
-        this.formHeight = parseInt(this.websocketService.getURLParameter("h"), 10);
-        this.formComponent = this.websocketService.getURLParameter("fc");
-        this.showingInContainer = this.websocketService.getURLParameter("cont");
+        this.hideDefault = this.websocketService.getURLParameter('hd') === 'true';
+        this.marqueeSelectOuter = this.websocketService.getURLParameter('mso');
+        this.formWidth = parseInt(this.websocketService.getURLParameter('w'), 10);
+        this.formHeight = parseInt(this.websocketService.getURLParameter('h'), 10);
+        this.formComponent = this.websocketService.getURLParameter('fc');
+        this.showingInContainer = this.websocketService.getURLParameter('cont');
+        this.contentClientNr = this.websocketService.getURLParameter('c_clientnr');
     }
 
     public getFormName() {
@@ -39,11 +41,11 @@ export class URLParserService {
     }
 
     public isAbsoluteFormLayout() {
-        return (this.layout == "absolute" || this.layout == "csspos");
+        return (this.layout == 'absolute' || this.layout == 'csspos');
     }
 
     public isCSSPositionFormLayout() {
-        return this.layout == "csspos";
+        return this.layout == 'csspos';
     }
 
     public isShowingContainer() {
@@ -51,15 +53,15 @@ export class URLParserService {
     }
 
     public isHideDefault() {
-        return this.hideDefault == "true";
+        return this.hideDefault;
     }
 
     public isFormComponent() {
-        return this.formComponent === "true";
+        return this.formComponent === 'true';
     }
 
     public isMarqueeSelectOuter() {
-        return this.marqueeSelectOuter === "true";
+        return this.marqueeSelectOuter === 'true';
     }
 
     public getFormWidth() {
@@ -68,6 +70,10 @@ export class URLParserService {
 
     public getFormHeight() {
         return this.formHeight;
+    }
+    
+    public getContentClientNr(){
+        return this.contentClientNr;
     }
 
 }

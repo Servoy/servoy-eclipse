@@ -106,7 +106,6 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is
                 // leading/has priority because not all server side values might support being recreated from client values)
                 if (internalState.contentVersion === serverJSONValue.vEr) {
-                    let i: number;
                     for (const granularOp of serverJSONValue.g) {
                         const startIndex_endIndex_opType = granularOp.op; // it's an array of 3 elements in the order given in name
                         const startIndex: number = startIndex_endIndex_opType[0];
@@ -115,7 +114,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
                         if (opType === ICATOpTypeEnum.CHANGED) {
                             const changedData = granularOp.d;
-                            for (i = startIndex; i <= endIndex; i++) {
+                            for (let i = startIndex; i <= endIndex; i++) {
                                 const relIdx = i - startIndex;
                                 // remove change listeners from any smart el. values that are now obsolete
                                 const oldElemValue = currentClientValue[i];
@@ -146,14 +145,14 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                                 } else delete internalState.dynamicPropertyTypesHolder['' + (idxToShift + numberOfInsertedRows)];
 
                             // apply conversions
-                            for (i = numberOfInsertedRows - 1; i >= 0 ; i--) {
+                            for (let i = numberOfInsertedRows - 1; i >= 0 ; i--) {
                                 const addedRow = this.converterService.convertFromServerToClient(insertedData[i], this.staticElementType, undefined,
                                                 internalState.dynamicPropertyTypesHolder, '' + (startIndex + i), elemPropertyContext);
                                 currentClientValue.splice(startIndex, 0, addedRow);
                             }
 
                             // update any affected change notifiers
-                            for (i = startIndex; i < currentClientValue.length; i++) {
+                            for (let i = startIndex; i < currentClientValue.length; i++) {
                                 const childEl = currentClientValue[i];
                                 if (instanceOfChangeAwareValue(childEl)) {
                                     // child is able to handle it's own change mechanism
@@ -182,7 +181,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                             currentClientValue.splice(startIndex, numberOfDeletedRows);
 
                             // update any affected change notifiers
-                            for (i = startIndex; i < currentClientValue.length; i++) {
+                            for (let i = startIndex; i < currentClientValue.length; i++) {
                                 const childEl = currentClientValue[i];
                                 if (instanceOfChangeAwareValue(childEl)) {
                                     // child is able to handle it's own change mechanism

@@ -27,6 +27,8 @@ import java.util.List;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -49,10 +51,11 @@ import com.servoy.j2db.ClientVersion;
 public class NGDesktopConfiguration extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
-	private List<String> remoteVersions = new ArrayList<String>();
+	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/2022.09.0/ngdesktop-versions-2022.09.txt";
+	private static List<String> remoteVersions = new ArrayList<String>();
 
 	private Combo srcVersionCombo;
+	private Label deprecatedLabel;
 
 
 	@Override
@@ -71,13 +74,31 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		initializeDialogUnits(parent);
 
 		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(2, true));
+		composite.setLayout(new GridLayout(3, true));
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Label launchVersionLabel = new Label(composite, SWT.NONE);
 		launchVersionLabel.setText("Default NG Desktop version:");
+		String tooltipText = "Select \"latest\" for always using the latest NG Desktop version, otherwise the selected version will be preserved.";
+		launchVersionLabel
+			.setToolTipText(tooltipText);
 
 		srcVersionCombo = new Combo(composite, SWT.READ_ONLY);
+		srcVersionCombo.setToolTipText(tooltipText);
+
+
+		deprecatedLabel = new Label(composite, SWT.NONE);
+		deprecatedLabel.setText("Deprecated: will be removed in the next release");
+		deprecatedLabel.setVisible(false);
+
+		srcVersionCombo.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				srcVersionListener(event);
+			}
+		});
 
 		initializeFields();
 
@@ -87,23 +108,38 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 	protected void initializeFields()
 	{
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
+		String ngVersion = prefs.getNgDesktopVersionKey(); //this may return "latest" - if no previous prefs
+		final int[] selectedIndex = new int[1];
 
-		remoteVersions = getAvailableVersions();
-		if (remoteVersions.isEmpty())
-		{
-			remoteVersions.add(prefs.getNgDesktopVersionKey());
-		}
-
+		selectedIndex[0] = 0;
 		srcVersionCombo.removeAll();
+		srcVersionCombo.add("latest");
+		remoteVersions = getAvailableVersions();//versions available on s3
+
 
 		remoteVersions.forEach((s) -> {
 			srcVersionCombo.add(s);
+
+			if (s.indexOf(ngVersion) >= 0)
+			{
+				selectedIndex[0] = srcVersionCombo.getItems().length - 1;
+			}
 		});
 
-		srcVersionCombo.select(getVersionIndex(prefs.getNgDesktopVersionKey()));
+		srcVersionCombo.select(selectedIndex[0]);
 	}
 
-	private List<String> getAvailableVersions()
+	private void srcVersionListener(SelectionEvent event)
+	{
+		deprecatedLabel.setVisible(isDeprecatedVersion());
+	}
+
+	private boolean isDeprecatedVersion()
+	{
+		return srcVersionCombo.getText().startsWith("*");
+	}
+
+	public static List<String> getAvailableVersions()
 	{
 		try
 		{
@@ -124,7 +160,10 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 						final String devVersion = ClientVersion.getMajorVersion() + "." + ClientVersion.getMiddleVersion();
 						if (SemVerComparator.compare(devVersion, servoyVersion) < 0)
 							return;
-						result.add(((JSONObject)item).getString("ngDesktopVersion"));
+						final String status = ((JSONObject)item).getString("status");
+						String version = ((JSONObject)item).getString("ngDesktopVersion");
+						if ("deprecated".equals(status)) version = "* " + version;
+						result.add(version);
 					});
 					if (result.size() > 0)
 					{
@@ -142,18 +181,13 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		return remoteVersions;
 	}
 
-	private int getVersionIndex(String value)
-	{
-		//we need an index from a sorted list
-		final int result = remoteVersions.indexOf(value);
-		return result < 0 ? 0 : result;
-	}
-
 	@Override
 	public boolean performOk()
 	{
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
-		prefs.setNgDesktopVersion(srcVersionCombo.getText());
+		String ngdesktop_version = srcVersionCombo.getText();
+		if (ngdesktop_version.startsWith("*")) ngdesktop_version = ngdesktop_version.substring(1).trim();
+		prefs.setNgDesktopVersion(ngdesktop_version);
 		prefs.save();
 		return true;
 	}
@@ -162,7 +196,7 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 	protected void performDefaults()
 	{
 		NgDesktopPreferences prefs = new NgDesktopPreferences();
-		prefs.setNgDesktopVersion(NgDesktopPreferences.NGDESKTOP_VERSION_DEFAULT);
+		prefs.setNgDesktopVersion("latest");
 		prefs.save();
 		initializeFields();
 		super.performDefaults();

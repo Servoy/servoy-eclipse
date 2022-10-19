@@ -21,7 +21,7 @@
       <consoleFactory
             class="com.servoy.eclipse.ngclient.ui.ConsoleFactory"
             icon="images/npmconsole.png"
-            label="NG2 Build Console">
+            label="Titanium NG Build Console">
       </consoleFactory>
    </extension>
 

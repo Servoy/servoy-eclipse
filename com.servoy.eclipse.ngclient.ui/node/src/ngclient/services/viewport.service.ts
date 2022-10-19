@@ -126,7 +126,10 @@ export class ViewportService {
         for (let i = 0; i < rowUpdates.length; i++) {
             const rowUpdate = rowUpdates[i];
             if (rowUpdate.type === ChangeType.ROWS_CHANGED) {
-                // if the rowUpdate rows contain '_svyRowId' then we know it's the entire/complete row object; same if it's a one value per row (foundset linked)
+                // if the rowUpdate rows contain '_svyRowId' then we know it's the entire/complete row object; same if it's a one value per row (foundset linked);
+                // one granular "CHANGE" operation can only have all changed rows with ROW_ID_COL_KEY or all changed rows without ROW_ID_COL_KEY, that is why we
+                // can check only rowUpdate.rows[0] below, see FoundsetTypeRowDataProvider.populateRowData() which always uses "columnNames" to decide that which is
+                // the same for all rows that are written in a "CHANGE" op
                 const wholeRowUpdates = simpleRowValue || rowUpdate.rows[0][ViewportService.ROW_ID_COL_KEY];
 
                 // clear notifiers for any old smart values
@@ -199,13 +202,13 @@ export class ViewportService {
                 // remove any change notifiers for the rows that were deleted
                 for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
                     if (!simpleRowValue && this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes))
-                        internalState.rowLevelProxyRevokerFuncs[j](); // destroy proxy for deleted row if available
+                        internalState.rowLevelProxyRevokers[j].revoker(); // destroy proxy for deleted row
 
                     this.updateChangeAwareNotifiersForRow(j, viewPort, internalState, simpleRowValue, propertyContextCreator, true);
                 }
 
                 if (!simpleRowValue && this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes))
-                    internalState.rowLevelProxyRevokerFuncs.splice(rowUpdate.startIndex, numberOfDeletedRows);
+                    internalState.rowLevelProxyRevokers.splice(rowUpdate.startIndex, numberOfDeletedRows);
 
                 viewPort.splice(rowUpdate.startIndex, numberOfDeletedRows);
 
@@ -288,7 +291,7 @@ export class ViewportService {
     // IMPORTANT: This comment should always match ConversionInfoFromServerForViewport declared above AND the comment and impl of ViewportClientSideTypes.getClientSideTypes() java method
     // and the code in foundsetLinked.ts -> generateWholeViewportFromOneValue.
     //
-    // This is what we get as conversion info from server for viewports or viewport updates; indexes are relative to the received data (either full viewport ot viewport update data).
+    // This is what we get as conversion info from server for viewports or viewport updates; indexes are relative to the received data (either full viewport or viewport update data).
     // Basically the type of one cell in received data is the one in CELL_TYPES of COL_TYPES that matches FOR_ROW_IDXS; if that is not present it falls back to the main CONVERSION_CL_SIDE_TYPE_KEY
     // in that column, if that is not present it falls back to MAIN_TYPE. If it's missing completely then no data in the viewport needs client side conversions.
     //
@@ -524,8 +527,8 @@ export class ViewportService {
 
             // if a full new viewport if being created, revoke the row proxies on the old viewport rows (if present); those are now obsolete - so that the old viewport
             // cannot trigger wrong SHALLOW change notifications for cells that are not changed in the new viewport
-            if (internalState.rowLevelProxyRevokerFuncs) internalState.rowLevelProxyRevokerFuncs.forEach((rowLevelProxyRevokerFunc) =>  rowLevelProxyRevokerFunc());
-            internalState.rowLevelProxyRevokerFuncs = [];
+            if (internalState.rowLevelProxyRevokers) internalState.rowLevelProxyRevokers.forEach((rowLevelProxyRevoker) =>  rowLevelProxyRevoker.revoker());
+            internalState.rowLevelProxyRevokers = [];
 
             // see if we have any columns
             if (this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes)) {
@@ -539,11 +542,14 @@ export class ViewportService {
     }
 
     private addRowProxyTo(viewPort: any[], rowIndex: number, propertyContextCreator: IPropertyContextCreatorForRow, internalState: FoundsetViewportState) {
-        if (internalState.rowLevelProxyRevokerFuncs[rowIndex]) internalState.rowLevelProxyRevokerFuncs[rowIndex]();
+        if (internalState.rowLevelProxyRevokers[rowIndex]) {
+            internalState.rowLevelProxyRevokers[rowIndex].revoker();
+            viewPort[rowIndex] = internalState.rowLevelProxyRevokers[rowIndex].original;
+        }
 
         // add the actual row proxy for listening to cell change-by-ref
         const rowProxyRevoke = Proxy.revocable(viewPort[rowIndex], this.getRowLevelProxyHandler(viewPort, rowIndex, propertyContextCreator, internalState));
-        internalState.rowLevelProxyRevokerFuncs[rowIndex] = rowProxyRevoke.revoke;
+        internalState.rowLevelProxyRevokers[rowIndex] = { original: viewPort[rowIndex], revoker: rowProxyRevoke.revoke };
         return rowProxyRevoke.proxy;
     }
 
@@ -683,7 +689,7 @@ export abstract class FoundsetViewportState extends ChangeAwareState {
     ignoreChanges = true;
 
     viewportLevelProxyRevokerFunc?: () => void;
-    rowLevelProxyRevokerFuncs?: Array<() => void>;
+    rowLevelProxyRevokers?: Array<{ original: any, revoker: () => void }>;
     /** just a value that is cached here for component and foundset type viewports - so we don't need to search for it each time it's needed */
     hasPushToServerForNestedCellsInRowsGreaterOrEqualTo: Map<PushToServerEnum, boolean> = new Map();
 

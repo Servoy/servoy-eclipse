@@ -6,7 +6,6 @@ import { Deferred } from '@servoy/public';
 import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
-import { TestabilityService } from './testability.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +24,7 @@ export class WebsocketService {
         private converterService: ConverterService,
         private logFactory: LoggerFactory,
         private loadingIndicatorService: LoadingIndicatorService,
-        private ngZone: NgZone,
-        private testability: TestabilityService) {
+        private ngZone: NgZone) {
     }
 
     public connect(context, args, queryArgs?, websocketUri?): WebsocketSession {
@@ -43,7 +41,7 @@ export class WebsocketService {
             const websocket = new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']), this.logFactory);
 
-            this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.testability, this.logFactory );
+            this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory );
         });
         //$services.setSession(wsSession);
         if (this.wsSessionDeferred != null) {
@@ -78,7 +76,7 @@ export class WebsocketService {
     }
 
     public getURLParameter(name: string): string {
-        return decodeURIComponent((new RegExp('[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
+        return decodeURIComponent((new RegExp('[&]?\\b' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
     }
 
     public setPathname(name: string) {
@@ -117,6 +115,10 @@ export class WebsocketService {
 
     public disconnect(){
         this.wsSession.disconnect();
+    }
+
+    public getCurrentRequestInfo(): any {
+        return this.wsSession.getCurrentRequestInfo();
     }
 
     private generateURL(context, args, queryArgs?, websocketUri?) {
@@ -198,6 +200,7 @@ export class WebsocketSession {
     private nextMessageId = 1;
     private log: LoggerService;
 
+    private currentRequestInfo = undefined;
 
     constructor(private websocket: ReconnectingWebSocket,
         private websocketService: WebsocketService,
@@ -205,7 +208,6 @@ export class WebsocketSession {
         private converterService: ConverterService,
         private loadingIndicatorService: LoadingIndicatorService,
         private ngZone: NgZone,
-        private testability: TestabilityService,
         logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('WebsocketSession');
         this.websocket.onopen = (evt) => {
@@ -214,6 +216,7 @@ export class WebsocketSession {
             for (const handler of Object.keys( this.onOpenHandlers)) {
                 this.onOpenHandlers[handler](evt);
             }
+            this.ngZone.run( () => this.websocketService.reconnectingEmitter.next(false) );
         };
         this.websocket.onerror = (evt) => {
             this.stopHeartbeat();
@@ -225,7 +228,7 @@ export class WebsocketSession {
             this.stopHeartbeat();
             if (this.connected !== 'CLOSED') {
                 this.connected = 'RECONNECTING';
-                this.websocketService.reconnectingEmitter.next(true);
+                this.ngZone.run( () => this.websocketService.reconnectingEmitter.next(true) );
                 this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (' + new Date().getTime() + ')')));
             }
             for (const handler of Object.keys(this.onCloseHandlers)) {
@@ -233,29 +236,23 @@ export class WebsocketSession {
             }
         };
         this.websocket.onconnecting = (evt) => {
-            // this event indicates we are trying to reconnect, the event has the close code and reason from the disconnect.
-            if (evt.code && evt.code !== WsCloseCodes.CLOSED_ABNORMALLY && evt.code !== WsCloseCodes.SERVICE_RESTART) {
-
-                this.websocket.close();
-
                 if (evt.reason === 'CLIENT-OUT-OF-SYNC') {
                     // Server detected that we are out-of-sync, reload completely
                     this.windowRef.nativeWindow.location.reload();
-                    return;
-                }
-
-                // server disconnected, do not try to reconnect
-                this.connected = 'CLOSED';
-                this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onconnecting got a server disconnect/close with reason '
-                    + evt.reason + '): ... CLOSED (' + new Date().getTime() + ')')));
+                } else if (evt.reason === 'CLIENT-SHUTDOWN') {
+                    // client is shutdown just force close the websocket and set the connected state toe CLOSED so no reconnecting is shown
+                    this.websocket.close();
+                    // server disconnected, do not try to reconnect
+                    this.connected = 'CLOSED';
+                    this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onconnecting got a server disconnect/close with reason '
+                        + evt.reason + '): ... CLOSED (' + new Date().getTime() + ')')));
             }
         };
         this.websocket.onmessage = (message) => this.handleHeartbeat(message) || this.ngZone.run(() => this.handleMessage(message));
-        testability.setEventList(this.deferredEvents);
     }
 
-    public createDeferredEvent(): {deferred: Deferred<any>; cmsgid: number } {
-          const deferred = new Deferred<any>();
+    public  createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
+          const deferred = new Deferred<T>();
             const cmsgid = this.getNextMessageId();
             this.deferredEvents[cmsgid] = deferred;
             return {deferred, cmsgid};
@@ -267,12 +264,11 @@ export class WebsocketSession {
                 delete this.deferredEvents[cmsgid];
                 if (success) deferred.resolve(argument);
                 else deferred.reject(argument);
-                this.testability.testEvents();
             }
     }
 
     // api
-    public callService(serviceName: string, methodName: string, argsObject?, async?: boolean): Promise<any> {
+    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): Promise<T> {
         const cmd = {
             service: serviceName,
             methodname: methodName,
@@ -281,7 +277,7 @@ export class WebsocketSession {
         if (async) {
             this.sendMessageObject(cmd);
         } else {
-            const deferred = this.createDeferredEvent();
+            const deferred = this.createDeferredEvent<T>();
             this.loadingIndicatorService.showLoading();
             cmd['cmsgid'] = deferred.cmsgid;
             this.sendMessageObject(cmd);
@@ -352,6 +348,10 @@ export class WebsocketSession {
         if (this.functionsToExecuteAfterIncommingMessageWasHandled) this.functionsToExecuteAfterIncommingMessageWasHandled.push(func);
         else func(); // will not addPostIncommingMessageHandlingTask while not handling an incoming message;
                      // the task can execute right away then (maybe it was called due to a change detected somewhere else instead of property listener)
+    }
+
+    public getCurrentRequestInfo(): any {
+        return this.currentRequestInfo;
     }
 
     private setConnected() {
@@ -426,17 +426,22 @@ export class WebsocketSession {
         let message_data = message.data;
         let hideIndicator = false;
         try {
-            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server: ' + JSON.stringify(message))));
 
             const separator = message_data.indexOf('#');
             if (separator >= 0 && separator < 5) {
                 // the json is prefixed with a message number: 123#{bla: "hello"}
                 this.websocketService.setLastServerMessageNumber(message_data.substring(0, separator));
+                this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message number: ' + message_data.substring(0, separator))));
                 message_data = message_data.substr(separator + 1);
             }
             // else message has no seq-no
 
             obj = JSON.parse(message_data);
+            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
+
+            if (obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
+                				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
+            			}
 
             if (obj.serviceApis) {
                 responseValue = this.servicesHandler.handleServiceApisWithApplyFirst(obj.serviceApis, responseValue);
@@ -446,25 +451,6 @@ export class WebsocketSession {
             hideIndicator = obj && obj.smsgid && this.loadingIndicatorService.isShowing();
             // if a request to a service is being done then this could be a blocking
             if (hideIndicator) {
-                this.loadingIndicatorService.hideLoading();
-            }
-
-            // data got back from the server
-            if (obj.cmsgid) { // response to event
-                const deferredEvent = this.deferredEvents[obj.cmsgid];
-                if (deferredEvent !== null) {
-                    if (obj.exception) {
-                        // something went wrong
-                        // do a default conversion although I doubt it will do anything (don't think server will send client side type for exceptions)
-                        obj.exception = this.converterService.convertFromServerToClient(obj.exception, undefined, undefined, undefined, undefined, undefined);
-                        deferredEvent.reject(obj.exception);
-                    } else {
-                        // if it's a handler/server side api call that expects a return value, any type conversions should be done in code triggered by this resolve (in calling code)
-                        deferredEvent.resolve(obj.ret);
-                    }
-                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
-                delete this.deferredEvents[obj.cmsgid];
-                this.testability.testEvents();
                 this.loadingIndicatorService.hideLoading();
             }
 
@@ -498,16 +484,8 @@ export class WebsocketSession {
             }
 
             if (obj && obj.smsgid) {
-                if (responseValue instanceof Promise) {
-                    // the server wants a response, this could be a promise so a dialog could be shown
-                    // then just let protractor go through.
-                    this.testability.increaseEventLoop();
-                }
                 // server wants a response; responseValue may be a promise
                 Promise.resolve(responseValue).then((ret) => {
-                    if (responseValue instanceof Promise) {
-                        this.testability.decreaseEventLoop();
-                    }
                     // success
                     const response = {
                         smsgid: obj.smsgid
@@ -520,7 +498,6 @@ export class WebsocketSession {
                     }
                     this.sendMessageObject(response);
                 }, (reason) => {
-                    if (responseValue instanceof Promise) this.testability.decreaseEventLoop();
                     // server wants a response; send failure so that browser side script doesn't hang
                     const response = {
                         smsgid: obj.smsgid,
@@ -531,6 +508,24 @@ export class WebsocketSession {
                     }
                     this.sendMessageObject(response);
                 });
+            }
+
+            // got the return value for a client-to-server call (that has a defer/waiting promise) back from the server
+            if (obj.cmsgid) { // response to event
+                const deferredEvent = this.deferredEvents[obj.cmsgid];
+                if (deferredEvent !== null) {
+                    if (obj.exception) {
+                        // something went wrong
+                        // do a default conversion although I doubt it will do anything (don't think server will send client side type for exceptions)
+                        obj.exception = this.converterService.convertFromServerToClient(obj.exception, undefined, undefined, undefined, undefined, undefined);
+                        deferredEvent.reject(obj.exception);
+                    } else {
+                        // if it's a handler/server side api call that expects a return value, any type conversions should be done in code triggered by this resolve (in calling code)
+                        deferredEvent.resolve(obj.ret);
+                    }
+                } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
+                delete this.deferredEvents[obj.cmsgid];
+                this.loadingIndicatorService.hideLoading();
             }
         } catch (e) {
             this.log.error(this.log.buildMessage(() => ('Error (follows below) in parsing/processing this message: ' + message_data)));
@@ -547,6 +542,7 @@ export class WebsocketSession {
                 this.sendMessageObject(response);
             }
         } finally {
+            this.currentRequestInfo = undefined;
             let err: any;
             const toExecuteAfterIncommingMessageWasHandled = this.functionsToExecuteAfterIncommingMessageWasHandled;
 
@@ -614,10 +610,6 @@ export class SabloUtils {
     // execution priority on server value used when for example a blocking API call from server needs to request more data from the server through this change
     // or whenever during a (blocking) API call to client we want some messages sent to the server to still be processed.
     static readonly EVENT_LEVEL_SYNC_API_CALL = 500;
-
-    // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
-    // usage as handler arg. for example where we don't know the arg. types on client)
-    static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = '_dctsf';
 
     /**
      * Makes a clone of "obj" (new object + iterates on properties and copies them over (so shallow clone)) that will have it's [[Prototype]] set to "newPrototype".

@@ -8,15 +8,32 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2021.9.0.3700_rc</version>
+	<version>2022.12.0.3820_rc</version>
 	<properties>
-		<tycho.version>2.3.0</tycho.version>
+		<tycho.version>2.6.0</tycho.version>
+		<rhino.version>1.7.14.s1</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+<!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
+        <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
+-->
 	</properties>
 
-
+<!--
+    <repositories>
+        <repository>
+            <id>chromium</id>
+            <url>${chromium}</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>chromium.cef</id>
+            <url>${chromium.cef}</url>
+            <layout>p2</layout>
+        </repository>        
+    </repositories>
+-->
 
 	<build>
 		<plugins>
@@ -67,6 +84,11 @@
 							<ws>gtk</ws>
 							<arch>x86_64</arch>
 						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>aarch64</arch>
+						</environment>
 					</environments>
 					<filters>
 						<filter>
@@ -80,7 +102,7 @@
 							<type>eclipse-plugin</type>
 							<id>org.eclipse.dltk.javascript.rhino</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<version>${rhino.version}</version>
 							</restrictTo>
 						</filter>
 						<filter>
@@ -158,7 +180,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<phase>generate-resources</phase>
+						<phase>generate-sources</phase>
 						<id>default-target-platform</id>
 						<goals>
 							<goal>target-platform</goal>
@@ -172,19 +194,6 @@
 				<version>${tycho.version}</version>
 			</plugin>
 			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-pack200a-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<executions>
-					<execution>
-						<id>pack200-normalize</id>
-						<goals>
-							<goal>normalize</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
 				<version>3.0.0</version>
@@ -193,19 +202,6 @@
 						<id>sign</id>
 						<goals>
 							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-pack200b-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<executions>
-					<execution>
-						<id>pack200-pack</id>
-						<goals>
-							<goal>pack</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -341,7 +337,12 @@
 			<modules>
 				<module>com.servoy.eclipse.jre.linux.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
+				<module>com.servoy.eclipse.jre.macosx.aarch64</module>
 				<module>com.servoy.eclipse.jre.win32.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>
@@ -403,9 +404,6 @@
 				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
-				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
-				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
-				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 			</modules>
 		</profile>
 		<profile>
@@ -440,7 +438,10 @@
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
 											match="${project.version}" replace="${newVersion}"
 											byline="true" />
-									</target>
+                                        <replaceregexp
+                                            file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
+                                            match="${project.version}" replace="${newVersion}"
+                                            byline="true" />									</target>
 								</configuration>
 							</execution>
 						</executions>

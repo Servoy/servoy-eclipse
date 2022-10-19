@@ -48,6 +48,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -318,7 +319,7 @@ public class ServoyFormBuilder
 							FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, fs, null, true);
 							for (PropertyDescription pd : properties)
 							{
-								String datasource = null;
+								String datasource = form.getDataSource();
 								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 								if (frm == null) continue;
@@ -1638,6 +1639,14 @@ public class ServoyFormBuilder
 							IMarker.PRIORITY_NORMAL,
 							null, o);
 					}
+					if (uuid != null && handlerDefinition.isDeprecated())
+					{
+						ServoyMarker mk = MarkerMessages.DeprecatedHandler.fill(handler,
+							"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
+							handlerDefinition.getDeprecatedMessage());
+						ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+							ServoyBuilder.DEPRECATED_HANDLER, IMarker.PRIORITY_NORMAL, null, o);
+					}
 				}
 
 			}
@@ -1788,7 +1797,7 @@ public class ServoyFormBuilder
 										continue;
 									}
 								}
-								if (val.has("dataproviders"))
+								if (val.opt("dataproviders") instanceof JSONObject)
 								{
 									JSONObject dataproviders = val.getJSONObject("dataproviders");
 									for (String dp : dataproviders.keySet())
@@ -2197,17 +2206,25 @@ public class ServoyFormBuilder
 		String inForm, IPersist o, Object valuelistUUID) throws CoreException
 	{
 		int realValueType = valuelist.getRealValueType();
-		if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+		int dataProviderType = dataProvider.getDataProviderType();
+		if (realValueType != 0 && realValueType != dataProviderType)
 		{
+
 			boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-				((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-					(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
+				((realValueType == IColumnTypes.INTEGER && dataProviderType == IColumnTypes.NUMBER) ||
+					(realValueType == IColumnTypes.NUMBER && dataProviderType == IColumnTypes.INTEGER));
+
+			if (!isValidNumberVariable && dataProvider.hasFlag(IBaseColumn.UUID_COLUMN))
+			{
+				// if the dataprovider is a uuid column then allow text or media columns.
+				isValidNumberVariable = realValueType == IColumnTypes.TEXT || realValueType == IColumnTypes.MEDIA;
+			}
 
 			if (!isValidNumberVariable)
 			{
 
-				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-					elementName != null ? elementName : "UNNAMED", inForm);
+				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(), Column.getDisplayTypeString(realValueType),
+					Column.getDisplayTypeString(dataProviderType), elementName != null ? elementName : "UNNAMED", inForm);
 				IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
 					IMarker.PRIORITY_NORMAL, null, o);
 				marker.setAttribute("Uuid", valuelistUUID.toString());

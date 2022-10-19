@@ -18,6 +18,7 @@ export class FormService {
     private formsCache: Map<string, FormCache>;
     private log: LoggerService;
     private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy form components
+    private ngUtilsFormStyleclasses: {property: string};
     //    private touchedForms:Map<String,boolean>;
 
     /**
@@ -61,9 +62,13 @@ export class FormService {
 
                     const callItNow = ((doReturnTheRetVal: boolean): any => {
                         const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
-                        const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
-                        formComponent.detectChanges();
-                        if (doReturnTheRetVal) return retValue;
+                        const def = new Deferred();
+                        this.clientFunctionService.waitForLoading().finally(() => {
+                            const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
+                            formComponent.detectChanges();
+                            def.resolve(retValue);
+                        });
+                        if (doReturnTheRetVal) return def.promise;
                     });
 
                     // if form is loaded just call the api
@@ -104,8 +109,14 @@ export class FormService {
             const propertyType = componentSpec?.getPropertyType(propertyName); // get static client side type if any
             const oldValueOfProperty = comp.model[propertyName];
 
-            comp.model[propertyName] = newPropertyValue = converterService.convertFromServerToClient(newPropertyValue, propertyType, oldValueOfProperty,
+            newPropertyValue = converterService.convertFromServerToClient(newPropertyValue, propertyType, oldValueOfProperty,
                     componentDynamicTypesHolder, propertyName, propertyContextCreator.withPushToServerFor(propertyName));
+
+            if (property === 'cssPosition'){
+                comp.layout = newPropertyValue;
+            } else{
+                comp.model[propertyName] = newPropertyValue;
+            }
 
             if (instanceOfChangeAwareValue(newPropertyValue)) {
                 newPropertyValue.getInternalState().setChangeListener(smartPropertyChangeListenerGenerator(propertyName, newPropertyValue));
@@ -146,7 +157,7 @@ export class FormService {
 
         let fslRowID = null;
         let converted: [any, any];
-        if (propertyType) {
+        if (propertyType && !componentModel?.findmode) {
             // I think this never happens currently except for simple date dataproviders; because other simple dataproviders don't have a client-side type (either static or dynamic)
             // and foundset linked dataproviders would be an array of values and applyDataprovider would be called with a propertyName like ...pathToFSLinkedDP[15]
             // for which no propertyType will be found directly in spec - due to the index or any dots
@@ -225,8 +236,27 @@ export class FormService {
         return this.formsCache.get(form.name);
     }
 
-    public destroy(form: IFormComponent) {
-        this.formComponentCache.delete(form.name);
+    public getFormStyleClasses(name: string){
+        if (this.ngUtilsFormStyleclasses){
+            return this.ngUtilsFormStyleclasses[name];
+        }
+        return null;
+    }
+
+    public setFormStyleClasses(styleclasses: {property: string}){
+        this.ngUtilsFormStyleclasses = styleclasses;
+        if (styleclasses) {
+            for (const formname of Object.keys(styleclasses)) {
+                if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
+                    (this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses(styleclasses[formname]);
+                }
+            }
+        }
+
+    }
+
+    public destroy(formName: string) {
+        this.formComponentCache.delete(formName);
     }
 
     public hasFormCacheEntry(name: string): boolean {
@@ -234,7 +264,7 @@ export class FormService {
     }
 
     public createFormCache(formName: string, jsonData: any,  url: string) {
-        const formCache = new FormCache(formName, jsonData.size, url, this.typesRegistry);
+        const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
         try {
             this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
             this.walkOverChildren(jsonData.children, formCache);
@@ -320,10 +350,12 @@ export class FormService {
         if (!formname) {
             throw new Error('formname is undefined');
         }
-        return this.sabloService.callService('formService', 'formvisibility', {
-            formname, visible: false, parentForm,
-            bean: beanName, relation: relationname, formIndex, show: { formname: formnameThatWillBeShown, relation: relationnameThatWillBeShown, formIndex: formIndexThatWillBeShown }
-        });
+        let formShow = {};
+        if (formnameThatWillBeShown) {
+            formShow = { formname: formnameThatWillBeShown, relation: relationnameThatWillBeShown, formIndex: formIndexThatWillBeShown };
+        }
+        const formDetails = { formname, visible: false, parentForm, bean: beanName, relation: relationname, formIndex, show: formShow }
+        return this.sabloService.callService('formService', 'formvisibility', formDetails);
     }
 
     public pushEditingStarted(formName: string, componentName: string, propertyName: string) {
@@ -353,7 +385,7 @@ export class FormService {
                                      undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
     }
 
-    public callServiceServerSideApi(serviceName: string, methodName: string, args: Array<any>): Promise<any> {
+    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): Promise<T> {
         const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
 
         // convert args as needed
@@ -493,7 +525,7 @@ export class FormService {
     private walkOverChildren(children: any[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
-                const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes);
+                const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
                 this.walkOverChildren(elem.children, formCache, structure);
                 if (parent == null) {
                     parent = new StructureCache(null, null);
@@ -502,6 +534,12 @@ export class FormService {
                 if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
                     parent.addChild(structure);
                 }
+
+                if (parent instanceof PartCache) {
+                    // this is a absolute form where a layout container is added to a part, make sure the form knows about this main "component"
+                     formCache.add(structure, parent);
+                }
+                formCache.addLayoutContainer(structure);
             } else if (elem.part === true) {
                 const part = new PartCache(elem.classes, elem.layout);
                 this.walkOverChildren(elem.children, formCache, part);
@@ -513,21 +551,35 @@ export class FormService {
 
                 if (elem.formComponent) {
                     // component that also has servoy-form-component properties
-                    const classes: Array<string> = new Array();
-                    if (elem.model.styleClass) {
-                        classes.push(elem.model.styleClass);
-                    }
+                    const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
                     const layout: { [property: string]: string } = {};
                     if (!elem.responsive) {
-                        let height = elem.model.height;
-                        if (!height) height = elem.model.containedForm.formHeight;
-                        let width = elem.model.width;
-                        if (!width) width = elem.model.containedForm.formWidth;
-                        if (height) {
-                            layout.height = height + 'px';
+                        // form component content is anchored layout
+
+                        const continingFormIsResponsive = !formCache.absolute;
+                        let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight : elem.model.height; // height is deprecated in favor of minHeight but they do the same thing;
+                        let minWidth = elem.model.minWidth !== undefined ? elem.model.minWidth : elem.model.width; // width is deprecated in favor of minWidth but they do the same thing;;
+                        let widthExplicitlySet: boolean;
+
+                        if (!minHeight && elem.model.containedForm) minHeight = elem.model.containedForm.formHeight;
+                        if (!minWidth && elem.model.containedForm) {
+                            widthExplicitlySet = false;
+                            minWidth = elem.model.containedForm.formWidth;
+                        } else widthExplicitlySet = true;
+
+                        if (minHeight) {
+                            layout['min-height'] = minHeight + 'px';
+                            if (!continingFormIsResponsive) layout['height'] = "100%"; // allow anchoring to bottom in anchored form + anchored form component
                         }
-                        if (width) {
-                            layout.width = width + 'px';
+                        if (minWidth) {
+                            layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
+
+                            if (continingFormIsResponsive && widthExplicitlySet) {
+                                // if container is in a responsive form, content is anchored and width model property is explicitly set
+                                // then we assume that developer wants to really set width of the form component so it can put multiple of them inside
+                                // for example a 12grid column; that means they should not simply be div / block elements; we change float as well
+                                layout['float'] = 'left';
+                            } 
                         }
                     }
 
@@ -550,10 +602,7 @@ export class FormService {
                                                         this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
                     this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
 
-                    formCache.add(comp);
-                    if (parent != null) {
-                        parent.addChild(comp);
-                    }
+                    formCache.add(comp, parent);
                 }
             }
         });

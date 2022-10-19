@@ -37,12 +37,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -111,7 +112,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				{
 					final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
 						"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
-						MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
+						MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
 					retval = dialog.open();
 				}
 			});
@@ -187,6 +188,14 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		return UIUtils.askQuestion(shell, "Sample Data", "Do you want to import the sample data contained in the import?") ? OK_ACTION : CANCEL_ACTION;
 	}
+
+	@Override
+	public int askImportDatasources()
+	{
+		return UIUtils.askQuestion(shell, "Datasources", "Do you want to overwrite the DBI files in the workspace with those contained in the import?")
+			? OK_ACTION : CANCEL_ACTION;
+	}
+
 
 	public int askMediaChangedAction(String name)
 	{
@@ -379,94 +388,126 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			else
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
-				ServerConfig serverConfig = null;
-				IServerInternal serverPrototype = null;
-				ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
-				for (ServerConfig sc : serverConfigs)
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+				String[] serverNames = serverManager.getServerNames(false, true, true, false);
+				ServerConfig serverConfig = serverManager.getServerConfig(name);
+				if (serverConfig != null)
 				{
-					if (sc.isEnabled() && sc.isPostgresDriver())
+					if (!serverConfig.isEnabled())
 					{
-						serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
-						if (serverPrototype != null && serverPrototype.isValid())
+						boolean[] enable = new boolean[] { true };
+						Display.getDefault().syncExec(() -> {
+							enable[0] = MessageDialog.openConfirm(shell, "Server found",
+								"The database server '" + name + "' was found, but it is disabled. Do you wish to enable it?");
+						});
+						if (!enable[0])
 						{
-							if (ApplicationServerRegistry.get().getServerManager().getServerConfig(name) == null)
+							return CANCEL_ACTION;
+						}
+						try
+						{
+							serverConfig = serverConfig.getEnabledCopy(true);
+							serverManager.testServerConfigConnection(serverConfig, 0);
+							serverManager.saveServerConfig(name, serverConfig);
+							// return retry so importer picks up the enabled server
+							return RETRY_ACTION;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+							MessageDialog.openError(shell, "Cannot enable server", e.getMessage());
+							return CANCEL_ACTION;
+						}
+					}
+				}
+				else
+				{
+					IServerInternal serverPrototype = null;
+					ServerConfig[] serverConfigs = serverManager.getServerConfigs();
+					for (ServerConfig sc : serverConfigs)
+					{
+						if (sc.isEnabled() && sc.isPostgresDriver())
+						{
+							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
+							if (serverPrototype != null && serverPrototype.isValid())
 							{
-								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
+								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
 									sc.getQuoteList(), sc.isClientOnlyConnections());
-								if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
+								if (serverManager.validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
 									serverConfig = null;
 								}
 							}
-
 						}
 					}
-				}
-				final int[] selectedOption = new int[1];
-				String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
-					: new String[] { "Replace Server", "Cancel" };
-				int defaultOption = serverConfig != null ? 1 : 0;
-				Display.getDefault().syncExec(new Runnable()
-				{
-					public void run()
+
+					final int[] selectedOption = new int[1];
+					String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
+						: new String[] { "Replace Server", "Cancel" };
+					int defaultOption = serverConfig != null ? 1 : 0;
+					Display.getDefault().syncExec(new Runnable()
 					{
-						final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
-							"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
-							MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
-						retval = optionDialog.open();
-						selectedOption[0] = optionDialog.getSelectedOption();
+						public void run()
+						{
+							final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
+								"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
+								MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
+							retval = optionDialog.open();
+							selectedOption[0] = optionDialog.getSelectedOption();
+						}
+					});
+					if (serverConfig != null && retval == 1)
+					{
+						// create server option
+						ITransactionConnection connection = null;
+						PreparedStatement ps = null;
+						try
+						{
+							connection = serverPrototype.getUnmanagedConnection();
+							ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
+							ps.execute();
+							ps.close();
+							ps = null;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+						finally
+						{
+							Utils.closeConnection(connection);
+							Utils.closeStatement(ps);
+						}
+						try
+						{
+							serverManager.testServerConfigConnection(serverConfig, 0);
+							serverManager.saveServerConfig(null, serverConfig);
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+							Display.getDefault().syncExec(new Runnable()
+							{
+								public void run()
+								{
+									MessageDialog.openError(shell, "Cannot create server '" + name + "'",
+										"An unexpected error occured while creating new server, please select an existing server or create server manually.");
+								}
+							});
+						}
+						// return retry so that the importer will pick up the new database server or show the choices again if the server was not created successfully
+						return RETRY_ACTION;
 					}
-				});
-				if (serverConfig != null && retval == 1)
-				{
-					// create server
-					ITransactionConnection connection = null;
-					PreparedStatement ps = null;
-					try
+					// replace server option
+					if (retval == 0)
 					{
-						connection = serverPrototype.getUnmanagedConnection();
-						ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
-						ps.execute();
-						ps.close();
-						ps = null;
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-					finally
-					{
-						Utils.closeConnection(connection);
-						Utils.closeStatement(ps);
+						s = serverNames[selectedOption[0]];
 					}
 
-					try
-					{
-						ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-						ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								MessageDialog.openError(shell, "Cannot create server '" + name + "'",
-									"An unexpected error occured while creating new server, please select an existing server or create server manually.");
-							}
-						});
-					}
-					return RETRY_ACTION;
-				}
-				if (retval == Window.OK)
-				{
-					s = serverNames[selectedOption[0]];
 				}
 				unknownServerNameMap.put(name, s);
 			}
@@ -475,15 +516,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				lastName = s;
 				return RENAME_ACTION;
 			}
-			else
-			{
-				return CANCEL_ACTION;
-			}
+			// rename or create was not selected, so user choose to cancel
+			return CANCEL_ACTION;
 		}
-		catch (
-
-		Exception e)
-
+		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 			return CANCEL_ACTION;

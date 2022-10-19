@@ -57,7 +57,6 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.ContentSpec;
-import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -208,7 +207,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 
 	private int last_element_id = Integer.MAX_VALUE / 2;
 
-	public int getNewElementID(UUID new_uuid) throws RepositoryException
+	public int getNewElementID(UUID new_uuid)
 	{
 		synchronized (uuid_element_id_map)
 		{
@@ -313,11 +312,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		//nop, remove project manually in eclipse
 	}
 
-
-	public IColumnInfoManager getColumnInfoManager()
-	{
-		return ServoyModelFinder.getServoyModel().getDataModelManager();
-	}
 
 	@Override
 	public IRootObject createNewRootObject(String name, int objectTypeId, int newElementID, UUID uuid) throws RepositoryException
@@ -604,6 +598,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 
 		final List<IPersist> processedNodes = new ArrayList<IPersist>();
+		final Set<Integer> processedNodesThatWereCreated = new HashSet<>(); // stores indexes in processedNodes that were new persists
+		final Set<Integer> processedNodesThatWereDeleted = new HashSet<>(); // stores indexes in processedNodes that were deleted persists
+
 		final List<IScriptElement> scriptsToRegenerate = new ArrayList<IScriptElement>();
 
 		// visit each node, find deletions and renames
@@ -683,6 +680,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 						}
 					}
 					processedNodes.add(toDelete);
+					processedNodesThatWereDeleted.add(Integer.valueOf(processedNodes.size() - 1));
 				}
 
 
@@ -754,12 +752,12 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 							if (o.getTypeID() == IRepository.FORMS) // move form security file
 							{
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
-									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + WorkspaceUserManager.SECURITY_FILE_EXTENSION;
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
 									wsa.move(oldSecFileRelativePath,
 										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-											WorkspaceUserManager.SECURITY_FILE_EXTENSION);
+											DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT);
 								}
 							}
 						}
@@ -771,6 +769,11 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 				}
 
 				processedNodes.add(o);
+				if (sp == null || AbstractRepository.searchPersist(sp.getSolution(), o) == null)
+				{
+					// it is new, only in editing solution
+					processedNodesThatWereCreated.add(Integer.valueOf(processedNodes.size() - 1));
+				}
 				return CONTINUE_TRAVERSAL;
 			}
 		};
@@ -817,6 +820,17 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 
 		// remove the processed nodes from the new, renamed and removed lists and clear the changed flags
+		for (int i = 0; i < processedNodes.size(); i++)
+		{
+			IPersist processed = processedNodes.get(i);
+			// delete and create are fired directly by AbstractBase; we need to fire the changed ones so that
+			// the persist index that listens to it does get updated correctly
+			if (!processedNodesThatWereDeleted.contains(Integer.valueOf(i)) && !processedNodesThatWereCreated.contains(Integer.valueOf(i)) &&
+				processed.isChanged())
+			{
+				solution.getChangeHandler().fireIPersistChanged(processed);
+			}
+		}
 		for (IPersist processed : processedNodes)
 		{
 			solution.clearEditingState(processed);

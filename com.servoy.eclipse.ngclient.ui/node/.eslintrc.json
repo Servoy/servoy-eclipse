@@ -54,14 +54,10 @@
           {
             "type": "attribute",
             "prefix": [
-              "servoydefault",
-              "bootstrapcomponents",
-              "bootstrapextracomponents",
-              "svychartjs",
-              "servoycore",
-              "servoyextra",
               "svy",
-              "aggrid"
+              "servoydefault",
+              "servoycore",
+              "testcomponents"
             ],
             "style": "camelCase"
           }

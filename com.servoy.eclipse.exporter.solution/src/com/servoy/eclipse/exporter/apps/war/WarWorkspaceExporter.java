@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.apps.war;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,9 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ngclient.ui.Activator;
+import com.servoy.eclipse.ngclient.ui.StringOutputStream;
+import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -334,9 +338,15 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isExportNG2()
+		public String exportNG2Mode()
 		{
-			return cmdLineArguments.isNG2Export();
+			return cmdLineArguments.exportNG2Mode();
+		}
+
+		@Override
+		public boolean exportNG1()
+		{
+			return cmdLineArguments.exportNG1();
 		}
 
 		@Override
@@ -552,6 +562,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 			return exportedPackages;
 		}
+
+		@Override
+		public void displayWarningMessage(String title, String message)
+		{
+			System.out.println(title + ": " + message);
+		}
 	}
 
 	@Override
@@ -605,6 +621,30 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			throw new ExportException("Error creating the WAR file. " + checkFile);
 		}
+	}
+
+	@Override
+	protected void checkAndExportSolutions(WarArgumentChest configuration)
+	{
+		if (configuration.exportNG2Mode() != null && !configuration.exportNG2Mode().equals("false"))
+		{
+			WebPackagesListener.setIgnore(true);
+			Activator.getInstance().setConsole(() -> new StringOutputStream()
+			{
+				@Override
+				public void write(CharSequence chars) throws IOException
+				{
+					outputExtra(chars.toString().trim());
+				}
+
+				@Override
+				public void close() throws IOException
+				{
+				}
+			});
+			Activator.getInstance().extractNode();
+		}
+		super.checkAndExportSolutions(configuration);
 	}
 
 	@Override

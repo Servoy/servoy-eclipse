@@ -538,7 +538,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		else if (draggedPersist instanceof WebCustomType && parent instanceof IBasicWebComponent)
 		{
 			WebCustomType iChildWebObject = (WebCustomType)draggedPersist;
-			IPersist persist = AddContainerCommand.addCustomType((IBasicWebComponent)parent, iChildWebObject.getJsonKey(), iChildWebObject.getTypeName(), -1);
+			IPersist persist = AddContainerCommand.addCustomType((IBasicWebComponent)parent, iChildWebObject.getJsonKey(), iChildWebObject.getTypeName(), -1,
+				iChildWebObject);
 			return toArrAy(persist);
 		}
 
@@ -558,6 +559,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 	{
 		if (parent instanceof LayoutContainer)
 		{
+			if (((LayoutContainer)parent).getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null) return true;
 			Set<String> allowed = DesignerUtil.getAllowedChildren().get(
 				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
 			if (component instanceof LayoutContainer)

@@ -3,7 +3,6 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -19,21 +18,20 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
 public class Activator extends Plugin
 {
 	private final String PLUGIN_ID = "com.servoy.eclipse.ngclient.ui";
 	private final String NODEJS_EXTENSION = "nodejs";
+	private final static String NG2_FOLDER = "target";
 
-	private final CountDownLatch nodeReady = new CountDownLatch(2);
+	private final CountDownLatch nodeReady = new CountDownLatch(1);
 
 	// The shared instance
 	private static Activator plugin;
@@ -41,8 +39,9 @@ public class Activator extends Plugin
 	private File nodePath;
 	private File npmPath;
 	private RunNPMCommand buildCommand;
-	private File projectFolder;
-	private IOConsole console;
+	private File mainTargetFolder;
+	private File solutionProjectFolder;
+	private IConsole console;
 
 
 	public static Activator getInstance()
@@ -54,25 +53,41 @@ public class Activator extends Plugin
 	public void start(BundleContext context) throws Exception
 	{
 		plugin = this;
-		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(this::exportNG2ToWar);
-		File stateLocation = Activator.getInstance().getStateLocation().toFile();
-		this.projectFolder = new File(stateLocation, "target");
+
+		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(WebPackagesListener::exportNG2ToWar);
+
+		String targetFolder = getSystemOrEvironmentProperty("servoy.ng2.target.folder");
+		if (targetFolder != null)
+		{
+			this.mainTargetFolder = new File(targetFolder);
+		}
+		else
+		{
+			File stateLocation = Activator.getInstance().getStateLocation().toFile();
+			this.mainTargetFolder = new File(stateLocation, NG2_FOLDER);
+		}
+		this.solutionProjectFolder = new File(mainTargetFolder, "solution");
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
-		extractNode();
-		copyNodeFolder();
+//		extractNode();
 	}
 
-	public synchronized IOConsole getConsole()
+	public synchronized IConsole getConsole()
 	{
 		if (console == null)
 		{
 			URL imageUrl = Activator.getInstance().getBundle().getEntry("/images/npmconsole.png");
-			console = new IOConsole("NG2 Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
+			EclipseIOConsole eclipseConsole = new EclipseIOConsole("Titanium NG Build Console", "ng2console", ImageDescriptor.createFromURL(imageUrl));
 			IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-			consoleManager.addConsoles(new IConsole[] { console });
-			consoleManager.showConsoleView(console);
+			consoleManager.addConsoles(new IOConsole[] { eclipseConsole });
+			consoleManager.showConsoleView(eclipseConsole);
+			console = eclipseConsole;
 		}
 		return console;
+	}
+
+	public synchronized void setConsole(IConsole console)
+	{
+		this.console = console;
 	}
 
 	void countDown()
@@ -80,54 +95,83 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == -0)
+			if (nodeReady.getCount() == 0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
 		}
 	}
 
-	private void copyNodeFolder()
+	public void setActiveSolution(String solutionName)
 	{
-		new NodeFolderCreatorJob(this.projectFolder, true, false).schedule();
+		this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
 	}
 
-	private void extractNode()
+	private String getSystemOrEvironmentProperty(String propertyName)
 	{
-		Job extractingNode = new Job("extracting nodejs")
+		String value = System.getProperty(propertyName);
+		if (value == null)
 		{
+			value = System.getenv(propertyName);
+		}
+		return value;
+	}
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor)
+	public void extractNode()
+	{
+		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
+		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
+		if (nodePth != null && npmPth != null)
+		{
+			nodePath = new File(nodePth);
+			npmPath = new File(npmPth);
+			countDown();
+		}
+		else
+		{
+			Job extractingNode = new Job("extracting nodejs")
 			{
-				IExtensionRegistry registry = Platform.getExtensionRegistry();
-				IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
-				File node = null;
-				File npm = null;
-				if (cf.length > 0)
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					node = extractPath(cf[0], "nodePath");
-					node.setExecutable(true);
-					npm = extractPath(cf[0], "npmPath");
+					IExtensionRegistry registry = Platform.getExtensionRegistry();
+					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
+					File node = null;
+					File npm = null;
+					if (cf.length > 0)
+					{
+						node = extractPath(cf[0], "nodePath", true);
+						node.setExecutable(true);
+						npm = extractPath(cf[0], "npmPath", false);
+					}
+					nodePath = node;
+					npmPath = npm;
+					countDown();
+					return Status.OK_STATUS;
 				}
-				nodePath = node;
-				npmPath = npm;
-				countDown();
-				return Status.OK_STATUS;
-			}
-		};
-		extractingNode.schedule();
+			};
+			extractingNode.schedule();
+		}
 	}
 
 	/**
 	 * @return the projectFolder
 	 */
-	public File getProjectFolder()
+	public File getSolutionProjectFolder()
 	{
-		return projectFolder;
+		return solutionProjectFolder;
 	}
 
-	private static File extractPath(IConfigurationElement element, String attribute)
+	/**
+	 * @return the projectFolder
+	 */
+	public File getMainTargetFolder()
+	{
+		return mainTargetFolder;
+	}
+
+	private static File extractPath(IConfigurationElement element, String attribute, boolean deletePreviousPaths)
 	{
 		String pluginId = element.getNamespaceIdentifier();
 		String path = element.getAttribute(attribute);
@@ -140,6 +184,24 @@ public class Activator extends Plugin
 			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
+				if (deletePreviousPaths)
+				{
+					File[] dirs = baseDir.listFiles(oldFile -> oldFile.isDirectory() && !oldFile.getName().equals(NG2_FOLDER));
+					if (dirs != null)
+					{
+						for (File oldDir : dirs)
+						{
+							try
+							{
+								FileUtils.deleteDirectory(oldDir);
+							}
+							catch (IOException e)
+							{
+								getInstance().getLog().error("Error deleting old node install path:" + oldDir.getAbsolutePath(), e);
+							}
+						}
+					}
+				}
 				try
 				{
 					if (ZipUtils.isZipFile(archiveUrl))
@@ -169,44 +231,26 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public RunNPMCommand createNPMCommand(List<String> commandArguments)
+	public RunNPMCommand createNPMCommand(File folder, List<String> commandArguments)
 	{
 		waitForNodeExtraction();
-		return new RunNPMCommand(nodePath, npmPath, projectFolder, commandArguments);
+		return new RunNPMCommand(nodePath, npmPath, folder, commandArguments);
 	}
 
-	public void executeNPMInstall()
-	{
-		RunNPMCommand installCommand = createNPMCommand(NGClientConstants.NPM_INSTALL);
-		installCommand.setUser(false);
-		createBuildCommand();
-		installCommand.setNextJob(buildCommand);
-		installCommand.schedule();
-
-	}
-
-	public void executeNPMBuild()
-	{
-		if (buildCommand != null) return; // already started?
-		waitForNodeExtraction();
-		createBuildCommand();
-		buildCommand.schedule();
-	}
-
-	/**
+	/*
+	 * public void executeNPMInstall() { RunNPMCommand installCommand = createNPMCommand(NGClientConstants.NPM_INSTALL); installCommand.setUser(false);
+	 * createBuildCommand(); installCommand.setNextJob(buildCommand); installCommand.schedule();
 	 *
-	 */
-	private void createBuildCommand()
-	{
-		buildCommand = new RunNPMCommand(NGClientConstants.NPM_BUILD_JOB, nodePath, npmPath, projectFolder, NGClientConstants.NG_BUILD_COMMAND);
-		buildCommand.setUser(false);
-		buildCommand.setSystem(true);
-	}
-
-	/**
+	 * }
 	 *
+	 * public void executeNPMBuild() { if (buildCommand != null) return; // already started? waitForNodeExtraction(); createBuildCommand();
+	 * buildCommand.schedule(); }
+	 *
+	 * private void createBuildCommand() { buildCommand = new RunNPMCommand(NGClientConstants.NPM_BUILD_JOB, nodePath, npmPath, projectFolder,
+	 * NGClientConstants.NG_BUILD_COMMAND); buildCommand.setUser(false); buildCommand.setSystem(true); }
 	 */
-	private void waitForNodeExtraction()
+
+	void waitForNodeExtraction()
 	{
 		try
 		{
@@ -222,35 +266,5 @@ public class Activator extends Plugin
 	public void stop(BundleContext context) throws Exception
 	{
 		if (buildCommand != null) buildCommand.cancel();
-	}
-
-	/**
-	 *  exports the state location dir to the location given that should be a WAR layout
-	 *  The index.html page will be put in WEB-INF/angular-index.html the rest in the root.
-	 * @throws IOException
-	 */
-	public void exportNG2ToWar(File location, IProgressMonitor monitor)
-	{
-		waitForNodeExtraction();
-
-		try
-		{
-			// TODO get exactly the exported components and services and adjust the sources
-			// check what happens if there was a debug watch command on the sources..
-
-			// create the production build
-			createNPMCommand(Arrays.asList("run", "build")).runCommand(monitor);
-			// copy the production build
-			File distFolder = new File(projectFolder, "dist/app_prod");
-			FileUtils.copyDirectory(distFolder, location, (path) -> !path.getName().equals("index.html"));
-
-			FileUtils.copyFile(new File(distFolder, "index.html"), new File(location, "WEB-INF/angular-index.html"));
-
-			// TODO revert the sources to the "debug/developer" build? (that dist/app debug build would have used)
-		}
-		catch (Exception e)
-		{
-			getLog().error("exceptions when exporting NG2 to WAR", e);
-		}
 	}
 }

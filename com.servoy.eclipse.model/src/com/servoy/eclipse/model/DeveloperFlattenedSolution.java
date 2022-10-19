@@ -60,6 +60,21 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 
 
 	@Override
+	protected void flushExtendsStuff()
+	{
+		// refresh all the extends forms, TODO this is kind of bad, because form instances are shared over clients.
+		Iterator<Form> it = getForms(false);
+		while (it.hasNext())
+		{
+			Form childForm = it.next();
+			if (childForm.getExtendsID() > 0)
+			{
+				childForm.setExtendsForm(getForm(childForm.getExtendsID()));
+			}
+		}
+	}
+
+	@Override
 	protected ISolutionModelPersistIndex createPersistIndex()
 	{
 		List<Solution> solutions = new ArrayList<>();
@@ -72,7 +87,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 				solutions.add(mod);
 			}
 		}
-		return new DeveloperPersistIndex(solutions);
+		return (ISolutionModelPersistIndex)new DeveloperPersistIndex(solutions).createIndex();
 	}
 
 	/*

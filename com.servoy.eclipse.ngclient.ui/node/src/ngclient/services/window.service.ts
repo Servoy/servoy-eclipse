@@ -1,12 +1,12 @@
-import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Inject, Renderer2, RendererFactory2 } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
-import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow.service';
-import { WindowRefService, LocalStorageService, SessionStorageService } from '@servoy/public';
+import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
+import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
@@ -29,9 +29,7 @@ export class WindowService {
     constructor(private formService: FormService,
         public servoyService: ServoyService,
         private windowRefService: WindowRefService,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private _applicationRef: ApplicationRef,
-        private _injector: Injector,
+        private mainViewRefService: MainViewRefService,
         public localStorageService: LocalStorageService,
         public sessionStorageService: SessionStorageService,
         private titleService: Title,
@@ -156,10 +154,10 @@ export class WindowService {
             const loc = { left: location.x, top: location.y };
 
             // create the bs window instance
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DialogWindowComponent);
-            const dialogWindowComponent = componentFactory.create(this._injector);
+            const dialogWindowComponent  = this.mainViewRefService.mainContainer.createComponent(DialogWindowComponent);
+//
             dialogWindowComponent.instance.setWindow(instance);
-            this._applicationRef.attachView(dialogWindowComponent.hostView);
+            instance.componentRef = dialogWindowComponent;
 
             const opt: BSWindowOptions = {
                 id: instance.name,
@@ -386,8 +384,11 @@ export class WindowService {
                 this.servoyService.getSolutionSettings().mainForm = form;
                 this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
                 if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false) {
-                    this.windowRefService.nativeWindow.location.hash = form.name;
-                    this.formService.goToForm(form.name);
+                    // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
+                    const state = this.platformLocation.getState();
+                    if (state && state['navigationId'])
+                        this.platformLocation.replaceState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
+                    else  this.platformLocation.pushState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
                 }
             }
             const formCache = this.formService.getFormCacheByName(form.name);
@@ -478,9 +479,10 @@ export class SvyWindow {
     transparent = false;
     storeBounds = false;
     renderer2: Renderer2;
-    bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
 
+    bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;
+    componentRef: ComponentRef<DialogWindowComponent>;
 
     constructor(name: string, type: number, windowService: WindowService, renderer2: Renderer2) {
         this.name = name;
@@ -491,6 +493,7 @@ export class SvyWindow {
 
     hide() {
         if (this.bsWindowInstance) this.bsWindowInstance.close();
+        if (this.componentRef) this.componentRef.destroy();
         if (!this.storeBounds) {
             delete this.location;
             delete this.size;

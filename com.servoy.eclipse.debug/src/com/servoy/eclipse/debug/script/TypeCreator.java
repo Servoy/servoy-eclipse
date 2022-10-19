@@ -58,6 +58,7 @@ import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
+import org.eclipse.dltk.javascript.typeinfo.model.ArrayType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -77,8 +78,6 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
@@ -247,12 +246,14 @@ import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
 import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
@@ -426,7 +427,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType(JSSolutionModel.class);
 		addAnonymousClassType(JSDatabaseManager.class);
-		addAnonymousClassType(JSDeveloperSolutionModel.class);
+		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 		addAnonymousClassType(JSSecurity.class);
 		addAnonymousClassType("servoyApi", ServoyApiObject.class);
 		addAnonymousClassType("console", ConsoleObject.class);
@@ -1171,6 +1172,9 @@ public class TypeCreator extends TypeCache
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
+		type.setDeprecated(spec.isDeprecated());
+		if (spec.getDeprecatedMessage() != null && !"".equals(spec.getDeprecatedMessage())) type.setDescription(spec.getDeprecatedMessage());
+
 		// test form formcomponnent properties
 		String specName = null;
 		if (fullTypeName.startsWith(RUNTIME_WEB_COMPONENT))
@@ -1194,6 +1198,7 @@ public class TypeCreator extends TypeCache
 			}
 
 		}
+		SolutionExplorerListContentProvider.extractApiDocs(spec);
 		EList<Member> members = type.getMembers();
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
@@ -1233,12 +1238,13 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
-				Property property = createProperty(name, false, memberType, pd.getDocumentation(), null);
+				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
+				Property property = createProperty(name, false, memberType, SolutionExplorerListContentProvider.getParsedComment(pd.getDocumentation(),
+					STANDARD_ELEMENT_NAME, true), null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
 			}
 		}
-		SolutionExplorerListContentProvider.extractApiDocs(spec);
 		Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
 		for (WebObjectFunctionDefinition api : apis.values())
 		{
@@ -1390,37 +1396,62 @@ public class TypeCreator extends TypeCache
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		if (RuntimeComponentPropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, "Component");
+		if (ValueListPropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			Type valueListType = TypeInfoModelFactory.eINSTANCE.createType();
+			valueListType.setName("ValueListPropertyType");
+			EList<Member> members = valueListType.getMembers();
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("name");
+			property.setType(getTypeRef(context, ITypeNames.STRING));
+			property.setDescription("Gets the name of the current valuelist or give name to change the used valuelist to a different one with that name");
+			members.add(property);
+			property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("dataset");
+			property.setDescription(
+				"Get or Set the current dataset of this valuelist,</br>Assign a JSDataSet to it when you want to change the values, setting is only possible for a CustomValueList");
+			property.setType(getTypeRef(context, "JSDataSet"));
+			members.add(property);
+			return TypeUtil.ref(valueListType);
+		}
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
+			recordType.setName("FoundsetPropertyType");
 			EList<Member> members = recordType.getMembers();
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName("foundset");
 			property.setType(getTypeRef(context, FoundSet.JS_FOUNDSET));
 			members.add(property);
-			Object config = pd.getConfig();
-			if (config instanceof JSONObject)
+			Object cfg = pd.getConfig();
+			if (cfg instanceof FoundsetPropertyTypeConfig)
 			{
-				if (((JSONObject)config).optBoolean("dynamicDataproviders", false))
+				FoundsetPropertyTypeConfig config = (FoundsetPropertyTypeConfig)cfg;
+				if (config.hasDynamicDataproviders)
 				{
 					property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName("dataproviders");
+					property.setDescription(
+						"FoundsetPropertyType.dataproviders - component was configured to use dynamic dataproviders.\n This is an object in which the key is the client side dataprovider name while the value is the server side dataprovider to use.");
 					property.setType(getTypeRef(context, ITypeNames.OBJECT));
 					members.add(property);
 				}
 				else
 				{
-					JSONArray dataproviders = ((JSONObject)config).optJSONArray("dataproviders");
+					String[] dataproviders = config.dataproviders;
 					if (dataproviders != null)
 					{
 						property = TypeInfoModelFactory.eINSTANCE.createProperty();
 						property.setName("dataproviders");
+						property.setDescription(
+							"This component was configured to use a fixed set of dataproviders. This is an object in which the key is the client side dataprovider name while the value is the server side dataprovider to use.");
 						Type dataprovidersType = TypeInfoModelFactory.eINSTANCE.createType();
+						dataprovidersType.setName("FixedFoundsetDataproviders");
 						EList<Member> dpMembers = dataprovidersType.getMembers();
-						for (int i = 0; i < dataproviders.length(); i++)
+						for (String dataprovider : dataproviders)
 						{
 							Property dbProp = TypeInfoModelFactory.eINSTANCE.createProperty();
-							dbProp.setName(dataproviders.optString(i));
+							dbProp.setName(dataprovider);
 							dbProp.setType(getTypeRef(context, ITypeNames.STRING));
 							dpMembers.add(dbProp);
 						}
@@ -2686,7 +2717,8 @@ public class TypeCreator extends TypeCache
 					if (!form.isFormComponent())
 					{
 						Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
-							getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());
+							getDescription(form.getDataSource(), form.getComment()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null,
+							form.getDeprecated());
 						formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
 						if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
 						{
@@ -2703,7 +2735,7 @@ public class TypeCreator extends TypeCache
 		 * @param dataSource
 		 * @return
 		 */
-		private String getDescription(String ds)
+		private String getDescription(String ds, String comment)
 		{
 			String datasource = ds;
 			if (datasource == null) datasource = "<no datasource>";
@@ -2713,6 +2745,7 @@ public class TypeCreator extends TypeCache
 				description = "Form based on datasource: " + datasource;
 				descriptions.putIfAbsent(datasource, description);
 			}
+			if (comment != null) return description + "<br/> Comment: " + comment;
 			return description;
 		}
 
@@ -4008,14 +4041,16 @@ public class TypeCreator extends TypeCache
 				return addType(null, createBaseType(context, fullTypeName));
 			}
 
-			if (cachedSuperTypeTemplateType == null)
+			Type superTypeTemplateType = cachedSuperTypeTemplateType;
+			if (superTypeTemplateType == null)
 			{
-				cachedSuperTypeTemplateType = createBaseType(context, cls.getSimpleName());
+				superTypeTemplateType = createBaseType(context, cls.getSimpleName());
+				cachedSuperTypeTemplateType = superTypeTemplateType;
 			}
 
 			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 
-			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			EList<Member> members = superTypeTemplateType.getMembers();
 
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
@@ -5020,6 +5055,10 @@ public class TypeCreator extends TypeCache
 				sb.append("<br/>");
 			}
 		}
+		if (relation.getComment() != null)
+		{
+			sb.append("Comment: " + relation.getComment());
+		}
 		str = sb.toString();
 		relationCache.put(relation, str);
 		return str;
@@ -5093,7 +5132,13 @@ public class TypeCreator extends TypeCache
 		Parameter clone = TypeInfoModelFactory.eINSTANCE.createParameter();
 		clone.setKind(parameter.getKind());
 		clone.setName(parameter.getName());
-		if (parameter.getDirectType() != null)
+		if (parameter.getType() instanceof ArrayType)
+		{
+			ArrayType typeRef = TypeInfoModelFactory.eINSTANCE.createArrayType();
+			typeRef.setItemType(((ArrayType)parameter.getType()).getItemType());
+			clone.setType(typeRef);
+		}
+		else if (parameter.getDirectType() != null)
 		{
 			SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 			typeRef.setTarget(parameter.getDirectType());

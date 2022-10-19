@@ -512,6 +512,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				new ErrorWarningPreferenceItem(ServoyBuilder.FORM_FORMAT_INVALID, Messages.ErrorWarningPreferencePage_formFormatInvalid, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_INCOMPATIBLE_ELEMENT_TYPE,
 				Messages.ErrorWarningPreferencePage_formIncompatibleElementType, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_COMPONENT_INVALID_LAYOUT_COMBINATION,
+				Messages.ErrorWarningPreferencePage_formComponentInvalidLayoutCombination, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_LABEL_FOR_ELEMENT_NOT_FOUND,
 				Messages.ErrorWarningPreferencePage_formLabelForElementNotFound, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE,
@@ -584,6 +586,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM,
 				Messages.ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ERROR_MISSING_PROJECT_REFERENCE,
+				Messages.ErrorWarningPreferencePage_errorMissingProjectReference, false));
 		}
 
 		Collections.sort(associatedProblemMarkers, descriptionComparator);

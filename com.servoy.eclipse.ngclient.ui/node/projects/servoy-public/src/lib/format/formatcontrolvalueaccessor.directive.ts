@@ -27,6 +27,13 @@ class NumberParser {
   }
 }
 
+/**
+  * This is the format directive [svyFormat]="format" that can format the dataprovider value in a input field and parse the value back when the user changes the value.
+  * this is an Angular  ControlValueAccessor  that sits between the angular component ( {@link ServoyBaseComponent } and the dom element, it writes the formatted value to the dom 
+  * and parses and pushes the parsed value back into the component.
+  *
+  * it uses the {@link FormattingService} for this. 
+  */
 @Directive({
 
     // eslint-disable-next-line @angular-eslint/directive-selector
@@ -54,6 +61,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private isKeyPressEventFired = false;
     private oldInputValue = null;
     private listeners = [];
+    private maskFormat : MaskFormat;
     private readonly log: LoggerService;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
@@ -64,7 +72,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
         this.hasFocus = false;
-        if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
+        if (this.format.display && !this.format.isMask) {
             this.writeValue(this.realValue);
         }
     }
@@ -173,7 +181,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (inputType === 'email') {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
-        } else if (value && this.format) {
+        } else if ((value !== null && value !== undefined) && this.format) {
             let data = value;
             if (!this.findmode) {
                 data = inputType  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
@@ -191,7 +199,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             }
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else {
-            this._renderer.setProperty(this._elementRef.nativeElement, 'value', value ? value : '');
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', (value !== null && value !== undefined) ? value : '');
         }
     }
 
@@ -203,6 +211,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private setFormat() {
         this.listeners.forEach(lFn => lFn());
         this.listeners = [];
+        if (this.maskFormat){
+           this.maskFormat.destroy();
+           this.maskFormat = null; 
+        } 
         if (this.format) {
             if (!this.findmode && (this.format.uppercase || this.format.lowercase)) {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));
@@ -222,7 +234,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 }
             }
             if (!this.findmode && this.format.isMask) {
-                new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
+                this.maskFormat = new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
             }
             this.writeValue(this.realValue);
         }

@@ -1,0 +1,25 @@
+{
+  "name": "@servoy/servoydefault",
+  "version": "2022.3.0",
+  "peerDependencies": {
+    "@angular/common": "^14",
+    "@angular/core": "^14",
+    "@servoy/public": "*"
+  },
+  "dependencies": {
+    "@angular/cdk": "<15",
+    "@ng-bootstrap/ng-bootstrap": "<14",
+    "@popperjs/core": "<3",
+    "@servoy/tempus-dominus": "6.0.0-beta5.1",
+    "@tinymce/tinymce-angular": "<8",
+    "bootstrap": "<6",
+    "tinymce": "^6",
+    "tinymce-i18n": ">=22",
+    "tslib": "*"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Servoy/servoy-eclipse/tree/master/com.servoy.eclipse.ngclient.ui/node/projects/servoydefault"
+  }
+}

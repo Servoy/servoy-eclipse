@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -53,7 +52,6 @@ import com.servoy.j2db.util.Debug;
 public class RemovePackageProjectReferenceAction extends Action implements ISelectionChangedListener
 {
 
-
 	private final Shell shell;
 	private ServoyNGPackageProject selectedProject;
 	private ServoyProject parentSolutionProject;
@@ -82,6 +80,8 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 			IProject project = parentProject.getProject();
 			IProject projectToBeRemoved = selectedProject.getProject();
 			removeProjectReference(project, projectToBeRemoved);
+//			ServoyModelManager.getServoyModelManager().getServoyModel().getNGPackageManager()
+//				.reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 		}
 	}
 
@@ -111,25 +111,16 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 	private ServoyProject askUserForParentProject()
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		HashSet<ServoyProject> activeSolutionProjects = new HashSet<>(Arrays.asList(servoyModel.getModulesOfActiveProject()));
 		IProject[] referencingProjects = selectedProject.getProject().getReferencingProjects();
 
 
 		ArrayList<ServoyProject> activeReferencingModules = new ArrayList<ServoyProject>();
 
-		for (IProject servoyProject : referencingProjects)
+		for (IProject referencingProject : referencingProjects)
 		{
-			try
+			if (servoyModel.isSolutionActive(referencingProject.getName()))
 			{
-				if (servoyProject.isAccessible() && servoyProject.hasNature(ServoyProject.NATURE_ID) &&
-					activeSolutionProjects.contains(servoyProject.getNature(ServoyProject.NATURE_ID)))
-				{
-					activeReferencingModules.add((ServoyProject)servoyProject.getNature(ServoyProject.NATURE_ID));
-				}
-			}
-			catch (CoreException e)
-			{
-				Debug.log(e);
+				activeReferencingModules.add(servoyModel.getServoyProject(referencingProject.getName()));
 			}
 		}
 

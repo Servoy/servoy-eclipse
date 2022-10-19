@@ -82,7 +82,8 @@ public class MarkerMessages
 	public static ServoyMarker ReferencesToMultipleResources = new ServoyMarker(
 		"Solution project \"{0}\" has references to more than one Servoy Resources Projects.", ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
 	// It seems that elements with duplicate UUIDs are not loaded at all.
-	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" in {1}.", ServoyBuilder.DUPLICATE_UUID);
+	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" of {1} in {2}, duplicates: {3} in {4}.",
+		ServoyBuilder.DUPLICATE_UUID);
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.
 	public static ServoyMarker PropertyFormCannotBeInstantiated = new ServoyMarker("Property \"{0}\" refers to a form that cannot be instantiated.",
 		ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE);
@@ -229,7 +230,7 @@ public class MarkerMessages
 		"Valuelist \"{0}\" has fallback valuelist \"{1}\" which has a fallback valuelist as well. This is not supported.",
 		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 	public static ServoyMarker ValuelistDataproviderTypeMismatch = new ServoyMarker(
-		"Valuelist \"{0}\" real value type does not match the dataProvider type of element \"{1}\" in form \"{2}\"",
+		"Valuelist \"{0}\" real value type \"{1}\" does not match the dataProvider type \"{2}\" of element \"{3}\" in form \"{4}\"",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE);
@@ -694,10 +695,16 @@ public class MarkerMessages
 	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification \"{1}\" from package \"{2}\" is missing.",
 		ServoyBuilder.MISSING_SPEC);
 
+	public static ServoyMarker MissingProjectReference = new ServoyMarker("Missing project reference \"{0}\" for solution \"{1}\".",
+		ServoyBuilder.MISSING_PROJECT_REFERENCE);
+
 	public static ServoyMarker MethodOverrideProblem = new ServoyMarker("The function \"{0}\" in form \"{1}\" must override a superform method.",
 		ServoyBuilder.METHOD_OVERRIDE);
 
 	public static ServoyMarker DeprecatedSpecification = new ServoyMarker("The type \"{0}\" of the {1} is deprecated. {2}", ServoyBuilder.DEPRECATED_SPEC);
+
+	public static ServoyMarker DeprecatedHandler = new ServoyMarker("The handler \"{0}\" of the {1} is deprecated. {2}",
+		ServoyBuilder.DEPRECATED_ELEMENT_USAGE);
 
 	public static ServoyMarker Parameters_Mismatch = new ServoyMarker(
 		"Component {0} has handler \"{1}\" which has different number of parameters in spec and properties view.", ServoyBuilder.PARAMETERS_MISMATCH);

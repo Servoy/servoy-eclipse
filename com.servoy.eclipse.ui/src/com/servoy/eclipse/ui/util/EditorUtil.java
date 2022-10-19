@@ -118,6 +118,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
@@ -611,17 +612,17 @@ public class EditorUtil
 	}
 
 
-	public static IEditorPart openServerEditor(ServerConfig serverConfig)
+	public static IEditorPart openServerEditor(ServerConfig serverConfig, ServerSettings serverSettings)
 	{
-		return openServerEditor(serverConfig, false);
+		return openServerEditor(serverConfig, serverSettings, false);
 	}
 
-	public static IEditorPart openServerEditor(ServerConfig serverConfig, boolean isNew)
+	public static IEditorPart openServerEditor(ServerConfig serverConfig, ServerSettings serverSettings, boolean isNew)
 	{
-		if (serverConfig == null) return null;
+		if (serverConfig == null || serverSettings == null) return null;
 		try
 		{
-			ServerEditorInput sei = new ServerEditorInput(serverConfig);
+			ServerEditorInput sei = new ServerEditorInput(serverConfig, serverSettings);
 			sei.setIsNew(isNew);
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
@@ -794,7 +795,7 @@ public class EditorUtil
 										return super.getText(element);
 									}
 								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyParts, new StructuredSelection(dirtyParts), true, null,
-								null);
+								null, false);
 
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)

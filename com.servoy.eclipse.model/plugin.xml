@@ -821,6 +821,13 @@
 			<problem>com.servoy.eclipse.model.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
 	   </problemCategory>      
    </extension>
+   <extension
+         point="org.eclipse.dltk.core.problemFactory">
+      <problemIdentifierFactory
+            class="com.servoy.eclipse.model.builder.JSFileExpressionWithVarsProblemFactory"
+            namespace="com.servoy.eclipse.model.builder.JSFileExpressionWithVarsProblem">
+      </problemIdentifierFactory>      
+   </extension>
     <extension
          id="com.servoy.eclipse.core.missingSpec"
          name="Missing Spec"
@@ -875,6 +882,26 @@
         </section>
    </extension>
    <extension
+         point="org.eclipse.dltk.core.buildParticipant">
+      <buildParticipant
+            class="com.servoy.eclipse.model.builder.JSFileExpressionsWithVars"
+            id="com.servoy.eclipse.model.builder.JSFileExpressionsWithVars"
+            name="JavaScript file more then one var declaration in a line"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </buildParticipant>
+   </extension>   
+   <extension
+        point="org.eclipse.dltk.javascript.ui.problemSections">
+        <section
+                id="com.servoy.eclipse.model.builder.servoyCode"
+                name="Servoy code"
+                priority="1000">
+            <problem
+                id="com.servoy.eclipse.model.builder.JSFileExpressionWithVarsProblem#EXPRESSION_WITH_VARS"
+                label="More then one variable declared in a line"/>
+        </section>
+   </extension>   
+   <extension
          id="com.servoy.eclipse.core.methodOverride"
          name="Method Override Problem"
          point="org.eclipse.core.resources.markers">
@@ -906,5 +933,16 @@
       <persistent
             value="true">
       </persistent>
+   </extension>
+   <extension
+         id="com.servoy.eclipse.core.missingProjectReference"
+         name="Missing Project Reference"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
    </extension>
 </plugin>

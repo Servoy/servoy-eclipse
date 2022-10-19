@@ -4,7 +4,6 @@ import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
 import { LoggerFactory, ServoyPublicService, SessionStorageService, IDeferred, WindowRefService } from '@servoy/public';
 import { ServicesService } from '../sablo/services.service';
-import { TestabilityService } from '../sablo/testability.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ServoyPublicServiceImpl } from '../ngclient/services/servoy_public_impl.service';
@@ -14,7 +13,6 @@ import { ApplicationService } from '../ngclient/services/application.service';
 import { ServoyService } from '../ngclient/servoy.service';
 import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 import { SvyUtilsService } from '../ngclient/utils.service';
-import { SabloModule } from '../sablo/sablo.module';
 import { SabloService } from '../sablo/sablo.service';
 
 
@@ -40,14 +38,13 @@ export class TestWebsocketService extends WebsocketService {
         private _converterService: ConverterService,
         private _logFactory: LoggerFactory,
         private _loadingIndicatorService: LoadingIndicatorService,
-        private _ngZone: NgZone,
-        private _testability: TestabilityService) {
-     super(_windowRef, _converterService, _logFactory, _loadingIndicatorService,_ngZone, _testability);
+        private _ngZone: NgZone) {
+     super(_windowRef, _converterService, _logFactory, _loadingIndicatorService, _ngZone);
     }
 
   connect(): WebsocketSession {
       return new WebsocketSession({} as ReconnectingWebSocket, this,
-        this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._testability, this._logFactory );
+        this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._logFactory );
   }
   disconnect() {
   }
@@ -67,7 +64,6 @@ export class TestSabloService extends SabloService {
 
   ],
   imports: [
-    SabloModule
   ],
   exports: [
 

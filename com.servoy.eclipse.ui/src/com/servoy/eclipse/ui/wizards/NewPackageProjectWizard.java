@@ -1,13 +1,21 @@
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +50,7 @@ import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
@@ -58,6 +67,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 public class NewPackageProjectWizard extends Wizard implements INewWizard
 {
@@ -68,6 +78,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 	private PlatformSimpleUserNode treeNode;
 	private final String packageType;
+	private final static String PROJECT_NAME_TAG = "##packagename##";
 
 	public NewPackageProjectWizard()
 	{
@@ -106,6 +117,109 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		return true;
 	}
 
+
+	/**
+	 * @param newProject
+	 */
+	public static void copyAndRenameFiles(IProject project)
+	{
+		String projectName = project.getName();
+		File packageFile = new File(project.getLocation().toOSString());
+		copyAllEntries("packagetemplate", packageFile);
+		replaceTagInFile(new File(packageFile, "angular.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "scripts/build.js"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/ng-package.json"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/karma.conf.js"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, projectName);
+		replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, projectName);
+		new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + projectName + ".module.ts"));
+		ignoreNodeModules(project);
+		try
+		{
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		}
+		catch (CoreException e)
+		{
+			// ignore
+		}
+	}
+
+	private static void ignoreNodeModules(IProject project)
+	{
+		IFile projectFile = project.getFile(".project");
+
+		String projectFileContent = null;
+		try (InputStream is = projectFile.getContents(true))
+		{
+			projectFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+			if (projectFileContent != null)
+			{
+				int startAddIndex = projectFileContent.indexOf("</projectDescription>");
+				if (startAddIndex >= 0)
+				{
+					projectFileContent = projectFileContent.replaceFirst("</projectDescription>",
+						"	<filteredResources>\n" +
+							"		<filter>\n" +
+							"			<id>1651500530696</id>\n" +
+							"			<name></name>\n" +
+							"			<type>26</type>\n" +
+							"			<matcher>\n" +
+							"				<id>org.eclipse.ui.ide.multiFilter</id>\n" +
+							"				<arguments>1.0-name-matches-false-false-node_modules</arguments>\n" +
+							"			</matcher>\n" +
+							"		</filter>\n" +
+							"	</filteredResources>\n</projectDescription>");
+				}
+				projectFile.setContents(new ByteArrayInputStream(projectFileContent.getBytes(Charset.forName("UTF8"))), true, false, null);
+			}
+		}
+		catch (IOException | CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	private static void copyAllEntries(String entryPath, File packageFile)
+	{
+		Enumeration<URL> entries = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle().findEntries(entryPath, "*", true);
+		while (entries.hasMoreElements())
+		{
+			URL entry = entries.nextElement();
+			String filename = entry.getFile();
+			try
+			{
+				if (!filename.endsWith("/"))
+				{
+					try (InputStream is = entry.openStream())
+					{
+						FileUtils.copyInputStreamToFile(is, new File(packageFile, filename.substring("/packagetemplate/".length())));
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.error("Error copy file " + filename + "to node folder " + packageFile, e);
+			}
+		}
+	}
+
+	private static void replaceTagInFile(File file, String tagName, String tagValue)
+	{
+		try
+		{
+			String encoding = "UTF-8";
+			String content = FileUtils.readFileToString(file, encoding);
+			content = content.replaceAll(tagName, tagValue);
+			FileUtils.writeStringToFile(file, content, encoding);
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
 	private class CreatePackageProjectJob extends WorkspaceJob
 	{
 		private final String projectName;
@@ -137,6 +251,14 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 				}
 				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, displayName, projectName, version, packageType); // TODO symbolic name here instead of double projectName?
+				try
+				{
+					copyAndRenameFiles(newProject);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
 
 				if (viewer != null)
 				{
@@ -346,21 +468,27 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			final GroupLayout groupLayout = new GroupLayout(container);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().add(packageLabel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-					LayoutStyle.RELATED).add(packName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
-						groupLayout.createSequentialGroup().add(packageDisplayLabel, GroupLayout.PREFERRED_SIZE, 150,
-							GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packDisplay, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
-									groupLayout.createSequentialGroup().add(packageVersionLabel, GroupLayout.PREFERRED_SIZE, 150,
-										GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packVersion, GroupLayout.DEFAULT_SIZE,
-											GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(projectLocationComposite, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE,
-													GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+					LayoutStyle.RELATED).add(packName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(
+					groupLayout.createSequentialGroup().add(packageDisplayLabel, GroupLayout.PREFERRED_SIZE, 150,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packDisplay, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(
+					groupLayout.createSequentialGroup().add(packageVersionLabel, GroupLayout.PREFERRED_SIZE, 150,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packVersion, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.add(projectLocationComposite, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+				.add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
 
 			groupLayout.setVerticalGroup(
 				groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageLabel).add(packName)).add(
 					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageDisplayLabel).add(packDisplay)).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageVersionLabel).add(packVersion)).add(projectLocationComposite).add(
-							selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageVersionLabel).add(packVersion))
+					.add(projectLocationComposite).add(
+						selectSolutionLabel)
+					.add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
 			groupLayout.setAutocreateGaps(true);
 			groupLayout.setAutocreateContainerGaps(true);
 			container.setLayout(groupLayout);

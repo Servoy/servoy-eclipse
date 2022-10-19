@@ -56,6 +56,18 @@ describe('FormattingService', () => {
         myformat.display = '$ #.###-';
         expect(service.format(-10.49, myformat, false)).toEqual('$ 10.49-');
 
+        myformat.display = '#,######.00000';
+        expect(service.format(0, myformat, false)).toEqual('0.00000');
+
+        myformat.display = '#,######.00000';
+        expect(service.format(1000000, myformat, false)).toEqual('1,000,000.00000');
+        
+        myformat.display = '#,######.00000';
+        expect(service.format(125.5, myformat, false)).toEqual('125.50000');
+
+        myformat.display = '#,######.00000';
+        expect(service.format(1125.5, myformat, false)).toEqual('1,125.50000');
+
         myformat.display = '#.###-$';
         expect(service.format(-10.49, myformat, false)).toEqual('10.49-$');
 
@@ -78,6 +90,9 @@ describe('FormattingService', () => {
         expect(service.format(12, myformat, false)).toEqual('12');
 
         myformat.display = '##-';
+        expect(service.format(1, myformat, false)).toEqual('1');
+
+        myformat.display = '##-';
         expect(service.format(-12, myformat, false)).toEqual('12-');
 
         myformat.display = '-##';
@@ -92,6 +107,12 @@ describe('FormattingService', () => {
         myformat.display = '##.##-';
         expect(service.format(-12.34, myformat, false)).toEqual('12.34-');
 
+        myformat.display = '##.##+';
+        expect(service.format(+12.34, myformat, false)).toEqual('12.34+');
+        
+        myformat.display = '##.##+';
+        expect(service.format(12.34, myformat, false)).toEqual('12.34+')
+
         myformat.display = '-##.##';
         expect(service.format(12.34, myformat, false)).toEqual('12.34');
 
@@ -99,8 +120,25 @@ describe('FormattingService', () => {
         expect(service.format(-12.34, myformat, false)).toEqual('-12.34');
 
         myformat.display = '+0';
-        //TODO numbro vs numeral difference
-        expect(service.format(10.49, myformat, false)).toEqual('+10.49');
+        expect(service.format(10.49, myformat, false)).toEqual('+10');
+
+        myformat.display = '+0';
+        expect(service.format(10.59, myformat, false)).toEqual('+11')
+        
+        myformat.display = '-0';
+        expect(service.format(10.59, myformat, false)).toEqual('11')
+        
+        myformat.display = '0-';
+        expect(service.format(10.59, myformat, false)).toEqual('11')
+        
+        myformat.display = '0-';
+        expect(service.format(-10.59, myformat, false)).toEqual('11-')
+        
+        myformat.display = '0+';
+        expect(service.format(10.59, myformat, false)).toEqual('11+')
+        
+        myformat.display = '0+';
+        expect(service.format(-10.59, myformat, false)).toEqual('-11+')
 
         myformat.display = '+%00.00';
         expect(service.format(10.49, myformat, false)).toEqual('+%1049.00');
@@ -128,6 +166,99 @@ describe('FormattingService', () => {
 
         myformat.display = '#.#';
         expect(service.format(0.9, myformat, false)).toEqual('0.9');
+        
+        myformat.display = '#.#';
+        expect(service.format(0, myformat, false)).toEqual('');
+        
+        myformat.display = '#,##0.##';
+        expect(service.format(0, myformat, false)).toEqual('0');
+        
+        myformat.display = '#,##0.##';
+        expect(service.format(0.1, myformat, false)).toEqual('0.1');
+        
+        myformat.display = '#0.##';
+        expect(service.format(1, myformat, false)).toEqual('1');
+        
+        myformat.display = '#0.##';
+        expect(service.format(0.1, myformat, false)).toEqual('0.1');
+
+        myformat.display = '#0.##';
+        expect(service.format(null, myformat, false)).toEqual('');
+        
+        myformat.display = '#0.##';
+        expect(service.format(1.1, myformat, false)).toEqual('1.1');
+
+        myformat.display = '#0.##';
+        expect(service.format(1000.1, myformat, false)).toEqual('1000.1');
+
+        myformat.display = '#0.##';
+        expect(service.format(1000.100, myformat, false)).toEqual('1000.1');
+        
+        myformat.display = '#0.##';
+        expect(service.format(1000.101, myformat, false)).toEqual('1000.1');
+
+        myformat.display = '#0.##';
+        expect(service.format(0.100, myformat, false)).toEqual('0.1');
+        
+        myformat.display = '#0.##';
+        expect(service.format(0, myformat, false)).toEqual('0');
+        
+        myformat.display = '#0';
+        expect(service.format(0.101, myformat, false)).toEqual('0');
+        
+        myformat.display = '#0';
+        expect(service.format(0.901, myformat, false)).toEqual('1');
+        
+        myformat.display = '#0';
+        expect(service.format(125.5, myformat, false)).toEqual('126');
+
+        myformat.display = '#0';
+        expect(service.format(0, myformat, false)).toEqual('0');
+
+        myformat.display = '0#.##';
+        expect(service.format(0, myformat, false)).toEqual('00');
+
+        myformat.display = '0#.##';
+        expect(service.format(1, myformat, false)).toEqual('01');
+        
+        myformat.display = '0#.##';
+        expect(service.format(100, myformat, false)).toEqual('100');
+        
+        myformat.display = '0#.##';
+        expect(service.format(0.1, myformat, false)).toEqual('00.1');
+        
+        myformat.display = '0#.##';
+        expect(service.format(0.111, myformat, false)).toEqual('00.11');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(0, myformat, false)).toEqual('0000.00');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1, myformat, false)).toEqual('0001.00');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1.1, myformat, false)).toEqual('0001.10');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('1,000.10');
+        
+        myformat.display = '0000,000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('0,001,000.10');
+        
+        myformat.display = '0000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('1000.10');
+        
+        myformat.display = '0000000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('0001000.10');
+
+        myformat.display = '0,000.00';
+        expect(service.format(125.5, myformat, false)).toEqual('0125.50');
+        
+        myformat.display = '#,##0.00##';
+        expect(service.format(125.5, myformat, false)).toEqual('125.50');
+        expect(service.format(125.556789, myformat, false)).toEqual('125.5568');
+        expect(service.format(125.5567, myformat, false)).toEqual('125.5567');
+        expect(service.format(125.556, myformat, false)).toEqual('125.556');
     });
 
     it('should corectly UNformat  numbers', () => {
@@ -173,8 +304,11 @@ describe('FormattingService', () => {
         expect(service.format(1000,  myformat, false)).toEqual('1.000');
 
         myformat.display = '+0';
-        expect(service.format(10.49,  myformat, false)).toEqual('+10,49');
+        expect(service.format(10.49,  myformat, false)).toEqual('+10');
 
+        myformat.display = '+0';
+        expect(service.format(10.79,  myformat, false)).toEqual('+11');
+        
         myformat.display = '+%00.00';
         expect(service.format(10.49,  myformat, false)).toEqual('+%1049,00');
 
@@ -186,6 +320,31 @@ describe('FormattingService', () => {
 
         myformat.display = '00.00E00';
         expect(service.format(10.49,  myformat, false)).toEqual('1.0490e+1'); // TODO shouldn't this also be in dutch notation??
+   
+        myformat.display = '0,000.00';
+        expect(service.format(0, myformat, false)).toEqual('0000,00');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1, myformat, false)).toEqual('0001,00');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1.1, myformat, false)).toEqual('0001,10');
+        
+        myformat.display = '0,000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('1.000,10');
+        
+        myformat.display = '0000,000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('0.001.000,10');
+        
+        myformat.display = '0000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('1000,10');
+        
+        myformat.display = '0000000.00';
+        expect(service.format(1000.1, myformat, false)).toEqual('0001000,10');
+
+        myformat.display = '0,000.00';
+        expect(service.format(125.5, myformat, false)).toEqual('0125,50');
+   
     });
 
     it('should corectly UNformat  numbers in dutch locale', () => {

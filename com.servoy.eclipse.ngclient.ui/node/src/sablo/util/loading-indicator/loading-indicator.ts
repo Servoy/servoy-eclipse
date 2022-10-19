@@ -1,10 +1,7 @@
-
-import { Component, OnInit, Output, EventEmitter, NgZone } from '@angular/core';
-import {LoadingIndicatorService } from './loading-indicator.service';
+import { Component } from '@angular/core';
 
 @Component({
     selector:'loading-indicator',
     templateUrl:'./loading-indicator.html',
-    styleUrls:['./loading-indicator.css'],
 })
 export class LoadingIndicatorComponent {}

@@ -48,12 +48,10 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.sablo.specification.PackageSpecification;
@@ -284,6 +282,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
+	public static final String MISSING_PROJECT_REFERENCE = _PREFIX + ".missingProjectReference";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
@@ -291,6 +290,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
 	public static final String SERVICE_MUST_AUTHENTICATE_MARKER_TYPE = _PREFIX + ".serviceMustAuthenticateProblem";
 	public static final String NAMED_FOUNDSET_DATASOURCE = _PREFIX + ".namedFoundsetDatasourceProblem";
+
+	public static final String PROJECT_REFERENCE_NAME = "projectReferenceName";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -320,6 +321,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// problems with resource projects
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>("referencesToMultipleResources",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> ERROR_MISSING_PROJECT_REFERENCE = new Pair<String, ProblemSeverity>("missingProjectReference",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
@@ -482,7 +485,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_LAYOUT_COMBINATION = new Pair<String, ProblemSeverity>(
 		"formComponentInvalidLayoutCombination",
-		ProblemSeverity.ERROR);
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_NESTED_LIST = new Pair<String, ProblemSeverity>("formComponentNestedList",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
@@ -496,6 +499,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_HANDLER = new Pair<String, ProblemSeverity>("deprecatedHandler", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
 		ProblemSeverity.WARNING);
 
@@ -616,22 +620,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
-		// this is kind of a hack because you can listen to ResourceChangeEvent.PRE_BUILD and ResourceChangeEvent.POST_BUILD as workspace resource listeners
-		// because Eclipse does block the PRE_BUILD of the AutoBuildJob
-		// so this makes a job that has the workspace as the rule (so it waits for any workspace jobs to finish like the build job)
-		// then turns of the super persist cache of the PersistHelper that it always just enables when a build starts.
-		// This can't be enabled/disabled just in this method because a build creates multiply instances of this class. (1 for every project)
-		Job disableCache = Job.createSystem("clear cache", new ICoreRunnable()
-		{
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException
-			{
-				PersistHelper.enableSuperPersistCaching(false);
-			}
-		});
-		disableCache.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		disableCache.schedule();
-		PersistHelper.enableSuperPersistCaching(true);
 		// make sure the IServoyModel is initialized
 		getServoyModel();
 		referencedProjectsSet.clear();
@@ -730,7 +718,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				IResourceDelta resourcesProjectDelta = null;
 				for (IProject p : monitoredProjects)
 				{
-					if (p.exists() && p.isOpen() && !needFullBuild)
+					/*
+					 * If you have a reference to a project and then you close or delete that project it will not do a build. That is why p.exists() and
+					 * p.isOpen() is commented.
+					 */
+					if (/* p.exists() && p.isOpen() && */ !needFullBuild)
 					{
 						IResourceDelta delta = getDelta(p);
 						if (delta != null)
@@ -1200,20 +1192,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					List<IPersist> lst = duplicates.get(uuid);
 					if (lst.size() >= 2)
 					{
-						IPersist p = lst.get(0);
-						IPersist other = lst.get(1);
-						// for now only add it on both if there is 1, just skip the rest.
-						if (lst.size() == 1)
+						IPersist first = lst.get(0);
+						for (IPersist persist : lst)
 						{
-							ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
-								SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+							IPersist other = first;
+							if (persist == other) other = lst.get(1);
+							ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(persist.getUUID(), persist,
+								SolutionSerializer.getRelativePath(persist, false) + SolutionSerializer.getFileName(persist, false), other,
+								SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
 							addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-								IMarker.PRIORITY_HIGH, null, other);
+								IMarker.PRIORITY_HIGH, null, persist);
 						}
-						ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
-							SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
-						addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE, IMarker.PRIORITY_HIGH,
-							null, p);
 					}
 				}
 			}
@@ -3025,6 +3014,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkResourcesForServoyProject(IProject project)
 	{
 		deleteMarkers(project, MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
+		deleteMarkers(project, MISSING_PROJECT_REFERENCE);
 		try
 		{
 			// check if this project references more than one or no resources projects
@@ -3035,6 +3025,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (p.exists() && p.isOpen() && p.hasNature(ServoyResourcesProject.NATURE_ID))
 				{
 					count++;
+				}
+				if (!p.isAccessible())
+				{
+					ServoyMarker mk = MarkerMessages.MissingProjectReference.fill(p.getName(), project.getName());
+					final IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, ERROR_MISSING_PROJECT_REFERENCE, IMarker.PRIORITY_NORMAL, null,
+						null);
+					if (marker != null)
+					{
+						try
+						{
+							marker.setAttribute(PROJECT_REFERENCE_NAME, p.getName());
+						}
+						catch (CoreException e)
+						{
+							Debug.error(e);
+						}
+					}
 				}
 			}
 

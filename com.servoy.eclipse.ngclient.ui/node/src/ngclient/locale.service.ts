@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
-import { Deferred, SessionStorageService, LoggerFactory, LoggerService } from '@servoy/public';
+import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
 
 import numbro from 'numbro';
@@ -31,6 +31,10 @@ export class LocaleService {
 
     public getLocale(): string {
         return this.locale;
+    }
+
+    public getLocaleObject(): Locale {
+        return this.sabloService.getLocale();;
     }
 
     public setLocale(language: string, country: string, initializing?: boolean) {
@@ -85,13 +89,14 @@ export class LocaleService {
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
         return new Promise<string>((resolve, reject) => {
-            import(`@angular/common/locales/${localeId}.js`).then(
+            import(
+                `@/../../node_modules/@angular/common/locales/${localeId}.mjs`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);
                 },
                 () => {
-                    import(`@angular/common/locales/${language.toLowerCase()}.js`).then(module => {
+                    import(`@/../../node_modules/@angular/common/locales/${language.toLowerCase()}.mjs`).then(module => {
                         registerLocaleData(module.default, localeId.split('-')[0]);
                         resolve(language.toLowerCase());
                     }, reject);

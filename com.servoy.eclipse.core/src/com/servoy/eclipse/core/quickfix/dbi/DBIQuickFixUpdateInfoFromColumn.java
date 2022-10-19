@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.json.JSONException;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -36,13 +37,14 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the column information to match the DB column.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
@@ -72,10 +74,10 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 	public boolean canHandleDifference(TableDifference difference)
 	{
 		return difference != null && ((difference.getType() == TableDifference.COLUMN_CONFLICT && (//
-			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType)) || //
-				(difference.getDbiFileDefinition().allowNull != difference.getTableDefinition().allowNull) || //
-			((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != (difference.getTableDefinition().flags & Column.PK_COLUMN))//
-			)) || (difference.getType() == TableDifference.COLUMN_SEQ_TYPE_OVERRIDEN));
+		(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType)) || //
+			(difference.getDbiFileDefinition().allowNull != difference.getTableDefinition().allowNull) || //
+			((difference.getDbiFileDefinition().flags & IBaseColumn.PK_COLUMN) != (difference.getTableDefinition().flags & IBaseColumn.PK_COLUMN))//
+		)) || (difference.getType() == TableDifference.COLUMN_SEQ_TYPE_OVERRIDEN));
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 
 						// prepare to update column creation order to the one of current real table
 						ArrayList<String> colNames = new ArrayList<String>();
@@ -162,12 +164,12 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 									}
 								}
 								// if pk info differs... use real one
-								cid.flags = (cid.flags & (~Column.PK_COLUMN)) | (difference.getTableDefinition().flags & Column.PK_COLUMN);
+								cid.flags = (cid.flags & (~IBaseColumn.PK_COLUMN)) | (difference.getTableDefinition().flags & IBaseColumn.PK_COLUMN);
 								// make sure that if it is marked as pk, it is not marked as user row id col. too
-								if ((cid.flags & Column.PK_COLUMN) != 0) cid.flags = cid.flags & (~Column.USER_ROWID_COLUMN);
+								if ((cid.flags & IBaseColumn.PK_COLUMN) != 0) cid.flags = cid.flags & (~IBaseColumn.USER_ROWID_COLUMN);
 
 								// if it's an auto increment but the subtype is different in the db, use the one in the db
-								if (((cid.flags & Column.USER_ROWID_COLUMN) != 0 || (cid.flags & Column.PK_COLUMN) != 0) &&
+								if (((cid.flags & IBaseColumn.USER_ROWID_COLUMN) != 0 || (cid.flags & IBaseColumn.PK_COLUMN) != 0) &&
 									difference.getTableDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER &&
 									cid.autoEnterType == difference.getTableDefinition().autoEnterType &&
 									cid.autoEnterSubType != difference.getTableDefinition().autoEnterSubType)

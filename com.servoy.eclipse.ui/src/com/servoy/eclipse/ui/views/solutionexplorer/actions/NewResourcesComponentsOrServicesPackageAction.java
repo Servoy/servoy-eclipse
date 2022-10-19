@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -222,16 +225,13 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 
 	private boolean isNameValid(SimpleUserNode node)
 	{
-		SpecProviderState specProviderState;
-		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
-		{
-			specProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
-		else
-		{
-			specProviderState = WebComponentSpecProvider.getSpecProviderState();
-		}
-		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
+		List<PackageSpecification< ? extends WebObjectSpecification>> allPackageSpecs = new ArrayList<>(
+			WebServiceSpecProvider.getSpecProviderState().getWebObjectSpecifications().values());
+		SpecProviderState compspecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		allPackageSpecs.addAll(compspecProviderState.getWebObjectSpecifications().values());
+		allPackageSpecs.addAll(compspecProviderState.getLayoutSpecifications().values());
+
+		for (PackageSpecification< ? extends WebObjectSpecification> p : allPackageSpecs)
 		{
 			if (p.getPackageName().equals(packageName))
 			{
@@ -283,6 +283,13 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
 		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Version"), isEmpty(version) ? "1.0.0" : version);
+
+		if (IPackageReader.WEB_COMPONENT.equals(packageType))
+		{
+			manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), packageName);
+			manifest.getMainAttributes().put(new Attributes.Name("NG2-Module"), packageName + "Module");
+			manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist");
+		}
 
 		IFolder metainf = pack.getFolder(new Path("META-INF"));
 		metainf.create(true, true, new NullProgressMonitor());

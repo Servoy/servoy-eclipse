@@ -16,10 +16,17 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import static com.servoy.j2db.persistence.ServerConfig.CONNECTION_DRIVER_VALIDATION;
+import static com.servoy.j2db.persistence.ServerConfig.CONNECTION_EXCEPTION_VALIDATION;
+import static com.servoy.j2db.persistence.ServerConfig.CONNECTION_METADATA_VALIDATION;
+import static com.servoy.j2db.persistence.ServerConfig.CONNECTION_QUERY_VALIDATION;
+import static com.servoy.j2db.persistence.ServerConfig.getConnectionValidationTypeAsString;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +61,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.internal.ui.Utils;
 import org.eclipse.ui.IEditorInput;
@@ -79,7 +84,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
-import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -101,6 +105,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
+import com.servoy.j2db.persistence.SortingNullprecedence;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
@@ -115,10 +121,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private DataBindingContext m_bindingContext;
 	private boolean modified = false;
 	private ImmutableObjectObservable<ServerConfig> serverConfigObservable;
+	private ImmutableObjectObservable<ServerSettings> serverSettingsObservable;
 
 	private Button enabledButton;
 	private Button logServerButton;
 	private Button proceduresButton;
+	private Button sortIgnoreCaseButton;
+	private CCombo sortNullprecedenceField;
 	private Button clientOnlyConnectionsButton;
 	private Button prefixTablesButton;
 	private Button createLogTableButton;
@@ -168,7 +177,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		GridData tmpGD;
 
-		String toolTip;
 		Display display = getDisplay(parent);
 
 		myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -176,21 +184,17 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		Label mainSeparator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label mainSeparator = separator(parent);
 
 		Composite bottomComposite = new Composite(parent, SWT.NONE);
 
 		mainComposite = new Composite(myScrolledComposite, SWT.NONE);
 		myScrolledComposite.setContent(mainComposite);
 
-		toolTip = "The (friendly) name that this DB server/connection will have in Servoy Developer.\nIt doesn't have to match the real database name (the one used by DB Server).";
-		Label serverNameLabel;
-		serverNameLabel = new Label(mainComposite, SWT.LEFT);
-		serverNameLabel.setText("Server name");
-		serverNameLabel.setToolTipText(toolTip);
+		String toolTip = "The (friendly) name that this DB server/connection will have in Servoy Developer.\nIt doesn't have to match the real database name (the one used by DB Server).";
+		Label serverNameLabel = label(mainComposite, "Server name", toolTip);
+		serverNameField = text(mainComposite, toolTip);
 
-		serverNameField = new Text(mainComposite, SWT.BORDER);
-		serverNameField.setToolTipText(toolTip);
 		ModifyListener ml = null;
 		if (serverTemplateDefinition != null)
 		{
@@ -221,19 +225,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				{
 					toolTip = (urlKeyDescriptions != null && urlKeyDescriptions.length > z ? urlKeyDescriptions[z] : null);
 
-					Label templateLabel;
-					templateLabel = new Label(mainComposite, SWT.LEFT);
-					templateLabel.setText(urlKeys[z]);
-					templateLabel.setToolTipText(toolTip);
+					Label templateLabel = label(mainComposite, urlKeys[z], toolTip);
 					urlPropertiesLabels.add(templateLabel);
 
-					Text templateField = new Text(mainComposite, SWT.BORDER);
+					Text templateField = text(mainComposite, toolTip);
 					if (urlValues != null && z < urlValues.length)
 					{
 						templateField.setText(urlValues[z]);
 					}
 					templateField.addModifyListener(ml);
-					templateField.setToolTipText(toolTip);
 
 					urlPropertiesFields.add(templateField);
 				}
@@ -241,23 +241,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 
 		toolTip = "User name for connecting to the database.";
-		Label userNameLabel;
-		userNameLabel = new Label(mainComposite, SWT.LEFT);
-		userNameLabel.setText("User name");
-		userNameLabel.setToolTipText(toolTip);
-
-		userNameField = new Text(mainComposite, SWT.BORDER);
-		userNameField.setToolTipText(toolTip);
+		Label userNameLabel = label(mainComposite, "User name", toolTip);
+		userNameField = text(mainComposite, toolTip);
 
 		toolTip = "Password to use when connecting to the database.";
-		Label passwordLabel;
-		passwordLabel = new Label(mainComposite, SWT.LEFT);
-		passwordLabel.setText("Password");
-		passwordLabel.setToolTipText(toolTip);
-
+		Label passwordLabel = label(mainComposite, "Password", toolTip);
 		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
 		passwordField.setToolTipText(toolTip);
-
 
 		saveButton = new Button(mainComposite, SWT.PUSH);
 		saveButton.setText("Save");
@@ -360,7 +350,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 							ApplicationServerRegistry.get().getServerManager().loadInstalledDrivers();
 							ServerEditor.this.getEditorSite().getPage().closeEditor(ServerEditor.this, false);
-							EditorUtil.openServerEditor(serverConfigObservable.getObject(), true);
+							EditorUtil.openServerEditor(serverConfigObservable.getObject(), serverSettingsObservable.getObject(), true);
 						}
 						catch (IOException ex)
 						{
@@ -375,10 +365,10 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Composite advancedSettingsCollapserComposite = new Composite(mainComposite, SWT.NONE);
 
-		Label separator1 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label separator1 = separator(advancedSettingsCollapserComposite);
 		ExpandBarWidthAware expandBarWrapper = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.NONE, SWT.NONE);
 		ExpandBar advancedSettingsCollapser = expandBarWrapper.getWrappedControl();
-		final Label separator2 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label separator2 = separator(advancedSettingsCollapserComposite);
 
 		collapsableItem = new ExpandItem(advancedSettingsCollapser, SWT.NONE, 0);
 		collapsableItem.setText("Show advanced server settings");
@@ -390,155 +380,95 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("advanced_serverproperties.png"));
 		collapsableItem.setControl(advancedSettingsComposite);
 
-		Label urlLabel;
-		urlLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		urlLabel.setText("URL");
-		urlLabel.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
+		Label urlLabel = label(advancedSettingsComposite, "URL", ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
+		urlField = text(advancedSettingsComposite, ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 
-		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
-		urlField.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 		final ModifyListener finalML = ml;
 		urlField.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
 			{
-				String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
-				if (urlValues != null && urlValues.length == urlPropertiesFields.size())
+				if (serverTemplateDefinition != null)
 				{
-					for (int i = 0; i < urlPropertiesFields.size(); i++)
+					String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
+					if (urlValues != null && urlValues.length == urlPropertiesFields.size())
 					{
-						if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+						for (int i = 0; i < urlPropertiesFields.size(); i++)
 						{
-							if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
-							urlPropertiesFields.get(i).setText(urlValues[i]);
-							if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
-						}
+							if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+							{
+								if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
+								urlPropertiesFields.get(i).setText(urlValues[i]);
+								if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
+							}
 
+						}
 					}
 				}
 			}
 		});
 
 		toolTip = "JDBC driver to use. Each DB type has a different driver. For some DB types there are multiple drivers available.\nThis is the name of a driver class that is located in the driver directory's jar files.";
-		Label driverLabel;
-		driverLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		driverLabel.setText("Driver");
-		driverLabel.setToolTipText(toolTip);
-
-		driverField = new CCombo(advancedSettingsComposite, SWT.BORDER);
-		driverField.setToolTipText(toolTip);
-		driverField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
-		driverField.addModifyListener(new ModifyListener()
-		{
-			public void modifyText(ModifyEvent e)
-			{
-				driverField.setForeground(getDisplay(parent).getSystemColor(isExistingDriver(driverField.getText()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
-			}
-		});
+		Label driverLabel = label(advancedSettingsComposite, "Driver", toolTip);
+		driverField = dropdown(advancedSettingsComposite, toolTip);
+		driverField.addModifyListener(
+			e -> driverField.setForeground(getDisplay(parent).getSystemColor(isExistingDriver(driverField.getText()) ? SWT.COLOR_BLACK : SWT.COLOR_RED)));
 		driverField.setForeground(
 			display.getSystemColor(isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 
 		toolTip = "The specific catalog to connect to; not all databases support this option.";
-		Label catalogLabel;
-		catalogLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		catalogLabel.setText("Catalog");
-		catalogLabel.setToolTipText(toolTip);
-
-		catalogField = new CCombo(advancedSettingsComposite, SWT.BORDER);
-		catalogField.setToolTipText(toolTip);
-		catalogField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		Label catalogLabel = label(advancedSettingsComposite, "Catalog", toolTip);
+		catalogField = dropdown(advancedSettingsComposite, toolTip, ServerConfig.NONE, ServerConfig.EMPTY);
 
 		toolTip = "The specific schema to connect to; not all databases support this option.";
-		Label schemaLabel;
-		schemaLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		schemaLabel.setText("Schema");
-		schemaLabel.setToolTipText(toolTip);
-
-		schemaField = new CCombo(advancedSettingsComposite, SWT.BORDER);
-		schemaField.setToolTipText(toolTip);
-		schemaField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		Label schemaLabel = label(advancedSettingsComposite, "Schema", toolTip);
+		schemaField = dropdown(advancedSettingsComposite, toolTip, ServerConfig.NONE, ServerConfig.EMPTY);
 
 		toolTip = "Determines the maximum number of connections that will be made to the database simultaneously.";
-		Label maxActiveLabel;
-		maxActiveLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		maxActiveLabel.setText("Max Active Connections");
-		maxActiveLabel.setToolTipText(toolTip);
-
-		maxActiveField = new Text(advancedSettingsComposite, SWT.BORDER);
-		maxActiveField.setToolTipText(toolTip);
+		Label maxActiveLabel = label(advancedSettingsComposite, "Max Active Connections", toolTip);
+		maxActiveField = text(advancedSettingsComposite, toolTip);
 
 		toolTip = "Determines the maximum number of unused connections that are in the pool.";
-		Label maxIdleLabel;
-		maxIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		maxIdleLabel.setText("Max Idle Connections");
-		maxIdleLabel.setToolTipText(toolTip);
-
-		maxIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
-		maxIdleField.setToolTipText(toolTip);
+		Label maxIdleLabel = label(advancedSettingsComposite, "Max Idle Connections", toolTip);
+		maxIdleField = text(advancedSettingsComposite, toolTip);
 
 		toolTip = "Idle connections from the connection pool will be disposed of if they are not used for this given amount of time (minutes).";
-		Label idleTimoutLabel;
-		idleTimoutLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		idleTimoutLabel.setText("Connection Idle Timeout");
-		idleTimoutLabel.setToolTipText(toolTip);
-
-		idleTimoutField = new Text(advancedSettingsComposite, SWT.BORDER);
-		idleTimoutField.setToolTipText(toolTip);
+		Label idleTimoutLabel = label(advancedSettingsComposite, "Connection Idle Timeout", toolTip);
+		idleTimoutField = text(advancedSettingsComposite, toolTip);
 
 		toolTip = "All Servoy generated SQL statements are in the form of Prepared statements, to increase the performance of statement execution.\nThis setting determines how many prepared statements are kept in cache.";
-		Label maxPreparedStatementsIdleLabel;
-		maxPreparedStatementsIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		maxPreparedStatementsIdleLabel.setText("Max Idle Prepared Statements");
-		maxPreparedStatementsIdleLabel.setToolTipText(toolTip);
+		Label maxPreparedStatementsIdleLabel = label(advancedSettingsComposite, "Max Idle Prepared Statements", toolTip);
+		maxPreparedStatementsIdleField = text(advancedSettingsComposite, toolTip);
 
-		maxPreparedStatementsIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
-		maxPreparedStatementsIdleField.setToolTipText(toolTip);
-
-		Label separator4 = new Label(advancedSettingsComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label separator3 = separator(advancedSettingsComposite);
 
 		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
-			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION) +
+			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION) +
 			"\" - will consider a connection invalid if it's getException() returns non-null.\n" + "\"" +
-			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION) +
+			getConnectionValidationTypeAsString(CONNECTION_METADATA_VALIDATION) +
 			"\" - will consider a connection invalid if fetching database metadata fails.\n" + "\"" +
-			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+			getConnectionValidationTypeAsString(CONNECTION_QUERY_VALIDATION) +
 			"\" - will consider a connection valid as long as it is able to run the given query scucessfully.\n" + "\"" +
-			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION) +
+			getConnectionValidationTypeAsString(CONNECTION_DRIVER_VALIDATION) +
 			"\" - use the connection validation mechanism of the JDBC driver.";
 
-		Label validationTypeLabel;
-		validationTypeLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		validationTypeLabel.setText("Connection Validation Type");
-		validationTypeLabel.setToolTipText(toolTip);
+		Label validationTypeLabel = label(advancedSettingsComposite, "Connection Validation Type", toolTip);
+		validationTypeField = dropdown(advancedSettingsComposite, SWT.READ_ONLY, toolTip,
+			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION),
+			getConnectionValidationTypeAsString(CONNECTION_METADATA_VALIDATION),
+			getConnectionValidationTypeAsString(CONNECTION_QUERY_VALIDATION),
+			getConnectionValidationTypeAsString(CONNECTION_DRIVER_VALIDATION));
 
-		validationTypeField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
-		validationTypeField.setToolTipText(toolTip);
-		validationTypeField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
-
-		toolTip = "If validation type is set to \"" + ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+		toolTip = "If validation type is set to \"" + getConnectionValidationTypeAsString(CONNECTION_QUERY_VALIDATION) +
 			"\", then this is the query that must run successfully in order for the connection to be considered valid.";
-		Label validationQueryLabel;
-		validationQueryLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		validationQueryLabel.setText("Connection Validation Query");
-		validationQueryLabel.setToolTipText(toolTip);
-
-		validationQueryField = new Text(advancedSettingsComposite, SWT.BORDER);
-		validationQueryField.setToolTipText(toolTip);
+		Label validationQueryLabel = label(advancedSettingsComposite, "Connection Validation Query", toolTip);
+		validationQueryField = text(advancedSettingsComposite, toolTip);
 
 		toolTip = "This setting allows marking a Database Server as a clone of another Database Server.\nWhen marked as such, if a Solution is imported on the Servoy Application Server, any updates to the datamodel of the master Database Server are also applied to the Database Servers that are marked as a clone of the master Database Server.";
-		Label dataModel_cloneFromLabel;
-		dataModel_cloneFromLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		dataModel_cloneFromLabel.setText("Data model clone from");
-		dataModel_cloneFromLabel.setToolTipText(toolTip);
+		Label dataModel_cloneFromLabel = label(advancedSettingsComposite, "Data model clone from", toolTip);
+		dataModel_cloneFromField = dropdown(advancedSettingsComposite, SWT.READ_ONLY, toolTip);
 
-		dataModel_cloneFromField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
-		dataModel_cloneFromField.setToolTipText(toolTip);
-		dataModel_cloneFromField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
-
-		Label enabledLabel;
-		enabledLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		enabledLabel.setText("Enabled");
-
+		Label enabledLabel = label(advancedSettingsComposite, "Enabled", "Enabled");
 		enabledButton = new Button(advancedSettingsComposite, SWT.CHECK);
 		enabledButton.addSelectionListener(new SelectionListener()
 		{
@@ -559,88 +489,34 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 
 		toolTip = "Specifies whether or not System Tables and Views from the database are to be exposed in Servoy.";
-		Label skipSysTablesLabel;
-		skipSysTablesLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		skipSysTablesLabel.setText("Skip System Tables");
-		skipSysTablesLabel.setToolTipText(toolTip);
-
-		skipSysTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
-		skipSysTablesButton.setToolTipText(toolTip);
-
-		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
-		Label proceduresLabel;
-		proceduresLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		proceduresLabel.setText("Enable procedures");
-		proceduresLabel.setToolTipText(toolTip);
-
-		proceduresButton = new Button(advancedSettingsComposite, SWT.CHECK);
-		proceduresButton.setToolTipText(toolTip);
-		proceduresButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				flagModified();
-			}
-		});
-
-		toolTip = "Enabling this will set this server to only have client defined connections (datasources.db.server.defineDatasource()). This tries to postpone also the loading of the tables (only do that with a client connection)";
-		Label clientOnlyConnectionsLabel;
-		clientOnlyConnectionsLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		clientOnlyConnectionsLabel.setText("Client Only Connections");
-		clientOnlyConnectionsLabel.setToolTipText(toolTip);
-
-		clientOnlyConnectionsButton = new Button(advancedSettingsComposite, SWT.CHECK);
-		clientOnlyConnectionsButton.setToolTipText(toolTip);
-		clientOnlyConnectionsButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				flagModified();
-			}
-		});
-
+		Label skipSysTablesLabel = label(advancedSettingsComposite, "Skip System Tables", toolTip);
+		skipSysTablesButton = checkbox(advancedSettingsComposite, toolTip);
 
 		toolTip = "When tables are defined in multiple schemas, with this option set to true, Servoy will prefix the table in the sql when needed.";
-		Label prefixTablesLabel;
-		prefixTablesLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		prefixTablesLabel.setText("Prefix Tables");
-		prefixTablesLabel.setToolTipText(toolTip);
-
-		prefixTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
-		prefixTablesButton.setToolTipText(toolTip);
-		prefixTablesButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				flagModified();
-			}
-		});
+		label(advancedSettingsComposite, "Prefix Tables", toolTip);
+		prefixTablesButton = checkbox(advancedSettingsComposite, toolTip);
 
 		toolTip = "Servoy has functionality that allows to automatically track all insert/updates/deletes on tables.\nThis functionality can be enabled through the Security layer inside the Solution.\nThis functionality relies on one of the enabled Database Servers configured on the Servoy Application Server being marked at 'Log server'.";
-		Label logServerLabel;
-		logServerLabel = new Label(advancedSettingsComposite, SWT.LEFT);
-		logServerLabel.setText("Log Server");
-		logServerLabel.setToolTipText(toolTip);
+		Label logServerLabel = label(advancedSettingsComposite, "Log Server", toolTip);
+		logServerButton = checkbox(advancedSettingsComposite, toolTip);
 
-		logServerButton = new Button(advancedSettingsComposite, SWT.CHECK);
-		logServerButton.setToolTipText(toolTip);
-		logServerButton.addListener(SWT.Selection, new Listener()
-		{
-			public void handleEvent(Event event)
-			{
-				flagModified();
-			}
-		});
+		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
+			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION) +
+			"\" - will consider a connection invalid if it's getException() returns non-null.\n" + "\"" +
+			getConnectionValidationTypeAsString(CONNECTION_METADATA_VALIDATION) +
+			"\" - will consider a connection invalid if fetching database metadata fails.\n" + "\"" +
+			getConnectionValidationTypeAsString(CONNECTION_QUERY_VALIDATION) +
+			"\" - will consider a connection valid as long as it is able to run the given query scucessfully.\n" + "\"" +
+			getConnectionValidationTypeAsString(CONNECTION_DRIVER_VALIDATION) +
+			"\" - use the connection validation mechanism of the JDBC driver.";
 
 		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new EnableServerListener());
 
 		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
 
-		Label logTableLabel = new Label(buttonsComposite, SWT.LEFT);
-		logTableLabel.setText("Log Table Name");
-
-		logTableName = new Text(buttonsComposite, SWT.BORDER);
-		logTableName.setToolTipText("Log table name, default is \"log\"");
+		toolTip = "Log table name, default is \"log\"";
+		Label logTableLabel = label(buttonsComposite, "Log Table Name", toolTip);
+		logTableName = text(buttonsComposite, toolTip);
 
 		createLogTableButton = new Button(buttonsComposite, SWT.PUSH);
 		createLogTableButton.setText("Create Log Table");
@@ -734,6 +610,28 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
+
+		Label separator4 = separator(advancedSettingsComposite);
+
+		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
+		label(advancedSettingsComposite, "Enable procedures", toolTip);
+		proceduresButton = checkbox(advancedSettingsComposite, toolTip);
+
+		toolTip = "Enabling this will set this server to only have client defined connections (datasources.db.server.defineDatasource()). This tries to postpone also the loading of the tables (only do that with a client connection)";
+		label(advancedSettingsComposite, "Client Only Connections", toolTip);
+		clientOnlyConnectionsButton = checkbox(advancedSettingsComposite, toolTip);
+
+		toolTip = "Options for ignoring case when sorting, this can be overridden at column level (in the table editor)";
+		label(advancedSettingsComposite, "Sort ignoring case", toolTip);
+		sortIgnoreCaseButton = checkbox(advancedSettingsComposite, toolTip);
+
+		toolTip = "Options for setting sorting of null values, this can be overridden at column level (in the table editor)";
+		label(advancedSettingsComposite, "Sorting null-precedence", toolTip);
+		sortNullprecedenceField = dropdown(advancedSettingsComposite, SWT.READ_ONLY, toolTip,
+			SortingNullprecedence.databaseDefault.display(),
+			SortingNullprecedence.ascNullsFirst.display(),
+			SortingNullprecedence.ascNullsLast.display());
+
 		XLControl<FormText> wikiLinkWrapper = new XLControl<FormText>(bottomComposite, SWT.NONE);
 		wikiLinkWrapper.wrapControl(new FormText(wikiLinkWrapper, SWT.NONE));
 		wikiLinkWrapper.setExtraWidth(10); // workaround for a SWT-native bug on Mac where the FormText reports less preferred width then it actually needs and then when painting it wraps
@@ -767,29 +665,29 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		mainComposite.setLayout(gridLayout);
 
 		// simple part of editor layout setup follows
-		serverNameLabel.setLayoutData(col1GD());
-		serverNameField.setLayoutData(col234GD());
+		serverNameLabel.setLayoutData(oneColumn());
+		serverNameField.setLayoutData(threeColumns());
 
 		for (int i = 0; i < urlPropertiesLabels.size(); i += 2)
 		{
-			urlPropertiesLabels.get(i).setLayoutData(col1GD());
-			urlPropertiesFields.get(i).setLayoutData(col2GD());
+			urlPropertiesLabels.get(i).setLayoutData(oneColumn());
+			urlPropertiesFields.get(i).setLayoutData(oneColumnFill());
 			if (i + 1 < urlPropertiesLabels.size())
 			{
-				urlPropertiesLabels.get(i + 1).setLayoutData(col3GD());
-				urlPropertiesFields.get(i + 1).setLayoutData(col4GD());
+				urlPropertiesLabels.get(i + 1).setLayoutData(oneColumn());
+				urlPropertiesFields.get(i + 1).setLayoutData(oneColumnFill());
 			}
 			else
 			{
-				urlPropertiesFields.get(i).setLayoutData(col234GD());
+				urlPropertiesFields.get(i).setLayoutData(threeColumns());
 			}
 		}
 
-		userNameLabel.setLayoutData(col1GD());
-		userNameField.setLayoutData(col2GD());
+		userNameLabel.setLayoutData(oneColumn());
+		userNameField.setLayoutData(oneColumnFill());
 
-		passwordLabel.setLayoutData(col3GD());
-		passwordField.setLayoutData(col4GD());
+		passwordLabel.setLayoutData(oneColumn());
+		passwordField.setLayoutData(oneColumnFill());
 
 		tmpGD = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		tmpGD.verticalIndent = 15;
@@ -801,11 +699,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		// layout missing driver if necessary
 		if (noDriverMessage != null)
 		{
-			tmpGD = col1234GD();
+			tmpGD = fourColumns();
 			tmpGD.verticalIndent = 20;
 			noDriverWarningWrapper.setLayoutData(tmpGD);
-			noDriverMessageWrapper.setLayoutData(col1234GD());
-			addDriverButton.setLayoutData(col1234GD());
+			noDriverMessageWrapper.setLayoutData(fourColumns());
+			addDriverButton.setLayoutData(fourColumns());
 		}
 
 		// layout advanced settings
@@ -817,13 +715,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		advancedSettingsCollapserComposite.setLayout(gridLayout);
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
-		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
-		tmpGD.verticalIndent = 20;
-		separator1.setLayoutData(tmpGD);
 		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tmpGD = new GridData(SWT.FILL, SWT.TOP, true, false);
-		tmpGD.minimumHeight = 0;
-		separator2.setLayoutData(tmpGD);
+		separator1.setLayoutData(separatorGd());
+		separator2.setLayoutData(separatorGd());
+		separator3.setLayoutData(separatorGd());
+		separator4.setLayoutData(separatorGd());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginRight = 0;
@@ -834,63 +730,59 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		gridLayout.horizontalSpacing = 10;
 		advancedSettingsComposite.setLayout(gridLayout);
 
-		urlLabel.setLayoutData(col1GD());
-		urlField.setLayoutData(col234GD());
+		urlLabel.setLayoutData(oneColumn());
+		urlField.setLayoutData(threeColumns());
 
-		driverLabel.setLayoutData(col1GD());
-		driverField.setLayoutData(col234GD());
+		driverLabel.setLayoutData(oneColumn());
+		driverField.setLayoutData(threeColumns());
 
-		catalogLabel.setLayoutData(col1GD());
-		catalogField.setLayoutData(col2GD());
+		catalogLabel.setLayoutData(oneColumn());
+		catalogField.setLayoutData(oneColumnFill());
 
-		schemaLabel.setLayoutData(col3GD());
-		schemaField.setLayoutData(col4GD());
+		schemaLabel.setLayoutData(oneColumn());
+		schemaField.setLayoutData(oneColumnFill());
 
-		maxActiveLabel.setLayoutData(col1GD());
-		maxActiveField.setLayoutData(col2GD());
+		maxActiveLabel.setLayoutData(oneColumn());
+		maxActiveField.setLayoutData(oneColumnFill());
 
-		maxIdleLabel.setLayoutData(col3GD());
-		maxIdleField.setLayoutData(col4GD());
+		maxIdleLabel.setLayoutData(oneColumn());
+		maxIdleField.setLayoutData(oneColumnFill());
 
-		idleTimoutLabel.setLayoutData(col1GD());
-		idleTimoutField.setLayoutData(col2GD());
+		idleTimoutLabel.setLayoutData(oneColumn());
+		idleTimoutField.setLayoutData(oneColumnFill());
 
-		maxPreparedStatementsIdleLabel.setLayoutData(col3GD());
-		maxPreparedStatementsIdleField.setLayoutData(col4GD());
+		maxPreparedStatementsIdleLabel.setLayoutData(oneColumn());
+		maxPreparedStatementsIdleField.setLayoutData(oneColumnFill());
 
-		tmpGD = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
-		tmpGD.verticalIndent = 10;
-		separator4.setLayoutData(tmpGD);
-
-		tmpGD = col1GD();
+		tmpGD = oneColumn();
 		tmpGD.verticalIndent = 10;
 		validationTypeLabel.setLayoutData(tmpGD);
 
-		tmpGD = col2GD();
+		tmpGD = oneColumnFill();
 		tmpGD.verticalIndent = 10;
 		validationTypeField.setLayoutData(tmpGD);
 
-		tmpGD = col3GD();
+		tmpGD = oneColumn();
 		tmpGD.verticalIndent = 10;
 		validationQueryLabel.setLayoutData(tmpGD);
 
-		tmpGD = col4GD();
+		tmpGD = oneColumnFill();
 		tmpGD.verticalIndent = 10;
 		validationQueryField.setLayoutData(tmpGD);
 
-		dataModel_cloneFromLabel.setLayoutData(col1GD());
-		dataModel_cloneFromField.setLayoutData(col234GD());
+		dataModel_cloneFromLabel.setLayoutData(oneColumn());
+		dataModel_cloneFromField.setLayoutData(threeColumns());
 
-		enabledLabel.setLayoutData(col1GD());
-		enabledButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		enabledLabel.setLayoutData(oneColumn());
+		enabledButton.setLayoutData(oneColumn());
 
-		skipSysTablesLabel.setLayoutData(col3GD());
-		skipSysTablesButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		skipSysTablesLabel.setLayoutData(oneColumn());
+		skipSysTablesButton.setLayoutData(oneColumn());
 
-		logServerLabel.setLayoutData(col1GD());
-		logServerButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		logServerLabel.setLayoutData(oneColumn());
+		logServerButton.setLayoutData(oneColumn());
 
-		buttonsComposite.setLayoutData(col34GD());
+		buttonsComposite.setLayoutData(twoColumns());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
@@ -898,9 +790,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		buttonsComposite.setLayout(gridLayout);
 
 		logTableLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.minimumWidth = 100;
-		logTableName.setLayoutData(gd);
+		logTableName.setLayoutData(oneColumnFill());
 		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
@@ -946,6 +836,48 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 
 		});
+	}
+
+	private static Label label(Composite parent, String text, String toolTip)
+	{
+		Label label = new Label(parent, SWT.LEFT);
+		label.setText(text);
+		label.setToolTipText(toolTip);
+		return label;
+	}
+
+	private static Text text(Composite parent, String toolTip)
+	{
+		Text text = new Text(parent, SWT.BORDER);
+		text.setToolTipText(toolTip);
+		return text;
+	}
+
+	private Button checkbox(Composite parent, String toolTip)
+	{
+		Button checkbox = new Button(parent, SWT.CHECK);
+		checkbox.setToolTipText(toolTip);
+		checkbox.addListener(SWT.Selection, event -> flagModified());
+		return checkbox;
+	}
+
+	private static CCombo dropdown(Composite parent, String toolTip, String... items)
+	{
+		return dropdown(parent, SWT.NONE, toolTip, items);
+	}
+
+	private static CCombo dropdown(Composite parent, int style, String toolTip, String... items)
+	{
+		CCombo combo = new CCombo(parent, SWT.BORDER | style);
+		combo.setToolTipText(toolTip);
+		combo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
+		stream(items).forEach(combo::add);
+		return combo;
+	}
+
+	private static Label separator(Composite parent)
+	{
+		return new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 	}
 
 	/**
@@ -1040,50 +972,44 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		parentControl.layout(true, true);
 	}
 
-	// declare some grid-datas creators to be reused per column for easier tuning
-	protected GridData col1GD()
+	private static GridData oneColumnFill()
+	{
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	}
+
+	private static GridData oneColumn()
 	{
 		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 	}
 
-	protected GridData col2GD()
+	private static GridData twoColumns()
 	{
-		GridData col2GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		col2GD.minimumWidth = 100;
-		return col2GD;
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 	}
 
-	protected GridData col3GD()
+	private static GridData threeColumns()
 	{
-		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		return width(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 	}
 
-	protected GridData col4GD()
+	private static GridData fourColumns()
 	{
-		GridData col4GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		col4GD.minimumWidth = 100;
-		return col4GD;
+		return new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 	}
 
-	protected GridData col234GD()
+	private static GridData separatorGd()
 	{
-		GridData col234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
-		col234GD.minimumWidth = 100;
-		return col234GD;
+		GridData gd = fourColumns();
+		gd.verticalAlignment = 10;
+		return gd;
 	}
 
-	protected GridData col34GD()
+	private static GridData width(GridData gd)
 	{
-		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-		col1234GD.minimumWidth = 100;
-		return col1234GD;
+		gd.minimumWidth = 100;
+		return gd;
 	}
 
-	protected GridData col1234GD()
-	{
-		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
-		return col1234GD;
-	}
 
 	@Override
 	public void dispose()
@@ -1113,10 +1039,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		ServerEditorInput serverInput = (ServerEditorInput)input;
 
-		ServerConfig inputConfig = serverInput.getServerConfig();
-		ServerConfig serverConfig = inputConfig == null ? ServerConfig.TEMPLATES.get(ServerConfig.EMPTY_TEMPLATE_NAME).getTemplate() : inputConfig;
-		oldServerName = inputConfig == null ? null : inputConfig.getServerName();
-
+		ServerConfig serverConfig = serverInput.getServerConfig();
+		ServerSettings serverSettings = serverInput.getServerSettings();
+		oldServerName = serverConfig.getServerName();
 
 		for (ServerTemplateDefinition templateDefinition : ServerConfig.TEMPLATES.values())
 		{
@@ -1137,16 +1062,19 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
-			"skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList", "clientOnlyConnections" });
+			"skipSysTables", "prefixTables", "queryProceduresNOTUSED", "idleTimeout", "selectINValueCountLimit", //
+			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED" }, new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
 
-		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
+		serverSettingsObservable = new ImmutableObjectObservable<ServerSettings>(serverSettings,
+			new Class[] { boolean.class, SortingNullprecedence.class, Boolean.class, Boolean.class
+			}, new String[] { "sortIgnorecase", "sortingNullprecedence", "queryProcedures", "clientOnlyConnections" });
+
 		if (serverInput.getIsNew())
-
+		{
 			flagModified();
+		}
 
 		updateTitle();
-
 	}
 
 	protected void updateTitle()
@@ -1181,6 +1109,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		{
 			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			ServerConfig serverConfig = serverConfigObservable.getObject();
+			ServerSettings serverSettings = serverSettingsObservable.getObject();
 			String currentServerName = serverConfig.getServerName();
 			String dataModelCloneFrom = null;
 			String oldURL = null;
@@ -1224,6 +1153,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 
 			serverManager.saveServerConfig(oldServerName, serverConfig);
+			serverManager.saveServerSettings(serverConfig.getServerName(), serverSettings);
 
 			//"refresh" the log table creation button
 			enableButtons();
@@ -1231,7 +1161,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			modified = false;
 			firePropertyChange(IEditorPart.PROP_DIRTY);
 			updateTitle();
-			setInput(new ServerEditorInput(serverConfig));
+			setInput(new ServerEditorInput(serverConfig, serverSettings));
 			initDataBindings();
 			if (serverConfig.getDataModelCloneFrom() != null && !Utils.equalObject(dataModelCloneFrom, serverConfig.getDataModelCloneFrom()))
 			{
@@ -1240,8 +1170,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					MessageDialog.openQuestion(getSite().getShell(), "Copy files", "Server '" + currentServerName + "' was marked as clone of '" +
 						serverConfig.getDataModelCloneFrom() + "'. Do you want to copy(overwrite) all table related files from parent server?"))
 				{
-					IFolder sourceFolder = dataModelManager.getDBIFileContainer(serverConfig.getDataModelCloneFrom());
-					IFolder cloneFolder = dataModelManager.getDBIFileContainer(currentServerName);
+					IFolder sourceFolder = dataModelManager.getServerInformationFolder(serverConfig.getDataModelCloneFrom());
+					IFolder cloneFolder = dataModelManager.getServerInformationFolder(currentServerName);
 					if (cloneFolder.exists())
 					{
 						cloneFolder.delete(true, null);
@@ -1301,32 +1231,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		serverNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 		driverField.removeAll();
-		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		for (String name : ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames())
-		{
-			driverField.add(name);
-		}
-
+		stream(ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames()).forEach(driverField::add);
 		driverField.add("sun.jdbc.odbc.JdbcOdbcDriver");
-
-		catalogField.removeAll();
-		catalogField.add(ServerConfig.NONE);
-		catalogField.add(ServerConfig.EMPTY);
-
-		schemaField.removeAll();
-		schemaField.add(ServerConfig.NONE);
-		schemaField.add(ServerConfig.EMPTY);
 
 		maxActiveField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		idleTimoutField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
 		maxPreparedStatementsIdleField.addVerifyListener(DocumentValidatorVerifyListener.NUMBER_VERIFIER);
-
-		validationTypeField.removeAll();
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
-		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION));
 
 		dataModel_cloneFromField.removeAll();
 		dataModel_cloneFromField.add(ServerConfig.NONE);
@@ -1355,8 +1266,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			protected Object doGetValue()
 			{
 				String dataModelCloneFrom = serverConfigObservable.getObject().getDataModelCloneFrom();
-				if (Arrays.asList(dataModel_cloneFromField.getItems()).contains(dataModelCloneFrom)) return dataModelCloneFrom;
-				else return ServerConfig.NONE;
+				if (asList(dataModel_cloneFromField.getItems()).contains(dataModelCloneFrom)) return dataModelCloneFrom;
+				return ServerConfig.NONE;
 			}
 
 			public Object getValueType()
@@ -1440,7 +1351,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			protected Object doGetValue()
 			{
-				return ServerConfig.getConnectionValidationTypeAsString(serverConfigObservable.getObject().getConnectionValidationType());
+				return getConnectionValidationTypeAsString(serverConfigObservable.getObject().getConnectionValidationType());
 			}
 
 			@Override
@@ -1448,29 +1359,50 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			{
 				String validationType = value.toString();
 				int type = ServerConfig.VALIDATION_TYPE_DEFAULT;
-				if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION).equals(validationType))
+				if (getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION).equals(validationType))
 				{
-					type = ServerConfig.CONNECTION_EXCEPTION_VALIDATION;
+					type = CONNECTION_EXCEPTION_VALIDATION;
 					validationQueryField.setEnabled(false);
 				}
-				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION).equals(validationType))
+				else if (getConnectionValidationTypeAsString(CONNECTION_METADATA_VALIDATION).equals(validationType))
 				{
-					type = ServerConfig.CONNECTION_METADATA_VALIDATION;
+					type = CONNECTION_METADATA_VALIDATION;
 					validationQueryField.setEnabled(false);
 				}
-				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(validationType))
+				else if (getConnectionValidationTypeAsString(CONNECTION_QUERY_VALIDATION).equals(validationType))
 				{
-					type = ServerConfig.CONNECTION_QUERY_VALIDATION;
+					type = CONNECTION_QUERY_VALIDATION;
 					validationQueryField.setEnabled(true);
 				}
-				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION).equals(validationType))
+				else if (getConnectionValidationTypeAsString(CONNECTION_DRIVER_VALIDATION).equals(validationType))
 				{
-					type = ServerConfig.CONNECTION_DRIVER_VALIDATION;
+					type = CONNECTION_DRIVER_VALIDATION;
 					validationQueryField.setEnabled(false);
 				}
 				serverConfigObservable.setPropertyValue("connectionValidationType", new Integer(type));
 			}
 		};
+
+		IObservableValue getSortingNullprecedenceObserveValue = new AbstractObservableValue()
+		{
+			public Object getValueType()
+			{
+				return null;
+			}
+
+			@Override
+			protected Object doGetValue()
+			{
+				return serverSettingsObservable.getObject().getSortingNullprecedence().display();
+			}
+
+			@Override
+			protected void doSetValue(Object value)
+			{
+				SortingNullprecedence.fromDisplay(value.toString()).ifPresent(snp -> serverSettingsObservable.setPropertyValue("sortingNullprecedence", snp));
+			}
+		};
+
 		IObservableValue validationTypeSelectionObserveWidget = SWTObservables.observeSelection(validationTypeField);
 		IObservableValue getValidationQueryObserveValue = serverConfigObservable.observePropertyValue("validationQuery");
 		IObservableValue validationQueryTextObserveWidget = SWTObservables.observeText(validationQueryField, SWT.Modify);
@@ -1478,12 +1410,16 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		IObservableValue enabledSelectionObserveWidget = SWTObservables.observeSelection(enabledButton);
 		IObservableValue getSkipSysTablesObserveValue = serverConfigObservable.observePropertyValue("skipSysTables");
 		IObservableValue skipSysTablesSelectionObserveWidget = SWTObservables.observeSelection(skipSysTablesButton);
-		IObservableValue proceduresButtonObserveValue = serverConfigObservable.observePropertyValue("queryProcedures");
+		IObservableValue proceduresButtonObserveValue = serverSettingsObservable.observePropertyValue("queryProcedures");
 		IObservableValue proceduresButtonSelectionObserveWidget = SWTObservables.observeSelection(proceduresButton);
-		IObservableValue clientOnlyConnectionsButtonObserveValue = serverConfigObservable.observePropertyValue("clientOnlyConnections");
+		IObservableValue clientOnlyConnectionsButtonObserveValue = serverSettingsObservable.observePropertyValue("clientOnlyConnections");
 		IObservableValue clientOnlyConnectionsSelectionObserveWidget = SWTObservables.observeSelection(clientOnlyConnectionsButton);
 		IObservableValue prefixTablesButtonObserveValue = serverConfigObservable.observePropertyValue("prefixTables");
 		IObservableValue prefixTablesButtonSelectionObserveWidget = SWTObservables.observeSelection(prefixTablesButton);
+
+		IObservableValue sortIgnoreCaseButtonObserveValue = serverSettingsObservable.observePropertyValue("sortIgnorecase");
+		IObservableValue sortIgnoreCaseButtonSelectionObserveWidget = SWTObservables.observeSelection(sortIgnoreCaseButton);
+		IObservableValue sortNullprecedenceSelectionObserveWidget = SWTObservables.observeSelection(sortNullprecedenceField);
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);
@@ -1506,6 +1442,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		m_bindingContext.bindValue(clientOnlyConnectionsSelectionObserveWidget, clientOnlyConnectionsButtonObserveValue, null, null);
 		m_bindingContext.bindValue(prefixTablesButtonSelectionObserveWidget, prefixTablesButtonObserveValue, null, null);
 
+		m_bindingContext.bindValue(sortIgnoreCaseButtonSelectionObserveWidget, sortIgnoreCaseButtonObserveValue, null, null);
+		m_bindingContext.bindValue(sortNullprecedenceSelectionObserveWidget, getSortingNullprecedenceObserveValue, null, null);
+
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{
 			public void handleChange(ChangeEvent event)
@@ -1513,7 +1452,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				flagModified();
 			}
 		});
-		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == ServerConfig.CONNECTION_QUERY_VALIDATION);
+		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == CONNECTION_QUERY_VALIDATION);
 
 		logServerButton
 			.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
@@ -1526,13 +1465,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	public void flagModified()
 	{
 		modified = true;
-		this.getSite().getShell().getDisplay().asyncExec(new Runnable()
-		{
-			public void run()
-			{
-				firePropertyChange(IEditorPart.PROP_DIRTY);
-			}
-		});
+		this.getSite().getShell().getDisplay().asyncExec(() -> firePropertyChange(IEditorPart.PROP_DIRTY));
 	}
 
 	@Override
@@ -1669,7 +1602,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			// if it is an update for a diff server or it is a delete (newServerConfig == null), skip ui update
 			if (isUpdateForDifferenServer || newServerConfig == null) return;
 
-			setInput(new ServerEditorInput(newServerConfig));
+			setInput(new ServerEditorInput(newServerConfig, currentServerEditorInput.getServerSettings()));
 			initDataBindings();
 			relayout();
 			if (serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()))

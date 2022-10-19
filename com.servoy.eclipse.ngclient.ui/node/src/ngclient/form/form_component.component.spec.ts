@@ -8,7 +8,7 @@ import { FormattingService, TooltipService, LoggerFactory, ServoyBaseComponent,
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 
-import { FormComponent, AddAttributeDirective } from '../../ngclient/form/form_component.component';
+import { FormComponent } from '../../ngclient/form/form_component.component';
 
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
@@ -24,6 +24,8 @@ import { WebsocketService } from '../../sablo/websocket.service';
 import { TypesRegistry } from '../../sablo/types_registry';
 
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { PopupFormService } from '../services/popupform.service';
+import { AddAttributeDirective } from '../../servoycore/addattribute.directive';
 
 import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
 import { ObjectType } from '../../ngclient/converters/object_converter';
@@ -173,7 +175,8 @@ describe('FormComponentComponentTest', () => {
                 LoggerFactory,
                 ClientFunctionService,
 
-                FormService
+                FormService,
+                PopupFormService
             ],
             schemas: [
                 CUSTOM_ELEMENTS_SCHEMA

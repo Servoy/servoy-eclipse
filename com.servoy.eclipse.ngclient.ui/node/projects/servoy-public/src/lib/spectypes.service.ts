@@ -190,6 +190,31 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
+/**
+ * Besides working like a normal Promise that you can use to get notified when some action is done (success/error/finally), chain etc., this promise also
+ * contains field "requestInfo" which can be set by the user and could later be reported in some listener events back to the user (in case this same action
+ * is going to trigger those listeners as well).
+ *
+ * @since 2021.09
+ */
+export interface RequestInfoPromise<T> extends Promise<T> {
+
+    /**
+     * You can assign any value to it. The value that you assign - if any - will be given back in the
+     * event object of any listener that will be triggered as a result of the promise's action. So in
+     * case the same action, when done, will trigger both the "then" of the Promise and a separate
+     * listener, that separate listener will contain this "requestInfo" value.
+     *
+     * This is useful for some components that want to know if some change (reported by the listener)
+     * happened due to an action that the component requested or due to changes in the outside world.
+     * (eg: FoundsetPropertyValue.loadRecordsAsync(...) returns RequestInfoPromise and 
+     * FoundsetChangeEvent.requestInfos array can return that RequestInfoPromise.requestInfo on the
+     * event that was triggered by that loadRecordsAsync).
+     */
+    requestInfo?: any;
+
+}
+
 export interface IFoundsetFieldsOnly {
 
     /**
@@ -272,8 +297,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *
      * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadRecordsAsync(startIndex: number, size: number): Promise<any>;
+    loadRecordsAsync(startIndex: number, size: number): RequestInfoPromise<any>;
 
     /**
      * Request more records for your viewPort; if the argument is positive more records will be
@@ -291,8 +318,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
+    loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any>;
 
     /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
@@ -309,8 +338,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      *                   -side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any>;
+    loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): RequestInfoPromise<any>;
 
     /**
      * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
@@ -336,8 +367,10 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * @return a promise that will get resolved when the new sort
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): Promise<any>;
+    sort(sortColumns: Array<{ name: string; direction: ('asc' | 'desc') }>): RequestInfoPromise<any>;
 
     /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
@@ -349,8 +382,13 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * first call will be rejected and the caller will receive the string 'canceled' as the value
      * for the parameter serverRows.
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
+     *
+     * @return a promise that will get resolved when the requested selection update arrived back browser-
+     *                   side. As with any promise you can register success, error callbacks, finally, ...
+     *                   See JSDoc of RequestInfoPromise.requestInfo and FoundsetChangeEvent.requestInfos
+     *                   for more information about determining if a listener event was caused by this call.
      */
-    requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
+    requestSelectionUpdate(selectedRowIdxs: number[]): RequestInfoPromise<any>;
 
     /**
      * It will send a data update for a cell (a column in a row) in the foundset to the server.
@@ -378,6 +416,36 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * Convenience method that does exactly what #columnDataChangedByRowId does, but based on a row index from the viewport not on that row's ID.
      */
     columnDataChanged(rowIndex: number, columnName: string, newValue: any, oldValue: any): Promise<any>;
+
+    /**
+     * Please use columnDataChangedByRowId(...) instead.
+     *
+     * @deprecated please use columnDataChangedByRowId(...) instead.
+     */
+    updateViewportRecord(rowID: string, columnID: string, newValue: any, oldValue: any): void;
+
+    /**
+     * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
+     * and gives a Record reference, an object
+     * which can be resolved server side to the exact Record via the 'record' property type;
+     * for example if you call a handler or a servoyapi.callServerSideApi(...) and want
+     * to give it a Record as parameter and you have the rowID and foundset in your code,
+     * you can use this method. E.g: servoyapi.callServerSideApi("doSomethingWithRecord",
+     *                     [this.myFoundsetProperty.getRecordRefByRowID(clickedRowId)]);
+     *
+     * NOTE: if in your component you know the whole row (so myFoundsetProp.viewPort.rows[idx])
+     * already - not just the rowID - that you want to send you can just give that directly to the
+     * handler/serverSideApi; you do not need to use this method in that case. E.g:
+     * // if you have the index inside the viewport
+     * servoyapi.callServerSideApi("doSomethingWithRecord",
+     *           [this.myFoundsetProperty.viewPort.rows[clickedRowIdx]]);
+     * // or if you have the row directly
+     * servoyapi.callServerSideApi("doSomethingWithRecord", [clickedRow]);
+     *
+     * This method has been added in Servoy 8.3.
+     */
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    getRecordRefByRowID(rowId: string): object;
 
     /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
@@ -437,10 +505,27 @@ export interface ViewportChangeEvent {
 }
 
 export interface FoundsetChangeEvent extends ViewportChangeEvent {
+
     /**
-     * If the previous value was non-null, had listeners and a full value update was
-     * received from server, this key is set on the change event; if newValue is non-null, it will keep the same reference as before;
-     * it will just update it's contents; oldValue will be a dummy shallow copy of old value contents
+     * If this change event is caused by one or more calls (by the component) on the IFoundset obj
+     * (like loadRecordsAsync requestSelectionUpdate and so on), and the caller then assigned a value to
+     * the returned RequestInfoPromise's "requestInfo" field, then that value will be present in this array.
+     *
+     * This is useful for some components that want to know if some change (reported in this FoundsetChangeEvent)
+     * happened due to an action that the component requested or due to changes in the outside world. (eg:
+     * IFoundset.loadRecordsAsync(...) returns RequestInfoPromise and FoundsetChangeEvent.requestInfos array can
+     * contain that RequestInfoPromise.requestInfo on the event that was triggered by that loadRecordsAsync).
+     *
+     * @since 2021.09
+     */
+    requestInfos?: any[];
+
+    /**
+     * If a full value update was received from server, this key is set; if both the newValue and
+     * the oldValue are non-null, the oldValue's reference will be reused (so the reference of the
+     * foundset property doesn't change, just it's contents are updated) and oldValue given below is
+     * actually a shallow-copy of the old value's properties/keys; this can help in some component
+     * implementations.
      */
     fullValueChanged?: { oldValue: IFoundsetFieldsOnly; newValue: IFoundset };
 
@@ -448,6 +533,7 @@ export interface FoundsetChangeEvent extends ViewportChangeEvent {
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
     serverFoundsetSizeChanged?: { oldValue: number; newValue: number };
+    foundsetDefinitionChanged?: boolean;
     hasMoreRowsChanged?: { oldValue: boolean; newValue: boolean };
     multiSelectChanged?: { oldValue: boolean; newValue: boolean };
     columnFormatsChanged?: { oldValue: Record<string, Record<string, unknown>>; newValue: Record<string, Record<string, unknown>> };

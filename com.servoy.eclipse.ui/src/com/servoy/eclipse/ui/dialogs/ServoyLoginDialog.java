@@ -22,13 +22,13 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -154,7 +154,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	{
 		String loginToken = null;
 
-		HttpClient httpclient = HttpClients.createDefault();
+		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpget = new HttpGet(CROWD_URL);
 
 		String auth = username + ":" + password;
@@ -164,13 +164,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		httpget.addHeader(HttpHeaders.ACCEPT, "application/json");
 
 		// execute the request
-		HttpResponse response;
+		CloseableHttpResponse response;
 		try
 		{
 			response = httpclient.execute(httpget);
 			HttpEntity responseEntity = response.getEntity();
 			String responseString = EntityUtils.toString(responseEntity);
-			if (response.getStatusLine().getStatusCode() == 200)
+			if (response.getCode() == 200)
 			{
 
 				JSONObject loginTokenJSON = new JSONObject(responseString);
@@ -180,7 +180,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			else
 			{
 				StringBuilder sb = new StringBuilder();
-				sb.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(responseString);
+				sb.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
 				return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
 			}
 		}

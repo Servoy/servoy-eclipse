@@ -22,7 +22,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
@@ -60,7 +60,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 
 			RelatedForm relatedForm = (RelatedForm)value;
 			propertySource.setPropertyValue("containsFormID", relatedForm.form.getID());
-			propertySource.setPropertyValue("relationName", DatabaseUtils.getRelationsString(relatedForm.relations));
+			propertySource.setPropertyValue("relationName", EclipseDatabaseUtils.getRelationsString(relatedForm.relations));
 			// update text as well if it has not been changed yet
 			if (oldValue instanceof RelatedForm && ((RelatedForm)oldValue).form.getName().equals(propertySource.getPropertyValue("text")))
 			{

@@ -101,7 +101,8 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 						{
 							return ((Form)element).getName();
 						};
-					}, null, null, SWT.NONE, "Open Form in Script Editor", PersistHelper.getOverrideHierarchy(openForm), null, false, "Superform Dialog", null);
+					}, null, null, SWT.NONE, "Open Form in Script Editor", PersistHelper.getOverrideHierarchy(openForm), null, false, "Superform Dialog", null,
+					false);
 				dialog.open();
 				if (dialog.getReturnCode() == Window.OK)
 				{

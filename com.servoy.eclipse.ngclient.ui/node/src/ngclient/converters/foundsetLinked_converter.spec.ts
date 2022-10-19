@@ -10,7 +10,6 @@ import { SabloDeferHelper } from '../../sablo/defer.service';
 import { ViewportService } from '../services/viewport.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
-import { TestabilityService } from '../../sablo/testability.service';
 import { TypesRegistry, PropertyContext, PushToServerEnum } from '../../sablo/types_registry';
 import { DateType } from './date_converter';
 import { ObjectType } from './object_converter';
@@ -31,7 +30,7 @@ describe('FoundsetLinked Converter', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [ServoyTestingModule],
-            providers: [ConverterService, TestabilityService, LoggerFactory,
+            providers: [ConverterService, LoggerFactory,
                 WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
         });
 

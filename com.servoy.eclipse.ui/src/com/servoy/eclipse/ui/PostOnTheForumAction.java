@@ -18,41 +18,28 @@
 package com.servoy.eclipse.ui;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.ISelection;
@@ -69,11 +56,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
+import com.servoy.j2db.util.HtmlUtils;
 
 /**
  * Post on the forum directly from the IDE.
@@ -98,174 +86,68 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		private final int[] topicIds = new int[] { 74, 11, 2, 3, 4, 9, 15, 22, 25, 34, 69, 38 };
 
 		private String errorMessage;
-		private static final String LOGIN_URL = "https://forum.servoy.com/ucp.php?mode=login&sid=";
-		private static final String POST_URL = "https://forum.servoy.com/posting.php?mode=post&f=";
+		private Button post;
+		private static final String POST_URL = "https://forum.servoy.com/submit_post.php?f=";
 
 		protected ForumPostDialog(Shell parentShell)
 		{
 			super(parentShell);
 		}
 
-		private class ContentLengthHeaderRemover implements HttpRequestInterceptor
-		{
-			@Override
-			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException
-			{
-				request.removeHeaders(HTTP.CONTENT_LEN);// fighting org.apache.http.protocol.RequestContent's ProtocolException("Content-Length header already present");
-			}
-		}
-
 		public boolean post()
 		{
-			CookieStore httpCookieStore = new BasicCookieStore();
-			try (CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(httpCookieStore).addInterceptorFirst(new ContentLengthHeaderRemover())
-				.build())
+			try (CloseableHttpClient client = HttpClients.createDefault())
 			{
 				HttpClientContext context = HttpClientContext.create();
-				String sid = getSID(client, context);
-				if (sid == null || !login(client, sid, context)) return false;
+				HttpPost httpPost = new HttpPost(POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
+				ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+				ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+				ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+				params.add(new BasicNameValuePair("username",
+					node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null)));
+				params.add(new BasicNameValuePair("password", node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null)));
+				params.add(new BasicNameValuePair("subject", subjectText.getText()));
+				params.add(new BasicNameValuePair("message", description.getText()));
 
-				String form_token = getFormToken(client, sid, httpCookieStore, context);
-
-				HttpPost httpPost = new HttpPost(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-
-				MultipartEntityBuilder requestEntity = MultipartEntityBuilder.create();
-				requestEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-				requestEntity.addTextBody("subject", subjectText.getText());
-				requestEntity.addTextBody("addbbcode20", "100");
-				requestEntity.addTextBody("message", description.getText());
-				String timestamp = String.valueOf(System.currentTimeMillis());
-				requestEntity.addTextBody("lastclick", timestamp);
-				requestEntity.addTextBody("post", "Submit");
-				requestEntity.addTextBody("attach_sig", "on");
-				requestEntity.addTextBody("creation_time", timestamp);
-				requestEntity.addTextBody("form_token", form_token);
-				requestEntity.addBinaryBody("fileupload", new byte[0], ContentType.APPLICATION_OCTET_STREAM, "");
-				requestEntity.addTextBody("filecomment", "");
-				requestEntity.addTextBody("poll_title", "");
-				requestEntity.addTextBody("poll_option_text", "");
-				requestEntity.addTextBody("poll_max_options", "1");
-				requestEntity.addTextBody("poll_length", "0");
-				HttpEntity httpEntity = requestEntity.build();
-				httpPost.setEntity(httpEntity);
-
-				httpPost.addHeader(HttpHeaders.ACCEPT,
-					"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-				httpPost.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
-				httpPost.addHeader(HttpHeaders.ACCEPT_LANGUAGE, "ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7");
-				httpPost.addHeader(HttpHeaders.CACHE_CONTROL, "max-age=0");
-				httpPost.addHeader(HttpHeaders.CONNECTION, "keep-alive");
-				httpPost.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(httpEntity.getContentLength()));
-				//httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "multipart/form-data"); //OR the next line
-				httpPost.addHeader(httpEntity.getContentType()); //also includes the boundary but then I get a 302 http status...
-				String cookies = httpCookieStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-				httpPost.addHeader("Cookie", cookies);
-				httpPost.addHeader(HttpHeaders.HOST, "forum.servoy.com");
-				httpPost.addHeader("Origin", "https://forum.servoy.com");
-				httpPost.addHeader(HttpHeaders.REFERER, POST_URL + topicIds[topicsCombo.getSelectionIndex()]);
-				httpPost.addHeader("sec-ch-ua", "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Google Chrome\";v=\"90\"");
-				httpPost.addHeader("sec-ch-ua-mobile", "?0");
-				httpPost.addHeader("Sec-Fetch-Dest", "document");
-				httpPost.addHeader("Sec-Fetch-Mode", "navigate");
-				httpPost.addHeader("Sec-Fetch-Site", "same-origin");
-				httpPost.addHeader("Sec-Fetch-User", "?1");
-				httpPost.addHeader("Upgrade-Insecure-Requests", "1");
-				httpPost.addHeader(HttpHeaders.USER_AGENT,
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36");
-
-				//TODO remove printing the headers and content
-				for (Header h : httpPost.getAllHeaders())
-				{
-					System.out.println(h.getName() + ": " + h.getValue());
-				}
-				System.out.println(EntityUtils.toString(httpEntity));
-
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
+				httpPost.setEntity(entity);
 				CloseableHttpResponse response = client.execute(httpPost, context);
-				HttpEntity respEntity = response.getEntity();
-				if (respEntity != null)//TODO rem
+				String content = EntityUtils.toString(response.getEntity());
+				if (response.getCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
 				{
-					String content = EntityUtils.toString(respEntity);
-					System.out.println(content); //TODO rem
-					System.out.println(" STATUS " + response.getStatusLine().getReasonPhrase());
+					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Thank you for posting", null,
+						"You can view your post on the Servoy forum.", MessageDialog.CONFIRM,
+						new String[] { "View post", "Close" }, 0);
+					dialog.setBlockOnOpen(true);
+					if (dialog.open() == 0)
+					{
+						try
+						{
+							String url = HtmlUtils.unescape(content.startsWith("./") ? content.replaceFirst(".", "https://forum.servoy.com") : content);
+							PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+						}
+						catch (PartInitException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
 				}
-				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+				else if (response.getCode() == HttpStatus.SC_UNAUTHORIZED)
 				{
-					//TODO button for showing the post on the forum
-					UIUtils.showInformation(getParentShell(), "Thank you for posting", "View your post on the Servoy forum here ...");
+					setErrorMessage("Could not login on the forum.");
 				}
 				else
 				{
-					setErrorMessage("Connot post to the forum. Please try again later.");
+					ServoyLog.logInfo("Cannot post to the forum " + EntityUtils.toString(response.getEntity()));
+					setErrorMessage("Cannot post to the forum. Please try again later.");
 				}
-				return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+				return response.getCode() == HttpStatus.SC_OK;
 			}
-			catch (IOException | StorageException e)
+			catch (IOException | StorageException | ParseException e)
 			{
 				ServoyLog.logError(e);
 			}
 			return false;
-		}
-
-
-		private String getFormToken(CloseableHttpClient client, String sid, CookieStore cookiesStore, HttpClientContext context)
-			throws ClientProtocolException, IOException
-		{
-			HttpGet httpGet = new HttpGet(POST_URL + topicIds[topicsCombo.getSelectionIndex()] + "&sid=" + sid);
-			String cookies = cookiesStore.getCookies().stream().map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining("; "));
-			httpGet.addHeader("Cookie", cookies);
-			httpGet.addHeader("Connection", "keep-alive");
-			HttpResponse httpresponse = client.execute(httpGet, context);
-			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-			{
-				setErrorMessage("Cannot connect to the forum. Please try again later.");
-				return null;
-			}
-			String content = EntityUtils.toString(httpresponse.getEntity());
-			int beginIndex = content.indexOf("form_token") + 19;
-			String token = content.substring(beginIndex, beginIndex + 32);
-			return token;
-		}
-
-		private boolean login(CloseableHttpClient client, String sid, HttpClientContext context) throws StorageException, IOException, ClientProtocolException
-		{
-			ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
-			ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
-			HttpPost httpPost = new HttpPost(LOGIN_URL + sid);
-			ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("username",
-				node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null)));
-			params.add(new BasicNameValuePair("password", node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null)));
-			params.add(new BasicNameValuePair("login", "Login"));
-			params.add(new BasicNameValuePair("redirect", "./index.php?"));
-
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
-			httpPost.setEntity(entity);
-			httpPost.addHeader("Connection", "keep-alive");
-			httpPost.addHeader("referer", "https://forum.servoy.com/index.php?sid=" + sid);
-			HttpResponse httpresponse = client.execute(httpPost, context);
-
-			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-			{
-				setErrorMessage("Could not log in.");
-				return false;
-			}
-			return true;
-		}
-
-
-		private String getSID(CloseableHttpClient client, HttpClientContext context) throws IOException, ClientProtocolException
-		{
-			HttpGet httpGet = new HttpGet("https://forum.servoy.com/");
-			HttpResponse httpresponse = client.execute(httpGet, context);
-			if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-			{
-				getShell().setText("Cannot connect to the forum. Please try again later.");
-				return null;
-			}
-			String content = EntityUtils.toString(httpresponse.getEntity());
-			int beginIndex = content.indexOf("index.php?sid=") + 14;
-			String sid = content.substring(beginIndex, beginIndex + 32);
-			return sid;
 		}
 
 		@Override
@@ -333,13 +215,21 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			gridData.horizontalSpan = 2;
 			description.setLayoutData(gridData);
 
+			subjectText.addListener(SWT.Modify, event -> {
+				post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
+			});
+			description.addListener(SWT.Modify, event -> {
+				post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
+			});
+
 			return topLevel;
 		}
 
 		@Override
 		protected void createButtonsForButtonBar(Composite parent)
 		{
-			Button post = createButton(parent, IDialogConstants.OK_ID, "Post", false);
+			post = createButton(parent, IDialogConstants.OK_ID, "Post", false);
+			post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
 			Button cancel = createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			post.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));

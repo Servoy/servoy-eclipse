@@ -16,12 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -46,43 +41,13 @@ import com.servoy.j2db.util.DataSourceUtils;
 public class EventsMethodEditingSupport extends EditingSupport
 {
 	private final ITable table;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	public EventsMethodEditingSupport(TreeViewer viewer, ITable table)
 	{
 		super(viewer);
 		this.table = table;
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
 
 	@Override
@@ -104,7 +69,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 			persistProperties.setPropertyValue(node.getType().getProperty().getPropertyName(), value);
 			if (persistProperties.getPersist().isChanged())
 			{
-				changeSupport.fireEvent(new ChangeEvent(observable));
+				observable.fireChangeEvent();
 			}
 		}
 		catch (RepositoryException e)
@@ -114,8 +79,6 @@ public class EventsMethodEditingSupport extends EditingSupport
 		node.setMethodWithArguments((MethodWithArguments)value);
 		getViewer().refresh(node);
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -150,7 +113,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 				new AccesCheckingContextDelegateLabelProvider(
 					new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)),
 				new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
-				new MethodListOptions(false, true, false, true, DataSourceUtils.getViewDataSourceName(table.getDataSource()) == null, table));
+				new MethodListOptions(true, false, false, true, DataSourceUtils.getViewDataSourceName(table.getDataSource()) == null, table));
 		}
 		return editor;
 	}

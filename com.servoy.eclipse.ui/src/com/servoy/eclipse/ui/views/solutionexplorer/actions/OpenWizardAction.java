@@ -110,7 +110,7 @@ public class OpenWizardAction extends Action
 					}
 					else
 					{
-						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+						super.setShellStyle(SWT.CLOSE | SWT.PRIMARY_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
 					}
 				}
 

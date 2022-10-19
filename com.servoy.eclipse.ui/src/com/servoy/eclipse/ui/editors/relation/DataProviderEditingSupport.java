@@ -16,19 +16,24 @@
  */
 package com.servoy.eclipse.ui.editors.relation;
 
+import static java.util.Arrays.asList;
+
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -49,6 +54,7 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
+import com.servoy.eclipse.ui.views.solutionexplorer.StatusBarUpdater;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -73,6 +79,8 @@ public class DataProviderEditingSupport extends EditingSupport
 		super(tv);
 		relationEditor = re;
 		index = i;
+		IStatusLineManager slManager = re.getEditorSite().getActionBars().getStatusLineManager();
+		StatusBarUpdater statusBarUpdater = new StatusBarUpdater(slManager);
 		if (editable)
 		{
 			editor = new FixedComboBoxCellEditor(tv.getTable(), new String[0], SWT.READ_ONLY)
@@ -152,8 +160,23 @@ public class DataProviderEditingSupport extends EditingSupport
 					}
 				}
 			});
-		}
+			((CCombo)editor.getControl()).addFocusListener(new FocusListener()
+			{
 
+				@Override
+				public void focusLost(FocusEvent e)
+				{
+					statusBarUpdater.selectionChanged(new SelectionChangedEvent(tv, new StructuredSelection("")));
+				}
+
+				@Override
+				public void focusGained(FocusEvent e)
+				{
+					statusBarUpdater
+						.selectionChanged(new SelectionChangedEvent(tv, new StructuredSelection("Ctrl+click in a cell to open data provider dialog")));
+				}
+			});
+		}
 	}
 
 	private void setDataProvider(final TableViewer tv, final TableItem item, final RelationEditor re)
@@ -161,7 +184,7 @@ public class DataProviderEditingSupport extends EditingSupport
 		try
 		{
 			IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
-			List<TableItem> items = Arrays.asList(tv.getTable().getItems());
+			List<TableItem> items = asList(tv.getTable().getItems());
 			int idx = items.indexOf(item);
 			if (re.canEditIndex(idx))
 			{
@@ -219,7 +242,6 @@ public class DataProviderEditingSupport extends EditingSupport
 
 				}
 			}
-
 		}
 		catch (Exception ex)
 		{
@@ -306,11 +328,6 @@ public class DataProviderEditingSupport extends EditingSupport
 					// get it back so that we get the display value.
 					currentValue = pi.getCIFrom();
 					break;
-				case RelationEditor.CI_OP :
-					currentValue = Integer.valueOf(intValue);
-					previousValue = pi.getOperator();
-					pi.setOperator((Integer)currentValue);
-					break;
 				case RelationEditor.CI_TO :
 					currentValue = intValue != -1 ? dataProviders[intValue] : null;
 					previousValue = pi.getCITo();
@@ -330,23 +347,22 @@ public class DataProviderEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			Integer value = null;
+			int value = 0;
+			List<String> dataProviders = asList(relationEditor.getDataProviders(index));
 			switch (index)
 			{
 				case RelationEditor.CI_FROM :
-					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_FROM)).indexOf(pi.getCIFrom()));
-					if (value.intValue() == -1 && pi.getCIFrom() != null)
+					value = dataProviders.indexOf(pi.getCIFrom());
+					if (value == -1 && pi.getCIFrom() != null)
 					{
 						return pi.getCIFrom();
 					}
 					break;
-				case RelationEditor.CI_OP :
-					value = pi.getOperator();
-					break;
 				case RelationEditor.CI_TO :
-					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_TO)).indexOf(pi.getCITo()));
+					value = dataProviders.indexOf(pi.getCITo());
+					break;
 			}
-			return value != null ? value : Integer.valueOf(0);
+			return Integer.valueOf(value);
 		}
 		return null;
 	}

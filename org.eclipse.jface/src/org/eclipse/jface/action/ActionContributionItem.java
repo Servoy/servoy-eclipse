@@ -595,10 +595,8 @@ public class ActionContributionItem extends ContributionItem {
 			if (trace) {
 				System.out.println((System.currentTimeMillis() - ms) + " ms to run action: " + action.getText()); //$NON-NLS-1$
 			}
-		} else {
-			if (callback != null) {
-				callback.notEnabled(action, new NotEnabledException(action.getText() + " is not enabled.")); //$NON-NLS-1$
-			}
+		} else if (callback != null) {
+			callback.notEnabled(action, new NotEnabledException(action.getText() + " is not enabled.")); //$NON-NLS-1$
 		}
 	}
 
@@ -820,11 +818,10 @@ public class ActionContributionItem extends ContributionItem {
 	}
 
 	private void updateMenuItemText(MenuItem mi) {
-		int accelerator = 0;
 		String acceleratorText = null;
 		IAction updatedAction = getAction();
 		String text = null;
-		accelerator = updatedAction.getAccelerator();
+		int accelerator = updatedAction.getAccelerator();
 		ExternalActionManager.ICallback callback = ExternalActionManager.getInstance().getCallback();
 
 		// Block accelerators that are already in use.

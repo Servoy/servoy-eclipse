@@ -1,15 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { MainComponent } from './main.component';
-import { FormService } from './form.service';
-import { ServoyService } from './servoy.service';
 
-import { FormComponent, AddAttributeDirective } from './form/form_component.component';
-
-import { SabloModule } from '../sablo/sablo.module';
+import { FormComponent } from './form/form_component.component';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
@@ -20,56 +15,46 @@ import { ServoyFormPopupComponent } from './services/popupform/popupform';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import { I18NProvider } from './services/i18n_provider.service';
-import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
-import { ErrorBean } from '../servoycore/error-bean/error-bean';
-import { ServoyCoreSlider } from '../servoycore/slider/slider';
-import { SessionView } from '../servoycore/session-view/session-view';
-import { ServoyCoreFormContainer } from '../servoycore/formcontainer/formcontainer';
 
 import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
-import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
 import { ServerDataService } from './services/serverdata.service';
-import { BSWindow } from './services/bootstrap-window/bswindow.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import {MainRoutingModule} from './main-routing.module';
+import { DeveloperService } from './developer.service';
 
 @NgModule( {
     declarations: [
         MainComponent,
         FormComponent,
-        AddAttributeDirective,
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
-        DefaultNavigator,
-        SessionView,
-        ErrorBean,
-        ServoyCoreSlider,
-        ServoyCoreFormContainer,
         DialogWindowComponent,
         ServoyFormPopupComponent,
-        LoadingIndicatorComponent,
-        ListFormComponent
+        LoadingIndicatorComponent
     ],
     imports: [
         CommonModule,
-        NgbModule,
         FormsModule,
-        SabloModule,
         AllComponentsModule,
         AllServicesModules,
         ServoyPublicModule,
-        MainRoutingModule
+        MainRoutingModule,
+        ServoyCoreComponentsModule
     ],
     providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
-					ServerDataService, BSWindow, BSWindowManager, DatePipe, DecimalPipe,
-					ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
+        ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
+        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent, ServoyFormPopupComponent],
     schemas: [
-              CUSTOM_ELEMENTS_SCHEMA
+        CUSTOM_ELEMENTS_SCHEMA
     ]
 } )
-export class ServoyModule { }
+export class ServoyModule {
+    constructor(_developerService: DeveloperService) {
+        // the above developer service must just be loaded..
+    }
+ }

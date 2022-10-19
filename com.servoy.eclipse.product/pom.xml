@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2021.9.0.3700_rc</version>
+		<version>2022.12.0.3820_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.product</artifactId>
@@ -85,7 +85,7 @@
 			<plugin>
 				<groupId>net.jsign</groupId>
 				<artifactId>jsign-maven-plugin</artifactId>
-				<version>3.0</version>
+				<version>4.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -99,7 +99,7 @@
 							<keystore>${jarsigner.keystore}</keystore>
 							<alias>${jarsigner.alias}</alias>
 							<storepass>${jarsigner.storepass}</storepass>
-							<tsaurl>${jarsigner.tsa}</tsaurl>
+							<tsaurl>http://timestamp.sectigo.com,http://timestamp.digicert.com,${jarsigner.tsa}</tsaurl>
 						</configuration>
 					</execution>
 				</executions>
@@ -114,6 +114,15 @@
 						<macosx-bundled>true</macosx-bundled>
 					</profileProperties>
 				</configuration>
+                <executions>
+                <execution>
+                        <id>default-archive-repository</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>archive-repository</goal>
+                        </goals>
+                </execution>
+                </executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -138,13 +147,37 @@
 					</execution>
 					<execution>
 						<id>archive-products</id>
+						<phase>verify</phase>
 						<goals>
 							<goal>archive-products</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>name.abuchen</groupId>
+				<artifactId>fix-info-plist-maven-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>fix-info-plist</id>
+						<phase>package</phase>
+						<goals>
+							<goal>fix-info-plist</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<productId>servoy.product</productId>
+					<appName>Servoy.app</appName>
+					<properties>
+						<property>
+							<name>NSAppTransportSecurity</name>
+							<value><![CDATA[<dict><key>NSAllowsLocalNetworking</key><true/></dict>]]></value>
+						</property>
+					</properties>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>

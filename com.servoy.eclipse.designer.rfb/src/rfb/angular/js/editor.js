@@ -1150,8 +1150,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					});
 					$(document).keydown(function(objEvent) {
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
-
-						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt) {
+						
+						if ( objEvent.target.id != 'directEdit' && (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt)) {
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
