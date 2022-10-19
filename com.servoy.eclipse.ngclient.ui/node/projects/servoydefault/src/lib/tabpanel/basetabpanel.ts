@@ -211,4 +211,5 @@ export class Tab extends BaseCustomObject {
     disabled: boolean;
     imageMediaID: string;
     mnemonic: string;
+    toolTipText: string;
 }
