@@ -47,10 +47,6 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
         super.svyOnChanges(changes);
     }
 
-    public getNativeChild() {
-        return this.child.nativeElement;
-    }
-
     protected attachHandlers() {
         super.attachHandlers();
         if (this.onActionMethodID) {
@@ -80,13 +76,13 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
 
     private setVerticalAlignment(): void {
             if (this.verticalAlignment === 1) {
-                this.renderer.setStyle(this.getNativeChild(), 'top', '0px');
+                this.renderer.setStyle(this.child.nativeElement, 'top', '0px');
             } else if (this.verticalAlignment === 3) {
-                this.renderer.setStyle(this.getNativeChild(), 'top', '100%');
-                this.renderer.setStyle(this.getNativeChild(), 'transform', 'translateY(-100%)');
+                this.renderer.setStyle(this.child.nativeElement, 'top', '100%');
+                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-100%)');
             } else {
-                this.renderer.setStyle(this.getNativeChild(), 'top', '50%');
-                this.renderer.setStyle(this.getNativeChild(), 'transform', 'translateY(-50%)');
+                this.renderer.setStyle(this.child.nativeElement, 'top', '50%');
+                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-50%)');
             }
         }
 }

@@ -1,8 +1,9 @@
-<ul ngbNav #element #nav="ngbNav" class="nav-tabs" [(activeId)]="selectedTabID" (navChange)="onTabChange($event)"
-	[class]='(styleClass ? styleClass : "")  + " svy-tabpanel"' [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq"
+<div class="svy-tabpanel" #element style='height:100%;width:100%;position:absolute;'>
+<ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
+	[class]='styleClass' [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq"
 	[sabloTabseqConfig]="{container: true, reservedGap: 50}">
 	<li *ngFor="let tab of tabs" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId"
-		[id]="tab._id">
+		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
 		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
 			<img ng-hide="tab.imageMediaID == ''" ng-src='tab.imageMediaID' />
 			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
@@ -14,6 +15,6 @@
 		</ng-template>
 	</li>
 </ul>
-<div [ngbNavOutlet]="nav" style="position: absolute;overflow: auto;top: 39px;bottom: 0px;left: 0px;right: 0px;"></div>
-
+<div [ngbNavOutlet]="nav" [ngStyle]="getContainerStyle(element)"></div>
+</div>
 

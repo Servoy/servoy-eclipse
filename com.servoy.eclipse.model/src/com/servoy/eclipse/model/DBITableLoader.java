@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.model;
 
+import static java.lang.Boolean.TRUE;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,27 +63,23 @@ public class DBITableLoader implements ITableLoader
 				if (server.getConfig().getServerName().equals(entry.getKey().name))
 				{
 					List<TableDef> tableDefList = entry.getValue();
-
 					for (TableDef tableDef : tableDefList)
 					{
 						if (!tableDef.name.toUpperCase().startsWith(IServer.SERVOY_UPPERCASE_PREFIX))
 						{
 							Table table = new Table(server.getConfig().getServerName(), tableDef.name, true, tableDef.tableType, null, null);
+							table.setMarkedAsHiddenInDeveloperInternal(tableDef.hiddenInDeveloper);
+							table.setMarkedAsMetaData(TRUE.equals(tableDef.isMetaData));
 							for (ColumnInfoDef colInfo : tableDef.columnInfoDefSet)
 							{
 								Column c = new Column(table, colInfo.name, colInfo.columnType.getSqlType(), colInfo.columnType.getLength(),
 									colInfo.columnType.getScale(), true);
 								if (colInfo.dataProviderID != null) c.setDataProviderID(colInfo.dataProviderID);
 								c.setAllowNull(colInfo.allowNull);
-								//c.setColumnInfo(colInfo);
 								if ((IBaseColumn.PK_COLUMN & colInfo.flags) > 0) c.setDatabasePK(true);
 								c.setFlags(colInfo.flags);
 								table.addColumn(c);
-								//table.a
 							}
-							//tableDef.primaryKey
-							//Column c = new Column(table, name, columnMetaInfo.type, columnMetaInfo.length, columnMetaInfo.scale, true);
-							//table.addColumn(c);
 							table.setInitialized(true);
 
 							loading_tables.put(table.getName(), table);

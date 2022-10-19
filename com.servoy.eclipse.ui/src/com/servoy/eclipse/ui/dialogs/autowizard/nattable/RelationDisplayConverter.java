@@ -48,6 +48,10 @@ public class RelationDisplayConverter extends DisplayConverter
 			Relation relation = relationsWrapper.relations[relationsWrapper.relations.length - 1];
 			relationName = relation.getName();
 		}
+		else if (canonicalValue instanceof String)
+		{
+			relationName = (String)canonicalValue;
+		}
 		return relationName;
 	}
 

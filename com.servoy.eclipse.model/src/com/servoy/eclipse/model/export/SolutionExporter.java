@@ -97,7 +97,7 @@ public class SolutionExporter
 		}
 		if (!"".equals(warningMessage[0]))
 		{
-			userChannel.displayWarningMessage("Export solution from database files (database server not accesible)", warningMessage[0]);
+			userChannel.displayWarningMessage("Export solution from database files (database server not accesible)", warningMessage[0], false);
 		}
 
 		exporter.exportSolutionToFile(activeSolution, exportFile, ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),

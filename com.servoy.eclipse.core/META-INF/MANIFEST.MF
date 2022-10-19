@@ -44,7 +44,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.model.exporter.mobile,
  net.sourceforge.sqlexplorer;resolution:=optional,
  sablo,
- org.apache.commons.io,
  sj.jsonschemavalidation,
  slf4j.api,
  com.servoy.eclipse.ngclient,
@@ -62,8 +61,9 @@ Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,
  com.servoy.eclipse.dnd
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.core
 Import-Package: javax.servlet;version="4.0.0",
  javax.servlet.annotation;version="4.0.0",
- javax.servlet.http;version="4.0.0"
+ javax.servlet.http;version="4.0.0",
+ org.apache.commons.io;version="2.11.0"

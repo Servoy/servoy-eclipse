@@ -605,9 +605,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof ISupportExtendsID && changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
+								if (o instanceof ISupportExtendsID && (changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
 									(((ISupportExtendsID)changed).getExtendsID() > 0 &&
-										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID()))
+										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID())))
 								{
 									return o;
 								}

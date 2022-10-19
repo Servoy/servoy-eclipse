@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="5">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .content-wrapper {
+            background: #ffffff;
+            flex-direction: column;
+            display: flex;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            font-family: system-ui;
+            justify-content: center;
+            align-items: center;
+        }
+    
+        .content {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+        }
+    
+        .big-text {
+            font-size: x-large;
+            font-weight: 600;
+        }
+    
+        .btn-rebuild {
+			width: 130px;
+            height: 30px;
+            margin-top: 30px;
+            border-radius: 5px;
+            background: #04AA6D;
+            color: #ffffff;
+            border: unset;
+            font-size: 17px;
+            padding: 6px 18px;
+        }
+    
+        .btn-rebuild:hover {
+            cursor: pointer;
+        }
+    </style>
+    <script>
+    	window.parent.addEventListener('message', handlerMessage);
+		function handlerMessage(ev) {
+			if (ev.data.id == 'positionClick') {
+				const btn = document.querySelector('.btn-rebuild');
+				const minX = btn.getBoundingClientRect().x;
+				const maxX = minX + 130; // width of the btn -> css
+				const minY = btn.getBoundingClientRect().y;
+				const maxY = minY + 30; // height of the btn -> css
+				if ((ev.data.x >= minX && ev.data.x <= maxX) && (ev.data.y >= minY && ev.data.y <= maxY)) {
+					window.parent.postMessage({ id: 'buildTitaniumClient' }, '*');
+				}
+			} else {
+				window.parent.postMessage({}, '*');
+			}
+		}
+    </script>
+</head>
+<body style="text-align:center">
+    <div class="content-wrapper">
+        <div class="content big-text">TiNG resources are not generated correctly yet, please check the Titanium NG Build Console for more information.</div>
+        <div class="content">(Maybe you should trigger a rebuild by using Copy the TiNG sources -> "Clean build" option from the context menu of the Servoy Packages node or pressing the below button)</div>
+        <div><button class="btn-rebuild">TiNG build</button></div>
+    </div>
+</body>
+</html>

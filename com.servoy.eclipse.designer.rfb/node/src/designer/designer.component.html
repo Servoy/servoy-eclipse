@@ -9,7 +9,9 @@
             <designer-highlight></designer-highlight>
             <designer-ghostscontainer></designer-ghostscontainer>
             <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
-            <dragselection-responsive *ngIf="!urlParser.isAbsoluteFormLayout()"></dragselection-responsive>
+            <dragselection-responsive></dragselection-responsive>
+            <designer-samesize-indicator></designer-samesize-indicator>
+            <designer-anchoring-indicator></designer-anchoring-indicator>
         </div>
         <designer-editorcontent></designer-editorcontent> 
     </div>
@@ -20,5 +22,3 @@
 </div> <designer-status-bar *ngIf="!urlParser.isAbsoluteFormLayout()"></designer-status-bar> </div>
 <designer-contextmenu></designer-contextmenu>
 <designer-inline-edit></designer-inline-edit>
-<designer-samesize-indicator></designer-samesize-indicator>
-<designer-anchoring-indicator></designer-anchoring-indicator>

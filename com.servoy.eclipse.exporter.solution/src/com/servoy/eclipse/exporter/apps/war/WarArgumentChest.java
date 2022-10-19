@@ -238,7 +238,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + addUsersToAdminGroup + " ... adds Users To Admin Group\n"
 			+ "        -" + updateSequences + " ... updates Sequences\n"
 			+ "        -" + upgradeRepository + " ... automatically upgrade repository if needed\n"
-			+ "        -" + contextFileName + " ...  a path to a tomcat context.xml  that should be included into the WAR/META-INF/context.xml\n"
+			+ "        -" + contextFileName + " ... a path to a tomcat context.xml  that should be included\n"
+			+ "             into the WAR/META-INF/context.xml\n"
 //			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml   file;   please   see\n"
 //			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implement\n"
 //			+ "             ation for more information.\n"
@@ -278,7 +279,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
-			+ "        -ng2 true/false/sourcemaps export ng2 binaries  (default true). You can give 'sourcemaps' as value to generate sourcemaps.\n"
+			+ "        -ng2 true / false / sourcemaps - export ng2  binaries (default true). You  can give\n"
+			+ "             'sourcemaps' as value in order to generate sourcemaps.\n"
 			+ "        -ng1 ... export NGClient1 resources (default false)\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on

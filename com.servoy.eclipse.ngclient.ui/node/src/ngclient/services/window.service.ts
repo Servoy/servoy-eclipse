@@ -24,6 +24,7 @@ export class WindowService {
     private instances: { [property: string]: SvyWindow } = {};
     private windowCounter: number;
     private windowsRestored = false;
+    private dialogShown = false;
     private renderer2: Renderer2;
 
     constructor(private formService: FormService,
@@ -74,6 +75,7 @@ export class WindowService {
     }
 
     public show(name: string, form: string, title: string) {
+        this.dialogShown = true;
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.showForm) {
@@ -90,7 +92,7 @@ export class WindowService {
                 return;
             }
 
-            if (this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
@@ -228,7 +230,7 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
@@ -422,15 +424,21 @@ export class WindowService {
 
     private restoreWindows() {
         const window0 = this.sessionStorageService.get('window0');
-        if (window0 && window0.showForm) {
+        // a dialog was shown and we are after a tab refresh; restore from storage
+        if (window0 && window0.showForm && !this.dialogShown) {
             // wait until the server is connected
             const interval = setInterval(() => {
                 if (this.webSocketService.isConnected()) {
                     clearInterval(interval);
-                    let counter = 0;
-                    let windowCounterReset = false;
+                    
+                    let windowsToRestore: any[] = [];
+                    let counter = 0; 
                     while (this.sessionStorageService.get('window' + counter)) {
-                        const window = this.sessionStorageService.get('window' + counter);
+                        windowsToRestore.push(this.sessionStorageService.get('window' + counter));
+                        counter++;
+                    }
+                    let windowCounterReset = false;
+                    windowsToRestore.forEach( window =>  {
                         // server call for getting form's data (send data from server to client)
                         // call a couple of methods that will create and display the window
                         this.create(window.name, window.type);
@@ -453,9 +461,8 @@ export class WindowService {
                           this.show(window.name, window.showForm, window.showTitle);
                           this.windowCounter++;
                         });
-                        counter++;
                         this.windowCounter++;
-                }
+                });
                 }
             }, 1000);
         }
@@ -503,7 +510,7 @@ export class SvyWindow {
 
     setLocation(location: {x: number; y: number}) {
         this.location = location;
-        if (this.bsWindowInstance) {
+        if (this.bsWindowInstance && this.location) {
             this.renderer2.setStyle(this.bsWindowInstance.element, 'left', this.location.x + 'px');
             this.renderer2.setStyle(this.bsWindowInstance.element, 'top', this.location.y + 'px');
         }

@@ -234,6 +234,10 @@ public class Activator extends Plugin
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
 
+		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
+		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
+		prefs.setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+
 		Dictionary<String, String[]> properties = new Hashtable<String, String[]>(1);
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { MediaURLStreamHandlerService.PROTOCOL });
 		String serviceClass = URLStreamHandlerService.class.getName();
@@ -1150,7 +1154,7 @@ public class Activator extends Plugin
 					return new DebugWebClientSession(request);
 				}
 			});
-			ss.start(false);
+			ss.start(false, true);
 			ss.startWebServer();
 
 			checkApplicationServerVersion(ss.getApplicationServer());

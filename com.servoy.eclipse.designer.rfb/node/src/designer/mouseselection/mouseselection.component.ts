@@ -137,7 +137,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             svyid: node.getAttribute('svy-id'),
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                            containerName: layoutName
+                            containerName: layoutName,
+                            autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                         })
                     }
                 });
@@ -172,9 +173,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
-
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect.top + 'px');
+			
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect?.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect?.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
@@ -185,7 +186,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect.left - this.leftAdjust, y: event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect.top - this.topAdjust });
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
         if (this.editorSession.getState().dragging) return;
@@ -222,7 +223,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                        containerName: layoutName
+                        containerName: layoutName,
+                        autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                     };
                     newNodes.push(newNode);
                     newSelection.push(node.getAttribute('svy-id'))
@@ -274,7 +276,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         svyid: node.getAttribute('svy-id'),
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                        containerName: layoutName
+                        containerName: layoutName,
+                        autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                     };
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
@@ -381,6 +384,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         event.stopPropagation();
         this.editorSession.executeAction('copy');
     }
+    
+    openWizardAction(event: MouseEvent, property: string) {
+        event.stopPropagation();
+        this.editorSession.openConfigurator(property);
+    }
 
     insertACopyAction(event: MouseEvent, node: SelectionNode, before: boolean) {
         event.stopPropagation();
@@ -441,6 +449,7 @@ export class SelectionNode {
     isContainer: boolean;
     maxLevelDesign: boolean;
     containerName: string;
+    autowizardProperties?: string[];
 }
 export class Point {
     x: number;

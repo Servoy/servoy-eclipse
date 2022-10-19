@@ -37,14 +37,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -122,7 +118,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String contextFileName;
 	private WorkspaceJob searchForUsedAndUnderTheHoodWebObjectsJob;
 	private String generateExportCommandLinePropertiesFileSavePath;
-	private EclipseExportUserChannel userChannel;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
@@ -166,6 +161,10 @@ public class ExportWarModel extends AbstractWarExportModel
 			searchForUsedAndUnderTheHoodWebObjectsJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
 			searchForUsedAndUnderTheHoodWebObjectsJob.setUser(false);
 			searchForUsedAndUnderTheHoodWebObjectsJob.schedule();
+		}
+		else
+		{
+			ready = true;
 		}
 
 		Cipher desCipher = null;
@@ -1163,20 +1162,4 @@ public class ExportWarModel extends AbstractWarExportModel
 		generateExportCommandLinePropertiesFileSavePath = path;
 	}
 
-	public void setUserChannel(EclipseExportUserChannel eclipseExportUserChannel)
-	{
-		this.userChannel = eclipseExportUserChannel;
-	}
-
-	@Override
-	public void displayWarningMessage(String title, String message)
-	{
-		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title, message);
-			}
-		});
-	}
 }

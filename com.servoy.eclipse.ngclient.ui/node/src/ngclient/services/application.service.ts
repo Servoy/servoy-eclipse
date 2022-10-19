@@ -64,6 +64,26 @@ export class ApplicationService {
         this.localStorageService.set('userProperties', JSON.stringify(userProps));
     }
 
+    public removeUserProperty(key: string) {
+        const userProps = this.getUserProperties();
+        delete userProps[key];
+        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
+    public removeAllUserProperties() {
+        const userProps = this.getUserProperties();
+        const userPropsToDelete = [];
+        Object.keys(userProps).forEach(prop => {
+			if (prop.includes('user.properties.')) {
+				userPropsToDelete.push(prop);
+			}
+		});
+		userPropsToDelete.forEach(key => {
+			delete userProps[key];
+		});
+        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
     public getUIProperty(key: string) {
         return this.servoyService.getUIProperties().getUIProperty(key);
     }

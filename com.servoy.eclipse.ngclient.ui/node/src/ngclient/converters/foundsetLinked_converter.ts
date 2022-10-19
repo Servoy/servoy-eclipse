@@ -233,7 +233,7 @@ class SingleValueState {
             if (fs) this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
                 if (event.viewPortSizeChanged || event.fullValueChanged) {
                     let newSize = iS.forFoundset()?.viewPort.size;
-                    if (newSize === undefined) newSize = 0;
+                    if (newSize === undefined || newSize === null) newSize = 0;
                     if (newSize === this.viewPortSize) return;
 
                     const wholeViewport = this.regenerateWholeViewportDueToSizeChange(newSize);
@@ -252,9 +252,9 @@ class SingleValueState {
     }
 
     /** This builds (from the single value from server) a viewport-from-server-equivalent to be used with viewportService code  */
-    generateWholeViewportFromOneValue(singleValue: any, vpSize: number | undefined, conversionInfoFromServer: string): Array<any> {
+    generateWholeViewportFromOneValue(singleValue: any, vpSize: number | undefined | null, conversionInfoFromServer: string): Array<any> {
         // this gets called for values that are not actually record linked, and we 'fake' a viewport containing the same value on each row in the array
-        if (vpSize === undefined) vpSize = 0;
+        if (vpSize === undefined || vpSize === null) vpSize = 0;
         this.viewPortSize = vpSize;
         this.singleValue = singleValue;
 
@@ -268,10 +268,8 @@ class SingleValueState {
     }
 
     /** This re-builds based on previously stored singleValue (from the single value from server) a viewport-from-server-equivalent to be used with viewportService code. */
-    regenerateWholeViewportDueToSizeChange(vpSize: number | undefined): Array<any> {
-        if (vpSize === undefined) vpSize = 0;
+    regenerateWholeViewportDueToSizeChange(vpSize: number): Array<any> {
         this.viewPortSize = vpSize;
-
         return this.generateWholeViewportFromOneValueInternal();
     }
 

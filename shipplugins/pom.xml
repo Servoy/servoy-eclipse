@@ -4,15 +4,12 @@
     <artifactId>shiplibs</artifactId>
     <version>2022.3.0.3740_rc</version>
     <name>Servoy shiplibs</name>
-
     <packaging>eclipse-repository</packaging>
-
     <properties>
         <tycho.version>2.6.0</tycho.version>
         <log4j-version>2.18.0</log4j-version>
-        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.24/</eclipse.url>
+        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.25/</eclipse.url>
     </properties>
-
     <repositories>
         <repository>
             <id>developer_repo</id>
@@ -25,7 +22,6 @@
             <layout>p2</layout>
         </repository>
     </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -58,7 +54,6 @@
                             <arch>x86_64</arch>
                         </environment>
                     </environments>
-
                 </configuration>
             </plugin>
             <plugin>
@@ -176,28 +171,24 @@
             <artifactId>jakarta.servlet.jsp-api</artifactId>
             <version>2.3.6</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>
             <version>2.2</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
             <version>3.4.3.Final</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.12</version>
+            <version>1.12.17</version>
         </dependency>
-
         <dependency>
             <groupId>com.servoy</groupId>
             <artifactId>javax.websocket</artifactId>
@@ -219,9 +210,14 @@
             <version>1.1.0.201005260935</version>
         </dependency>
         <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.19</version>
+        </dependency>
+        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.15.2</version>
+            <version>1.15.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
@@ -261,7 +257,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.9</version>
+            <version>1.10.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
         <dependency>
@@ -272,14 +268,14 @@
         <!-- https://mvnrepository.com/artifact/com.sun.activation/javax.activation -->
         <dependency>
             <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
+            <artifactId>jakarta.activation</artifactId>
+            <version>1.2.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.sun.mail/javax.mail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
+            <artifactId>jakarta.mail</artifactId>
+            <version>1.6.7</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.james/apache-mime4j -->
         <dependency>
@@ -301,7 +297,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.30</version>
+            <version>1.33</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>

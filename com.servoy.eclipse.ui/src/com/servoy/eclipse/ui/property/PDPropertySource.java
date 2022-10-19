@@ -87,6 +87,19 @@ public class PDPropertySource extends PersistPropertySource
 		return createPropertyHandlersFromSpec(propertyDescription, persistContext);
 	}
 
+	@Override
+	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
+	{
+		// this is called when one property from the properties view is reset to default (and
+		// it has a descriptor for that prop. and it should reset a prop in an AbstractBase persist);
+		// by default this works directly on persist properties, but
+		// if it's a layout container and the property's descriptor is based on a LayoutContainerPropertyHandler
+		// we have to reset the attribute, not the property (those work with attributes)
+		if (propertyDescriptor.propertyDescriptor instanceof LayoutContainerPropertyHandler)
+			((LayoutContainer)persist).putAttribute((String)id, null);
+		else super.clearAbstractBaseProperty(propertyDescriptor, id, persist);
+	}
+
 	public static IPropertyHandler[] createPropertyHandlersFromSpec(PropertyDescription propertyDescription, PersistContext persistContext)
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
@@ -103,7 +116,7 @@ public class PDPropertySource extends PersistPropertySource
 				new PropertyDescriptionBuilder().withName(IContentSpecConstants.PROPERTY_ATTRIBUTES).withConfig(
 					new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(new MapEntriesPropertyController(
 						IContentSpecConstants.PROPERTY_ATTRIBUTES, RepositoryHelper.getDisplayName(IContentSpecConstants.PROPERTY_ATTRIBUTES, Form.class),
-						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
+						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null, false)
 					{ /*
 						 * (non-Javadoc)
 						 *

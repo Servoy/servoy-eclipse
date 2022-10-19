@@ -83,7 +83,8 @@ public class NodeFolderCreatorJob extends Job
 				createFolder(nodeFolder);
 			}
 			boolean codeChanged = true;
-			File packageJsonFile = new File(nodeFolder, "package_original.json");
+			boolean mainPackageJsonChanged = false;
+			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
@@ -93,6 +94,7 @@ public class NodeFolderCreatorJob extends Job
 				{
 					String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
 					codeChanged = !fileContent.equals(bundleContent);
+					mainPackageJsonChanged = codeChanged;
 				}
 				catch (IOException e)
 				{
@@ -101,38 +103,49 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (!codeChanged)
 			{
-				Optional<File> srcMax = FileUtils.listFiles(new File(nodeFolder, "src"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
-					.max((file1, file2) -> {
-						long tm = file1.lastModified() - file2.lastModified();
-						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
-					});
-				Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
-					.max((file1, file2) -> {
-						long tm = file1.lastModified() - file2.lastModified();
-						return tm < 0 ? -1 : tm > 0 ? 1 : 0;
-					});
+				if (new File(nodeFolder, "src").exists())
+				{
+					Optional<File> srcMax = FileUtils.listFiles(new File(nodeFolder, "src"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+						.max((file1, file2) -> {
+							long tm = file1.lastModified() - file2.lastModified();
+							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+						});
+					Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+						.max((file1, file2) -> {
+							long tm = file1.lastModified() - file2.lastModified();
+							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
+						});
 
-				long timestamp = Math.max(srcMax.isPresent() ? srcMax.get().lastModified() : 0, projectsMax.isPresent() ? projectsMax.get().lastModified() : 0);
+					long timestamp = Math.max(srcMax.isPresent() ? srcMax.get().lastModified() : 0,
+						projectsMax.isPresent() ? projectsMax.get().lastModified() : 0);
 
-				codeChanged = checkForHigherTimestamp("/node", false, timestamp, console);
+					codeChanged = checkForHigherTimestamp("/node", false, timestamp, console);
+				}
+				else
+				{
+					// this is a new soluton dir just make sure we copy it
+					codeChanged = true;
+				}
 			}
 			if (codeChanged)
 			{
-				try
+				// delete the full parent dir because the main package json is changed
+				if (mainPackageJsonChanged)
 				{
-					// create the package_original.json
-					FileUtils.writeStringToFile(packageJsonFile, bundleContent, "UTF-8");
 
-					// delete the source dirs so we start clean
+					FileUtils.deleteQuietly(nodeFolder.getParentFile());
+					writeConsole(console, "Deleted the main target folder because the root package.json is changed " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+				}
+				else
+				{
+					// delete only the source dirs so we start clean
 					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
 					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					writeConsole(console, "The resources of the solution was changed started to copy the new sources " +
+						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 				}
 
-				writeConsole(console, "Tested package.json which is changed, starting to copy " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
 				time = System.currentTimeMillis();
 
 				// copy over the latest resources
@@ -142,7 +155,7 @@ public class NodeFolderCreatorJob extends Job
 
 				try
 				{
-					FileUtils.copyFile(new File(nodeFolder, "package.json"), new File(nodeFolder.getParent(), "package.json"));
+					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
 
 					executeNpmInstall = true;

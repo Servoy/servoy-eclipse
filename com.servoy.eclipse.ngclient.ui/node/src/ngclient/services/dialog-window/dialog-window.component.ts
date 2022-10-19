@@ -21,7 +21,7 @@ import { FormService } from '../../form.service';
     }
 
     getFormName(): string {
-        const name = this.window.form.name;
+        const name =  this.window.form ? this.window.form.name : undefined;
         if (name && this.formservice.hasFormCacheEntry(name))
             return name;
         return null;

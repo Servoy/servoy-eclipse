@@ -3,6 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based exporter
 Bundle-SymbolicName: com.servoy.eclipse.exporter.solution;singleton:=true
 Bundle-Version: 2022.12.0.3820_rc
+Import-Package: org.apache.commons.io;version="2.11.0",
+ org.apache.commons.io.filefilter;version="2.11.0"
 Bundle-Activator: com.servoy.eclipse.exporter.apps.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.resources,
@@ -14,8 +16,7 @@ Require-Bundle: org.eclipse.core.resources,
  com.servoy.eclipse.model.exporter.mobile,
  servoy_ngclient,
  sablo,
- org.apache.commons.io,
  com.servoy.eclipse.ngclient.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: com.servoy.eclipse.exporter.solution

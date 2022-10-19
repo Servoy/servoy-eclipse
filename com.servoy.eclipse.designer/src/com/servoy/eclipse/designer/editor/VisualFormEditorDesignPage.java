@@ -207,7 +207,8 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 			@Override
 			protected boolean calculateEnabled()
 			{
-				return !DesignerUtil.containsInheritedElement(getSelectedObjects()) && super.calculateEnabled();
+				return !DesignerUtil.containsFormComponentElement(getSelectedObjects()) && !DesignerUtil.containsInheritedElement(getSelectedObjects()) &&
+					super.calculateEnabled();
 			}
 		};
 	}

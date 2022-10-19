@@ -33,12 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.ui.css.swt.theme.ITheme;
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
-import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -91,10 +86,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-
-	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
-	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
-
 	/**
 	 *
 	 */
@@ -126,8 +117,6 @@ public class Activator extends AbstractUIPlugin
 	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
-
-	private IPreferenceChangeListener themeChangedListener;
 
 	private static BundleContext context;
 
@@ -275,72 +264,9 @@ public class Activator extends AbstractUIPlugin
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
 
-		final BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		final ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			final IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				final Display d = Display.getDefault();
-				final IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					final ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						String label = it.getLabel();
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
-						{
-							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
-							IconPreferences.getInstance().save(true);
-							ServoyModelManager.getServoyModelManager().getServoyModel()
-								.addDoneListener(() -> {
-									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-										label + " theme was detected",
-										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?"))
-									{
-										PlatformUI.getWorkbench().restart();
-									}
-								});
-						}
-					}
-					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
-					{
-						IconPreferences.getInstance().setUseDarkThemeIcons(false);
-						IconPreferences.getInstance().save(true);
-						ServoyModelManager.getServoyModelManager().getServoyModel()
-							.addDoneListener(() -> {
-								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-									"Theming is disabled",
-									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
-								{
-									PlatformUI.getWorkbench().restart();
-								}
-							});
-					}
-				}
-			}
-		}
-
-		listenForThemeChanges();
+		EclipseCSSThemeListener.getInstance().initThemeListener();
 	}
 
-	private void listenForThemeChanges()
-	{
-		themeChangedListener = (PreferenceChangeEvent event) -> {
-			if (event.getKey().equals("themeid"))
-			{
-				String themeid = (String)event.getNewValue();
-				IconPreferences iconPreferences = IconPreferences.getInstance();
-				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
-				iconPreferences.save();
-			}
-		};
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).addPreferenceChangeListener(themeChangedListener);
-	}
 
 	/**
 	 *
@@ -452,8 +378,7 @@ public class Activator extends AbstractUIPlugin
 			provisioningAgent.stop();
 		}
 
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
-
+		EclipseCSSThemeListener.getInstance().removeListener();
 		plugin = null;
 		super.stop(context);
 	}
@@ -690,33 +615,5 @@ public class Activator extends AbstractUIPlugin
 		}
 
 		return provisioningAgent;
-	}
-
-	public boolean isDarkThemeSelected()
-	{
-		boolean IS_DARK_THEME = false;
-		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				Display d = Display.getDefault();
-				IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()))
-						{
-							IS_DARK_THEME = true;
-						}
-					}
-				}
-			}
-		}
-		return IS_DARK_THEME;
 	}
 }

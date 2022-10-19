@@ -657,6 +657,9 @@ export class ContextMenuComponent implements OnInit {
         // entry.getIconStyle = () => {
         // 	return {'background-image':"url(designer/assets/images/delete.gif)"};
         // };
+        entry.getItemClass = () => {
+            if (!this.canDeleteSelection()) return 'disabled';
+        };
         this.menuItems.push(entry);
 
         entry = new ContextmenuItem(
@@ -693,7 +696,22 @@ export class ContextMenuComponent implements OnInit {
         }
         return false;
     }
-
+    
+    private canDeleteSelection() : boolean{
+         if (this.selection && this.selection.length > 0) {
+            for (const selection of this.selection) {
+                const node = this.editorContentService.getContentElement(selection );
+                if (node) {
+                    if (node.parentElement.closest('.svy-listformcomponent')) return false;
+                    if (node.parentElement.closest('.svy-formcomponent')) return false;
+                    if (node.parentElement.closest('.inherited_element')) return false;
+                }
+            }
+        }
+        else return false;
+        return true;
+    }
+    
     private isAnchored(anchor: number): boolean {
         if (this.selection && this.selection.length == 1) {
             if (this.selectionAnchor == 0)

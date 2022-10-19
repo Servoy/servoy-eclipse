@@ -87,7 +87,7 @@ export class FormattingService {
                 if (keyChar === undefined || keyChar === null) {
                     return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
                         .symbol,
-                        vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                        vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength, null);
                 } else {
                     return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
@@ -97,7 +97,7 @@ export class FormattingService {
 
                 if (keyChar === undefined || keyChar === null) {
                     return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
-                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength, vSvyFormat);
                 } else {
                     return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
@@ -173,7 +173,7 @@ export class FormattingService {
         return ret;
     }
 
-    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength, vSvyFormat) {
         let key;
 
         if (window.event) {
@@ -190,8 +190,22 @@ export class FormattingService {
         }
 
         const keychar = String.fromCharCode(key);
-        return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
-
+        if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
+			const value = vElement.value;
+			if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+				const allowToConcat = value.indexOf(decimalChar);
+				if (e.target.selectionStart <= allowToConcat) {
+					return true;
+				}
+				const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
+				if (value.split(decimalChar)[1].length >= maxDecimals) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
+		}
     }
 
     private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
@@ -213,7 +227,7 @@ export class FormattingService {
             if (counter > mlength) return false;
         }
 
-        if ((('-0123456789').indexOf(keychar) > -1)) {
+		if ((('-0123456789').indexOf(keychar) > -1)) {
             return true;
         } else if (decimal && (keychar === decimalChar)) {
             return true;

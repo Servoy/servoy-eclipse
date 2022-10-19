@@ -3,6 +3,7 @@ import { DragItem } from '../palette/palette.component';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { URLParserService } from '../services/urlparser.service';
 
 @Component({
     selector: 'dragselection-responsive',
@@ -11,7 +12,6 @@ import { EditorContentService } from '../services/editorcontent.service';
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll {
     allowedChildren: any;
     dragNode: HTMLElement;
-    urlParser: any;
     dragStartEvent: MouseEvent;
     initialParent: Element;
     dragging: boolean;
@@ -23,7 +23,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     dragItem: DragItem = {};
     dragCopy: boolean;
 
-    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) { }
+    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, protected urlParser: URLParserService) { }
 
     ngOnInit(): void {
         this.editorContentService.getContentArea().addEventListener('mousedown', (event) => this.onMouseDown(event));
@@ -55,7 +55,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         // do not allow moving elements inside css position container in responsive layout
         if (this.dragNode && this.findAncestor(this.dragNode, '.svy-csspositioncontainer') !== null)
             return;
-
+        
+        if (this.urlParser.isAbsoluteFormLayout() && !this.dragNode.parentElement.closest('.svy-responsivecontainer')){
+             // only use this for responsive container
+            this.dragNode = null;
+            return;
+        }
+      
         // skip dragging if it is an child element of a form reference
         if (event.button == 0 && this.dragNode) {
             this.dragStartEvent = event;
@@ -132,13 +138,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
         this.dragStartEvent = event;
 
-        if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-            this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
-        }
-
         if (this.editorContentService.getGlassPane().style.cursor === "pointer") {
-            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentNode && this.canDrop.beforeChild === this.dragNode.nextElementSibling) {
-                this.canDrop.dropAllowed = false; //it does not make sense to drop exactly where it is
+            if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
+               this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
+               return; //preview position not changed, return here
+            }
+            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement.closest("[svy-id]") && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
+                return; //preview position not changed, return here
             }
             if (this.canDrop.dropAllowed) {
                 this.renderer.setStyle(this.dragNode, 'opacity', '1');
@@ -160,11 +166,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             const obj = (event.ctrlKey || event.metaKey) ? [] : {};
 
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
-                this.canDrop.beforeChild = this.dragNode.nextElementSibling;
+                this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.dragNode);
             }
 
             if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-                this.canDrop.beforeChild = this.canDrop.beforeChild.nextElementSibling;
+                this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop.beforeChild);
             }
 
             const key = (event.ctrlKey || event.metaKey) && this.dragCopy ? 0 : this.dragNode.getAttribute("svy-id");
@@ -223,12 +229,12 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     }
 
     private getDropNode(type: string, topContainer: boolean, layoutName: string, event: MouseEvent, svyId: string) {
-        const canDrop = this.designerUtilsService.getDropNode(type, topContainer, layoutName, event, undefined, svyId);
+        const canDrop = this.designerUtilsService.getDropNode(false, type, topContainer, layoutName, event, undefined, svyId);
         canDrop.dropAllowed = canDrop.dropAllowed && this.dragNode.classList.contains("inheritedElement")
             && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
         return canDrop;
     }
-
+    
     getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
         return null;
     }

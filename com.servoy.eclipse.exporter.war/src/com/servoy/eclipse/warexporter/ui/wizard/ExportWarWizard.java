@@ -283,8 +283,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			{
 				try
 				{
-					exportModel.setUserChannel(new EclipseExportUserChannel(exportModel, monitor));
-					final WarExporter exporter = new WarExporter(exportModel);
+					final WarExporter exporter = new WarExporter(exportModel, new EclipseExportUserChannel(exportModel, monitor));
 					final boolean[] cancel = new boolean[] { false };
 					Display.getDefault().syncExec(new Runnable()
 					{

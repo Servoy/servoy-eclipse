@@ -84,6 +84,7 @@ html, body {
 }
 
 .dark .mat-form-field-infix {
+	border-top: 1px solid;
     border-color: #ffffff;
 }
 .dark .mat-form-field-underline {
@@ -102,4 +103,12 @@ html, body {
 .dark .mat-select-panel {
     background: #3c3c3c;
     color: #ffffff;
+}
+
+.dark .mat-form-field-label {
+	color: #ffffff;
+}
+
+.dark .column-fitwidth {
+    height: 80px;
 }

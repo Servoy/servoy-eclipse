@@ -46,7 +46,7 @@ export class PackagesComponent implements OnChanges {
 
     installAvailable(p: Package): boolean {
         const installedVersion = p.installed == 'unknown' ? '' : p.installed;
-        return !p.installed || (p.installedIsWPA && (this.wpmService.versionCompare(p.selected, installedVersion) != 0)) || (!p.installedIsWPA && (this.wpmService.versionCompare(p.selected, installedVersion) > 0));
+        return !p.installed || (p.installedIsWPA && (this.wpmService.versionCompare(p.selected, installedVersion) != 0));
     }
 
     canBeRemoved(p: Package): boolean {
@@ -142,5 +142,9 @@ export class PackagesComponent implements OnChanges {
 
     needsActiveSolution(p: Package): boolean {
         return p.packageType != PACKAGE_TYPE_SOLUTION;
+    }
+    
+    invertIcon(p: Package): boolean {
+        return this.wpmService.isDarkTheme() && p.invertIcon;
     }
 }

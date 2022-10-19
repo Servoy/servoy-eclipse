@@ -116,7 +116,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
-import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
@@ -146,6 +145,7 @@ import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 
 /**
@@ -197,13 +197,15 @@ public class WarExporter
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("HH:mm:ss:S");
 
 	private final IWarExportModel exportModel;
+	private final IXMLExportUserChannel userChannel;
 	private SpecProviderState componentsSpecProviderState;
 	private SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
 
-	public WarExporter(IWarExportModel exportModel)
+	public WarExporter(IWarExportModel exportModel, IXMLExportUserChannel userChannel)
 	{
 		this.exportModel = exportModel;
+		this.userChannel = userChannel;
 
 		if (exportModel.isNGExport())
 		{
@@ -503,7 +505,7 @@ public class WarExporter
 				"\n If you use a smartclient, then the jnlp's files version could be needed to also have a version update.");
 			messageBuilder.append(
 				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
-			exportModel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString());
+			userChannel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString(), true);
 		}
 	}
 
@@ -1138,9 +1140,9 @@ public class WarExporter
 						}
 					}
 					scripts.forEach((String path) -> {
-						String serverScriptName = path.substring(path.lastIndexOf("/") + 1);
-						ZipEntry serverScriptEntry = jarfile.getEntry(path);
-						File destScriptFile = new File(destdir, serverScriptName);
+						String serverScriptPath = path.substring(path.indexOf("/") + 1);
+						ZipEntry serverScriptEntry = jarfile.getEntry(serverScriptPath);
+						File destScriptFile = new File(destdir, serverScriptPath);
 						try (InputStream is = jarfile.getInputStream(serverScriptEntry); FileOutputStream fo = new FileOutputStream(destScriptFile))
 						{
 							while (is.available() > 0)
@@ -1150,7 +1152,7 @@ public class WarExporter
 						}
 						catch (Exception ex)
 						{
-							ServoyLog.logError(ex);
+							ServoyLog.logError("error extracting serverside script " + path + " from jar/zip: " + file, ex);
 						}
 					});
 				}
@@ -1469,7 +1471,7 @@ public class WarExporter
 		try
 		{
 			SolutionExporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), exportModel,
-				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), new EclipseExportUserChannel(exportModel, monitor),
+				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), userChannel,
 				null, TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()), false, exportSolution);
 			monitor.done();
 		}
@@ -1704,12 +1706,6 @@ public class WarExporter
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
-		boolean noConvertorsOrValidators = !plugins.contains("converters.jar") || !plugins.contains("default_validators.jar");
-		if (noConvertorsOrValidators)
-		{
-			// print to system out for the command line exporter.
-			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
-		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
@@ -2277,9 +2273,9 @@ public class WarExporter
 						}
 					}
 					scripts.forEach((String path) -> {
-						String serverScriptPath = path.substring(path.lastIndexOf("/") + 1);
-						File serverScriptFile = new File(file.getParentFile(), serverScriptPath);
-						File newServerScriptFile = new File(destDir, serverScriptPath);
+						String fileName = path.substring(path.lastIndexOf("/") + 1);
+						File serverScriptFile = new File(file.getParentFile(), fileName);
+						File newServerScriptFile = new File(destDir, fileName);
 						try
 						{
 							copyFile(serverScriptFile, newServerScriptFile);
@@ -2297,7 +2293,7 @@ public class WarExporter
 
 	private static void copyFile(File sourceFile, File destFile) throws ExportException
 	{
-		if (!sourceFile.exists())
+		if (!sourceFile.exists() || sourceFile.length() == 0)
 		{
 			return;
 		}

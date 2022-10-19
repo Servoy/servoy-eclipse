@@ -26,6 +26,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -66,6 +68,13 @@ public class PropertyWizardDialog extends Dialog
 	}
 
 	@Override
+	protected void okPressed()
+	{
+		tableComposite.commitAndCloseActiveCellEditor();
+		super.okPressed();
+	}
+
+	@Override
 	protected boolean isResizable()
 	{
 		return true;
@@ -80,10 +89,25 @@ public class PropertyWizardDialog extends Dialog
 		// first check what the main thing must be (dataproviders, forms, relations?)
 
 		Composite c = new Composite(area, SWT.NONE);
-		c.setLayout(new FillLayout());
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.marginRight = 5;
+		c.setLayout(layout);
+		GridData gridData = new GridData();
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.horizontalSpan = 1;
+		gridData.verticalSpan = 1;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.horizontalAlignment = GridData.FILL;
+		c.setLayoutData(gridData);
 		SashForm form = new SashForm(c, SWT.HORIZONTAL);
+		form.setLayout(layout);
+		form.setLayoutData(gridData);
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
-		SashForm form3 = new SashForm(form, SWT.VERTICAL | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		Composite tableParentComposite = new Composite(form, SWT.BORDER);
+		tableParentComposite.setLayout(new FillLayout());
 		form.setWeights(40, 60);
 
 		if (configurator.getDataproviderProperties().size() > 0)
@@ -106,7 +130,7 @@ public class PropertyWizardDialog extends Dialog
 				persistContext, settings, flattenedSolution);
 		}
 
-		tableComposite = new AutoWizardPropertiesComposite(form3, persistContext, flattenedSolution,
+		tableComposite = new AutoWizardPropertiesComposite(tableParentComposite, persistContext, flattenedSolution,
 			configurator);
 		return area;
 	}

@@ -820,13 +820,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 		}
 
-		/**
-		 * @param packageToInstall
-		 * @param dependencies
-		 * @param packageName
-		 * @param packageReader
-		 * @param entryPoint
-		 */
 		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
@@ -1178,6 +1171,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	{
 		WebPackagesListener.ignore.set(ignore);
 		if (!ignore) checkPackages(false);
+	}
+
+	public static void setIgnoreAndCheck(boolean ignore, boolean check)
+	{
+		WebPackagesListener.ignore.set(ignore);
+		if (!ignore && check) checkPackages(false);
 	}
 
 	public static void checkPackages(boolean ci)

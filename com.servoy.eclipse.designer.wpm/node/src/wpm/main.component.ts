@@ -12,7 +12,7 @@ export class MainComponent {
 
   constructor(public wpmService: WpmService) {
 	this.url = new URL(window.location.href);
-	this.darkTheme = this.url.searchParams.get('darkTheme') === 'true';
+	this.darkTheme = this.wpmService.isDarkTheme();
 	if (this.darkTheme) {
 		document.body.classList.add('dark');
 	}

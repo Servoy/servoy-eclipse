@@ -1,0 +1,16 @@
+file_export_version=3.0
+/instance/org.eclipse.dltk.javascript.ui/DLTK_number=0,128,0
+/instance/org.eclipse.dltk.javascript.ui/JS_REGEXP=0,128,192
+/instance/org.eclipse.dltk.javascript.ui/DLTK_function_definition=192,192,192
+/instance/org.eclipse.dltk.javascript.ui/JS_PROPERTY=0,128,255
+/instance/org.eclipse.dltk.ui/sourceHoverBackgroundColor=255,255,225
+/instance/org.eclipse.dltk.javascript.ui/DLTK_string=0,128,192
+/instance/org.eclipse.dltk.javascript.ui/JS_DOC_TAGS=255,255,128
+/instance/org.eclipse.dltk.javascript.ui/JS_DEPRECATED=128,128,128
+/instance/org.eclipse.dltk.javascript.ui/DLTK_keyword_return=255,255,255
+/instance/org.eclipse.dltk.javascript.ui/DLTK_default=192,192,192
+/instance/org.eclipse.dltk.javascript.ui/DLTK_keyword=255,255,255
+/instance/org.eclipse.dltk.javascript.ui/JS_DOC=255,255,128
+/instance/org.eclipse.dltk.javascript.ui/sourceHoverBackgroundColor=255,255,225
+/instance/org.eclipse.dltk.javascript.ui/content_assist_proposals_background=81,81,81
+/instance/org.eclipse.dltk.javascript.ui/content_assist_proposals_foreground=255,255,255

@@ -63,9 +63,9 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
-        if (type == "layout" || (type == "component" && !this.editorSession.isAbsoluteFormLayout())) {
+        if (type == "layout" || (type == "component" && !absoluteLayout)) {
             const realName = layoutName ? layoutName : "component";
 
             dropTarget = this.getNode(event, true, skipNodeId);
@@ -127,7 +127,7 @@ export class DesignerUtilsService {
                         // this is in the 30% corner (bottom or right) of the component
                         // the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
 
-                        dropTarget = dropTarget.nextElementSibling;
+                        dropTarget = this.getNextElementSibling(dropTarget);
                         //realDropTarget = this.getParent(dropTarget, realName);
 
                         // if there is no nextElementSibling then force it to append so that it is moved to the last position.
@@ -140,7 +140,7 @@ export class DesignerUtilsService {
                         }
                     }
                     if (dropTarget && !dropTarget.getAttribute('svy-id')) {
-                        dropTarget = dropTarget.nextElementSibling;
+                        dropTarget = this.getNextElementSibling(dropTarget);
                     }
                     return {
                         dropAllowed: true,
@@ -152,7 +152,10 @@ export class DesignerUtilsService {
                     // we drop directly on the node, try to determine its position between children
                     let beforeNode: Element = null;
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                        const node = dropTarget.childNodes[i];
+                        let node = dropTarget.childNodes[i];
+                        if (node instanceof Element && !node.getAttribute('svy-id')){
+                            node = node.querySelector("[svy-id]");
+                        }
                         if (node instanceof Element && node.getAttribute('svy-id')) {
                             const clientRec = node.getBoundingClientRect();
                             const absolutePoint = this.convertToAbsolutePoint({
@@ -193,6 +196,10 @@ export class DesignerUtilsService {
                     return {
                         dropAllowed: false
                     }; // the drop target doesn't support this component
+            }
+            if (absoluteLayout && dropTarget && dropTarget.closest('.svy-responsivecontainer')){
+                // we must find the drop target in responsive mode
+                return this.getDropNode(false, type, topContainer, layoutName, event, componentName, skipNodeId);
             }
         }
         return {
@@ -301,5 +308,17 @@ export class DesignerUtilsService {
             autoscrollElementClientBounds[3] = this.editorContentService.querySelector('.topAutoscrollArea').getBoundingClientRect();
         }
         return autoscrollElementClientBounds;
+    }
+    
+     getNextElementSibling(element) : Element{
+        // find the correct sibbling (the one which has the svy-id)
+        while ( element.parentElement && !element.parentElement.getAttribute("svy-id")){
+            element = element.parentElement;
+        }
+        let sibbling = element.nextElementSibling;
+        if (sibbling && !sibbling.getAttribute("svy-id")){
+            sibbling = sibbling.querySelector("[svy-id]");
+        }
+        return sibbling;
     }
 }

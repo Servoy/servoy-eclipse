@@ -1,6 +1,6 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
-import { URLParserService } from 'src/designer/services/urlparser.service';
+import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -55,6 +55,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
   
   private onMouseDown(event: MouseEvent) {
       this.dragNode = this.designerUtilsService.getNode( event);
+      if (this.dragNode && this.dragNode.parentElement.closest('.svy-responsivecontainer')){
+         // we are inside responsive container, let dragselection-responsive handle this
+         this.dragNode = null;
+         return;
+      }
       if(!this.currentElementInfo) {
           this.currentElementInfo = new Map<string, ElementInfo>();
       }

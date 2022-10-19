@@ -92,7 +92,6 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -284,10 +283,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void init()
 	{
-		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
-		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
-		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
-
 		realOutstandingChanges = new ArrayList<IPersist>();
 
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should

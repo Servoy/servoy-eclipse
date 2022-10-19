@@ -49,6 +49,7 @@ import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -116,16 +117,23 @@ public class AutoWizardPropertiesComposite
 		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
 		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer, 0, 1);
 		natTable = new NatTable(parent, SWT.NONE, composeLayer, false);
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		natTable.setLayoutData(gridData);
 		ConfigRegistry configRegistry = new ConfigRegistry();
 		natTable.setConfigRegistry(configRegistry);
 		configRegistry.registerConfigAttribute(
 			CellConfigAttributes.RENDER_GRID_LINES,
 			Boolean.FALSE);
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		natTable.setLayerPainter(new HorizontalGridLineCellLayerPainter());
 
 		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration();
 		natTable.addConfiguration(
-			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution, parent.getShell()));
+			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution));
 		natTable.addConfiguration(linkClickConfiguration);
 		composeLayer.addConfiguration(new AbstractLayerConfiguration<AbstractLayer>()
 		{
@@ -229,6 +237,9 @@ public class AutoWizardPropertiesComposite
 		{
 			DataLayer bodyDataLayer = new DataLayer(dataProvider);
 			bodyDataLayer.setDefaultRowHeight(40);
+			bodyDataLayer.setColumnPercentageSizing(true);
+			bodyDataLayer.setDefaultMinColumnWidth(20);
+			bodyDataLayer.setDistributeRemainingRowSpace(true);
 
 			AggregateConfigLabelAccumulator accumulator = new AggregateConfigLabelAccumulator();
 			// create the ColumnLabelAccumulator with IDataProvider to be able to
@@ -287,5 +298,10 @@ public class AutoWizardPropertiesComposite
 				bodyLayer, bodyLayer.getSelectionLayer());
 			setUnderlyingLayer(rowHeaderLayer);
 		}
+	}
+
+	public void commitAndCloseActiveCellEditor()
+	{
+		natTable.commitAndCloseActiveCellEditor();
 	}
 }

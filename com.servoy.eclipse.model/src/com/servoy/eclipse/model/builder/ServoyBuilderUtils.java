@@ -119,6 +119,11 @@ public class ServoyBuilderUtils
 					file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION)) &&
 				servoyModel.isSolutionActive(project.getName()))
 			{
+				// clear deserializer error for this js file as this change may have fixed it
+				if (file.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+				{
+					ServoyBuilder.deleteMarkers(file, ServoyBuilder.PROJECT_DESERIALIZE_MARKER_TYPE);
+				}
 				// form js file is changed
 				// get form
 				// get child forms
@@ -195,6 +200,8 @@ public class ServoyBuilderUtils
 		{
 			IProject project = (IProject)resources.get(0);
 			IFile file = (IFile)resources.get(1);
+			// clear deserializer error for this js file as this change may have fixed it
+			ServoyBuilder.deleteMarkers(file, ServoyBuilder.PROJECT_DESERIALIZE_MARKER_TYPE);
 			ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 			String scopeName = file.getName().substring(0, file.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
 			List<IPersist> persists = BuilderDependencies.getInstance().getScopeDependency(scopeName);

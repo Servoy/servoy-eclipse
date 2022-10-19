@@ -67,7 +67,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
@@ -84,7 +83,8 @@ Require-Bundle: org.eclipse.ui,
  com.equo.chromium;resolution:=optional,
  org.eclipse.nebula.widgets.nattable.core,
  org.eclipse.nebula.widgets.nattable.extension.nebula,
- org.eclipse.e4.ui.css.swt
+ org.eclipse.e4.ui.css.swt,
+ org.eclipse.nebula.widgets.nattable.extension.e4
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,
@@ -111,6 +111,7 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards,
  com.servoy.eclipse.ui.wizards.exportsolution.pages
+Import-Package: org.apache.commons.io;version="2.11.0"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.ui

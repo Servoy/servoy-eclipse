@@ -90,7 +90,7 @@ public class OpenWizardAction extends Action
 			wizard.init(PlatformUI.getWorkbench(), selection);
 			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
-			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
+			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard)
 			{
 				private Button restoreDefault = null;
 				private Button copyWarToCmd = null;
