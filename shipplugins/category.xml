@@ -62,9 +62,6 @@
 	<bundle id="org.apache.commons.commons-text">
 		<category name="bundles" />
 	</bundle>
-    <bundle id="org.apache.commons.commons-codec">
-        <category name="bundles" />
-    </bundle>
 	<bundle id="org.freemarker.freemarker">
 		<category name="bundles" />
 	</bundle>
