@@ -71,17 +71,7 @@ export class ApplicationService {
     }
 
     public removeAllUserProperties() {
-        const userProps = this.getUserProperties();
-        const userPropsToDelete = [];
-        Object.keys(userProps).forEach(prop => {
-			if (prop.includes('user.properties.')) {
-				userPropsToDelete.push(prop);
-			}
-		});
-		userPropsToDelete.forEach(key => {
-			delete userProps[key];
-		});
-        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+        this.localStorageService.set('userProperties', JSON.stringify({}));
     }
 
     public getUIProperty(key: string) {
