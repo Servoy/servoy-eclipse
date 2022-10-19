@@ -29,4 +29,5 @@ export * from './lib/utils/popupform';
 export * from './lib/spectypes.service';
 export * from './lib/testing/publictesting.module';
 export * from './lib/testing/utils';
+export * from './lib/directives/tabfix.directive';
 
