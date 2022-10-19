@@ -252,6 +252,10 @@ export class EditorSessionService implements ServiceProvider {
             'uuid': uuid
         }, true)
     }
+    
+    buildTiNG() {
+		void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
+	}
 
     setInlineEditMode(edit: boolean) {
         this.inlineEdit = edit

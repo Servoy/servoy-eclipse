@@ -173,9 +173,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
-
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect.top + 'px');
+			
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect?.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect?.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
@@ -186,7 +186,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect.left - this.leftAdjust, y: event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect.top - this.topAdjust });
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getGlassPane().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
         if (this.editorSession.getState().dragging) return;

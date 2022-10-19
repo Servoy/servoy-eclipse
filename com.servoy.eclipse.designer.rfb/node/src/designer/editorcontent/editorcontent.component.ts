@@ -67,6 +67,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
         if (id === 'contentSizeChanged' && !this.urlParser.isAbsoluteFormLayout()) {
             this.adjustFromContentSize();
         }
+        if (id === 'buildTitaniumClient') {
+			this.editorSession.buildTiNG();
+		}
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -86,6 +89,11 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             return false;
         }
         return true;
+    }
+    
+    @HostListener('document:click', ['$event'])
+    onClick(event: MouseEvent) {
+		window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
     }
 
     adjustFromContentSize() {
