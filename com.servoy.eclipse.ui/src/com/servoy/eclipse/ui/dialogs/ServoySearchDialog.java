@@ -32,6 +32,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -325,6 +329,9 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final OpenInScriptEditorAction showEditWithScriptEditor;
 	private final OpenInFormEditorAction showEditWithFormEditor;
 
+	private boolean isAltKeyPressed;
+	private SelectionListener okButtonSelectionListener;
+
 	/**
 	 * @param shell
 	 */
@@ -596,6 +603,40 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	{
 		Composite container = (Composite)super.createDialogArea(parent);
 		return container;
+	}
+
+	@Override
+	public void create()
+	{
+		super.create();
+		// add our on selection listener to OK so we can read the modifier keys
+		okButtonSelectionListener = new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				isAltKeyPressed = (e.stateMask & SWT.BUTTON_MASK) != 0 && (e.stateMask & SWT.ALT) != 0;
+				getOkButton().removeSelectionListener(okButtonSelectionListener);
+				superOkPressed();
+			}
+		};
+		getOkButton().addSelectionListener(okButtonSelectionListener);
+	}
+
+	@Override
+	protected void okPressed()
+	{
+		// avoid calling super okPressed, let our own listener get the key modifiers first
+	}
+
+	private void superOkPressed()
+	{
+		super.okPressed();
+	}
+
+	public boolean isAltKeyPressed()
+	{
+		return isAltKeyPressed;
 	}
 
 	/**
