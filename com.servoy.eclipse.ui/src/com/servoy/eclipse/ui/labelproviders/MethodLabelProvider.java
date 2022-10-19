@@ -55,11 +55,18 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 	private final PersistContext persistContext;
 	private final boolean showPrefix;
 	private final boolean showNoneForDefault;
+	private final boolean defaultAsText;
 
 	public MethodLabelProvider(PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
 	{
+		this(persistContext, showPrefix, showNoneForDefault, false);
+	}
+
+	public MethodLabelProvider(PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault, boolean defaultAsText)
+	{
 		this.showPrefix = showPrefix;
 		this.showNoneForDefault = showNoneForDefault;
+		this.defaultAsText = defaultAsText;
 		if (persistContext == null) throw new NullPointerException();
 		this.persistContext = persistContext;
 	}
@@ -75,16 +82,17 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		}
 		if (val instanceof MethodWithArguments)
 		{
-			return getMethodText((MethodWithArguments)val, persistContext, showPrefix, showNoneForDefault);
+			return getMethodText((MethodWithArguments)val, persistContext, showPrefix, showNoneForDefault, defaultAsText);
 		}
 		return val.toString();
 	}
 
-	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault)
+	public static String getMethodText(MethodWithArguments mwa, PersistContext persistContext, boolean showPrefix, boolean showNoneForDefault,
+		boolean defaultAsText)
 	{
 		if (MethodWithArguments.METHOD_DEFAULT.equals(mwa))
 		{
-			return showNoneForDefault ? Messages.LabelNone : Messages.LabelDefault;
+			return showNoneForDefault ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
 		}
 
 		if (MethodWithArguments.METHOD_NONE.equals(mwa))
