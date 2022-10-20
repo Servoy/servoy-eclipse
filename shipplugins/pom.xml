@@ -114,13 +114,13 @@
                             <goal>fix-artifacts-metadata</goal>
                         </goals>
                     </execution>
-<!--                    <execution>
+                    <execution>
                         <id>verify</id>
                         <goals>
                             <goal>verify-repository</goal>
                         </goals>
                     </execution>
--->                </executions>
+                </executions>
             </plugin>
         </plugins>
     </build>
