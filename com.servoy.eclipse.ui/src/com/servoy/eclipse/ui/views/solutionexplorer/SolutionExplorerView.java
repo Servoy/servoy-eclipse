@@ -1089,7 +1089,7 @@ public class SolutionExplorerView extends ViewPart
 				fireTreeRefreshed(null);
 			}
 		};
-		runAndKeepTreePaths(runnable);
+		runAndKeepTreePaths(runnable, true);
 	}
 
 	public void refreshTreeNodeFromModel(final SimpleUserNode node)
@@ -1097,12 +1097,18 @@ public class SolutionExplorerView extends ViewPart
 		refreshTreeNodeFromModel(node, false);
 	}
 
+
+	public void refreshTreeNodeFromModel(final SimpleUserNode node, final boolean cleanOldNodeChildren)
+	{
+		refreshTreeNodeFromModel(node, cleanOldNodeChildren, true);
+	}
+
 	/**
 	 * Refreshes the specified node from the tree. If the node is null, it refreshes the whole tree.
 	 *
 	 * @param node the node to be refreshed in the tree or null to refresh the whole tree.
 	 */
-	public void refreshTreeNodeFromModel(final SimpleUserNode node, final boolean cleanOldNodeChildren)
+	public void refreshTreeNodeFromModel(final SimpleUserNode node, final boolean cleanOldNodeChildren, final boolean revealSelectedNode)
 	{
 		Runnable runnable = new Runnable()
 		{
@@ -1127,10 +1133,10 @@ public class SolutionExplorerView extends ViewPart
 			}
 		};
 
-		runAndKeepTreePaths(runnable);
+		runAndKeepTreePaths(runnable, revealSelectedNode);
 	}
 
-	private void runAndKeepTreePaths(final Runnable toRun)
+	private void runAndKeepTreePaths(final Runnable toRun, final boolean revealSelection)
 	{
 		UIJob job = new UIJob(getTreeViewer().getControl().getDisplay(), "Solution explorer tree operation in progress...")
 		{
@@ -1169,7 +1175,7 @@ public class SolutionExplorerView extends ViewPart
 							}
 							tree.setExpandedTreePaths(oldPath); // TODO hmm, isn't this redundant? I mean the loop above does the same thing right?
 							list.refresh();
-							tree.setSelection(toSelect, true);
+							tree.setSelection(toSelect, revealSelection);
 							ISelection current = tree.getSelection();
 							while (current.isEmpty() && !toSelect.isEmpty() && toSelect.getPaths()[0].getParentPath().getSegmentCount() > 0)
 							{
