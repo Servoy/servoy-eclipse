@@ -79,6 +79,7 @@ public class SplashHandler extends BasicSplashHandler
 
 			StringBuffer text = getSplashText(doGetRegisterString);
 			gc.drawText(text.toString(), 10, 320);
+			gc.getFont().dispose();
 			gc.dispose();
 
 //			if (!doGetRegisterString)
