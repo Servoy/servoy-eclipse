@@ -147,33 +147,20 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         continue;
                     }
                     let style = {};
-                    ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts
                         style = {
                             background: '#d0d0d0',
-                            top: ghost.location.y + 'px',
+                            bottom: '-20px',
+                            borderTop: '1px solid #000',
                             right: '-90px',
                             width: '90px',
                             height: '20px',
-                            cursor: 's-resize',
                             overflow: 'visible'
                         };
-                        ghost.hrstyle = {
-                            marginTop: '-1px',
-                            borderTop: '1px dashed #000',
-                            height: '0px',
-                            width: (this.formWidth + 90) + 'px',
-                            float: 'right'
-                        } as CSSStyleDeclaration;
                     } else if (ghost.type == GHOST_TYPES.GHOST_TYPE_FORM) { // the form
                         // why should we need this, it interferes a lot with the events
                         style = {
-                            display: 'none'/*
-                            left: 0,
-                            top: 0,
-                            width: ghost.size.width + "px",
-                            height: ghost.size.height + "px",
-                            padding: "3px"*/
+                            display: 'none'
                         };
                     } else {
                         let xOffset = this.ghostOffset;
@@ -361,7 +348,6 @@ class Ghost {
     class: string;
     propertyType: string;
     style: { left?: string, top?: string; right?: string; width?: string; height?: string };
-    hrstyle: CSSStyleDeclaration;
     location: { x: number, y: number };
     size: { width: number, height: number };
 }

@@ -1,7 +1,7 @@
 .resize-editor-width {
     width: 2px;
     height: 100%;
-    cursor: e-resize;
+    cursor: ew-resize;
     background-color: #e5e5e5;
     position: relative;
     left: 100%;

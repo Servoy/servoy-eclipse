@@ -6,6 +6,8 @@
         [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]" [attr.svy-ghosttype]="[ghost.type]"
         (dblclick)="openContainedForm(ghost)" (mousedown)="onMouseDown($event, ghost, container)">
         <i *ngIf="draggingGhost == ghost" class="fas fa-anchor"></i>
-        <hr [ngStyle]="ghost.hrstyle">{{ghost.text}}&nbsp;
+        {{ghost.text}}&nbsp;
     </div>
+    <designer-resizeeditorheight *ngIf="!container.propertyName"></designer-resizeeditorheight>
+   
 </div>
