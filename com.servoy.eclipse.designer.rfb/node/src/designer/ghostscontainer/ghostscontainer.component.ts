@@ -28,6 +28,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingGhostComponent: HTMLElement;
     formWidth: number;
     formHeight: number;
+    
+    ghostsVisible = true;
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -72,7 +74,23 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
             }
         }
+        
+        if (id !== 'hideGhostContainer' && !this.ghostsVisible) {
+			this.ghostsVisible = true;
+			this.hideShowGhosts('visible');
+		} else if (id === 'hideGhostContainer' && this.ghostsVisible) {
+			this.ghostsVisible = false;
+			this.hideShowGhosts('hidden');
+		}
     }
+    
+    hideShowGhosts(visibility: string) {
+		const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
+		Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
+			item.style.visibility = visibility; 
+			item.querySelector<HTMLElement>('.ghost').style.visibility = visibility;
+		});
+	}
 
     renderGhosts() {
         void this.editorSession.getGhostComponents<{ ghostContainers: Array<GhostContainer> }>().then((result: { ghostContainers: Array<GhostContainer> }) => {
