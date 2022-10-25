@@ -153,11 +153,6 @@ public class SetPropertiesHandler implements IServerService
 								cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(context, false),
 									StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("width"))));
 							}
-							if (properties.has("height"))
-							{
-								cc.add(new SetPropertyCommand("formheight", PersistPropertySource.createPersistPropertySource(context, false),
-									StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("height"))));
-							}
 						}
 					}
 				}
