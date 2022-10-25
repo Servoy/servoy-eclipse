@@ -91,6 +91,24 @@ body {
  .svy-overflow-auto {
 	overflow: auto;
 }
+ .svy-overflowx-auto {
+    overflow-x: auto;
+}
+ .svy-overflowy-auto {
+    overflow-y: auto;
+}
+ .svy-overflowx-hidden {
+    overflow-x: hidden;
+}
+ .svy-overflowy-hidden {
+    overflow-y: hidden;
+}
+ .svy-overflowx-scroll {
+    overflow-x: scroll;
+}
+ .svy-overflowy-scroll {
+    overflow-y: scroll;
+}
 .svy-padding-xs {
 	padding: 1px 5px;
 }
