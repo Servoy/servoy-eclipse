@@ -286,7 +286,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				}
 				if (value instanceof MethodWithArguments)
 				{
-					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persistContext, showPrefix, false);
+					return MethodLabelProvider.getMethodText((MethodWithArguments)value, persistContext, showPrefix, false, true);
 				}
 
 				return value.toString();

@@ -68,6 +68,7 @@ public class NodeFolderCreatorJob extends Job
 	protected IStatus run(IProgressMonitor monitor)
 	{
 		boolean executeNpmInstall = false;
+		File fullyGenerated = new File(nodeFolder.getParent(), ".fullygenerated");
 		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 		try
 		{
@@ -88,7 +89,7 @@ public class NodeFolderCreatorJob extends Job
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
-			if (packageJsonFile.exists() && !force)
+			if (packageJsonFile.exists() && !force && fullyGenerated.exists())
 			{
 				try
 				{
@@ -130,6 +131,7 @@ public class NodeFolderCreatorJob extends Job
 			if (codeChanged)
 			{
 				// delete the full parent dir because the main package json is changed
+				fullyGenerated.delete();
 				if (mainPackageJsonChanged)
 				{
 
@@ -182,6 +184,7 @@ public class NodeFolderCreatorJob extends Job
 			{
 				// now do an npm install on the main, parent folder
 				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
+				fullyGenerated.createNewFile();
 			}
 			catch (IOException | InterruptedException e1)
 			{

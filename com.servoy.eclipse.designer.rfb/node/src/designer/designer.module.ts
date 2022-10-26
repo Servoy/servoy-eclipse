@@ -9,6 +9,7 @@ import { AnchoringIndicatorComponent } from './anchoringindicator/anchoringindic
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ResizeEditorWidthComponent } from './resizeeditorwidth/resizeeditorwidth.component';
+import { ResizeEditorHeightComponent } from './resizeeditorheight/resizeeditorheight.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
 import { MouseSelectionComponent, PositionMenuDirective } from './mouseselection/mouseselection.component';
 import { HighlightComponent } from './highlight/highlight.component';
@@ -47,6 +48,7 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     PaletteComponent,
     ResizerComponent,
     ResizeEditorWidthComponent,
+    ResizeEditorHeightComponent,
     ContextMenuComponent,
     MouseSelectionComponent,
     HighlightComponent,

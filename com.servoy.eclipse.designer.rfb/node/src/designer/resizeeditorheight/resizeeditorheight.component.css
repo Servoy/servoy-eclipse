@@ -1,0 +1,12 @@
+.resize-editor-height {
+    width: 100%;
+    height: 2px;
+    cursor: ns-resize;
+    background-color: #e5e5e5;
+    position: relative;
+    top: 0px;
+}
+
+.resize-editor-height:HOVER {
+    background-color: #CCC;
+}

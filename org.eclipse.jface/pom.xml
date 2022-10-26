@@ -29,6 +29,7 @@
   </properties>
 	<build>
 		<plugins>
+<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -50,7 +51,7 @@
 									<overWrite>true</overWrite>
 									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
 								</artifactItem>
-<!--								<artifactItem>
+								<artifactItem>
 									<groupId>eclipse.platform.ui</groupId>
 									<artifactId>org.eclipse.jface</artifactId>
 									<version>${project.version}</version>
@@ -59,12 +60,12 @@
 									<overWrite>true</overWrite>
 									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
 								</artifactItem>
--->
 							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+-->
 		</plugins>
 	</build>
 </project>

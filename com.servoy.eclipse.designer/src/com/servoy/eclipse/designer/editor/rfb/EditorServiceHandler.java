@@ -210,6 +210,17 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("consoleLog", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				System.out.println(args.optString("message", ""));
+				return null;
+			}
+		});
+
 
 		configuredHandlers.put("zoomOut", new IServerService()
 		{

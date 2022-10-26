@@ -257,6 +257,10 @@ export class EditorSessionService implements ServiceProvider {
 		void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
 	}
 
+    consoleLog(message: string) {//log message to eclipse console
+        void this.wsSession.callService('formeditor', 'consoleLog', {message: message}, true);
+    }
+
     setInlineEditMode(edit: boolean) {
         this.inlineEdit = edit
         void this.wsSession.callService('formeditor', 'setInlineEditMode', {

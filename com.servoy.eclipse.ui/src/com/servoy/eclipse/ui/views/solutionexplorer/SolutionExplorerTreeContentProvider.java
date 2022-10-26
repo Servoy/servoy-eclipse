@@ -2138,7 +2138,7 @@ public class SolutionExplorerTreeContentProvider
 		if (pluginNode.isHidden()) pluginNode.hide();
 		else pluginNode.unhide();
 
-		view.refreshTreeNodeFromModel(pluginNode);
+		view.refreshTreeNodeFromModel(pluginNode, false, false);
 	}
 
 	private ArrayList<PlatformSimpleUserNode> getJavaPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
@@ -2149,10 +2149,8 @@ public class SolutionExplorerTreeContentProvider
 			if (loadedJavaPluginNodes == null)
 			{
 				loadedJavaPluginNodes = new ArrayList<PlatformSimpleUserNode>();
-				Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
-				while (it.hasNext())
+				for (IClientPlugin plugin : Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class))
 				{
-					IClientPlugin plugin = it.next();
 					try
 					{
 						IScriptable scriptObject = null;
@@ -3041,10 +3039,8 @@ public class SolutionExplorerTreeContentProvider
 
 			List<PlatformSimpleUserNode> relationNodes = new ArrayList<PlatformSimpleUserNode>();
 			TreeSet<Relation> relations = new TreeSet<Relation>(NameComparator.INSTANCE);
-			Iterator<Solution> solutions = allSolutions.values().iterator();
-			while (solutions.hasNext())
+			for (Solution sol : allSolutions.values())
 			{
-				Solution sol = solutions.next();
 				Iterator<Relation> it = sol.getRelations(table, true, false);
 
 				while (it.hasNext())
@@ -3078,12 +3074,9 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshContent(Map<IPersist, Set<Class< ? extends IPersist>>> persists)
 	{
-		// optimize a bit so we don't refresh the same thing multiple times
-		Iterator<Entry<IPersist, Set<Class< ? extends IPersist>>>> it = persists.entrySet().iterator();
 		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
-		while (it.hasNext())
+		for (Entry<IPersist, Set<Class< ? extends IPersist>>> entry : persists.entrySet())
 		{
-			Entry<IPersist, Set<Class< ? extends IPersist>>> entry = it.next();
 			IPersist persist = entry.getKey();
 			IRootObject root = persist.getRootObject();
 			boolean refreshedFormsNode = false;

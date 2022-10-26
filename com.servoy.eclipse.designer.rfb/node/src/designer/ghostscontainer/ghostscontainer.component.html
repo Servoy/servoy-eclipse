@@ -2,10 +2,12 @@
      [ngStyle]="container.style">
     <div class="ghostContainerPropName" *ngIf="container.propertyName">property '{{container.propertyName}}'</div>
     <designer-resizeeditorwidth *ngIf="!container.propertyName"></designer-resizeeditorwidth>
-    <div class="ghost label {{ghost.class}}" *ngFor="let ghost of container.ghosts"
+    <div id="ghostBody" class="ghost label {{ghost.class}}" *ngFor="let ghost of container.ghosts"
         [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]" [attr.svy-ghosttype]="[ghost.type]"
         (dblclick)="openContainedForm(ghost)" (mousedown)="onMouseDown($event, ghost, container)">
         <i *ngIf="draggingGhost == ghost" class="fas fa-anchor"></i>
-        <hr [ngStyle]="ghost.hrstyle">{{ghost.text}}&nbsp;
+        {{ghost.text}}&nbsp;
     </div>
+    <designer-resizeeditorheight *ngIf="!container.propertyName"></designer-resizeeditorheight>
+   
 </div>
