@@ -17,11 +17,6 @@
             <unit id="org.apache.commons.codec.source" version="1.14.0.v20200818-1422"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository"/>
-            <unit id="org.antlr.runtime" version="3.0.0.v200803061811"/>
-            <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.12/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
@@ -92,6 +87,26 @@
             <unit id="tus-java-server" version="2.0.0.s2"/>
             <unit id="xstream" version="1.4.19"/>
         </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <dependencies>
+			    <dependency>
+				    <groupId>org.antlr</groupId>
+				    <artifactId>antlr4-runtime</artifactId>
+				    <version>4.11.1</version>
+				    <type>jar</type>
+			    </dependency>
+		    </dependencies>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <dependencies>
+			    <dependency>
+				    <groupId>org.antlr</groupId>
+				    <artifactId>ST4</artifactId>
+				    <version>4.3.4</version>
+				    <type>jar</type>
+			    </dependency>
+		    </dependencies>
+	    </location>
     </locations>
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>
