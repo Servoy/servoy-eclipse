@@ -4,12 +4,13 @@ import { IDesignFormComponent } from './servoydesigner.component';
 import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
+import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } from '../sablo/types_registry';
 
 @Injectable()
 export class EditorContentService {
     designFormCallback: IDesignFormComponent;
 
-    constructor(private formService: FormService, protected converterService: ConverterService) {
+    constructor(private formService: FormService, protected converterService: ConverterService, private typesRegistry: TypesRegistry) {
 
     }
 
@@ -17,7 +18,7 @@ export class EditorContentService {
         this.designFormCallback = designFormCallback;
     }
 
-    updateFormData(updates) {
+    updateFormData(updates: string) {
         const data = JSON.parse(updates);
         const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
         const reorderLayoutContainers: Array<StructureCache> = new Array();
@@ -114,11 +115,22 @@ export class EditorContentService {
                     }
                 } else if (formCache.getFormComponent(elem.name) == null) {
                     redrawDecorators = true;
-                    if (elem.model[ConverterService.TYPES_KEY] != null) {
-                        this.converterService.convertFromServerToClient(elem.model, elem.model[ConverterService.TYPES_KEY], null,
-                            (property: string) => elem.model ? elem.model[property] : elem.model);
+
+                    const rawModelProperties = elem.model;
+                    elem.model = {};
+
+                    const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.type);
+                    const componentDynamicTypesHolder = {};
+                    const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => elem.model?.[propertyName], componentSpec);
+
+                    for (const propName of Object.keys(rawModelProperties)) {
+                        elem.model[propName] = this.converterService.convertFromServerToClient(rawModelProperties[propName],
+                                                componentSpec?.getPropertyType(propName), null,
+                                                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+                        // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
                     }
-                    if (elem.type == 'servoycoreFormcomponent' || elem.type == 'servoycoreListformcomponent') {
+
+                    if (elem.type === 'servoycoreFormcomponent' || elem.type === 'servoycoreListformcomponent') {
                         const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
                         const layout: { [property: string]: string } = {};
                         if (!elem.responsive) {
@@ -140,7 +152,8 @@ export class EditorContentService {
                                 if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
                             }
                             if (minWidth) {
-                                layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
+                                layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored,
+                                                                       // allow it to grow in width to fill responsive space
 
                                 if (continingFormIsResponsive && widthExplicitlySet) {
                                     // if container is in a responsive form, content is anchored and width model property is explicitly set
@@ -151,7 +164,8 @@ export class EditorContentService {
                             }
                         }
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                        const fcc = new FormComponentCache(elem.name, elem.model, elem.handlers, elem.responsive, elem.position, formComponentProperties, elem.model.foundset);
+                        const fcc = new FormComponentCache(elem.name, elem.type, elem.handlers, elem.responsive, elem.position,
+                            formComponentProperties, elem.model.foundset, this.typesRegistry, undefined).initForDesigner(elem.model);
                         formCache.addFormComponent(fcc);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -165,7 +179,7 @@ export class EditorContentService {
                             }
                         }
                     } else {
-                        const comp = new ComponentCache(elem.name, elem.type, elem.model, elem.handlers, elem.position);
+                        const comp = new ComponentCache(elem.name, elem.type, elem.handlers, elem.position, this.typesRegistry, undefined).initForDesigner(elem.model);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -193,7 +207,7 @@ export class EditorContentService {
                         if (!isNaN(fixedName[0])) {
                             fixedName = '_' + fixedName;
                         }
-                        if ((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1) {
+                        if ((data.updatedFormComponentsDesignId.indexOf(fixedName)) !== -1) {
                             refresh = true;
                             const formComponent = component as FormComponentCache;
                             if (formComponent.responsive) {
@@ -236,11 +250,12 @@ export class EditorContentService {
         }
         let toDelete = [];
         if (data.updatedFormComponentsDesignId) {
-            for (var index in data.updatedFormComponentsDesignId) {
+            for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
                 const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
                 //delete components of the old form component
-                const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) == -1));
+                const found = [...formCache.componentCache.keys()].filter(comp =>
+                    (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) === -1));
                 if (found) {
                     found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
                     toDelete.push(...found);
@@ -326,30 +341,39 @@ export class EditorContentService {
     updateComponentProperties(component: IComponentCache, elem: any): boolean {
         let redrawDecorators = false;
         component.layout = elem.position;
-        const beanConversion = elem.model[ConverterService.TYPES_KEY];
-        for (const property of Object.keys(elem.model)) {
-            let value = elem.model[property];
-            if (beanConversion && beanConversion[property]) {
-                value = this.converterService.convertFromServerToClient(value, beanConversion[property], component.model[property],
-                    (prop: string) => component.model ? component.model[prop] : component.model);
-            }
-            if (property === 'size' && (component.model[property].width !== value.width || component.model[property].height !== value.height) ||
-                property === 'location' && (component.model[property].x !== value.x || component.model[property].y !== value.y) ||
-                property === 'anchors' && component.model[property] != value || 
-                property === 'cssPosition' && (component.model[property].top !== value.top || component.model[property].bottom !== value.bottom || component.model[property].left !== value.left || component.model[property].right !== value.right) ) {
+
+        const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.type);
+        const componentDynamicTypesHolder = {};
+        const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => component.model?.[propertyName], componentSpec);
+
+        for (const propName of Object.keys(elem.model)) {
+            const value = component.model[propName] = this.converterService.convertFromServerToClient(elem.model[propName],
+                            componentSpec?.getPropertyType(propName), component.model[propName],
+                            componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+            // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
+
+            if (
+                   (propName === 'size' && (component.model[propName].width !== value.width || component.model[propName].height !== value.height)) ||
+                   (propName === 'location' && (component.model[propName].x !== value.x || component.model[propName].y !== value.y)) ||
+                   (propName === 'anchors' && component.model[propName] !== value) ||
+                   (
+                       propName === 'cssPosition' &&
+                       (component.model[propName].top !== value.top || component.model[propName].bottom !== value.bottom ||
+                       component.model[propName].left !== value.left || component.model[propName].right !== value.right)
+                   )
+               ) {
                 redrawDecorators = true;
             }
-            component.model[property] = value;
         }
         for (const property of Object.keys(component.model)) {
-            if (elem.model[property] == undefined) {
-                component.model[property] = null;
+            if (elem.model[property] === undefined) {
+                delete component.model[property];
             }
         }
         return redrawDecorators;
     }
 
-    updateForm(uuid: string, parentUuid: string, width: number, height: number) {
+    updateForm(_uuid: string, _parentUuid: string, width: number, height: number) {
         /*if (formData.parentUuid !== parentUuid)
         {
             this.contentRefresh();
@@ -387,10 +411,10 @@ export class EditorContentService {
                 if (elem instanceof StructureCache) {
                     formCache.removeLayoutContainer(elem.id);
                     this.removeChildrenRecursively(elem, formCache);
-                } else if (elem instanceof ComponentCache) {
-                    formCache.removeComponent(elem.name);
                 } else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
+                } else if (elem instanceof ComponentCache) {
+                    formCache.removeComponent(elem.name);
                 }
             });
         }
@@ -399,8 +423,9 @@ export class EditorContentService {
     private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (items) {
             items.sort((comp1, comp2): number => {
-                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority']) : parseInt(comp1.model.servoyAttributes['svy-priority']);
-                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority']) : parseInt(comp2.model.servoyAttributes['svy-priority']);
+                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority'], 10) : parseInt(comp1.model.servoyAttributes['svy-priority'], 10);
+                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority'], 10) : parseInt(comp2.model.servoyAttributes['svy-priority'], 10);
+
                 // priority is location in responsive form and formindex in absolute form
                 if (priocomp2 > priocomp1) {
                     return -1;

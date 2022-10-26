@@ -152,7 +152,7 @@ export class FoundsetType implements IType<FoundsetValue> {
 
             // if it's a no-op ('n' below), ignore it (sometimes server asks a prop. to send changes even though it has none to send);
             // if it has serverJSONValue.serverSize !== undefined that means a full value has been sent from server; so no granular updates above
-            if (!serverJSONValue.n &&  && serverJSONValue.serverSize !== undefined) {
+            if (!serverJSONValue.n && serverJSONValue.serverSize !== undefined) {
                 // not updates - so the whole thing was received
 
                 let internalState: FoundsetTypeInternalState;
@@ -558,6 +558,22 @@ class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
 
 interface ServerSentJSONForFoundset {
 
+    serverSize?: number;
+    foundsetId?: number;
+    sortColumns?: string;
+    selectedRowIndexes?: number[];
+    multiSelect?: boolean;
+    hasMoreRows?: boolean;
+    columnFormats?: Record<string, any>;
+    handledClientReqIds?: [{ id: number; value: any }];
+    n?: boolean; // NO_OP
+    viewPort?: {
+        startIndex?: number;
+        size?: number;
+        rows?: any[];
+        _T?: ConversionInfoFromServerForViewport;
+    };
+
     upd_serverSize?: number;
     upd_hasMoreRows?: boolean;
     upd_multiSelect?: boolean;
@@ -574,7 +590,5 @@ interface ServerSentJSONForFoundset {
         upd_rows?: RowUpdate[];
         _T?: ConversionInfoFromServerForViewport;
     };
-    handledClientReqIds?: [{ id: number; value: any }];
-    n?: boolean; // NO_OP
 
 }

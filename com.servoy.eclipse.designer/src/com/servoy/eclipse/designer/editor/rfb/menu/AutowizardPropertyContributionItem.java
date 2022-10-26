@@ -49,7 +49,7 @@ public class AutowizardPropertyContributionItem extends CompoundContributionItem
 		IPersist persist = persistContext != null ? persistContext.getPersist() : null;
 		if (persist instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)persist).getTypeName());
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)persist).getTypeName());
 			list = spec.getAllPropertiesNames().stream()
 				.filter(property -> spec.getProperty(property) != null && "autoshow".equals(spec.getProperty(property).getTag("wizard")))//
 				.map(p -> {

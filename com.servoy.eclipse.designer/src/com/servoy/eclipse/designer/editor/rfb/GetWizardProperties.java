@@ -35,7 +35,7 @@ public class GetWizardProperties implements IServerService
 	public Object executeMethod(String methodName, JSONObject args) throws Exception
 	{
 		JSONObject result = new JSONObject();
-		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		for (WebObjectSpecification spec : specs)
 		{
 			List<String> autoshowProperties = spec.getAllPropertiesNames().stream()

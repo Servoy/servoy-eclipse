@@ -72,7 +72,7 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectSpecification spec : specs)
 		{
-			if (model == null || model.getExportedComponents().contains(spec.getName()))
+			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				genereateSpec(template, viewChild, spec, spec.getName());
 				if (spec.getName().equals("servoydefault-tabpanel"))

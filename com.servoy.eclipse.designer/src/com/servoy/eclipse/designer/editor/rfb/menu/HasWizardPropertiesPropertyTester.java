@@ -22,7 +22,7 @@ public class HasWizardPropertiesPropertyTester extends PropertyTester
 			if (persistContext.getPersist() instanceof WebComponent)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-					.getWebComponentSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
+					.getWebObjectSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
 				return spec.getAllPropertiesNames().stream()//
 					.filter(prop -> spec.getProperty(prop) != null && "autoshow".equals(spec.getProperty(prop).getTag("wizard")))//
 					.count() > 1;

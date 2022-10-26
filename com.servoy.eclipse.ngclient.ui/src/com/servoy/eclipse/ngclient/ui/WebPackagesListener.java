@@ -143,7 +143,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				for (WebObjectSpecification webObjectSpecification : allServices)
 				{
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(webObjectSpecification.getPackageName()))
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(webObjectSpecification.getPackageName()))
 					{
 						continue;
 					}
@@ -174,7 +174,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
 				{
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
 					{
 						continue;
 					}
@@ -196,7 +196,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 				{
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackages().contains(entry.getPackageName()))
+					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
 					{
 						continue;
 					}
@@ -293,7 +293,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					ng2Services.keySet().forEach(service -> {
 						if (service.getNG2Config().getServiceName() != null)
 						{
-							if (this.warExportModel != null && !this.warExportModel.getExportedServices().contains(service.getName()))
+							if (this.warExportModel != null && !this.warExportModel.getAllExportedServicesWithoutSabloServices().contains(service.getName()))
 							{
 								return;
 							}
@@ -352,10 +352,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					ServoyLog.logError(e);
 				}
 
-				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications())
+				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications())
 				{
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (warExportModel == null || warExportModel.getExportedComponents().contains(spec.getName()))
+					if (warExportModel == null || warExportModel.getAllExportedComponents().contains(spec.getName()))
 					{
 						Set<CssLib> libs = spec.getNG2Config().getDependencies().getCssLibrary();
 						if (libs != null)
@@ -1151,7 +1151,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	}
 
 	/**
-	 * returns true if the given package is enabled, will return falso only when the given package is a ng1 default package mapping
+	 * returns true if the given package is enabled, will return false only when the given package is a ng1 default package mapping
 	 * and the preference says it is disabled
 	 * @param packageName
 	 * @return

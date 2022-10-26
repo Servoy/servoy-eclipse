@@ -76,7 +76,8 @@ export class ViewportService {
      *
      * @return the given viewPortUpdate with conversions applied to it
      */
-    public updateWholeViewport<T extends any[]>(oldViewPort: T, internalState: FoundsetViewportState, viewPortUpdate: any[], viewPortUpdateConversions: ConversionInfoFromServerForViewport,
+    public updateWholeViewport<T extends any[]>(oldViewPort: T, internalState: FoundsetViewportState, viewPortUpdate: any[],
+                                viewPortUpdateConversions: ConversionInfoFromServerForViewport,
                                 defaultColumnTypes: IWebObjectSpecification,
                                 propertyContextCreator: IPropertyContextCreatorForRow,
                                 simpleRowValue: boolean,

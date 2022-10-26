@@ -462,10 +462,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return this.parent.getTemplateForLFC(item);
     }
 
-    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache ): IChildComponentPropertyValue {
+    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache): IChildComponentPropertyValue {
         for (const elem of items) {
             if (elem['name'] === item.name) {
-                return elem as IChildComponentPropertyValue;
+                return (elem as unknown) as IChildComponentPropertyValue;
             }
             if (elem['items']) {
                 const found = this.findElement(elem['items'], item);

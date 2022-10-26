@@ -1,7 +1,7 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-        TemplateRef,  Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
+import { Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+        TemplateRef,  ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, PartCache, FormComponentProperties, IFormComponent } from '../types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
@@ -22,31 +22,28 @@ import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_re
  */
 export abstract class AbstractFormComponent {
 
-    abstract getFormCache(): FormCache;
-
-    abstract getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any>;
-
-    abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
-
-    abstract getContainerByName(containername: string): Element;
-
     _containers: { added: any; removed: any };
     _cssstyles: { [x: string]: any };
+    protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
 
     constructor(protected renderer: Renderer2) {
+    }
+
+    get containers() {
+        return this._containers;
     }
 
     @Input()
     set containers(containers: { added: any; removed: any }) {
         if (!containers) return;
-        for (const containername in containers.added) {
+        for (const containername of Object.keys(containers.added)) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
             }
         }
         if (this._containers && this._containers.added) {
-            for (const containername in this._containers.added) {
+            for (const containername of Object.keys(this._containers.added)) {
                 const container = this.getContainerByName(containername);
                 if (container) {
                     let classesToRemove = this._containers.added[containername];
@@ -58,14 +55,14 @@ export abstract class AbstractFormComponent {
                 }
             }
         }
-        for (const containername in containers.removed) {
+        for (const containername of Object.keys(containers.removed)) {
             const container = this.getContainerByName(containername);
             if (container) {
                 containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
             }
         }
         if (this._containers && this._containers.removed) {
-            for (const containername in this._containers.removed) {
+            for (const containername of Object.keys(this._containers.removed)) {
                 const container = this.getContainerByName(containername);
                 if (container) {
                     let classesToAddBackIn = this._containers.removed[containername];
@@ -80,28 +77,47 @@ export abstract class AbstractFormComponent {
         this._containers = containers;
     }
 
-    get containers() {
-        return this._containers;
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    get cssStyles() {
+        return this._cssstyles;
     }
 
-    @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any }) {
+    @Input()
+    set cssStyles(cssStyles: { [x: string]: any }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
-        for (const containername in cssStyles) {
+        for (const containername of Object.keys(cssStyles)) {
             const container = this.getContainerByName(containername);
             if (container) {
                 const stylesMap = cssStyles[containername];
-                for (const key in stylesMap) {
+                for (const key of Object.keys(stylesMap)) {
                     this.renderer.setStyle(container, key, stylesMap[key]);
                 }
             }
         }
     }
 
-    get cssstyles() {
-        return this._cssstyles;
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void {
+        const comp = this.componentCache[componentName];
+        if (comp) {
+            const changes = {};
+            propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
+                changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
+            });
+            comp.ngOnChanges(changes);
+            // this is kind of like a push so we should trigger this.
+            comp.detectChanges();
+        }
     }
+
+    abstract getFormCache(): FormCache;
+
+    abstract getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any>;
+
+    abstract getTemplateForLFC(state: ComponentCache): TemplateRef<any>;
+
+    abstract getContainerByName(containername: string): Element;
+
 }
 
 @Component({
@@ -126,7 +142,7 @@ export abstract class AbstractFormComponent {
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
-      
+
       <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
@@ -134,7 +150,7 @@ export abstract class AbstractFormComponent {
             </div>
           </div>
       </ng-template>
-      
+
       <!-- structure template generate start -->
       <!-- structure template generate end -->
       <ng-template  #formComponentAbsoluteDiv  let-state="state" >
@@ -192,7 +208,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     private handlerCache: { [property: string]: { [property: string]: () => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
-    private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
@@ -203,6 +218,48 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
                 @Inject(DOCUMENT) private document: Document) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
+    }
+
+    get containers() {
+        return this._containers;
+    }
+
+    @Input()
+    set containers(containers: { added: any; removed: any }) {
+        if (!containers) return;
+        this._containers = containers;
+        for (const containername of Object.keys(containers.added)) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
+            }
+        }
+        for (const containername of Object.keys(containers.removed)) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
+            }
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    get cssStyles() {
+        return this._cssstyles;
+    }
+
+    @Input()
+    set cssStyles(cssStyles: { [x: string]: any }) {
+        if (!cssStyles) return;
+        this._cssstyles = cssStyles;
+        for (const containername of Object.keys(cssStyles)) {
+            const container = this.getContainerByName(containername);
+            if (container) {
+                const stylesMap = cssStyles[containername];
+                for (const key of Object.keys(stylesMap)) {
+                    this.renderer.setStyle(container, key, stylesMap[key]);
+                }
+            }
+        }
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
@@ -238,60 +295,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     public getFormCache(): FormCache {
         return this.formCache;
-    }
-
-    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void {
-        const comp = this.componentCache[componentName];
-        if (comp) {
-            const changes = {};
-            propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
-                changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
-            });
-            comp.ngOnChanges(changes);
-            // this is kind of like a push so we should trigger this.
-            comp.detectChanges();
-        }
-    }
-
-    @Input('containers')
-    set containers(containers: {added: any, removed: any}) {
-        if (!containers) return;
-        this._containers = containers;
-        for (let containername in containers.added) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
-            }
-        }
-        for (let containername in containers.removed) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
-            }
-        }
-    }
-
-    get containers() {
-        return this._containers;
-    }
-
-    @Input('cssStyles')
-    set cssstyles(cssStyles: { [x: string]: any; }) {
-        if (!cssStyles) return;
-        this._cssstyles = cssStyles;
-        for (let containername in cssStyles) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                const stylesMap = cssStyles[containername];
-                for (let key in stylesMap) {
-                    this.renderer.setStyle(container, key, stylesMap[key]);
-                }
-            }
-        }
-    }
-
-    get cssstyles() {
-        return this._cssstyles;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -478,10 +481,10 @@ class FormComponentServoyApi extends ServoyApi {
     }
 
     registerComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.registerComponent(comp);
+        this.fc.registerComponent(comp);
     }
 
     unRegisterComponent(comp: ServoyBaseComponent<any> ) {
-     this.fc.unRegisterComponent(comp);
+        this.fc.unRegisterComponent(comp);
     }
 }

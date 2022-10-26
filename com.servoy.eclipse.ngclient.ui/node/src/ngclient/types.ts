@@ -13,9 +13,8 @@ export class FormCache implements IFormCache {
     public size: Dimension;
     public partComponentsCache: Array<ComponentCache | StructureCache>;
     public layoutContainersCache: Map<string, StructureCache>;
-
-    private componentCache: Map<string, ComponentCache>;
-    private formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
+    public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
+    public componentCache: Map<string, ComponentCache>;
 
     private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
@@ -110,7 +109,7 @@ export class FormCache implements IFormCache {
 
     public getComponentSpecification(componentName: string) {
         let componentCache: ComponentCache = this.componentCache.get(componentName);
-        if (!componentCache) componentCache = this._formComponents.get(componentName);
+        if (!componentCache) componentCache = this.formComponents.get(componentName);
         return componentCache ? this.typesRegistry.getComponentSpecification(componentCache.type) : undefined;
     }
 
@@ -119,7 +118,7 @@ export class FormCache implements IFormCache {
 
         let type = componentSpec.getPropertyType(propertyName);
         if (!type) type = this.componentCache.get(componentName)?.dynamicClientSideTypes[propertyName];
-        if (!type) type = this._formComponents.get(componentName)?.dynamicClientSideTypes[propertyName];
+        if (!type) type = this.formComponents.get(componentName)?.dynamicClientSideTypes[propertyName];
 
         return type;
     }
@@ -167,6 +166,11 @@ export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
 export class ComponentCache implements IComponentCache {
 
+    private static NO_PUSH_PARENT_ACCESS_FOR_DESIGNER = {
+        shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => true,
+        changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {}
+    };
+
     /**
      * The dynamic client side types of a component's properties (never null, can be an empty obj). These are client side types sent from server that are
      * only known at runtime (so not directly from .spec). For example dataproviders could decide that they send 'date' types.
@@ -177,9 +181,9 @@ export class ComponentCache implements IComponentCache {
     public readonly dynamicClientSideTypes: Record<string, IType<any>> = {};
     public readonly model: { [property: string]: any };
 
-    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
-
     public parent: StructureCache;
+
+    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
 
     constructor(public readonly name: string,
         public readonly type: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
@@ -188,7 +192,24 @@ export class ComponentCache implements IComponentCache {
         private readonly typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
             this.model = this.createModel();
-            this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(parentAccessForSubpropertyChanges);
+            this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
+                parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
+    }
+
+    initForDesigner(initialModelProperties: { [property: string]: any }): ComponentCache {
+        // set initial model contents
+        for (const key of Object.keys(initialModelProperties)) {
+            this.model[key] = initialModelProperties[key];
+        }
+        return this;
+    }
+
+    sendChanges(_propertyName: string, _newValue: any, _oldValue: any, _rowId?: string, _isDataprovider?: boolean) {
+        // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.)
+    }
+
+    toString() {
+        return 'ComponentCache(' + this.name + ', '+ this.type + ')';
     }
 
     private createModel(): { [property: string]: any } {
@@ -247,14 +268,6 @@ export class ComponentCache implements IComponentCache {
                 } else return Reflect.deleteProperty(underlyingModelObject, prop);
             }
         };
-    }
-
-    sendChanges(propertyName: string, newValue: any, oldValue: any, rowId?: string, isDataprovider?: boolean) {
-        // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.) 
-    }
-
-    toString() {
-        return 'ComponentCache(' + this.name + ', '+ this.type + ')';
     }
 
 }
@@ -335,6 +348,7 @@ export class FormComponentCache extends ComponentCache {
 
     constructor(
         name: string,
+        type: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
         handlers: Array<string>,
         public responsive: boolean,
         layout: { [property: string]: string },
@@ -359,6 +373,11 @@ export class FormComponentCache extends ComponentCache {
         if (child instanceof StructureCache) {
             child.parent = undefined;
         }
+    }
+
+    initForDesigner(initialModelProperties: { [property: string]: any }): FormComponentCache {
+        super.initForDesigner(initialModelProperties);
+        return this;
     }
 
 }

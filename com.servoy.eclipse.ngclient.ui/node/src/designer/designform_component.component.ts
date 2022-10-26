@@ -3,17 +3,17 @@ import {
     TemplateRef, AfterViewInit, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
-import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
+import { FormCache, StructureCache, FormComponentCache, ComponentCache, IFormComponent } from '../ngclient/types';
 
 import { ServoyService } from '../ngclient/servoy.service';
 
-import { SabloService } from '../sablo/sablo.service';
 import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
 import { DOCUMENT } from '@angular/common';
 import { AbstractFormComponent } from '../ngclient/form/form_component.component';
+import { TypesRegistry} from '../sablo/types_registry';
 
 @Component({
     // eslint-disable-next-line
@@ -48,7 +48,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
-      
+
       <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
@@ -83,7 +83,8 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
     /* eslint-enable max-len */
 })
 
-export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit {
+export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, IFormComponent {
+
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -100,8 +101,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     // component viewchild template generate end
 
-
-
     @Input() name: string;
 
     formClasses: string[];
@@ -115,7 +114,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     insertedClone: ComponentCache | StructureCache;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
-    private componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
     private log: LoggerService;
     private designMode: boolean;
     private maxLevel = 3;
@@ -123,15 +121,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private dropHighlightIgnoredIds: Array<string> = null;
     private allowedChildren: unknown;
 
-    constructor(private formservice: FormService, private sabloService: SabloService,
+    constructor(private formservice: FormService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
         private changeHandler: ChangeDetectorRef,
         private el: ElementRef, protected renderer: Renderer2,
         @Inject(DOCUMENT) private document: Document,
-        private windowRefService: WindowRefService) {
+        private windowRefService: WindowRefService,
+        private typesRegistry: TypesRegistry) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
-        this.windowRefService.nativeWindow.addEventListener("message", (event) => {
+
+        this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
@@ -150,8 +150,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         });
                     }
                 } else {
-                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, event.data.model, [], model);
-                    this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, event.data.model, [], model_inserted); //TODO only in responsive
+                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, [], model, typesRegistry, undefined).initForDesigner(event.data.model);
+                    this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, [], model_inserted,
+                                                typesRegistry, undefined).initForDesigner(event.data.model); //TODO only in responsive
                 }
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
@@ -170,13 +171,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 } else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                    const oldModel = this.insertedClone.model;
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers,
-                            this.insertedClone.layout);
+                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.type, this.insertedClone.handlers,
+                            this.insertedClone.layout, this.typesRegistry, undefined).initForDesigner(oldModel);
+
                         parent.addChild(this.insertedClone);
                     }
-                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.model, this.insertedClone.handlers, this.insertedClone.layout);
+
+                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.handlers, this.insertedClone.layout,
+                                                    this.typesRegistry, undefined).initForDesigner(oldModel);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
                 this.designMode = this.showWireframe;
@@ -192,9 +197,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
 
                 if (event.data.dropTarget) {
-                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
-                }
-                else if (!this.formCache.absolute){
+                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget);
+                } else if (!this.formCache.absolute) {
                     if (this.formCache.mainStructure == null) {
                         this.formCache.mainStructure = new StructureCache(null, null);
                     }
@@ -222,7 +226,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
             }
             if (event.data.id === 'showWireframe') {
-                const changed = this.showWireframe != event.data.value;
+                const changed = this.showWireframe !== event.data.value;
                 this.showWireframe = event.data.value;
                 if (changed) {
                     // how can we detect the style is completely applied before redraw ?
@@ -233,17 +237,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
             }
             if (event.data.id === 'maxLevel') {
-                this.maxLevel = parseInt(event.data.value);
+                this.maxLevel = parseInt(event.data.value, 10);
             }
             if (event.data.id === 'dropHighlight') {
                 this.dropHighlight = event.data.value ? event.data.value.dropHighlight : null;
                 this.dropHighlightIgnoredIds = event.data.value ? event.data.value.dropHighlightIgnoredIds : null;
             }
-            if (event.data.id == 'allowedChildren') {
+            if (event.data.id === 'allowedChildren') {
                 this.allowedChildren = event.data.value;
             }
             this.detectChanges();
-        })
+        });
     }
 
     ngAfterViewInit() {
@@ -263,34 +267,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.detectChanges();
     }
 
-    private initFormCache(): void {
-        // really make sure all form state is reverted to default
-        // Form Instances are reused for tabpanels that have a template reference to this.
-        this.formCache = this.formservice.getFormCache(this);
-        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
-        if (styleClasses)
-            this.formClasses = styleClasses.split(' ');
-        else
-            this.formClasses = null;
-        this._containers = this.formCache.getComponent('').model.containers;
-        this._cssstyles = this.formCache.getComponent('').model.cssstyles;
-        this.servoyApiCache = {};
-        this.componentCache = {};
-    }
-
     public getFormCache(): FormCache {
         return this.formCache;
-    }
-
-    propertyChanged(componentName: string, property: string, value: any): void {
-        const comp = this.componentCache[componentName];
-        if (comp) {
-            const change = {};
-            change[property] = new SimpleChange(value, value, false);
-            comp.ngOnChanges(change);
-            // this is kind of like a push so we should trigger this.
-            comp.detectChanges();
-        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -373,11 +351,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return this.formservice.hasFormCacheEntry(name);
     }
 
-    datachange(component: ComponentCache, property: string, value, dataprovider: boolean) {
+    datachange(_component: ComponentCache, _property: string, _value: any, _dataprovider: boolean) {
         // no operation needed for this dataprovider change event
     }
 
-    getHandler(item: ComponentCache, handler: string) {
+    getHandler(_item: ComponentCache, _handler: string) {
         return null;
     }
 
@@ -398,7 +376,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return api;
     }
 
-    getNGClass(item: StructureCache): { [klass: string]: any; } {
+    getNGClass(item: StructureCache): { [klass: string]: any } {
         const ngclass = {};
         ngclass[item.attributes.designclass] = this.showWireframe;
         ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
@@ -413,7 +391,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return ngclass;
     }
 
-    public callApi(componentName: string, apiName: string, args: any, path?: string[]): any {
+    public callApi(_componentName: string, _apiName: string, _args: any, _path?: string[]): any {
         return null;
     }
 
@@ -421,23 +399,39 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
 
+    updateFormStyleClasses(_ngutilsstyleclasses: string): void {
+
+    }
+
+    private initFormCache(): void {
+        // really make sure all form state is reverted to default
+        // Form Instances are reused for tabpanels that have a template reference to this.
+        this.formCache = this.formservice.getFormCache(this);
+        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+        if (styleClasses)
+            this.formClasses = styleClasses.split(' ');
+        else
+            this.formClasses = null;
+        this._containers = this.formCache.getComponent('').model.containers;
+        this._cssstyles = this.formCache.getComponent('').model.cssstyles;
+        this.servoyApiCache = {};
+        this.componentCache = {};
+    }
+
     private canContainDraggedElement(container: string, svyid: string): boolean {
         if (this.dropHighlight === null) return false;
         if (this.dropHighlightIgnoredIds && svyid && this.dropHighlightIgnoredIds.indexOf(svyid) >= 0) return false;
-        const drop = this.dropHighlight.split(".");
+        const drop = this.dropHighlight.split('.');
         const allowedChildren = this.allowedChildren[container];
         if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
 
-        for (const layout in allowedChildren) {
-            const a = allowedChildren[layout].split(".");
-            if (a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+        for (const layout of Object.keys(allowedChildren)) {
+            const a = allowedChildren[layout].split('.');
+            if (a[0] === drop[0] && ((a[1] === '*') || (a[1] === drop[1]))) return true;
         }
         return false;
     }
 
-    updateFormStyleClasses(ngutilsstyleclasses: string): void {
-
-    }
 }
 
 class FormComponentDesignServoyApi extends ServoyApi {
@@ -458,23 +452,23 @@ class FormComponentDesignServoyApi extends ServoyApi {
         this.fc.unRegisterComponent(comp);
     }
 
-    public formWillShow(formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
-        return new Promise<any>(resolve => {
-            resolve(true);
-        })
-    }
-
-    public hideForm(formname: string, relationname?: string, formIndex?: number,
-        formNameThatWillShow?: string, relationnameThatWillBeShown?: string, formIndexThatWillBeShown?: number): Promise<boolean> {
+    public formWillShow(_formname: string, _relationname?: string, _formIndex?: number): Promise<boolean> {
         return new Promise<any>(resolve => {
             resolve(true);
         });
     }
 
+    public hideForm(_formname: string, _relationname?: string, _formIndex?: number,
+        _formNameThatWillShow?: string, _relationnameThatWillBeShown?: string, _formIndexThatWillBeShown?: number): Promise<boolean> {
+        return new Promise<any>(resolve => {
+            resolve(true);
+        });
+    }
 
-    public apply(propertyName: string, value: any) {
+    public apply(_propertyName: string, _value: any) {
         // noop
     }
+
 }
 
 

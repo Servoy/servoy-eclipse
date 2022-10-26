@@ -73,7 +73,7 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 			final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
 			WebComponent webComponent = (WebComponent)persistContext.getPersist();
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-				.getWebComponentSpecification(webComponent.getTypeName());
+				.getWebObjectSpecification(webComponent.getTypeName());
 			String propertyName = event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.config.type");
 			if (propertyName == null)
 			{
@@ -206,7 +206,7 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 			if (persistContext.getPersist() instanceof WebComponent)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-					.getWebComponentSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
+					.getWebObjectSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
 				return spec.getAllPropertiesNames().stream()//
 					.filter(prop -> spec.getProperty(prop) != null && "autoshow".equals(spec.getProperty(prop).getTag("wizard"))).collect(Collectors.toList());
 			}

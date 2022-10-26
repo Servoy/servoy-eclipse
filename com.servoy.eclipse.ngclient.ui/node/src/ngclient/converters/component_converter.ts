@@ -247,7 +247,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
                         this, wholeViewportUpdateFromServer, serverSentData._T,
                         this.componentSpecification, this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
-                            cellUpdatedFromServerListener, false);
+                            cellUpdatedFromServerListener);
             }
 
             if (serverSentData.handlers)
@@ -291,7 +291,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                         this, wholeViewportUpdate, granularUpdateFromServer._T,
                         this.componentSpecification,
                         this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
-                        cellUpdatedFromServerListener, false);
+                        cellUpdatedFromServerListener);
                 if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: this.componentValue.modelViewport };
                 done = true;
             } else if (viewportUpdate) {

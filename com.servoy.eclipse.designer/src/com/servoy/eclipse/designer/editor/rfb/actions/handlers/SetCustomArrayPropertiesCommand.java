@@ -65,7 +65,7 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 		WebComponent webComponent = (WebComponent)persistContext.getPersist();
 		saveState(webComponent);
 
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponent.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponent.getTypeName());
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
 

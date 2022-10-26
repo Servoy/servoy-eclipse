@@ -112,7 +112,7 @@ export class FormService {
             newPropertyValue = converterService.convertFromServerToClient(newPropertyValue, propertyType, oldValueOfProperty,
                     componentDynamicTypesHolder, propertyName, propertyContextCreator.withPushToServerFor(propertyName));
 
-            if (property === 'cssPosition'){
+            if (propertyName === 'cssPosition'){
                 comp.layout = newPropertyValue;
             } else{
                 comp.model[propertyName] = newPropertyValue;
@@ -354,7 +354,7 @@ export class FormService {
         if (formnameThatWillBeShown) {
             formShow = { formname: formnameThatWillBeShown, relation: relationnameThatWillBeShown, formIndex: formIndexThatWillBeShown };
         }
-        const formDetails = { formname, visible: false, parentForm, bean: beanName, relation: relationname, formIndex, show: formShow }
+        const formDetails = { formname, visible: false, parentForm, bean: beanName, relation: relationname, formIndex, show: formShow };
         return this.sabloService.callService('formService', 'formvisibility', formDetails);
     }
 
@@ -569,17 +569,18 @@ export class FormService {
 
                         if (minHeight) {
                             layout['min-height'] = minHeight + 'px';
-                            if (!continingFormIsResponsive) layout['height'] = "100%"; // allow anchoring to bottom in anchored form + anchored form component
+                            if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
                         }
                         if (minWidth) {
-                            layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored, allow it to grow in width to fill responsive space
+                            layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and
+                                                                   // this form component is anchored, allow it to grow in width to fill responsive space
 
                             if (continingFormIsResponsive && widthExplicitlySet) {
                                 // if container is in a responsive form, content is anchored and width model property is explicitly set
                                 // then we assume that developer wants to really set width of the form component so it can put multiple of them inside
                                 // for example a 12grid column; that means they should not simply be div / block elements; we change float as well
                                 layout['float'] = 'left';
-                            } 
+                            }
                         }
                     }
 

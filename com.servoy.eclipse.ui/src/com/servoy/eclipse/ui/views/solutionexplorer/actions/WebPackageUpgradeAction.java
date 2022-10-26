@@ -98,9 +98,9 @@ public class WebPackageUpgradeAction extends Action implements ISelectionChanged
 			// create all the components stubs that are in the package and try to copy over the current ng1 template
 			final File projectRoot = new File(project.getLocation().toOSString());
 			final File srcRoot = new File(projectRoot, "project/src/");
-			Collection<String> components = WebComponentSpecProvider.getSpecProviderState().getComponentsInPackage(reader.getPackageName());
+			Collection<String> components = WebComponentSpecProvider.getSpecProviderState().getWebObjectsInPackage(reader.getPackageName());
 			components.forEach(component -> {
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(component);
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(component);
 				String definition = spec.getDefinition();
 				if (definition != null)
 				{
