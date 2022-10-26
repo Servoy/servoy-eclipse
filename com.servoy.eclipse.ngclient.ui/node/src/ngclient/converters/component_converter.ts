@@ -5,6 +5,7 @@ import { FoundsetConverter } from './foundset_converter';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
 import { ComponentCache } from '../types';
 import { SabloService } from '../../sablo/sablo.service';
+import { UIBlockerService } from '../services/ui_blocker.service';
 
 export class ComponentConverter implements IConverter {
 
@@ -20,8 +21,8 @@ export class ComponentConverter implements IConverter {
 
     private log: LoggerService;
 
-    constructor(private converterService: ConverterService, private viewportService: ViewportService, 
-        private sabloService: SabloService,logFactory: LoggerFactory) {
+    constructor(private converterService: ConverterService, private viewportService: ViewportService,
+        private sabloService: SabloService,logFactory: LoggerFactory, private uiBlockerService: UIBlockerService) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
@@ -155,7 +156,9 @@ export class ComponentConverter implements IConverter {
                 if (!serverSentData.api) serverSentData.api = {};
                 if (serverSentData.handlers) {
                     for (const key of Object.keys(serverSentData.handlers)) {
-                        componentModel.mappedHandlers.set(key, this.generateWrapperHandler(key, componentModel));
+                        const ignoreNGBlockDuplicateEvents = serverSentData.handlers[key]['ignoreNGBlockDuplicateEvents'] !== undefined ?
+                            serverSentData.handlers[key]['ignoreNGBlockDuplicateEvents'] : false;
+                        componentModel.mappedHandlers.set(key, this.generateWrapperHandler(key, componentModel, ignoreNGBlockDuplicateEvents));
                     }
                 }
             }
@@ -208,15 +211,13 @@ export class ComponentConverter implements IConverter {
         return retValue;
     }
 
-    private generateWrapperHandler(handler: string, state: ComponentModel) {
+    private generateWrapperHandler(handler: string, state: ComponentModel, ignoreNGBlockDuplicateEvents: boolean) {
         const executeHandler = (type, args, row, name, model) => {
-            // TODO implement $uiBlocker
-            // if ($uiBlocker.shouldBlockDuplicateEvents(name, model, type, row))
-            // {
-            //     // reject execution
-            //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
-            //     return $q.resolve(null);
-            // }
+            if (!ignoreNGBlockDuplicateEvents && this.uiBlockerService.shouldBlockDuplicateEvents(name, model, type, row)) {
+                // reject execution
+                this.log.debug('rejecting execution of: ' + type + ' on ' + name + ' row ' + row);
+                return Promise.resolve(null);
+            }
             const deferred = this.sabloService.createDeferredWSEvent();
             const newargs = this.converterService.getEventArgs(args, type);
             state.getStateHolder().requests.push({
@@ -228,7 +229,9 @@ export class ComponentConverter implements IConverter {
                 }
             });
             state.getStateHolder().notifyChangeListener();
-            // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
+            deferred.deferred.promise.finally(() => {
+                this.uiBlockerService.eventExecuted(name, model, type, row);
+            });
             return deferred.deferred.promise;
         };
         const eventHandler = (args: any, rowId: any) => executeHandler(handler, args, rowId, state.name, state.model);

@@ -323,7 +323,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
     }
 
-    getHandler(item: ComponentCache, handler: string) {
+    getHandler(item: ComponentCache, handler: string, ignoreNGBlockDuplicateEvents: boolean) {
         let itemCache = this.handlerCache[item.name];
         if (itemCache == null) {
             itemCache = {};

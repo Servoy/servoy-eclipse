@@ -171,7 +171,16 @@ public class ComponentTemplateGenerator
 			template.append(handler.getName());
 			template.append("]=\"callback.getHandler(state,'");
 			template.append(handler.getName());
-			template.append("')\"");
+			if (handler.shouldIgnoreNGBlockDuplicateEvents())
+			{
+				template.append("',");
+				template.append(handler.shouldIgnoreNGBlockDuplicateEvents());
+			}
+			else
+			{
+				template.append('\'');
+			}
+			template.append(")\"");
 		}
 		template.append(" [servoyApi]=\"callback.getServoyApi(state)\"");
 		template.append(" [name]=\"state.name\" #cmp");
