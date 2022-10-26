@@ -297,7 +297,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
     }
 
-    getHandler(item: ComponentCache, handler: string) {
+    getHandler(item: ComponentCache, handler: string, ignoreNGBlockDuplicateEvents: boolean) {
         let itemCache = this.handlerCache[item.name];
         if (itemCache == null) {
             itemCache = {};
@@ -308,7 +308,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             const me = this;
             // eslint-disable-next-line
             func = function() {
-                return me.formservice.executeEvent(me.name, item.name, handler, arguments);
+                return me.formservice.executeEvent(me.name, item.name, handler, ignoreNGBlockDuplicateEvents, arguments);
             };
             itemCache[handler] = func;
         }
@@ -387,4 +387,3 @@ class FormComponentServoyApi extends ServoyApi {
         this.fc.unRegisterComponent(comp);
     }
 }
-

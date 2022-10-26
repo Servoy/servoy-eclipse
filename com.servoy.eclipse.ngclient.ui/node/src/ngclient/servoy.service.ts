@@ -24,6 +24,7 @@ import { FormSettings } from './types';
 import { ClientFunctionConverter } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { DeveloperService } from './developer.service';
+import { UIBlockerService } from './services/ui_blocker.service';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -74,6 +75,7 @@ class SolutionSettings {
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
     private uiProperties: UIProperties;
+    private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
 
@@ -92,6 +94,7 @@ export class ServoyService {
 
         this.uiProperties = new UIProperties(sessionStorageService);
         const dateConverter = new DateConverter();
+        this.uiBlockerService = new UIBlockerService(this);
         converterService.registerCustomPropertyHandler('svy_date', dateConverter);
         converterService.registerCustomPropertyHandler('Date', dateConverter);
         converterService.registerCustomPropertyHandler('JSON_obj', new JSONObjectConverter(converterService, specTypesService));
@@ -102,7 +105,7 @@ export class ServoyService {
         converterService.registerCustomPropertyHandler('fsLinked',
             new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
         converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
-        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, this.sabloService, logFactory));
+        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, this.sabloService, logFactory, this.uiBlockerService));
         converterService.registerCustomPropertyHandler('clientfunction', new ClientFunctionConverter(this.windowRefService));
     }
 
@@ -161,6 +164,10 @@ export class ServoyService {
 
     public getUIProperties(): UIProperties {
         return this.uiProperties;
+    }
+
+    public getUIBlockerService(): UIBlockerService {
+        return this.uiBlockerService;
     }
 
     public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
