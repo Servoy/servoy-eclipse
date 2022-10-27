@@ -88,7 +88,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 		const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
 		Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
 			item.style.visibility = visibility; 
-			item.querySelector<HTMLElement>('.ghost').style.visibility = visibility;
+			item.querySelectorAll('.ghost').forEach((ghost:HTMLElement) => ghost.style.visibility = visibility);
 		});
 	}
 
