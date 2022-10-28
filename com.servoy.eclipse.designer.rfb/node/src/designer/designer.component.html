@@ -7,7 +7,7 @@
         <div #glasspane class="contentframe-overlay">
             <selection-decorators></selection-decorators>
             <designer-highlight></designer-highlight>
-            <designer-ghostscontainer></designer-ghostscontainer>
+            <designer-ghostscontainer #ghostContainer></designer-ghostscontainer>
             <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
             <dragselection-responsive></dragselection-responsive>
             <designer-samesize-indicator></designer-samesize-indicator>
