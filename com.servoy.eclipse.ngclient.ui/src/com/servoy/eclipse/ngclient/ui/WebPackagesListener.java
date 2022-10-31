@@ -1086,15 +1086,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 
 				// check for prerelease (npm uses x.y.z-rc1 manifest: x.y.z.rc1)
-				String[] split = packageVersion.split("\\.");
-				if (split.length == 4)
+				if (packageVersion != null)
 				{
-					packageVersion = split[0] + '.' + split[1] + '.' + split[2] + '-' + split[3];
-				}
-				String installedVersion = dependencies.optString(packageName);
-				if (!installedVersion.contains(packageVersion))
-				{
-					return packageName + '@' + packageVersion;
+					String[] split = packageVersion.split("\\.");
+					if (split.length == 4)
+					{
+						packageVersion = split[0] + '.' + split[1] + '.' + split[2] + '-' + split[3];
+					}
+					String installedVersion = dependencies.optString(packageName);
+					if (!installedVersion.contains(packageVersion))
+					{
+						return packageName + '@' + packageVersion;
+					}
 				}
 			}
 
