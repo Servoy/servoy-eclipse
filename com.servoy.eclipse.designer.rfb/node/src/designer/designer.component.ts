@@ -30,6 +30,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
     rightAutoscrollLimit = 0;
     autoscrollMargin = 100;
     leftAutoscrollPosition = 0;
+    isAutoscrollActive = false; //autoscroll safety
 
     constructor(public readonly editorSession: EditorSessionService, 
                 public urlParser: URLParserService, 
@@ -56,7 +57,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
                 this.rightAutoscrollLimit = this.ghostContainer.formWidth + this.autoscrollMargin;
 
                 this.leftAutoscrollPosition =  this.editorContentService.getDesignerElementById('palette').offsetWidth;
-                this.setLeftPosition();
+                this.setAutoscrollPositions();
             }
             else if (Object.keys(this.autoscrollTrigger).length > 0) {
                 for (const direction in this.autoscrollEnter) {
@@ -74,25 +75,39 @@ export class DesignerComponent implements OnInit, AfterViewInit {
 
     addAutoscrollListeners(direction: string, scrollComponent: ISupportAutoscroll) {
         this.editorSession.getState().pointerEvents = 'all';
-
         this.autoscrollEnter[direction] = this.registerDOMEvent('mouseenter', direction, () => {
+            if (this.isAutoscrollActive) {
+                this.clearAutoscroll(null);
+            } 
             this.autoscrollTrigger[direction] = this.startAutoScroll(direction, scrollComponent);
         }) as () => void;
 
         this.autoscrollLeave[direction] = (event: MouseEvent) => {
-            if (this.autoscrollTrigger[direction]) {
-                clearInterval(this.autoscrollTrigger[direction]);
-                this.autoscrollTrigger[direction] = null;
-            }
+            this.clearAutoscroll(direction);
             if (event.type == 'mouseup')
                 scrollComponent.onMouseUp(event);
         }
-
         this.registerDOMEvent('mouseleave', direction, this.autoscrollLeave[direction]);
         this.registerDOMEvent('mouseup', direction, this.autoscrollLeave[direction]);
     }
 
+    clearAutoscroll(direction: string) {
+        let tmpDirection = direction;
+        if (!tmpDirection) {
+            if (this.autoscrollTrigger['BOTTOM_AUTOSCROLL']) { tmpDirection = 'BOTTOM_AUTOSCROLL'; }
+            else if (this.autoscrollTrigger['RIGHT_AUTOSCROLL']) { tmpDirection = 'RIGHT_AUTOSCROLL'; }
+            else if (this.autoscrollTrigger['TOP_AUTOSCROLL']) { tmpDirection = 'TOP_AUTOSCROLL'; }
+            else if (this.autoscrollTrigger['LEFT_AUTOSCROLL']) { tmpDirection = 'LEFT_AUTOSCROLL'; }
+        } 
+        if (this.autoscrollTrigger[tmpDirection]) {
+            clearInterval(this.autoscrollTrigger[tmpDirection]);
+            this.autoscrollTrigger[tmpDirection] = null;
+        }
+        this.isAutoscrollActive = false;
+    }
+
     startAutoScroll(direction: string, scrollComponent: ISupportAutoscroll): ReturnType<typeof setInterval> {
+        this.isAutoscrollActive = true;
         let autoScrollPixelSpeed = 2;
         return setInterval(() => {
             autoScrollPixelSpeed = this.autoScroll(direction, autoScrollPixelSpeed, scrollComponent);
@@ -204,7 +219,7 @@ export class DesignerComponent implements OnInit, AfterViewInit {
         if (element) element.removeEventListener(eventType, callback);
     }
 
-    setLeftPosition() {
+    setAutoscrollPositions() {
         const leftAutoscrollElement = this.editorContentService.getBodyElement().getElementsByClassName('leftAutoscrollArea').item(0);
         this.renderer.setStyle(leftAutoscrollElement, 'left', this.leftAutoscrollPosition + 'px');
         const topAutoscrollElement = this.editorContentService.getBodyElement().getElementsByClassName('topAutoscrollArea').item(0);
@@ -212,7 +227,8 @@ export class DesignerComponent implements OnInit, AfterViewInit {
         const bottomAutoscrollElement = this.editorContentService.getBodyElement().getElementsByClassName('bottomAutoscrollArea').item(0);
         this.renderer.setStyle(bottomAutoscrollElement, 'left', (this.leftAutoscrollPosition) + 'px');
 
-        const sideAutoscrollHeight = (bottomAutoscrollElement as HTMLElement).offsetTop - ((topAutoscrollElement as HTMLElement).offsetTop + (topAutoscrollElement as HTMLElement).offsetHeight);
+        //autoscroll area must not overlapp since in that case they can get mixed mouse events which lead to unexpected situations
+        const sideAutoscrollHeight = (bottomAutoscrollElement as HTMLElement).offsetTop - ((topAutoscrollElement as HTMLElement).offsetTop + (topAutoscrollElement as HTMLElement).offsetHeight) - 10;
 
         this.renderer.setStyle(leftAutoscrollElement, 'height', sideAutoscrollHeight + 'px');
         const rightAutoscrollElement = this.editorContentService.getBodyElement().getElementsByClassName('rightAutoscrollArea').item(0);

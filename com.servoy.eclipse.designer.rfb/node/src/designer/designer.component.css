@@ -41,7 +41,8 @@
 	right: 0px;
 	width: 30px;
 	height: 100%;
-	margin-top : 10px;
+	margin-top : 15px;
+	/* do not set margin-right since it is going under properties view */
 	/* background-color: green;
 	opacity: 0.3; */
 	pointer-events: none;
@@ -52,8 +53,8 @@
 	position: fixed;
 	width: 30px;
 	height: 100%;
-	margin-top : 10px;
-	margin-left: -20px;
+	margin-top : 15px;
+	margin-left: -15px;
 	/* background-color: green;
 	opacity: 0.3; */
 	pointer-events: none;
@@ -65,7 +66,7 @@
 	bottom: 0px;
 	height: 30px;
 	width: 100%;
-	margin-left: -20px;
+	margin-left: -15px;
 	/* background-color: blue;
 	opacity: 0.3; */
 	pointer-events: none;
@@ -77,7 +78,7 @@
 	height: 30px;
 	width: 100%;
 	margin-top: -20px;
-	margin-left: -20px; 
+	margin-left: -15px; 
 	/* background-color: blue;
 	opacity: 0.3; */
 	pointer-events: none;
