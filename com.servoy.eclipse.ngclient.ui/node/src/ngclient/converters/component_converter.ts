@@ -7,6 +7,7 @@ import { ComponentCache } from '../types';
 import { SabloService } from '../../sablo/sablo.service';
 import { TypesRegistry, IType, IPropertyContext, PushToServerEnum, IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
 import { FormService } from '../form.service';
+import { UIBlockerService } from '../services/ui_blocker.service';
 
 export class ComponentType implements IType<ChildComponentPropertyValue> {
 
@@ -15,7 +16,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
     private log: LoggerService;
 
     constructor(private converterService: ConverterService, private readonly typesRegistry: TypesRegistry, logFactory: LoggerFactory,
-                    private viewportService: ViewportService, private readonly sabloService: SabloService) {
+                    private viewportService: ViewportService, private readonly sabloService: SabloService, private uiBlockerService: UIBlockerService) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
@@ -29,7 +30,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
             // full contents received
             if (serverSentData) {
                 newValue = new ChildComponentPropertyValue(serverSentData, currentClientValue, propertyContext,
-                        this.converterService, this.sabloService, this.viewportService, this.typesRegistry, this.log);
+                        this.converterService, this.sabloService, this.viewportService, this.typesRegistry, this.uiBlockerService, this.log);
             } else newValue = undefined;
         }
 
@@ -87,7 +88,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     private __internalState: ComponentTypeInternalState;
 
     constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
-                    sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, log: LoggerService) {
+                    sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
         super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.handlers, serverSentData.position, typesRegistry, {
 
@@ -111,7 +112,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
 
         const componentSpecification = typesRegistry.getComponentSpecification(this.type);
         this.__internalState = new ComponentTypeInternalState(this, oldClientValue?.__internalState, componentSpecification, converterService,
-                viewportService, sabloService, log, () => propertyContext.getProperty(forFoundsetPropertyName));
+                viewportService, sabloService, uiBlockerService, log, () => propertyContext.getProperty(forFoundsetPropertyName));
 
         this.__internalState.initializeFullValueFromServer(serverSentData);
     }
@@ -197,6 +198,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                     public readonly converterService: ConverterService,
                     private readonly viewportService: ViewportService,
                     public readonly sabloService: SabloService,
+                    private uiBlockerService: UIBlockerService,
                     log: LoggerService,
                     forFoundset?: () => IFoundset) {
 
@@ -252,7 +254,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
 
             if (serverSentData.handlers)
                 for (const handlerName of Object.keys(serverSentData.handlers))
-                    this.componentValue.mappedHandlers.set(handlerName, this.generateWrapperHandler(handlerName));
+                    this.componentValue.mappedHandlers.set(handlerName, this.generateWrapperHandler(handlerName, this.componentValue));
 
             // restore smart watches and proxy notifiers; server side send changes are now applied
             this.ignoreChanges = false;
@@ -390,17 +392,15 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 : this.componentValue.model; // component is not foundset linked or rowId is not known to caller (probably dealing with a non-fs-linked property)
     }
 
-    private generateWrapperHandler(handlerName: string) {
+    private generateWrapperHandler(handlerName: string, componentValue: ChildComponentPropertyValue) {
         const executeHandler = (args: IArguments, rowId: string) => {
-            // TODO implement $uiBlocker
-            // if ($uiBlocker.shouldBlockDuplicateEvents(name, componentModel, type, row))
-            // {
-            //     // reject execution
-            //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
-            //     return $q.resolve(null);
-            // }
-            const deferred = this.sabloService.createDeferredWSEvent();
             const handlerSpec = this.componentSpecification?.getHandler(handlerName);
+            if ((!handlerSpec || !handlerSpec.ignoreNGBlockDuplicateEvents) && this.uiBlockerService.shouldBlockDuplicateEvents(componentValue.name, componentValue.model, handlerName, rowId)) {
+                // reject execution
+                this.log.debug('rejecting execution of handler "' + handlerName + '" on component "' + componentValue.name + '"; rowID = ' + rowId);
+                return Promise.resolve(null);
+            }
+            const deferred = this.sabloService.createDeferredWSEvent();
             const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec);
             this.requests.push({
                 handlerExec: {
@@ -411,7 +411,9 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 }
             });
             this.notifyChangeListener();
-            // defered.defered.promise.finally(function(){$uiBlocker.eventExecuted(name, componentModel, type, row);});
+            deferred.deferred.promise.finally(() => {
+                this.uiBlockerService.eventExecuted(componentValue.name, componentValue.model, handlerName, rowId);
+            });
             return deferred.deferred.promise.then((retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
                        undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
         };

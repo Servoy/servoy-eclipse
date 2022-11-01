@@ -28,7 +28,7 @@ export class FormService {
     private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
-        servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
+        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
@@ -303,13 +303,38 @@ export class FormService {
         return loadedState;
     }
 
-    public executeEvent(formName: string, componentName: string, handlerName: string, args: IArguments | Array<any>, async?: boolean): Promise<any> {
+    public executeEvent(formName: string, componentName: string, handlerName: string, ignoreNGBlockDuplicateEvents: boolean, args: IArguments | Array<any>, async?: boolean): Promise<any> {
         this.log.debug(this.log.buildMessage(() => (formName + ',' + componentName + ', executing: ' + handlerName + ' with values: ' + JSON.stringify(args))));
 
         const handlerSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getHandler(handlerName);
 
         const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec); // this will do the needed handler arg conversions from client to server
         const cmd = { formname: formName, beanname: componentName, event: handlerName, args: newargs, changes: {} };
+
+        const form = this.formsCache.get(formName);
+        if (form) {
+            const component = form.getComponent(componentName);
+            if (component && component.model) {
+                const componentId = formName + '_' + componentName;
+                if (!ignoreNGBlockDuplicateEvents && this.servoyService.getUIBlockerService().shouldBlockDuplicateEvents(componentId, component.model, handlerName)) {
+                    // reject execution
+                    this.log.debug('Prevented duplicate  execution of: ' + handlerName + ' on ' + componentName);
+                    return Promise.resolve(null);
+                }
+
+                // call handler
+                const promise = this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false).then(
+                        // convert return value from server to client
+                        (retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
+                                        undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
+                );
+
+                promise.finally(() => {
+                    this.servoyService.getUIBlockerService().eventExecuted(componentId, component.model, handlerName);
+                });
+                return promise;
+            }
+        }
 
         // call handler
         return this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false).then(

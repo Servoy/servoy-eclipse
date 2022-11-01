@@ -24,6 +24,7 @@ import { FormSettings } from './types';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { ObjectType } from './converters/object_converter';
+import { UIBlockerService } from './services/ui_blocker.service';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -74,6 +75,7 @@ class SolutionSettings {
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
     private uiProperties: UIProperties;
+    private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
 
@@ -87,10 +89,12 @@ export class ServoyService {
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,
-        viewportService: ViewportService) {
+        viewportService: ViewportService,
+        uiBlockerService: UIBlockerService) {
 
         this.uiProperties = new UIProperties(sessionStorageService);
         const dateType = new DateType();
+        this.uiBlockerService = new UIBlockerService(this);
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
@@ -105,7 +109,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
         typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, logFactory));
         typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
-        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService));
+        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
     }
@@ -165,6 +169,10 @@ export class ServoyService {
 
     public getUIProperties(): UIProperties {
         return this.uiProperties;
+    }
+
+    public getUIBlockerService(): UIBlockerService {
+        return this.uiBlockerService;
     }
 
     public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {

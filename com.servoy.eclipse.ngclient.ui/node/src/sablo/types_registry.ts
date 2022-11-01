@@ -121,7 +121,7 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         if (webObjectSpecificationFromServer.ftd) this.processFactoryTypeDetails(webObjectSpecificationFromServer.ftd, webObjectSpecName);
 
         let properties: ObjectOfIPropertyDescription;
-        let handlers: ObjectOfIWebObjectFunctions;
+        let handlers: ObjectOfIEventHandlerFunctions;
         let apiFunctions: ObjectOfIWebObjectFunctions;
 
         // properties
@@ -136,7 +136,7 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         if (webObjectSpecificationFromServer.h) {
             handlers = {};
             for (const handlerName of Object.keys(webObjectSpecificationFromServer.h)) {
-                handlers[handlerName] = this.processFunction(webObjectSpecificationFromServer.h[handlerName], webObjectSpecName);
+                handlers[handlerName] = this.processEventHandler(webObjectSpecificationFromServer.h[handlerName], webObjectSpecName);
             }
         }
 
@@ -144,7 +144,7 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         if (webObjectSpecificationFromServer.a) {
             apiFunctions = {};
             for (const apiFunctionName of Object.keys(webObjectSpecificationFromServer.a)) {
-                apiFunctions[apiFunctionName] = this.processFunction(webObjectSpecificationFromServer.a[apiFunctionName], webObjectSpecName);
+                apiFunctions[apiFunctionName] = this.processApiFunction(webObjectSpecificationFromServer.a[apiFunctionName], webObjectSpecName);
             }
         }
 
@@ -162,7 +162,15 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         }
     }
 
-    private processFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): IWebObjectFunction {
+    private processEventHandler(functionFromServer: IEventHandlerFromServer, webObjectSpecName: string): IEventHandler {
+        return new WebObjectEventHandler(...this.processFunction(functionFromServer, webObjectSpecName), functionFromServer.iBDE);
+    }
+
+    private processApiFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): IWebObjectFunction {
+        return new WebObjectFunction(...this.processFunction(functionFromServer, webObjectSpecName));
+    }
+
+    private processFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): [IType<any>, ObjectOfITypeWithNumberKeys] {
         let returnType: IType<any>;
         let argumentTypes: ObjectOfITypeWithNumberKeys;
 
@@ -173,7 +181,7 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
                 argumentTypes[argIdx] = this.processTypeFromServer(functionFromServer[argIdx], webObjectSpecName);
             }
         }
-        return new WebObjectFunction(returnType, argumentTypes);
+        return [returnType, argumentTypes];
     }
 
 }
@@ -250,13 +258,13 @@ export class PushToServerUtils {
         // arguments/return values received from server in case of api calls/handlers are not properties of a component or service so can't return sibling properties
         getProperty: (_propertyName: string): any  => undefined,
         getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
-    }
+    };
 
     public static readonly PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES: IPropertyContext = {
         // arguments/return values sent to server in case of api calls/handlers are not properties of a component or service so can't return sibling properties
         getProperty: (_propertyName: string): any  => undefined,
         getPushToServerCalculatedValue: () => PushToServerEnum.ALLOW
-    }
+    };
 
     public static valueOf(pushToServerRawValue: PushToServerEnumServerValue): PushToServerEnum {
         if (pushToServerRawValue === undefined) throw new Error('pushToServerRawValue cannot be present but undefined!');
@@ -309,6 +317,7 @@ class TypeFactoryRegistry implements ITypeFactoryRegistry {
 
 export interface ObjectOfIPropertyDescription { [key: string]: IPropertyDescription }
 export interface ObjectOfIWebObjectFunctions { [key: string]: IWebObjectFunction }
+export interface ObjectOfIEventHandlerFunctions { [key: string]: IEventHandler }
 
 class PropertyDescription implements IPropertyDescription {
 
@@ -386,6 +395,18 @@ class WebObjectFunction implements IWebObjectFunction {
 
 }
 
+class WebObjectEventHandler extends WebObjectFunction implements IEventHandler {
+
+    constructor(
+            returnType?: IType<any>,
+            argumentTypes?: ObjectOfITypeWithNumberKeys,
+            readonly ignoreNGBlockDuplicateEvents?: boolean
+    ) {
+        super(returnType, argumentTypes);
+    }
+
+}
+
 export interface IWebObjectTypesFromServer {
     [specName: string]: IWebObjectSpecificationFromServer;
 }
@@ -397,7 +418,7 @@ export interface IWebObjectSpecificationFromServer {
          ftd?: IFactoryTypeDetails; // this will be the custom type details from spec something like { "JSON_obj": ICustomTypesFromServer}}
 
          /** any handlers */
-         h?: IWebObjectFunctionsFromServer;
+         h?: IEventHandlersFromServer;
 
          /** any api functions */
          a?: IWebObjectFunctionsFromServer;
@@ -422,15 +443,24 @@ export interface IPropertiesFromServer {
     [propertyName: string]: IPropertyDescriptionFromServer;
 }
 
+interface IEventHandlersFromServer {
+    [name: string]: IEventHandlerFromServer;
+}
+
 export interface IWebObjectFunctionsFromServer {
     [name: string]: IWebObjectFunctionFromServer;
+}
+
+interface IEventHandlerFromServer extends IWebObjectFunctionFromServer {
+    /** "ignoreNGBlockDuplicateEvents" flag from spec. - if the handler is supposed to ignore the blocking of duplicates - when that is enabled via client or ui properties of component */
+    iBDE?: boolean;
 }
 
 export interface IWebObjectFunctionFromServer {
     /** any api/handler call arguments with client side conversion types (by arg no.)  */
     [argumentIdx: number]: ITypeFromServer;
     /** return value of api/handler call if it's a converting client side type */
-    r: ITypeFromServer;
+    r?: ITypeFromServer;
 }
 
 /**
@@ -554,7 +584,7 @@ export interface IWebObjectSpecification {
     getPropertyPushToServer(propertyName: string): PushToServerEnum;
 
     getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription };
-    getHandler(handlerName: string): IWebObjectFunction;
+    getHandler(handlerName: string): IEventHandler;
     getApiFunction(apiFunctionName: string): IWebObjectFunction;
 
 }
@@ -573,6 +603,14 @@ export interface IPropertyDescription {
      * instead of returning undefined. Use this for root component/service properties.
      */
     getPropertyPushToServer(): PushToServerEnum;
+
+}
+
+/** The type definition with client side conversion types for a handler.  */
+interface IEventHandler extends IWebObjectFunction {
+
+    /** if the handler is supposed to ignore the blocking of duplicates - when that is enabled via client or ui properties of component */
+    ignoreNGBlockDuplicateEvents?: boolean;
 
 }
 
