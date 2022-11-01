@@ -231,7 +231,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		if (exportModel.isExportNonActiveSolutions() && exportNonActiveSolutionsDialog)
 		{
 			exportNonActiveSolutionsDialog = false;
-			if (componentsSelectionPage.availableComponentsList.getItems().length > 0 || servicesSelectionPage.availableComponentsList.getItems().length > 0)
+			if (componentsSelectionPage.availableWebObjectsList.getItems().length > 0 || servicesSelectionPage.availableWebObjectsList.getItems().length > 0)
 			{
 				final boolean[] exportNonActiveSolutionsComponents = new boolean[] { true };
 				Display.getDefault().syncExec(() -> {
@@ -242,24 +242,24 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				if (exportNonActiveSolutionsComponents[0])
 				{
 					// components
-					for (String componentName : componentsSelectionPage.availableComponentsList.getItems())
+					for (String componentName : componentsSelectionPage.availableWebObjectsList.getItems())
 					{
-						componentsSelectionPage.selectedComponentsList.add(componentName);
+						componentsSelectionPage.selectedWebObjectsList.add(componentName);
 					}
-					String[] selectedComp = componentsSelectionPage.selectedComponentsList.getItems();
+					String[] selectedComp = componentsSelectionPage.selectedWebObjectsList.getItems();
 					Arrays.sort(selectedComp);
-					componentsSelectionPage.selectedComponentsList.setItems(selectedComp);
-					componentsSelectionPage.availableComponentsList.removeAll();
+					componentsSelectionPage.selectedWebObjectsList.setItems(selectedComp);
+					componentsSelectionPage.availableWebObjectsList.removeAll();
 
 					// services
-					for (String componentName : servicesSelectionPage.availableComponentsList.getItems())
+					for (String componentName : servicesSelectionPage.availableWebObjectsList.getItems())
 					{
-						servicesSelectionPage.selectedComponentsList.add(componentName);
+						servicesSelectionPage.selectedWebObjectsList.add(componentName);
 					}
-					String[] selectedServ = servicesSelectionPage.selectedComponentsList.getItems();
+					String[] selectedServ = servicesSelectionPage.selectedWebObjectsList.getItems();
 					Arrays.sort(selectedServ);
-					servicesSelectionPage.selectedComponentsList.setItems(selectedServ);
-					servicesSelectionPage.availableComponentsList.removeAll();
+					servicesSelectionPage.selectedWebObjectsList.setItems(selectedServ);
+					servicesSelectionPage.availableWebObjectsList.removeAll();
 				}
 				else
 				{
