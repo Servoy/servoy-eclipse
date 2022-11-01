@@ -819,7 +819,7 @@ public class SolutionSerializer
 					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
 				}
 			}
-			else if (jsType == null || ArgumentType.isGeneratedType(jsType))
+			else if (jsType != null && ArgumentType.isGeneratedType(jsType))
 			{
 				// remove existing object type when generated from columnn type, do not touch others
 				int index = sb.lastIndexOf(TYPEKEY);
