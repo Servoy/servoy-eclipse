@@ -15,7 +15,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     @ViewChild('input') input: ElementRef<HTMLButtonElement>;
     @ViewChild( NgbDropdown ) comboboxDropdown: NgbDropdown;
     @ViewChild('tooltip') tooltip: NgbTooltip;
-    
+
     formattedValue: any;
     valueComparator: (value: { displayValue: any; realValue: any }) => boolean;
     openState = false;

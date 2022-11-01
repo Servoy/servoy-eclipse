@@ -77,6 +77,26 @@ public class TreeBuilder
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Object.class, UserNodeType.OBJECT, null);
 	}
 
+	public static UserNode[] createJSSet(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Set.class, UserNodeType.SET, null);
+	}
+
+	public static UserNode[] createJSMap(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Map.class, UserNodeType.MAP, null);
+	}
+
+	public static UserNode[] createJSIterator(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Iterator.class, UserNodeType.ITERATOR, null);
+	}
+
+	public static UserNode[] createJSIterableValue(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.IterableValue.class, UserNodeType.ITERABELVALUE, null);
+	}
+
 	public static UserNode[] createJSDate(IImageLookup imageLookup)
 	{
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Date.class, UserNodeType.DATE, null);

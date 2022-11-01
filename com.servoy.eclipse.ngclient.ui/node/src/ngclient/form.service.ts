@@ -303,7 +303,7 @@ export class FormService {
         return loadedState;
     }
 
-    public executeEvent(formName: string, componentName: string, handlerName: string, ignoreNGBlockDuplicateEvents: boolean, args: IArguments | Array<any>, async?: boolean): Promise<any> {
+    public executeEvent(formName: string, componentName: string, handlerName: string, args: IArguments | Array<any>, async?: boolean): Promise<any> {
         this.log.debug(this.log.buildMessage(() => (formName + ',' + componentName + ', executing: ' + handlerName + ' with values: ' + JSON.stringify(args))));
 
         const handlerSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getHandler(handlerName);
@@ -316,7 +316,7 @@ export class FormService {
             const component = form.getComponent(componentName);
             if (component && component.model) {
                 const componentId = formName + '_' + componentName;
-                if (!ignoreNGBlockDuplicateEvents && this.servoyService.getUIBlockerService().shouldBlockDuplicateEvents(componentId, component.model, handlerName)) {
+                if ((!handlerSpec || !handlerSpec.ignoreNGBlockDuplicateEvents) && this.servoyService.getUIBlockerService().shouldBlockDuplicateEvents(componentId, component.model, handlerName)) {
                     // reject execution
                     this.log.debug('Prevented duplicate  execution of: ' + handlerName + ' on ' + componentName);
                     return Promise.resolve(null);

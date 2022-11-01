@@ -604,6 +604,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSObject(this);
 			}
+			else if (type == UserNodeType.MAP)
+			{
+				lm = TreeBuilder.createJSMap(this);
+			}
+			else if (type == UserNodeType.SET)
+			{
+				lm = TreeBuilder.createJSSet(this);
+			}
+			else if (type == UserNodeType.ITERATOR)
+			{
+				lm = TreeBuilder.createJSIterator(this);
+			}
+			else if (type == UserNodeType.ITERABELVALUE)
+			{
+				lm = TreeBuilder.createJSIterableValue(this);
+			}
 			else if (type == UserNodeType.REGEXP)
 			{
 				lm = TreeBuilder.createJSRegexp(this);
@@ -1044,10 +1060,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<IRootObject> styles = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.STYLES);
 		Collections.sort(styles, NameComparator.INSTANCE);
 
-		Iterator<IRootObject> stylesIterator = styles.iterator();
-		while (stylesIterator.hasNext())
+		for (IRootObject style : styles)
 		{
-			IRootObject style = stylesIterator.next();
 			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, uiActivator.loadImageFromBundle("style.png"));
 			dlm.add(node);
 		}
@@ -1072,10 +1086,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<String> messagesFiles = Arrays.asList(EclipseMessages.getDefaultMessageFileNames());
 		Collections.sort(messagesFiles);
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		Iterator<String> messagesFilesIte = messagesFiles.iterator();
-		while (messagesFilesIte.hasNext())
+		for (String i18nFileItemName : messagesFiles)
 		{
-			String i18nFileItemName = messagesFilesIte.next();
 			i18nFileItemName = i18nFileItemName.substring(0, i18nFileItemName.indexOf(EclipseMessages.MESSAGES_EXTENSION));
 			boolean isActive = activeI18NFileNames.indexOf(i18nFileItemName) != -1;
 			UserNode node = new UserNode(i18nFileItemName, UserNodeType.I18N_FILE_ITEM, null, isActive ? null : "Not referenced");
@@ -1093,10 +1105,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		Collections.sort(templates, NameComparator.INSTANCE);
 
-		Iterator<IRootObject> templatesIterator = templates.iterator();
-		while (templatesIterator.hasNext())
+		for (IRootObject template : templates)
 		{
-			IRootObject template = templatesIterator.next();
 			UserNode node = new UserNode(template.getName(), UserNodeType.TEMPLATE_ITEM, template, null);
 			dlm.add(node);
 		}
@@ -1114,10 +1124,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (viewNames != null && viewNames.size() > 0)
 				{
 					List<String> hiddenViews = null;
-					Iterator<String> it = viewNames.iterator();
-					while (it.hasNext())
+					for (String name : viewNames)
 					{
-						String name = it.next();
 						if (s.isTableMarkedAsHiddenInDeveloper(name))
 						{
 							if (hiddenViews == null) hiddenViews = new ArrayList<String>();

@@ -28,6 +28,6 @@ export class DefaultNavigator {
     }
     this.navigatorComponentCache.model.currentIndex = i;
     this.sliderValue = -i;
-    this.formservice.executeEvent(this.name, this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
+    this.formservice.executeEvent(this.name, this.navigatorComponentCache.name, 'setSelectedIndex', true, [i]);
   }
 }

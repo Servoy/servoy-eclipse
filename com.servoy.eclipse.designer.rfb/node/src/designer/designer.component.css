@@ -41,20 +41,9 @@
 	right: 0px;
 	width: 30px;
 	height: 100%;
-	margin-top : -20px;
-	/* background-color: blue;
-	opacity: 0.3; */
-	pointer-events: none;
-}
-
-.bottomAutoscrollArea {
-	z-index: 3;
-	position: fixed;
-	bottom: 0px;
-	height: 60px;
-	width: 100%;
-	margin-left : -20px;
-	/* background-color: blue;
+	margin-top : 15px;
+	/* do not set margin-right since it is going under properties view */
+	/* background-color: green;
 	opacity: 0.3; */
 	pointer-events: none;
 }
@@ -64,8 +53,20 @@
 	position: fixed;
 	width: 30px;
 	height: 100%;
-	margin-top : -20px;
-	margin-left: -20px;
+	margin-top : 15px;
+	margin-left: -15px;
+	/* background-color: green;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.bottomAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	bottom: 0px;
+	height: 30px;
+	width: 100%;
+	margin-left: -15px;
 	/* background-color: blue;
 	opacity: 0.3; */
 	pointer-events: none;
@@ -76,8 +77,8 @@
 	position: fixed;
 	height: 30px;
 	width: 100%;
-	margin-top : -20px;
-	margin-left : -20px;
+	margin-top: -20px;
+	margin-left: -15px; 
 	/* background-color: blue;
 	opacity: 0.3; */
 	pointer-events: none;

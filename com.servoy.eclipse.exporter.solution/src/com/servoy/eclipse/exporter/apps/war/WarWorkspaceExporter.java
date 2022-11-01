@@ -753,6 +753,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		try
 		{
 			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
+			if (exportModel.isExportNonActiveSolutions() && (configuration.getSelectedComponents().length() == 0 ||
+				configuration.getSelectedServices().length() == 0))
+			{
+				output(
+					"\nThe arguments contains a non active solution/s, be aware that all the components and services for that solution/s are not exported into the .war file.\nPlease use -help to update your syntax, if you need all those components and services.\n");
+			}
 			checkAndAutoUpgradeLicenses(exportModel);
 			CommandLineExportProgressMonitor monitor = new CommandLineExportProgressMonitor();
 			CommandLineExportUserChannel userChannel = new CommandLineExportUserChannel(exportModel, monitor);

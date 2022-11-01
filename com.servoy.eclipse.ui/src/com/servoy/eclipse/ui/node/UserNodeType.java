@@ -154,5 +154,9 @@ public enum UserNodeType
 	VIEW_FOUNDSET,
 	WEB_OBJECT_FOLDER,
 	ZIP_RESOURCE,
+	MAP,
+	SET,
+	ITERATOR,
+	ITERABELVALUE,
 	LOADING //a temporary node type which is displayed until the normal ones are loaded
 }
