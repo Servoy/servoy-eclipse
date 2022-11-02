@@ -168,6 +168,20 @@ export class FormattingService {
                 }
             }
         }
+        const formatDecimalSeparatorPos = format.indexOf('\.');
+        if (formatDecimalSeparatorPos > -1) {
+            const currentLanguageNumeralSymbols = numbro.languageData();
+            const dataDecimalSeparatorPos = data.indexOf(currentLanguageNumeralSymbols.delimiters.decimal);
+            if (dataDecimalSeparatorPos > -1) {
+                const decimalLen = format.length - formatDecimalSeparatorPos - 1;
+                let adjustedData = data.toString().substring(0, dataDecimalSeparatorPos + 1);
+                const decimal = data.toString().substring(dataDecimalSeparatorPos + 1);
+                if (decimal.length > decimalLen) {
+                    adjustedData += decimal.substring(0, decimalLen);
+                    data = adjustedData;
+                }
+            }
+        }
         let ret = numbro(data).value();
         ret *= multFactor;
         return ret;
