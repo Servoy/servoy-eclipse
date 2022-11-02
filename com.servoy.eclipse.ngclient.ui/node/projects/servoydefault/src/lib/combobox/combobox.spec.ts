@@ -1,46 +1,17 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicModule, ServoyBaseComponent, Format, ServoyApi } from '@servoy/public';
-import { ServoyTestingModule } from '../../testing/servoytesting.module';
+import { ServoyPublicTestingModule, Format, ServoyApi, IValuelist, ServoyBaseComponent } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-
-import { ConverterService } from '../../sablo/converter.service';
-import { SabloDeferHelper } from '../../sablo/defer.service';
-import { ValuelistType } from '../../ngclient/converters/valuelist_converter';
-import { ServicesService } from '../../sablo/services.service';
+import { Observable, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TypesRegistry, IPropertyContext, PushToServerEnum } from '../../sablo/types_registry';
-
-const mockData = [
-  {
-    realValue: 1,
-    displayValue: 'Bucuresti'
-  },
-  {
-    realValue: 2,
-    displayValue: 'Timisoara'
-  },
-  {
-    realValue: 3,
-    displayValue: 'Cluj'
-  }
-];
-
-function createDefaultValuelist() {
-  const json = {};
-  json['values'] = mockData;
-  json['valuelistid'] = 1073741880;
-  return json;
-}
 
 describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
   let servoyApi: ServoyApi;
   let combobox: DebugElement;
-  let converterService: ConverterService;
 
   beforeEach(waitForAsync(() => {
 
@@ -53,9 +24,9 @@ describe('ComboboxComponent', () => {
         apply(_propertyName: string, _value: any) {}
         callServerSideApi(_methodName: string, _args: Array<any>) {}
         getFormComponentElements(_propertyName: string, _formComponentValue: any) {}
-        isInDesigner(): boolean { return false }
-        trustAsHtml(): boolean { return false }
-        isInAbsoluteLayout(): boolean { return false }
+        isInDesigner(): boolean { return false; }
+        trustAsHtml(): boolean { return false; }
+        isInAbsoluteLayout(): boolean { return false; }
         getMarkupId(): string  { return undefined; }
         getFormName(): string  { return undefined; }
         registerComponent(_component: ServoyBaseComponent<any>) {}
@@ -84,30 +55,33 @@ describe('ComboboxComponent', () => {
 
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultCombobox ],
-        providers: [ ServicesService ],
-        imports: [ ServoyPublicModule, ServoyTestingModule, NgbModule, FormsModule ]
+        providers: [ ],
+        imports: [ServoyPublicTestingModule, NgbModule, FormsModule]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    const sabloDeferHelper = TestBed.inject( SabloDeferHelper );
-    const typesRegistry = TestBed.inject(TypesRegistry);
-    converterService = TestBed.inject( ConverterService );
-
-    typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper), true);
-
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
+    const dummyValuelist = new DummyValuelist();
+    dummyValuelist.push({
+        realValue: 1,
+        displayValue: 'Bucuresti'
+    });
+    dummyValuelist.push( {
+       realValue: 2,
+       displayValue: 'Timisoara'
+    });
+     dummyValuelist.push({
+         realValue: 3,
+         displayValue: 'Cluj'
+    });
+
     component = fixture.componentInstance;
-    const propertyContext = {
-            getProperty: (_propertyName: string) => undefined,
-            getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
-        } as IPropertyContext;
-    component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(),
-                     new ValuelistType(sabloDeferHelper) , undefined, undefined, undefined, propertyContext);
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+    component.valuelistID = dummyValuelist;
+    component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
     component.dataProviderID = 3;
     component.format = new Format();
     component.format.type = 'TEXT';
@@ -146,3 +120,19 @@ describe('ComboboxComponent', () => {
   });
 
 });
+
+class DummyValuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist {
+    filterList(_filterString: string): Observable<any>{
+        return of('');
+    }
+
+    getDisplayValue(_realValue: any): Observable<any>{
+        return of('');
+    }
+    hasRealValues(): boolean{
+        return true;
+    }
+    isRealValueDate(): boolean{
+        return false;
+    }
+}
