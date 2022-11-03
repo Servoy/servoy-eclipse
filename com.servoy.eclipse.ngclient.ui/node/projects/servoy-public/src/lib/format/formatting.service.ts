@@ -79,8 +79,7 @@ export class FormattingService {
     public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
-                //do not looses focus, just apply the format and push value
-                vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
+                // enter key is pressed
             } else if (vSvyFormat.type === 'INTEGER') {
                 const currentLanguageNumeralSymbols = numbro.languageData();
 
