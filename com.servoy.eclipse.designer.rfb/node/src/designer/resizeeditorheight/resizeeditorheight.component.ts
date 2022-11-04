@@ -28,7 +28,7 @@ export class ResizeEditorHeightComponent implements OnInit {
             this.dragingEvent = event;
             this.editorSession.getState().dragging = true;
             this.ghostLabel = null;
-            //components placed in the outside view area will generate a second ghostview container
+            //components placed outside view area will generate a second ghostcontainer
             this.ghostContainers = this.editorContentService.querySelectorAll('.ghostcontainer');
             this.editorContent = this.editorContentService.querySelector('.content');  
             this.glassPaneElement = this.editorContentService.querySelector('.contentframe-overlay');
@@ -72,18 +72,6 @@ export class ResizeEditorHeightComponent implements OnInit {
         this.editorContentService.getDocument().removeEventListener('mousemove', this.mousemove);
         this.editorContentService.getDocument().removeEventListener('mouseup', this.mouseup);  
         let glasspaneLimit = this.heightLimit;
-
-        const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
-        for (let index=0; index < ghostsList.length; index++) {
-            const ghost = ghostsList.item(index);
-            const ghostType = ghost.getAttribute('svy-ghosttype');
-            if (ghostType == 'comp') {
-                glasspaneLimit = Math.max(glasspaneLimit, (ghost as HTMLElement).offsetTop + (ghost as HTMLElement).offsetHeight) + 5
-            }
-        }
-        if (this.currentPosition < glasspaneLimit) {
-            this.renderer.setStyle(this.glassPaneElement, 'height', this.currentPosition +'px');
-        }
 
         let changes = {};
         let id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');

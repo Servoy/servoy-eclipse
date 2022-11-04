@@ -1,5 +1,4 @@
 import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -19,16 +18,16 @@ export class ResizeEditorWidthComponent implements OnInit {
     editorContent: HTMLElement;
     glassPaneElement: HTMLElement;
 
-    constructor(protected readonly renderer: Renderer2, @Inject(DOCUMENT) private doc: Document, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
+    constructor(protected readonly renderer: Renderer2, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
     }
 
     ngOnInit() {
         this.elementRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
             this.editorContentService.getDocument().addEventListener('mousemove', this.mousemove);
             this.editorContentService.getDocument().addEventListener('mouseup', this.mouseup);
-            //components placed in the outside view area will generate a second ghostview container
+            //components placed outside view area will generate a second ghostcontainer
             this.ghostContainers = this.editorContentService.querySelectorAll('.ghostcontainer');
-            this.editorContent = this.doc.querySelector('.content');
+            this.editorContent = this.editorContentService.querySelector('.content');
             this.startPosition = event.pageX - this.ghostContainers[0].offsetWidth;
             this.currentPosition = this.startPosition;
             this.editorSession.getState().dragging = true;
@@ -58,18 +57,6 @@ export class ResizeEditorWidthComponent implements OnInit {
         changes[id] = {
             'width': this.currentPosition
         };
-
-        const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
-        for (let index=0; index < ghostsList.length; index++) {
-            const ghost = ghostsList.item(index);
-            const ghostType = ghost.getAttribute('svy-ghosttype');
-            if (ghostType == 'comp') {
-                glasspaneLimit = Math.max(glasspaneLimit, (ghost as HTMLElement).offsetLeft + (ghost as HTMLElement).offsetWidth) + 5
-            }
-        }
-        if (this.currentPosition < glasspaneLimit) {
-            this.renderer.setStyle(this.glassPaneElement, 'width', this.currentPosition +'px');
-        }
 
         this.editorSession.sendChanges(changes);
         this.editorSession.getState().dragging = false;   
