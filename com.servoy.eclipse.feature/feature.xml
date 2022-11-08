@@ -539,7 +539,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.17.0"/>
+         version="18.12.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
@@ -548,7 +548,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.17.0"/>
+         version="18.12.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
@@ -557,7 +557,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.17.0"/>
+         version="18.12.1"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
@@ -579,7 +579,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -587,7 +587,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -595,7 +595,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="jakarta.servlet-api"
@@ -617,7 +617,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
@@ -626,27 +626,27 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="16.17.0"/>
+         version="18.12.1"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j18-impl"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.18.0"
          unpack="false"/>
 
    <plugin
          id="com.sun.activation.jakarta.activation"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin
          id="com.sun.mail.jakarta.mail"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.7"
          unpack="false"/>
 
 </feature>
