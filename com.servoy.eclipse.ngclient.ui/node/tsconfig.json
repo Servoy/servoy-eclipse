@@ -16,10 +16,10 @@
       "typings"
     ],
     "lib": [
-      "es2017",
-      "dom",
-      "ES2020.Promise",
-       "dom.Iterable"
+        "es2020",
+        "es2022.Error",
+        "dom",
+        "dom.Iterable"
     ],
     "paths": {
       "@servoy/public": [
