@@ -539,7 +539,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="18.12.1"/>
+         version="16.18.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
