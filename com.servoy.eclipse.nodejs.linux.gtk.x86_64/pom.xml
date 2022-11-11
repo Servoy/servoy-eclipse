@@ -38,7 +38,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <url>https://nodejs.org/dist/v18.12.1/node-v16.18.1-linux-x64.tar.xz</url>
+                            <url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz</url>
                             <outputFileName>node.tar.xz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>

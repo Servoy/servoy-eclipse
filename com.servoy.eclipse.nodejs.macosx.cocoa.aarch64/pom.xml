@@ -39,7 +39,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <url>https://nodejs.org/dist/v18.12.1/node-v18.12.1-darwin-arm64.tar.gz</url>
+                            <url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-darwin-arm64.tar.gz</url>
                             <outputFileName>node.tar.gz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>
