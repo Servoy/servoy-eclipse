@@ -201,6 +201,23 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			case "getData" :
 			{
 				boolean isNG2 = args.optBoolean("ng2", false);
+				Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
+
+				// send any client-side-types that the form designer will neeed for this form's components
+				EmbeddableJSONWriter compSpecsToSend = null;
+				for (IFormElement baseComponent : baseComponents)
+				{
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+					String specName = fe.getWebComponentSpec().getName();
+					compSpecsToSend = sendComponentSpecToClientIfNeeded(compSpecsToSend, fe, specName);
+				}
+				if (compSpecsToSend != null)
+				{
+					compSpecsToSend.endObject();
+					getTypesRegistryService().addComponentClientSideSpecs(compSpecsToSend);
+				}
+
+				// send the rest of the form data
 				if (isNG2)
 				{
 					LayoutContainer zoomedInContainer = null;
@@ -221,7 +238,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(new JSONObject(wrapper.getPropertiesString()));
 					writer.key("parentUuid");
 					writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
-					Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
 					Collection<IFormElement> deleted = Collections.emptyList();
 					sendComponents(fs, writer, baseComponents, deleted, false);
 					writer.key("solutionProperties");
@@ -920,7 +936,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			Collections.reverse(components);
 			EmbeddableJSONWriter compSpecNames = new EmbeddableJSONWriter();
-			EmbeddableJSONWriter compSpecsToSend = null;
 			writer.key("components");
 			writer.object();
 			compSpecNames.object();
@@ -941,23 +956,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				String specName = fe.getWebComponentSpec().getName();
 				compSpecNames.value(specName);
-				if (!clientSideSpecs.contains(specName))
-				{
-					clientSideSpecs.add(specName);
-
-					EmbeddableJSONWriter clSideTypesForThisComponent = WebComponentSpecProvider.getInstance().getClientSideTypeCache().getClientSideSpecFor(
-						fe.getWebComponentSpec());
-					if (clSideTypesForThisComponent != null)
-					{
-						if (compSpecsToSend == null)
-						{
-							compSpecsToSend = new EmbeddableJSONWriter();
-							compSpecsToSend.object();
-						}
-						compSpecsToSend.key(specName).value(clSideTypesForThisComponent);
-					}
-
-				}
 
 				fe.propertiesAsTemplateJSON(writer,
 					new FormElementContext(fe, new ServoyDataConverterContext(ServoyModelFinder.getServoyModel().getFlattenedSolution(),
@@ -982,13 +980,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 			writer.key("componentSpecNames");
 			writer.value(compSpecNames);
-
-			if (compSpecsToSend != null)
-			{
-				compSpecsToSend.endObject();
-				writer.key("componentSpecs");
-				writer.value(compSpecsToSend);
-			}
 
 			if (writeNG2)
 			{
@@ -1027,6 +1018,27 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			writer.endArray();
 		}
 
+	}
+
+	private EmbeddableJSONWriter sendComponentSpecToClientIfNeeded(EmbeddableJSONWriter compSpecsToSend, FormElement fe, String specName)
+	{
+		if (!clientSideSpecs.contains(specName))
+		{
+			clientSideSpecs.add(specName);
+
+			EmbeddableJSONWriter clSideTypesForThisComponent = WebComponentSpecProvider.getInstance().getClientSideTypeCache().getClientSideSpecFor(
+				fe.getWebComponentSpec());
+			if (clSideTypesForThisComponent != null)
+			{
+				if (compSpecsToSend == null)
+				{
+					compSpecsToSend = new EmbeddableJSONWriter();
+					compSpecsToSend.object();
+				}
+				compSpecsToSend.key(specName).value(clSideTypesForThisComponent);
+			}
+		}
+		return compSpecsToSend;
 	}
 
 	public void handleBrowserWindowRefresh()

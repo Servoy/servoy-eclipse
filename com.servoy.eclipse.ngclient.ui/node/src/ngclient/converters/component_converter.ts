@@ -26,12 +26,12 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
         if (serverSentData && serverSentData.propertyUpdates) {
             // granular updates received
             currentClientValue.getInternalState().updateFromServerArrived(serverSentData.propertyUpdates);
-        } else if (serverSentData === undefined || !serverSentData.n) { // .n means NO OPERATION
+        } else if (!serverSentData || !serverSentData.n) { // .n means NO OPERATION
             // full contents received
             if (serverSentData) {
                 newValue = new ChildComponentPropertyValue(serverSentData, currentClientValue, propertyContext,
                         this.converterService, this.sabloService, this.viewportService, this.typesRegistry, this.uiBlockerService, this.log);
-            } else newValue = undefined;
+            } else newValue = null;
         }
 
         return newValue;

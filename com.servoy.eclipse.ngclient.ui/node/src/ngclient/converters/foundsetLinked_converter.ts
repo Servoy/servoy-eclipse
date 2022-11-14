@@ -17,6 +17,11 @@ export class FoundsetLinkedType implements IType<FoundsetLinkedValue> {
     }
 
     public fromServerToClient(serverSentData: IServerSentData, currentClientValue: FoundsetLinkedValue, propertyContext: IPropertyContext): FoundsetLinkedValue {
+        if (serverSentData === null) {
+            if (currentClientValue) currentClientValue.getInternalState().dispose();
+            return null;
+        }
+
         // foundset linked properties always have a value both on client and on server (if wrapped value is null, foundset linked prop. will be an
         // array of null values in sync with the foundset prop's viewport)
         let newValue: FoundsetLinkedValue;
@@ -217,6 +222,10 @@ class FSLinkedInternalState extends FoundsetViewportState {
         }
     }
 
+    public dispose() {
+        if (this.singleValueState) this.singleValueState.dispose();
+    }
+
 }
 
 class SingleValueState {
@@ -244,7 +253,10 @@ class SingleValueState {
     }
 
     dispose() {
-        if (this.viewportSizeChangedListener) this.viewportSizeChangedListener();
+        if (this.viewportSizeChangedListener) {
+            this.viewportSizeChangedListener();
+            this.viewportSizeChangedListener = undefined;
+        }
     }
 
     getConversionInfo() {

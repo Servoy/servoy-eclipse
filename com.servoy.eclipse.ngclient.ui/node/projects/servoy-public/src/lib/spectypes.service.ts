@@ -52,8 +52,8 @@ export class SpecTypesService {
  * object) - and you can use it.
  *
  * Now, more .spec info about components/services is being sent to client (types + pushToServer info), and
- * for pushToServer SHALLOW or DEEP in .spec file (for custom objects/custom arrays), a proxy object will be used
- * on client to automatically detect reference changes in subproperties and send them to server as needed (note: for deep nested JSON changes
+ * for pushToServer SHALLOW/DEEP or even for ALLOW in .spec file (for custom objects/custom arrays), a proxy object will be used
+ * on client to automatically detect reference changes in subproperties (and send them to server if it is SHALLOW/DEEP) (note: for deep nested JSON changes
  * in plain 'object' subproperties - if any - you need to use ICustomObjectValue interface in order to tell the system that it changed, but
  * that is probably rarely needed).
  *
@@ -73,7 +73,16 @@ export class BaseCustomObject {
      * @deprecated
      */
     getStateHolder(): BaseCustomObjectState {
-        return new BaseCustomObjectState(); // dummy; just not to generate compile errors for older code
+        return getDeprecatedCustomObjectState(); // dummy; just not to generate compile errors for older code
+    }
+
+    /**
+     * DEPRECATED: See class jsdoc for more information.
+     *
+     * @deprecated
+     */
+    getWatchedProperties(): Array<string> {
+        return null;
     }
 
 }
@@ -119,6 +128,81 @@ export class BaseCustomObjectState {
 
 }
 
+/**
+ * This type is DEPRECATED (you can stop using ICustomArray for arrays declared as such in component/service .spec files; just use them as Array<T>).
+ *
+ * You can expect these custom arrays to implement ICustomArrayValue (if you need that; see details below). The system
+ * will automatically generate the correct value implementing that interface for typed arrays (as long as it follows what is defined in the .spec file)
+ * - and you can use it.
+ *
+ * Now, more .spec info about components/services is being sent to client (types + pushToServer info, ...), and
+ * for pushToServer SHALLOW/DEEP or even for ALLOW in .spec file (for custom objects/custom arrays), a proxy object will be used
+ * on client to automatically detect reference changes in elements (and send them to server if it is SHALLOW/DEEP) (note: for deep nested JSON changes
+ * in plain 'object' elements of an array - if any - you need to use the ICustomArrayValue interface in order to tell the system that it changed, but
+ * that is probably rarely needed).
+ *
+ * So there isn't a need anymore mark as changed manually (except for the deep neste JSON elements case mentioned above) or to manually push them to server
+ * by using getter/setter pair; that is done automatically via use of Proxy objects. Just make sure that, if it has pushToServer >= ALLOW, and if you assign
+ * a new full value (full custom array value - although it is the same for custom objects from .spec as well) to the property on client-side, you read it
+ * back from the model when you need to use it (as that reference will be updated to a newly created Proxy of your new value, that also implements ICustomArrayValue
+ *  - after being sent to server) and use the new reference instead.
+ *
+ * @deprecated
+ */
+export interface ICustomArray<T> extends Array<T> {
+    getStateHolder(): ArrayState;
+    markForChanged(): void;
+}
+
+/**
+ * This type is DEPRECATED - see ICustomArray jsdoc for more information.
+ *
+ * @deprecated
+ */
+ export class ArrayState extends BaseCustomObjectState {
+
+    /**
+     * DEPRECATED: See ICustomArray jsdoc for more information.
+     *
+     * @deprecated
+     */
+    public initDiffer() {
+    }
+
+    /**
+     * DEPRECATED: See ICustomArray jsdoc for more information.
+     *
+     * @deprecated
+     */
+     public clearChanges() {
+     }
+
+    /**
+     * DEPRECATED: See ICustomArray jsdoc for more information.
+     *
+     * @deprecated
+     */
+     public getChangedKeys(): Set<string | number> {
+         return super.getChangedKeys();
+     }
+
+}
+
+let deprecatedCustomObjectState: BaseCustomObjectState;
+let deprecatedCustomArrayState: ArrayState;
+
+/** @deprecated see BaseCustomObjectState jsdoc */
+const getDeprecatedCustomObjectState = (): BaseCustomObjectState => {
+    if (!deprecatedCustomObjectState) deprecatedCustomObjectState = new BaseCustomObjectState();
+    return deprecatedCustomObjectState;
+}
+
+/** @deprecated see ArrayState jsdoc */
+export const getDeprecatedCustomArrayState = (): ArrayState => {
+    if (!deprecatedCustomArrayState) deprecatedCustomArrayState = new ArrayState();
+    return deprecatedCustomArrayState;
+}
+
 /** Value present for properties in model of Servoy components/services if they are declared in the .spec file as arrays. (someType[]) */
 export interface ICustomArrayValue<T> extends Array<T> {
 
@@ -147,7 +231,7 @@ export interface ICustomArrayValue<T> extends Array<T> {
      * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
      * DO NOT add this method yourself in newly created custom array instances client-side, as that will not help!
      */
-    markElementAsHavingDeepChanges(index: number): void;
+    markElementAsHavingDeepChanges?(index: number): void; // marked optional - "?" - to allow client side code that is typed to this interface to assign plain array values to it
 
 }
 
@@ -179,7 +263,7 @@ export interface ICustomObjectValue extends Record<string, any> {
      * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
      * DO NOT add this method yourself in newly created custom object instances client-side, as that will not help!
      */
-    markSubPropertyAsHavingDeepChanges?(subPropertyName: string): void;
+    markSubPropertyAsHavingDeepChanges?(subPropertyName: string): void; // marked optional - "?" - to allow client side code that is typed to this interface to assign plain array values to it
 
 }
 

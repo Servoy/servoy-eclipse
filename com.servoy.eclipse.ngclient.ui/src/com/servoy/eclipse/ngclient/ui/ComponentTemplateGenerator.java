@@ -137,6 +137,7 @@ public class ComponentTemplateGenerator
 
 			// all properties that handle there own stuff, (that have converters on the server side)
 			// should not have the need for an emitter/datachange call. this should be handled in the type itself.
+			// TODO can we make this check more generic?
 			if (pd.getPushToServer() != null && pd.getPushToServer() != PushToServerEnum.reject &&
 				!(pd.getType() instanceof FoundsetPropertyType ||
 					pd.getType() instanceof FoundsetLinkedPropertyType ||

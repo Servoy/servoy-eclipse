@@ -36,7 +36,6 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -78,7 +77,7 @@ public class NodeFolderCreatorJob extends Job
 			}
 			long startTime = System.currentTimeMillis();
 			long time = startTime;
-			writeConsole(console, "---- Start to check to copy the Titanium NG sources");
+			writeConsole(console, "---- Started to check for changes in the Titanium NG sources; will copy new sources if necessary...");
 			if (!nodeFolder.exists())
 			{
 				createFolder(nodeFolder);
@@ -136,16 +135,16 @@ public class NodeFolderCreatorJob extends Job
 				{
 
 					FileUtils.deleteQuietly(nodeFolder.getParentFile());
-					writeConsole(console, "Deleted the main target folder because the root package.json is changed " +
-						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+					writeConsole(console, "- deleted main target folder, because the root package.json is changed (" +
+						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
 				}
 				else
 				{
-					// delete only the source dirs so we start clean
+					// delete only the source dirs, so we start clean
 					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
 					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
-					writeConsole(console, "The resources of the solution was changed started to copy the new sources " +
-						Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+					writeConsole(console, "- the solution's sources were changed\r\n- deleted old sources (" +
+						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
 				}
 
 				time = System.currentTimeMillis();
@@ -164,18 +163,18 @@ public class NodeFolderCreatorJob extends Job
 				}
 				catch (IOException e)
 				{
-					writeConsole(console, "Exception when creating node/ng folder when moving the package json files: " + e.getMessage());
+					writeConsole(console, "\r\n" + "Exception when creating node/ng folder and moving the package json files: " + e.getMessage() + "\r\n");
 					e.printStackTrace();
 				}
 
-				writeConsole(console, "Copied all the sources " + Math.round((System.currentTimeMillis() - time) / 1000) + "s");
+				writeConsole(console, "- the new sources were copied (" + Math.round((System.currentTimeMillis() - time) / 1000) + " s)");
 			}
 			if (createWatcher) createFileWatcher(nodeFolder, null);
-			writeConsole(console, "Total time to copy done " + Math.round((System.currentTimeMillis() - startTime) / 1000) + "s\n");
+			writeConsole(console, "Total time (check/copy operation): " + Math.round((System.currentTimeMillis() - startTime) / 1000) + " s.\r\n");
 		}
 		catch (RuntimeException e)
 		{
-			writeConsole(console, "Exception when creating node/ng folder: " + e.getMessage());
+			writeConsole(console, "\r\n" + "Exception when creating node/ng folder: " + e.getMessage() + "\r\n");
 			e.printStackTrace();
 		}
 		finally
@@ -188,7 +187,7 @@ public class NodeFolderCreatorJob extends Job
 			}
 			catch (IOException | InterruptedException e1)
 			{
-				writeConsole(console, "Exception when caling install on the parent root folder: " + e1.getMessage());
+				writeConsole(console, "\r\n" + "Exception when calling install on the parent root folder: " + e1.getMessage() + "\r\n");
 				e1.printStackTrace();
 			}
 
@@ -238,7 +237,7 @@ public class NodeFolderCreatorJob extends Job
 						long lm = entry.openConnection().getLastModified();
 						if (lm > timestamp)
 						{
-							writeConsole(console, "core source changed: " + entry.getFile() + " , build will be triggered");
+							writeConsole(console, "- core source changed: " + entry.getFile() + " ; build will be triggered.");
 							higherFound = true;
 						}
 					}
@@ -411,10 +410,6 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	/**
-	 * @param file
-	 * @param watchService
-	 */
 	private static boolean addAllDirs(File dir, WatchService watchService, String filter)
 	{
 		String filename = dir.toURI().getPath();
@@ -470,14 +465,6 @@ public class NodeFolderCreatorJob extends Job
 		return registerWatch;
 	}
 
-	/**
-	 * @param monitor
-	 * @param nodeFolder
-	 * @param entry
-	 * @param filename
-	 * @throws CoreException
-	 * @throws IOException
-	 */
 	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
 	{
 		File file = new File(nodeFolder, filename);

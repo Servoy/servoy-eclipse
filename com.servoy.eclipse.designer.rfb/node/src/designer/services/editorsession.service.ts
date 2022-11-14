@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
+import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
 import { EditorContentService } from './editorcontent.service';
@@ -27,15 +27,17 @@ export class EditorSessionService implements ServiceProvider {
     private bIsDirty = false;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
-        private urlParser: URLParserService, private editorContentService: EditorContentService) {
+        private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject(null);
     }
 
     public getService(name: string) {
-        if (name == '$editorService') {
+        if (name === '$editorService') {
             return this;
+        } else if (name === '$typesRegistry') {
+            return this.typesRegistry;
         }
         return null;
     }

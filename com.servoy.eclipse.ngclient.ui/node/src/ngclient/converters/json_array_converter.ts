@@ -1,10 +1,10 @@
-import { ConverterService, INTERNAL_STATE_PROP_NAME, IChangeAwareValue, instanceOfChangeAwareValue, isChanged,
+import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue,
             ChangeListenerFunction } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum,
             PushToServerEnumServerValue, ICustomTypesFromServer, ITypeFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext } from '../../sablo/types_registry';
 import { BaseCustomObjectState } from './json_object_converter';
-import { ICustomArrayValue } from '@servoy/public';
+import { ICustomArrayValue, ICustomArray, ArrayState as DeprecatedArrayState, getDeprecatedCustomArrayState } from '@servoy/public';
 
 export class CustomArrayTypeFactory implements ITypeFactory<CustomArrayValue<any>> {
 
@@ -348,52 +348,20 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
         return this.staticElementType ? this.staticElementType : internalState.dynamicPropertyTypesHolder['' + idx];
     }
 
-    private initArrayValue(array: Array<any>, contentVersion: number,
+    private initArrayValue(arrayToInitialize: Array<any>, contentVersion: number,
                                 pushToServerCalculatedValue: PushToServerEnum): CustomArrayValue<T> {
 
         let proxiedArray: CustomArrayValue<T>;
-        if (!instanceOfCustomArray(array)) {
-            Object.defineProperty(array, INTERNAL_STATE_PROP_NAME, {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value: new ArrayState(array)
-            });
-            Object.defineProperty(array, BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME, {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value() {
-                    return this[INTERNAL_STATE_PROP_NAME];
-                }
-            });
+        if (!instanceOfCustomArray(arrayToInitialize)) {
+            // this setPrototypeOf seems to be faster (did some benchmarking) then creating a new CustomArrayValue and copying all elements over to it
+            // and it is better then having just an interface instead of CustomArrayValue and using Object.defineProperties(...) to define methods of
+            // that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
+            Object.setPrototypeOf(arrayToInitialize, CustomArrayValue.prototype);
 
-            const internalState: ArrayState = array[INTERNAL_STATE_PROP_NAME];
+            const array = arrayToInitialize as CustomArrayValue<any>;
 
-            // now make it implement ICustomArrayValue<T>
-            Object.defineProperty(array, 'markElementAsHavingDeepChanges', {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value: (index: number): void => {
-                    // markElementAsHavingDeepChanges (this can be called by user for >= ALLOW pushToServer combined with 'object' type,
-                    // so simple JSON elements, that change by content, not reference)
-                    const pushToServerOnElements = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
-                                    this.pushToServerForElements);
-
-                    if (pushToServerOnElements >= PushToServerEnum.ALLOW) {
-                        internalState.changedKeys.set(index, array[index]); // we do not really know what the old value was...
-
-                        // notify parent that changes are present, but trigger an actual push-to-server only if pushToServer is DEEP
-                        // SHALLOW will work/trigger push-to-server automatically through proxy array impl., and ALLOW doesn't need to trigger push right away
-                        internalState.notifyChangeListener(pushToServerOnElements <= PushToServerEnum.SHALLOW);
-                    }
-                }
-            });
-
-            internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
-            internalState.calculatedPushToServerOfWholeProp = (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT);
-            internalState.dynamicPropertyTypesHolder = {};
+            array.initialize(contentVersion, (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT), this.pushToServerForElements);
+            const internalState = array.getInternalState();
 
             // if elements have SHALLOW or DEEP pushToServer (either inherited from parent, anyway not REJECT), add a Proxy obj to intercept client side changes by ref to array elements
             // and send them to server;
@@ -407,7 +375,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                 proxiedArray = proxyRevoke.proxy;
                 internalState.proxyRevokerFunc = proxyRevoke.revoke;
             } else proxiedArray = array as CustomArrayValue<T>;
-        } else proxiedArray = array as CustomArrayValue<T>;
+        } else proxiedArray = arrayToInitialize as CustomArrayValue<T>;
 
         return proxiedArray;
     }
@@ -473,10 +441,50 @@ const instanceOfCustomArray = <T>(obj: any): obj is CustomArrayValue<T> =>
     instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof ArrayState;
 
 
-interface CustomArrayValue<T> extends ICustomArrayValue<T>, IChangeAwareValue {
+class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, IChangeAwareValue, ICustomArray<T> {
 
-    /** do not call this methods from component/service impls.; this state is meant to be used only by the property type impl. */
-    getInternalState(): ArrayState;
+    #internalState: ArrayState; // private class member (really not visible when iterating using 'in' or 'of' or when trying to access it from the outside of this class)
+    #pushToServerForElements: PushToServerEnum;
+
+    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, pushToServerForElements: PushToServerEnum) {
+        this.#internalState = new ArrayState(this);
+        this.#internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+        this.#internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
+        this.#internalState.dynamicPropertyTypesHolder = {};
+        this.#pushToServerForElements = pushToServerForElements;
+    }
+
+    /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState(): ArrayState {
+        return this.#internalState;
+    }
+
+    markElementAsHavingDeepChanges(index: number): void {
+        // this can be called by user for >= ALLOW pushToServer combined with 'object' type,
+        // so simple JSON elements, that change by content, not reference
+        const pushToServerOnElements = PushToServerUtils.combineWithChildStatic(this.#internalState.calculatedPushToServerOfWholeProp,
+                        this.#pushToServerForElements);
+
+        if (pushToServerOnElements >= PushToServerEnum.ALLOW) {
+            this.#internalState.changedKeys.set(index, this[index]); // we do not really know what the old value was...
+
+            // notify parent that changes are present, but trigger an actual push-to-server only if pushToServer is DEEP
+            // SHALLOW will work/trigger push-to-server automatically through proxy array impl., and ALLOW doesn't need to trigger push right away
+            this.#internalState.notifyChangeListener(pushToServerOnElements <= PushToServerEnum.SHALLOW);
+        }
+    }
+
+    // deprecated stuff follows for backwards compatibility
+
+    /** @deprecated see ICustomArray jsdoc */
+    markForChanged(): void {
+        // changes should automatically be noticed via the Proxy if spec has pushToServer >= ALLOW; for deep watched elements there's the new markElementAsHavingDeepChanges();
+    }
+
+    /** @deprecated see ICustomArray jsdoc */
+    getStateHolder(): DeprecatedArrayState {
+        return getDeprecatedCustomArrayState();
+    }
 
 }
 

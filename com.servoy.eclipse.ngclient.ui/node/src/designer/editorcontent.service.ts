@@ -119,7 +119,7 @@ export class EditorContentService {
                     const rawModelProperties = elem.model;
                     elem.model = {};
 
-                    const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.type);
+                    const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
                     const componentDynamicTypesHolder = {};
                     const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => elem.model?.[propertyName], componentSpec);
 
@@ -164,7 +164,7 @@ export class EditorContentService {
                             }
                         }
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                        const fcc = new FormComponentCache(elem.name, elem.type, elem.handlers, elem.responsive, elem.position,
+                        const fcc = new FormComponentCache(elem.name, elem.specName, elem.handlers, elem.responsive, elem.position,
                             formComponentProperties, elem.model.foundset, this.typesRegistry, undefined).initForDesigner(elem.model);
                         formCache.addFormComponent(fcc);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
@@ -179,7 +179,7 @@ export class EditorContentService {
                             }
                         }
                     } else {
-                        const comp = new ComponentCache(elem.name, elem.type, elem.handlers, elem.position, this.typesRegistry, undefined).initForDesigner(elem.model);
+                        const comp = new ComponentCache(elem.name, elem.specName, elem.handlers, elem.position, this.typesRegistry, undefined).initForDesigner(elem.model);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -342,7 +342,7 @@ export class EditorContentService {
         let redrawDecorators = false;
         component.layout = elem.position;
 
-        const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.type);
+        const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
         const componentDynamicTypesHolder = {};
         const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => component.model?.[propertyName], componentSpec);
 

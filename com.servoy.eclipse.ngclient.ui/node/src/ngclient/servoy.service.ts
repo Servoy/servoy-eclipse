@@ -7,7 +7,6 @@ import { TypesRegistry } from '../sablo/types_registry';
 import { WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
-import { DateType } from './converters/date_converter';
 import { CustomObjectTypeFactory } from './converters/json_object_converter';
 import { CustomArrayTypeFactory } from './converters/json_array_converter';
 import { ValuelistType } from './converters/valuelist_converter';
@@ -23,7 +22,6 @@ import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
-import { ObjectType } from './converters/object_converter';
 import { UIBlockerService } from './services/ui_blocker.service';
 
 class UIProperties {
@@ -89,16 +87,12 @@ export class ServoyService {
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,
-        viewportService: ViewportService,
-        uiBlockerService: UIBlockerService) {
+        viewportService: ViewportService) {
 
         this.uiProperties = new UIProperties(sessionStorageService);
-        const dateType = new DateType();
         this.uiBlockerService = new UIBlockerService(this);
-        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
-        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
+
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService)); // used for 'object' type as well as for the default conversions
 
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
@@ -109,7 +103,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
         typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, logFactory));
         typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
-        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, uiBlockerService));
+        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
     }

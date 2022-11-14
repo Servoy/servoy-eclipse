@@ -200,7 +200,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.containedForm && this.containedForm.childElements) {
             this.rowItems = [];
             this.containedForm.childElements.forEach(elem => {
-                if (elem.type === 'servoycore-formcomponent')
+                if (elem.specName === 'servoycore-formcomponent') // TODO this used elem.type before which was always camel-case; does this mean that this if should be removed instead of making it work?
                     this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
                 else this.rowItems.push(elem);
             });

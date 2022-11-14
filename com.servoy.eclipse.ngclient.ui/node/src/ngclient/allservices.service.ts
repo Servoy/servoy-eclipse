@@ -12,6 +12,7 @@ import {PopupFormService} from './services/popupform.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
+import { TypesRegistry } from '../sablo/types_registry';
 // generated imports start
 // generated imports end
 
@@ -31,6 +32,7 @@ export class AllServiceService implements ServiceProvider {
         private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
         private $sabloService: SabloService,
+        private $typesRegistry: TypesRegistry,
         // generated services start
         // generated services end
         private clientFunctionService: ClientFunctionService,

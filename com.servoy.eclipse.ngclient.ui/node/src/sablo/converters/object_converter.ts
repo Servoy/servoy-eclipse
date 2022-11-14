@@ -1,5 +1,6 @@
 import { IType, ITypesRegistryForSabloConverters, IPropertyContext } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
+import { DateType } from './date_converter';
 
 // object type / default conversions
 export class ObjectType implements IType<any> {
@@ -33,7 +34,7 @@ export class ObjectType implements IType<any> {
 
 		// default conversion to server (for date values)
 		if (newClientData instanceof Date) {
-			const dateType = this.typesRegistry.getAlreadyRegisteredType('Date');
+			const dateType = this.typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SABLO);
 
 			if (dateType) {
 				// as this is an object type write also the type of date being sent; this works in 'object' type similarly to how dynamic client

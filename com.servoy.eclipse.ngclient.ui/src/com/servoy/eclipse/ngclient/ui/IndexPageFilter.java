@@ -75,15 +75,15 @@ public class IndexPageFilter implements Filter
 		}
 		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		File distFolder = new File(projectFolder, "dist/app");
+		File indexFile = new File(distFolder, "index.html");
 		String solutionName = getSolutionNameFromURI(requestURI);
-		if (distFolder.exists())
+		if (indexFile.exists())
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
 			{
-				File file = new File(distFolder, "index.html");
-				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
+				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
 				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
 				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,

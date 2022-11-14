@@ -4,6 +4,7 @@ import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
 import { EditorContentService } from './editorcontent.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
+import { TypesRegistry } from '../sablo/types_registry';
 import { DesignFormComponent } from './designform_component.component';
 
 import { Inject } from '@angular/core';
@@ -34,6 +35,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         private formService: FormService,
         private services: ServicesService,
         private editorContentService: EditorContentService,
+        private typesRegistry: TypesRegistry,
         protected renderer: Renderer2,
         @Inject(DOCUMENT) private doc: Document) { }
 
@@ -70,12 +72,13 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
                 }
             }
         });
-        let _editorContentService = this.editorContentService;
         this.editorContentService.setDesignFormComponent(this);
         this.services.setServiceProvider({
-            getService(name: string) {
-                if (name == '$editorContentService') {
-                    return _editorContentService;
+            getService: (name: string) => {
+                if (name === '$editorContentService') {
+                    return this.editorContentService;
+                } else if (name === '$typesRegistry') {
+                    return this.typesRegistry;
                 }
                 return null;
             }

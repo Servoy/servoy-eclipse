@@ -1,9 +1,9 @@
-import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue, isChanged, INTERNAL_STATE_PROP_NAME,
+import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
             SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
-import { LoggerFactory, LoggerService  } from '@servoy/public';
+import { LoggerFactory, LoggerService, BaseCustomObject  } from '@servoy/public';
 import { ICustomObjectValue } from '@servoy/public';
 
 export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
@@ -327,51 +327,20 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         return propType;
     }
 
-    private initCustomObjectValue(object: any, contentVersion: number,
+    private initCustomObjectValue(objectToInitialize: any, contentVersion: number,
                                 pushToServerCalculatedValue: PushToServerEnum): CustomObjectValue {
 
         let proxiedCustomObject: CustomObjectValue;
-        if (!instanceOfChangeAwareValue(object)) {
-            Object.defineProperty(object, INTERNAL_STATE_PROP_NAME, {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value: new CustomObjectState(object)
-            });
-            Object.defineProperty(object, BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME, {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value() {
-                    return this[INTERNAL_STATE_PROP_NAME];
-                }
-            });
-            const internalState: CustomObjectState = object[INTERNAL_STATE_PROP_NAME];
+        if (!instanceOfChangeAwareValue(objectToInitialize)) {
+            // this setPrototypeOf seems to be faster then creating a new CustomObjectValue and copying all elements over to it
+            // and it is better then having just an interface for CustomObjectValue and adding via Object.defineProperties(...) all (deprecated or valid)
+            // methods of that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
+            Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
 
-            // now make it implement ICustomObjectValue<T>
-            Object.defineProperty(object, 'markSubPropertyAsHavingDeepChanges', {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value: (subPropertyName: string): void => {
-                    // markSubPropertyAsHavingDeepChanges (this can be called by user for >= ALLOW pushToServer combined with 'object' type,
-                    // so simple JSON subproperties, that change by content, not reference)
-                    const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
-                                                                this.propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
+            const object = objectToInitialize as CustomObjectValue;
 
-                    if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
-                        internalState.changedKeys.set(subPropertyName, object[subPropertyName]);
-
-                        // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
-                        // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
-                        internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
-                    }
-                }
-            });
-
-            internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
-            internalState.calculatedPushToServerOfWholeProp = (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT);
-            internalState.dynamicPropertyTypesHolder = {};
+            object.initialize(contentVersion, (typeof pushToServerCalculatedValue != 'undefined' ? pushToServerCalculatedValue : PushToServerEnum.REJECT), this.propertyDescriptions);
+            const internalState = object.getInternalState();
 
             // if object & elements have SHALLOW or DEEP pushToServer, add a Proxy obj to intercept client side changes to object and send them to server;
             // the proxy is added in case of ALLOW or higher on the object itself as well because:
@@ -387,7 +356,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                 proxiedCustomObject = proxyRevoke.proxy;
                 internalState.proxyRevokerFunc = proxyRevoke.revoke;
             } else proxiedCustomObject = object as CustomObjectValue;
-        } else proxiedCustomObject = object as CustomObjectValue;
+        } else proxiedCustomObject = objectToInitialize as CustomObjectValue;
 
         return proxiedCustomObject;
     }
@@ -451,9 +420,42 @@ interface CustomObjectValue extends IChangeAwareValue, ICustomObjectValue {
 
 }
 
-export class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState implements IParentAccessForSubpropertyChanges<KeyT> {
+class CustomObjectValue extends BaseCustomObject implements IChangeAwareValue, ICustomObjectValue {
 
-    public static readonly INTERNAL_STATE_GETTER_NAME = 'getInternalState';
+    #internalState: CustomObjectState; // private class member (really not visible when iterating using 'in' or 'of' or when trying to access it from the outside of this class)
+    #propertyDescriptions: { [propName: string]: IPropertyDescription };
+
+    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
+        this.#internalState = new CustomObjectState(this);
+        this.#internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+        this.#internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
+        this.#internalState.dynamicPropertyTypesHolder = {};
+        this.#propertyDescriptions = propertyDescriptions;
+    }
+
+    /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState(): CustomObjectState {
+        return this.#internalState;
+    }
+
+    markSubPropertyAsHavingDeepChanges(subPropertyName: string): void {
+        // this can be called by user for >= ALLOW pushToServer combined with 'object' type,
+        // so simple JSON subproperties, that change by content, not reference
+        const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(this.#internalState.calculatedPushToServerOfWholeProp,
+                                                    this.#propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
+
+        if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
+            this.#internalState.changedKeys.set(subPropertyName, this[subPropertyName]);
+
+            // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
+            // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
+            this.#internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
+        }
+    }
+
+}
+
+export class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState implements IParentAccessForSubpropertyChanges<KeyT> {
 
     public contentVersion: number;
 
@@ -488,9 +490,6 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
     }
 
     public destroyAndDeleteMeAndGetNonProxiedValueOfProp(): VT {
-        delete this.originalNonProxiedInstanceOfCustomObject[INTERNAL_STATE_PROP_NAME];
-        delete this.originalNonProxiedInstanceOfCustomObject[BaseCustomObjectState.INTERNAL_STATE_GETTER_NAME];
-
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
 

@@ -10,6 +10,8 @@ export class FormcomponentType implements IType<FormComponentValue> {
     }
 
     fromServerToClient(serverSentData: any, currentClientData: FormComponentValue, propertyContext: IPropertyContext): FormComponentValue {
+        if (!serverSentData) return null;
+
         let formComponentPropertyValue = currentClientData;
         if (!formComponentPropertyValue) formComponentPropertyValue = new FormComponentValue(serverSentData.absoluteLayout,
                                             serverSentData.childElements,
@@ -61,7 +63,6 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
 export class FormComponentValue extends ChangeAwareState implements IChangeAwareValue {
 
-    conversionInfo: any = {};
     constructor(
         public absoluteLayout: boolean,
         public childElements: ChildComponentPropertyValue[],

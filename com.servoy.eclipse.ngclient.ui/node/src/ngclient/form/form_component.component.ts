@@ -350,6 +350,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
             // TODO: this has to be replaced with a type property on the state object
+            // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName =  compDirectiveName.replace('-','');

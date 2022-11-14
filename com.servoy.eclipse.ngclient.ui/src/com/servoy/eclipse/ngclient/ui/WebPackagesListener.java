@@ -242,7 +242,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					sourceChanged = !distIndexFile.exists();
 					if (sourceChanged)
 					{
-						writeConsole(console, "No generated files, build will be triggered");
+						writeConsole(console, "- build will be triggered; no generated files...");
 					}
 					try
 					{
@@ -259,7 +259,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
 							if (pck != null)
 							{
-								writeConsole(console, "need to install package " + pck);
+								writeConsole(console, "- need to install package " + pck);
 								packageToInstall.add(pck);
 							}
 						});
@@ -343,7 +343,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (!old.equals(content))
 					{
 						sourceChanged = true;
-						writeConsole(console, "services ts file changed");
+						writeConsole(console, "- services ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
 					}
 				}
@@ -410,7 +410,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (!oldLFC.equals(lfc))
 						{
 							sourceChanged = true;
-							writeConsole(console, "LFC components ts file changed");
+							writeConsole(console, "- LFC components ts file changed");
 							FileUtils.writeStringToFile(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), lfc, "UTF-8");
 						}
 
@@ -418,14 +418,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (!old.equals(content))
 					{
 						sourceChanged = true;
-						writeConsole(console, "components ts file changed");
+						writeConsole(console, "- components ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
 					}
 
 					if (!oldEditor.equals(editorContent))
 					{
 						sourceChanged = true;
-						writeConsole(console, "editor ts file changed");
+						writeConsole(console, "- editor ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
 					}
 
@@ -468,7 +468,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (!current.equals(content))
 					{
 						sourceChanged = true;
-						writeConsole(console, "component modules  ts file changed");
+						writeConsole(console, "- component modules ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), current, "UTF-8");
 					}
 				}
@@ -507,7 +507,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (stylesChanged[0])
 						{
 							// just write everything back to be sure the priority is respected
-							writeConsole(console, "Styles source changed");
+							writeConsole(console, "- styles source changed");
 							sourceChanged = true;
 							while (styles.length() > 0)
 							{
@@ -567,7 +567,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						});
 						if (assetsChanged[0])
 						{
-							writeConsole(console, "Assets source changed");
+							writeConsole(console, "- assets source changed");
 							sourceChanged = true;
 							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
 						}
@@ -689,11 +689,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 
 					writeConsole(console,
-						"None NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) + "s");
+						"Node NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
+							" s.");
 
 					if (SOURCE_DEBUG)
 					{
-						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by your self (npm install did happen)");
+						writeConsole(console, "SOURCE DEBUG, skipping npm run build_debug_nowatch, need to be run by YOURSELF (npm install did happen).");
 					}
 					else
 					{
@@ -711,7 +712,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 				}
 				writeConsole(console, "Total time to check/install Titanium NG target folder: " + projectFolder + " is " +
-					Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
+					Math.round((System.currentTimeMillis() - time) / 1000) + " s.\n");
 				return Status.OK_STATUS;
 			}
 			finally
@@ -805,17 +806,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			};
 		}
 
-		/**
-		 * @param console
-		 * @param pck
-		 */
 		private void writeConsole(StringOutputStream console, String message)
 		{
 			try
 			{
 				console.write(message + "\n");
 			}
-			catch (IOException e2)
+			catch (IOException e)
 			{
 			}
 		}
@@ -924,12 +921,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										}
 										else
 										{
-											writeConsole(console, "The source of the package.json in " + packageFolder + " was modified");
+											writeConsole(console, "- the source of the package.json in " + packageFolder + " was modified");
 										}
 									}
 									else
 									{
-										writeConsole(console, "Package.json in " + packageFolder + " did not exists installing this package");
+										writeConsole(console, "- package.json in " + packageFolder + " did not exists; installing this package...");
 									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(packageFolder) || !packageFolder.exists() ||
@@ -940,7 +937,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										FileUtils.deleteQuietly(packageFolder);
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
-										writeConsole(console, "Updated SPM target folder: " + packageFolder + " from source package dir: " + srcDir);
+										writeConsole(console, "- updated target folder " + packageFolder + " from source package dir " + srcDir);
 										WebPackagesListener.watchCreated.put(packageFolder, new DirectorySync(srcDir, packageFolder, null));
 
 										Optional<File> srcMax = FileUtils.listFiles(packageFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
@@ -953,7 +950,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 										if (tm != timestamp)
 										{
-											writeConsole(console, "Source Package project changed " + project.getName() + " current timestamp: " +
+											writeConsole(console, "- source Package Project changed (" + project.getName() + ") current timestamp: " +
 												new Date(tm) + " compared to the stored timestamp " + new Date(timestamp));
 											packageJsonChanged = true;
 										}
@@ -983,8 +980,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								else
 								{
-									writeConsole(console, "Source package " + packageName + " (project: " + project +
-										") should have a .sourcepath json file in the project root having 2 properties: srcDir (pointing to the root souce dir) and apiFile (pointing to the public api file without extension in that source dir\n");
+									writeConsole(console, "\nSource Package " + packageName + " (project: " + project +
+										") should have a .sourcepath json file in the project root having 2 properties: srcDir (pointing to the root souce dir) and apiFile (pointing to the public api file without extension in that source dir)!\n");
 								}
 								return null;
 							}
@@ -1105,7 +1102,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		}
 	}
 
-	private static boolean SOURCE_DEBUG = false;
+	private static boolean SOURCE_DEBUG = "true".equals(System.getProperty("ti.ng.source.debug", "false"));
 
 	private static final AtomicBoolean ignore = new AtomicBoolean(false);
 

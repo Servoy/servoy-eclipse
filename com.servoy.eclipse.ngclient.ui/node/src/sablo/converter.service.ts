@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory } from '@servoy/public';
-import { ObjectType } from '../ngclient/converters/object_converter';
+import { ObjectType } from './converters/object_converter';
+import { DateType } from './converters/date_converter';
 import { IType, IPropertyContext, TypesRegistry, IWebObjectFunction, PushToServerUtils } from '../sablo/types_registry';
 
 class SwingModifiers {
@@ -21,12 +22,6 @@ class SwingModifiers {
     public static readonly ALT_GRAPH_DOWN_MASK = 8192;
 }
 
-/**
- * Only use this constant if you want to define the internal state prop using Object.defineProperty; any access to internal states should be done via
- * IChangeAwareValue.getInternalState() instead.
- */
-export const INTERNAL_STATE_PROP_NAME = '__internalState';
-
 @Injectable({
     providedIn: 'root'
 })
@@ -40,6 +35,11 @@ export class ConverterService {
 
     constructor(logFactory: LoggerFactory, private typesRegistry: TypesRegistry) {
         this.log = logFactory.getLogger('ConverterService');
+
+        const dateType = new DateType();
+        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
+        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, this)); // used for 'object' type as well as for the default conversions
     }
 
     public static getCombinedPropertyNames(now: any, prev: any) {

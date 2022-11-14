@@ -110,7 +110,7 @@ export class FormCache implements IFormCache {
     public getComponentSpecification(componentName: string) {
         let componentCache: ComponentCache = this.componentCache.get(componentName);
         if (!componentCache) componentCache = this.formComponents.get(componentName);
-        return componentCache ? this.typesRegistry.getComponentSpecification(componentCache.type) : undefined;
+        return componentCache ? this.typesRegistry.getComponentSpecification(componentCache.specName) : undefined;
     }
 
     public getClientSideType(componentName: string, propertyName: string) {
@@ -181,19 +181,41 @@ export class ComponentCache implements IComponentCache {
     public readonly dynamicClientSideTypes: Record<string, IType<any>> = {};
     public readonly model: { [property: string]: any };
 
+    /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
+    public readonly type: string;
+
     public parent: StructureCache;
 
     private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
 
     constructor(public readonly name: string,
-        public readonly type: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
+        public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string },
         private readonly typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
+            this.type = ComponentCache.convertToJSName(specName);
             this.model = this.createModel();
             this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
                 parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
+    }
+
+    private static convertToJSName(webObjectSpecName: string) {
+        if (webObjectSpecName) {
+            // transform webObjectSpecName like testpackage-myTestService (as it is defined in the .spec files) into testPackageMyTestService - as
+            // this is needed sometimes client-side
+            // but who knows, maybe someone will try the dashed version and wonder why it doesn't work
+
+            // this should do the same as ClientService.java #convertToJSName()
+            const packageAndName = webObjectSpecName.split('-');
+            if (packageAndName.length > 1) {
+                webObjectSpecName = packageAndName[0];
+                for (let i = 1; i < packageAndName.length; i++) {
+                    if (packageAndName[1].length > 0) webObjectSpecName += packageAndName[i].charAt(0).toUpperCase() + packageAndName[i].slice(1);
+                }
+            }
+        }
+        return webObjectSpecName;
     }
 
     initForDesigner(initialModelProperties: { [property: string]: any }): ComponentCache {
@@ -227,7 +249,7 @@ export class ComponentCache implements IComponentCache {
     }
 
     private hasSubPropsWithShallowOrDeep(): boolean {
-        const componentSpec = this.typesRegistry.getComponentSpecification(this.type);
+        const componentSpec = this.typesRegistry.getComponentSpecification(this.specName);
         if (componentSpec) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
             if (propertyDescription.getPropertyPushToServer() > PushToServerEnum.ALLOW) return true;
         }
@@ -243,7 +265,7 @@ export class ComponentCache implements IComponentCache {
             set: (underlyingModelObject: { [property: string]: any }, prop: any, v: any) => {
                 if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingModelObject, prop, v);
 
-                const propertyDescription = this.typesRegistry.getComponentSpecification(this.type)?.getPropertyDescription(prop);
+                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
                 const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
 
                 if (pushToServer > PushToServerEnum.ALLOW) {
@@ -257,7 +279,7 @@ export class ComponentCache implements IComponentCache {
             deleteProperty: (underlyingModelObject: { [property: string]: any }, prop: any) => {
                 if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingModelObject, prop);
 
-                const propertyDescription = this.typesRegistry.getComponentSpecification(this.type)?.getPropertyDescription(prop);
+                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
                 const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
 
                 if (pushToServer > PushToServerEnum.ALLOW) {
@@ -348,7 +370,7 @@ export class FormComponentCache extends ComponentCache {
 
     constructor(
         name: string,
-        type: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
+        specName: string,
         handlers: Array<string>,
         public responsive: boolean,
         layout: { [property: string]: string },
@@ -356,7 +378,7 @@ export class FormComponentCache extends ComponentCache {
         public readonly hasFoundset: boolean,
         typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
-            super(name, type, handlers, layout, typesRegistry, parentAccessForSubpropertyChanges);
+            super(name, specName, handlers, layout, typesRegistry, parentAccessForSubpropertyChanges);
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {

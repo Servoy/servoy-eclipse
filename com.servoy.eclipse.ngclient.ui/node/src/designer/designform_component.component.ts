@@ -174,13 +174,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     const oldModel = this.insertedClone.model;
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.type, this.insertedClone.handlers,
+                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.specName, this.insertedClone.handlers,
                             this.insertedClone.layout, this.typesRegistry, undefined).initForDesigner(oldModel);
 
                         parent.addChild(this.insertedClone);
                     }
 
-                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.type, this.insertedClone.handlers, this.insertedClone.layout,
+                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.specName, this.insertedClone.handlers, this.insertedClone.layout,
                                                     this.typesRegistry, undefined).initForDesigner(oldModel);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
@@ -304,6 +304,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
             // TODO: this has to be replaced with a type property on the state object
+            // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');

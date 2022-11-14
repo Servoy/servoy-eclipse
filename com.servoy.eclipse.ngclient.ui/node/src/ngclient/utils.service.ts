@@ -123,4 +123,3 @@ export class SvyUtilsService {
         return this.doc.getElementById('mainBody');
     }
 }
-
