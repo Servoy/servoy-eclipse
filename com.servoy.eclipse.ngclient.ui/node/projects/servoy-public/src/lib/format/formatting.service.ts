@@ -79,8 +79,7 @@ export class FormattingService {
     public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
-                //do not looses focus, just apply the format and push value
-                vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
+                // enter key is pressed
             } else if (vSvyFormat.type === 'INTEGER') {
                 const currentLanguageNumeralSymbols = numbro.languageData();
 
@@ -165,6 +164,20 @@ export class FormattingService {
             for (let i = 0; i < parts.length; i++) {
                 if (i % 2 === 1) {
                     data = data.replace(new RegExp(parts[i], 'g'), '');
+                }
+            }
+        }
+        const formatDecimalSeparatorPos = format.indexOf('\.');
+        if (formatDecimalSeparatorPos > -1) {
+            const currentLanguageNumeralSymbols = numbro.languageData();
+            const dataDecimalSeparatorPos = data.indexOf(currentLanguageNumeralSymbols.delimiters.decimal);
+            if (dataDecimalSeparatorPos > -1) {
+                const decimalLen = format.length - formatDecimalSeparatorPos - 1;
+                let adjustedData = data.toString().substring(0, dataDecimalSeparatorPos + 1);
+                const decimal = data.toString().substring(dataDecimalSeparatorPos + 1);
+                if (decimal.length > decimalLen) {
+                    adjustedData += decimal.substring(0, decimalLen);
+                    data = adjustedData;
                 }
             }
         }

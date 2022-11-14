@@ -10,7 +10,7 @@
 		<version>2022.12.0.3820_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</artifactId>
-	<version>16.17.0</version>
+	<version>18.12.1</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -39,7 +39,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <url>https://nodejs.org/dist/v16.17.0/node-v16.17.0-darwin-arm64.tar.gz</url>
+                            <url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-darwin-arm64.tar.gz</url>
                             <outputFileName>node.tar.gz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>

@@ -9,57 +9,81 @@ import { EditorContentService } from '../services/editorcontent.service';
 })
 export class ResizeEditorHeightComponent implements OnInit {
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
-    position: number;
-    topLimit = 0;
+    startPosition: number;
+    currentPosition = 0;
+    heightLimit = 5;
     ghostLabel: Element;
+    dragingEvent = null;
+    ghostContainers: HTMLElement[];
+    editorContent: HTMLElement;
+    glassPaneElement: HTMLElement;
 
     constructor(protected readonly renderer: Renderer2, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
     }
 
     ngOnInit() {
         this.elementRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
-            this.editorContentService.getContentArea().addEventListener('mousemove', this.mousemove);
-            this.editorContentService.getContentArea().addEventListener('mouseup', this.mouseup);
-            this.editorSession.setDragging(true);
-            this.position = event.pageY - (this.editorContentService.querySelector('.ghostcontainer') as HTMLElement).offsetHeight;
-            // title / header / body / footer / form
-            // form ghost is always present; position is always initialized to the ghost's top before form ghost
-            const ghostsLabels = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
-            const lastIndex = ghostsLabels.length - 2;//index of the last visible ghost (if present)
-            if (ghostsLabels.length < 0) {//no visible parts in form
-                this.ghostLabel = null;
-                this.topLimit = 5;
-            } else {
-                this.ghostLabel = ghostsLabels[lastIndex ]; //select the last visible ghost
-                this.topLimit = lastIndex > 0 ? (ghostsLabels[lastIndex - 1] as HTMLElement).offsetTop + 5 : 5;//the previous ghost is the upper limit
+            this.editorContentService.getDocument().addEventListener('mousemove', this.mousemove);
+            this.editorContentService.getDocument().addEventListener('mouseup', this.mouseup);
+            this.dragingEvent = event;
+            this.editorSession.getState().dragging = true;
+            this.ghostLabel = null;
+            //components placed outside view area will generate a second ghostcontainer
+            this.ghostContainers = this.editorContentService.querySelectorAll('.ghostcontainer');
+            this.editorContent = this.editorContentService.querySelector('.content');  
+            this.glassPaneElement = this.editorContentService.querySelector('.contentframe-overlay');
+            this.startPosition = event.pageY - this.ghostContainers[0].offsetHeight;
+            this.currentPosition = this.startPosition;
+            const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
+            if (ghostsList.length <= 1) return; //contain only form; top limit is the upper margin of the form
+            for (let index=0; index < ghostsList.length; index++) {
+                const tmpGhost = ghostsList.item(index);
+                const ghostType = tmpGhost.getAttribute('svy-ghosttype');
+                if (ghostType == 'part') {
+                    if (!this.ghostLabel) {
+                        this.ghostLabel = tmpGhost;
+                    }
+                    let tmpTop = (tmpGhost as HTMLElement).offsetTop;
+                    let ghostTop = (this.ghostLabel as HTMLElement).offsetTop
+                    if (tmpTop > ghostTop) {
+                        this.heightLimit = (this.ghostLabel as HTMLElement).offsetTop + 5;
+                        this.ghostLabel = tmpGhost;
+                    }
+                } 
             }
-            
         });
     }
 
     mousemove = (event: MouseEvent) => { 
-        const topPosition = event.pageY-this.position > this.topLimit ? event.pageY-this.position : this.topLimit;
-        const container: HTMLElement = this.editorContentService.querySelector('.ghostcontainer');
-        const content: HTMLElement = this.editorContentService.querySelector('.content');    
-        this.renderer.setStyle(container, 'height', topPosition +'px');
-        this.renderer.setStyle(content, 'height', topPosition +'px');
-        this.renderer.setStyle(this.ghostLabel, 'top', topPosition + 'px');
+        if (this.dragingEvent) {
+            this.currentPosition = event.pageY-this.startPosition > this.heightLimit ? event.pageY-this.startPosition : this.heightLimit;
+
+            for (let index = 0; index < this.ghostContainers.length; index++) {//components outside view became ghost places in a separate container
+                this.renderer.setStyle(this.ghostContainers[index], 'height', this.currentPosition +'px');
+            }
+            this.renderer.setStyle(this.editorContent, 'height', this.currentPosition +'px');
+            this.renderer.setStyle(this.glassPaneElement, 'height', this.currentPosition +'px');
+            this.renderer.setStyle(this.ghostLabel, 'top', this.currentPosition + 'px');
+        }
     }
 
     mouseup = (event: MouseEvent) => {
-        const topPosition = event.pageY-this.position > this.topLimit ? event.pageY-this.position : this.topLimit;
-        this.editorContentService.getContentArea().removeEventListener('mousemove', this.mousemove);
-        this.editorContentService.getContentArea().removeEventListener('mouseup', this.mouseup);
-        this.editorSession.setDragging(false);    
+        this.currentPosition = event.pageY-this.startPosition > this.heightLimit ? event.pageY-this.startPosition : this.heightLimit;
+        this.editorContentService.getDocument().removeEventListener('mousemove', this.mousemove);
+        this.editorContentService.getDocument().removeEventListener('mouseup', this.mouseup);  
+        let glasspaneLimit = this.heightLimit;
 
         let changes = {};
         let id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
-        changes[id] = { 'y': topPosition};
+        changes[id] = { 'y': this.currentPosition};
         this.editorSession.sendChanges(changes); 
         if (this.ghostLabel) {
             id = this.ghostLabel.getAttribute('svy-id');
-            changes[id] = { 'y': topPosition};
+            changes[id] = { 'y': this.currentPosition};
             this.editorSession.sendChanges(changes); 
         } 
+        this.dragingEvent = null;
+        this.editorSession.getState().dragging = false;
     }
+    
 }

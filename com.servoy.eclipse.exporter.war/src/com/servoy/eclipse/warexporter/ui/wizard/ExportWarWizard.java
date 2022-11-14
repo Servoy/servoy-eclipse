@@ -163,7 +163,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		int solutionType = activeProject.getSolutionMetaData().getSolutionType();
 		isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
 		exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
-		exportNonActiveSolutionsDialog = exportModel.isExportNonActiveSolutions();
+		exportNonActiveSolutionsDialog = true;
 		disableFinishButton = false;
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
 		{

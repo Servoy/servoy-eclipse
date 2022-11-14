@@ -51,7 +51,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
 export class ServoyCoreComponentsModule {
     constructor() {
         // eslint-disable-next-line max-len
-        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=10000,AssetReference=AG-018380,ExpiryDate=11_October_2022_[v2]_MTY2NTQ0MjgwMDAwMA==a725c314c19f2c87b1f6a2f4836eec3e');
+        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=-1,AssetReference=AG-031784,SupportServicesEnd=11_November_2023_[v2]_MTY5OTY2MDgwMDAwMA==ef0717137a9846a6aa3a3c8426e308b4');
         ModuleRegistry.registerModules([ServerSideRowModelModule, ClientSideRowModelModule]);
     }
 }

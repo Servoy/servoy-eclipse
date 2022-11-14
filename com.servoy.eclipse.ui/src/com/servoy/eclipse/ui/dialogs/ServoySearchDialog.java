@@ -25,6 +25,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -615,7 +616,17 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				isAltKeyPressed = (e.stateMask & SWT.BUTTON_MASK) != 0 && (e.stateMask & SWT.ALT) != 0;
+				// on linux we really need to check for BUTTON_MASK (mouse click)
+				// because on key press ENTER, SWT.ALT is always set
+				if (Platform.getOS().equals(Platform.OS_LINUX))
+				{
+					isAltKeyPressed = (e.stateMask & SWT.BUTTON_MASK) != 0 && (e.stateMask & SWT.ALT) != 0;
+				}
+				else
+				{
+					isAltKeyPressed = (e.stateMask & SWT.ALT) != 0;
+				}
+
 				getOkButton().removeSelectionListener(okButtonSelectionListener);
 				superOkPressed();
 			}

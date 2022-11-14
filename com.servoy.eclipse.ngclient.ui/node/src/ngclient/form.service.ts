@@ -244,15 +244,22 @@ export class FormService {
     }
 
     public setFormStyleClasses(styleclasses: {property: string}){
-        this.ngUtilsFormStyleclasses = styleclasses;
+		if (this.ngUtilsFormStyleclasses) {
+			for (const formname of Object.keys(this.ngUtilsFormStyleclasses)) {
+        		if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
+            		(this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses('');
+            	}
+        	}
+		}
+
         if (styleclasses) {
-            for (const formname of Object.keys(styleclasses)) {
+			for (const formname of Object.keys(styleclasses)) {
                 if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
                     (this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses(styleclasses[formname]);
                 }
             }
         }
-
+		this.ngUtilsFormStyleclasses = styleclasses;
     }
 
     public destroy(formName: string) {
