@@ -17,6 +17,7 @@
     ],
     "lib": [
         "es2020",
+        "es2021.Promise",
         "es2022.Error",
         "dom",
         "dom.Iterable"
