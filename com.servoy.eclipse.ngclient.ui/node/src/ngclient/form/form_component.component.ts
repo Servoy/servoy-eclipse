@@ -393,6 +393,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         if (ngutilsstyleclasses) {
             this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
         }
+        this.detectChanges();
     }
 }
 
