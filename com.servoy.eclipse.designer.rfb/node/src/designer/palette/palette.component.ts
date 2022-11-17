@@ -18,8 +18,6 @@ export class PaletteComponent implements ISupportAutoscroll{
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     
-    autoscrollAreasEnabled: boolean;
-    autoscrollElementClientBounds: Array<DOMRect>;
     
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
@@ -107,8 +105,9 @@ export class PaletteComponent implements ISupportAutoscroll{
         if (!ghost) {
             this.editorSession.setDragging(true);
             this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
-            this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
         }
+
+        this.editorSession.registerAutoscroll(this);
     }
 
     onMouseUp = (event: MouseEvent) => {
@@ -178,10 +177,7 @@ export class PaletteComponent implements ISupportAutoscroll{
 
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
              
-             //disable mouse events on the autoscroll
-            this.editorSession.getState().pointerEvents = 'none'; 
-            this.autoscrollAreasEnabled = false;
-            this.editorSession.stopAutoscroll();
+            this.editorSession.unregisterAutoscroll(this);
         }
     }
 
@@ -257,12 +253,6 @@ export class PaletteComponent implements ISupportAutoscroll{
                     }
                 }
             }
-             // enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
-            if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
-                this.autoscrollAreasEnabled = true;
-                this.editorSession.startAutoscroll(this);
-            }
-
         }
     }
 
@@ -284,8 +274,13 @@ export class PaletteComponent implements ISupportAutoscroll{
         return this.editorSession.getState().packages;
     }
     
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
-        return null;
+    updateLocationCallback(changeX: number, changeY: number) {
+        this.editorContentService.getContentArea().scrollTop += changeY;
+        this.editorContentService.getContentArea().scrollLeft += changeX;
+    }
+
+    getAutoscrollLockId(): string {
+        return 'palette';
     }
 }
 

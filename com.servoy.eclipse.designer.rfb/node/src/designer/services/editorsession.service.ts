@@ -25,6 +25,7 @@ export class EditorSessionService implements ServiceProvider {
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
+    private lockAutoscrollId = '';
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -422,7 +423,9 @@ export class EditorSessionService implements ServiceProvider {
         this.bIsDirty = dirty;
     }
 
-    startAutoscroll(scrollComponent: ISupportAutoscroll) {
+    registerAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
+        this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
         if (this.autoscrollBehavior == null) {
             this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
         } else {
@@ -430,8 +433,11 @@ export class EditorSessionService implements ServiceProvider {
         }
     }
 
-    stopAutoscroll() {
-        this.autoscrollBehavior.next(null);
+    unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
+            this.lockAutoscrollId = '';
+            this.autoscrollBehavior.next(null);
+        }
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
@@ -519,6 +525,8 @@ export class Package {
 }
 
 export interface ISupportAutoscroll {
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void;
+    updateLocationCallback(changeX: number, changeY: number): void;
     onMouseUp(event: MouseEvent): void;
+    onMouseMove(event: MouseEvent): void;
+    getAutoscrollLockId(): string;
 }

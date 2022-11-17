@@ -15,10 +15,10 @@
         </div>
         <designer-editorcontent></designer-editorcontent> 
     </div>
-    <div #bottomAutoscroll class="bottomAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #rightAutoscroll class="rightAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #topAutoscroll class="topAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #leftAutoscroll class="leftAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
+    <designer-autoscroll [placement]="'top'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'bottom'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'left'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'right'"></designer-autoscroll>
 </div> <designer-status-bar *ngIf="!urlParser.isAbsoluteFormLayout()"></designer-status-bar> </div>
 <designer-contextmenu></designer-contextmenu>
 <designer-inline-edit></designer-inline-edit>

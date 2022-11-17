@@ -1,3 +1,4 @@
+import { AutoscrollComponent } from './autoscroll/autoscroll.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -61,7 +62,8 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     PositionMenuDirective,
     DragselectionComponent,
     DragselectionResponsiveComponent,
-    InlineEditComponent
+    InlineEditComponent,
+    AutoscrollComponent
   ],
   imports: [
     BrowserModule,
