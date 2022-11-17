@@ -4,8 +4,6 @@ import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } f
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
-import { DOCUMENT } from '@angular/common';
-import { Injectable, Inject } from '@angular/core';
 
 @Component({
     selector: 'designer-ghostscontainer',
@@ -44,7 +42,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     private ghostsBottom = 0;
     private lastMouseY = 0;
 
-    constructor(@Inject(DOCUMENT) private document: Document, protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
+    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
