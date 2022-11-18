@@ -115,9 +115,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     }
 
     setPosition() {
-        const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
-                      this.editorContent.getDesignerElementById('palette').offsetLeft;
         if (this.placement == 'left') {
+            const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
+                this.editorContent.getDesignerElementById('palette').offsetLeft;
             this.renderer.setStyle(this.autoscrollElement.nativeElement, 'left', left + 'px');
         }
         if (this.placement != 'top' && this.placement != 'bottom') {
