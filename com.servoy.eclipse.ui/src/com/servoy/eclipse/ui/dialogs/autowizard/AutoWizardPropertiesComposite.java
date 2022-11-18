@@ -50,7 +50,6 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -99,9 +98,6 @@ public class AutoWizardPropertiesComposite
 	 */
 	private void setupNatTable(final Composite parent, PropertyWizardDialogConfigurator configurator)
 	{
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 1;
-		parent.setLayout(gridLayout);
 		this.propertyNames = propertiesConfigurator.getOrderedProperties().stream().filter(pd -> !propertiesConfigurator.getPrefillProperties().contains(pd))
 			.map(pd -> pd.getName()).collect(Collectors.toList());
 		if (configurator.getDataproviderProperties().size() > 0) propertyNames.add(0, configurator.getAutoPropertyName());
@@ -241,6 +237,9 @@ public class AutoWizardPropertiesComposite
 		{
 			DataLayer bodyDataLayer = new DataLayer(dataProvider);
 			bodyDataLayer.setDefaultRowHeight(40);
+			bodyDataLayer.setColumnPercentageSizing(true);
+			bodyDataLayer.setDefaultMinColumnWidth(20);
+			bodyDataLayer.setDistributeRemainingRowSpace(true);
 
 			AggregateConfigLabelAccumulator accumulator = new AggregateConfigLabelAccumulator();
 			// create the ColumnLabelAccumulator with IDataProvider to be able to

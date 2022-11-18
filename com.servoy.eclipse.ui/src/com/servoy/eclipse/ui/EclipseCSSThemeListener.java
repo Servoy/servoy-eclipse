@@ -110,13 +110,17 @@ public class EclipseCSSThemeListener
 											PlatformUI.getWorkbench().restart();
 										}
 									}
-									else if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-										label + " theme was detected",
-										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?"))
-								{
-									PlatformUI.getWorkbench().restart();
-								}
+									else
+									{
+										setThemePreferences(it.getId()); //if nothing is overwritten, just import preferences
+										if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+											label + " theme was detected",
+											"It is strongly recommended to restart the developer for the " + label +
+												" theme preferences to be applied. Would you like to restart now?"))
+										{
+											PlatformUI.getWorkbench().restart();
+										}
+									}
 								});
 						}
 					}

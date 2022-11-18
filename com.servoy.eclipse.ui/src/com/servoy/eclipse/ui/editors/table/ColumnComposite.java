@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -378,7 +379,8 @@ public class ColumnComposite extends Composite
 	{
 		//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
 		//closest match, but the label background is slightly visible
-		Color backgroundColor = JFaceResources.getColorRegistry().get("servoy_gray_background");
+		Color backgroundColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+			.get("org.eclipse.ui.workbench.HOVER_BACKGROUND");
 		if (backgroundColor == null)
 		{
 			JFaceResources.getColorRegistry().put("servoy_gray_background", new RGB(38, 38, 38));

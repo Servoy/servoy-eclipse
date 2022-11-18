@@ -22,12 +22,12 @@ export class DefaultNavigator {
   }
 
   setIndex(newIndex: any) {
-    let i = parseInt(newIndex);
+    let i = parseInt(newIndex, 10);
     if (!i) {
       i = 1;
     }
     this.navigatorComponentCache.model.currentIndex = i;
     this.sliderValue = -i;
-    this.formservice.executeEvent(this.name, this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
+    this.formservice.executeEvent(this.name, this.navigatorComponentCache.name, 'setSelectedIndex', true, [i]);
   }
 }

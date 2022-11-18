@@ -2,9 +2,11 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
+		var lastValue = {nodeId: '', directEditText: '', property: '', propertyValue: ''};
 
 		function handleDirectEdit(nodeId, absolutePoint, property, propertyValue) {
 			var obj = {};
+			var sameValue = false;
 			var applyValue = function() {
 				angular.element("#directEdit").hide();
 				var newValue = angular.element("#directEdit").text();
@@ -13,7 +15,17 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 					var value = {};
 					value[property] = newValue;
 					obj[nodeId] = value;
-					$editorService.sendChanges(obj);
+					if (nodeId === lastValue.nodeId && newValue === lastValue.directEditText && property === lastValue.property && propertyValue === lastValue.propertyValue) {
+						sameValue = true;
+					}
+					lastValue.nodeId = nodeId;
+					lastValue.directEditText =  newValue;
+					lastValue.property = property;
+					lastValue.propertyValue = propertyValue;
+
+					if (!sameValue) { //avoid sending the same value twice
+						$editorService.sendChanges(obj);
+					}
 				}
 				$editorService.setInlineEditMode(false);
 			}

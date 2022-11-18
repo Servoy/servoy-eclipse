@@ -280,6 +280,11 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Iterablevalue, UserNodeType.ITERABELVALUE, com.servoy.j2db.documentation.scripting.docs.IterableValue.class,
+				jslib), //
 			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib), //
 			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
@@ -2138,7 +2143,7 @@ public class SolutionExplorerTreeContentProvider
 		if (pluginNode.isHidden()) pluginNode.hide();
 		else pluginNode.unhide();
 
-		view.refreshTreeNodeFromModel(pluginNode);
+		view.refreshTreeNodeFromModel(pluginNode, false, false);
 	}
 
 	private ArrayList<PlatformSimpleUserNode> getJavaPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
@@ -2149,10 +2154,8 @@ public class SolutionExplorerTreeContentProvider
 			if (loadedJavaPluginNodes == null)
 			{
 				loadedJavaPluginNodes = new ArrayList<PlatformSimpleUserNode>();
-				Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
-				while (it.hasNext())
+				for (IClientPlugin plugin : Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class))
 				{
-					IClientPlugin plugin = it.next();
 					try
 					{
 						IScriptable scriptObject = null;
@@ -3041,10 +3044,8 @@ public class SolutionExplorerTreeContentProvider
 
 			List<PlatformSimpleUserNode> relationNodes = new ArrayList<PlatformSimpleUserNode>();
 			TreeSet<Relation> relations = new TreeSet<Relation>(NameComparator.INSTANCE);
-			Iterator<Solution> solutions = allSolutions.values().iterator();
-			while (solutions.hasNext())
+			for (Solution sol : allSolutions.values())
 			{
-				Solution sol = solutions.next();
 				Iterator<Relation> it = sol.getRelations(table, true, false);
 
 				while (it.hasNext())
@@ -3078,12 +3079,9 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshContent(Map<IPersist, Set<Class< ? extends IPersist>>> persists)
 	{
-		// optimize a bit so we don't refresh the same thing multiple times
-		Iterator<Entry<IPersist, Set<Class< ? extends IPersist>>>> it = persists.entrySet().iterator();
 		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
-		while (it.hasNext())
+		for (Entry<IPersist, Set<Class< ? extends IPersist>>> entry : persists.entrySet())
 		{
-			Entry<IPersist, Set<Class< ? extends IPersist>>> entry = it.next();
 			IPersist persist = entry.getKey();
 			IRootObject root = persist.getRootObject();
 			boolean refreshedFormsNode = false;

@@ -27,6 +27,7 @@ public class Messages extends NLS
 {
 	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages";
 
+
 	public static String MoveTextAction_moveCode;
 	public static String MoveTextAction_moveSample;
 	public static String RefreshAction_refresh;
@@ -121,6 +122,10 @@ public class Messages extends NLS
 	public static String TreeStrings_Application;
 	public static String TreeStrings_Array;
 	public static String TreeStrings_Object;
+	public static String TreeStrings_Map;
+	public static String TreeStrings_Set;
+	public static String TreeStrings_Iterator;
+	public static String TreeStrings_Iterablevalue;
 	public static String TreeStrings_controller;
 	public static String TreeStrings_currentcontroller;
 	public static String TreeStrings_DatabaseManager;

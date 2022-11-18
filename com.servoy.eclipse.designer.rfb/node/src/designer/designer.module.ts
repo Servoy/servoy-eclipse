@@ -1,3 +1,4 @@
+import { AutoscrollComponent } from './autoscroll/autoscroll.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -9,6 +10,7 @@ import { AnchoringIndicatorComponent } from './anchoringindicator/anchoringindic
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette/palette.component';
 import { ResizerComponent } from './resizer/resizer.component';
 import { ResizeEditorWidthComponent } from './resizeeditorwidth/resizeeditorwidth.component';
+import { ResizeEditorHeightComponent } from './resizeeditorheight/resizeeditorheight.component';
 import { ContextMenuComponent } from './contextmenu/contextmenu.component';
 import { MouseSelectionComponent, PositionMenuDirective } from './mouseselection/mouseselection.component';
 import { HighlightComponent } from './highlight/highlight.component';
@@ -49,6 +51,7 @@ import { VariantsPreviewComponent } from './variantspreview/variantspreview.comp
     PaletteComponent,
     ResizerComponent,
     ResizeEditorWidthComponent,
+    ResizeEditorHeightComponent,
     ContextMenuComponent,
     MouseSelectionComponent,
     HighlightComponent,
@@ -63,7 +66,8 @@ import { VariantsPreviewComponent } from './variantspreview/variantspreview.comp
     DragselectionResponsiveComponent,
     InlineEditComponent,
     VariantsContentComponent,
-    VariantsPreviewComponent
+    VariantsPreviewComponent,
+    AutoscrollComponent
   ],
   imports: [
     BrowserModule,

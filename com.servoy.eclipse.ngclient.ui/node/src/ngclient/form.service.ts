@@ -22,7 +22,7 @@ export class FormService {
     //    private touchedForms:Map<String,boolean>;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
-        servoyService: ServoyService, private clientFunctionService: ClientFunctionService) {
+        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService) {
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
         this.formComponentCache = new Map();
@@ -97,15 +97,22 @@ export class FormService {
     }
 
     public setFormStyleClasses(styleclasses: {property: string}){
-        this.ngUtilsFormStyleclasses = styleclasses;
+		if (this.ngUtilsFormStyleclasses) {
+			for (const formname of Object.keys(this.ngUtilsFormStyleclasses)) {
+        		if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
+            		(this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses('');
+            	}
+        	}
+		}
+
         if (styleclasses) {
-            for (const formname of Object.keys(styleclasses)) {
+			for (const formname of Object.keys(styleclasses)) {
                 if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)){
                     (this.formComponentCache.get(formname)as IFormComponent).updateFormStyleClasses(styleclasses[formname]);
                 }
             }
         }
-
+		this.ngUtilsFormStyleclasses = styleclasses;
     }
 
     public destroy(formName: string) {
@@ -150,7 +157,7 @@ export class FormService {
         return loadedState;
     }
 
-    public executeEvent(formname: string, beanname: string, handler: string, args: IArguments | Array<any>, async?: boolean) {
+    public executeEvent(formname: string, beanname: string, handler: string, ignoreNGBlockDuplicateEvents: boolean, args: IArguments | Array<any>, async?: boolean) {
         this.log.debug(this.log.buildMessage(() => (formname + ',' + beanname + ', executing: ' + handler + ' with values: ' + JSON.stringify(args))));
 
         const newargs = this.converterService.getEventArgs(args, handler);
@@ -161,6 +168,25 @@ export class FormService {
         const cmd = { formname, beanname, event: handler, args: newargs, changes: data };
         //        if (rowId)
         //            cmd['rowId'] = rowId;
+
+        const form = this.formsCache.get(formname);
+        if(form) {
+            const component = form.getComponent(beanname);
+            if(component && component.model) {
+                const componentId = formname + '_' + beanname;
+                if(!ignoreNGBlockDuplicateEvents && this.servoyService.getUIBlockerService().shouldBlockDuplicateEvents(componentId, component.model, handler)) {
+				    // reject execution
+				    this.log.debug('Prevented duplicate  execution of: ' + handler + ' on ' + beanname);
+                    return Promise.resolve(null);
+                }
+                const promise = this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false);
+                promise.finally(() => {
+                    this.servoyService.getUIBlockerService().eventExecuted(componentId, component.model, handler);
+                });
+                return promise;
+            }
+        }
+
         return this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false);
     }
 

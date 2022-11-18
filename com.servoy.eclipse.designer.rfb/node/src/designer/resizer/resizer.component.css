@@ -2,7 +2,7 @@
     flex-shrink: 0;
     width: 6px;
     height: 100%;
-    cursor: e-resize;
+    cursor: ew-resize;
     background-color: #e5e5e5;
 }
 

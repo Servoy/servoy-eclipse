@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@angular/cdk": "<15",
+    "@eonasdan/tempus-dominus": "6.2.4",
     "@ng-bootstrap/ng-bootstrap": "<14",
     "@popperjs/core": "<3",
-    "@eonasdan/tempus-dominus": "6.2.4",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",
     "tinymce": "^6",

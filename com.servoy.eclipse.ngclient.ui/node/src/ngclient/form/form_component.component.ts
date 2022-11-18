@@ -115,7 +115,7 @@ export abstract class AbstractFormComponent {
                 </div>
           </div>
       </div>
-      <div *ngIf="!formCache.absolute&&formCache.mainStructure" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
+      <div *ngIf="!formCache.absolute&&formCache.mainStructure" class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
 
@@ -323,7 +323,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
     }
 
-    getHandler(item: ComponentCache, handler: string) {
+    getHandler(item: ComponentCache, handler: string, ignoreNGBlockDuplicateEvents: boolean) {
         let itemCache = this.handlerCache[item.name];
         if (itemCache == null) {
             itemCache = {};
@@ -334,7 +334,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             const me = this;
             // eslint-disable-next-line
             func = function() {
-                return me.formservice.executeEvent(me.name, item.name, handler, arguments);
+                return me.formservice.executeEvent(me.name, item.name, handler, ignoreNGBlockDuplicateEvents, arguments);
             };
             itemCache[handler] = func;
         }
@@ -385,13 +385,15 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     public updateFormStyleClasses(ngutilsstyleclasses: string): void{
+        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+        if (styleClasses)
+            this.formClasses = styleClasses.split(' ');
+        else
+            this.formClasses = [];
         if (ngutilsstyleclasses) {
-            if (!this.formClasses) {
-                this.formClasses = ngutilsstyleclasses.split(' ');
-            } else {
-                this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
-            }
+            this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
         }
+        this.detectChanges();
     }
 }
 

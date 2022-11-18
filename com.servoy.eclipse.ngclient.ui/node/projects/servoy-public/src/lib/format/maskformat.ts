@@ -128,14 +128,14 @@ export class MaskFormat {
     private onBlur() {
         this.checkVal(true);
         if (this.element.value !== this.focusText) {
-            this.element.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => this.element.value } }));
+            this.element.dispatchEvent(new CustomEvent('change', { bubbles: true}));
         }
     }
 
     private onKeypress(e) {
         if (this.formatService.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
             //do not looses focus, just apply the format and push value
-            this.element.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => this.element.value } }));
+            this.element.dispatchEvent(new CustomEvent('change', { bubbles: true}));
             return true;
         }
         if (this.ignore) {

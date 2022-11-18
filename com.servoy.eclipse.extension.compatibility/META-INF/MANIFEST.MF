@@ -27,7 +27,7 @@ Require-Bundle: servoy_shared,
  org.apache.commons.commons-io,
  com.sun.mail.jakarta.mail,
  com.sun.activation.jakarta.activation
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.servlet;version="[4.0.0,5.0.0)",

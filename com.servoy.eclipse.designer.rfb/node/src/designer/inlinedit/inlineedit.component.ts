@@ -20,6 +20,8 @@ export class InlineEditComponent implements AfterViewInit {
     keydownListener: () => void;
     blurListener: () => void;
     lastTimestamp: number;
+
+    lastValue = {node: '', directEditProperty: '', propertyValue: ''}
     
     constructor(protected readonly editorSession: EditorSessionService, private readonly designerUtilsService: DesignerUtilsService,
         @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly cdRef: ChangeDetectorRef) {
@@ -75,11 +77,22 @@ export class InlineEditComponent implements AfterViewInit {
         const changes = {};
         const newValue = this.elementRef.nativeElement.textContent;
         const oldValue = propertyValue;
+       let sameValue = false;
         if (oldValue != newValue && !(oldValue === null && newValue === "")) {
             const value = {};
             value[directEditProperty] = newValue;
             changes[node] = value;
-            this.editorSession.sendChanges(changes);
+            
+            if (node === this.lastValue.node && directEditProperty === this.lastValue.directEditProperty && propertyValue === this.lastValue.propertyValue) {
+                sameValue = true;
+            }
+            this.lastValue.node = node;
+            this.lastValue.directEditProperty = directEditProperty;
+            this.lastValue.propertyValue = propertyValue;
+
+            if (!sameValue) { //avoid sending the same value twice
+                this.editorSession.sendChanges(changes);
+            }
         } 
         this.showDirectEdit = false;
         this.cdRef.detectChanges();

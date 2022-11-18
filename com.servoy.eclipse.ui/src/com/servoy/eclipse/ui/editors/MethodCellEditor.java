@@ -73,7 +73,7 @@ public class MethodCellEditor extends DialogCellEditor
 	@Override
 	public MethodWithArguments openDialogBox(Control cellEditorWindow)
 	{
-		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), new MethodLabelProvider(persistContext, false, !options.includeDefault),
+		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), new MethodLabelProvider(persistContext, false, !options.includeDefault, true),
 			new MethodTreeContentProvider(persistContext), getSelection(), options, SWT.NONE, "Select Method", this.valueEditor);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
@@ -88,8 +88,9 @@ public class MethodCellEditor extends DialogCellEditor
 					Form form = (Form)persistContext.getContext();
 					if (form.getExtendsID() > 0)
 					{
-						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
-							form);
+						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution()
+							.getFormHierarchy(
+								form);
 						for (Form f : formHierarchy)
 						{
 							if (f != form)

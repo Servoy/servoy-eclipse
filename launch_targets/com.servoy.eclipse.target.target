@@ -28,12 +28,12 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.5.202209220414"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.5.202209220414"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="95.0.5.202209142104"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.6"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.6"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.6"/>
         </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
+		    <repository location="https://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
 		    <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.0.3.202208090440"/>
 		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.0.3.202208090440"/>
 		    <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.source.feature.feature.group" version="2.0.3.202208090440"/>
@@ -65,7 +65,7 @@
             <unit id="javax.servlet.jsp-api" version="2.3.6"/>
             <unit id="javax.transaction" version="1.1.0"/>
             <unit id="javax.websocket" version="1.1.0"/>
-            <unit id="net.bytebuddy.byte-buddy" version="1.12.17"/>
+            <unit id="net.bytebuddy.byte-buddy" version="1.12.18"/>
             <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.5"/>
             <unit id="org.apache.aries.util" version="1.1.3"/>
             <unit id="org.apache.commons.commons-collections4" version="4.4.0"/>
@@ -80,7 +80,7 @@
             <unit id="org.apache.logging.log4j.jcl" version="2.18.0"/>
             <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.18.0"/>
             <unit id="org.freemarker.freemarker" version="2.3.31.stable"/>
-            <unit id="org.jboss.logging.jboss-logging" version="3.4.3.Final"/>
+            <unit id="org.jboss.logging.jboss-logging" version="3.5.0.Final"/>
             <unit id="org.jsoup" version="1.15.3"/>
             <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
             <unit id="org.objectweb.asm.commons" version="9.3.0"/>
@@ -93,5 +93,5 @@
             <unit id="xstream" version="1.4.19"/>
         </location>
     </locations>
-    <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+    <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>

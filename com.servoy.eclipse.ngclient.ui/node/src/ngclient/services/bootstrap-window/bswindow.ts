@@ -146,8 +146,8 @@ export class BSWindow {
 
     setSize(size: { width: number; height: number }) {
         const winBody = this.element.querySelector(this.options.selectors.body);
-        this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
-        this.renderer.setStyle(winBody, 'height', size.height + 'px');
+        this.renderer.setStyle(winBody, 'min-width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
+        this.renderer.setStyle(winBody, 'min-height', size.height + 'px');
     }
 
     centerWindow() {

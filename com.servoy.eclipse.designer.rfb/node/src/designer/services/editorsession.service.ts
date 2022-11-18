@@ -1,5 +1,4 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -26,11 +25,12 @@ export class EditorSessionService implements ServiceProvider {
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
+    private lockAutoscrollId = '';
     
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
-        @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService, private editorContentService: EditorContentService) {
+        private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject(null);
@@ -43,16 +43,6 @@ export class EditorSessionService implements ServiceProvider {
         return null;
     }
     connect() {
-        //if (deferred) return deferred.promise;
-        //deferred = $q.defer();
-        // var promise = deferred.promise;
-        // if (!connected) testWebsocket();
-        // else {
-        //    deferred.resolve();
-        //     deferred = null;
-        // }
-        // return promise;
-
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
@@ -263,6 +253,14 @@ export class EditorSessionService implements ServiceProvider {
             'uuid': uuid
         }, true)
     }
+    
+    buildTiNG() {
+		        void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
+	    }
+
+    consoleLog(message: string) {//log message to eclipse console
+        void this.wsSession.callService('formeditor', 'consoleLog', {message: message}, true);
+    }
 
     setInlineEditMode(edit: boolean) {
         this.inlineEdit = edit
@@ -425,7 +423,9 @@ export class EditorSessionService implements ServiceProvider {
         this.bIsDirty = dirty;
     }
 
-    startAutoscroll(scrollComponent: ISupportAutoscroll) {
+    registerAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
+        this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
         if (this.autoscrollBehavior == null) {
             this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
         } else {
@@ -433,8 +433,11 @@ export class EditorSessionService implements ServiceProvider {
         }
     }
 
-    stopAutoscroll() {
-        this.autoscrollBehavior.next(null);
+    unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
+            this.lockAutoscrollId = '';
+            this.autoscrollBehavior.next(null);
+        }
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
@@ -537,6 +540,8 @@ export class Package {
 }
 
 export interface ISupportAutoscroll {
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void;
+    updateLocationCallback(changeX: number, changeY: number): void;
     onMouseUp(event: MouseEvent): void;
+    onMouseMove(event: MouseEvent): void;
+    getAutoscrollLockId(): string;
 }

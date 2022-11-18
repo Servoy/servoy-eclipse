@@ -124,6 +124,10 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private ExportConfirmationPage exportConfirmationPage;
 
+	private boolean exportNonActiveSolutionsDialog;
+
+	private boolean disableFinishButton;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -155,6 +159,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		int solutionType = activeProject.getSolutionMetaData().getSolutionType();
 		isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
 		exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
+		exportNonActiveSolutionsDialog = true;
+		disableFinishButton = false;
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
 		{
 			createErrorPage("No active Resource project found", "No active Resource project found",
@@ -188,6 +194,19 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	}
 
 	@Override
+	public boolean canFinish()
+	{
+		if (disableFinishButton)
+		{
+			return false;
+		}
+		else
+		{
+			return super.canFinish();
+		}
+	}
+
+	@Override
 	public boolean performFinish()
 	{
 		// check if finish is pressed on the first page, to ask if the file can be overwritten or not.
@@ -195,6 +214,50 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			return false;
 		}
+
+		// check if we automatically export components for non active solutions.
+		if (exportModel.isExportNonActiveSolutions() && exportNonActiveSolutionsDialog)
+		{
+			exportNonActiveSolutionsDialog = false;
+			if (componentsSelectionPage.availableComponentsList.getItems().length > 0 || servicesSelectionPage.availableComponentsList.getItems().length > 0)
+			{
+				final boolean[] exportNonActiveSolutionsComponents = new boolean[] { true };
+				Display.getDefault().syncExec(() -> {
+					exportNonActiveSolutionsComponents[0] = MessageDialog.openQuestion(getShell(), "Non Active Solutions Components",
+						"Should we export all the components for non active solutions or do you want to manually select them?\nPress 'Yes' -> we automatically export all the components.");
+				});
+
+				if (exportNonActiveSolutionsComponents[0])
+				{
+					// components
+					for (String componentName : componentsSelectionPage.availableComponentsList.getItems())
+					{
+						componentsSelectionPage.selectedComponentsList.add(componentName);
+					}
+					String[] selectedComp = componentsSelectionPage.selectedComponentsList.getItems();
+					Arrays.sort(selectedComp);
+					componentsSelectionPage.selectedComponentsList.setItems(selectedComp);
+					componentsSelectionPage.availableComponentsList.removeAll();
+
+					// services
+					for (String componentName : servicesSelectionPage.availableComponentsList.getItems())
+					{
+						servicesSelectionPage.selectedComponentsList.add(componentName);
+					}
+					String[] selectedServ = servicesSelectionPage.selectedComponentsList.getItems();
+					Arrays.sort(selectedServ);
+					servicesSelectionPage.selectedComponentsList.setItems(selectedServ);
+					servicesSelectionPage.availableComponentsList.removeAll();
+				}
+				else
+				{
+					disableFinishButton = true;
+					getContainer().showPage(componentsSelectionPage);
+					return false;
+				}
+			}
+		}
+
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
@@ -268,7 +331,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
-		if (isNGExport)
+		if (isNGExport && !exportModel.isExportNonActiveSolutions())
 		{
 			//make sure the currently used components are exported in case the user didn't go through the components selection pages
 			if (!exportModel.isReady())
@@ -541,6 +604,10 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				setupComponentsPages();
 			}
 
+		}
+		if (page.equals(servicesSelectionPage) && !exportNonActiveSolutionsDialog)
+		{
+			disableFinishButton = false;
 		}
 		return super.getNextPage(page);
 	}

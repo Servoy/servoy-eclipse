@@ -75,9 +75,9 @@ public class IndexPageFilter implements Filter
 		}
 		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		File distFolder = new File(projectFolder, "dist/app");
+		String solutionName = getSolutionNameFromURI(requestURI);
 		if (distFolder.exists())
 		{
-			String solutionName = getSolutionNameFromURI(requestURI);
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
@@ -110,6 +110,17 @@ public class IndexPageFilter implements Filter
 					return;
 				}
 			}
+		}
+		else if (solutionName != null)
+		{
+			// the system is not ready because the TiNG resources are not build/ not build properly
+			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/buildfailedclient.html"));
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/html");
+			response.setContentLengthLong(indexHtml.length());
+			response.getWriter().write(indexHtml);
+
+			return;
 		}
 		chain.doFilter(servletRequest, servletResponse);
 	}

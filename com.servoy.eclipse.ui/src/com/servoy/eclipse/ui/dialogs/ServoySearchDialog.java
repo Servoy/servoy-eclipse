@@ -25,6 +25,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -32,6 +33,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -325,6 +330,9 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final OpenInScriptEditorAction showEditWithScriptEditor;
 	private final OpenInFormEditorAction showEditWithFormEditor;
 
+	private boolean isAltKeyPressed;
+	private SelectionListener okButtonSelectionListener;
+
 	/**
 	 * @param shell
 	 */
@@ -596,6 +604,50 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	{
 		Composite container = (Composite)super.createDialogArea(parent);
 		return container;
+	}
+
+	@Override
+	public void create()
+	{
+		super.create();
+		// add our on selection listener to OK so we can read the modifier keys
+		okButtonSelectionListener = new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				// on linux we really need to check for BUTTON_MASK (mouse click)
+				// because on key press ENTER, SWT.ALT is always set
+				if (Platform.getOS().equals(Platform.OS_LINUX))
+				{
+					isAltKeyPressed = (e.stateMask & SWT.BUTTON_MASK) != 0 && (e.stateMask & SWT.ALT) != 0;
+				}
+				else
+				{
+					isAltKeyPressed = (e.stateMask & SWT.ALT) != 0;
+				}
+
+				getOkButton().removeSelectionListener(okButtonSelectionListener);
+				superOkPressed();
+			}
+		};
+		getOkButton().addSelectionListener(okButtonSelectionListener);
+	}
+
+	@Override
+	protected void okPressed()
+	{
+		// avoid calling super okPressed, let our own listener get the key modifiers first
+	}
+
+	private void superOkPressed()
+	{
+		super.okPressed();
+	}
+
+	public boolean isAltKeyPressed()
+	{
+		return isAltKeyPressed;
 	}
 
 	/**

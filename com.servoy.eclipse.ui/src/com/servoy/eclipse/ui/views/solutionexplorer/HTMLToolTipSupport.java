@@ -56,7 +56,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 	protected Composite createToolTipContentArea(Event event, Composite parent)
 	{
 		setShift(new Point(1, 1));
-		// we can't we just use SWT.DEFAULT below to determine preferred height unfortunately (don't think Browser.compute... can detect that - from what I tested)
+		// we can't just use SWT.DEFAULT below to determine preferred height unfortunately (don't think Browser.compute... can detect that - from what I tested)
 		// so, instead, we give these 4 sizing hints
 		return createBrowserTooltipContentArea(this, getText(event), parent, true, 600, 450, 150, 50);
 	}

@@ -61,7 +61,9 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
 				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
 					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
-				if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+				boolean showFormDesigner = SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption);
+				if (ssd.isAltKeyPressed()) showFormDesigner = !showFormDesigner;
+				if (showFormDesigner)
 				{
 					EditorUtil.openFormDesignEditor((Form)result);
 				}

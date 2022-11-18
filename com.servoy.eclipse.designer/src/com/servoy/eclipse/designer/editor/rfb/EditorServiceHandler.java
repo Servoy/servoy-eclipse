@@ -68,6 +68,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -155,6 +156,17 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
+		configuredHandlers.put("buildTiNG", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				CopySourceFolderAction copySourceFolderAction = new CopySourceFolderAction();
+				copySourceFolderAction.run();
+				return null;
+			}
+		});
 		configuredHandlers.put("setInlineEditMode", new IServerService()
 		{
 
@@ -199,6 +211,17 @@ public class EditorServiceHandler implements IServerService
 				{
 					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
 				}
+				return null;
+			}
+		});
+
+		configuredHandlers.put("consoleLog", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				System.out.println(args.optString("message", ""));
 				return null;
 			}
 		});
