@@ -218,12 +218,17 @@ export class PaletteComponent implements ISupportAutoscroll{
                 component.w = this.draggedVariant.size.width;
                 component.h = this.draggedVariant.size.height;
                 component.text = this.draggedVariant.text;
+                if (this.draggedVariant.styleClass) {
+                    component.styleClass = this.draggedVariant.styleClass;
+                }
                 this.isDraggedVariant = false;
             }
 
             // do we also need to set size here ?
             component.x = component.x - this.editorContentService.getLeftPositionIframe();
             component.y = component.y - this.editorContentService.getTopPositionIframe();
+
+            
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
