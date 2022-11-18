@@ -128,11 +128,7 @@ export class EditorContentService {
     getDesignerElementById(id: string): HTMLElement {
         return this.document.getElementById(id);
     }
-
-    getDocument() {
-        return this.document
-    }
-
+    
     executeOnlyAfterInit(callback: () => void) {
         if (this.contentWasInit) {
             callback();
