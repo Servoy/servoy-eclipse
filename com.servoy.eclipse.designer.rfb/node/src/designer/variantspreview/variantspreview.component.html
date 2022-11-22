@@ -6,9 +6,13 @@
 </button>
 <ng-template #popoverContent let-popOv="popOv" let-clientURL="clientURL">
 	<div class="modal-body">
-		<iframe id="VariantsForm" class="contentframe" [src]="clientURL"></iframe>
+		<div #variantContent class="variant-content-area" tabindex="0">
+			<div #variantGlassspane class="variant-content-overlay">
+				<iframe id="VariantsForm" class="variant-content-frame" [src]="clientURL" ></iframe>
+			</div>
+		</div>
 	</div>
-	<div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0">
+	<div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 10px">
 		<button name="variants" type="button" 
 			class="btn btn-outline-dark btn-sm" 
 			(click)="onAddVariant($event)" 

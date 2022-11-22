@@ -91,6 +91,10 @@ export class PaletteComponent implements ISupportAutoscroll{
         component.isOpen = !component.isOpen;
     }
 
+    onPaletteScroll() {
+        this.editorSession.variantsScroll.emit({scrollPos: this.editorContentService.getPallete().scrollTop});
+    }
+
     onVariantClick(event: MouseEvent, component: PaletteComp,packageName: string ) {   
         this.draggedVariant.packageName = packageName;
         this.draggedVariant.name = component.name;
@@ -103,11 +107,14 @@ export class PaletteComponent implements ISupportAutoscroll{
         }
         this.draggedVariant.element = targetElement.cloneNode(true) as Element;
 
-        Array.from(this.draggedVariant.element.children).forEach((child) => {
-            if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT' ) {
-                this.draggedVariant.element.removeChild(child);
-            }
-        });
+        if (this.draggedVariant.element.children) {//without this check I'll get a console exception of null children
+            Array.from(this.draggedVariant.element.children).forEach((child) => {
+                if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT' ) {
+                    this.draggedVariant.element.removeChild(child);
+                }
+            });
+        }
+       
         let variantBtn = this.editorContentService.getDocument().elementFromPoint(event.pageX, event.pageY) as HTMLButtonElement;
         if (variantBtn.type != 'button') { //clicked on the inner element
             variantBtn = variantBtn.parentElement as HTMLButtonElement;
@@ -277,12 +284,6 @@ export class PaletteComponent implements ISupportAutoscroll{
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
                 
             this.editorSession.unregisterAutoscroll(this);
-        }
-
-        if (this.draggedVariant.element) {
-            this.draggedVariant.element = null;
-            this.draggedVariant.styleClass = null;
-            this.editorSession.variantsTrigger.emit({show: false});
         }
     }
 

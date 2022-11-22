@@ -28,6 +28,7 @@ export class EditorSessionService implements ServiceProvider {
     private lockAutoscrollId = '';
     
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
+    variantsScroll = new EventEmitter<{scrollPos: number}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService) {

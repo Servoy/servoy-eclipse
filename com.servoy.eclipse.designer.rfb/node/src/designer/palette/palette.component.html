@@ -1,4 +1,4 @@
-<div id="palette" class="palette">	
+<div id="palette" class="palette" (scroll)="onPaletteScroll()">	
     <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
     <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
     <ngb-accordion [activeIds]="activeIds" [type]="'light'">
@@ -6,8 +6,7 @@
          <ng-template ngbPanelTitle>
            {{package.packageDisplayname}}
         </ng-template>
-         <ng-template ngbPanelContent>
-         
+         <ng-template ngbPanelContent>         
             <ul>
                 <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">

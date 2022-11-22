@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+
 import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener, Input, Output, EventEmitter } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
@@ -8,8 +8,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-variantscontent',
-    templateUrl: './variantscontent.component.html',
-    styleUrls: ['./variantscontent.component.css']
+    templateUrl: './variantscontent.component.html'
 })
 export class VariantsContentComponent implements OnInit {
 
@@ -23,12 +22,11 @@ export class VariantsContentComponent implements OnInit {
 
 	rowInterspace = 10;
 	columnInterspace = 20;
-	maxFormSize = {width: 200, height: 300}; //these dimentions doesn't consider margins and space between columns
+	maxFormSize = {width: 190, height: 240}; 
 
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService,
-        private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
+        private windowRef: WindowRefService, private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
 	
 		this.editorSession.variantsTrigger.subscribe((value) => {
 			if (this.component == value.component) {
@@ -53,9 +51,8 @@ export class VariantsContentComponent implements OnInit {
         });
     }
 	
-	
 	sendStylesToVariantsForm() {
-		this.variantsIFrame = this.doc.getElementById('VariantsForm') as HTMLIFrameElement;
+		this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
 		const message = { 
 			id: 'createVariants', 
 			variants: this.component.styleVariants, 

@@ -165,10 +165,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
                 let margin = 5;
 
-			                const variants = event.data.variants;
-			                const rowInterspace= event.data.rowInterspace;
+			    const variants = event.data.variants;
+			    const rowInterspace= event.data.rowInterspace;
                 const columnInterspace= event.data.columnInterspace;
-			                const maxFormSize= event.data.maxFormSize;
+			    const maxFormSize = event.data.maxFormSize;
    
                 let modelTop = margin;
                 let columnsWidth = [0, 0];
@@ -212,7 +212,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 };
                 let formWidth = margin + columnsWidth[0] + (columnsWidth[1] > 0 ? columnInterspace : 0) + columnsWidth[1] + margin;
                 //we need at least 150px in order to display variants Add and Edit buttons
-                this.windowRefService.nativeWindow.parent.postMessage({ id: 'resizePopover', popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width), popoverHeight: Math.min(columnsHeight[0], maxFormSize.height)}, '*');
+                this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover', popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width), popoverHeight: Math.min(columnsHeight[0], maxFormSize.height), formWidth: formWidth, formHeight: columnsHeight[0]}, '*');
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
 			}
