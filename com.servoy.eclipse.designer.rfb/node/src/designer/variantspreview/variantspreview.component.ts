@@ -144,7 +144,6 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		contentArea.style.height = height + 'px';
 		contentOverlay.style.width= formWidth + 'px';
 		contentOverlay.style.height = formHeight + 'px';
-
 		contentArea.scrollTop = 0;
 	}
 
@@ -188,5 +187,10 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			this.variantItemBeingDragged = null;
 		 	this.hidePopover();
 		}
+	}
+
+	onAreaMouseUp(event: MouseEvent) {
+		//avoid palette receiving this event (and trigger a popup close) when click inside variants area
+		event.stopPropagation();
 	}
 }

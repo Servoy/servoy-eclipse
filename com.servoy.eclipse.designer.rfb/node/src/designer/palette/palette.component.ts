@@ -285,6 +285,12 @@ export class PaletteComponent implements ISupportAutoscroll{
                 
             this.editorSession.unregisterAutoscroll(this);
         }
+
+        if (this.draggedVariant.element) {
+            this.draggedVariant.element = null;
+            this.draggedVariant.styleClass = null;
+            this.editorSession.variantsTrigger.emit({show: false});
+        }
     }
 
     onMouseMove = (event: MouseEvent) => {
