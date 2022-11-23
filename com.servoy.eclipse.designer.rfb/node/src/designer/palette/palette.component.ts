@@ -252,6 +252,7 @@ export class PaletteComponent implements ISupportAutoscroll{
                     }
                 } else if (!this.dragItem.ghost){
                     this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+                    this.editorSession.unregisterAutoscroll(this);
                     return;
                 }
             }
@@ -264,6 +265,7 @@ export class PaletteComponent implements ISupportAutoscroll{
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
                         const types = node.getAttribute('svy-types');
                         if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
+                            this.editorSession.unregisterAutoscroll(this);
                             return node;
                         }
                     }
@@ -282,9 +284,8 @@ export class PaletteComponent implements ISupportAutoscroll{
             }
 
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
-                
-            this.editorSession.unregisterAutoscroll(this);
         }
+        this.editorSession.unregisterAutoscroll(this);
 
         if (this.draggedVariant.element) {
             this.draggedVariant.element = null;
