@@ -81,29 +81,33 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
 	hidePopover() {
-		this.isPopoverVisible = false;
+		if (this.isPopoverVisible) {
+			this.isPopoverVisible = false;
 
-		let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
-		popoverCtrl.style.display = 'none'
+			let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
+			popoverCtrl.style.display = 'none'
 
-		let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-		popover.style.display = 'none';
+			let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
+			popover.style.display = 'none';
 
-		let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-		popoverArrow.style.display = 'none';	
+			let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
+			popoverArrow.style.display = 'none';
+		}	
 	}
 
 	showPopover() {
-		this.isPopoverVisible = true;
+		if (!this.isPopoverVisible) {
+			this.isPopoverVisible = true;
 
-		let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
-		popoverCtrl.style.display = 'block'
+			let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
+			popoverCtrl.style.display = 'block'
 
-		let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-		popover.style.display = 'block';
+			let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
+			popover.style.display = 'block';
 
-		let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-		popoverArrow.style.display = 'block';		
+			let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
+			popoverArrow.style.display = 'block';
+		}
 	}
 
 	setPopoverSizeAndPosition(width, height: number, formWidth: number, formHeight: number) {
