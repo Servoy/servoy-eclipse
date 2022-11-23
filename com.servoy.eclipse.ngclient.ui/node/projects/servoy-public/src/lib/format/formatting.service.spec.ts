@@ -19,6 +19,7 @@ describe('FormattingService', () => {
         const CURRENCY = '\u00A4';
         const myformat: Format = new Format();
         myformat.type = 'NUMBER';
+        let num;
 
         myformat.display = '0.000';
         expect(service.format(10.49, myformat, false)).toEqual('10.490');
@@ -31,6 +32,22 @@ describe('FormattingService', () => {
 
         myformat.display = '#.###';
         expect(service.format(10.49, myformat, false)).toEqual('10.49');
+        
+        myformat.display = '#.###';
+        num = 1;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12.;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12.1;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12.12;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12.123;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeTrue;
+        num = 12.1234;
+        expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBeFalse;
 
         myformat.display = '#.###' + CURRENCY;
         expect(service.format(10.49, myformat, false)).toEqual('10.49\u00A3');
