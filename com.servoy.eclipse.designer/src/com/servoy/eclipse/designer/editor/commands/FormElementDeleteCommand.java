@@ -273,7 +273,7 @@ public class FormElementDeleteCommand extends Command
 				if (name == null) name = child.toString();
 
 				ConfirmDeleteDialog dialog = new ConfirmDeleteDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-					"Delete the overidden element '" + name + "' from the following subforms:", overriding);
+					"Delete the overridden element '" + name + "' from the following subforms:", overriding);
 				dialog.setBlockOnOpen(true);
 				if (dialog.open() == Window.OK)
 				{
