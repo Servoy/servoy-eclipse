@@ -210,9 +210,11 @@ export class FormattingService {
 				if (e.target.selectionStart <= allowToConcat) {
 					return true;
 				}
-				const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
-				if (value.split(decimalChar)[1].length >= maxDecimals) {
-					return false;
+				if (vSvyFormat.edit) {
+					const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
+					if (value.split(decimalChar)[1].length >= maxDecimals) {
+						return false;
+					}
 				}
 			}
 			return true;
