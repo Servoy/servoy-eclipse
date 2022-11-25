@@ -1632,7 +1632,7 @@ public class ServoyFormBuilder
 					WebObjectFunctionDefinition handlerDefinition = spec.getHandler(handler);
 					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handlerDefinition.getName());
 					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
-						handlerDefinition.getParameters().size() >= instanceMethodArguments.size())
+						handlerDefinition.getParameters().getDefinedArgsCount() >= instanceMethodArguments.size())
 					{
 						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler);
 						ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.PARAMETERS_MISMATCH_SEVERITY,

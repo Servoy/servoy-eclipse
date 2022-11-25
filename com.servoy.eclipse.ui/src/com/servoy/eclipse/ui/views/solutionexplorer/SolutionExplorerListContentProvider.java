@@ -78,6 +78,7 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -2345,16 +2346,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				String name = api.getName();
 				String displayParams = "(";
-				List<PropertyDescription> parameters = api.getParameters();
+				IFunctionParameters parameters = api.getParameters();
 				final List<String> parNames = new ArrayList<String>();
 				List<String> parTypes = new ArrayList<String>();
 
-				for (int i = 0; i < parameters.size(); i++)
+				for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
 				{
-					displayParams += parameters.get(i).getName();
-					parNames.add(parameters.get(i).getName());
-					parTypes.add(parameters.get(i).getType().getName());
-					if (i < parameters.size() - 1) displayParams += ", ";
+					displayParams += parameters.getParameterDefinition(i).getName();
+					parNames.add(parameters.getParameterDefinition(i).getName());
+					parTypes.add(parameters.getParameterDefinition(i).getType().getName());
+					if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
 				}
 				displayParams += ")";
 
