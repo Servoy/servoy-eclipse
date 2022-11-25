@@ -72,7 +72,7 @@ export class PaletteComponent implements ISupportAutoscroll{
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'onVariantMouseDown') {
                 //element
-                this.onVariantMouseDown(event.data.pageX, event.data.pageY, event.data.model);
+                this.onVariantMouseDown(event.data.pageX , event.data.pageY, event.data.model);
             }
             if (event.data.id === 'onVariantMouseUp') {
                 //element
@@ -122,11 +122,11 @@ export class PaletteComponent implements ISupportAutoscroll{
         this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
     }
 
-    onVariantMouseDown(pageX, pageY: number, model: { [property: string]: any }) {
+    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: any }) {
         this.isDraggedVariant = true;
-        this.draggedVariant.styleClass = model.styleClass;
+        this.draggedVariant.variant = model._variantName as string;
         this.draggedVariant.size = model.size as { width: number; height: number };
-        this.draggedVariant.text = model.text;
+        this.draggedVariant.text = model.text as string;
 
         this.dragItem.paletteItemBeingDragged = this.draggedVariant.element;
         this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', this.editorContentService.getTopPositionIframe(true) + pageX + 'px');
@@ -225,8 +225,8 @@ export class PaletteComponent implements ISupportAutoscroll{
                 component.w = this.draggedVariant.size.width;
                 component.h = this.draggedVariant.size.height;
                 component.text = this.draggedVariant.text;
-                if (this.draggedVariant.styleClass) {
-                    component.styleClass = this.draggedVariant.styleClass;
+                if (this.draggedVariant.variant) {
+                    component.variant = this.draggedVariant.variant;
                 }
                 this.isDraggedVariant = false;
             }
@@ -289,7 +289,7 @@ export class PaletteComponent implements ISupportAutoscroll{
 
         if (this.draggedVariant.element) {
             this.draggedVariant.element = null;
-            this.draggedVariant.styleClass = null;
+            this.draggedVariant.variant = null;
             this.editorSession.variantsTrigger.emit({show: false});
         }
     }
@@ -444,7 +444,7 @@ export class DraggedVariant {
     name?: string;
     type?: string;
     text?: string;
-    styleClass?: string;
+    variant?: string;
     element?: Element;
     size?: {
         width: number,

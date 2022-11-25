@@ -374,8 +374,7 @@ public class DesignerFilter implements Filter
 									componentJson.put("keywords", spec.getKeywords());
 									if (spec.getStyleVariantCategory() != null)
 									{
-										JSONArray variantsForCategory = ServoyModelManager.getServoyModelManager().getServoyModel()
-											.getExistingVariants(spec.getStyleVariantCategory());
+										JSONArray variantsForCategory = fl.getVariantsHandler().getVariantsForCategory(spec.getStyleVariantCategory());
 										if (variantsForCategory.length() > 0)
 										{
 											componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());

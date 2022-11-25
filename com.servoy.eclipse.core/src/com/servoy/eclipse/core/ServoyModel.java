@@ -16,13 +16,11 @@
  */
 package com.servoy.eclipse.core;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
@@ -105,7 +103,6 @@ import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
 import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
 import org.webbitserver.HttpControl;
@@ -210,17 +207,6 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  */
 public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
-
-	class Variant
-	{
-		public String category;
-		public JSONObject variantJson;
-	}
-
-	private IFile variantsFile;
-	private List<Variant> variantsList = new ArrayList<Variant>();
-
-
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
@@ -1350,8 +1336,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 						fireLoadingDone();
 					}
-					initStylesWizard();
-
 				}
 				finally
 				{
@@ -1402,86 +1386,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				}
 
 			});
-		}
-	}
-
-	private void initStylesWizard()
-	{
-		variantsList.clear();
-		variantsFile = activeProject == null ? null : activeProject.getProject().getFile(new Path("medias/variants.less"));
-		if (variantsFile != null && variantsFile.exists())
-		{
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(variantsFile.getContents())))
-			{
-				String line;
-				Variant variant = null;
-				boolean classFound = false;
-				boolean variantFound = false;
-				JSONObject variantJson = null;
-				List<String> variantClasses = null;
-				int width = 0;
-				int height = 0;
-				String variantName = null;
-				while ((line = br.readLine()) != null)
-				{
-					int pos = line.indexOf("@category:");
-					if (pos > 0)
-					{
-						variantFound = true;
-						variant = new Variant();
-						variant.category = line.substring(pos + 10).trim();
-					}
-					pos = line.indexOf("@name:");
-					if (pos > 0)
-					{
-						variantName = line.substring(pos + 6).trim();
-					}
-					pos = line.indexOf("@width:");
-					if (pos > 0)
-					{
-						width = Integer.parseInt(line.substring(pos + 7).trim());
-					}
-					pos = line.indexOf("@height:");
-					if (pos > 0)
-					{
-						height = Integer.parseInt(line.substring(pos + 8).trim());
-					}
-					int startBracketPos = line.indexOf("{");
-					if (variantFound && (line.startsWith(".") && startBracketPos > 0))
-					{
-						classFound = true;
-						variantJson = new JSONObject();
-						String styleClass = line.substring(1, startBracketPos).trim();
-						variantJson.put("name", variantName);
-						JSONObject variantSize = new JSONObject();
-						variantSize.put("width", width);
-						variantSize.put("height", height);
-						variantJson.put("size", variantSize);
-						variantJson.put("styleClass", styleClass);
-						variantClasses = new ArrayList<String>();
-					}
-					int semicolonPos = line.indexOf("();");
-					if (classFound && (line.trim().startsWith(".") && semicolonPos > 0))
-					{
-						variantClasses.add(line.substring(0, semicolonPos).trim().substring(1));
-					}
-					if (line.trim().startsWith("}"))
-					{//end of the object detected
-						variantJson.put("classes", variantClasses);
-						variant.variantJson = variantJson;
-						variantsList.add(variant);
-						variantFound = false;
-						classFound = false;
-						width = 0;
-						height = 0;
-						variantName = null;
-					}
-				}
-			}
-			catch (IOException | CoreException e)
-			{
-				ServoyLog.logError("error parsing styles in variants file " + variantsFile.getName(), e);
-			}
 		}
 	}
 
@@ -4219,77 +4123,4 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		solutionImportListeners.remove(l);
 	}
-
-	public void setVariantsFor(String variantCategoryName, String jsonArrayString)
-	{
-		JSONArray myJsonArray = new JSONArray(jsonArrayString);
-		List<Variant> tmp_variantsList = new ArrayList<Variant>();
-
-		for (Variant variant : variantsList)
-		{
-			if (!variant.category.equals(variantCategoryName))
-			{
-				tmp_variantsList.add(variant);
-			}
-		}
-		for (int index = 0; index < myJsonArray.length(); index++)
-		{
-			JSONObject variantJson = myJsonArray.getJSONObject(index);
-			Variant variant = new Variant();
-			variant.category = variantCategoryName;
-			variant.variantJson = variantJson;
-			tmp_variantsList.add(variant);
-		}
-		variantsList = tmp_variantsList;
-
-		String myStyleString = getStyleString();
-
-		// write variants list to the file
-		if (variantsFile != null)
-		{
-			InputStream source = new ByteArrayInputStream(myStyleString.getBytes());
-			try
-			{
-				variantsFile.setContents(source, true, false, null);
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError("error saving style to variants file", e);
-			}
-		}
-	}
-
-	private String getStyleString()
-	{
-		String result = "";
-		for (Variant variant : variantsList)
-		{
-			result += "/*\n* @type:" + variant.category + "\n*/\n." + variant.variantJson.getString("name") + " {\n";
-			JSONArray myArray = variant.variantJson.getJSONArray("classes");
-			for (int arrIndex = 0; arrIndex < myArray.length(); arrIndex++)
-			{
-				result += "   ." + myArray.getString(arrIndex) + "();\n";
-			}
-			result += "}\n";
-
-		}
-		return result;
-	}
-
-	public JSONArray getExistingVariants(String variantCategoryName)
-	{
-
-		JSONArray myArray = new JSONArray();
-
-		for (Variant variant : variantsList)
-		{
-			if (variant.category.equals(variantCategoryName))
-			{
-				myArray.put(variant.variantJson);
-			}
-		}
-
-		return myArray;
-	}
-
 }

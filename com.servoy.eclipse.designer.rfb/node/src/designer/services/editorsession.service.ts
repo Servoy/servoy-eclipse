@@ -21,7 +21,7 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
-    private allowedChildren = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
+    private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
@@ -34,7 +34,7 @@ export class EditorSessionService implements ServiceProvider {
         private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
-        this.autoscrollBehavior = new BehaviorSubject(null);
+        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null);
     }
 
     public getService(name: string) {
@@ -48,7 +48,7 @@ export class EditorSessionService implements ServiceProvider {
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
-                this.allowedChildren = JSON.parse(result);
+                this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
                 this.editorContentService.executeOnlyAfterInit(() => {
                     this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
                 });
@@ -256,8 +256,8 @@ export class EditorSessionService implements ServiceProvider {
     }
     
     buildTiNG() {
-		        void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
-	    }
+        void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
+    }
 
     consoleLog(message: string) {//log message to eclipse console
         void this.wsSession.callService('formeditor', 'consoleLog', {message: message}, true);
@@ -528,7 +528,7 @@ export class PaletteComp {
     attributes?: { [property: string]: string };
     children?: [{ [property: string]: string }];
     rightSibling?: string;
-    styleClass?: string;
+    variant?: string;
 }
 
 export class Package {

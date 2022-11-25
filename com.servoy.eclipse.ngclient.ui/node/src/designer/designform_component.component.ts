@@ -51,7 +51,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
           </div>
       </ng-template>
-      
+
       <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
@@ -136,7 +136,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
-        this.windowRefService.nativeWindow.addEventListener("message", (event) => {
+        this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
@@ -163,46 +163,46 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'createVariants') {
 
-                let margin = 5;
+                const margin = 5;
 
 			    const variants = event.data.variants;
 			    const rowInterspace= event.data.rowInterspace;
                 const columnInterspace= event.data.columnInterspace;
 			    const maxFormSize = event.data.maxFormSize;
-   
+
                 let modelTop = margin;
-                let columnsWidth = [0, 0];
-                let columnsHeight = [0, 0];
-                let maxRowIndex = [0, 0];
+                const columnsWidth = [0, 0];
+                const columnsHeight = [0, 0];
+                const maxRowIndex = [0, 0];
                 let columnIndex = 0;
 
                 maxRowIndex[0] = Math.floor(variants.length / 2) + variants.length % 2;
-                maxRowIndex[1] = variants.length - maxRowIndex[0]; 
+                maxRowIndex[1] = variants.length - maxRowIndex[0];
 
                 this.variantElements.splice(0);
 
                 for(let index = 0; index < variants.length; index++) {
-                   
-                    let variant = variants[index];
-                    const model = { width: variant.size.width + 'px', height: variant.size.height + 'px' };
-                    if (variants.length > 4 && columnIndex == 0 && index >= maxRowIndex[0]) {
+                    const variant = variants[index];
+                    const model = { width: variant.width + 'px', height: variant.height + 'px' };
+                    if (variants.length > 4 && columnIndex === 0 && index >= maxRowIndex[0]) {
                         columnsHeight[columnIndex] = columnsHeight[columnIndex] - rowInterspace + margin;
-                        columnIndex = 1; 
+                        columnIndex = 1;
                         modelTop = margin;
                     }
-                    columnsWidth[columnIndex] = Math.max(columnsWidth[columnIndex], variant.size.width);
+                    columnsWidth[columnIndex] = Math.max(columnsWidth[columnIndex], variant.width);
 					model['left'] =  margin + columnIndex * (columnsWidth[0] + columnInterspace) + 'px' ;
 					model['top'] = modelTop + 'px';
-					modelTop += variant.size.height + rowInterspace;
+					modelTop += variant.height + rowInterspace;
                     columnsHeight[columnIndex] = modelTop;
 					const componentModel = JSON.parse(JSON.stringify(event.data.model).slice());
-					componentModel.styleClass = variant.styleClass;
-                    componentModel.size.width = variant.size.width;
-                    componentModel.size.height = variant.size.height
+					componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
+					componentModel._variantName = variant.name;
+                    componentModel.size.width = variant.width;
+                    componentModel.size.height = variant.height;
                     componentModel.text = variant.name;
                 	this.variantElements.push(
                     new ComponentCache(
-                      "variant_element",
+                      'variant_element',
                       event.data.name,
                       componentModel,
                       [],
@@ -210,9 +210,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     )
                   );
                 };
-                let formWidth = margin + columnsWidth[0] + (columnsWidth[1] > 0 ? columnInterspace : 0) + columnsWidth[1] + margin;
+                const formWidth = margin + columnsWidth[0] + (columnsWidth[1] > 0 ? columnInterspace : 0) + columnsWidth[1] + margin;
                 //we need at least 150px in order to display variants Add and Edit buttons
-                this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover', popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width), popoverHeight: Math.min(columnsHeight[0], maxFormSize.height), formWidth: formWidth, formHeight: columnsHeight[0]}, '*');
+                this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
+                    popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width),
+                    popoverHeight: Math.min(columnsHeight[0], maxFormSize.height),
+                    formWidth,
+                    formHeight: columnsHeight[0]}, '*');
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
 			}
@@ -252,9 +256,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
 
                 if (event.data.dropTarget) {
-                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)
-                }
-                else if (!this.formCache.absolute){
+                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget);
+                } else if (!this.formCache.absolute){
                     if (this.formCache.mainStructure == null) {
                         this.formCache.mainStructure = new StructureCache(null, null);
                     }
@@ -299,18 +302,18 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.allowedChildren = event.data.value;
             }
             this.detectChanges();
-        })
+        });
     }
-    
+
     public onVariantMouseDown(event: MouseEvent, item: ComponentCache) {
         event.stopPropagation();
 		this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: item.model}, '*');
 	}
-    
+
     ngAfterViewInit() {
         this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
     }
-    
+
     public detectChanges() {
         this.changeHandler.markForCheck();
     }
@@ -459,7 +462,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return api;
     }
 
-    getNGClass(item: StructureCache): { [klass: string]: any; } {
+    getNGClass(item: StructureCache): { [klass: string]: any } {
         const ngclass = {};
         ngclass[item.attributes.designclass] = this.showWireframe;
         ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
@@ -485,13 +488,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private canContainDraggedElement(container: string, svyid: string): boolean {
         if (this.dropHighlight === null) return false;
         if (this.dropHighlightIgnoredIds && svyid && this.dropHighlightIgnoredIds.indexOf(svyid) >= 0) return false;
-        const drop = this.dropHighlight.split(".");
+        const drop = this.dropHighlight.split('.');
         const allowedChildren = this.allowedChildren[container];
         if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
 
         for (const layout in allowedChildren) {
-            const a = allowedChildren[layout].split(".");
-            if (a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+            const a = allowedChildren[layout].split('.');
+            if (a[0] == drop[0] && ((a[1] == '*') || (a[1] == drop[1]))) return true;
         }
         return false;
     }
@@ -522,7 +525,7 @@ class FormComponentDesignServoyApi extends ServoyApi {
     public formWillShow(formname: string, relationname?: string, formIndex?: number): Promise<boolean> {
         return new Promise<any>(resolve => {
             resolve(true);
-        })
+        });
     }
 
     public hideForm(formname: string, relationname?: string, formIndex?: number,

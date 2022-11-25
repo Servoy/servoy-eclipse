@@ -21,9 +21,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.json.JSONArray;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -543,10 +542,8 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
 				if (map != null)
 				{
-					Iterator<Map.Entry<UUID, Integer>> it = map.entrySet().iterator();
-					while (it.hasNext())
+					for (Entry<UUID, Integer> entry : map.entrySet())
 					{
-						Map.Entry<UUID, Integer> entry = it.next();
 						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
 					}
 				}
@@ -555,16 +552,4 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		});
 		return foreignElementUUIDs;
 	}
-
-	public JSONArray js_getExistingVariants(String variantCategoryName)
-	{
-		return ServoyModelManager.getServoyModelManager().getServoyModel().getExistingVariants(variantCategoryName);
-	}
-
-	public void js_setVariantsFor(String variantCategoryName, String jsonArrayString)
-	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().setVariantsFor(variantCategoryName, jsonArrayString);
-	}
-
-
 }
