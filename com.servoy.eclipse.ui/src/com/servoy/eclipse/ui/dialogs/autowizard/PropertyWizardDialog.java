@@ -108,7 +108,11 @@ public class PropertyWizardDialog extends Dialog
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 		Composite tableParentComposite = new Composite(form, SWT.BORDER);
 		tableParentComposite.setLayout(new FillLayout());
-		form.setWeights(40, 60);
+		int initialW = settings.get("weight") != null ? settings.getInt("weight") : 400;
+		form.setWeights(initialW, 1000 - initialW);
+		form2.addListener(SWT.Resize, e -> {
+			settings.put("weight", form.getWeights()[0]);
+		});
 
 		if (configurator.getDataproviderProperties().size() > 0)
 		{
@@ -158,5 +162,17 @@ public class PropertyWizardDialog extends Dialog
 	public List<Map<String, Object>> getInput()
 	{
 		return tableComposite.getInput();
+	}
+
+	@Override
+	protected int getDialogBoundsStrategy()
+	{
+		return Dialog.DIALOG_PERSISTLOCATION | Dialog.DIALOG_PERSISTSIZE;
+	}
+
+	@Override
+	protected IDialogSettings getDialogBoundsSettings()
+	{
+		return settings;
 	}
 }
