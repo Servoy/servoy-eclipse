@@ -419,7 +419,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (IOException e)
 									{
-										ServoyLog.logError("error saving chagnes from debugger", e);
+										ServoyLog.logError("error saving changes from debugger", e);
 									}
 									return null;
 								}
@@ -448,7 +448,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (Exception e)
 									{
-										e.printStackTrace();
+										ServoyLog.logError("error parsing script method " + method.getName(), e);
 									}
 									return null;
 								}
@@ -1408,9 +1408,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private void initStylesWizard()
 	{
 		variantsList.clear();
-		variantsFile = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-			.getFile(new Path("medias/variants.less"));
-		if (variantsFile.exists())
+		variantsFile = activeProject == null ? null : activeProject.getProject().getFile(new Path("medias/variants.less"));
+		if (variantsFile != null && variantsFile.exists())
 		{
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(variantsFile.getContents())))
 			{
@@ -1481,7 +1480,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			}
 			catch (IOException | CoreException e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError("error parsing styles in variants file " + variantsFile.getName(), e);
 			}
 		}
 	}
@@ -4245,16 +4244,18 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		String myStyleString = getStyleString();
 
-		//write variants list to the file
-		InputStream source = new ByteArrayInputStream(myStyleString.getBytes());
-		try
+		// write variants list to the file
+		if (variantsFile != null)
 		{
-			variantsFile.setContents(source, true, false, null);
-		}
-		catch (CoreException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			InputStream source = new ByteArrayInputStream(myStyleString.getBytes());
+			try
+			{
+				variantsFile.setContents(source, true, false, null);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError("error saving style to variants file", e);
+			}
 		}
 	}
 
