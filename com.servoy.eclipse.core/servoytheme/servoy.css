@@ -29,7 +29,7 @@
 	background-color: #FFFFFF;
 }
 
- * {
+ *, Shell, Composite, Label, Button[style~='SWT.CHECK'], Button[style~='SWT.RADIO'], Combo, Group {
 	background-color: #FFFFFF;
 }
 
