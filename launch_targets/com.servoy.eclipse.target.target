@@ -41,18 +41,18 @@
 		    <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.source.feature.feature.group" version="2.0.3.202208090440"/>
 	    </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2022-09/"/>
-            <unit id="org.eclipse.egit.feature.group" version="6.3.0.202209071007-r"/>
-            <unit id="org.eclipse.emf.sdk.feature.group" version="2.31.0.v20220817-1401"/>
-            <unit id="org.eclipse.jgit.feature.group" version="6.3.0.202209071007-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.3.0.202209071007-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.3.0.202209071007-r"/>
-            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.27.0.v202206160204"/>
+            <repository location="https://download.eclipse.org/eclipse/updates/4.24/"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1700.v20220509-0833"/>
+            <unit id="org.eclipse.sdk.ide" version="4.24.0.I20220607-0700"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.25/"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1800.v20220720-1949"/>
-            <unit id="org.eclipse.sdk.ide" version="4.25.0.I20220831-1800"/>
+            <repository location="https://download.eclipse.org/releases/2022-06/"/>
+            <unit id="org.eclipse.egit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.emf.sdk.feature.group" version="2.30.0.v20220516-1117"/>
+            <unit id="org.eclipse.jgit.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.2.0.202206071550-r"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.26.0.v202204042240"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/ship_plugins/antlr/"/>
