@@ -58,6 +58,7 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 }
 
 .svyNatTable > .COLUMN_0 {
+	painter-resolution: true;
 	padding-left: 5px;
 	text-align: left;
 }
