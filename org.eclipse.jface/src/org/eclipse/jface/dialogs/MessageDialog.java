@@ -14,9 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jface.dialogs;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.util.Policy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.graphics.Image;
@@ -41,14 +38,6 @@ import org.eclipse.swt.widgets.Shell;
  * </p>
  */
 public class MessageDialog extends IconAndMessageDialog {
-
-	/**
-	 * Flag to prevent opening of message dialogs for automated testing.
-	 *
-	 * @since 3.27
-	 */
-	public static boolean AUTOMATED_MODE = false;
-
 	/**
 	 * Constant for no image (value 0).
 	 *
@@ -75,8 +64,8 @@ public class MessageDialog extends IconAndMessageDialog {
 	public static final int INFORMATION = 2;
 
 	/**
-	 * Constant for the question image, or a simple dialog without an icon and
-	 * Yes/No buttons (value 3).
+	 * Constant for the question image, or a simple dialog with the question
+	 * image and Yes/No buttons (value 3).
 	 *
 	 * @see #MessageDialog(Shell, String, Image, String, int, int, String...)
 	 * @see #open(int, Shell, String, String, int)
@@ -93,7 +82,7 @@ public class MessageDialog extends IconAndMessageDialog {
 	public static final int WARNING = 4;
 
 	/**
-	 * Constant for a simple dialog without an icon and OK/Cancel buttons (value 5).
+	 * Constant for a simple dialog with the question image and OK/Cancel buttons (value 5).
 	 *
 	 * @see #open(int, Shell, String, String, int)
 	 * @since 3.5
@@ -101,8 +90,7 @@ public class MessageDialog extends IconAndMessageDialog {
 	public static final int CONFIRM = 5;
 
 	/**
-	 * Constant for a simple dialog without an icon and Yes/No/Cancel buttons (value
-	 * 6).
+	 * Constant for a simple dialog with the question image and Yes/No/Cancel buttons (value 6).
 	 *
 	 * @see #open(int, Shell, String, String, int)
 	 * @since 3.5
@@ -175,8 +163,8 @@ public class MessageDialog extends IconAndMessageDialog {
 	 *                           with an error image</li>
 	 *                           <li><code>MessageDialog.INFORMATION</code> for a
 	 *                           dialog with an information image</li>
-	 *                           <li><code>MessageDialog.QUESTION </code> for a simple
-	 *                           dialog without an icon</li>
+	 *                           <li><code>MessageDialog.QUESTION </code> for a
+	 *                           dialog with a question image</li>
 	 *                           <li><code>MessageDialog.WARNING</code> for a dialog
 	 *                           with a warning image</li>
 	 *                           </ul>
@@ -221,8 +209,8 @@ public class MessageDialog extends IconAndMessageDialog {
 	 *                           with an error image</li>
 	 *                           <li><code>MessageDialog.INFORMATION</code> for a
 	 *                           dialog with an information image</li>
-	 *                           <li><code>MessageDialog.QUESTION </code> for a simple
-	 *                           dialog without an icon</li>
+	 *                           <li><code>MessageDialog.QUESTION </code> for a
+	 *                           dialog with a question image</li>
 	 *                           <li><code>MessageDialog.WARNING</code> for a dialog
 	 *                           with a warning image</li>
 	 *                           </ul>
@@ -258,6 +246,7 @@ public class MessageDialog extends IconAndMessageDialog {
 		case QUESTION:
 		case QUESTION_WITH_CANCEL:
 		case CONFIRM: {
+			this.image = getQuestionImage();
 			break;
 		}
 		case WARNING: {
@@ -601,17 +590,5 @@ public class MessageDialog extends IconAndMessageDialog {
 			throw new NullPointerException("The array of button labels cannot be null."); //$NON-NLS-1$
 		}
 		this.buttonLabels = buttonLabels;
-	}
-
-	@Override
-	public int open() {
-		if (!AUTOMATED_MODE) {
-			return super.open();
-		}
-		IllegalStateException e = new IllegalStateException("Message dialog is supposed to be shown now"); //$NON-NLS-1$
-		IStatus ms = Status.warning(title + " : " + message, e); //$NON-NLS-1$
-		Policy.getLog().log(ms);
-		setReturnCode(OK);
-		return OK;
 	}
 }

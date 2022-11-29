@@ -183,6 +183,7 @@ public class JFaceResources {
 
 	/**
 	 * Returns the color registry for JFace itself.
+	 * <p>
 	 *
 	 * @return the <code>ColorRegistry</code>.
 	 * @since 3.0

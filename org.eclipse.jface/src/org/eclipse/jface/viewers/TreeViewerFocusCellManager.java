@@ -119,8 +119,7 @@ public class TreeViewerFocusCellManager extends SWTFocusCellManager {
 	ViewerCell getInitialFocusCell() {
 		Tree tree = (Tree) getViewer().getControl();
 
-		if (!tree.isDisposed() && tree.getItemCount() > 0 && tree.getTopItem() != null
-				&& !tree.getTopItem().isDisposed()) {
+		if (! tree.isDisposed() && tree.getItemCount() > 0 && ! tree.getTopItem().isDisposed()) {
 			ViewerRow aViewerRow = getViewer().getViewerRowFromItem(tree.getTopItem());
 			if (tree.getColumnCount() == 0) {
 				return aViewerRow.getCell(0);

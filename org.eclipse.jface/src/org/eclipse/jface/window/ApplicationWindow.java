@@ -827,9 +827,9 @@ public class ApplicationWindow extends Window implements IRunnableContext {
 	}
 
 	/**
-	 * Returns whether or not children exist for the Application Window's toolbar
-	 * control.
-	 *
+	 * Returns whether or not children exist for the Application Window's
+	 * toolbar control.
+	 * <p>
 	 * @return boolean true if children exist, false otherwise
 	 */
 	protected boolean toolBarChildrenExist() {
