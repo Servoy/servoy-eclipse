@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
 import { SabloService } from '../sablo/sablo.service';
 import { FormService } from '../ngclient/form.service';
 import { LocaleService } from '../ngclient/locale.service';
@@ -27,6 +27,9 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
         });
     }
 
+    public listenForI18NMessages(...keys: string[]): I18NListener {
+        throw new Error('Method not implemented.');
+    }
     getI18NMessages(...keys: string[]): Promise<any> {
         return new Promise<any>(resolve => {
             resolve({});

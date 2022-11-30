@@ -15,9 +15,9 @@ export class DialogService {
 
     public init(): void {
         try {
-            this.servoyService.getI18NMessages('servoy.button.cancel', 'servoy.button.ok').then((val) => {
-                this.i18nOK = val['servoy.button.ok'];
-                this.i18nCancel = val['servoy.button.cancel'];
+            this.servoyService.listenForI18NMessages('servoy.button.cancel', 'servoy.button.ok').messages((val) => {
+                this.i18nOK = val.get('servoy.button.ok');
+                this.i18nCancel = val.get('servoy.button.cancel');
             });
         } catch (e) {
             console.error(e);

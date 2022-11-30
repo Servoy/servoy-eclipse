@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -7,18 +7,20 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
-import { MainViewRefService } from '@servoy/public';
+import { I18NListener, MainViewRefService } from '@servoy/public';
 
 @Component({
   selector: 'svy-main',
   templateUrl: './main.component.html'
 })
 
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, OnDestroy {
   title = 'Servoy NGClient';
   i18n_reconnecting_feedback: string;
   formStyle = { position: 'absolute', top: '0px', bottom: '0px' };
   navigatorStyle = { position: 'absolute', top: '0px', bottom: '0px' };
+
+  private  listener: I18NListener = null;
 
   constructor(private servoyService: ServoyService,
           private i18nProvider: I18NProvider,
@@ -33,13 +35,6 @@ export class MainComponent implements OnInit {
     mainViewRefService.mainContainer = viewContainerRef;
     allService.init();
     serverData.init();
-  }
-
-  ngOnInit() {
-      this.i18nProvider.getI18NMessages(
-              'servoy.ngclient.reconnecting').then((val)=> {
-                this.i18n_reconnecting_feedback = val['servoy.ngclient.reconnecting'];
-      });
   }
 
   public get mainForm() {
@@ -58,13 +53,24 @@ export class MainComponent implements OnInit {
     return null;
   }
 
+  public get sessionProblem() {
+    return this.servoyService.getSolutionSettings().sessionProblem;
+  }
+
+  public ngOnDestroy(): void {
+    this.listener.destroy();
+    }
+
+  public ngOnInit() {
+      this.listener = this.i18nProvider.listenForI18NMessages(
+              'servoy.ngclient.reconnecting').messages((val)=> {
+                this.i18n_reconnecting_feedback = val['servoy.ngclient.reconnecting'];
+      });
+  }
+
   hasDefaultNavigator(): boolean {
     const cache = this.mainForm? this.formservice.getFormCacheByName(this.mainForm.toString()): null;
     return cache && cache.getComponent('svy_default_navigator') != null;
-  }
-
-  public get sessionProblem() {
-    return this.servoyService.getSolutionSettings().sessionProblem;
   }
 
   public getNavigatorStyle() {

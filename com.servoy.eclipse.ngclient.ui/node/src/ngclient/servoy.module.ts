@@ -14,8 +14,6 @@ import { DialogWindowComponent } from './services/dialog-window/dialog-window.co
 import { ServoyFormPopupComponent } from './services/popupform/popupform';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
-import { I18NProvider } from './services/i18n_provider.service';
-
 import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
@@ -45,7 +43,7 @@ import { DeveloperService } from './developer.service';
         MainRoutingModule,
         ServoyCoreComponentsModule
     ],
-    providers: [I18NProvider, UpperCasePipe, LowerCasePipe,
+    providers: [UpperCasePipe, LowerCasePipe,
         ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
         ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
     bootstrap: [MainComponent],

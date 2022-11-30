@@ -2,7 +2,7 @@ import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { PopupForm } from '../utils/popupform';
-import { IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
+import { I18NListener, IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
 import { ServoyPublicModule } from '../servoy_public.module';
 
 @Injectable()
@@ -69,6 +69,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         return Promise.resolve(resolvedMessages);
     }
 
+    public listenForI18NMessages(...keys: string[]): I18NListener {
+        throw new Error('Method not implemented.');
+    }
     public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
         throw new Error('Method not implemented.');
     }

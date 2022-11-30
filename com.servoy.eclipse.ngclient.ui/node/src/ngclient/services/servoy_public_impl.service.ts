@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { FormService } from '../form.service';
@@ -33,6 +33,9 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
 
     getI18NMessages(...keys: string[]): Promise<any> {
         return this.i18nProvider.getI18NMessages(...keys);
+    }
+    public listenForI18NMessages(...keys: string[]): I18NListener {
+        return this.i18nProvider.listenForI18NMessages(...keys);
     }
     getClientnr(): string {
         return this.sabloService.getClientnr();
