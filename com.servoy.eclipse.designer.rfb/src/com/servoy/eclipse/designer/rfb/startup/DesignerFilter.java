@@ -378,7 +378,6 @@ public class DesignerFilter implements Filter
 										if (variantsForCategory.length() > 0)
 										{
 											componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());
-											componentJson.put("styleVariants", variantsForCategory);
 										}
 									}
 

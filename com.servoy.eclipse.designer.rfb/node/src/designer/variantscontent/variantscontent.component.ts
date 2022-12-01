@@ -3,7 +3,7 @@ import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewI
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
-import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
+import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
 @Component({
@@ -52,18 +52,25 @@ export class VariantsContentComponent implements OnInit {
     }
 	
 	sendStylesToVariantsForm() {
-		this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
-		const message = { 
-			id: 'createVariants', 
-			variants: this.component.styleVariants, 
-			model: this.component.model, 
-			name: this.convertToJSName(this.component.name), 
-			tag: this.component.name,
-			rowInterspace: this.rowInterspace,
-			columnInterspace: this.columnInterspace,
-			maxFormSize: this.maxFormSize
-		};
-		this.variantsIFrame.contentWindow.postMessage(message, '*');
+
+
+		this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
+			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
+			this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
+			const message = { 
+				id: 'createVariants', 
+				variants: result as Array<Variant>,
+				model: this.component.model, 
+				name: this.convertToJSName(this.component.name), 
+				tag: this.component.name,
+				rowInterspace: this.rowInterspace,
+				columnInterspace: this.columnInterspace,
+				maxFormSize: this.maxFormSize
+			};
+			this.variantsIFrame.contentWindow.postMessage(message, '*');
+		});
+
+		
 
 	}
 				

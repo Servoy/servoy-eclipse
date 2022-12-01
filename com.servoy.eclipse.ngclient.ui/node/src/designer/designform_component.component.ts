@@ -183,6 +183,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
                 for(let index = 0; index < variants.length; index++) {
                     const variant = variants[index];
+
+                    //set model
                     const model = { width: variant.width + 'px', height: variant.height + 'px' };
                     if (variants.length > 4 && columnIndex === 0 && index >= maxRowIndex[0]) {
                         columnsHeight[columnIndex] = columnsHeight[columnIndex] - rowInterspace + margin;
@@ -194,12 +196,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 					model['top'] = modelTop + 'px';
 					modelTop += variant.height + rowInterspace;
                     columnsHeight[columnIndex] = modelTop;
+                    //end model
+
+                    //set component model
 					const componentModel = JSON.parse(JSON.stringify(event.data.model).slice());
 					componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
 					componentModel._variantName = variant.name;
                     componentModel.size.width = variant.width;
                     componentModel.size.height = variant.height;
-                    componentModel.text = variant.name;
+                    componentModel.text = variant.displayName;
+                   //end component model
+
                 	this.variantElements.push(
                     new ComponentCache(
                       'variant_element',

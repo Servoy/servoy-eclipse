@@ -97,6 +97,10 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true);
     }
 
+    getVariantsForCategory<T>(variantCategory: string) {
+        return this.wsSession.callService<T>('formeditor', 'getVariantsForCategory', { variantCategory: variantCategory }, false);
+    }
+
     getGhostComponents<T>() {
         return this.wsSession.callService<T>('formeditor', 'getGhostComponents', null, false)
     }
@@ -501,15 +505,6 @@ export class PaletteComp {
     type: string;
     ghostPropertyName: string;
     styleVariantCategory: string;
-    styleVariants: Array<
-        {
-            name: string, 
-            size: {
-                width: number, 
-                height: number
-            }
-        }
-    >;
     lastChosenVariant: string;
     dropTargetUUID?: string;
     isOpen: boolean;
@@ -545,4 +540,13 @@ export interface ISupportAutoscroll {
     onMouseUp(event: MouseEvent): void;
     onMouseMove(event: MouseEvent): void;
     getAutoscrollLockId(): string;
+}
+
+export class Variant {
+    category: string;
+    classes: Array<String>;
+    displayName: string;
+    height: number;
+    name: string;
+    width: number;
 }

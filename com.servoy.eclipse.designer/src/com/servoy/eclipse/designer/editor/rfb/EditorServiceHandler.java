@@ -67,11 +67,13 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrde
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -539,6 +541,18 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(selectionProvider));
 		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
+
+		configuredHandlers.put("getVariantsForCategory", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+				String category = args.getString("variantCategory");
+				JSONArray variants = fl.getVariantsHandler().getVariantsForCategory(category);
+				return variants;
+			}
+		});
 	}
 
 	@Override
