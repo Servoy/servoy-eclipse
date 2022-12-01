@@ -123,6 +123,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		}
 
 		@Override
+		public boolean belongsTo(Object family)
+		{
+			return CopySourceFolderAction.JOB_FAMILY.equals(family);
+		}
+
+		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
 			StringOutputStream console = Activator.getInstance().getConsole().outputStream();

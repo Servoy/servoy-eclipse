@@ -17,7 +17,12 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.IOException;
+
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -32,6 +37,8 @@ import org.eclipse.swt.widgets.Display;
  */
 public class CopySourceFolderAction extends Action
 {
+	public static final String JOB_FAMILY = "Copy_Build_Sources";
+
 	public CopySourceFolderAction()
 	{
 		setText("Copy the Titanium NGClient sources");
@@ -39,8 +46,25 @@ public class CopySourceFolderAction extends Action
 	}
 
 	@Override
+	public boolean isEnabled()
+	{
+		if (super.isEnabled())
+		{
+			Job[] jobs = Job.getJobManager().find(JOB_FAMILY);
+			return jobs.length == 0;
+		}
+		return false;
+	}
+
+	@Override
 	public void run()
 	{
+		if (!isEnabled())
+		{
+			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Copy and Build TiNG",
+				"Build is already running, wait for that one to finish");
+			return;
+		}
 		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
@@ -54,10 +78,42 @@ public class CopySourceFolderAction extends Action
 		Job deleteJob = null;
 		if (choice == 1)
 		{
-			deleteJob = Job.createSystem("delete .angular and packages cache", (monitor) -> {
-				WebPackagesListener.setIgnore(true);
-				FileUtils.deleteQuietly(Activator.getInstance().getMainTargetFolder());
-			});
+			deleteJob = new Job("delete .angular and packages cache")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+					try
+					{
+						long time = System.currentTimeMillis();
+						console.write("Starting to delete the main target folder: " + Activator.getInstance().getMainTargetFolder() + "\n");
+						WebPackagesListener.setIgnore(true);
+						FileUtils.deleteQuietly(Activator.getInstance().getMainTargetFolder());
+						console.write("Done deleting the main target folder: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
+					}
+					catch (IOException e)
+					{
+					}
+					finally
+					{
+						try
+						{
+							console.close();
+						}
+						catch (IOException e)
+						{
+						}
+					}
+					return Status.OK_STATUS;
+				}
+
+				@Override
+				public boolean belongsTo(Object family)
+				{
+					return CopySourceFolderAction.JOB_FAMILY.equals(family);
+				}
+			};
 		}
 		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
