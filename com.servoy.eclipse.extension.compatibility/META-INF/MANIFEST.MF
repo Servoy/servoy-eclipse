@@ -24,9 +24,9 @@ Require-Bundle: servoy_shared,
  javax.websocket,
  org.apache.commons.commons-fileupload,
  org.apache.httpcomponents.core5.httpcore5-h2,
+ org.apache.commons.commons-io,
  com.sun.mail.jakarta.mail,
- com.sun.activation.jakarta.activation,
- org.apache.commons.io
+ com.sun.activation.jakarta.activation
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
