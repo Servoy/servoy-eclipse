@@ -14,3 +14,4 @@ file_export_version=3.0
 /instance/org.eclipse.dltk.javascript.ui/sourceHoverBackgroundColor=255,255,225
 /instance/org.eclipse.dltk.javascript.ui/content_assist_proposals_background=81,81,81
 /instance/org.eclipse.dltk.javascript.ui/content_assist_proposals_foreground=255,255,255
+/instance/org.eclipse.ui.workbench/org.eclipse.e4.ui.css.theme.e4_dark.org.eclipse.ui.workbench.DARK_BACKGROUND=47,47,47
