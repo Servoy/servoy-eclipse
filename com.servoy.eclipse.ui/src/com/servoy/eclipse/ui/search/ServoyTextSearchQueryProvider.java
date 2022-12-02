@@ -25,9 +25,9 @@ import org.eclipse.ui.IWorkingSet;
 
 /**
  * This class consists of code from org.eclipse.search2.internal.ui.text2.DefaultTextSearchQueryProvider
- * but is used to return the SerovyFileSearchQuery for each created query, in order to use 
+ * but is used to return the SerovyFileSearchQuery for each created query, in order to use
  * Servoy's SearchResultUpdater class.
- * 
+ *
  * @author acostache
  *
  */
@@ -35,7 +35,7 @@ public class ServoyTextSearchQueryProvider extends TextSearchQueryProvider
 {
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.text.TextSearchQueryProvider#createQuery(TextSearchInput)
 	 */
 	@Override
@@ -45,43 +45,45 @@ public class ServoyTextSearchQueryProvider extends TextSearchQueryProvider
 		String text = input.getSearchText();
 		boolean regEx = input.isRegExSearch();
 		boolean caseSensitive = input.isCaseSensitiveSearch();
-		return new ServoyFileSearchQuery(text, regEx, caseSensitive, scope);
+		boolean word = input.isWholeWordSearch();
+		boolean binary = input.searchInBinaries();
+		return new ServoyFileSearchQuery(text, regEx, caseSensitive, word, binary, scope);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.text.TextSearchQueryProvider#createQuery(java.lang.String)
 	 */
 	@Override
 	public ISearchQuery createQuery(String searchForString)
 	{
 		FileTextSearchScope scope = FileTextSearchScope.newWorkspaceScope(getPreviousFileNamePatterns(), false);
-		return new ServoyFileSearchQuery(searchForString, false, true, scope);
+		return new ServoyFileSearchQuery(searchForString, false, true, false, false, scope);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.text.TextSearchQueryProvider#createQuery(java.lang.String, org.eclipse.core.resources.IResource[])
 	 */
 	@Override
 	public ISearchQuery createQuery(String selectedText, IResource[] resources)
 	{
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(resources, getPreviousFileNamePatterns(), false);
-		return new ServoyFileSearchQuery(selectedText, false, true, scope);
+		return new ServoyFileSearchQuery(selectedText, false, true, false, false, scope);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.text.TextSearchQueryProvider#createQuery(java.lang.String, org.eclipse.ui.IWorkingSet[])
 	 */
 	@Override
 	public ISearchQuery createQuery(String selectedText, IWorkingSet[] ws)
 	{
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(ws, getPreviousFileNamePatterns(), false);
-		return new ServoyFileSearchQuery(selectedText, false, true, scope);
+		return new ServoyFileSearchQuery(selectedText, false, true, false, false, scope);
 	}
 
 	private String[] getPreviousFileNamePatterns()
