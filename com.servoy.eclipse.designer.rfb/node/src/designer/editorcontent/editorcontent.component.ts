@@ -72,8 +72,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             this.adjustFromContentSize();
         }
         if (id === 'buildTitaniumClient') {
-            			this.editorSession.buildTiNG();
-		        }
+            this.editorSession.buildTiNG();
+            window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
+		}
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -97,7 +98,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     
     @HostListener('document:click', ['$event'])
     onClick(event: MouseEvent) {
-        		window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+		if (event.offsetX > 50 && event.offsetY > 50) {
+			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+		}
     }
 
     adjustFromContentSize() {

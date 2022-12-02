@@ -34,7 +34,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     
     private topLimit = 0;
     private bottomLimit = 0;
-    private ghostsVisible = true;
     private isLowestPart = false;
     private editorContent: HTMLElement;
     private contentArea: HTMLElement;
@@ -89,21 +88,24 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             }
         }
         
-        if (id !== 'hideGhostContainer' && !this.ghostsVisible) {
-			this.ghostsVisible = true;
+        if (id !== 'hideGhostContainer' && id !== 'positionClick') {
 			this.hideShowGhosts('visible');
-		} else if (id === 'hideGhostContainer' && this.ghostsVisible) {
-			this.ghostsVisible = false;
+		}
+        
+		if (id === 'hideGhostContainer') {
 			this.hideShowGhosts('hidden');
 		}
+
     }
     
     hideShowGhosts(visibility: string) {
-		const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
-		Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
-			item.style.visibility = visibility; 
-			item.querySelectorAll('.ghost').forEach((ghost:HTMLElement) => ghost.style.visibility = visibility);
-		});
+		if (this.elementRef) {
+			const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
+			Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
+				item.style.visibility = visibility; 
+				item.querySelectorAll('.ghost').forEach((ghost:HTMLElement) => ghost.style.visibility = visibility);
+			});
+		}
 	}
 
     renderGhosts() {
