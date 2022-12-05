@@ -251,7 +251,7 @@ export class WebsocketSession {
         this.websocket.onmessage = (message) => this.handleHeartbeat(message) || this.ngZone.run(() => this.handleMessage(message));
     }
 
-    public  createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
+    public createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
           const deferred = new Deferred<T>();
             const cmsgid = this.getNextMessageId();
             this.deferredEvents[cmsgid] = deferred;

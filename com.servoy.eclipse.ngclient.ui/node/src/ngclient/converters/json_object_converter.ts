@@ -1,5 +1,5 @@
 import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
-            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction } from '../../sablo/converter.service';
+            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction, SoftProxyRevoker } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
@@ -50,7 +50,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
         // create empty CustomObjectType instances for all custom types in this .spec
         for (const customTypeName of Object.keys(details)) {
              // create just an empty type reference that will be populated below with child property types
-            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService);
+            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService, this.logger);
         }
 
         // set the sub-properties of each CustomObjectType to the correct IType
@@ -71,7 +71,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
     private propertyDescriptions: { [propName: string]: IPropertyDescription };
 
-    constructor(private converterService: ConverterService) {}
+    constructor(private converterService: ConverterService, private readonly logger: LoggerService) {}
 
     // this will always get called once with a non-null param before the CustomObjectType is used for conversions;
     // it can't be given in constructor as types might depend on each other and they are all created before being 'linked'; see factory code above
@@ -187,8 +187,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
+                    internalState.markAllChanged(false);
                 } else if (newClientData !== oldClientData) {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
@@ -198,8 +198,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
+                    internalState.markAllChanged(false);
                 } else {
                     // new the same as old and already initialized
                     newClientDataInited = newClientData;
@@ -351,10 +351,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             if (this.hasSubPropsWithAllowOrShallowOrDeep(internalState.calculatedPushToServerOfWholeProp)) {
                 // TODO should we add the proxy in all cases? just in order to detect reference changes for any smart children and make sure we update their changeListener?;
                 //      but that would only be needed if ppl. start moving around properties with APIs (like foundsets) that are nested in arrays/objects - and have REJECT
-
-                const proxyRevoke = Proxy.revocable(object as CustomObjectValue, this.getProxyHandler(internalState));
-                proxiedCustomObject = proxyRevoke.proxy;
-                internalState.proxyRevokerFunc = proxyRevoke.revoke;
+                proxiedCustomObject = new Proxy(object as CustomObjectValue, this.getProxyHandler(internalState));
             } else proxiedCustomObject = object as CustomObjectValue;
         } else proxiedCustomObject = objectToInitialize as CustomObjectValue;
 
@@ -380,9 +377,12 @@ export class CustomObjectType implements IType<CustomObjectValue> {
      * This implements the shallow PushToServer behavior.
      */
     private getProxyHandler(internalState: CustomObjectState) {
+        const softProxyRevoker = new SoftProxyRevoker(this.logger);
+        internalState.proxyRevokerFunc = softProxyRevoker.getRevokeFunction();
+
         return {
             set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any) => {
-                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingCustomObject, prop, v);
+                if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingCustomObject, prop, v);
 
                 const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
                                                                     this.propertyDescriptions[prop]?.getPropertyDeclaredPushToServer());
@@ -394,7 +394,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             },
 
             deleteProperty: (underlyingCustomObject: CustomObjectValue, prop: any) => {
-                if (internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingCustomObject, prop);
+                if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingCustomObject, prop);
 
                 const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
                                                                     this.propertyDescriptions[prop]?.getPropertyDeclaredPushToServer());
@@ -422,34 +422,42 @@ interface CustomObjectValue extends IChangeAwareValue, ICustomObjectValue {
 
 class CustomObjectValue extends BaseCustomObject implements IChangeAwareValue, ICustomObjectValue {
 
-    #internalState: CustomObjectState; // private class member (really not visible when iterating using 'in' or 'of' or when trying to access it from the outside of this class)
-    #propertyDescriptions: { [propName: string]: IPropertyDescription };
+    // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
+    // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
+    // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
+    // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
+    // avoid iteration/enumeration/public access to/on it
+    __internalState: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
 
     initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
-        this.#internalState = new CustomObjectState(this);
-        this.#internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
-        this.#internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
-        this.#internalState.dynamicPropertyTypesHolder = {};
-        this.#propertyDescriptions = propertyDescriptions;
+        Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
+            configurable: true,
+            enumerable: false,
+            writable: false,
+            value: new CustomObjectState(this, propertyDescriptions)
+        }); // we use Object.defineProperty to make the internal state not enumerable (so that it does not appear when iterating using 'in' or 'of')
+        this.__internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+        this.__internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
+        this.__internalState.dynamicPropertyTypesHolder = {};
     }
 
     /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
     getInternalState(): CustomObjectState {
-        return this.#internalState;
+        return this.__internalState;
     }
 
     markSubPropertyAsHavingDeepChanges(subPropertyName: string): void {
         // this can be called by user for >= ALLOW pushToServer combined with 'object' type,
         // so simple JSON subproperties, that change by content, not reference
-        const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(this.#internalState.calculatedPushToServerOfWholeProp,
-                                                    this.#propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
+        const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(this.__internalState.calculatedPushToServerOfWholeProp,
+                                                    this.__internalState.propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
 
         if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
-            this.#internalState.changedKeys.set(subPropertyName, this[subPropertyName]);
+            this.__internalState.changedKeys.set(subPropertyName, this[subPropertyName]);
 
             // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
             // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
-            this.#internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
+            this.__internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
         }
     }
 
@@ -492,6 +500,7 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
     public destroyAndDeleteMeAndGetNonProxiedValueOfProp(): VT {
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
+        console.log("Revoking proxy of: " + JSON.stringify(this.originalNonProxiedInstanceOfCustomObject));
 
         return this.originalNonProxiedInstanceOfCustomObject;
     }
@@ -514,6 +523,10 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
 }
 
 class CustomObjectState extends BaseCustomObjectState<any, any> {
+
+    constructor(originalNonProxiedInstanceOfCustomObject: any, public readonly propertyDescriptions: { [propName: string]: IPropertyDescription }) {
+        super(originalNonProxiedInstanceOfCustomObject);
+    }
 
 }
 

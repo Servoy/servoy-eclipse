@@ -10,8 +10,9 @@ export class FoundsetRefType implements IType<any> {
 		return serverJSONValue;
 	}
 
-	fromClientToServer(newClientData: FoundsetValue, _oldClientData: any, _propertyContext: IPropertyContext): [any, FoundsetValue] {
-		return [newClientData.foundsetId, newClientData];
+	fromClientToServer(newClientData: FoundsetValue | number, _oldClientData: any, _propertyContext: IPropertyContext): [any, FoundsetValue | number] {
+        if (typeof newClientData === 'number') return [newClientData, newClientData]; // it is already a foundsetId (probably what was received from server is now sent back as an arg or something)
+		else return [newClientData.foundsetId, newClientData];
 	}
 
 }

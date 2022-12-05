@@ -4553,10 +4553,8 @@ public class TypeCreator extends TypeCache
 	public static Set<Member> getMembers(String memberName, Type existingType)
 	{
 		Set<Member> result = new HashSet<>();
-		Iterator<Member> members = new TypeMemberQuery(existingType).ignoreDuplicates().iterator();
-		while (members.hasNext())
+		for (Member member : new TypeMemberQuery(existingType).ignoreDuplicates())
 		{
-			Member member = members.next();
 			if (memberName.equals(member.getName()))
 			{
 				result.add(member);

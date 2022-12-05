@@ -168,9 +168,9 @@ export class ConverterService {
         return ret;
     }
 
-    public getEventArgs(args, eventName: string, handlerSpecification: IWebObjectFunction) {
+    public getEventArgs(args: any[] | IArguments, eventName: string, handlerSpecification: IWebObjectFunction) {
         const newargs = [];
-        for (const i of args) {
+        for (let i = 0; i < args.length; i++) {
             let arg = args[i];
             if (arg && arg.originalEvent) arg = arg.originalEvent;
 
@@ -204,6 +204,32 @@ export class ConverterService {
             newargs.push(arg);
         }
         return newargs;
+    }
+}
+
+/**
+ * Instead of using Proxy.revocable when creating proxies, and then really revoking the proxies, use use a 'softer' approach.
+ * This is because really revoking proxies will make them unusable - all access to them throwing an exception - and it is possible that custom components
+ * still hold on to old proxy references (maybe execute later/async code, or even really keep refs). It can be argued that this usage is incorrect,
+ * but it is better to just have a way of disabling old proxies from firing changes - and not break component code (that is from before we started using
+ * proxies) by throwing exceptions for even simple read operations.
+ */
+export class SoftProxyRevoker {
+    private proxyIsDisabled = false;
+
+    constructor(private log: LoggerService) {}
+
+    isProxyDisabled() {
+        // hint - if this warn message is bugging you, it means that a component/service is setting something on a value (from the model for example, a custom
+        // object, array, viewport/viewport row...) that is obsolete (has been since deleted/replaced from the model, or moved to another place with another proxy
+        // possibly created for it)
+        if (this.proxyIsDisabled)
+            this.log.info('Mutation detected on an obsolete Proxy instance that is no longer supposed to be used (custom obj./custom array/viewport contents/...). Change detection ignored.');
+        return this.proxyIsDisabled;
+    }
+
+    getRevokeFunction(): () => void {
+        return () => ( this.proxyIsDisabled = false );
     }
 }
 
@@ -267,6 +293,8 @@ export interface IChangeAwareValue {
 }
 
 export class ChangeAwareState {
+    
+    public static INTERNAL_STATE_MEMBER_NAME = "__internalState";
 
     public allChanged = false;
 

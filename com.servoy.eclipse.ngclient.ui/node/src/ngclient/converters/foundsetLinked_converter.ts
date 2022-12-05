@@ -177,7 +177,10 @@ class FSLinkedInternalState extends FoundsetViewportState {
                 }
 
                 if (wholeViewport !== undefined) this.updateWholeViewport(wholeViewport, conversionInfoFromServerForViewport);
-                else if (!didSomethingWithServerSentData) this.log.error('Can\'t interpret foundset linked prop. server update correctly: ' + JSON.stringify(serverSentData, undefined, 2));
+                else if (!didSomethingWithServerSentData && !serverSentData.forFoundset)
+                    // it is possible in form designer (not real client) that serverSentData.forFoundset is the only thing that is received
+                    // multiple times, due to multiple calls to toTemplateJSON on server; so allow that without logging an error
+                    this.log.error('Can\'t interpret foundset linked prop. server update correctly: ' + JSON.stringify(serverSentData, undefined, 2));
 
                 // restore smart watches and proxy notifiers; server side send changes are now applied
                 this.ignoreChanges = false; // this is normally already done by updateWholeViewportFunc(...) call above; but to be sure...

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ChangeType, IFoundset, LoggerService, ViewportChangeEvent, ViewportChangeListener } from '@servoy/public';
 import { ConverterService, ChangeAwareState, isChanged, instanceOfChangeAwareValue,
-            SubpropertyChangeByReferenceHandler } from '../../sablo/converter.service';
+            SubpropertyChangeByReferenceHandler, SoftProxyRevoker } from '../../sablo/converter.service';
 import { IType, ITypeFromServer, IPropertyContext, PushToServerEnum,
             IWebObjectSpecification, TypesRegistry } from '../../sablo/types_registry';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
@@ -203,7 +203,7 @@ export class ViewportService {
                 // remove any change notifiers for the rows that were deleted
                 for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
                     if (!simpleRowValue && this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes))
-                        internalState.rowLevelProxyRevokers[j].revoker(); // destroy proxy for deleted row
+                        internalState.rowLevelProxyRevokers[j].revoker(); // disable proxy notifications for deleted row
 
                     this.updateChangeAwareNotifiersForRow(j, viewPort, internalState, simpleRowValue, propertyContextCreator, true);
                 }
@@ -344,16 +344,17 @@ export class ViewportService {
                     propertyContextCreator: IPropertyContextCreatorForRow, simpleRowValue: boolean, fullRowUpdates: boolean, rowCreator?: () => any,
                     cellUpdatedFromServerListener?: CellUpdatedFromServerListener): any[] {
 
-        if (serverConversionInfo && rowsToBeConverted) {
+        if (rowsToBeConverted) { // if it's a simpleRowValue without serverConversionInfo we don't need to alter what we received at all
             rowsToBeConverted.forEach((rowData, index) => {
                 if (simpleRowValue) {
                     // without columns, so a foundset linked prop's rows
-                    const cellConversion = this.getCellTypeFromServer(serverConversionInfo, index); // this is the whole row in this case (only one cell)
+                    // foundsetLinked viewport; rowCreator should be undefined here so we ignore it
+                    const cellConversion = serverConversionInfo ? this.getCellTypeFromServer(serverConversionInfo, index) : undefined; // this is the whole row in this case (only one cell)
                     // defaultColumnTypes should be null here because it's not a component prop's viewport so no need to check for it
-                    const oldCellVal = rowsToBeConverted[index];
+                    const oldCellVal = oldViewportRows ? oldViewportRows[startIdxInViewportForRowsToBeConverted + index] : undefined;
 
                     rowsToBeConverted[index] = this.converterService.convertFromServerToClient(rowsToBeConverted[index],
-                            cellConversion, oldViewportRows ? oldViewportRows[startIdxInViewportForRowsToBeConverted + index] : undefined,
+                            cellConversion, oldCellVal,
                             undefined /*dynamic types are already handled via serverConversionInfo here*/, undefined,
                             this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined));
                     this.updateRowTypes(startIdxInViewportForRowsToBeConverted + index, internalState, cellConversion);
@@ -365,7 +366,7 @@ export class ViewportService {
                     const newRowData = rowCreator ? (rowCreator()) : rowData;
 
                     Object.keys(rowData).forEach(columnName => {
-                        let cellConversion: IType<any> = this.getCellTypeFromServer(serverConversionInfo, index, columnName);
+                        let cellConversion: IType<any> = serverConversionInfo ? this.getCellTypeFromServer(serverConversionInfo, index, columnName) : undefined;
                         if (!cellConversion && defaultColumnTypes) cellConversion = defaultColumnTypes.getPropertyType(columnName);
 
                         // ignore null or undefined type of cell; otherwise remember it in expanded
@@ -518,15 +519,13 @@ export class ViewportService {
             const cellPropertyContext = this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined);
             if (cellPropertyContext.getPushToServerCalculatedValue() > PushToServerEnum.ALLOW && !internalState.viewportLevelProxyRevokerFunc) {
                 // add the actual viewport proxy for listening to cell change-by-ref
-                const viewportProxyRevoke = Proxy.revocable(viewPort, this.getViewportLevelProxyHandler(viewPort, cellPropertyContext, internalState));
-                resultingViewport = viewportProxyRevoke.proxy;
-                internalState.viewportLevelProxyRevokerFunc = viewportProxyRevoke.revoke; // in the end, if we never call the revoke function we could even use here a boolean instead
+                resultingViewport = new Proxy(viewPort, this.getViewportLevelProxyHandler(viewPort, cellPropertyContext, internalState));
             }
         } else {
             // component viewport or foundset viewport; we don't need to proxy the viewport itself to detect change-by-ref for cells
             // but rather each row needs to be proxied
 
-            // if a full new viewport if being created, revoke the row proxies on the old viewport rows (if present); those are now obsolete - so that the old viewport
+            // if a full new viewport if being created, disable the row proxy notifications for the old viewport rows (if present); those are now obsolete - so that the old viewport
             // cannot trigger wrong SHALLOW change notifications for cells that are not changed in the new viewport
             if (internalState.rowLevelProxyRevokers) internalState.rowLevelProxyRevokers.forEach((rowLevelProxyRevoker) =>  rowLevelProxyRevoker.revoker());
             internalState.rowLevelProxyRevokers = [];
@@ -549,9 +548,7 @@ export class ViewportService {
         }
 
         // add the actual row proxy for listening to cell change-by-ref
-        const rowProxyRevoke = Proxy.revocable(viewPort[rowIndex], this.getRowLevelProxyHandler(viewPort, rowIndex, propertyContextCreator, internalState));
-        internalState.rowLevelProxyRevokers[rowIndex] = { original: viewPort[rowIndex], revoker: rowProxyRevoke.revoke };
-        return rowProxyRevoke.proxy;
+        return new Proxy(viewPort[rowIndex], this.getRowLevelProxyHandler(viewPort, rowIndex, propertyContextCreator, internalState));
     }
 
     private hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(atLeastPushToServer: PushToServerEnum, internalState: FoundsetViewportState, propertyContextCreator: IPropertyContextCreatorForRow,
@@ -589,6 +586,9 @@ export class ViewportService {
      * This implements the shallow PushToServer behavior for singleValue / foundset linked types.
      */
     private getViewportLevelProxyHandler<T extends any[]>(viewPort: T, cellPropertyContext: IPropertyContext, internalState: FoundsetViewportState) {
+        const softProxyRevoker = new SoftProxyRevoker(internalState.log);
+        internalState.viewportLevelProxyRevokerFunc = softProxyRevoker.getRevokeFunction(); // in the end, if we never call the revoke function we could even use here a boolean instead
+
         const changeHandlerForWholeViewportProxy: SubpropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler({
 
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => internalState.ignoreChanges,
@@ -602,7 +602,7 @@ export class ViewportService {
 
         return {
             set: (underlyingViewport: T, prop: any, v: any) => {
-                if (internalState.ignoreChanges) return Reflect.set(underlyingViewport, prop, v);
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(underlyingViewport, prop, v);
 
                 // eslint-disable-next-line radix
                 const i = Number.parseInt(prop);
@@ -617,7 +617,7 @@ export class ViewportService {
             },
 
             deleteProperty: (underlyingViewport: T, prop: any) => {
-                if (internalState.ignoreChanges) return Reflect.deleteProperty(underlyingViewport, prop);
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.deleteProperty(underlyingViewport, prop);
 
                 // eslint-disable-next-line radix
                 const i = Number.parseInt(prop);
@@ -636,6 +636,12 @@ export class ViewportService {
      * This implements the shallow PushToServer behavior for multiple cells on one row (foundset viewport/component viewport).
      */
     private getRowLevelProxyHandler(viewPort: any[], rowIndex: number, propertyContextCreator: IPropertyContextCreatorForRow, internalState: FoundsetViewportState) {
+        const softProxyRevoker = new SoftProxyRevoker(internalState.log);
+        internalState.rowLevelProxyRevokers[rowIndex] = {
+                original: viewPort[rowIndex],
+                revoker: softProxyRevoker.getRevokeFunction()
+        }; // in the end, if we never call the revoke function we could even use here a boolean instead
+
         const changeHandlerForRowProxy: SubpropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler({
 
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => internalState.ignoreChanges,
@@ -649,7 +655,7 @@ export class ViewportService {
 
         return {
             set: (row: any, prop: any, v: any) => {
-                if (internalState.ignoreChanges) return Reflect.set(row, prop, v);
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(row, prop, v);
 
                 if (instanceOfISomePropertiesInRowAreNotFoundsetLinked(internalState) && !internalState.isFoundsetLinkedProperty(prop))
                     return Reflect.set(row, prop, v);   // the viewport proxy doesn't want to intercept changes on shared part (that is done elsewhere)
@@ -662,7 +668,7 @@ export class ViewportService {
             },
 
             deleteProperty: (row: any, prop: any) => {
-                if (internalState.ignoreChanges) return Reflect.deleteProperty(row, prop);
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.deleteProperty(row, prop);
 
                 if (instanceOfISomePropertiesInRowAreNotFoundsetLinked(internalState) && !internalState.isFoundsetLinkedProperty(prop))
                     return Reflect.deleteProperty(row, prop);   // the viewport proxy doesn't want to intercept changes on shared part (that is done elsewhere)
@@ -689,8 +695,8 @@ export abstract class FoundsetViewportState extends ChangeAwareState {
 
     ignoreChanges = true;
 
-    viewportLevelProxyRevokerFunc?: () => void;
-    rowLevelProxyRevokers?: Array<{ original: any, revoker: () => void }>;
+    viewportLevelProxyRevokerFunc?: () => void; // this can be just a boolean I think; we never call it, we just check if it's there or not
+    rowLevelProxyRevokers?: Array<{ original: any; revoker: () => void }>;
     /** just a value that is cached here for component and foundset type viewports - so we don't need to search for it each time it's needed */
     hasPushToServerForNestedCellsInRowsGreaterOrEqualTo: Map<PushToServerEnum, boolean> = new Map();
 

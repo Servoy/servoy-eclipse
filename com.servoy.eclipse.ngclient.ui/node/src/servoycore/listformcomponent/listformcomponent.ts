@@ -522,7 +522,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
         const handlers = {};
-        const rowItem = new Cell(cm, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex);
+        const rowItem = new Cell(cm, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex, rowIndex);
 
         if (cm.mappedHandlers) {
             cm.mappedHandlers.forEach((value, key) => {
@@ -710,15 +710,16 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 }
 
 class Cell {
+
     api: ServoyApi;
     name: string;
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
     readonly model: any;
 
     constructor(public readonly state: IChildComponentPropertyValue,
-        public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number) {
+        public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number, relativeRowIndex: number) {
         this.name = state.name;
-        this.model = state.modelViewport[rowIndex];
+        this.model = state.modelViewport ? state.modelViewport[relativeRowIndex] : state.model; // modelViewport can be undefined in form editor/designer - that sends stuff as if it is a simple form component, not a list form component
     }
 
 }
@@ -732,7 +733,7 @@ class ListFormComponentServoyApi extends ServoyApi {
             formservice: FormService,
             servoyService: ServoyService,
             private fc: ListFormComponent,
-            isdesigner : boolean) {
+            isdesigner: boolean) {
         super(cell.state, formname, absolute, formservice, servoyService, isdesigner);
         this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
     }

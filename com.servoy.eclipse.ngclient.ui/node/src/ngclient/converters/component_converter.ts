@@ -110,7 +110,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
 
         const forFoundsetPropertyName = serverSentData.forFoundset;
 
-        const componentSpecification = typesRegistry.getComponentSpecification(this.type);
+        const componentSpecification = typesRegistry.getComponentSpecification(this.specName);
         this.__internalState = new ComponentTypeInternalState(this, oldClientValue?.__internalState, componentSpecification, converterService,
                 viewportService, sabloService, uiBlockerService, log, () => propertyContext.getProperty(forFoundsetPropertyName));
 

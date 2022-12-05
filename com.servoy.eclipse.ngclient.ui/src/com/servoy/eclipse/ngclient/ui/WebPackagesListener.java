@@ -130,7 +130,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				scheduled.incrementAndGet();
 				long time = System.currentTimeMillis();
-				writeConsole(console, "---- Starting Titanium NGClient source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
+				writeConsole(console,
+					"---- Starting Titanium NGClient solution/dependencies source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
 				Set<String> packageToInstall = new HashSet<>();
@@ -242,7 +243,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					sourceChanged = !distIndexFile.exists();
 					if (sourceChanged)
 					{
-						writeConsole(console, "- build will be triggered; no generated files...");
+						writeConsole(console, "- build will be triggered; no previously build-generated files detected...");
 					}
 					try
 					{
@@ -711,7 +712,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 					}
 				}
-				writeConsole(console, "Total time to check/install Titanium NG target folder: " + projectFolder + " is " +
+				else writeConsole(console, "Skipping install / build as no changes were found.");
+				writeConsole(console, "Total time to check/install Titanium NG solution/dependencies into target folder: " + projectFolder + " is " +
 					Math.round((System.currentTimeMillis() - time) / 1000) + " s.\n");
 				return Status.OK_STATUS;
 			}

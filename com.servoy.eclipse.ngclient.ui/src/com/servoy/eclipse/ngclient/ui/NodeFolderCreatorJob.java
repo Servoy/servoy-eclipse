@@ -123,7 +123,7 @@ public class NodeFolderCreatorJob extends Job
 				}
 				else
 				{
-					// this is a new soluton dir just make sure we copy it
+					// this is a new solution dir; just make sure we copy it
 					codeChanged = true;
 				}
 			}
@@ -237,7 +237,7 @@ public class NodeFolderCreatorJob extends Job
 						long lm = entry.openConnection().getLastModified();
 						if (lm > timestamp)
 						{
-							writeConsole(console, "- core source changed: " + entry.getFile() + " ; build will be triggered.");
+							writeConsole(console, "- core source changed: " + entry.getFile() + "; build will be triggered.");
 							higherFound = true;
 						}
 					}
@@ -292,7 +292,7 @@ public class NodeFolderCreatorJob extends Job
 	{
 		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.indexOf("/node_modules/") != -1 ||
 			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts") ||
-			filename.startsWith("/.gitignore");
+			filename.startsWith("/.gitignore") || filename.startsWith("/.angular/");
 	}
 
 
