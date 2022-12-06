@@ -224,7 +224,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				final boolean[] exportNonActiveSolutionsComponents = new boolean[] { true };
 				Display.getDefault().syncExec(() -> {
 					exportNonActiveSolutionsComponents[0] = MessageDialog.openQuestion(getShell(), "Non Active Solutions Components",
-						"Should we export all the components for non active solutions or do you want to manually select them?\nPress 'Yes' -> we automatically export all the components.");
+						"Should we export all the components for non active solutions or do you want to manually select them?\nPress 'Yes' -> we automatically export all the components which are available in the active solution.");
 				});
 
 				if (exportNonActiveSolutionsComponents[0])
@@ -605,7 +605,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			}
 
 		}
-		if (page.equals(servicesSelectionPage) && !exportNonActiveSolutionsDialog)
+		if (page.equals(componentsSelectionPage) && !exportNonActiveSolutionsDialog)
 		{
 			disableFinishButton = false;
 		}

@@ -93,7 +93,7 @@ public class BrowserDialog extends Dialog
 	 */
 	public BrowserDialog(Shell parentShell, String url, boolean modal, boolean showSkipNextTime)
 	{
-		super(parentShell, modal ? SWT.APPLICATION_MODAL : SWT.MODELESS);
+		super(parentShell, modal ? SWT.PRIMARY_MODAL : SWT.MODELESS);
 		this.url = url;
 		this.showSkipNextTime = showSkipNextTime;
 	}
