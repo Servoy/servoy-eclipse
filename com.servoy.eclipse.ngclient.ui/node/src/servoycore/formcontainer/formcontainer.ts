@@ -77,7 +77,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
     @Input() containedForm: any;
     @Input() relationName: any;
     @Input() waitForData: any;
-    @Input() height: number;
+    @Input() height: string;
     @Input() tabSeq: number;
     @Input() toolTipText: string;
     @Input() animation: string;
@@ -211,7 +211,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 
     getContainerStyle(name: string) {
         const styl = {  };
-        let minHeight = 0;
+        let minHeight;
         if (this.height) {
             minHeight = this.height;
         } else if (this.containedForm || name) {
@@ -221,7 +221,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
                 minHeight = formCache.size.height;
             }
         }
-        if (minHeight > 0) {
+        if (this.height && this.height.indexOf('%') >= 0){
+            styl['height'] = this.height;
+            if (this.getNativeElement()) this.renderer.setStyle(this.getNativeElement(), 'height', this.height);
+        } else if (minHeight) {
             styl['minHeight'] = minHeight + 'px';
         }
         return styl;
