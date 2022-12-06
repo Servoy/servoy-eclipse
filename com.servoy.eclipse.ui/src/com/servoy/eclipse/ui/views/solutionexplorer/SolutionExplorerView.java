@@ -1652,6 +1652,7 @@ public class SolutionExplorerView extends ViewPart
 	private IAction importComponentInSolution;
 	private IntroViewListener introViewListener;
 	private ISolutionImportListener solutionImportListener;
+	private ConfigureLessThemeAction configureLessTheme;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2687,6 +2688,7 @@ public class SolutionExplorerView extends ViewPart
 		if (convertFormsToCSSPosition.isEnabled()) manager.add(convertFormsToCSSPosition);
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
+		if (configureLessTheme.isEnabled()) manager.add(configureLessTheme);
 
 		if (copyTable.isEnabled()) manager.add(copyTable);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
@@ -3083,6 +3085,7 @@ public class SolutionExplorerView extends ViewPart
 		flagTenantColumn = new FlagTenantColumnAction(this);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
 		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
+		configureLessTheme = new ConfigureLessThemeAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
 		openCreateFormTutorialAction = new OpenCreateFormTutorialAction(this);
@@ -3472,6 +3475,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(convertToCSSPositionForm);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
+		addTreeSelectionChangedListener(configureLessTheme);
 
 		addTreeSelectionChangedListener(addComponentIcon);
 
