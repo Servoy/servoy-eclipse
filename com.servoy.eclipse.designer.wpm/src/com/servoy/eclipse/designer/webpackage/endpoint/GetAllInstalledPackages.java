@@ -441,7 +441,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									{
 										String servoyVersion = jsonObject.getString("servoy-version");
 										String[] minAndMax = servoyVersion.split(" - ");
-										if (minAndMax.length > 1 && SemVerComparator.compare(minAndMax[1], currentVersion) <= 0)
+										if (minAndMax.length > 1 && SemVerComparator.compare(minAndMax[1], currentVersion) < 0)
 										{
 											break;
 										}

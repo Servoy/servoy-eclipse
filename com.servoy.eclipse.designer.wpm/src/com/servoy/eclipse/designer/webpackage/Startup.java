@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.webpackage;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
@@ -42,6 +44,7 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
+import com.servoy.eclipse.designer.webpackage.endpoint.InstallWebPackageHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -113,10 +116,16 @@ public class Startup implements IStartup
 						TreeMap<String, Pair<String, String>> projectPackages = new TreeMap<String, Pair<String, String>>();
 						for (IPackageReader packageReader : packageReaders)
 						{
+							// skip package projects
+							if (packageReader instanceof BaseNGPackageManager.ContainerPackageReader)
+							{
+								continue;
+							}
 							// skip older versions
 							if (projectPackages.containsKey(packageReader.getPackageName()) &&
 								packageReader.getVersion().compareTo(projectPackages.get(packageReader.getPackageName()).getRight()) < 0)
 								continue;
+
 							projectPackages.put(packageReader.getPackageName(),
 								new Pair<String, String>(packageReader.getPackageDisplayname(), packageReader.getVersion()));
 						}
@@ -133,6 +142,8 @@ public class Startup implements IStartup
 							}
 						}
 
+						StringBuilder mustUpdatePackagesNames = new StringBuilder();
+						List<JSONObject> mustUpdatePackages = new ArrayList<JSONObject>();
 						StringBuilder updatedPackagesNames = new StringBuilder();
 						Set<String> projectPackagesNames = projectPackages.keySet();
 						List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
@@ -146,11 +157,35 @@ public class Startup implements IStartup
 									JSONArray releases = p.optJSONArray("releases");
 									if (releases != null && releases.length() > 0)
 									{
+										String projectVersion = projectPackages.get(name).getRight();
+
+										// check for must update packages
+										boolean mustUpdate = true;
+										for (int i = releases.length() - 1; i >= 0; i--)
+										{
+											JSONObject releasePackage = releases.optJSONObject(i);
+											if (releasePackage != null)
+											{
+												String version = releasePackage.optString("version");
+												if (version != null && (SemVerComparator.compare(version, projectVersion) == 0))
+												{
+													mustUpdate = false;
+													break;
+												}
+											}
+										}
+										if (mustUpdate)
+										{
+											mustUpdatePackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
+												.append(projectVersion).append('\n');
+											mustUpdatePackages.add(p);
+										}
+
+										// add notification for latest release
 										JSONObject latestRelease = releases.optJSONObject(0);
 										if (latestRelease != null)
 										{
 											String version = latestRelease.optString("version");
-											String projectVersion = projectPackages.get(name).getRight();
 											if (version != null && SemVerComparator.compare(version, projectVersion) > 0)
 											{
 												String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
@@ -165,6 +200,38 @@ public class Startup implements IStartup
 									}
 								}
 							}
+						}
+
+						// the following packages needs to be updated
+						if (mustUpdatePackages.size() > 0)
+						{
+							final boolean doMustUpdate[] = { false };
+							PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
+								ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+								if (servoyProject == activeProject)
+								{
+									doMustUpdate[0] = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "SPM",
+										"The following packages are not compatible with this Servoy version and must be updated.\n\n" +
+											mustUpdatePackagesNames +
+											"\nClick Yes to update them now.");
+								}
+							});
+							if (doMustUpdate[0])
+							{
+								// do update
+								for (JSONObject p : mustUpdatePackages)
+								{
+									try
+									{
+										InstallWebPackageHandler.importPackage(p, null);
+									}
+									catch (IOException ex)
+									{
+										ServoyLog.logError(ex);
+									}
+								}
+							}
+							return Status.OK_STATUS;
 						}
 
 						if (updatedPackagesNames.length() > 0)
