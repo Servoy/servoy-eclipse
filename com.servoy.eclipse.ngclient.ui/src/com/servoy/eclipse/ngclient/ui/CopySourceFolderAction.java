@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
@@ -65,6 +66,9 @@ public class CopySourceFolderAction extends Action
 				"Build is already running, wait for that one to finish");
 			return;
 		}
+		File solutionProjectFolder = Activator.getInstance().getSolutionProjectFolder();
+		if (solutionProjectFolder == null) return;
+
 		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
@@ -115,7 +119,7 @@ public class CopySourceFolderAction extends Action
 				}
 			};
 		}
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(solutionProjectFolder, false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
