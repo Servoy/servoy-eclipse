@@ -195,8 +195,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         this.selectionToDrag = [];
         for (let i = 0; i < selection.length; i++) {
             let node = this.editorContentService.getContentElement(selection[i]);
-            if (node === undefined) {
-                console.log('Node with uuid ' + selection[i] + ' was not found');
+            if (!node) {
                 continue;
             }
             node = this.getSvyWrapper(node);
@@ -271,7 +270,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         //compute minimum bottom - right (that is visible area + margins, coordinates relative to glasspane)
         //for coordinates, can't refer to the parts only since they can be all missing
         //al ghstcontainer coordinates are the same, so processing first
-        let container =  this.editorContentService.querySelector('.ghostcontainer');
+        const container =  this.editorContentService.querySelector('.ghostcontainer');
         this.containerOffset = container.offsetTop; //same for vertical / horizontal positioning
         this.minimumMargins.bottom = this.containerOffset + container.offsetHeight;
         this.minimumMargins.right = this.containerOffset + container.offsetWidth;
@@ -324,8 +323,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
         for (let index = 0; index < ghostsList.length - 1; index++) {
             const ghost = ghostsList.item(index);
-            let bottom = (ghost as HTMLElement).offsetTop + (ghost as HTMLElement).offsetHeight;
-            let right = (ghost as HTMLElement).offsetLeft + (ghost as HTMLElement).offsetWidth;
+            const bottom = (ghost as HTMLElement).offsetTop + (ghost as HTMLElement).offsetHeight;
+            const right = (ghost as HTMLElement).offsetLeft + (ghost as HTMLElement).offsetWidth;
             margins.bottom = Math.max(margins.bottom, bottom);
             margins.right = Math.max(margins.right, right);
         }
