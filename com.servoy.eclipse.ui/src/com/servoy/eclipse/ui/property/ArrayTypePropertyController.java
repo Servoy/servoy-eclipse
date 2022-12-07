@@ -174,7 +174,8 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
 				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
-				buttonWidget.setToolTipText("Adds a new array item below.");
+				buttonWidget.setToolTipText("Prepends a new array item.\n" +
+					"To add a new item after another item,\nclick the '+' button on a specific item.");
 				buttonWidget.setEnabled(true);
 
 				if (visible == isNotSet(value))
