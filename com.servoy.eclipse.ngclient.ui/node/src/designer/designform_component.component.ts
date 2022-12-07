@@ -1,6 +1,6 @@
 import {
-    Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, Directive, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
+    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, ViewEncapsulation
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache } from '../ngclient/types';
