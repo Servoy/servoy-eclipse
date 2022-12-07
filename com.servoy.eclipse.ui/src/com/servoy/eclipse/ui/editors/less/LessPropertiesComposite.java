@@ -253,7 +253,7 @@ public class LessPropertiesComposite extends Composite
 				setThemeVersion();
 			});
 			tiCheck = new Button(comp, SWT.CHECK);
-			tiCheck.setText("Titanum NG Theme");
+			tiCheck.setText("Titanium NG Theme");
 			tiCheck.setSelection(tiVersion);
 			tiCheck.addSelectionListener(new SelectionAdapter()
 			{
