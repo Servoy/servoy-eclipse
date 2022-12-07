@@ -91,6 +91,7 @@ import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.editors.less.PropertiesLessEditorInput;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
@@ -124,6 +125,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -689,6 +691,28 @@ public class EditorUtil
 		catch (PartInitException e)
 		{
 			Debug.log(e);
+		}
+	}
+
+	public static void openThemeEditor(final Solution project)
+	{
+		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+		try
+		{
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
+					true);
+			}
+		}
+		catch (PartInitException ex)
+		{
+			ServoyLog.logError(ex);
 		}
 	}
 
