@@ -66,7 +66,6 @@ public class Activator extends Plugin
 			File stateLocation = Activator.getInstance().getStateLocation().toFile();
 			this.mainTargetFolder = new File(stateLocation, NG2_FOLDER);
 		}
-		this.solutionProjectFolder = new File(mainTargetFolder, "solution");
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
 //		extractNode();
 	}

@@ -1190,7 +1190,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	public static void checkPackages(boolean ci)
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() == null || ignore.get())
+		if (ServoyModelFinder.getServoyModel().getActiveProject() == null || ignore.get() || Activator.getInstance().getSolutionProjectFolder() == null)
+		{
+			return;
+		}
+		Job[] jobs = Job.getJobManager().find(CopySourceFolderAction.JOB_FAMILY);
+		if (jobs.length > 0 && scheduled.get() != 2)
 		{
 			return;
 		}
