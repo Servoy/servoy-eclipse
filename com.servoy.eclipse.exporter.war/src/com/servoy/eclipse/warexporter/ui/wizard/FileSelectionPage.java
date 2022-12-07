@@ -22,6 +22,7 @@ import java.io.File;
 import javax.swing.filechooser.FileSystemView;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -629,10 +631,12 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		File f = new File(exportModel.getWarFileName());
 		if (f.exists())
 		{
-			MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-			msg.setText("File already exists");
-			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
-			if (msg.open() != SWT.YES)
+			final boolean[] overwrite = new boolean[] { true };
+			Display.getDefault().syncExec(() -> {
+				overwrite[0] = MessageDialog.openQuestion(getShell(), "File already exists",
+					"The file you selected already exists on disk. Do you want to overwrite it?");
+			});
+			if (!overwrite[0])
 			{
 				return null;
 			}
