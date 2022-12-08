@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -332,51 +332,67 @@ public class VisualFormEditorPartsPage extends Composite
 				GroupLayout.PREFERRED_SIZE).add(18, 18, 18).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 89, GroupLayout.PREFERRED_SIZE).add(1, 1, 1)));
 		groupLayout_3.setVerticalGroup(groupLayout_3.createParallelGroup(GroupLayout.TRAILING).add(groupLayout_3.createSequentialGroup().add(
 			groupLayout_3.createParallelGroup(GroupLayout.LEADING).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).add(
-				addGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)).addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+				addGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
+			.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		groupByButtonGroup.setLayout(groupLayout_3);
 		final GroupLayout groupLayout_2 = new GroupLayout(optionsGroup);
 		groupLayout_2.setHorizontalGroup(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(
 			groupLayout_2.createSequentialGroup().addContainerGap().add(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
 				groupByFieldsList, GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE).add(GroupLayout.LEADING, groupbyFieldsLabel).add(groupByButtonGroup,
-					GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(groupLayout_2.createSequentialGroup().add(20, 20, 20).add(
-							groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318,
-								Short.MAX_VALUE).add(pageBreakBeforeButton, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE).add(sinkPartIfButton,
-									GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE).add(allowPartToButton, GroupLayout.PREFERRED_SIZE, 318,
-										Short.MAX_VALUE).add(restartPageNumbersButton)).add(73, 73, 73)).add(
-											groupLayout_2.createSequentialGroup().add(38, 38, 38).add(discardRemainderOfButton).addContainerGap()))));
+					GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(groupLayout_2.createSequentialGroup().add(20, 20, 20).add(
+						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318,
+							Short.MAX_VALUE).add(pageBreakBeforeButton, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE).add(sinkPartIfButton,
+								GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+							.add(allowPartToButton, GroupLayout.PREFERRED_SIZE, 318,
+								Short.MAX_VALUE)
+							.add(restartPageNumbersButton))
+						.add(73, 73, 73)).add(
+							groupLayout_2.createSequentialGroup().add(38, 38, 38).add(discardRemainderOfButton).addContainerGap()))));
 		groupLayout_2.setVerticalGroup(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(
 			groupLayout_2.createSequentialGroup().addContainerGap().add(groupbyFieldsLabel).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout_2.createSequentialGroup().add(sinkPartIfButton).addPreferredGap(LayoutStyle.RELATED).add(pageBreakBeforeButton).addPreferredGap(
 						LayoutStyle.RELATED).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-							LayoutStyle.RELATED).add(restartPageNumbersButton).addPreferredGap(LayoutStyle.RELATED).add(allowPartToButton).add(3, 3, 3).add(
-								discardRemainderOfButton)).add(
-									groupLayout_2.createSequentialGroup().add(groupByFieldsList, GroupLayout.PREFERRED_SIZE, 118,
-										GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(groupByButtonGroup, GroupLayout.PREFERRED_SIZE, 31,
-											GroupLayout.PREFERRED_SIZE))).add(101, 101, 101)));
+							LayoutStyle.RELATED)
+						.add(restartPageNumbersButton).addPreferredGap(LayoutStyle.RELATED).add(allowPartToButton).add(3, 3, 3).add(
+							discardRemainderOfButton))
+					.add(
+						groupLayout_2.createSequentialGroup().add(groupByFieldsList, GroupLayout.PREFERRED_SIZE, 118,
+							GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(groupByButtonGroup, GroupLayout.PREFERRED_SIZE, 31,
+								GroupLayout.PREFERRED_SIZE)))
+				.add(101, 101, 101)));
 		optionsGroup.setLayout(groupLayout_2);
 		final GroupLayout groupLayout = new GroupLayout(partsGroup);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsList, GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE).add(
-				availablePartsLabel, GroupLayout.PREFERRED_SIZE, 106, GroupLayout.PREFERRED_SIZE)).add(
-					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(6, 6, 6).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(addPartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE).add(
-							removePartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(currentPartsList,
-								GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)).add(
-									groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(onCurrentFormLabel, GroupLayout.PREFERRED_SIZE,
-										177, GroupLayout.PREFERRED_SIZE))).add(6, 6, 6).add(
-											groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 78,
-												GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 78,
-													GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+				availablePartsLabel, GroupLayout.PREFERRED_SIZE, 106, GroupLayout.PREFERRED_SIZE))
+			.add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(6, 6, 6).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(addPartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE).add(
+						removePartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE))
+					.addPreferredGap(LayoutStyle.RELATED).add(currentPartsList,
+						GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE))
+					.add(
+						groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(onCurrentFormLabel, GroupLayout.PREFERRED_SIZE,
+							177, GroupLayout.PREFERRED_SIZE)))
+			.add(6, 6, 6).add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 78,
+					GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 78,
+						GroupLayout.PREFERRED_SIZE))
+			.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsLabel, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE).add(
-				onCurrentFormLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(currentPartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
-						availablePartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
-							groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
-								groupLayout.createSequentialGroup().add(addPartsButton).addPreferredGap(LayoutStyle.RELATED).add(
-									removePartsButton))).addContainerGap()));
+				onCurrentFormLabel))
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(currentPartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
+					availablePartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
+						groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton))
+					.add(
+						groupLayout.createSequentialGroup().add(addPartsButton).addPreferredGap(LayoutStyle.RELATED).add(
+							removePartsButton)))
+			.addContainerGap()));
 		partsGroup.setLayout(groupLayout);
 		container.setLayout(groupLayout_1);
 
@@ -812,21 +828,23 @@ public class VisualFormEditorPartsPage extends Composite
 
 	protected DataBindingContext initDataBindings()
 	{
-		IObservableValue currentPartSinkWhenLastObserveValue = PojoObservables.observeValue(currentPartBean, "sinkWhenLast");
-		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = PojoObservables.observeValue(currentPartBean, "allowBreakAcrossPageBounds");
-		IObservableValue pageBreakAfterTextTextObserveWidget = SWTObservables.observeText(pageBreakAfterText, SWT.Modify);
-		IObservableValue pageBreakBeforeButtonSelectionObserveWidget = SWTObservables.observeSelection(pageBreakBeforeButton);
-		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakAfterOccurrence");
-		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = PojoObservables.observeValue(currentPartBean, "discardRemainderAfterBreak");
-		IObservableValue currentPartRestartPageNumberObserveValue = PojoObservables.observeValue(currentPartBean, "restartPageNumber");
-		IObservableValue pageBreakAfterButtonSelectionObserveWidget = SWTObservables.observeSelection(pageBreakAfterButton);
-		IObservableValue allowPartToButtonSelectionObserveWidget = SWTObservables.observeSelection(allowPartToButton);
-		IObservableValue discardRemainderOfButtonSelectionObserveWidget = SWTObservables.observeSelection(discardRemainderOfButton);
-		IObservableValue sinkPartIfButtonSelectionObserveWidget = SWTObservables.observeSelection(sinkPartIfButton);
-		IObservableValue currentPartPageBreakBeforeObserveValue = PojoObservables.observeValue(currentPartBean, "pageBreakBefore");
-		IObservableValue currentPartPageBreakAfterEveryNthOccurenceObserveValue = PojoObservables.observeValue(currentPartBean,
-			"pageBreakAfterEveryNthOccurence");
-		IObservableValue restartPageNumbersButtonSelectionObserveWidget = SWTObservables.observeSelection(restartPageNumbersButton);
+		IObservableValue currentPartSinkWhenLastObserveValue = BeanProperties.value(PartBean.class, "sinkWhenLast").observe(currentPartBean);
+		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = BeanProperties.value("allowBreakAcrossPageBounds").observe(currentPartBean);
+		IObservableValue pageBreakAfterTextTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(pageBreakAfterText);
+		IObservableValue pageBreakBeforeButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(pageBreakBeforeButton);
+		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = BeanProperties.value(PartBean.class, "pageBreakAfterOccurrence")
+			.observe(currentPartBean);
+		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = BeanProperties.value(PartBean.class, "discardRemainderAfterBreak")
+			.observe(currentPartBean);
+		IObservableValue currentPartRestartPageNumberObserveValue = BeanProperties.value(PartBean.class, "restartPageNumber").observe(currentPartBean);
+		IObservableValue pageBreakAfterButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(pageBreakAfterButton);
+		IObservableValue allowPartToButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(allowPartToButton);
+		IObservableValue discardRemainderOfButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(discardRemainderOfButton);
+		IObservableValue sinkPartIfButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(sinkPartIfButton);
+		IObservableValue currentPartPageBreakBeforeObserveValue = BeanProperties.value(PartBean.class, "pageBreakBefore").observe(currentPartBean);
+		IObservableValue currentPartPageBreakAfterEveryNthOccurenceObserveValue = BeanProperties.value(PartBean.class, "pageBreakAfterEveryNthOccurence")
+			.observe(currentPartBean);
+		IObservableValue restartPageNumbersButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(restartPageNumbersButton);
 		//
 		//
 		DataBindingContext bindingContext = new DataBindingContext();

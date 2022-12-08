@@ -25,14 +25,14 @@ import java.io.IOException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -520,30 +520,30 @@ public class ColumnDetailsComposite extends Composite
 
 		ColumnInfoBean columnInfoBean = new ColumnInfoBean(column.getColumnInfo());
 
-		IObservableValue getCIDescriptionObserveValue = PojoObservables.observeValue(columnInfoBean, "description");
-		IObservableValue descriptionTextObserveWidget = SWTObservables.observeText(descriptionText, SWT.Modify);
+		IObservableValue getCIDescriptionObserveValue = BeanProperties.value("description").observe(columnInfoBean);
+		IObservableValue descriptionTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(descriptionText);
 
-		IObservableValue getCITitleObserveValue = PojoObservables.observeValue(columnInfoBean, "titleText");
-		IObservableValue titleTextObserveWidget = SWTObservables.observeText(titleText, SWT.Modify);
+		IObservableValue getCITitleObserveValue = BeanProperties.value("titleText").observe(columnInfoBean);
+		IObservableValue titleTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(titleText);
 
-		IObservableValue getCIDefaultFormatObserveValue = PojoObservables.observeValue(columnInfoBean, "defaultFormat");
-		IObservableValue defaultFormatTextObserveWidget = SWTObservables.observeText(defaultFormat, SWT.Modify);
+		IObservableValue getCIDefaultFormatObserveValue = BeanProperties.value("defaultFormat").observe(columnInfoBean);
+		IObservableValue defaultFormatTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(defaultFormat);
 
-		IObservableValue getCIForeignTypeObserveValue = PojoObservables.observeValue(columnInfoBean, "foreignType");
+		IObservableValue getCIForeignTypeObserveValue = BeanProperties.value("foreignType").observe(columnInfoBean);
 		IObservableValue foreignTypeTextObserveWidget = new TreeSelectObservableValue(foreignTypeTreeSelect, IDataSourceWrapper.class);
 
 		//TODO: put the hardcoded strings in a list;
-		IObservableValue getCISortIgnorecaseObservableValue = PojoObservables.observeValue(columnInfoBean, "sortIgnorecase");
-		IObservableValue getCISortingNullprecedenceObservableValue = PojoObservables.observeValue(columnInfoBean, "sortingNullprecedence");
-		IObservableValue getCIFlagsExcludedObserveValue = PojoObservables.observeValue(columnInfoBean, "excludedFlag");
-		IObservableValue getCIFlagsUuidObserveValue = PojoObservables.observeValue(columnInfoBean, "uuidFlag");
-		IObservableValue getCIFlagsTenantObserveValue = PojoObservables.observeValue(columnInfoBean, "tenantFlag");
+		IObservableValue getCISortIgnorecaseObservableValue = BeanProperties.value("sortIgnorecase").observe(columnInfoBean);
+		IObservableValue getCISortingNullprecedenceObservableValue = BeanProperties.value("sortingNullprecedence").observe(columnInfoBean);
+		IObservableValue getCIFlagsExcludedObserveValue = BeanProperties.value("excludedFlag").observe(columnInfoBean);
+		IObservableValue getCIFlagsUuidObserveValue = BeanProperties.value("uuidFlag").observe(columnInfoBean);
+		IObservableValue getCIFlagsTenantObserveValue = BeanProperties.value("tenantFlag").observe(columnInfoBean);
 
-		IObservableValue sortIgnoringcaseComboObserveWidget = SWTObservables.observeSelection(sortIgnoringcaseCombo);
-		IObservableValue sortingNullprecedenceComboObserveWidget = SWTObservables.observeSelection(sortNullprecedenceCombo);
-		IObservableValue uuidOtherFlagsTextObserveWidget = SWTObservables.observeSelection(uuidCheckBox);
-		IObservableValue excludedOtherFlagsTextObserveWidget = SWTObservables.observeSelection(excludedCheckBox);
-		IObservableValue tenantOtherFlagsTextObserveWidget = SWTObservables.observeSelection(tenantCheckBox);
+		IObservableValue sortIgnoringcaseComboObserveWidget = WidgetProperties.widgetSelection().observe(sortIgnoringcaseCombo);
+		IObservableValue sortingNullprecedenceComboObserveWidget = WidgetProperties.widgetSelection().observe(sortNullprecedenceCombo);
+		IObservableValue uuidOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(uuidCheckBox);
+		IObservableValue excludedOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(excludedCheckBox);
+		IObservableValue tenantOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(tenantCheckBox);
 
 		if (listener != null)
 		{

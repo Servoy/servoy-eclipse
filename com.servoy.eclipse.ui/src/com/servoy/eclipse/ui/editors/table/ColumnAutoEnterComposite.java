@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -34,7 +34,7 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -204,12 +204,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.SCOPE_METHODS)
 						{
 							Collection<Pair<String, IRootObject>> scopes = ColumnAutoEnterComposite.this.flattenedSolution.getScopes();
-							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-
 							SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
-							while (it.hasNext())
+							for (Pair<String, IRootObject> sc : scopes)
 							{
-								Pair<String, IRootObject> sc = it.next();
 								scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 							}
 							List<Object> children = new ArrayList<Object>();
@@ -284,10 +281,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							Pair<String, String> scopePair = ScopesUtils.getVariableScope(((EnumDataProvider)value).getDataProviderID());
 							Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 							ScopeWithContext scope = null;
-							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-							while (it.hasNext())
+							for (Pair<String, IRootObject> sc : scopes)
 							{
-								Pair<String, IRootObject> sc = it.next();
 								if (sc.getLeft().equals(scopePair.getLeft()))
 								{
 									scope = new ScopeWithContext(sc.getLeft(), sc.getRight());
@@ -509,9 +504,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		{
 			columnInfoBean.setColumnInfo(c.getColumnInfo());
 		}
-		IObservableValue getCICustomValueObserveValue = PojoObservables.observeValue(columnInfoBean, "defaultValue");
-		IObservableValue customValueTextObserveWidget = SWTObservables.observeText(customValueText, SWT.Modify);
-		IObservableValue getCILookUpValueObserveValue = PojoObservables.observeValue(columnInfoBean, "lookupValue");
+		IObservableValue getCICustomValueObserveValue = BeanProperties.value("defaultValue").observe(columnInfoBean);
+		IObservableValue customValueTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(customValueText);
+		IObservableValue getCILookUpValueObserveValue = BeanProperties.value("lookupValue").observe(columnInfoBean);
 		IObservableValue lookUpValueSelectObserveWidget = new TreeSelectObservableValue(lookupValueSelect, IDataProvider.class);
 
 		bindingContext = new DataBindingContext();
