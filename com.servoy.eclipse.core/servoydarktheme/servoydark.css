@@ -1,17 +1,13 @@
 #svybackground {
-	background-color: #2F2F2F;
+	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
 }
 
 #PerspectiveSwitcher {
-	eclipse-perspective-keyline-color: #2F2F2F #2F2F2F;
+	eclipse-perspective-keyline-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND' '#org-eclipse-ui-workbench-DARK_BACKGROUND';
 }
 
- * , #PerspectiveSpacer, ScalingHyperlink, .MToolBar, .MToolControl, .MTrimBar, Shell, Composite, Label, Button, Combo, Group {
-	background-color: #2F2F2F;
-}
-
-Text {
-	background: #2F2F2F;
+ExpandBar {
+	color: #330099;
 }
 
 Table, Tree {
@@ -27,9 +23,11 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 	text-trim: false;
 	text-wrap: true;
 	
-	cell-background-color: #2F2F2F;
+	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
+	cell-background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
 	color: #F8F8F8;
 	invert-icons: true;
+	painter-resolution: false;
 }
 
 .svyNatTable > .styleClass,  .svyNatTable > .headertext{
@@ -51,6 +49,7 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 }
 
 .svyNatTable > .COLUMN_0 {
+	painter-resolution: true;
 	padding-left: 5px;
 	text-align: left;
 }

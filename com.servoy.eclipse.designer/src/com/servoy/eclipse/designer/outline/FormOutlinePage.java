@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
@@ -42,10 +43,14 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
@@ -63,6 +68,7 @@ import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.labelproviders.DelegatingDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -364,6 +370,31 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			Menu contextMenu = menuManager.createContextMenu(getTreeViewer().getTree());
 			getTreeViewer().getTree().setMenu(contextMenu);
 			getSite().registerContextMenu(CONTEXT_MENU_ID, menuManager, this);
+		}
+
+		if (EclipseCSSThemeListener.isDarkThemeSelected())
+		{
+			getTreeViewer().getTree().addListener(SWT.EraseItem, event -> {
+
+				event.detail &= ~SWT.HOT;
+				if ((event.detail & SWT.SELECTED) == 0)
+					return; /// item not selected
+
+				TreeItem item = (TreeItem)event.item;
+				int clientWidth = item.getBounds().width;
+
+				GC gc = event.gc;
+				Color oldForeground = gc.getForeground();
+				Color oldBackground = gc.getBackground();
+
+				gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+				gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+				gc.fillRectangle(item.getBounds().x, event.y, clientWidth, event.height);
+
+				gc.setForeground(oldForeground);
+				gc.setBackground(oldBackground);
+				event.detail &= ~SWT.SELECTED;
+			});
 		}
 	}
 

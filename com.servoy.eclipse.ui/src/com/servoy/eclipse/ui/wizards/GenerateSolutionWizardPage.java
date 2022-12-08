@@ -183,14 +183,14 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			public void itemExpanded(ExpandEvent e)
 			{
 				collapsableItem.setText("Hide advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree.png"));
+				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree_.png"));
 				resizeDialog();
 			}
 
 			public void itemCollapsed(ExpandEvent e)
 			{
 				collapsableItem.setText("Show advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall.png"));
+				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall_.png"));
 				resizeDialog();
 			}
 		});

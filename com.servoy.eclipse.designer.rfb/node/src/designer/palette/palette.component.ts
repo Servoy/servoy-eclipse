@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { WindowRefService } from '@servoy/public';
 
 @Component({
     selector: 'designer-palette',
@@ -17,12 +18,13 @@ export class PaletteComponent implements ISupportAutoscroll{
 
     dragItem: DragItem = {};
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
-    
-    autoscrollAreasEnabled: boolean;
-    autoscrollElementClientBounds: Array<DOMRect>;
-    
-    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
-        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) {
+    draggedVariant: DraggedVariant = {};
+    isDraggedVariant = false;
+
+    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
+        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
+        private windowRef: WindowRefService) {
+  
         let layoutType: string;
         if (urlParser.isAbsoluteFormLayout())
             layoutType = 'Absolute-Layout';
@@ -66,6 +68,17 @@ export class PaletteComponent implements ISupportAutoscroll{
             }
             this.editorSession.getState().packages = packages;
         });
+        this.windowRef.nativeWindow.addEventListener('message', (event) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (event.data.id === 'onVariantMouseDown') {
+                //element
+                this.onVariantMouseDown(event.data.pageX , event.data.pageY, event.data.model);
+            }
+            if (event.data.id === 'onVariantMouseUp') {
+                //element
+                this.onVariantMouseUp();
+            }
+        });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
     }
@@ -78,8 +91,89 @@ export class PaletteComponent implements ISupportAutoscroll{
         component.isOpen = !component.isOpen;
     }
 
+    onPaletteScroll() {
+        this.editorSession.variantsScroll.emit({scrollPos: this.editorContentService.getPallete().scrollTop});
+    }
+
+    onVariantClick(event: MouseEvent, component: PaletteComp,packageName: string ) {   
+        this.draggedVariant.packageName = packageName;
+        this.draggedVariant.name = component.name;
+        this.draggedVariant.type = component.componentType;
+        let targetElement: HTMLElement = (event.target as HTMLElement).parentElement;
+        while (targetElement.nodeName.toUpperCase() != 'LI') {
+            if (!targetElement.parentElement || targetElement.parentElement.nodeName.toUpperCase() == 'UL')
+                break;
+            targetElement = targetElement.parentElement;
+        }
+        this.draggedVariant.element = targetElement.cloneNode(true) as Element;
+
+        if (this.draggedVariant.element.children) {//without this check I'll get a console exception of null children
+            Array.from(this.draggedVariant.element.children).forEach((child) => {
+                if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT' ) {
+                    this.draggedVariant.element.removeChild(child);
+                }
+            });
+        }
+       
+        let variantBtn = this.editorContentService.getDocument().elementFromPoint(event.pageX, event.pageY) as HTMLButtonElement;
+        if (variantBtn.type != 'button') { //clicked on the inner element
+            variantBtn = variantBtn.parentElement as HTMLButtonElement;
+        }
+        this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+    }
+
+    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: any }) {
+        this.isDraggedVariant = true;
+        this.draggedVariant.variant = model._variantName as string;
+        this.draggedVariant.size = model.size as { width: number; height: number };
+        this.draggedVariant.text = model.text as string;
+
+        this.dragItem.paletteItemBeingDragged = this.draggedVariant.element;
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', this.editorContentService.getTopPositionIframe(true) + pageX + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', this.editorContentService.getTopPositionIframe(true) + pageY + 'px');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'position', 'absolute');
+        this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'list-style-type', 'none');
+        this.editorContentService.getBodyElement().appendChild(this.dragItem.paletteItemBeingDragged);
+
+        this.dragItem.elementName = this.draggedVariant.name;
+        this.dragItem.packageName = this.draggedVariant.packageName;
+        this.dragItem.ghost = null;
+        this.dragItem.propertyName = null;
+        this.dragItem.propertyValue = null;
+        this.dragItem.topContainer = null;
+
+        this.dragItem.componentType = this.draggedVariant.type;
+        this.dragItem.layoutName = null;
+        this.dragItem.attributes = null;
+
+        this.canDrop = { dropAllowed: false };
+        this.editorSession.getState().dragging = true;
+        this.editorContentService.sendMessageToIframe({
+            id: 'createElement',
+            name: this.convertToJSName(this.dragItem.elementName),
+            model: model,
+            type: this.dragItem.componentType,
+            attributes: this.dragItem.attributes,
+            children: null
+        });
+    }
+
+    onVariantMouseUp() {
+        if (this.dragItem.paletteItemBeingDragged) {
+            this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
+            this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+            this.dragItem.paletteItemBeingDragged = null;
+            this.dragItem.contentItemBeingDragged = null;
+            this.draggedVariant.element = null;
+        }
+    }
+
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        event.stopPropagation();
+        if ( event.target && (event.target as Element).getAttribute('name') === 'variants' ) {
+            return; // it has a separate handler
+        }
+        event.stopPropagation(); 
+        this.editorSession.variantsTrigger.emit({show: false});
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
@@ -107,8 +201,9 @@ export class PaletteComponent implements ISupportAutoscroll{
         if (!ghost) {
             this.editorSession.setDragging(true);
             this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
-            this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
         }
+
+        this.editorSession.registerAutoscroll(this);
     }
 
     onMouseUp = (event: MouseEvent) => {
@@ -125,10 +220,22 @@ export class PaletteComponent implements ISupportAutoscroll{
 
             component.x = event.pageX;
             component.y = event.pageY;
+                    
+            if (this.isDraggedVariant) {
+                component.w = this.draggedVariant.size.width;
+                component.h = this.draggedVariant.size.height;
+                component.text = this.draggedVariant.text;
+                if (this.draggedVariant.variant) {
+                    component.variant = this.draggedVariant.variant;
+                }
+                this.isDraggedVariant = false;
+            }
 
             // do we also need to set size here ?
             component.x = component.x - this.editorContentService.getLeftPositionIframe();
             component.y = component.y - this.editorContentService.getTopPositionIframe();
+
+            
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -140,13 +247,12 @@ export class PaletteComponent implements ISupportAutoscroll{
                     if (this.canDrop.dropTarget) {
                         component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                     }
-
                     if (this.canDrop.beforeChild) {
                         component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
                     }
-                }
-                else if (!this.dragItem.ghost){
+                } else if (!this.dragItem.ghost){
                     this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
+                    this.editorSession.unregisterAutoscroll(this);
                     return;
                 }
             }
@@ -159,6 +265,7 @@ export class PaletteComponent implements ISupportAutoscroll{
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
                         const types = node.getAttribute('svy-types');
                         if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
+                            this.editorSession.unregisterAutoscroll(this);
                             return node;
                         }
                     }
@@ -177,11 +284,13 @@ export class PaletteComponent implements ISupportAutoscroll{
             }
 
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
-             
-             //disable mouse events on the autoscroll
-            this.editorSession.getState().pointerEvents = 'none'; 
-            this.autoscrollAreasEnabled = false;
-            this.editorSession.stopAutoscroll();
+        }
+        this.editorSession.unregisterAutoscroll(this);
+
+        if (this.draggedVariant.element) {
+            this.draggedVariant.element = null;
+            this.draggedVariant.variant = null;
+            this.editorSession.variantsTrigger.emit({show: false});
         }
     }
 
@@ -224,7 +333,6 @@ export class PaletteComponent implements ISupportAutoscroll{
                     {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
                     }
-
                 }
             }
             else {
@@ -257,12 +365,6 @@ export class PaletteComponent implements ISupportAutoscroll{
                     }
                 }
             }
-             // enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
-            if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
-                this.autoscrollAreasEnabled = true;
-                this.editorSession.startAutoscroll(this);
-            }
-
         }
     }
 
@@ -284,8 +386,13 @@ export class PaletteComponent implements ISupportAutoscroll{
         return this.editorSession.getState().packages;
     }
     
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
-        return null;
+    updateLocationCallback(changeX: number, changeY: number) {
+        this.editorContentService.getContentArea().scrollTop += changeY;
+        this.editorContentService.getContentArea().scrollLeft += changeX;
+    }
+
+    getAutoscrollLockId(): string {
+        return 'palette';
     }
 }
 
@@ -330,4 +437,17 @@ export class DragItem {
     topContainer?: boolean = false;
     layoutName?: string;
     attributes?: { [property: string]: string };
+}
+
+export class DraggedVariant {
+    packageName?: string;
+    name?: string;
+    type?: string;
+    text?: string;
+    variant?: string;
+    element?: Element;
+    size?: {
+        width: number,
+        height: number
+    }
 }

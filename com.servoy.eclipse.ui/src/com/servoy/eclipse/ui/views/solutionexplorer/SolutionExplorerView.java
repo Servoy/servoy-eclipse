@@ -415,6 +415,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private EditVariableAction editVariableAction;
 
+	private EditComponentVariantsAction editComponentVariantsAction;
+
 	private DebugMethodAction debugMethodAction;
 
 	private ContextAction newActionInListSecondary;
@@ -1651,6 +1653,7 @@ public class SolutionExplorerView extends ViewPart
 	private IAction importComponentInSolution;
 	private IntroViewListener introViewListener;
 	private ISolutionImportListener solutionImportListener;
+	private ConfigureLessThemeAction configureLessTheme;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2686,6 +2689,7 @@ public class SolutionExplorerView extends ViewPart
 		if (convertFormsToCSSPosition.isEnabled()) manager.add(convertFormsToCSSPosition);
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
+		if (configureLessTheme.isEnabled()) manager.add(configureLessTheme);
 
 		if (copyTable.isEnabled()) manager.add(copyTable);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
@@ -2856,6 +2860,7 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(submenu);
 		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
+		if (editComponentVariantsAction.isEnabled()) manager.add(editComponentVariantsAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		if (searchListAction.isEnabled()) manager.add(searchListAction);
@@ -3081,6 +3086,7 @@ public class SolutionExplorerView extends ViewPart
 		flagTenantColumn = new FlagTenantColumnAction(this);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
 		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
+		configureLessTheme = new ConfigureLessThemeAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
 		openCreateFormTutorialAction = new OpenCreateFormTutorialAction(this);
@@ -3322,6 +3328,7 @@ public class SolutionExplorerView extends ViewPart
 
 		copyTable = new CopyTableAction(shell);
 		editVariableAction = new EditVariableAction(this);
+		editComponentVariantsAction = new EditComponentVariantsAction(this);
 
 		debugMethodAction = new DebugMethodAction(this);
 
@@ -3411,6 +3418,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(openAction);
 		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
+		addListSelectionChangedListener(editComponentVariantsAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
 		addListSelectionChangedListener(renameMediaAction);
@@ -3468,6 +3476,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(convertToCSSPositionForm);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
+		addTreeSelectionChangedListener(configureLessTheme);
 
 		addTreeSelectionChangedListener(addComponentIcon);
 

@@ -339,12 +339,7 @@ export class NGUtilsService {
             }
         });
     }
-
-    private beforeUnload(e: any) {
-        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
-        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
-    };
-
+    
     /**
      * Move the scrollbar to the position of the given anchorSelector.
      * The target anchorSelector can be a Servoy Form, Layout Container or element in a responsive form or any element in a form.
@@ -367,6 +362,48 @@ export class NGUtilsService {
             console.log( 'cannot find anchor element ' + anchorSelector );
         }
     }
+
+    /**
+	 * Utility method for manipulating any DOM element's style classes.
+	 * It will add the given class to the DOM element identified via the jQuery selector param.
+	 * 
+	 * NOTE: This operation is not persistent; it executes client-side only; so for example when the browser is reloaded (F5/Ctrl+F5) by the user classes added by this method are lost.
+	 * If you need this to be persistent - you can do that directly via server side scripting elements.myelement.addStyleClass(...) if the DOM element is a Servoy component. If the DOM element is
+	 * not a component then you probably lack something in terms of UI and you could build what you need as a new custom component or use another approach/set of components when building the UI.
+	 * 
+	 * @param cssSelector {string} the css selector string that is used to find the DOM element.
+	 * @param className {string} the class to be added to the element.
+	 */
+	public addClassToDOMElement(cssSelector : string, className : string) {
+		const nodeList = this.document.querySelectorAll(cssSelector);
+		for (let i = 0; i < nodeList.length; i++) {
+			nodeList[i].classList.add(className);
+		}
+	}
+
+	/**
+	 * Utility method for manipulating any DOM element's style classes.
+	 * It will remove the given class from the DOM element identified via the jQuery selector param.
+	 * 
+	 * NOTE: This operation is not persistent; it executes client-side only; so for example when the browser is reloaded (F5/Ctrl+F5) by the user classes removed by this method are lost;
+	 * If you need this to be persistent - you can do that directly via server side scripting elements.myelement.removeStyleClass(...) if the DOM element is a Servoy component. If the DOM element it is
+	 * not a component then you probably lack something in terms of UI and you could build what you need as a new custom component or use another approach/set of components when building the UI.
+	 * 
+	 * @param cssSelector {string} the css selector string that is used to find the DOM element.
+	 * @param className {string} the class to be added to the element.
+	 */
+	public removeClassFromDOMElement(cssSelector : string, className : string) {
+		const nodeList = this.document.querySelectorAll(cssSelector);
+		for (let i = 0; i < nodeList.length; i++) {
+			nodeList[i].classList.remove(className);
+		}
+	}
+
+    private beforeUnload(e: any) {
+        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
+        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
+    };
+
 }
 
 class Tag {

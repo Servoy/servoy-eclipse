@@ -228,6 +228,7 @@ import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -1510,7 +1511,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						resultingPropertyDescriptor = retVal;
 					}
 					else if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE ||
-						propertyType == LabelForPropertyType.INSTANCE)
+						propertyType == LabelForPropertyType.INSTANCE || propertyType == VariantPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
 							new ICellEditorFactory()

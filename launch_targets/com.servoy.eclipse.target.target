@@ -22,9 +22,9 @@
             <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2021.12/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202110110926"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202110110937"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2022.12/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202211211524"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202211230748"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
@@ -55,7 +55,7 @@
             <unit id="org.eclipse.sdk.ide" version="4.25.0.I20220831-1800"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/2022.12/"/>
+            <repository location="https://developer.servoy.com/p2_repository/ship_plugins/antlr/"/>
             <unit id="com.github.ua-parser.uap-java" version="1.5.3.SERVOY"/>
             <unit id="com.sun.activation.jakarta.activation" version="1.2.2"/>
             <unit id="com.sun.mail.jakarta.mail" version="1.6.7"/>
@@ -66,6 +66,7 @@
             <unit id="javax.transaction" version="1.1.0"/>
             <unit id="javax.websocket" version="1.1.0"/>
             <unit id="net.bytebuddy.byte-buddy" version="1.12.18"/>
+            <unit id="org.antlr.antlr4-runtime" version="4.11.1"/>
             <unit id="org.apache.aries.spifly.dynamic.bundle" version="1.3.5"/>
             <unit id="org.apache.aries.util" version="1.1.3"/>
             <unit id="org.apache.commons.commons-collections4" version="4.4.0"/>

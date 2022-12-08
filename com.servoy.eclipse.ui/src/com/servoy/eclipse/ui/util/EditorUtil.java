@@ -675,6 +675,23 @@ public class EditorUtil
 		}
 	}
 
+	public static void openComponentVariantsEditor(String deepLinkArgs)
+	{
+		try
+		{
+			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
+			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
+			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
+				.getFile(new Path("medias/variants.less"));
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
+		}
+		catch (PartInitException e)
+		{
+			Debug.log(e);
+		}
+	}
+
 	public static void closeEditor(Object object)
 	{
 		for (IWorkbenchPage page : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages())

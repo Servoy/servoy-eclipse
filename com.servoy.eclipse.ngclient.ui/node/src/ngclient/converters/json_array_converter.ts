@@ -227,8 +227,8 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.ignoreChanges = true;
                     internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else if (newClientData !== oldClientData) {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
@@ -238,8 +238,8 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.ignoreChanges = true;
                     internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else {
                     newClientDataInited = newClientData; // it was already initialized in the past (not a new client side created value)
                     internalState = newClientData.getInternalState();

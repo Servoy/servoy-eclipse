@@ -207,7 +207,6 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  */
 public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
-
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
@@ -406,7 +405,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (IOException e)
 									{
-										ServoyLog.logError("error saving chagnes from debugger", e);
+										ServoyLog.logError("error saving changes from debugger", e);
 									}
 									return null;
 								}
@@ -435,7 +434,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (Exception e)
 									{
-										e.printStackTrace();
+										ServoyLog.logError("error parsing script method " + method.getName(), e);
 									}
 									return null;
 								}
@@ -3933,17 +3932,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						while (it.hasNext())
 						{
 							String path = it.next();
-							IResource resource = null;
-							try
-							{
-								resource = getWorkspace().getRoot().getFile(new Path(path));
-								resources.add(resource);
-							}
-							catch (Exception ex)
-							{
-								ServoyLog.logError(ex);
-							}
-							if (resource == null || !resource.exists())
+							IResource resource = getWorkspace().getRoot().getFile(new Path(path));
+							resources.add(resource);
+							if (!resource.exists())
 							{
 								it.remove();
 							}
@@ -4132,5 +4123,4 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		solutionImportListeners.remove(l);
 	}
-
 }

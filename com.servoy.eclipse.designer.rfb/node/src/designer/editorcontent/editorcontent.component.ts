@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -24,10 +24,14 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
 
     clientURL: SafeResourceUrl;
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
-
+    
+    @Input() styleVariantPreview: boolean
+    @Output() previewReady = new EventEmitter<{previewReady: boolean}>();
+    
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         protected designSize: DesignSizeService, private editorContentService: EditorContentService, private windowRef: WindowRefService,
         private editorSession: EditorSessionService) {
+
         designSize.setEditor(this);
         this.editorContentService.addContentMessageListener(this);
     }
@@ -68,7 +72,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             this.adjustFromContentSize();
         }
         if (id === 'buildTitaniumClient') {
-			this.editorSession.buildTiNG();
+            this.editorSession.buildTiNG();
+            window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
 		}
     }
 
@@ -93,7 +98,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     
     @HostListener('document:click', ['$event'])
     onClick(event: MouseEvent) {
-		window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+		if (event.offsetX > 50 && event.offsetY > 50) {
+			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+		}
     }
 
     adjustFromContentSize() {

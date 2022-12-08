@@ -375,6 +375,10 @@ public class CreateComponentHandler implements IServerService
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					CSSPositionUtils.setLocation(gc, x, y);
 					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-label".equals(name))
@@ -383,6 +387,10 @@ public class CreateComponentHandler implements IServerService
 					gc.setText(args.has("text") ? args.getString("text") : "label");
 					CSSPositionUtils.setLocation(gc, x, y);
 					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-combobox".equals(name))
@@ -576,7 +584,12 @@ public class CreateComponentHandler implements IServerService
 							Portal portal = (Portal)parentSupportingElements;
 							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
 								IRepository.WEBCOMPONENTS);
-							webComponent.setProperty("text", compName);
+							webComponent.setProperty("text", compName); //default
+							if (args.has("text"))
+							{
+								webComponent.setProperty("text", args.getString("text"));
+							}
+
 							webComponent.setTypeName(name);
 							portal.addChild(webComponent);
 						}
@@ -588,7 +601,7 @@ public class CreateComponentHandler implements IServerService
 						CSSPositionUtils.setLocation(webComponent, x, y);
 						CSSPositionUtils.setSize(webComponent, w, h);
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-						if (description != null && description.getDefaultValue() instanceof JSONObject)
+						if ((w == 0 && h == 0) && description != null && description.getDefaultValue() instanceof JSONObject)
 						{
 							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
 								((JSONObject)description.getDefaultValue()).optInt("height", 80));

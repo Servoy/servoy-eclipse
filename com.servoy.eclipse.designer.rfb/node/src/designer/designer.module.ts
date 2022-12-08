@@ -1,3 +1,4 @@
+import { AutoscrollComponent } from './autoscroll/autoscroll.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -34,6 +35,8 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
 import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
+import { VariantsContentComponent } from './variantscontent/variantscontent.component'
+import { VariantsPreviewComponent } from './variantspreview/variantspreview.component'
 
 @NgModule({
   declarations: [
@@ -61,7 +64,10 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
     PositionMenuDirective,
     DragselectionComponent,
     DragselectionResponsiveComponent,
-    InlineEditComponent
+    InlineEditComponent,
+    VariantsContentComponent,
+    VariantsPreviewComponent,
+    AutoscrollComponent
   ],
   imports: [
     BrowserModule,

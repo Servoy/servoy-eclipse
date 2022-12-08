@@ -1,4 +1,4 @@
-<div #element class="ghostcontainer {{container.class}}" *ngFor="let container of ghosts"
+<div #element class="ghostcontainer {{container.class}}" *ngFor="let container of ghostContainers"
      [ngStyle]="container.style">
     <div class="ghostContainerPropName" *ngIf="container.propertyName">property '{{container.propertyName}}'</div>
     <designer-resizeeditorwidth *ngIf="!container.propertyName"></designer-resizeeditorwidth>

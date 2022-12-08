@@ -9,7 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'dragselection-responsive',
     templateUrl: './dragselection-responsive.component.html'
 })
-export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll {
+export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll { // ISupportAutoscroll
     allowedChildren: any;
     dragNode: HTMLElement;
     dragStartEvent: MouseEvent;
@@ -17,11 +17,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     dragging: boolean;
     highlightEl: HTMLElement;
     dropHighlight: string;
-    autoscrollElementClientBounds: Array<DOMRect>;
-    autoscrollAreasEnabled: any;
     canDrop: { dropAllowed: boolean; dropTarget?: Element; beforeChild?: Element; append?: boolean; };
     dragItem: DragItem = {};
     dragCopy: boolean;
+    currentPoint: {x: number, y: number};
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, protected urlParser: URLParserService) { }
 
@@ -89,6 +88,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             this.dragItem.layoutName = this.dragNode.getAttribute("svy-layoutname");
             this.dragItem.componentType = this.dragItem.layoutName ? "layout" : "component";
         }
+
+        this.currentPoint = this.adjustPoint(event.pageX, event.pageY);
+        this.editorSession.registerAutoscroll(this);
     }
 
     onMouseMove(event: MouseEvent) {
@@ -98,7 +100,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                 this.editorSession.setDragging( true );
                 this.dragCopy = event.ctrlKey || event.metaKey;
                 this.editorContentService.sendMessageToIframe({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute("svy-id"), dragCopy: this.dragCopy });
-                this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
                 if (this.dropHighlight !== this.dragItem.layoutName) {
                     const elements = this.dragNode.querySelectorAll('[svy-id]');
                     const dropHighlightIgnoredIds = Array.from(elements).map((element) => {
@@ -113,16 +114,12 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             } else return;
         }
 
-        if (this.autoscrollElementClientBounds && !this.autoscrollAreasEnabled && !this.designerUtilsService.isInsideAutoscrollElementClientBounds(this.autoscrollElementClientBounds, event.clientX, event.clientY)) {
-            this.autoscrollAreasEnabled = true;
-            this.editorSession.startAutoscroll(this);
-        }
-
         if (!this.dragItem.contentItemBeingDragged) {
             this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
         }
         if (this.dragItem.contentItemBeingDragged) {
             const point = this.adjustPoint(event.pageX + 1, event.pageY + 1);
+            this.currentPoint = point;
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', point.y + 'px');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', point.x + 'px');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'position', 'absolute');
@@ -162,7 +159,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseUp(event: MouseEvent) {
         if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
-
             const obj = (event.ctrlKey || event.metaKey) ? [] : {};
 
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
@@ -195,11 +191,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             }
         }
 
-        //disable mouse events on the autoscroll
-        this.editorSession.getState().pointerEvents = 'none';
-        this.autoscrollAreasEnabled = false;
-        this.editorSession.stopAutoscroll();
-
         this.dragStartEvent = null;
         this.editorSession.setDragging( false );
         this.editorContentService.getGlassPane().style.cursor = "default";
@@ -215,6 +206,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         });
         this.dragItem = {};
         this.dragCopy = false;
+        this.editorSession.unregisterAutoscroll(this);
     }
 
     private findAncestor(el: HTMLElement, cls: string): HTMLElement {
@@ -234,8 +226,25 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
         return canDrop;
     }
+
+    getAutoscrollLockId(): string {
+        return 'drag-selection-responsive';
+    }
     
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void {
-        return null;
+    updateLocationCallback(changeX: number, changeY: number) {
+        if (this.dragItem.contentItemBeingDragged) {
+            this.currentPoint.x += changeX;
+            this.currentPoint.y += changeY; 
+            const point = this.adjustPoint(this.currentPoint.x, this.currentPoint.y);
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', point.y + 'px');
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', point.x + 'px');
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'position', 'absolute');
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'display', 'block');
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'z-index', 4);
+            this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'transition', 'opacity .5s ease-in-out 0');
+
+            this.editorContentService.getContentArea().scrollTop += changeY;
+            this.editorContentService.getContentArea().scrollLeft += changeX;
+        }
     }
 }

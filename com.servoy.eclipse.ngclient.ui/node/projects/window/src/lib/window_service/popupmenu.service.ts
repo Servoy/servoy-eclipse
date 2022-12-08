@@ -21,9 +21,9 @@ export class PopupMenuService {
             if (handler) {
                 handler();
             }
-            this.doc.removeEventListener('click', listener);
+            this.doc.removeEventListener('mouseup', listener);
         };
-        this.doc.addEventListener('click', listener);
+        this.doc.addEventListener('mouseup', listener);
     }
 
     public getMenuRect(popup: Popup) {
@@ -88,8 +88,8 @@ export class PopupMenuService {
             if (item) {
                 if (item.enabled === false) link.classList.add('disabled');
                 if (item.callback) {
-                    li.addEventListener('click', () => {
-                        this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
+                    li.addEventListener('mouseup', (event) => {
+                        if (event.button == 0) this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
                 }
                 let faicon = item.fa_icon;

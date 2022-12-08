@@ -138,5 +138,4 @@ public interface IServoyModel
 	void addResourceChangeListener(IResourceChangeListener resourceChangeListener, int eventMask);
 
 	void removeResourceChangeListener(IResourceChangeListener resourceChangeListener);
-
 }

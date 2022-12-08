@@ -1,4 +1,4 @@
-<div id="palette" class="palette">
+<div id="palette" class="palette" (scroll)="onPaletteScroll()">	
     <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
     <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
     <ngb-accordion [activeIds]="activeIds" [type]="'light'">
@@ -6,13 +6,14 @@
          <ng-template ngbPanelTitle>
            {{package.packageDisplayname}}
         </ng-template>
-         <ng-template ngbPanelContent>
+         <ng-template ngbPanelContent>         
             <ul>
                 <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                     <img draggable="false" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
                     <ul>
-                    <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
+                    	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
                     </ul>
                     <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
                         <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><img draggable="false" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>

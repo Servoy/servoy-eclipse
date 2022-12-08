@@ -44,9 +44,10 @@ public class SemVerComparator
 			Arrays.fill(v2Split, v2SplitLength, maxVersionTags, "0");
 		}
 
+		int cv = 0;
 		for (int i = 0; i < v1Split.length; i++)
 		{
-			int cv = 0;
+
 			try
 			{
 				int v1Nr = Integer.parseInt(v1Split[i]);
@@ -57,10 +58,9 @@ public class SemVerComparator
 			{
 				cv = v1Split[i].compareTo(v2Split[i]);
 			}
-			if (cv == 0) continue;
-			return cv;
+			if (cv != 0) break;
 		}
 
-		return v1.compareTo(v2);
+		return cv;
 	}
 }

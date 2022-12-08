@@ -219,9 +219,7 @@ public class DesignerFilter implements Filter
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
-							// hard coded that in absolute layout we get the servoycore (responsive container) layout
-							if ((!"servoycore".equals(key) && !"Absolute-Layout".equals(layoutType)) ||
-								("servoycore".equals(key) && "Absolute-Layout".equals(layoutType)))
+							if (!"Absolute-Layout".equals(layoutType))
 							{
 								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
@@ -333,29 +331,17 @@ public class DesignerFilter implements Filter
 								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
-								if ("servoycore-responsivecontainer".equals(spec.getName()))
+								PropertyDescription pd = spec.getProperty("size");
+								if (pd != null && pd.getDefaultValue() != null)
 								{
-									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("width", Integer.valueOf(200));
-									size.put("height", Integer.valueOf(200));
-									model.put("size", size);
-									model.put("classes", new String[] { "highlight_element", "svy-responsivecontainer" });
+									model.put("size", pd.getDefaultValue());
 								}
 								else
 								{
-									PropertyDescription pd = spec.getProperty("size");
-									if (pd != null && pd.getDefaultValue() != null)
-									{
-										model.put("size", pd.getDefaultValue());
-									}
-									else
-									{
-										HashMap<String, Number> size = new HashMap<String, Number>();
-										size.put("width", Integer.valueOf(300));
-										model.put("size", size);
-									}
+									HashMap<String, Number> size = new HashMap<String, Number>();
+									size.put("width", Integer.valueOf(300));
+									model.put("size", size);
 								}
-								// special code to make the drag from palette have the nice clases so it is drawn what you drop
 								layoutJson.put("model", new JSONObject(model));
 								if (spec.getIcon() != null)
 								{
@@ -386,6 +372,14 @@ public class DesignerFilter implements Filter
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
+									if (spec.getStyleVariantCategory() != null)
+									{
+										JSONArray variantsForCategory = fl.getVariantsHandler().getVariantsForCategory(spec.getStyleVariantCategory());
+										if (variantsForCategory.length() > 0)
+										{
+											componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());
+										}
+									}
 
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())

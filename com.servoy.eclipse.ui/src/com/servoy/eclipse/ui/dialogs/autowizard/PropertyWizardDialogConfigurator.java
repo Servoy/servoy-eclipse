@@ -131,7 +131,7 @@ public class PropertyWizardDialogConfigurator
 	{
 		dialog = new PropertyWizardDialog(shell, persistContext, flattenedSolution,
 			table,
-			EditorUtil.getDialogSettings("PropertyWizard"), mainProperty, this);
+			EditorUtil.getDialogSettings("PropertyWizard" + mainProperty.getName()), mainProperty, this);
 		return dialog.open();
 	}
 

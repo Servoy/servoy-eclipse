@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -21,16 +21,20 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
-    private allowedChildren = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
+    private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
+    private lockAutoscrollId = '';
+    
+    variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
+    variantsScroll = new EventEmitter<{scrollPos: number}>();
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
-        this.autoscrollBehavior = new BehaviorSubject(null);
+        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null);
     }
 
     public getService(name: string) {
@@ -42,21 +46,11 @@ export class EditorSessionService implements ServiceProvider {
         return null;
     }
     connect() {
-        //if (deferred) return deferred.promise;
-        //deferred = $q.defer();
-        // var promise = deferred.promise;
-        // if (!connected) testWebsocket();
-        // else {
-        //    deferred.resolve();
-        //     deferred = null;
-        // }
-        // return promise;
-
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
-                this.allowedChildren = JSON.parse(result);
+                this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
                 this.editorContentService.executeOnlyAfterInit(() => {
                     this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
                 });
@@ -95,6 +89,18 @@ export class EditorSessionService implements ServiceProvider {
 
     createComponent(component) {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
+    }
+
+    addStyleVariantFor(variantCategory: string) {
+        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true);
+    }
+
+    editStyleVariantsFor(variantCategory: string) {
+        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true);
+    }
+
+    getVariantsForCategory<T>(variantCategory: string) {
+        return this.wsSession.callService<T>('formeditor', 'getVariantsForCategory', { variantCategory: variantCategory }, false);
     }
 
     getGhostComponents<T>() {
@@ -256,8 +262,8 @@ export class EditorSessionService implements ServiceProvider {
     }
     
     buildTiNG() {
-		void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
-	}
+        void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
+    }
 
     consoleLog(message: string) {//log message to eclipse console
         void this.wsSession.callService('formeditor', 'consoleLog', {message: message}, true);
@@ -424,7 +430,9 @@ export class EditorSessionService implements ServiceProvider {
         this.bIsDirty = dirty;
     }
 
-    startAutoscroll(scrollComponent: ISupportAutoscroll) {
+    registerAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
+        this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
         if (this.autoscrollBehavior == null) {
             this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
         } else {
@@ -432,8 +440,11 @@ export class EditorSessionService implements ServiceProvider {
         }
     }
 
-    stopAutoscroll() {
-        this.autoscrollBehavior.next(null);
+    unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
+            this.lockAutoscrollId = '';
+            this.autoscrollBehavior.next(null);
+        }
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
@@ -490,8 +501,13 @@ export class PaletteComp {
     packageName: string;
     x: number;
     y: number;
+    w: number;
+    h: number;
+    text: string;
     type: string;
     ghostPropertyName: string;
+    styleVariantCategory: string;
+    lastChosenVariant: string;
     dropTargetUUID?: string;
     isOpen: boolean;
     propertyName: string; // ghost
@@ -509,6 +525,7 @@ export class PaletteComp {
     attributes?: { [property: string]: string };
     children?: [{ [property: string]: string }];
     rightSibling?: string;
+    variant?: string;
 }
 
 export class Package {
@@ -521,6 +538,17 @@ export class Package {
 }
 
 export interface ISupportAutoscroll {
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void;
+    updateLocationCallback(changeX: number, changeY: number): void;
     onMouseUp(event: MouseEvent): void;
+    onMouseMove(event: MouseEvent): void;
+    getAutoscrollLockId(): string;
+}
+
+export class Variant {
+    category: string;
+    classes: Array<String>;
+    displayName: string;
+    height: number;
+    name: string;
+    width: number;
 }

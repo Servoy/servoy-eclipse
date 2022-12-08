@@ -31,7 +31,7 @@ export class FileUploadWindowComponent {
     onCloseCallback: () => void;
 
     constructor(private http: HttpClient, i18nProvider: I18NProvider) {
-        i18nProvider.getI18NMessages(
+        i18nProvider.listenForI18NMessages(
             'servoy.filechooser.button.upload',
             'servoy.filechooser.upload.addFile',
             'servoy.filechooser.upload.addFiles',
@@ -40,7 +40,7 @@ export class FileUploadWindowComponent {
             'servoy.filechooser.button.remove',
             'servoy.filechooser.label.name',
             'servoy.button.cancel',
-            'servoy.filechooser.error').then((val) => {
+            'servoy.filechooser.error').messages((val) => {
                 this.i18n_upload = val['servoy.filechooser.button.upload'];
                 if (this.isMultiselect())
                     this.i18n_chooseFiles = val['servoy.filechooser.upload.addFiles'];

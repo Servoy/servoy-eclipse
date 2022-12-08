@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
@@ -291,6 +292,8 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void putInCache(IPersist persist)
 	{
+		if (persist instanceof AbstractBase && ((AbstractBase)persist).isAClone()) return;
+		if (persist.getParent() instanceof AbstractBase && ((AbstractBase)persist.getParent()).isAClone()) return;
 		if (uuidToPersist.containsKey(persist.getUUID().toString()))
 		{
 			IPersist existingPersist = uuidToPersist.get(persist.getUUID().toString());

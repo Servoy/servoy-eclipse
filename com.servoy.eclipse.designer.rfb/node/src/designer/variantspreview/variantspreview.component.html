@@ -1,0 +1,31 @@
+<button id="VariantsCtrl" type="button" class="btn btn-light btn-sm" 
+	#popover="ngbPopover" [ngbPopover]="popoverContent" [placement]="placement" 
+	style="position: absolute; top: -10000px; left: -1000px; display: block;"
+	(click)="onVariantsClick()">
+   <i class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
+</button>
+<ng-template #popoverContent let-popOv="popOv" let-clientURL="clientURL">
+	<div class="modal-body">
+		<div #variantContent class="variant-content-area" tabindex="0" (mouseup)="onAreaMouseUp($event)">
+			<div #variantGlassspane class="variant-content-overlay">
+				<iframe id="VariantsForm" class="variant-content-frame" [src]="clientURL" ></iframe>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer" style="padding-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 10px">
+		<button name="variants" type="button" 
+			class="btn btn-outline-dark btn-sm" 
+			(click)="onAddVariant($event)" 
+			disabled>
+			<i name="variants" class="fa fa-plus" aria-hidden="true"></i>
+				Add
+		</button>
+		<button name="variants" type="button" 
+			class="btn btn-outline-dark btn-sm" 
+			(click)="onEditVariant($event)" 
+			disabled>
+			<i name="variants" class="fa fa-pen" aria-hidden="true"></i>
+			Edit
+		</button>
+	</div>
+</ng-template>

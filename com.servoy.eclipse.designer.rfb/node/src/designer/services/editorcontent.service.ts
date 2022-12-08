@@ -54,14 +54,14 @@ export class EditorContentService {
         return this.frameElement.contentWindow.document.querySelector('.svy-form');
     }
 
-    getTopPositionIframe(): number {
-        this.initIFrame();
+    getTopPositionIframe(variants?: boolean): number {
+        this.initIFrame(variants);
         const frameRect = this.frameElement.getBoundingClientRect();
         return frameRect.top;
     }
 
-    getLeftPositionIframe(): number {
-        this.initIFrame();
+    getLeftPositionIframe(variants?: boolean): number {
+        this.initIFrame(variants);
         const frameRect = this.frameElement.getBoundingClientRect();
         return frameRect.left;
     }
@@ -98,6 +98,10 @@ export class EditorContentService {
         return this.document.body;
     }
 
+    getDocument(): Document {
+        return this.document;
+    }
+
     getContentBodyElement(): HTMLElement {
         this.initIFrame();
         return this.frameElement.contentWindow.document.body;
@@ -116,19 +120,15 @@ export class EditorContentService {
         this.frameElement.contentWindow.postMessage(message, '*');
     }
 
-    getContentElementById(id: string): HTMLElement {
-        this.initIFrame();
+    getContentElementById(id: string, variants?: boolean): HTMLElement {
+        this.initIFrame(variants);
         return this.frameElement.contentWindow.document.getElementById(id);
     }
 
     getDesignerElementById(id: string): HTMLElement {
         return this.document.getElementById(id);
     }
-
-    getDocument() {
-        return this.document
-    }
-
+    
     executeOnlyAfterInit(callback: () => void) {
         if (this.contentWasInit) {
             callback();
@@ -158,9 +158,23 @@ export class EditorContentService {
         return this.leftAdjust;
     }
     
-    private initIFrame() {
-        if (!this.frameElement) {
-            this.frameElement = this.document.querySelector('iframe');
+   private initIFrame(variants?: boolean) {
+        if (variants) {
+            if (!this.frameElement || this.frameElement.id != 'VariantsForm') {
+                const frames = this.document.getElementsByTagName('iframe');
+                if (frames[0] && frames[0].id === 'VariantsForm') {
+                    this.frameElement = frames[0];
+                } else if (frames.length > 0 ){//true when variants form is rendered
+                    this.frameElement = frames[1];
+                }   
+            }
+        } else {//!variants
+            const frames = this.document.getElementsByTagName('iframe');
+                if (frames[0] && frames[0].id != 'VariantsForm') {
+                    this.frameElement = frames[0];
+                } else if (frames.length > 0 ){//true when preview
+                    this.frameElement = frames[1];
+                }
         }
     }
     

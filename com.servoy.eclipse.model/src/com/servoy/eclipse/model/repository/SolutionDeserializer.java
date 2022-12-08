@@ -871,7 +871,7 @@ public class SolutionDeserializer
 			{
 				typeId = IRepository.SCRIPTCALCULATIONS;
 			}
-			else if (jsFile.getName().endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
+			else if (jsFile.getName().endsWith(SolutionSerializer.FOUNDSET_POSTFIX) && object.has("declaration"))
 			{
 				typeId = IRepository.METHODS;
 			}

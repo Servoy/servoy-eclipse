@@ -187,8 +187,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.ignoreChanges = true;
                     internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else if (newClientData !== oldClientData) {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
@@ -198,8 +198,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
-                    internalState.ignoreChanges = true;
                     internalState.markAllChanged(false);
+                    internalState.ignoreChanges = true;
                 } else {
                     // new the same as old and already initialized
                     newClientDataInited = newClientData;

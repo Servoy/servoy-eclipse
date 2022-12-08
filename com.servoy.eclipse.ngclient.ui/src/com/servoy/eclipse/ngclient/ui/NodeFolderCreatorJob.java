@@ -64,6 +64,12 @@ public class NodeFolderCreatorJob extends Job
 	}
 
 	@Override
+	public boolean belongsTo(Object family)
+	{
+		return CopySourceFolderAction.JOB_FAMILY.equals(family);
+	}
+
+	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
 		boolean executeNpmInstall = false;

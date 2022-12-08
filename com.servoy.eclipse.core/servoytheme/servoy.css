@@ -29,7 +29,7 @@
 	background-color: #FFFFFF;
 }
 
- * {
+ *, Shell, Composite, Label, Button[style~='SWT.CHECK'], Button[style~='SWT.RADIO'], Combo, Group {
 	background-color: #FFFFFF;
 }
 
@@ -92,4 +92,9 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 
 .svyNatTable > .containedForm, .svyNatTable > .relationName {
 	text-trim: false;
+}
+
+Button  {
+    background-color: unset;
+    color: unset;
 }
