@@ -401,6 +401,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 					break;
 				}
 			}
+			if (persists.size() == 1 && persists.get(0) instanceof Form)
+			{
+				// datasource changed, refresh palette for form components
+				this.refreshPalette();
+			}
 			final String[] newStylesheetsFinal = newStylesheets;
 			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 			{
