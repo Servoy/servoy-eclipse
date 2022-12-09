@@ -20,6 +20,7 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -82,6 +84,7 @@ import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
@@ -678,7 +681,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								if (new File(file, "package.json").exists())
 								{
 									// this is already the package (root of node modules, like rxjs)
-									FileUtils.deleteQuietly(file);
+									try
+									{
+										Files.walkFileTree(file.toPath(), DeletingPathVisitor.withLongCounters());
+									}
+									catch (IOException e)
+									{
+										Debug.error(e);
+									}
 								}
 								else
 								{
@@ -686,7 +696,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
 										new File(rootNodeModules, file.getName()).listFiles());
 									nestedResult.forEach(nested -> {
-										if (nested.isDirectory() && new File(nested, "package.json").exists()) FileUtils.deleteQuietly(nested);
+										if (nested.isDirectory() && new File(nested, "package.json").exists())
+										{
+											try
+											{
+												Files.walkFileTree(nested.toPath(), DeletingPathVisitor.withLongCounters());
+											}
+											catch (IOException e)
+											{
+												Debug.error(e);
+											}
+
+										}
 									});
 								}
 
@@ -943,7 +964,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									{
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageFolder);
 										if (directorySync != null) directorySync.destroy();
-										FileUtils.deleteQuietly(packageFolder);
+										try
+										{
+											Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+										}
+										catch (IOException e)
+										{
+											Debug.error(e);
+										}
+
 										File srcDir = file.getLocation().toFile();
 										FileUtils.copyDirectory(srcDir, packageFolder);
 										writeConsole(console, "Updated SPM target folder: " + packageFolder + " from source package dir: " + srcDir);
@@ -1019,7 +1048,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							DirectorySync directorySync = WebPackagesListener.watchCreated.remove(packageFolder);
 							if (directorySync != null) directorySync.destroy();
-							if (packageFolder.exists()) FileUtils.deleteQuietly(packageFolder);
+							if (packageFolder.exists())
+							{
+								try
+								{
+									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+								}
+								catch (IOException e)
+								{
+									Debug.error(e);
+								}
+							}
 
 							File tsConfig = new File(projectFolder, "tsconfig.json");
 							String tsConfigContents = FileUtils.readFileToString(tsConfig, "UTF8");
@@ -1047,13 +1086,29 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						{
 							if (!entry.exists() || Long.parseLong(FileUtils.readFileToString(entry, "UTF8")) != packageReader.getResource().lastModified())
 							{
-								FileUtils.deleteQuietly(packageFolder);
+								try
+								{
+									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+								}
+								catch (IOException e)
+								{
+									Debug.error(e);
+								}
+
 								exists = false;
 							}
 						}
 						catch (Exception e)
 						{
-							FileUtils.deleteQuietly(packageFolder);
+							try
+							{
+								// this could happen if we deleted the war file but undeploy failed once
+								Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+							}
+							catch (IOException io)
+							{
+								Debug.error(io);
+							}
 							exists = false;
 						}
 
