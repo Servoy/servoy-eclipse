@@ -17,7 +17,7 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -113,7 +113,7 @@ public class ColumnAutoEnterDBSeqComposite extends Composite
 		bindingContext = BindingHelper.dispose(bindingContext);
 
 		ColumnInfoBean columnInfoBean = new ColumnInfoBean(c.getColumnInfo());
-		IObservableValue getCIDBSequenceObserveValue = BeanProperties.value("databaseSequenceName").observe(columnInfoBean);
+		IObservableValue getCIDBSequenceObserveValue = PojoProperties.value("databaseSequenceName").observe(columnInfoBean);
 		IObservableValue dbSequenceTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(text);
 
 		bindingContext = new DataBindingContext();

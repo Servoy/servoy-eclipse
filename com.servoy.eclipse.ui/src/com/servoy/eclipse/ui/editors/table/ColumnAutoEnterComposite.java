@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -504,9 +504,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		{
 			columnInfoBean.setColumnInfo(c.getColumnInfo());
 		}
-		IObservableValue getCICustomValueObserveValue = BeanProperties.value("defaultValue").observe(columnInfoBean);
+		IObservableValue getCICustomValueObserveValue = PojoProperties.value("defaultValue").observe(columnInfoBean);
 		IObservableValue customValueTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(customValueText);
-		IObservableValue getCILookUpValueObserveValue = BeanProperties.value("lookupValue").observe(columnInfoBean);
+		IObservableValue getCILookUpValueObserveValue = PojoProperties.value("lookupValue").observe(columnInfoBean);
 		IObservableValue lookUpValueSelectObserveWidget = new TreeSelectObservableValue(lookupValueSelect, IDataProvider.class);
 
 		bindingContext = new DataBindingContext();

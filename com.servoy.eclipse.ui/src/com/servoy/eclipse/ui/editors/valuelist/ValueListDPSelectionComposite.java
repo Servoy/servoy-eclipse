@@ -17,7 +17,7 @@
 package com.servoy.eclipse.ui.editors.valuelist;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -213,10 +213,10 @@ public class ValueListDPSelectionComposite extends Composite
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
 		IObservableValue returnDataProviderFieldTextObserveWidget = WidgetProperties.widgetSelection().observe(returnInDataproviderButton);
-		IObservableValue< ? > getValueListReturnDataProviderObserveValue = BeanProperties.value("returnInDataProvider").observe(this);
+		IObservableValue< ? > getValueListReturnDataProviderObserveValue = PojoProperties.value("returnInDataProvider").observe(this);
 		getValueListReturnDataProviderObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
 		IObservableValue showInFieldSelectionObserveWidget = WidgetProperties.widgetSelection().observe(showInFieldButton);
-		IObservableValue< ? > getShowInFieldSelectionObserveValue = BeanProperties.value("showInField").observe(this);
+		IObservableValue< ? > getShowInFieldSelectionObserveValue = PojoProperties.value("showInField").observe(this);
 		getShowInFieldSelectionObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
 
 		m_bindingContext = new DataBindingContext();

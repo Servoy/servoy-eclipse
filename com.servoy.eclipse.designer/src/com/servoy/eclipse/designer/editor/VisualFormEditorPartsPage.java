@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -828,21 +828,21 @@ public class VisualFormEditorPartsPage extends Composite
 
 	protected DataBindingContext initDataBindings()
 	{
-		IObservableValue currentPartSinkWhenLastObserveValue = BeanProperties.value(PartBean.class, "sinkWhenLast").observe(currentPartBean);
-		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = BeanProperties.value("allowBreakAcrossPageBounds").observe(currentPartBean);
+		IObservableValue currentPartSinkWhenLastObserveValue = PojoProperties.value(PartBean.class, "sinkWhenLast").observe(currentPartBean);
+		IObservableValue currentPartAllowBreakAcrossPageBoundsObserveValue = PojoProperties.value("allowBreakAcrossPageBounds").observe(currentPartBean);
 		IObservableValue pageBreakAfterTextTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(pageBreakAfterText);
 		IObservableValue pageBreakBeforeButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(pageBreakBeforeButton);
-		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = BeanProperties.value(PartBean.class, "pageBreakAfterOccurrence")
+		IObservableValue currentPartPageBreakAfterOccurrenceObserveValue = PojoProperties.value(PartBean.class, "pageBreakAfterOccurrence")
 			.observe(currentPartBean);
-		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = BeanProperties.value(PartBean.class, "discardRemainderAfterBreak")
+		IObservableValue currentPartDiscardRemainderAfterBreakObserveValue = PojoProperties.value(PartBean.class, "discardRemainderAfterBreak")
 			.observe(currentPartBean);
-		IObservableValue currentPartRestartPageNumberObserveValue = BeanProperties.value(PartBean.class, "restartPageNumber").observe(currentPartBean);
+		IObservableValue currentPartRestartPageNumberObserveValue = PojoProperties.value(PartBean.class, "restartPageNumber").observe(currentPartBean);
 		IObservableValue pageBreakAfterButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(pageBreakAfterButton);
 		IObservableValue allowPartToButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(allowPartToButton);
 		IObservableValue discardRemainderOfButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(discardRemainderOfButton);
 		IObservableValue sinkPartIfButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(sinkPartIfButton);
-		IObservableValue currentPartPageBreakBeforeObserveValue = BeanProperties.value(PartBean.class, "pageBreakBefore").observe(currentPartBean);
-		IObservableValue currentPartPageBreakAfterEveryNthOccurenceObserveValue = BeanProperties.value(PartBean.class, "pageBreakAfterEveryNthOccurence")
+		IObservableValue currentPartPageBreakBeforeObserveValue = PojoProperties.value(PartBean.class, "pageBreakBefore").observe(currentPartBean);
+		IObservableValue currentPartPageBreakAfterEveryNthOccurenceObserveValue = PojoProperties.value(PartBean.class, "pageBreakAfterEveryNthOccurence")
 			.observe(currentPartBean);
 		IObservableValue restartPageNumbersButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(restartPageNumbersButton);
 		//

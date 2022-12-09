@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
@@ -520,24 +520,24 @@ public class ColumnDetailsComposite extends Composite
 
 		ColumnInfoBean columnInfoBean = new ColumnInfoBean(column.getColumnInfo());
 
-		IObservableValue getCIDescriptionObserveValue = BeanProperties.value("description").observe(columnInfoBean);
+		IObservableValue getCIDescriptionObserveValue = PojoProperties.value(ColumnInfoBean.class, "description").observe(columnInfoBean);
 		IObservableValue descriptionTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(descriptionText);
 
-		IObservableValue getCITitleObserveValue = BeanProperties.value("titleText").observe(columnInfoBean);
+		IObservableValue getCITitleObserveValue = PojoProperties.value("titleText").observe(columnInfoBean);
 		IObservableValue titleTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(titleText);
 
-		IObservableValue getCIDefaultFormatObserveValue = BeanProperties.value("defaultFormat").observe(columnInfoBean);
+		IObservableValue getCIDefaultFormatObserveValue = PojoProperties.value("defaultFormat").observe(columnInfoBean);
 		IObservableValue defaultFormatTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(defaultFormat);
 
-		IObservableValue getCIForeignTypeObserveValue = BeanProperties.value("foreignType").observe(columnInfoBean);
+		IObservableValue getCIForeignTypeObserveValue = PojoProperties.value("foreignType").observe(columnInfoBean);
 		IObservableValue foreignTypeTextObserveWidget = new TreeSelectObservableValue(foreignTypeTreeSelect, IDataSourceWrapper.class);
 
 		//TODO: put the hardcoded strings in a list;
-		IObservableValue getCISortIgnorecaseObservableValue = BeanProperties.value("sortIgnorecase").observe(columnInfoBean);
-		IObservableValue getCISortingNullprecedenceObservableValue = BeanProperties.value("sortingNullprecedence").observe(columnInfoBean);
-		IObservableValue getCIFlagsExcludedObserveValue = BeanProperties.value("excludedFlag").observe(columnInfoBean);
-		IObservableValue getCIFlagsUuidObserveValue = BeanProperties.value("uuidFlag").observe(columnInfoBean);
-		IObservableValue getCIFlagsTenantObserveValue = BeanProperties.value("tenantFlag").observe(columnInfoBean);
+		IObservableValue getCISortIgnorecaseObservableValue = PojoProperties.value("sortIgnorecase").observe(columnInfoBean);
+		IObservableValue getCISortingNullprecedenceObservableValue = PojoProperties.value("sortingNullprecedence").observe(columnInfoBean);
+		IObservableValue getCIFlagsExcludedObserveValue = PojoProperties.value(ColumnInfoBean.class, "excludedFlag").observe(columnInfoBean);
+		IObservableValue getCIFlagsUuidObserveValue = PojoProperties.value("uuidFlag").observe(columnInfoBean);
+		IObservableValue getCIFlagsTenantObserveValue = PojoProperties.value("tenantFlag").observe(columnInfoBean);
 
 		IObservableValue sortIgnoringcaseComboObserveWidget = WidgetProperties.widgetSelection().observe(sortIgnoringcaseCombo);
 		IObservableValue sortingNullprecedenceComboObserveWidget = WidgetProperties.widgetSelection().observe(sortNullprecedenceCombo);

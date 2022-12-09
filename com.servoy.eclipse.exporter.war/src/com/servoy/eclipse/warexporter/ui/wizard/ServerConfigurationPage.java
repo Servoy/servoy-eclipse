@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.SortedSet;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
@@ -308,58 +308,58 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		DataBindingContext bindingContext = new DataBindingContext();
 		//
 		IObservableValue urlObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(url);
-		IObservableValue configServerUrlObserveValue = BeanProperties.value(ServerConfiguration.class, "serverUrl").observe(config);
+		IObservableValue configServerUrlObserveValue = PojoProperties.value(ServerConfiguration.class, "serverUrl").observe(config);
 		bindingContext.bindValue(urlObserveTextObserveWidget, configServerUrlObserveValue, null, null);
 		//
 		IObservableValue catalogObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(catalog);
-		IObservableValue configCatalogObserveValue = BeanProperties.value(ServerConfiguration.class, "catalog").observe(config);
+		IObservableValue configCatalogObserveValue = PojoProperties.value(ServerConfiguration.class, "catalog").observe(config);
 		bindingContext.bindValue(catalogObserveTextObserveWidget, configCatalogObserveValue, null, null);
 		//
 		IObservableValue cloneObserveSelectionObserveWidget = WidgetProperties.widgetSelection().observe(clone);
-		IObservableValue configDataModelCloneFromObserveValue = BeanProperties.value(ServerConfiguration.class, "dataModelCloneFrom").observe(config);
+		IObservableValue configDataModelCloneFromObserveValue = PojoProperties.value(ServerConfiguration.class, "dataModelCloneFrom").observe(config);
 		bindingContext.bindValue(cloneObserveSelectionObserveWidget, configDataModelCloneFromObserveValue, null, null);
 		//
 		IObservableValue driverObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(driver);
-		IObservableValue configDriverObserveValue = BeanProperties.value(ServerConfiguration.class, "driver").observe(config);
+		IObservableValue configDriverObserveValue = PojoProperties.value(ServerConfiguration.class, "driver").observe(config);
 		bindingContext.bindValue(driverObserveTextObserveWidget, configDriverObserveValue, null, null);
 		//
 		IObservableValue validationQueryObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(validationQuery);
-		IObservableValue configValidationQueryObserveValue = BeanProperties.value(ServerConfiguration.class, "validationQuery").observe(config);
+		IObservableValue configValidationQueryObserveValue = PojoProperties.value(ServerConfiguration.class, "validationQuery").observe(config);
 		bindingContext.bindValue(validationQueryObserveTextObserveWidget, configValidationQueryObserveValue, null, null);
 		//
 		IObservableValue usernameObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(username);
-		IObservableValue configUserNameObserveValue = BeanProperties.value(ServerConfiguration.class, "userName").observe(config);
+		IObservableValue configUserNameObserveValue = PojoProperties.value(ServerConfiguration.class, "userName").observe(config);
 		bindingContext.bindValue(usernameObserveTextObserveWidget, configUserNameObserveValue, null, null);
 		//
 		IObservableValue schemaObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(schema);
-		IObservableValue configSchemaObserveValue = BeanProperties.value(ServerConfiguration.class, "schema").observe(config);
+		IObservableValue configSchemaObserveValue = PojoProperties.value(ServerConfiguration.class, "schema").observe(config);
 		bindingContext.bindValue(schemaObserveTextObserveWidget, configSchemaObserveValue, null, null);
 		//
 		IObservableValue maxActiveObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(maxActive);
-		IObservableValue configMaxActiveObserveValue = BeanProperties.value(ServerConfiguration.class, "maxActive").observe(config);
+		IObservableValue configMaxActiveObserveValue = PojoProperties.value(ServerConfiguration.class, "maxActive").observe(config);
 		bindingContext.bindValue(maxActiveObserveTextObserveWidget, configMaxActiveObserveValue, null, null);
 		//
 		IObservableValue maxIdleObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(maxIdle);
-		IObservableValue configMaxIdleObserveValue = BeanProperties.value(ServerConfiguration.class, "maxIdle").observe(config);
+		IObservableValue configMaxIdleObserveValue = PojoProperties.value(ServerConfiguration.class, "maxIdle").observe(config);
 		bindingContext.bindValue(maxIdleObserveTextObserveWidget, configMaxIdleObserveValue, null, null);
 		//
 		IObservableValue statementsIdleObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(statementsIdle);
-		IObservableValue configMaxPreparedStatementsIdleObserveValue = BeanProperties.value(ServerConfiguration.class, "maxPreparedStatementsIdle")
+		IObservableValue configMaxPreparedStatementsIdleObserveValue = PojoProperties.value(ServerConfiguration.class, "maxPreparedStatementsIdle")
 			.observe(config);
 		bindingContext.bindValue(statementsIdleObserveTextObserveWidget, configMaxPreparedStatementsIdleObserveValue, null, null);
 		//
 		IObservableValue skipObserveSelectionObserveWidget = WidgetProperties.widgetSelection().observe(skip);
-		IObservableValue configSkipSysTablesObserveValue = BeanProperties.value(ServerConfiguration.class, "skipSysTables")
+		IObservableValue configSkipSysTablesObserveValue = PojoProperties.value(ServerConfiguration.class, "skipSysTables")
 			.observe(config);
 		bindingContext.bindValue(skipObserveSelectionObserveWidget, configSkipSysTablesObserveValue, null, null);
 		//
 		IObservableValue proceduresObserveSelectionObserveWidget = WidgetProperties.widgetSelection().observe(procedures);
-		IObservableValue configproceduresObserveValue = BeanProperties.value(ServerConfiguration.class, "queryProcedures")
+		IObservableValue configproceduresObserveValue = PojoProperties.value(ServerConfiguration.class, "queryProcedures")
 			.observe(config);
 		bindingContext.bindValue(proceduresObserveSelectionObserveWidget, configproceduresObserveValue, null, null);
 		//
 		IObservableValue passwordObserveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(password);
-		IObservableValue configPasswordObserveValue = BeanProperties.value(ServerConfiguration.class, "password")
+		IObservableValue configPasswordObserveValue = PojoProperties.value(ServerConfiguration.class, "password")
 			.observe(config);
 		bindingContext.bindValue(passwordObserveTextObserveWidget, configPasswordObserveValue, null, null);
 		//

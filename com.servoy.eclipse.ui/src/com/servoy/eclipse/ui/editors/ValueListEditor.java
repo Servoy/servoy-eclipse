@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -899,14 +899,14 @@ public class ValueListEditor extends PersistEditor
 	{
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
-		IObservableValue getValueListCustomValuesObserveValue = BeanProperties.value("customValues").observe(getValueList());
-		IObservableValue fallbackValueListObserveValue = BeanProperties.value("fallbackValueListID").observe(getValueList());
+		IObservableValue getValueListCustomValuesObserveValue = PojoProperties.value("customValues").observe(getValueList());
+		IObservableValue fallbackValueListObserveValue = PojoProperties.value("fallbackValueListID").observe(getValueList());
 
 		IObservableValue customValuesTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(customValues);
 		IObservableValue globalMethodtObserveWidget = new TreeSelectObservableValue(globalMethodSelect, MethodWithArguments.class);
 		IObservableValue fallbackValueListObserveWidget = new TreeSelectObservableValue(fallbackValuelist, int.class);
 
-		IObservableValue getValueListSortOpotionsObserveValue = BeanProperties.value("sortOptions").observe(getValueList());
+		IObservableValue getValueListSortOpotionsObserveValue = PojoProperties.value("sortOptions").observe(getValueList());
 		IObservableValue sortingDefinitionSelectObserveWidget = new TreeSelectObservableValue(sortingDefinitionSelect, String.class);
 
 		IObservableValue nameFieldTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameField);
@@ -932,25 +932,25 @@ public class ValueListEditor extends PersistEditor
 			}
 		};
 		IObservableValue separatorFieldTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(separator_char);
-		IObservableValue getValueListSeparatorObserveValue = BeanProperties.value("separator").observe(getValueList());
+		IObservableValue getValueListSeparatorObserveValue = PojoProperties.value("separator").observe(getValueList());
 
 		IObservableValue allowEmptyFieldTextObserveWidget = WidgetProperties.widgetSelection().observe(allowEmptyValueButton);
-		IObservableValue getValueListAllowEmptyValueObserveValue = BeanProperties.value("addEmptyValue").observe(getValueList());
+		IObservableValue getValueListAllowEmptyValueObserveValue = PojoProperties.value("addEmptyValue").observe(getValueList());
 		IObservableValue lazyLoadingTextObserveWidget = WidgetProperties.widgetSelection().observe(lazyLoading);
-		IObservableValue getValueListLazyLoadingObserveValue = BeanProperties.value("lazyLoading").observe(getValueList());
+		IObservableValue getValueListLazyLoadingObserveValue = PojoProperties.value("lazyLoading").observe(getValueList());
 		IObservableValue applyNameFilterSelectionObserveWidget = WidgetProperties.widgetSelection().observe(applyValuelistNameButton);
-		IObservableValue getApplyNameFilterSelectionObserveValue = BeanProperties.value("useTableFilter").observe(getValueList());
+		IObservableValue getApplyNameFilterSelectionObserveValue = PojoProperties.value("useTableFilter").observe(getValueList());
 		IObservableValue deprecatedObserveWidget = WidgetProperties.text(SWT.Modify).observe(deprecated);
-		IObservableValue deprecatedObserveValue = BeanProperties.value("deprecated").observe(getValueList());
+		IObservableValue deprecatedObserveValue = PojoProperties.value("deprecated").observe(getValueList());
 		IObservableValue encapsulationObserveWidget = WidgetProperties.widgetSelection().observe(encapsulation);
-		IObservableValue encapsulationObserveValue = BeanProperties.value("encapsulation").observe(getValueList());
+		IObservableValue encapsulationObserveValue = PojoProperties.value("encapsulation").observe(getValueList());
 		IObservableValue commentObserveWidget = WidgetProperties.text(SWT.Modify).observe(commentText);
-		IObservableValue commentObserveValue = BeanProperties.value("comment").observe(getValueList());
+		IObservableValue commentObserveValue = PojoProperties.value("comment").observe(getValueList());
 
 		IObservableValue displayTypeObserveWidget = WidgetProperties.widgetSelection().observe(displayType);
-		IObservableValue displayTypeObserveValue = BeanProperties.value("displayValueType").observe(getValueList());
+		IObservableValue displayTypeObserveValue = PojoProperties.value("displayValueType").observe(getValueList());
 		IObservableValue realTypeObserveWidget = WidgetProperties.widgetSelection().observe(realType);
-		IObservableValue realTypeObserveValue = BeanProperties.value("realValueType").observe(getValueList());
+		IObservableValue realTypeObserveValue = PojoProperties.value("realValueType").observe(getValueList());
 
 		m_bindingContext = new DataBindingContext();
 		//
