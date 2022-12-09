@@ -502,7 +502,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
 
         if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
-            cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], indexOfRow: number) => {
+            cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], relativeRowIndex: number) => {
                 const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({[property: string]: ServoyBaseComponent<any>})) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
@@ -515,8 +515,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                 };
 
-                if (indexOfRow === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
-                else triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[indexOfRow]);
+                if (relativeRowIndex === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
+                else triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
             };
         }
 

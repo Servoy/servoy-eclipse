@@ -739,7 +739,7 @@ interface CellChangeToServer {
     value: string;
 }
 
-export type CellUpdatedFromServerListener = (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void;
+export type CellUpdatedFromServerListener = (relativeRowIndex: number, columnName: string, oldValue: any, newValue: any) => void;
 
 export interface IPropertyContextCreatorForRow {
     withRowValueAndPushToServerFor(rowValue: any, propertyName: string): IPropertyContext;

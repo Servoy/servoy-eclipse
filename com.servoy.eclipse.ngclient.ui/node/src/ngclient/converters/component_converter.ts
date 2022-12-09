@@ -2,7 +2,7 @@ import { IParentAccessForSubpropertyChanges, ConverterService, isChanged, IChang
             instanceOfChangeAwareValue, ChangeListenerFunction } from '../../sablo/converter.service';
 import { LoggerService, LoggerFactory, IFoundset, ViewportChangeEvent, ViewportChangeListener, IChildComponentPropertyValue } from '@servoy/public';
 import { FoundsetViewportState, ViewportService, IPropertyContextCreatorForRow, ISomePropertiesInRowAreNotFoundsetLinked,
-            ConversionInfoFromServerForViewport, RowUpdate } from '../services/viewport.service';
+            ConversionInfoFromServerForViewport, RowUpdate, CellUpdatedFromServerListener } from '../services/viewport.service';
 import { ComponentCache } from '../types';
 import { SabloService } from '../../sablo/sablo.service';
 import { TypesRegistry, IType, IPropertyContext, PushToServerEnum, IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
@@ -66,6 +66,11 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
         apiCallTypes?: Array<any>;
     };
 
+    /** @deprecated legacy - tableview forms; not used anymore I think */
+    componentIndex?: number;
+    /** @deprecated legacy - tableview forms; not used anymore I think */
+    headerIndex?: number;
+
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
     modelViewport: { [property: string]: any }[];
 
@@ -75,7 +80,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
      * foundset linked components like in list form component for example). Then when there are changes comming from server, the 'component'
      * property type will call this function as needed.
      */
-    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], rowIndex: number) => void;
+    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[], relativeRowIndex: number) => void;
 
     /**
      * This gives a way to trigger handlers.
@@ -242,9 +247,14 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
 
         // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
         const wholeViewportUpdateFromServer = serverSentData.model_vp;
+
+        this.componentValue.foundsetConfig = serverSentData.foundsetConfig;
+        this.componentValue.componentIndex = serverSentData.componentIndex;
+        this.componentValue.headerIndex = serverSentData.headerIndex;
+
         this.componentValue.modelViewport = [];
 
-        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
+        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (relativeRrowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
             if (wholeViewportUpdateFromServer) {
                 this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
                         this, wholeViewportUpdateFromServer, serverSentData._T,
@@ -285,7 +295,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             done = true;
         }
 
-        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
+        this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (relativeRowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
             if (wholeViewportUpdate) {
                 const oldRows = this.componentValue.modelViewport;
 
@@ -469,15 +479,18 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         return clientSideType;
     }
 
-    private applyUpdatesAndHandleCellChangesThatAreNotByRef(applyUpdatesFunction: (
-                    cellUpdatedFromServerListener: (rowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => void) {
+    private applyUpdatesAndHandleCellChangesThatAreNotByRef(
+        applyUpdatesFunction: (
+            cellUpdatedFromServerListener: (relativeRowIndex: number, columnName: string, oldValue: any, newValue: any) => void
+        ) => void
+    ) {
 
-        const cellsChangedButNotByRef: { rowIndex: number; propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any }[] } []  = [];
-        const cellUpdatedFromServerListener = (rowIndex: number, columnName: string, oldValue: any, newValue: any) => {
+        const cellsChangedButNotByRef: { relativeRowIndex: number; propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any }[] } []  = [];
+        const cellUpdatedFromServerListener: CellUpdatedFromServerListener = (relativeRowIndex: number, columnName: string, oldValue: any, newValue: any) => {
             if (oldValue === newValue) {
                 let lastIdxChangedButNotByRefEntries = cellsChangedButNotByRef.length > 0 ? cellsChangedButNotByRef[cellsChangedButNotByRef.length - 1] : undefined;
-                if (!lastIdxChangedButNotByRefEntries || lastIdxChangedButNotByRefEntries.rowIndex !== rowIndex) {
-                    lastIdxChangedButNotByRefEntries = { rowIndex, propertiesChangedButNotByRef: [] };
+                if (!lastIdxChangedButNotByRefEntries || lastIdxChangedButNotByRefEntries.relativeRowIndex !== relativeRowIndex) {
+                    lastIdxChangedButNotByRefEntries = { relativeRowIndex, propertiesChangedButNotByRef: [] };
                     cellsChangedButNotByRef.push(lastIdxChangedButNotByRefEntries);
                 }
                 lastIdxChangedButNotByRefEntries.propertiesChangedButNotByRef.push({ propertyName: columnName, newPropertyValue: newValue });
@@ -488,7 +501,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
 
         // trigger ngOnChanges for properties that had updates but the ref remained the same (as those will not automatically be triggered by root detectChanges())
         cellsChangedButNotByRef.forEach((rowEntriesChangedButNotByRef) =>
-                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.rowIndex));
+                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex));
     }
 
 }
@@ -499,11 +512,21 @@ interface IServerSentData {
     name?: string;
     componentDirectiveName?: string;
     handlers?: Array<string>;
-    position?: { [property: string]: string };
     forFoundset?: string;
     model?: Record<string, any>;
     model_vp?: any[];
     _T?: ConversionInfoFromServerForViewport;
+    foundsetConfig?: {
+        recordBasedProperties?: Array<string>;
+        apiCallTypes?: Array<any>;
+    };
+
+    position?: { [property: string]: string }; // AngularFormGenerator.writePosition(...)
+
+    /** @deprecated legacy - tableview forms; not used anymore I think */
+    componentIndex?: number;
+    /** @deprecated legacy - tableview forms; not used anymore I think */
+    headerIndex?: number;
 }
 
 interface IGranularUpdatesFromServer {
