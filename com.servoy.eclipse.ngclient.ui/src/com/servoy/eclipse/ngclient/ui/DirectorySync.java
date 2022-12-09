@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -31,6 +32,7 @@ import java.nio.file.WatchService;
 import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 
 import com.servoy.j2db.util.Debug;
 
@@ -86,7 +88,14 @@ public class DirectorySync
 						File target = new File(targetFolder, localPath.toString());
 						if (kind == StandardWatchEventKinds.ENTRY_DELETE)
 						{
-							FileUtils.deleteQuietly(target);
+							try
+							{
+								Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+							}
+							catch (IOException e)
+							{
+								Debug.error(e);
+							}
 						}
 						else if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY)
 						{

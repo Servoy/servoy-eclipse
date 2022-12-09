@@ -19,8 +19,10 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,6 +33,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -93,11 +97,15 @@ public class CopySourceFolderAction extends Action
 						long time = System.currentTimeMillis();
 						console.write("Starting to delete the main target folder: " + Activator.getInstance().getMainTargetFolder() + "\n");
 						WebPackagesListener.setIgnore(true);
-						FileUtils.deleteQuietly(Activator.getInstance().getMainTargetFolder());
+
+						Path path = Activator.getInstance().getMainTargetFolder().toPath();
+						Files.walkFileTree(path, DeletingPathVisitor.withLongCounters());
+
 						console.write("Done deleting the main target folder: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 					}
 					catch (IOException e)
 					{
+						Debug.error(e);
 					}
 					finally
 					{
