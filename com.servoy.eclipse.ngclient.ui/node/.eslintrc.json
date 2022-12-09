@@ -2,7 +2,8 @@
   "root": true,
   "ignorePatterns": [],
   "plugins": [
-    "only-warn"
+    "only-warn",
+    "prefer-arrow"
   ],
   "overrides": [
     {
@@ -11,8 +12,7 @@
       ],
       "parserOptions": {
         "project": [
-          "tsconfig.json",
-          "e2e/tsconfig.json"
+          "tsconfig.json"
         ],
         "createDefaultProgram": true
       },
@@ -22,6 +22,14 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+          "prefer-arrow/prefer-arrow-functions": [
+            "warn",
+            {
+              "disallowPrototype": true,
+              "singleReturnOnly": false,
+              "classPropertiesAllowed": false
+            }
+          ],
         "@typescript-eslint/naming-convention": [
           "error",
           {
