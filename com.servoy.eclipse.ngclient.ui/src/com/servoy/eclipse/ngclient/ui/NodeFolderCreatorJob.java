@@ -118,16 +118,18 @@ public class NodeFolderCreatorJob extends Job
 					e.printStackTrace();
 				}
 			}
+			File projectsFolder = new File(nodeFolder, "projects");
+			File srcFolder = new File(nodeFolder, "src");
 			if (!codeChanged)
 			{
-				if (new File(nodeFolder, "src").exists())
+				if (srcFolder.exists())
 				{
-					Optional<File> srcMax = FileUtils.listFiles(new File(nodeFolder, "src"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+					Optional<File> srcMax = FileUtils.listFiles(srcFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
 						.max((file1, file2) -> {
 							long tm = file1.lastModified() - file2.lastModified();
 							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
 						});
-					Optional<File> projectsMax = FileUtils.listFiles(new File(nodeFolder, "projects"), TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+					Optional<File> projectsMax = FileUtils.listFiles(projectsFolder, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
 						.max((file1, file2) -> {
 							long tm = file1.lastModified() - file2.lastModified();
 							return tm < 0 ? -1 : tm > 0 ? 1 : 0;
@@ -166,7 +168,7 @@ public class NodeFolderCreatorJob extends Job
 					// delete only the source dirs so we start clean
 					try
 					{
-						Files.walkFileTree(new File(nodeFolder, "src").toPath(), DeletingPathVisitor.withLongCounters());
+						if (srcFolder.exists()) Files.walkFileTree(srcFolder.toPath(), DeletingPathVisitor.withLongCounters());
 					}
 					catch (IOException e)
 					{
@@ -174,7 +176,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					try
 					{
-						Files.walkFileTree(new File(nodeFolder, "projects").toPath(), DeletingPathVisitor.withLongCounters());
+						if (projectsFolder.exists()) Files.walkFileTree(projectsFolder.toPath(), DeletingPathVisitor.withLongCounters());
 					}
 					catch (IOException e)
 					{
