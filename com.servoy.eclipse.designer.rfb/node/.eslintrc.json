@@ -1,6 +1,10 @@
 {
   "root": true,
   "ignorePatterns": [],
+  "plugins": [
+    "only-warn",
+    "prefer-arrow"
+  ],
   "overrides": [
     {
       "files": [
@@ -21,6 +25,14 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+          "prefer-arrow/prefer-arrow-functions": [
+            "warn",
+            {
+              "disallowPrototype": true,
+              "singleReturnOnly": false,
+              "classPropertiesAllowed": false
+            }
+          ],
         "quotes": ["warn", "single", { "avoidEscape": true }],
         "@typescript-eslint/restrict-plus-operands": "off",
         "@angular-eslint/component-selector": [

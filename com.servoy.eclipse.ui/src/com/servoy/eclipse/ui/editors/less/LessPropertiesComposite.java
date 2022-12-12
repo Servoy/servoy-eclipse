@@ -128,6 +128,9 @@ public class LessPropertiesComposite extends Composite
 
 	private static final Pattern pattern = Pattern.compile("[@\\w]([\\w-]*)");
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";
+	private static final String SVY_BACKGROUND = "svybackground";
+
 
 	private String getWordAt(String txt, int pos)
 	{
@@ -176,7 +179,6 @@ public class LessPropertiesComposite extends Composite
 	private CachingChildrenComposite area;
 	private final ScrolledComposite sc;
 	private final PropertiesLessEditor editor;
-	private final Color backgroundColor;
 	private final char[] autoActivationCharacters = new char[] { '@' };
 	private KeyStroke keyStroke;
 	private ArrayList<ExpandableLessPropertiesComposite> categoryComposites;
@@ -201,8 +203,7 @@ public class LessPropertiesComposite extends Composite
 		sc = new ScrolledComposite(parent, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
-		backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		sc.setBackground(backgroundColor);
+		sc.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		createArea();
 	}
 
@@ -235,10 +236,10 @@ public class LessPropertiesComposite extends Composite
 
 			Label l = new Label(comp, SWT.NONE);
 			l.setText("Servoy Theme Version");
-			l.setBackground(backgroundColor);
+			l.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			l.setFont(font);
 			combo = new CCombo(comp, SWT.READ_ONLY | SWT.BORDER);
-			combo.setBackground(backgroundColor);
+			combo.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			combo.setItems(ThemeResourceLoader.VERSIONS);
 			String version = propertiesLessEditorInput.getVersion();
 			boolean tiVersion = false;
@@ -252,7 +253,7 @@ public class LessPropertiesComposite extends Composite
 				setThemeVersion();
 			});
 			tiCheck = new Button(comp, SWT.CHECK);
-			tiCheck.setText("Titanum NG Theme");
+			tiCheck.setText("Titanium NG Theme");
 			tiCheck.setSelection(tiVersion);
 			tiCheck.addSelectionListener(new SelectionAdapter()
 			{
@@ -266,13 +267,13 @@ public class LessPropertiesComposite extends Composite
 			for (String categoryName : propertiesLessEditorInput.getCategories())
 			{
 				ExpandBar expandBar = new ExpandBar(area, SWT.NONE);
-				expandBar.setBackground(backgroundColor);
+				expandBar.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 				expandBar.setFont(font);
 				expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, font,
 					categoryName);
 				categoryComposites.add(expandComposite);
-				expandComposite.setBackground(backgroundColor);
+				expandComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 				ExpandItem collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
 				collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 				collapsableItem.setControl(expandComposite);
@@ -361,7 +362,7 @@ public class LessPropertiesComposite extends Composite
 	protected void addPropertyEntry(Composite container, Font font, PropertiesLessEditorInput propertiesLessEditorInput, LessPropertyEntry property)
 	{
 		Label label = new Label(container, SWT.NONE);
-		label.setBackground(backgroundColor);
+		label.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		label.setFont(font);
 		label.setText(property.getLabel());
 		final Text txtName = new Text(container, SWT.BORDER);
@@ -422,7 +423,7 @@ public class LessPropertiesComposite extends Composite
 		if (property.getType() == LessPropertyType.COLOR)
 		{
 			Button editButton = new Button(container, SWT.FLAT);
-			editButton.setBackground(backgroundColor);
+			editButton.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			editButton.setText("Select Color");
 			editButton.addListener(SWT.Selection, e -> {
 				final Display display = editButton.getDisplay();

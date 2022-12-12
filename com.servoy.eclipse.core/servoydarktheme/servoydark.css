@@ -10,6 +10,11 @@ ExpandBar {
 	color: #330099;
 }
 
+* {
+	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
+	color:  '#org-eclipse-ui-workbench-DARK_FOREGROUND';
+}
+
 Table, Tree {
 	swt-lines-visible: false;
 }

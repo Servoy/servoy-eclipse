@@ -244,7 +244,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.editorSession.getState().dragging = true;
             this.mousedownpoint = { x: event.pageX, y: event.pageY };
             this.draggingGhost = ghost;
-            if (ghost.type == 'part')
+            this.draggingInGhostContainer = ghostContainer;
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION || this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
                 this.containerLeftOffset = parentRect.left;

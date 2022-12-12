@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Iterator;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +32,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
 
 
 public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelegate
@@ -49,7 +51,17 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			// temporary directory where the .war file will be exported; it should be moved afterwards to IMobileLaunchConstants.WAR_LOCATION / Tomcat webapps.
 			// this is needed because otherwise Tomcat can detect and try to deploy a partially written .war file giving invalid archive exceptions
 			tmpExportFolder = File.createTempFile("servoytempwd", "");
-			if (tmpExportFolder.exists()) FileUtils.deleteQuietly(tmpExportFolder);
+			if (tmpExportFolder.exists())
+			{
+				try
+				{
+					Files.walkFileTree(tmpExportFolder.toPath(), DeletingPathVisitor.withLongCounters());
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+				}
+			}
 			tmpExportFolder.mkdir();
 
 			prepareExporter(exporter, tmpExportFolder, configuration, launch, monitor);
@@ -65,7 +77,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			// there are Tomcat deploy/undeploy ant tasks that use the Tomcat Manager URLs to do the job, and we could do the same here
 			// but that would mean adding a user with the manager rights to Tomcat user list, so currently we do it by looking at the file-system
 			// and doing a delete/copy to undeploy and then redeploy (initially we did only copy for redeploy but it wasn't clear enough then starting with Tomcat 7 when the deployment was done)
-			
+
 			// we don't just copy but also undeploy first as in Tomcat >= 7 that sometimes resulted in partially deletion of contents and failed deployment - probably due to also accessing contents during deployment as timeouts could not be tuned ok
 
 			File warFinalLocation = getWarExportDir(configuration);
@@ -101,8 +113,29 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			{
 				if (monitor != null && monitor.isCanceled()) return;
 				if (monitor != null) monitor.subTask("deploying mobile solution; undeploying previous version");
-				if (finalWarFile.exists()) FileUtils.deleteQuietly(finalWarFile); // because moveFileToDirectory fails otherwise
-				else FileUtils.deleteQuietly(finalWarDir); // this could happen if we deleted the war file but undeploy failed once
+				if (finalWarFile.exists())
+				{
+					try
+					{
+						Files.walkFileTree(finalWarFile.toPath(), DeletingPathVisitor.withLongCounters());
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
+				}
+				else
+				{
+					try
+					{
+						// this could happen if we deleted the war file but undeploy failed once
+						Files.walkFileTree(finalWarDir.toPath(), DeletingPathVisitor.withLongCounters());
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
+				}
 
 				while ((warDeploymentTrackingDir.exists() || finalWarDir.exists()) && (System.currentTimeMillis() - startTimestamp) < maxWaitTime)
 				{
@@ -144,8 +177,9 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				(maxWaitTime / 1000) + " seconds."));
 
 			// make sure deployed war is available over HTTP - the file system checks are not enough...
-			if (!httpCheckOK(monitor, startTimestamp, maxWaitTime, getApplicationURL(configuration)) && monitor == null || monitor.isCanceled()) throw new CoreException(
-				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment http check failed after: " + (maxWaitTime / 1000) + " seconds."));
+			if (!httpCheckOK(monitor, startTimestamp, maxWaitTime, getApplicationURL(configuration)) && monitor == null || monitor.isCanceled())
+				throw new CoreException(
+					new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment http check failed after: " + (maxWaitTime / 1000) + " seconds."));
 			if (monitor != null && monitor.isCanceled()) return;
 		}
 		catch (IOException e)
@@ -155,7 +189,19 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		}
 		finally
 		{
-			if (tmpExportFolder != null && tmpExportFolder.exists()) FileUtils.deleteQuietly(tmpExportFolder);
+			if (tmpExportFolder != null && tmpExportFolder.exists())
+			{
+				try
+				{
+					// this could happen if we deleted the war file but undeploy failed once
+					Files.walkFileTree(tmpExportFolder.toPath(), DeletingPathVisitor.withLongCounters());
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+				}
+
+			}
 		}
 
 		//open browser
@@ -304,12 +350,10 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 	private static IBrowserDescriptor getBrowserDescriptor(String browserId)
 	{
-		Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
 		try
 		{
-			while (iterator.hasNext())
+			for (IBrowserDescriptor ewb : BrowserManager.getInstance().getWebBrowsers())
 			{
-				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
 				org.eclipse.ui.internal.browser.IBrowserExt ext = null;
 				if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 				{

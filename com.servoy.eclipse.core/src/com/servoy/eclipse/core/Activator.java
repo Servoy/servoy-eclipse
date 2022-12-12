@@ -103,6 +103,7 @@ import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RadioButtonsDialog;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
@@ -1316,7 +1317,7 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
+					ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
 						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
@@ -1338,7 +1339,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
+								ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
 									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
 										") \nPlease upgrade the developer Help->Check for updates");
 							}
@@ -1350,7 +1351,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								boolean upgrade = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								boolean upgrade = ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
 									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
 										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 

@@ -43,7 +43,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -1258,11 +1258,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
 		IObservableValue getServerNameObserveValue = serverConfigObservable.observePropertyValue("serverName");
-		IObservableValue serverNameTextObserveWidget = SWTObservables.observeText(serverNameField, SWT.Modify);
+		IObservableValue serverNameTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(serverNameField);
 		IObservableValue getUserNameObserveValue = serverConfigObservable.observePropertyValue("userName");
-		IObservableValue userNameTextObserveWidget = SWTObservables.observeText(userNameField, SWT.Modify);
+		IObservableValue userNameTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(userNameField);
 		IObservableValue getPasswordObserveValue = serverConfigObservable.observePropertyValue("password");
-		IObservableValue passwordTextObserveWidget = SWTObservables.observeText(passwordField, SWT.Modify);
+		IObservableValue passwordTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(passwordField);
 		IObservableValue getDataModel_cloneFromObserveValue = new AbstractObservableValue()
 		{
 			@Override
@@ -1284,12 +1284,12 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				serverConfigObservable.setPropertyValue("dataModelCloneFrom", value.equals(ServerConfig.NONE) ? null : value);
 			}
 		};
-		IObservableValue dataModel_cloneFromTextObserveWidget = SWTObservables.observeSelection(dataModel_cloneFromField);
+		IObservableValue dataModel_cloneFromTextObserveWidget = WidgetProperties.widgetSelection().observe(dataModel_cloneFromField);
 		IObservableValue getUrlObserveValue = serverConfigObservable.observePropertyValue("serverUrl");
-		IObservableValue urlTextObserveWidget = SWTObservables.observeText(urlField, SWT.Modify);
+		IObservableValue urlTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(urlField);
 		IObservableValue getDriverObserveValue = serverConfigObservable.observePropertyValue("driver");
-		IObservableValue driverTextObserveWidget = SWTObservables.observeSelection(driverField);
-		IObservableValue catalogSelectionObserveWidget = SWTObservables.observeSelection(catalogField);
+		IObservableValue driverTextObserveWidget = WidgetProperties.widgetSelection().observe(driverField);
+		IObservableValue catalogSelectionObserveWidget = WidgetProperties.widgetSelection().observe(catalogField);
 		IObservableValue getCatalogObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()
@@ -1312,7 +1312,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				serverConfigObservable.setPropertyValue("catalog", value);
 			}
 		};
-		IObservableValue schemaSelectionObserveWidget = SWTObservables.observeSelection(schemaField);
+		IObservableValue schemaSelectionObserveWidget = WidgetProperties.widgetSelection().observe(schemaField);
 		IObservableValue getSchemaObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()
@@ -1337,13 +1337,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		};
 
 		IObservableValue getMaxActiveObserveValue = serverConfigObservable.observePropertyValue("maxActive");
-		IObservableValue maxActiveTextObserveWidget = SWTObservables.observeText(maxActiveField, SWT.Modify);
+		IObservableValue maxActiveTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(maxActiveField);
 		IObservableValue getMaxIdleObserveValue = serverConfigObservable.observePropertyValue("maxIdle");
-		IObservableValue maxIdleTextObserveWidget = SWTObservables.observeText(maxIdleField, SWT.Modify);
+		IObservableValue maxIdleTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(maxIdleField);
 		IObservableValue getIdleTimeoutObserveValue = serverConfigObservable.observePropertyValue("idleTimeout");
-		IObservableValue idleTimeoutTextObserveWidget = SWTObservables.observeText(idleTimoutField, SWT.Modify);
+		IObservableValue idleTimeoutTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(idleTimoutField);
 		IObservableValue getMaxPreparedStatementsIdleObserveValue = serverConfigObservable.observePropertyValue("maxPreparedStatementsIdle");
-		IObservableValue maxPreparedStatementsIdleTextObserveWidget = SWTObservables.observeText(maxPreparedStatementsIdleField, SWT.Modify);
+		IObservableValue maxPreparedStatementsIdleTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(maxPreparedStatementsIdleField);
 		IObservableValue getValidationTypeObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()
@@ -1406,23 +1406,23 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		};
 
-		IObservableValue validationTypeSelectionObserveWidget = SWTObservables.observeSelection(validationTypeField);
+		IObservableValue validationTypeSelectionObserveWidget = WidgetProperties.widgetSelection().observe(validationTypeField);
 		IObservableValue getValidationQueryObserveValue = serverConfigObservable.observePropertyValue("validationQuery");
-		IObservableValue validationQueryTextObserveWidget = SWTObservables.observeText(validationQueryField, SWT.Modify);
+		IObservableValue validationQueryTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(validationQueryField);
 		IObservableValue getEnabledObserveValue = serverConfigObservable.observePropertyValue("enabled");
-		IObservableValue enabledSelectionObserveWidget = SWTObservables.observeSelection(enabledButton);
+		IObservableValue enabledSelectionObserveWidget = WidgetProperties.widgetSelection().observe(enabledButton);
 		IObservableValue getSkipSysTablesObserveValue = serverConfigObservable.observePropertyValue("skipSysTables");
-		IObservableValue skipSysTablesSelectionObserveWidget = SWTObservables.observeSelection(skipSysTablesButton);
+		IObservableValue skipSysTablesSelectionObserveWidget = WidgetProperties.widgetSelection().observe(skipSysTablesButton);
 		IObservableValue proceduresButtonObserveValue = serverSettingsObservable.observePropertyValue("queryProcedures");
-		IObservableValue proceduresButtonSelectionObserveWidget = SWTObservables.observeSelection(proceduresButton);
+		IObservableValue proceduresButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(proceduresButton);
 		IObservableValue clientOnlyConnectionsButtonObserveValue = serverSettingsObservable.observePropertyValue("clientOnlyConnections");
-		IObservableValue clientOnlyConnectionsSelectionObserveWidget = SWTObservables.observeSelection(clientOnlyConnectionsButton);
+		IObservableValue clientOnlyConnectionsSelectionObserveWidget = WidgetProperties.widgetSelection().observe(clientOnlyConnectionsButton);
 		IObservableValue prefixTablesButtonObserveValue = serverConfigObservable.observePropertyValue("prefixTables");
-		IObservableValue prefixTablesButtonSelectionObserveWidget = SWTObservables.observeSelection(prefixTablesButton);
+		IObservableValue prefixTablesButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(prefixTablesButton);
 
 		IObservableValue sortIgnoreCaseButtonObserveValue = serverSettingsObservable.observePropertyValue("sortIgnorecase");
-		IObservableValue sortIgnoreCaseButtonSelectionObserveWidget = SWTObservables.observeSelection(sortIgnoreCaseButton);
-		IObservableValue sortNullprecedenceSelectionObserveWidget = SWTObservables.observeSelection(sortNullprecedenceField);
+		IObservableValue sortIgnoreCaseButtonSelectionObserveWidget = WidgetProperties.widgetSelection().observe(sortIgnoreCaseButton);
+		IObservableValue sortNullprecedenceSelectionObserveWidget = WidgetProperties.widgetSelection().observe(sortNullprecedenceField);
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);

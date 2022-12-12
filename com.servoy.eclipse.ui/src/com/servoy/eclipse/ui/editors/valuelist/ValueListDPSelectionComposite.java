@@ -17,13 +17,13 @@
 package com.servoy.eclipse.ui.editors.valuelist;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -212,11 +212,11 @@ public class ValueListDPSelectionComposite extends Composite
 
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
-		IObservableValue returnDataProviderFieldTextObserveWidget = SWTObservables.observeSelection(returnInDataproviderButton);
-		IObservableValue< ? > getValueListReturnDataProviderObserveValue = PojoObservables.observeValue(this, "returnInDataProvider");
+		IObservableValue returnDataProviderFieldTextObserveWidget = WidgetProperties.widgetSelection().observe(returnInDataproviderButton);
+		IObservableValue< ? > getValueListReturnDataProviderObserveValue = PojoProperties.value("returnInDataProvider").observe(this);
 		getValueListReturnDataProviderObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
-		IObservableValue showInFieldSelectionObserveWidget = SWTObservables.observeSelection(showInFieldButton);
-		IObservableValue< ? > getShowInFieldSelectionObserveValue = PojoObservables.observeValue(this, "showInField");
+		IObservableValue showInFieldSelectionObserveWidget = WidgetProperties.widgetSelection().observe(showInFieldButton);
+		IObservableValue< ? > getShowInFieldSelectionObserveValue = PojoProperties.value("showInField").observe(this);
 		getShowInFieldSelectionObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
 
 		m_bindingContext = new DataBindingContext();

@@ -87,13 +87,17 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.showPermanentHighlight = showHighlight;
         this.editorContentService.executeOnlyAfterInit(() => {
             const elements = this.editorContentService.getAllContentElements();
-            Array.from(elements).forEach((node) => {
+            Array.from(elements).forEach((node,i) => {
                 if (showHighlight) {
                     this.renderer.addClass(node, 'highlight_element');
                 }
                 else {
                     this.renderer.removeClass(node, 'highlight_element');
                 }
+                if (i === Array.from(elements).length-1) {
+					const lastElement = Array.from(node.closest('.svy-form').childNodes).filter(item => item.toString() != '[object Comment]').slice(-1)[0] as HTMLElement;
+					lastElement.style.marginBottom = '1px';
+				}
             });
         });
     }

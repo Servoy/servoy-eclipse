@@ -17,28 +17,16 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.less.PropertiesLessEditorInput;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author emera
@@ -74,26 +62,7 @@ public class ConfigureLessThemeAction extends Action implements ISelectionChange
 		if (node.getRealObject() instanceof ServoyProject)
 		{
 			final ServoyProject project = (ServoyProject)node.getRealObject();
-			Media media = project.getSolution().getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-			Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
-			Path path = new Path(pathPair.getLeft() + pathPair.getRight());
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			try
-			{
-				IWorkbenchPage activePage = EditorUtil.getActivePage();
-				if (activePage != null)
-				{
-					activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)),
-						"com.servoy.eclipse.ui.editors.less.PropertiesLessEditor",
-//						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-//							Platform.getContentTypeManager().getContentType(PropertiesLessEditorInput.ID)).getId(),
-						true);
-				}
-			}
-			catch (PartInitException ex)
-			{
-				ServoyLog.logError(ex);
-			}
+			EditorUtil.openThemeEditor(project.getSolution());
 		}
 	}
 }

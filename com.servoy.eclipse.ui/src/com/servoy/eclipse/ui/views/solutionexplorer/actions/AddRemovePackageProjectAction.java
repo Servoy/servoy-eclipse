@@ -45,6 +45,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -104,12 +105,29 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 				return super.getText(element);
 			}
 		};
-		Object realObject = selection.getRealObject();
+		Object realObject;
+		if (selection != null)
+		{
+			realObject = selection.getRealObject();
+		}
+		else
+		{
+			realObject = null;
+		}
 
-		if (realObject instanceof Solution)
+		if (realObject instanceof Solution || realObject == null)
 		{
 			List<IProject> selectedProjectsList = new ArrayList<IProject>();
-			IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
+			IProject solutionProject;
+			if (realObject == null)
+			{
+				String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getName();
+				solutionProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
+			}
+			else
+			{
+				solutionProject = ServoyModel.getWorkspace().getRoot().getProject(((Solution)realObject).getName());
+			}
 			TreeSelectDialog dialog = null;
 			try
 			{
@@ -143,6 +161,7 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
+				if (realObject == null && selectablePackages.toArray().length == 0) return;
 
 				dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
 					selectionFilter, treeStyle, "Add/Remove Servoy Packages", selectablePackages.toArray(), theSelection, true, "Add/Remove Servoy Packages",

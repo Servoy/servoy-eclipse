@@ -73,11 +73,16 @@ public class IndexPageFilter implements Filter
 
 			return;
 		}
+		File distFolder = null;
+		File indexFile = null;
 		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
-		File distFolder = new File(projectFolder, "dist/app");
-		File indexFile = new File(distFolder, "index.html");
+		if (projectFolder != null)
+		{
+			distFolder = new File(projectFolder, "dist/app");
+			indexFile = new File(distFolder, "index.html");
+		}
 		String solutionName = getSolutionNameFromURI(requestURI);
-		if (indexFile.exists())
+		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||

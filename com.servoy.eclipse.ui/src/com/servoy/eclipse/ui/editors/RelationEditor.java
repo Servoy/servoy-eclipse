@@ -35,7 +35,7 @@ import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -265,7 +265,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		optionsComposite.initDataBindings(this);
 
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
-		IObservableValue nameFieldTextObserveWidget = SWTObservables.observeText(nameField, SWT.Modify);
+		IObservableValue nameFieldTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameField);
 		IObservableValue getRelationNameObserveValue = new AbstractObservableValue()
 		{
 			public Object getValueType()
@@ -389,10 +389,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 				{
 					if (!reuseSource)
 					{
-						Iterator<Column> it = primaryTable.getColumns().iterator();
-						while (it.hasNext())
+						for (Column c : primaryTable.getColumns())
 						{
-							Column c = it.next();
 							ColumnInfo ci = c.getColumnInfo();
 							if (ci != null && foreignTable.getName().equalsIgnoreCase(ci.getForeignType()))
 							{
@@ -404,10 +402,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					}
 					if (!reuseDestination)
 					{
-						Iterator<Column> it = foreignTable.getColumns().iterator();
-						while (it.hasNext())
+						for (Column c : foreignTable.getColumns())
 						{
-							Column c = it.next();
 							ColumnInfo ci = c.getColumnInfo();
 							if (ci != null && primaryTable.getName().equalsIgnoreCase(ci.getForeignType()))
 							{

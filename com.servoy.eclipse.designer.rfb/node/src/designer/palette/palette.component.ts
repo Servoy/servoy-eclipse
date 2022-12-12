@@ -1,5 +1,5 @@
 import { Component, Pipe, PipeTransform, Renderer2 } from '@angular/core';
-import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll } from '../services/editorsession.service';
+import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -11,7 +11,7 @@ import { WindowRefService } from '@servoy/public';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent implements ISupportAutoscroll{
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette{
 
     public searchText: string;
     public activeIds: Array<string>;
@@ -24,50 +24,9 @@ export class PaletteComponent implements ISupportAutoscroll{
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
         private windowRef: WindowRefService) {
-  
-        let layoutType: string;
-        if (urlParser.isAbsoluteFormLayout())
-            layoutType = 'Absolute-Layout';
-        else
-            layoutType = 'Responsive-Layout';
-        this.activeIds = [];
-        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: Array<Package>) => {
-            let packages: Array<Package>
-            let propertyValues: Array<PaletteComp>;
-            if (got[got.length - 1] && got[got.length - 1].propertyValues) {
-                propertyValues = got[got.length - 1].propertyValues;
-                packages = got.slice(0, got.length - 1);
-            }
-            else {
-                packages = got;
-            }
-            for (let i = 0; i < packages.length; i++) {
-                packages[i].id = ('svy_' + packages[i].packageName).replace(/[|&;$%@"<>()+,]/g, '').replace(/\s+/g, '_');
-                this.activeIds.push(packages[i].id);
-                if (packages[i].components) {
-                    for (let j = 0; j < packages[i].components.length; j++) {
-                        if (propertyValues && packages[i].components[j].properties) {
-                            packages[i].components[j].isOpen = false;
-                            //we still need to have the components with properties on the component for filtering
-
-                            if (propertyValues && propertyValues.length && packages[i].components[j].name == 'servoycore-formcomponent') {
-                                const newPropertyValues: Array<PaletteComp> = [];
-                                for (let n = 0; n < propertyValues.length; n++) {
-                                    if (!propertyValues[n].isAbsoluteCSSPositionMix) {
-                                        newPropertyValues.push(propertyValues[n]);
-                                    }
-                                }
-                                packages[i].components[j].components = newPropertyValues;
-                            }
-                            else {
-                                packages[i].components[j].components = propertyValues;
-                            }
-                        }
-                    }
-                }
-            }
-            this.editorSession.getState().packages = packages;
-        });
+        
+        this.editorSession.setPaletteRefresher(this);
+        this.refreshPalette();
         this.windowRef.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'onVariantMouseDown') {
@@ -393,6 +352,52 @@ export class PaletteComponent implements ISupportAutoscroll{
 
     getAutoscrollLockId(): string {
         return 'palette';
+    }
+    
+    refreshPalette(): void {
+        let layoutType: string;
+        if (this.urlParser.isAbsoluteFormLayout())
+            layoutType = 'Absolute-Layout';
+        else
+            layoutType = 'Responsive-Layout';
+        this.activeIds = [];
+        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: Array<Package>) => {
+            let packages: Array<Package>
+            let propertyValues: Array<PaletteComp>;
+            if (got[got.length - 1] && got[got.length - 1].propertyValues) {
+                propertyValues = got[got.length - 1].propertyValues;
+                packages = got.slice(0, got.length - 1);
+            }
+            else {
+                packages = got;
+            }
+            for (let i = 0; i < packages.length; i++) {
+                packages[i].id = ('svy_' + packages[i].packageName).replace(/[|&;$%@"<>()+,]/g, '').replace(/\s+/g, '_');
+                this.activeIds.push(packages[i].id);
+                if (packages[i].components) {
+                    for (let j = 0; j < packages[i].components.length; j++) {
+                        if (propertyValues && packages[i].components[j].properties) {
+                            packages[i].components[j].isOpen = false;
+                            //we still need to have the components with properties on the component for filtering
+
+                            if (propertyValues && propertyValues.length && packages[i].components[j].name == 'servoycore-formcomponent') {
+                                const newPropertyValues: Array<PaletteComp> = [];
+                                for (let n = 0; n < propertyValues.length; n++) {
+                                    if (!propertyValues[n].isAbsoluteCSSPositionMix) {
+                                        newPropertyValues.push(propertyValues[n]);
+                                    }
+                                }
+                                packages[i].components[j].components = newPropertyValues;
+                            }
+                            else {
+                                packages[i].components[j].components = propertyValues;
+                            }
+                        }
+                    }
+                }
+            }
+            this.editorSession.getState().packages = packages;
+        });
     }
 }
 

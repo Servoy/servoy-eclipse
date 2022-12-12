@@ -17,9 +17,12 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,6 +33,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -65,6 +70,9 @@ public class CopySourceFolderAction extends Action
 				"Build is already running, wait for that one to finish");
 			return;
 		}
+		File solutionProjectFolder = Activator.getInstance().getSolutionProjectFolder();
+		if (solutionProjectFolder == null) return;
+
 		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
@@ -89,11 +97,15 @@ public class CopySourceFolderAction extends Action
 						long time = System.currentTimeMillis();
 						console.write("Starting to delete the main target folder: " + Activator.getInstance().getMainTargetFolder() + "\n");
 						WebPackagesListener.setIgnore(true);
-						FileUtils.deleteQuietly(Activator.getInstance().getMainTargetFolder());
+
+						Path path = Activator.getInstance().getMainTargetFolder().toPath();
+						Files.walkFileTree(path, DeletingPathVisitor.withLongCounters());
+
 						console.write("Done deleting the main target folder: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 					}
 					catch (IOException e)
 					{
+						Debug.error(e);
 					}
 					finally
 					{
@@ -115,7 +127,7 @@ public class CopySourceFolderAction extends Action
 				}
 			};
 		}
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), false, true);
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(solutionProjectFolder, false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override

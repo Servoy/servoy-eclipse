@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -35,6 +36,7 @@ import java.util.Enumeration;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,6 +44,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -79,7 +82,14 @@ public class NodeFolderCreatorJob extends Job
 		{
 			if (new File(nodeFolder.getParent(), "src").exists())
 			{
-				FileUtils.deleteQuietly(nodeFolder.getParentFile());
+				try
+				{
+					Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+				}
 			}
 			long startTime = System.currentTimeMillis();
 			long time = startTime;
@@ -139,16 +149,36 @@ public class NodeFolderCreatorJob extends Job
 				fullyGenerated.delete();
 				if (mainPackageJsonChanged)
 				{
-
-					FileUtils.deleteQuietly(nodeFolder.getParentFile());
+					try
+					{
+						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
 					writeConsole(console, "- deleted main target folder, because the root package.json is changed (" +
 						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
 				}
 				else
 				{
 					// delete only the source dirs, so we start clean
-					FileUtils.deleteQuietly(new File(nodeFolder, "src"));
-					FileUtils.deleteQuietly(new File(nodeFolder, "projects"));
+					try
+					{
+						Files.walkFileTree(new File(nodeFolder, "src").toPath(), DeletingPathVisitor.withLongCounters());
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
+					try
+					{
+						Files.walkFileTree(new File(nodeFolder, "projects").toPath(), DeletingPathVisitor.withLongCounters());
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
 					writeConsole(console, "- the solution's sources were changed\r\n- deleted old sources (" +
 						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
 				}
@@ -353,7 +383,14 @@ public class NodeFolderCreatorJob extends Job
 									File target = new File(targetFolder, localPath.toString());
 									if (kind == StandardWatchEventKinds.ENTRY_DELETE)
 									{
-										FileUtils.deleteQuietly(target);
+										try
+										{
+											Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+										}
+										catch (IOException e)
+										{
+											Debug.error(e);
+										}
 									}
 									else if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY)
 									{

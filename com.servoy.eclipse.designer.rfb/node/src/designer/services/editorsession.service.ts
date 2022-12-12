@@ -29,7 +29,8 @@ export class EditorSessionService implements ServiceProvider {
     
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
     variantsScroll = new EventEmitter<{scrollPos: number}>();
-
+    paletteRefresher : ISupportRefreshPalette;
+    
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
         this.services.setServiceProvider(this);
@@ -429,7 +430,15 @@ export class EditorSessionService implements ServiceProvider {
     setDirty(dirty: boolean) {
         this.bIsDirty = dirty;
     }
-
+    
+    refreshPalette(){
+       this.paletteRefresher.refreshPalette();
+    }
+    
+    setPaletteRefresher( refresher : ISupportRefreshPalette){
+        this.paletteRefresher = refresher;
+    }
+    
     registerAutoscroll(scrollComponent: ISupportAutoscroll) {
         if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
         this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
@@ -542,6 +551,10 @@ export interface ISupportAutoscroll {
     onMouseUp(event: MouseEvent): void;
     onMouseMove(event: MouseEvent): void;
     getAutoscrollLockId(): string;
+}
+
+export interface ISupportRefreshPalette{
+    refreshPalette() : void;
 }
 
 export class Variant {
