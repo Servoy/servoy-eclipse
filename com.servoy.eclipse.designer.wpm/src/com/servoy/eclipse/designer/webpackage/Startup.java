@@ -146,54 +146,58 @@ public class Startup implements IStartup
 						List<JSONObject> mustUpdatePackages = new ArrayList<JSONObject>();
 						StringBuilder updatedPackagesNames = new StringBuilder();
 						Set<String> projectPackagesNames = projectPackages.keySet();
-						List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
-						for (JSONObject p : remotePackages)
+						JSONArray remotePackages = GetAllInstalledPackages.getAllInstalledPackages(false, true);
+						for (Object remotePackageObj : remotePackages)
 						{
-							String name = p.optString("name");
-							if (name != null)
+							if (remotePackageObj instanceof JSONObject)
 							{
-								if (projectPackagesNames.contains(name))
+								JSONObject p = (JSONObject)remotePackageObj;
+								String name = p.optString("name");
+								if (name != null)
 								{
-									JSONArray releases = p.optJSONArray("releases");
-									if (releases != null && releases.length() > 0)
+									if (projectPackagesNames.contains(name))
 									{
-										String projectVersion = projectPackages.get(name).getRight();
-
-										// check for must update packages
-										boolean mustUpdate = true;
-										for (int i = releases.length() - 1; i >= 0; i--)
+										JSONArray releases = p.optJSONArray("releases");
+										if (releases != null && releases.length() > 0)
 										{
-											JSONObject releasePackage = releases.optJSONObject(i);
-											if (releasePackage != null)
+											String projectVersion = projectPackages.get(name).getRight();
+
+											// check for must update packages
+											boolean mustUpdate = false;
+											for (int i = releases.length() - 1; i >= 0; i--)
 											{
-												String version = releasePackage.optString("version");
-												if (version != null && (SemVerComparator.compare(version, projectVersion) == 0))
+												JSONObject releasePackage = releases.optJSONObject(i);
+												if (releasePackage != null)
 												{
-													mustUpdate = false;
-													break;
+													String version = releasePackage.optString("version");
+													if (version != null && (SemVerComparator.compare(version, projectVersion) > 0))
+													{
+														mustUpdate = true;
+														break;
+													}
 												}
 											}
-										}
-										if (mustUpdate)
-										{
-											mustUpdatePackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
-												.append(projectVersion).append('\n');
-											mustUpdatePackages.add(p);
-										}
-
-										// add notification for latest release
-										JSONObject latestRelease = releases.optJSONObject(0);
-										if (latestRelease != null)
-										{
-											String version = latestRelease.optString("version");
-											if (version != null && SemVerComparator.compare(version, projectVersion) > 0)
+											if (mustUpdate)
 											{
-												String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
-												if (alreadyNotifiedVersion == null || !alreadyNotifiedVersion.equals(version))
+												mustUpdatePackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
+													.append(projectVersion).append('\n');
+												mustUpdatePackages.add(p);
+											}
+
+											// add notification for latest release
+											JSONObject latestRelease = releases.optJSONObject(0);
+											if (latestRelease != null)
+											{
+												String version = latestRelease.optString("version");
+												if (version != null && SemVerComparator.compare(version, projectVersion) > 0)
 												{
-													updatedPackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
-														.append(projectVersion).append(" -> ").append(version).append('\n');
-													solutionSPMNotificationsVersions.setProperty(name, version);
+													String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
+													if (alreadyNotifiedVersion == null || !alreadyNotifiedVersion.equals(version))
+													{
+														updatedPackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
+															.append(projectVersion).append(" -> ").append(version).append('\n');
+														solutionSPMNotificationsVersions.setProperty(name, version);
+													}
 												}
 											}
 										}
