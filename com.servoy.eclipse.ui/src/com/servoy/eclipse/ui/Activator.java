@@ -71,6 +71,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddRemovePackageProjectAction;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IPersist;
@@ -242,6 +243,12 @@ public class Activator extends AbstractUIPlugin
 												}
 											}
 										}
+										else
+										{
+											AddRemovePackageProjectAction referencesDialog = new AddRemovePackageProjectAction(active);
+											referencesDialog.run();
+										}
+
 									}
 								});
 							}
