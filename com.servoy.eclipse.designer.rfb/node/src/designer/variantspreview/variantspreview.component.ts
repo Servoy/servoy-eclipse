@@ -31,6 +31,10 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	isPopoverVisible = false
 	popoverFooterHeight = 0;
 	document: Document;
+	minPopupWidth = 100;//pixels
+	maxPopupWidth = 30; //percent
+	maxPopupHeight = 300;//pixels
+	hidePopupSize = '100px';
 	
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig, private editorSession: EditorSessionService,
@@ -40,11 +44,6 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			if (value.show) {
 				this.top = value.top;
 				this.left = value.left;
-				if (this.isPopoverClosed) {
-					this.isPopoverClosed = false;
-					this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
-					//we need to switch focus on the inner form else first click on scroll bar will close the popup
-				}
 			} else {
 				this.hidePopover();
 			}
@@ -68,7 +67,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			if (event.data.id === 'resizePopover') {
-                this.setPopoverSizeAndPosition(event.data.popoverWidth, event.data.popoverHeight, event.data.formWidth, event.data.formHeight);
+                this.setPopoverSizeAndPosition(event.data.formWidth, event.data.formHeight);
 				this.showPopover();
             } else if (event.data.id === 'onVariantMouseDown') {
 				this.onVariantMouseDown(event.data.pageX, event.data.pageY);
@@ -78,24 +77,43 @@ export class VariantsPreviewComponent implements AfterViewInit {
         		this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
 			}
         });
+		if (this.isPopoverClosed) {
+			this.isPopoverClosed = false;
+			this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
+			this.hidePopover();
+		}
     }
 
 	hidePopover() {
+		this.editorSession.variantsPopup.emit({status: 'hidden'});
 		if (this.isPopoverVisible) {
 			this.isPopoverVisible = false;
 
 			let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
-			popoverCtrl.style.display = 'none'
-
 			let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-			popover.style.display = 'none';
 
-			let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-			popoverArrow.style.display = 'none';
+			//TODO: set variable popover height (maximum height is limited by the palette)
+			//TODO: set position for popoverArrow relative to popover with dinamic size
+			//let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
+
+			//set popover position
+			//let footer = popover.getElementsByClassName('modal-footer').item(0) as HTMLElement;
+			let body = popover.getElementsByClassName('modal-body').item(0) as HTMLElement;
+
+			popover.style.width = this.hidePopupSize;
+			popover.style.height = this.hidePopupSize;
+		
+			//footer.style.width = this.hidePopupSize;
+			body.style.width = this.hidePopupSize;
+			body.style.height = this.hidePopupSize;
+
+			popoverCtrl.style.top = -1000 + 'px';
+			popoverCtrl.style.left = -1000 + 'px';
 		}	
 	}
 
 	showPopover() {
+		this.editorSession.variantsPopup.emit({status: 'visible'});
 		if (!this.isPopoverVisible) {
 			this.isPopoverVisible = true;
 
@@ -110,12 +128,19 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		}
 	}
 
-	setPopoverSizeAndPosition(width, height: number, formWidth: number, formHeight: number) {
+	setPopoverSizeAndPosition(formWidth: number, formHeight: number) {
+
+		//get max popup width
+		const popoverWidth = Math.round(this.maxPopupWidth * (this.editorContentService.getPallete().offsetWidth + this.editorContentService.getContentArea().offsetWidth) / 100.0);
+
 		//set popover size
 		let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-		let footer = popover.getElementsByClassName('modal-footer').item(0) as HTMLElement;
+		// let footer = popover.getElementsByClassName('modal-footer').item(0) as HTMLElement;
 		let body = popover.getElementsByClassName('modal-body').item(0) as HTMLElement;
 		let scrollbarWidth = 0;
+
+		const width = Math.max(this.minPopupWidth, formWidth);
+		const height = Math.min(formHeight, this.maxPopupHeight);
 
 		let palette = this.editorContentService.getPallete();
 		if (formHeight > height) {
@@ -125,14 +150,14 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		//very first display of the footer contain the footer's height
 		//hiding / showing popup -> footer's height is zero (ng-popup bug?) and overall height is no longer correct
 		//save hight on the first display and use it further
-		if (this.popoverFooterHeight == 0 && footer.clientHeight != 0) {
-			this.popoverFooterHeight = footer.clientHeight
-		}
+		// if (this.popoverFooterHeight == 0 && footer.clientHeight != 0) {
+		// 	this.popoverFooterHeight = footer.clientHeight
+		// }
  
 		popover.style.width = (width + scrollbarWidth + 2 * this.margin) + 'px';
 		popover.style.height = height + 2 * this.margin + Math.floor(this.margin / 2) + this.popoverFooterHeight + 'px';
 		
-		footer.style.width = width + 'px';
+		//footer.style.width = width + 'px';
 		body.style.width = width + 'px';
 		body.style.height = height + this.margin + 'px';
 		
@@ -146,25 +171,13 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		let contentOverlay = this.document.getElementsByClassName('variant-content-overlay').item(0) as HTMLElement;
 		contentArea.style.width = (width + scrollbarWidth) + 'px';
 		contentArea.style.height = height + 'px';
-		contentOverlay.style.width= formWidth + 'px';
+		contentOverlay.style.width= popoverWidth + 'px';
 		contentOverlay.style.height = formHeight + 'px';
 		contentArea.scrollTop = 0;
 	}
 
 	onVariantsClick() {
 		this.hidePopover();
-	}
-
-	onAddVariant(event: MouseEvent) {
-		//TODO: add iplementation
-		event.stopPropagation();
-		console.log('Add variant - not implemented');
-	}
-
-	onEditVariant(event: MouseEvent) {
-		//TODO: add implementation
-		event.stopPropagation();
-		console.log('Edit variant - not implemented');
 	}
 
 	onVariantMouseDown = (pageX, pageY: number) => {

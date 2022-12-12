@@ -14,16 +14,11 @@ export class VariantsContentComponent implements OnInit {
 
     @Input() component: PaletteComp;
 
-    margin = 16; //ng-popover margin
 	variantItemBeingDragged: Node;
 	variantsIFrame: HTMLIFrameElement;
-	size: {width: number, height: number};
 	activeVariant = false;
 
-	rowInterspace = 10;
-	columnInterspace = 20;
-	maxFormSize = {width: 190, height: 240}; 
-
+	private variantsQueryHandler: ReturnType<typeof setInterval>;
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         private windowRef: WindowRefService, private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
@@ -35,6 +30,18 @@ export class VariantsContentComponent implements OnInit {
 			}
 			else {
 			    this.activeVariant = false;
+			}
+		});
+		this.editorSession.variantsPopup.subscribe((value) => {
+			if (value.status === 'visible') {
+				if (this.variantsQueryHandler) {
+					clearInterval(this.variantsQueryHandler);
+				}
+			}
+			if (value.status === 'hidden') {
+				if (this.variantsIFrame) {
+					this.variantsIFrame.contentWindow.postMessage({ id: 'destroyVariants'});
+				}
 			}
 		});
     }
@@ -50,30 +57,27 @@ export class VariantsContentComponent implements OnInit {
             }
         });
     }
-	
+
 	sendStylesToVariantsForm() {
-
-
 		this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
 			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
-			this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
+			if (!this.variantsIFrame) {
+				this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
+			}
 			const message = { 
 				id: 'createVariants', 
 				variants: result as Array<Variant>,
 				model: this.component.model, 
 				name: this.convertToJSName(this.component.name), 
-				tag: this.component.name,
-				rowInterspace: this.rowInterspace,
-				columnInterspace: this.columnInterspace,
-				maxFormSize: this.maxFormSize
 			};
 			this.variantsIFrame.contentWindow.postMessage(message, '*');
+			if (this.variantsQueryHandler) {
+				clearInterval(this.variantsQueryHandler);
+			}
+			this.variantsQueryHandler = setInterval(() => {this.variantsIFrame.contentWindow.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
 		});
-
-		
-
 	}
-				
+		
 	convertToJSName(name: string): string {
         // this should do the same as websocket.ts #scriptifyServiceNameIfNeeded() and ClientService.java #convertToJSName()
         if (name) {
