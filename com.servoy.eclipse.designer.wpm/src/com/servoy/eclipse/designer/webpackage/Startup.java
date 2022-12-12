@@ -160,16 +160,16 @@ public class Startup implements IStartup
 										String projectVersion = projectPackages.get(name).getRight();
 
 										// check for must update packages
-										boolean mustUpdate = true;
+										boolean mustUpdate = false;
 										for (int i = releases.length() - 1; i >= 0; i--)
 										{
 											JSONObject releasePackage = releases.optJSONObject(i);
 											if (releasePackage != null)
 											{
 												String version = releasePackage.optString("version");
-												if (version != null && (SemVerComparator.compare(version, projectVersion) == 0))
+												if (version != null && (SemVerComparator.compare(version, projectVersion) > 0))
 												{
-													mustUpdate = false;
+													mustUpdate = true;
 													break;
 												}
 											}
