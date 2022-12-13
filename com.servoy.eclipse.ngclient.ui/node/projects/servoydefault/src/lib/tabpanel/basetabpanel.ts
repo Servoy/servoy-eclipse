@@ -100,7 +100,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                     this.waitingForServerVisibility[formInWait] = true;
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
-                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName);
+                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
                     this.log.debug(this.log.buildMessage(() => ('svy * Will hide previously selected form (tab): ' + this.selectedTab.containsFormId)));
                     promise.then((ok) => {
                         this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
@@ -110,7 +110,8 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                             this.log.debug(this.log.buildMessage(() => ('svy * Tab \'' + tab.containsFormId + '\': no longer active, ignore making it visible')));
                             // it could be that the server was sending the correct state in the mean time already at the same time
                             // we try to hide it. just call show again to be sure.
-                            if (currentSelectedTab === this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName);
+                            if (currentSelectedTab === this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName,
+                                    this.getTabIndex(this.selectedTab) - 1);
                             return;
                         }
                         if (ok) {
@@ -139,7 +140,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     
     protected setFormVisible(tab: Tab, event) {
         if (tab.containsFormId)
-            this.servoyApi.formWillShow(tab.containsFormId, tab.relationName).finally(() => this.cdRef.markForCheck());
+            this.servoyApi.formWillShow(tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1).finally(() => this.cdRef.markForCheck());
         this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
         const oldSelected = this.selectedTab;
         this.selectedTab = tab;
