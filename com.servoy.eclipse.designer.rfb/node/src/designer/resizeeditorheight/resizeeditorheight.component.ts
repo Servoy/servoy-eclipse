@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -31,8 +31,8 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
     ngOnInit() {
         this.resizerRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
             event.stopPropagation();
-            this.editorContentService.getDocument().addEventListener('mousemove', (event) => this.onMouseMove(event));
-            this.editorContentService.getDocument().addEventListener('mouseup', (event) => this.onMouseUp(event));
+            this.editorContentService.getDocument().addEventListener('mousemove', this.onMouseMove);
+            this.editorContentService.getDocument().addEventListener('mouseup', this.onMouseUp);
             this.lowestPart = null;
                  
             this.contentArea = this.editorContentService.getContentArea();
@@ -54,8 +54,8 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
                         this.lowestPart = ghost;
                     }
                     partHeight = (ghost as HTMLAnchorElement).offsetHeight;
-                    let tmpTop = (ghost as HTMLElement).offsetTop;
-                    let ghostTop = (this.lowestPart as HTMLElement).offsetTop
+                    const tmpTop = (ghost as HTMLElement).offsetTop;
+                    const ghostTop = (this.lowestPart as HTMLElement).offsetTop
                     if (tmpTop > ghostTop) {
                         this.heightLimit = (this.lowestPart as HTMLElement).offsetTop + 5;
                         this.lowestPart = ghost;
@@ -72,10 +72,10 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
         });
     }
 
-    onMouseMove(event: MouseEvent) { 
+    onMouseMove = (event: MouseEvent) => { 
         if (this.dragingEvent) {
             event.stopPropagation();
-            let step = event.pageY - this.mousePoint.y;
+            const step = event.pageY - this.mousePoint.y;
             if ( step != 0 ) {                
                 this.currentPosition += step;
                 if (this.currentPosition >= this.heightLimit) {
@@ -95,11 +95,9 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
         }
     }
 
-    onMouseUp(event: MouseEvent) {
+    onMouseUp = (event: MouseEvent) => {
         if (this.dragingEvent) {
             event.stopPropagation();
-            let id;
-            let changes = {};
 
             this.editorContentService.getDocument().removeEventListener('mousemove', this.onMouseMove);
             this.editorContentService.getDocument().removeEventListener('mouseup', this.onMouseUp);  
@@ -108,13 +106,14 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
                 this.currentPosition = this.heightLimit;
             }
             if (this.lowestPart) {
-                id = this.lowestPart.getAttribute('svy-id');
+                const changes = {};
+                const id = this.lowestPart.getAttribute('svy-id');
                 changes[id] = { 'y': this.currentPosition};
                 this.editorSession.sendChanges(changes); 
             } 
 
-            changes = {};
-            id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
+            const changes = {};
+            const id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
             changes[id] = { 'height': this.currentPosition};
             this.editorSession.sendChanges(changes);
 
@@ -131,7 +130,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
         return 'resize-editor-height';
     }
  
-    updateLocationCallback(changeX: number, changeY: number) {
+    updateLocationCallback(_changeX: number, changeY: number) {
         if (this.currentPosition >= this.heightLimit) {
             for (let index = 0; index < this.ghostContainers.length; index++) {
                 const ghostContainer = this.ghostContainers[index];
