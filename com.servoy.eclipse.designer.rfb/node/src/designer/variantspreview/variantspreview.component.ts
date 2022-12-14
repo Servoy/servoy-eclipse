@@ -90,10 +90,12 @@ export class VariantsPreviewComponent implements AfterViewInit {
 
 	hidePopover(iframeDisplay: string) {
 		this.editorSession.variantsPopup.emit({status: 'hidden'});
-		this.variantsIFrame.style.display = iframeDisplay;
-		const popoverCtrl = this.document.getElementById('VariantsCtrl');
-		popoverCtrl.style.top = this.popupParkingPosition;
-		popoverCtrl.style.left = this.popupParkingPosition;	
+        if (this.variantsIFrame) {
+            this.variantsIFrame.style.display = iframeDisplay;
+            const popoverCtrl = this.document.getElementById('VariantsCtrl');
+            popoverCtrl.style.top = this.popupParkingPosition;
+            popoverCtrl.style.left = this.popupParkingPosition;	
+        }
 	}
 
 	showPopover() {
