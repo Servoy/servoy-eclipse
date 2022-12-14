@@ -120,6 +120,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.equo.chromium.cef.arm.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.tm4e.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.tm4e.language_pack.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -647,6 +655,34 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.6.7"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tm4e.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tm4e.language_pack"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tm4e.languageconfiguration"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tm4e.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
