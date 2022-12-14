@@ -145,7 +145,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 this.nodes = newNodes;
             });
         } else {
-			this.nodes = this.nodes.slice(0,0);
+			this.nodes = new Array<SelectionNode>();
 		}
     }
 
