@@ -59,7 +59,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
         });
     }
 
-    onMouseMove(event: MouseEvent) {
+    onMouseMove = (event: MouseEvent) => {
         if (this.draggingEvent) {
             event.stopPropagation();
             const step = event.pageX - this.mousePoint.x;
@@ -80,7 +80,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
         }
     }
 
-    onMouseUp(event: MouseEvent) {
+    onMouseUp = (event: MouseEvent) => {
         if (this.draggingEvent) {
             event.stopPropagation();
             this.editorContentService.getDocument().removeEventListener('mousemove', this.onMouseMove);
@@ -107,7 +107,8 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
         return 'resize-editor-width';
     }
 
-    updateLocationCallback(changeX: number, changeY: number) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateLocationCallback(changeX: number, _changeY: number) {
         if (this.currentPosition >= this.widthLimit) {
             for (let index = 0; index < this.ghostContainers.length; index++) {
                 this.renderer.setStyle(this.ghostContainers[index], 'width', this.currentPosition +'px');

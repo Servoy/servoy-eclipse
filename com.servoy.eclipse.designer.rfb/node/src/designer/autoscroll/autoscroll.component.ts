@@ -65,7 +65,8 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
         }
     }
 
-    public onMouseLeave(event: MouseEvent) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public onMouseLeave(_event: MouseEvent) {
         if (this.scrollTarget && this.isAutoscrollActive) {
             this.stopAutoscroll();
         }

@@ -544,10 +544,8 @@ export interface ISupportAutoscroll {
 }
 
 export class Variant {
-    category: string;
-    classes: Array<String>;
-    displayName: string;
-    height: number;
     name: string;
-    width: number;
+    category: string;
+    displayName: string;
+    classes: Array<string>;
 }

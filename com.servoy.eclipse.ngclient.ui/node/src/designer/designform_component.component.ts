@@ -43,8 +43,8 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
 			<ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
       <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div (mousedown)="onVariantsMouseDown($event, item)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute">
-                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template> 
+            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute">
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
             </div>
       </div>
       <ng-template  #svyResponsiveDiv  let-state="state" >
@@ -139,7 +139,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
-        this.isVariantForm = (this.name == 'VariantsForm');
+        this.isVariantForm = (this.name === 'VariantsForm');
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
@@ -173,8 +173,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.variantsLoaded = false;
 
                 const attributes = {};
-                attributes["designclass"] =  "variant_item";
-		        attributes["svy-title"] = "flex-item";
+                attributes['designclass'] =  'variant_item';
+		        attributes['svy-title'] = 'flex-item';
 
                 if (!this.variantsContainer) {
                     this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
@@ -183,9 +183,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = new Array<StructureCache>();
 
                 const variants = event.data.variants;
-                for(let index = 0; index < variants.length; index++) {
-                    const variant = variants[index];
-                   
+                for(const variant of variants) {
+
+                    const variantAttributes = Object.assign({}, attributes);
+                    variantAttributes['svy-id'] = variant.name;
                     const model = { width: variant.width + 'px', height: variant.height + 'px' };
 					const componentModel = JSON.parse(JSON.stringify(event.data.model).slice());
                     componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
@@ -196,7 +197,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     componentModel.id = variant.name;
 
                     const insertedVariant = new ComponentCache(null, event.data.name, componentModel,[], model);
-                    this.insertedClone = new StructureCache(null, ["flex-item"], attributes , null, variant.name);
+                    this.insertedClone = new StructureCache(null, ['flex-item'], variantAttributes , null, variant.name);
                     this.insertedClone.addChild(insertedVariant);
                     this.variantsContainer.addChild(this.insertedClone, null);
                     this.insertedVariants.push(this.insertedClone);
@@ -213,8 +214,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
                     }
                     if (this.insertedVariants) {
-                        for (let index = 0; index < this.insertedVariants.length; index++) {//need to remove previous existing variants
-                            this.variantsContainer.removeChild(this.insertedVariants[index]);
+                        for (const insertedVariant of this.insertedVariants) {//need to remove previous existing variants
+                            this.variantsContainer.removeChild(insertedVariant);
                         }
                     }
                 }
@@ -222,7 +223,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = null;
                 this.variantsLoaded = false;
                 this.showWireframe = this.designMode;
-                
+
             }
             if (event.data.id === 'createDraggedComponent') {
                 this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
@@ -311,24 +312,54 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('flex-item');
-        if (!this.variantsLoaded || variants.length == 0) {
+        if (!this.variantsLoaded || variants.length === 0) {
             return;
         }
         const container = this.document.getElementsByClassName('flex').item(0);
         let formWidth = 0;
-        for (let index = 0; index < variants.length; index++) {
-            const variant = variants[index].firstChild.firstChild as Element;
-            formWidth = Math.max(formWidth, variant.clientLeft + variant.clientWidth + 2*this.variantMarginSize);
+        for (const variant of variants) {
+            const variantChild = variant.firstChild.firstChild as Element;
+            formWidth = Math.max(formWidth, variantChild.clientLeft + variantChild.clientWidth + 2*this.variantMarginSize);
         }
         formWidth += 2 * this.formMarginSize;
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
-            formWidth: formWidth,
+            formWidth,
             formHeight: container.clientHeight}, '*');
     }
-    
-    public onVariantsMouseDown(event: MouseEvent, item: ComponentCache | StructureCache | FormComponentCache) {
+
+    public onVariantsMouseDown(event: MouseEvent) {
         event.stopPropagation();
-		this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: item.model}, '*');
+        let targetElement = document.elementFromPoint(event.pageX, event.pageY);
+        if (targetElement.tagName === 'DIV' || targetElement.tagName === 'div') {
+            return; //click outside any element
+        }
+        let variantId: string;
+        //adding 3 pixels to width else, when drag&drop the text on the newly created component will be clipped (????)
+        const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
+        const targetHeight = Math.ceil(targetElement.getBoundingClientRect().height);
+        while (targetElement) {
+            if (targetElement.attributes.getNamedItem('svy-id')) {
+                variantId = targetElement.attributes.getNamedItem('svy-id').nodeValue;
+                break;
+            } else {
+                targetElement = targetElement.parentElement;
+            }
+        }
+        let selectedVariant: StructureCache;
+        if (variantId) {
+            for (const variant of this.insertedVariants) {
+                if (variantId === variant.id) {
+                    selectedVariant = variant;
+                    break;
+                }
+            }
+        }
+        if (selectedVariant) {
+            const model = Object.assign({}, selectedVariant.items[0].model);
+            model.size.width = targetWidth;
+            model.size.height = targetHeight;
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items[0].model}, '*');
+        }
 	}
 
     ngAfterViewInit() {

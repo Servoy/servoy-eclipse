@@ -1,7 +1,5 @@
 
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener, Input, Output, EventEmitter } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { URLParserService } from '../services/urlparser.service';
+import { Component, OnInit, Renderer2, Input } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -20,16 +18,16 @@ export class VariantsContentComponent implements OnInit {
 
 	private variantsQueryHandler: ReturnType<typeof setInterval>;
     
-    constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        private windowRef: WindowRefService, private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
+    constructor(protected readonly renderer: Renderer2, private windowRef: WindowRefService, 
+                private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
 	
 		this.editorSession.variantsTrigger.subscribe((value) => {
 			if (this.component == value.component) {
-			    this.activeVariant = true;
+                this.activeVariant = true;
 				this.sendStylesToVariantsForm();
 			}
 			else {
-			    this.activeVariant = false;
+                this.activeVariant = false;
 			}
 		});
 		this.editorSession.variantsPopup.subscribe((value) => {
@@ -51,6 +49,7 @@ export class VariantsContentComponent implements OnInit {
             //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if ( this.activeVariant)
             {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (event.data.id === 'variantsReady') {
                     this.sendStylesToVariantsForm();
                 }
@@ -59,11 +58,12 @@ export class VariantsContentComponent implements OnInit {
     }
 
 	sendStylesToVariantsForm() {
-		this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
+		void this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
 			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
 			if (!this.variantsIFrame) {
 				this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
 			}
+            this.variantsIFrame.contentWindow.postMessage({ id: 'destroyVariants' }, '*');
 			const message = { 
 				id: 'createVariants', 
 				variants: result as Array<Variant>,
