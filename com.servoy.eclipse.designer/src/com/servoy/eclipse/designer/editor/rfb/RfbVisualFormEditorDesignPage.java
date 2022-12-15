@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,7 +53,6 @@ import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -83,7 +81,6 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -187,7 +184,6 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
-		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(true, partListener);
 		designerPreferences.addPreferenceChangeListener(partListener);
 		createBrowser(parent);
 
@@ -615,8 +611,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		NO_REFRESH, FULL_REFRESH, PALETTE_REFRESH;
 	}
 
-	private final class PartListener
-		implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener, IPersistChangeListener
+	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener
 	{
 		private boolean hidden = false;
 		private RefreshType refresh = RefreshType.NO_REFRESH;
@@ -729,20 +724,6 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				}
 				else refresh = RefreshType.FULL_REFRESH;
 			}
-		}
-
-		@Override
-		public void persistChanges(Collection<IPersist> changes)
-		{
-			Object mediaFile = changes.iterator().next();
-			if (mediaFile instanceof Media myMedia)
-			{
-				if (myMedia.getName().equals("variants.json"))
-				{
-					refresh(true);
-				}
-			}
-
 		}
 	}
 
