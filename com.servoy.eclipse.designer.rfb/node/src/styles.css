@@ -41,3 +41,7 @@ html, body
 .popover { 
 	max-width: 100% !important;
 }
+
+.accordion-button {
+    opacity: 0.7;
+}

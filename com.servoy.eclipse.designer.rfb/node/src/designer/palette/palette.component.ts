@@ -31,8 +31,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'onVariantMouseDown') {
                 //element
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
                 this.onVariantMouseDown(event.data.pageX , event.data.pageY, event.data.model);
             }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'onVariantMouseUp') {
                 //element
                 this.onVariantMouseUp();
@@ -75,10 +77,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
        
         let variantBtn = this.editorContentService.getDocument().elementFromPoint(event.pageX, event.pageY) as HTMLButtonElement;
-        if (variantBtn.type != 'button') { //clicked on the inner element
+        if (variantBtn.tagName === 'I') { //clicked on the inner down arrow
             variantBtn = variantBtn.parentElement as HTMLButtonElement;
         }
-        this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+        if (variantBtn.tagName === 'BUTTON') { //clicked on the inner or button
+            this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+        } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
     onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: any }) {
@@ -136,7 +140,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
         this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
-            if (child.tagName == 'UL') {
+            if (child.tagName === 'DESIGNER-VARIANTSCONTENT') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
             }
         })

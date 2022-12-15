@@ -29,8 +29,9 @@ export class EditorSessionService implements ServiceProvider {
     
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
     variantsScroll = new EventEmitter<{scrollPos: number}>();
+    variantsPopup = new EventEmitter<{status: string}>();
     paletteRefresher : ISupportRefreshPalette;
-    
+
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.services.setServiceProvider(this);
@@ -556,10 +557,8 @@ export interface ISupportRefreshPalette{
 }
 
 export class Variant {
-    category: string;
-    classes: Array<String>;
-    displayName: string;
-    height: number;
     name: string;
-    width: number;
+    category: string;
+    displayName: string;
+    classes: Array<string>;
 }

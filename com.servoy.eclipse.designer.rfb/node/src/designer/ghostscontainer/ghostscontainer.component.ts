@@ -381,8 +381,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 if (this.draggingGhostComponent === null) { 
                     this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]'); 
-                    this.editorSession.consoleLog('Style left: ' + this.draggingGhostComponent.style.left);
-                    this.editorSession.consoleLog('Style top: ' + this.draggingGhostComponent.style.left);
                 }
                 this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
                 this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');

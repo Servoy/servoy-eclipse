@@ -18,9 +18,10 @@
 .palette ul {
     list-style-type: none;
     padding-left: 10px;
-    cursor: copy;
+    cursor: pointer;
      margin-bottom: 0;
 }
+
 
 .palette li {
     padding-top: 0px;
@@ -29,10 +30,20 @@
      margin-bottom: 0;
 }
 
+.palette li>span:hover {
+    background-color: #CCC
+}
+
 .palette img {
     width: 16px;
     height: 16px;
     display: inline-block;
     margin-right: 4px;
     vertical-align: middle;
+}
+
+.accordion {
+    --bs-accordion-active-bg: rgb(255, 187, 55);
+    --bs-accordion-active-color: #212529;
+    --bs-accordion-btn-padding-y: 0.5rem;
 }

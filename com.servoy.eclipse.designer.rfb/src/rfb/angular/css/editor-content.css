@@ -74,3 +74,11 @@
 .containerChildren10 {
 	background-image: url("../images/container-with-10-children.png");
 }
+
+.variant_item {
+	margin: 5px;
+}
+
+.variants_container {
+	margin: 1px;
+}
