@@ -291,7 +291,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             if (event.data.id === 'showWireframe') {
                 this.showWireframe = event.data.value;
-                this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value);
@@ -360,7 +360,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 	}
 
     ngAfterViewInit() {
-        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
+        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit', formname : this.name }, '*');
     }
 
     public detectChanges() {
