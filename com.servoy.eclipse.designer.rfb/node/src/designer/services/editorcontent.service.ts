@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { WindowRefService } from '@servoy/public';
+import { URLParserService } from '../services/urlparser.service';
 
 @Injectable()
 export class EditorContentService {
@@ -17,17 +18,19 @@ export class EditorContentService {
     private topAdjust: number;
     private leftAdjust: number;
     
-    constructor(@Inject(DOCUMENT) private document: Document, private windowRefService: WindowRefService) {
-        windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string }>) => {
+    constructor(@Inject(DOCUMENT) private document: Document, private windowRefService: WindowRefService, private urlParser: URLParserService) {
+        windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string, formname: string }>) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'afterContentInit') {
-                this.contentWasInit = true;
-                this.afterInitCallbacks.forEach(listener => {
-                    listener();
-                });
-                this.afterInitCallbacks.splice(0, this.afterInitCallbacks.length);
+                if (event.data.formname == this.urlParser.getFormName()) {
+                    this.contentWasInit = true;
+                    this.afterInitCallbacks.forEach(listener => {
+                        listener();
+                    });
+                    this.afterInitCallbacks.splice(0, this.afterInitCallbacks.length);
+                }
             }
-            else {
+            else if (!event.data.formname || event.data.formname == this.urlParser.getFormName()){
                 this.contentMessageListeners.forEach(listener => listener.contentMessageReceived(event.data.id, event.data));
             }
 
