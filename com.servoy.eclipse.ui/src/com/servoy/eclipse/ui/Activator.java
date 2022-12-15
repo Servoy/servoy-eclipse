@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,10 +28,13 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -63,6 +67,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -71,7 +76,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddRemovePackageProjectAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageAction;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IPersist;
@@ -223,32 +228,89 @@ public class Activator extends AbstractUIPlugin
 									@Override
 									public void run()
 									{
-										Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-										List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
-										final ListSelectionDialog lsd = new ListSelectionDialog(active, input, new ArrayContentProvider(), new LabelProvider(),
-											"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
-										lsd.setInitialElementSelections(input);
-										lsd.setBlockOnOpen(true);
-										int pressedButton = lsd.open();
-										if (pressedButton == 0)
+										try
 										{
-											List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
-												IAutomaticImportWPMPackages.EXTENSION_ID);
-											if (defaultImports != null && defaultImports.size() > 0)
+											boolean useRef = false;
+											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+											List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+											ArrayList<IProject> packages = new ArrayList<IProject>();
+											IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
+											for (IProject iProject : allProjects)
 											{
-												Object[] result = lsd.getResult();
-												for (Object o : result)
+												if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 												{
-													defaultImports.get(0).importPackage((String)o);
+													String packName = iProject.getName();
+													if (input.contains(packName) ||
+														(packName.equals("servoy-extra-components") && input.contains("servoyextra")))
+													{
+														packages.add(iProject);
+													}
+												}
+											}
+
+											List<String> finalInput = new ArrayList<String>();
+											if (input.size() == packages.size())
+											{
+												useRef = true;
+												finalInput.add("Use reference component(unchecking this option will import the default component)");
+											}
+											else
+											{
+												finalInput = input;
+											}
+
+											final ListSelectionDialog lsd = new ListSelectionDialog(active, finalInput, new ArrayContentProvider(),
+												new LabelProvider(),
+												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
+											lsd.setInitialElementSelections(finalInput);
+											lsd.setBlockOnOpen(true);
+											int pressedButton = lsd.open();
+											if (pressedButton == 0)
+											{
+												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+													IAutomaticImportWPMPackages.EXTENSION_ID);
+												Object[] result = lsd.getResult();
+												if (useRef)
+												{
+													if (result == null || result.length == 0)
+													{
+														if (defaultImports != null && defaultImports.size() > 0)
+														{
+															for (String o : input)
+															{
+																defaultImports.get(0).importPackage(o);
+															}
+														}
+													}
+													else
+													{
+														String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution()
+															.getName();
+														IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
+														IProjectDescription solutionProjectDescription = solutionProject.getDescription();
+														for (IProject o : packages)
+														{
+															AddAsWebPackageAction.addReferencedProjectToDescription(o, solutionProjectDescription);
+														}
+														solutionProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
+													}
+												}
+												else
+												{
+													if (defaultImports != null && defaultImports.size() > 0)
+													{
+														for (Object o : result)
+														{
+															defaultImports.get(0).importPackage((String)o);
+														}
+													}
 												}
 											}
 										}
-										else
+										catch (CoreException e)
 										{
-											AddRemovePackageProjectAction referencesDialog = new AddRemovePackageProjectAction(active);
-											referencesDialog.run();
+											ServoyLog.logError(e);
 										}
-
 									}
 								});
 							}
