@@ -292,11 +292,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
             }
             if (event.data.id === 'showWireframe') {
-                const changed = this.showWireframe != event.data.value;
                 this.showWireframe = event.data.value;
-                if (changed) {
-                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
-                }
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value);
