@@ -734,10 +734,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		@Override
 		public void persistChanges(Collection<IPersist> changes)
 		{
-			Object media = changes.iterator().next();
-			if (media instanceof Media mediaFile)
+			Object mediaFile = changes.iterator().next();
+			if (mediaFile instanceof Media myMedia)
 			{
-				if (mediaFile.getName().equals("variants.json") || mediaFile.getName().endsWith(".less") || mediaFile.getName().endsWith(".css"))
+				if (myMedia.getName().equals("variants.json"))
 				{
 					refresh(true);
 				}
