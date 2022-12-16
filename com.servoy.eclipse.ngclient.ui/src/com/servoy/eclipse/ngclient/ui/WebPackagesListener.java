@@ -956,7 +956,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 									else
 									{
-										writeConsole(console, "- package.json in " + packageFolder + " did not exists; installing this package...");
+										writeConsole(console, "- package.json in " + packageFolder + " did not exist; installing this package...");
 									}
 									// check/copy the dist folder to the target packages location
 									if (!WebPackagesListener.watchCreated.containsKey(packageFolder) || !packageFolder.exists() ||
