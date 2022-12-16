@@ -29,9 +29,6 @@ import { TypesRegistry} from '../sablo/types_registry';
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div (mousedown)="onVariantMouseDown($event, item)" *ngFor="let item of variantElements" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
-          </div>
            <div *ngFor="let item of formCache.formComponents | keyvalue" [svyContainerStyle]="item.value" [svyContainerLayout]="item.value.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.value.model.svyVisible === false, 'inherited_element' : item.value.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item.value)" [ngTemplateOutletContext]="{ state:item.value, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
@@ -39,13 +36,17 @@ import { TypesRegistry} from '../sablo/types_registry';
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
-      <div *ngIf="!formCache.absolute" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
+      <div *ngIf="!formCache.absolute && name!=='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
             <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
-          	</div>
-			<ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
+            </div>
+            <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
-
+      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
+            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute">
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
+            </div>
+      </div>
       <ng-template  #svyResponsiveDiv  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" [ngClass]="getNGClass(state)" class="svy-layoutcontainer">
                <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
@@ -96,18 +97,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
 
     // component viewchild template generate start
-
     @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
     @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
     @ViewChild('servoycoreFormcontainer', { static: true }) readonly servoycoreFormcontainer: TemplateRef<any>;
-
     // component viewchild template generate end
 
     @Input() name: string;
 
     formClasses: string[];
-
     formCache: FormCache;
 
     absolutFormPosition = {};
@@ -115,8 +113,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     draggedElementItem: ComponentCache | StructureCache;
     insertedCloneParent: StructureCache;
     insertedClone: ComponentCache | StructureCache;
-    variantElements: Array<ComponentCache> = new Array<ComponentCache>();
     dragItem: Element;
+    isVariantForm: boolean;
+    variantsContainer: StructureCache;
+    insertedVariants: Array<StructureCache>;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
@@ -125,6 +125,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private dropHighlight: string = null;
     private dropHighlightIgnoredIds: Array<string> = null;
     private allowedChildren: unknown;
+    private formMarginSize = 1;
+    private variantMarginSize = 5;
+    private variantsLoaded = false;
 
     constructor(private formservice: FormService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -136,6 +139,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
 
+        this.isVariantForm = (this.name === 'VariantsForm');
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
@@ -146,8 +150,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
-                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes);
-                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone');
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null ,null, false, model_inserted);
+                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
                     if (event.data.children) {
                         event.data.children.forEach(child => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
@@ -162,67 +166,67 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
+            if (event.data.id === 'sendVariantsSize') {
+                this.sendVariantSizes();
+            }
             if (event.data.id === 'createVariants') {
+                this.variantsLoaded = false;
 
-                const margin = 5;
+                const attributes = {};
+                attributes['designclass'] =  'variant_item';
+                attributes['svy-title'] = 'flex-item';
 
-			    const variants = event.data.variants;
-			    const rowInterspace= event.data.rowInterspace;
-                const columnInterspace= event.data.columnInterspace;
-			    const maxFormSize = event.data.maxFormSize;
+                if (!this.variantsContainer) {
+                    this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
+                }
 
-                let modelTop = margin;
-                const columnsWidth = [0, 0];
-                const columnsHeight = [0, 0];
-                const maxRowIndex = [0, 0];
-                let columnIndex = 0;
+                this.insertedVariants = new Array<StructureCache>();
 
-                maxRowIndex[0] = Math.floor(variants.length / 2) + variants.length % 2;
-                maxRowIndex[1] = variants.length - maxRowIndex[0];
+                const variants = event.data.variants;
+                for(const variant of variants) {
+                    const variantAttributes = Object.assign({}, attributes);
+                    variantAttributes['svy-id'] = variant.name;
+                    const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
-                this.variantElements.splice(0);
+                    const variantElement = new ComponentCache(null, event.data.name, [], layout, typesRegistry, undefined);
+                    variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
 
-                for(let index = 0; index < variants.length; index++) {
-                    const variant = variants[index];
-
-                    //set model
-                    const model = { width: variant.width + 'px', height: variant.height + 'px' };
-                    if (variants.length > 4 && columnIndex === 0 && index >= maxRowIndex[0]) {
-                        columnsHeight[columnIndex] = columnsHeight[columnIndex] - rowInterspace + margin;
-                        columnIndex = 1;
-                        modelTop = margin;
-                    }
-                    columnsWidth[columnIndex] = Math.max(columnsWidth[columnIndex], variant.width);
-					model['left'] =  margin + columnIndex * (columnsWidth[0] + columnInterspace) + 'px' ;
-					model['top'] = modelTop + 'px';
-					modelTop += variant.height + rowInterspace;
-                    columnsHeight[columnIndex] = modelTop;
-                    //end model
-
-                    const variantElement = new ComponentCache('variant_element', event.data.name, [], model /*layout actually*/, typesRegistry, undefined);
-
-                    //set component model
-					variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
-					const componentModel = variantElement.model;
-					componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
-					componentModel._variantName = variant.name;
+                    const componentModel = variantElement.model;
+                    componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
+                    componentModel._variantName = variant.name;
                     componentModel.size.width = variant.width;
                     componentModel.size.height = variant.height;
                     componentModel.text = variant.displayName;
-                    //end component model
+                    componentModel.id = variant.name;
 
-                	this.variantElements.push(variantElement);
-                };
-                const formWidth = margin + columnsWidth[0] + (columnsWidth[1] > 0 ? columnInterspace : 0) + columnsWidth[1] + margin;
-                //we need at least 150px in order to display variants Add and Edit buttons
-                this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
-                    popoverWidth: Math.min( Math.max(150, formWidth), maxFormSize.width),
-                    popoverHeight: Math.min(columnsHeight[0], maxFormSize.height),
-                    formWidth,
-                    formHeight: columnsHeight[0]}, '*');
+                    this.insertedClone = new StructureCache(null, ['flex-item'], variantAttributes , null, variant.name);
+                    this.insertedClone.addChild(variantElement);
+                    this.variantsContainer.addChild(this.insertedClone, null);
+                    this.insertedVariants.push(this.insertedClone);
+                }
+
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
-			}
+                this.variantsLoaded = true;
+            }
+            if (event.data.id === 'destroyVariants') {
+
+                if (this.insertedVariants) {
+                    if (!this.variantsContainer) {
+                        this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
+                    }
+                    if (this.insertedVariants) {
+                        for (const insertedVariant of this.insertedVariants) {//need to remove previous existing variants
+                            this.variantsContainer.removeChild(insertedVariant);
+                        }
+                    }
+                }
+
+                this.insertedVariants = null;
+                this.variantsLoaded = false;
+                this.showWireframe = this.designMode;
+
+            }
             if (event.data.id === 'createDraggedComponent') {
                 this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
                 if (this.insertedClone) {
@@ -294,9 +298,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'showWireframe') {
                 const changed = this.showWireframe !== event.data.value;
                 this.showWireframe = event.data.value;
-                if (changed) {
-                    this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts' }, '*');
-                }
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value, 10);
@@ -312,13 +314,60 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         });
     }
 
-    public onVariantMouseDown(event: MouseEvent, item: ComponentCache) {
+    sendVariantSizes() {
+        const variants = this.document.getElementsByClassName('flex-item');
+        if (!this.variantsLoaded || variants.length === 0) {
+            return;
+        }
+        const container = this.document.getElementsByClassName('flex').item(0);
+        let formWidth = 0;
+        for (const variant of variants) {
+            const variantChild = variant.firstChild.firstChild as Element;
+            formWidth = Math.max(formWidth, variantChild.clientLeft + variantChild.clientWidth + 2*this.variantMarginSize);
+        }
+        formWidth += 2 * this.formMarginSize;
+        this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
+            formWidth,
+            formHeight: container.clientHeight}, '*');
+    }
+
+    public onVariantsMouseDown(event: MouseEvent) {
         event.stopPropagation();
-		this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: item.model}, '*');
-	}
+        let targetElement = document.elementFromPoint(event.pageX, event.pageY);
+        if (targetElement.tagName === 'DIV' || targetElement.tagName === 'div') {
+            return; //click outside any element
+        }
+        let variantId: string;
+        //adding 3 pixels to width else, when drag&drop the text on the newly created component will be clipped (????)
+        const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
+        const targetHeight = Math.ceil(targetElement.getBoundingClientRect().height);
+        while (targetElement) {
+            if (targetElement.attributes.getNamedItem('svy-id')) {
+                variantId = targetElement.attributes.getNamedItem('svy-id').nodeValue;
+                break;
+            } else {
+                targetElement = targetElement.parentElement;
+            }
+        }
+        let selectedVariant: StructureCache;
+        if (variantId) {
+            for (const variant of this.insertedVariants) {
+                if (variantId === variant.id) {
+                    selectedVariant = variant;
+                    break;
+                }
+            }
+        }
+        if (selectedVariant) {
+            const model = Object.assign({}, selectedVariant.items[0].model);
+            model.size.width = targetWidth;
+            model.size.height = targetHeight;
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items[0].model}, '*');
+        }
+    }
 
     ngAfterViewInit() {
-        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit' }, '*');
+        this.windowRefService.nativeWindow.parent.postMessage({ id: 'afterContentInit', formname : this.name }, '*');
     }
 
     public detectChanges() {

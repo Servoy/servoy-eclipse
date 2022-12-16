@@ -64,7 +64,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public ngOnInit() {
       this.listener = this.i18nProvider.listenForI18NMessages(
               'servoy.ngclient.reconnecting').messages((val)=> {
-                this.i18n_reconnecting_feedback = val['servoy.ngclient.reconnecting'];
+                this.i18n_reconnecting_feedback = val.get('servoy.ngclient.reconnecting');
       });
   }
 

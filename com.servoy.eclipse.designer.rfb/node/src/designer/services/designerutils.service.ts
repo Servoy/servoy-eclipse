@@ -67,8 +67,8 @@ export class DesignerUtilsService {
 
     getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
-        if (type == "layout" || (type == "component" && !absoluteLayout)) {
-            const realName = layoutName ? layoutName : "component";
+        if (type == 'layout' || (type == 'component' && !absoluteLayout)) {
+            const realName = layoutName ? layoutName : 'component';
 
             dropTarget = this.getNode(event, true, skipNodeId);
             if (!dropTarget) {
@@ -78,7 +78,7 @@ export class DesignerUtilsService {
                 const isForm = event.clientX > formRect.left && event.clientX < formRect.right &&
                     event.clientY > formRect.top;
                 // this is on the form, can this layout container be dropped on the form?
-                if (!isForm || !topContainer) {
+                if ( (!isForm || !topContainer) && !(type === 'layout' && absoluteLayout)) {
                     return {
                         dropAllowed: false
                     };
@@ -156,7 +156,7 @@ export class DesignerUtilsService {
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
                         let node = dropTarget.childNodes[i];
                         if (node instanceof Element && !node.getAttribute('svy-id')){
-                            node = node.querySelector("[svy-id]");
+                            node = node.querySelector('[svy-id]');
                         }
                         if (node instanceof Element && node.getAttribute('svy-id')) {
                             const clientRec = node.getBoundingClientRect();
@@ -181,10 +181,10 @@ export class DesignerUtilsService {
                     };
                 }
             }
-        } else if (type != "component" && type != "template") {
+        } else if (type != 'component' && type != 'template') {
             dropTarget = this.getNode(event);
-            if (dropTarget && dropTarget.getAttribute("svy-types")) {
-                if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
+            if (dropTarget && dropTarget.getAttribute('svy-types')) {
+                if (dropTarget.getAttribute('svy-types').indexOf(type) <= 0)
                     return {
                         dropAllowed: false
                     }; // the drop target doesn't support this type
@@ -193,8 +193,8 @@ export class DesignerUtilsService {
             }; // ghost has no drop target or the drop target doesn't support any types
         } else {
             dropTarget = this.getNode(event, true);
-            if (componentName !== undefined && dropTarget && dropTarget.getAttribute("svy-forbidden-components")) {
-                if (dropTarget.getAttribute("svy-forbidden-components").indexOf(componentName) > 0)
+            if (componentName !== undefined && dropTarget && dropTarget.getAttribute('svy-forbidden-components')) {
+                if (dropTarget.getAttribute('svy-forbidden-components').indexOf(componentName) > 0)
                     return {
                         dropAllowed: false
                     }; // the drop target doesn't support this component
@@ -212,10 +212,10 @@ export class DesignerUtilsService {
 
     public getParent(dt: Element, realName?: string): Element {
         if (!dt) return null;
-        let allowedChildren = this.editorSession.getAllowedChildrenForContainer(dt.getAttribute("svy-layoutname"));
+        let allowedChildren = this.editorSession.getAllowedChildrenForContainer(dt.getAttribute('svy-layoutname'));
         if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
             // maybe this is a component that has svy-types instead of svy-allowed-childrent
-            const svytypes = dt.getAttribute("svy-types");
+            const svytypes = dt.getAttribute('svy-types');
             if (svytypes) {
                 allowedChildren = svytypes.split(',');
             }
@@ -254,7 +254,7 @@ export class DesignerUtilsService {
                 return node;
             }
             else if (node['offsetParent'] !== null) {
-                const computedStyle = window.getComputedStyle(node, ":before");
+                const computedStyle = window.getComputedStyle(node, ':before');
                 if (parseInt(computedStyle.height) > 0) {
                     //the top and left positions of the before pseudo element are computed as the sum of:
                     //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
@@ -275,9 +275,9 @@ export class DesignerUtilsService {
     isTopContainer(layoutName: string) {
         const packages = this.editorSession.getState().packages;
         for (let i = 0; i < packages.length; i++) {
-            if (packages[i].components[0] && packages[i].components[0].componentType === "layout") {
+            if (packages[i].components[0] && packages[i].components[0].componentType === 'layout') {
                 for (let j = 0; j < packages[i].components.length; j++) {
-                    if (packages[i].components[j].topContainer && packages[i].packageName + "." + packages[i].components[j].layoutName === layoutName) {
+                    if (packages[i].components[j].topContainer && packages[i].packageName + '.' + packages[i].components[j].layoutName === layoutName) {
                         return true;
                     }
                 }
@@ -314,12 +314,12 @@ export class DesignerUtilsService {
     
      getNextElementSibling(element) : Element{
         // find the correct sibbling (the one which has the svy-id)
-        while ( element.parentElement && !element.parentElement.getAttribute("svy-id")){
+        while ( element.parentElement && !element.parentElement.getAttribute('svy-id')){
             element = element.parentElement;
         }
         let sibbling = element.nextElementSibling;
-        if (sibbling && !sibbling.getAttribute("svy-id")){
-            sibbling = sibbling.querySelector("[svy-id]");
+        if (sibbling && !sibbling.getAttribute('svy-id')){
+            sibbling = sibbling.querySelector('[svy-id]');
         }
         return sibbling;
     }

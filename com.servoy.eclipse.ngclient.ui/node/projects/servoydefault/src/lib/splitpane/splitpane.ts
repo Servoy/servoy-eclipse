@@ -57,8 +57,8 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     svyOnChanges(changes: SimpleChanges) {
         if(changes['tabs']) {
-            this.leftTab = this.tabSwitch(this.leftTab, this.tabs?this.tabs[0]:null);
-            this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null);
+            this.leftTab = this.tabSwitch(this.leftTab, this.tabs?this.tabs[0]:null, 0);
+            this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null, 1);
         }
         super.svyOnChanges(changes);
     }
@@ -77,20 +77,20 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
         return this.leftTab?this.leftTab.containsFormId:null;
     }
 
-    private tabSwitch(oldTab: Tab,newTab: Tab): Tab {
+    private tabSwitch(oldTab: Tab,newTab: Tab, index : number): Tab {
         if (oldTab && oldTab.containsFormId && newTab && newTab.containsFormId) {
-            const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName);
+            const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName, index);
             promise.then((ok) => {
                 if (!ok) {
                     // a splitpane can't block the hide so show should be called
-                    this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
+                    this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName, index).
                         finally( () => this.cdRef.detectChanges());
                 }
             });
         } else if (oldTab && oldTab.containsFormId) {
             this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName);
         } else if (newTab && newTab.containsFormId) {
-            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName).
+            this.servoyApi.formWillShow(newTab.containsFormId,newTab.relationName, index).
                         finally( () => this.cdRef.detectChanges());
         }
         return newTab;

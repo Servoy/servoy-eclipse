@@ -104,26 +104,28 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     }
 
     adjustFromContentSize() {
-        const overlay = this.editorContentService.getGlassPane();
-        this.renderer.setStyle(overlay, 'height', '100%');
-        this.renderer.setStyle(overlay, 'width', '100%');
+        this.editorContentService.executeOnlyAfterInit(() => {
+            const overlay = this.editorContentService.getGlassPane();
+            this.renderer.setStyle(overlay, 'height', '100%');
+            this.renderer.setStyle(overlay, 'width', '100%');
 
-        let paletteHeight = '100%';
-        if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
-            const newHeight = this.editorContentService.getContentBodyElement().clientHeight + 30;
-            if (newHeight > this.elementRef.nativeElement.clientHeight) {
-                this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
-                paletteHeight = newHeight + 'px';
+            let paletteHeight = '100%';
+            if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
+                const newHeight = this.editorContentService.getContentBodyElement().clientHeight + 30;
+                if (newHeight > this.elementRef.nativeElement.clientHeight) {
+                    this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
+                    paletteHeight = newHeight + 'px';
+                }
             }
-        }
-        const palette = this.editorContentService.getPallete();
-        this.renderer.setStyle(palette, 'height', paletteHeight);
-        this.renderer.setStyle(palette, 'max-height', paletteHeight);
+            const palette = this.editorContentService.getPallete();
+            this.renderer.setStyle(palette, 'height', paletteHeight);
+            this.renderer.setStyle(palette, 'max-height', paletteHeight);
 
-        // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
-        const contentArea = this.editorContentService.getContentArea();
-        this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 'px');
-        this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 'px');
+            // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
+            const contentArea = this.editorContentService.getContentArea();
+            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 'px');
+            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 'px');
+        });
     }
 
     setContentSizeFull() {

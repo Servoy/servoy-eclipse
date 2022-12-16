@@ -205,11 +205,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            if (result) {
-                this.editorContentService.executeOnlyAfterInit(() => {
-                    this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
-                });
-            }
+            // always send showwireframe because this will also display the ghosts
+            this.editorContentService.executeOnlyAfterInit(() => {
+                this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
+            });
             // TODO:
             // this.editorSession.setContentSizes();
         });

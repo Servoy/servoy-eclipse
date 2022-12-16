@@ -219,7 +219,9 @@ public class DesignerFilter implements Filter
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
-							if (!"Absolute-Layout".equals(layoutType))
+							// hard coded that in absolute layout we get the servoycore (responsive container) layout
+							if ((!"servoycore".equals(key) && !"Absolute-Layout".equals(layoutType)) ||
+								("servoycore".equals(key) && "Absolute-Layout".equals(layoutType)))
 							{
 								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
@@ -331,16 +333,27 @@ public class DesignerFilter implements Filter
 								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
-								PropertyDescription pd = spec.getProperty("size");
-								if (pd != null && pd.getDefaultValue() != null)
+								if ("servoycore-responsivecontainer".equals(spec.getName()))
 								{
-									model.put("size", pd.getDefaultValue());
+									HashMap<String, Number> size = new HashMap<String, Number>();
+									size.put("width", Integer.valueOf(200));
+									size.put("height", Integer.valueOf(200));
+									model.put("size", size);
+									model.put("classes", new String[] { "highlight_element", "svy-responsivecontainer" });
 								}
 								else
 								{
-									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("width", Integer.valueOf(300));
-									model.put("size", size);
+									PropertyDescription pd = spec.getProperty("size");
+									if (pd != null && pd.getDefaultValue() != null)
+									{
+										model.put("size", pd.getDefaultValue());
+									}
+									else
+									{
+										HashMap<String, Number> size = new HashMap<String, Number>();
+										size.put("width", Integer.valueOf(300));
+										model.put("size", size);
+									}
 								}
 								layoutJson.put("model", new JSONObject(model));
 								if (spec.getIcon() != null)

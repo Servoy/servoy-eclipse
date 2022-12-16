@@ -41,17 +41,17 @@ export class FileUploadWindowComponent {
             'servoy.filechooser.label.name',
             'servoy.button.cancel',
             'servoy.filechooser.error').messages((val) => {
-                this.i18n_upload = val['servoy.filechooser.button.upload'];
+                this.i18n_upload = val.get('servoy.filechooser.button.upload');
                 if (this.isMultiselect())
-                    this.i18n_chooseFiles = val['servoy.filechooser.upload.addFiles'];
+                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFiles');
                 else
-                    this.i18n_chooseFiles = val['servoy.filechooser.upload.addFile'];
-                this.i18n_cancel = val['servoy.button.cancel'];
-                this.i18n_selectedFiles = val['servoy.filechooser.selected.files'];
-                this.i18n_nothingSelected = val['servoy.filechooser.nothing.selected'];
-                this.i18n_remove = val['servoy.filechooser.button.remove'];
-                this.i18n_name = val['servoy.filechooser.label.name'];
-                this.genericError = val['servoy.filechooser.error'];
+                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFile');
+                this.i18n_cancel = val.get('servoy.button.cancel');
+                this.i18n_selectedFiles = val.get('servoy.filechooser.selected.files');
+                this.i18n_nothingSelected = val.get('servoy.filechooser.nothing.selected');
+                this.i18n_remove = val.get('servoy.filechooser.button.remove');
+                this.i18n_name = val.get('servoy.filechooser.label.name');
+                this.genericError = val.get('servoy.filechooser.error');
                 if (!this.title) this.title = this.i18n_chooseFiles;
             });
     }

@@ -28,9 +28,13 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	left = 0;
 	placement = 'right';
 	isPopoverClosed = true;
-	isPopoverVisible = false
 	popoverFooterHeight = 0;
 	document: Document;
+	minPopupWidth = 100;
+	maxPopupWidth = 240;
+	maxPopupHeight = 300;
+    popupParkingPosition = '-10000px';
+    scrollbarwidth = 32;
 	
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig, private editorSession: EditorSessionService,
@@ -40,19 +44,14 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			if (value.show) {
 				this.top = value.top;
 				this.left = value.left;
-				if (this.isPopoverClosed) {
-					this.isPopoverClosed = false;
-					this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
-					//we need to switch focus on the inner form else first click on scroll bar will close the popup
-				}
 			} else {
-				this.hidePopover();
+				this.hidePopover('block');
 			}
 		});
 
 		this.editorSession.variantsScroll.subscribe((value) => {
 			if (!this.isPopoverClosed) {
-				let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
+				const popoverCtrl = this.document.getElementById('VariantsCtrl');
 				popoverCtrl.style.top = this.top - value.scrollPos + 'px';
 			}
 		});
@@ -68,106 +67,82 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			if (event.data.id === 'resizePopover') {
-                this.setPopoverSizeAndPosition(event.data.popoverWidth, event.data.popoverHeight, event.data.formWidth, event.data.formHeight);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                this.setPopoverSizeAndPosition(event.data.formWidth, event.data.formHeight);
 				this.showPopover();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (event.data.id === 'onVariantMouseDown') {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 				this.onVariantMouseDown(event.data.pageX, event.data.pageY);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			} else if (event.data.id === 'variantsReady') {
 				this.variantsIFrame = this.document.getElementById('VariantsForm') as HTMLIFrameElement;
 				this.variantsIFrame.contentWindow.document.body.addEventListener('mouseup', this.onMouseUp);
-        		this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
+                this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
 			}
         });
+		if (this.isPopoverClosed) {
+			this.isPopoverClosed = false;
+			this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
+			this.hidePopover('block');
+		}
     }
 
-	hidePopover() {
-		if (this.isPopoverVisible) {
-			this.isPopoverVisible = false;
-
-			let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
-			popoverCtrl.style.display = 'none'
-
-			let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-			popover.style.display = 'none';
-
-			let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-			popoverArrow.style.display = 'none';
-		}	
+	hidePopover(iframeDisplay: string) {
+		this.editorSession.variantsPopup.emit({status: 'hidden'});
+        if (this.variantsIFrame) {
+            this.variantsIFrame.style.display = iframeDisplay;
+            const popoverCtrl = this.document.getElementById('VariantsCtrl');
+            popoverCtrl.style.top = this.popupParkingPosition;
+            popoverCtrl.style.left = this.popupParkingPosition;	
+        }
 	}
 
 	showPopover() {
-		if (!this.isPopoverVisible) {
-			this.isPopoverVisible = true;
-
-			let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
-			popoverCtrl.style.display = 'block'
-
-			let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-			popover.style.display = 'block';
-
-			let popoverArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-			popoverArrow.style.display = 'block';
-		}
+		this.editorSession.variantsPopup.emit({status: 'visible'});
 	}
 
-	setPopoverSizeAndPosition(width, height: number, formWidth: number, formHeight: number) {
+	setPopoverSizeAndPosition(formWidth: number, formHeight: number) {
+
 		//set popover size
-		let popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
-		let footer = popover.getElementsByClassName('modal-footer').item(0) as HTMLElement;
-		let body = popover.getElementsByClassName('modal-body').item(0) as HTMLElement;
-		let scrollbarWidth = 0;
+		const popover = this.document.getElementsByClassName('popover-body').item(0) as HTMLElement;
+		// let footer = popover.getElementsByClassName('modal-footer').item(0) as HTMLElement;
+		const body = popover.getElementsByClassName('modal-body').item(0) as HTMLElement;
 
-		let palette = this.editorContentService.getPallete();
+		const width = Math.max(this.minPopupWidth, formWidth);
+		const height = Math.min(formHeight, this.maxPopupHeight);
+
+		const palette = this.editorContentService.getPallete();
+        let scrollbarWidth = 0;
 		if (formHeight > height) {
-			scrollbarWidth = palette.offsetWidth - palette.scrollWidth + 1; //all developer scroll width are the same
-		}
-
-		//very first display of the footer contain the footer's height
-		//hiding / showing popup -> footer's height is zero (ng-popup bug?) and overall height is no longer correct
-		//save hight on the first display and use it further
-		if (this.popoverFooterHeight == 0 && footer.clientHeight != 0) {
-			this.popoverFooterHeight = footer.clientHeight
+			scrollbarWidth = 30;
 		}
  
 		popover.style.width = (width + scrollbarWidth + 2 * this.margin) + 'px';
 		popover.style.height = height + 2 * this.margin + Math.floor(this.margin / 2) + this.popoverFooterHeight + 'px';
 		
-		footer.style.width = width + 'px';
 		body.style.width = width + 'px';
 		body.style.height = height + this.margin + 'px';
-		
 
 		//set popover position
-		let popoverCtrl = this.document.getElementById('VariantsCtrl') as HTMLElement;
+		const popoverCtrl = this.document.getElementById('VariantsCtrl');
 		popoverCtrl.style.top = this.top - palette.scrollTop + 'px';
 		popoverCtrl.style.left = this.left + 'px';
 
-		let contentArea = this.document.getElementsByClassName('variant-content-area').item(0) as HTMLElement;
-		let contentOverlay = this.document.getElementsByClassName('variant-content-overlay').item(0) as HTMLElement;
+		const contentArea = this.document.getElementsByClassName('variant-content-area').item(0) as HTMLElement;
+		const contentOverlay = this.document.getElementsByClassName('variant-content-overlay').item(0) as HTMLElement;
 		contentArea.style.width = (width + scrollbarWidth) + 'px';
 		contentArea.style.height = height + 'px';
-		contentOverlay.style.width= formWidth + 'px';
+		contentOverlay.style.width= this.maxPopupWidth + 'px';
 		contentOverlay.style.height = formHeight + 'px';
 		contentArea.scrollTop = 0;
 	}
 
-	onVariantsClick() {
-		this.hidePopover();
+	onVariantsClick = () => {
+		this.hidePopover('block');
 	}
 
-	onAddVariant(event: MouseEvent) {
-		//TODO: add iplementation
-		event.stopPropagation();
-		console.log('Add variant - not implemented');
-	}
-
-	onEditVariant(event: MouseEvent) {
-		//TODO: add implementation
-		event.stopPropagation();
-		console.log('Edit variant - not implemented');
-	}
-
-	onVariantMouseDown = (pageX, pageY: number) => {
+	onVariantMouseDown = (pageX: number, pageY: number) => {
 		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY).cloneNode(true) as Element;
 		this.renderer.setStyle(this.variantItemBeingDragged, 'left',pageX + 'px');
         this.renderer.setStyle(this.variantItemBeingDragged, 'top', pageY + 'px');
@@ -185,15 +160,15 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		}
 	}
 
-	onMouseMove = (event: MouseEvent) => {
-		if (this.variantItemBeingDragged && this.isPopoverVisible) {
+	onMouseMove = () => {
+		if (this.variantItemBeingDragged) {
 			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
 			this.variantItemBeingDragged = null;
-		 	this.hidePopover();
+			this.hidePopover('none');
 		}
 	}
 
-	onAreaMouseUp(event: MouseEvent) {
+	onAreaMouseUp = (event: MouseEvent) => {
 		//avoid palette receiving this event (and trigger a popup close) when click inside variants area
 		event.stopPropagation();
 	}
