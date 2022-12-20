@@ -314,8 +314,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         if (!this.variantsLoaded || variants.length === 0) {
             return;
         }
-        const container = this.document.getElementsByClassName('flex').item(0);
+        const container = this.document.getElementsByClassName('flex').item(0).parentElement;
         let formWidth = 0;
+        const containerHeight = Math.ceil(container.getBoundingClientRect().height);
         for (const variant of variants) {
             const variantChild = variant.firstChild.firstChild as Element;
             formWidth = Math.max(formWidth, variantChild.clientLeft + variantChild.clientWidth + 2*this.variantMarginSize);
@@ -333,9 +334,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             return; //click outside any element
         }
         let variantId: string;
-        //adding 3 pixels to width else, when drag&drop the text on the newly created component will be clipped (????)
-        const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
-        const targetHeight = Math.ceil(targetElement.getBoundingClientRect().height);
         while (targetElement) {
             if (targetElement.attributes.getNamedItem('svy-id')) {
                 variantId = targetElement.attributes.getNamedItem('svy-id').nodeValue;
@@ -344,6 +342,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 targetElement = targetElement.parentElement;
             }
         }
+        const targetHeight = Math.ceil(targetElement.getBoundingClientRect().height); //height of the flex item
+        targetElement = targetElement.firstElementChild;
+        //not adding 3 px then the text content is getting clipped after drop
+        const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
+        
         let selectedVariant: StructureCache;
         if (variantId) {
             for (const variant of this.insertedVariants) {
