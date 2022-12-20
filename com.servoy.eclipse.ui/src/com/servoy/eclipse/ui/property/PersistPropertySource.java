@@ -223,6 +223,7 @@ import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
@@ -1459,7 +1460,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 						}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 				}
-				else if (propertyType == StyleClassPropertyType.INSTANCE)
+				else if (propertyType == StyleClassPropertyType.INSTANCE || propertyType == NGStyleClassPropertyType.NG_INSTANCE)
 				{
 					resultingPropertyDescriptor = createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
 				}
@@ -2029,7 +2030,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
 						{
-							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc);
+							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc, persistContext.getPersist());
 						}
 						return defaultValue;
 					}
