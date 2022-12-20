@@ -130,13 +130,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private variantsLoaded = false;
 
     constructor(private formservice: FormService,
-        private servoyService: ServoyService, logFactory: LoggerFactory,
-        private changeHandler: ChangeDetectorRef,
-        private el: ElementRef, protected renderer: Renderer2,
-        @Inject(DOCUMENT) private document: Document,
-        private windowRefService: WindowRefService,
-        private typesRegistry: TypesRegistry) {
+            private servoyService: ServoyService, logFactory: LoggerFactory,
+            private changeHandler: ChangeDetectorRef,
+            private el: ElementRef, protected renderer: Renderer2,
+            @Inject(DOCUMENT) private document: Document,
+            private windowRefService: WindowRefService,
+            private typesRegistry: TypesRegistry) {
+
         super(renderer);
+        formservice.setDesignerMode();
         this.log = logFactory.getLogger('FormComponent');
 
         this.isVariantForm = (this.name === 'VariantsForm');

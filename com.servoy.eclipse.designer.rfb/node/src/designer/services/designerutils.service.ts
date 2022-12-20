@@ -17,13 +17,11 @@ export class DesignerUtilsService {
             let correctWidth = position.width;
             let correctHeight = position.height;
             let currentNode = node.parentElement;
-            while (correctWidth == 0 || correctHeight == 0) {
-                const parentPosition = currentNode?.getBoundingClientRect();
-                if (parentPosition) {
-					correctWidth = parentPosition.width;
-					correctHeight = parentPosition.height;
-					currentNode = currentNode.parentElement;
-				}
+            while ((correctWidth == 0 || correctHeight == 0) && currentNode) {
+                const parentPosition = currentNode.getBoundingClientRect();
+				correctWidth = parentPosition.width;
+				correctHeight = parentPosition.height;
+				currentNode = currentNode.parentElement;
             }
             if (position.width == 0) position.width = correctWidth;
             if (position.height == 0) position.height = correctHeight;

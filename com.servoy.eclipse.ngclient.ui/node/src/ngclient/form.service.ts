@@ -26,6 +26,7 @@ export class FormService {
      * When this is set to true, Proxy triggers of any SHALLOW/DEEP (property pushToServer) properties will be ignored as they are not client side generated changes.
      */
     private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+    private isInDesigner = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
         private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
@@ -440,6 +441,10 @@ export class FormService {
         }
     }
 
+    public setDesignerMode() {
+        this.isInDesigner = true;
+    }
+
     private setChangeListenerIfSmartProperty(propertyValue: any, formName: string, componentName: string, propertyName: string) {
         if (instanceOfChangeAwareValue(propertyValue)) {
             // setChangeListener can be called now after the new client side type was applied (which already happened before this method was called)
@@ -459,6 +464,8 @@ export class FormService {
     }
 
     private dataPush(formName: string, componentName: string, propertyName: string, newValue: any, oldValue: any) {
+        if (this.isInDesigner) return; // form designer doesn't send stuff back to server (doesn't even have access to wsSession in SabloService to do that)
+
         if (!isChanged(newValue, oldValue)) {
             this.log.spam(this.log.buildMessage(() => ('form service * dataPush (sendChanges) denied; no changes detected between new and old value!')));
             return;
@@ -494,6 +501,8 @@ export class FormService {
     }
 
     private applyDataprovider(formName: string, componentName: string, propertyName: string, newValue: any, oldValue: any) {
+        if (this.isInDesigner) return; // form designer doesn't send stuff back to server (doesn't even have access to wsSession in SabloService to do that)
+
         const formState = this.formsCache.get(formName);
         FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, formState.getClientSideType(componentName, propertyName),
             newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
