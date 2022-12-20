@@ -2029,7 +2029,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
 						{
-							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc);
+							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc, persistContext.getPersist());
 						}
 						return defaultValue;
 					}

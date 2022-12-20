@@ -157,7 +157,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			}
 			else if (value != null && getConverter(pd) != null)
 			{
-				value = getConverter(pd).fromDesignValue(value, pd);
+				value = getConverter(pd).fromDesignValue(value, pd, this);
 			}
 		}
 		return (val != JSONObject.NULL) ? value : null;
