@@ -185,9 +185,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = new Array<StructureCache>();
 
                 const variants = event.data.variants;
+                let index = 0;
                 for(const variant of variants) {
                     const variantAttributes = Object.assign({}, attributes);
-                    variantAttributes['svy-id'] = variant.name;
+                    const variantId = 'variantId_' + index++;
+                    variantAttributes['svy-id'] = variantId;
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
                     const variantElement = new ComponentCache(null, event.data.name, [], layout, typesRegistry, undefined);
@@ -201,7 +203,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     componentModel.text = variant.displayName;
                     componentModel.id = variant.name;
 
-                    this.insertedClone = new StructureCache(null, ['flex-item'], variantAttributes , null, variant.name);
+                    this.insertedClone = new StructureCache(null, ['flex-item'], variantAttributes , null, variantId);
                     this.insertedClone.addChild(variantElement);
                     this.variantsContainer.addChild(this.insertedClone, null);
                     this.insertedVariants.push(this.insertedClone);

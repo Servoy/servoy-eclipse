@@ -498,20 +498,27 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
 							.getJSONObject("options").getJSONArray("styles");
 						boolean[] stylesChanged = new boolean[] { false };
-						for (CssLib style : cssLibs)
+						if (cssLibs.size() + 1 != styles.length())
 						{
-							boolean[] styleFound = new boolean[] { false };
-							String styleUrl = style.getUrl().replace("~", "./node_modules/");
-							styles.forEach(existingStyle -> {
-								if (existingStyle.toString().equals(styleUrl))
-								{
-									styleFound[0] = true;
-								}
-							});
-							if (!styleFound[0])
+							stylesChanged[0] = true;
+						}
+						else
+						{
+							for (CssLib style : cssLibs)
 							{
-								stylesChanged[0] = true;
-								break;
+								boolean[] styleFound = new boolean[] { false };
+								String styleUrl = style.getUrl().replace("~", "./node_modules/");
+								styles.forEach(existingStyle -> {
+									if (existingStyle.toString().equals(styleUrl))
+									{
+										styleFound[0] = true;
+									}
+								});
+								if (!styleFound[0])
+								{
+									stylesChanged[0] = true;
+									break;
+								}
 							}
 						}
 						if (stylesChanged[0])
