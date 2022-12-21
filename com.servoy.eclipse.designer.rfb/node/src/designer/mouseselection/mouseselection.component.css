@@ -131,3 +131,10 @@
     pointer-events: auto;
     z-index: 1000;
 }
+
+.showWireframe.maxLevelDesign {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: rgb(211, 211, 211);
+    background-image: url("../assets/images/zoom_in.png");
+}
