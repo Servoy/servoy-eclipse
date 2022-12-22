@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.eventthread.WebsocketSessionWindows;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
@@ -47,6 +48,7 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
+import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.IWindow;
@@ -609,6 +611,27 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		if (formComponentsComponents.size() > 0)
 		{
 			baseComponents.addAll(formComponentsComponents);
+		}
+
+		EmbeddableJSONWriter compSpecsToSend = null;
+		for (IFormElement baseComponent : baseComponents)
+		{
+			FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+			String specName = fe.getWebComponentSpec().getName();
+			compSpecsToSend = sendComponentSpecToClientIfNeeded(compSpecsToSend, fe, specName);
+		}
+		if (compSpecsToSend != null)
+		{
+			compSpecsToSend.endObject();
+			final EmbeddableJSONWriter clientSideSpecsToSend = compSpecsToSend;
+			CurrentWindow.runForWindow(new WebsocketSessionWindows(this), new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					getTypesRegistryService().addComponentClientSideSpecs(clientSideSpecsToSend);
+				}
+			});
 		}
 
 		JSONWriter writer = new JSONStringer();

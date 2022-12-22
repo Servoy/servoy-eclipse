@@ -132,7 +132,7 @@ export class EditorContentService {
                         // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
                     }
 
-                    if (elem.type === 'servoycoreFormcomponent' || elem.type === 'servoycoreListformcomponent') {
+                    if (elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') {
                         const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
                         const layout: { [property: string]: string } = {};
                         if (!elem.responsive) {
