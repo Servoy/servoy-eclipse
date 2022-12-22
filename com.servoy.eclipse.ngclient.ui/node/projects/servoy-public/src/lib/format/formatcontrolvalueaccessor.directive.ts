@@ -73,7 +73,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
         this.hasFocus = false;
-        if (this.format.display && !this.format.isMask) {
+        const inputType = this.getType();
+        if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
         }
     }

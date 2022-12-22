@@ -2,7 +2,7 @@
 	#popover="ngbPopover" [ngbPopover]="popoverContent" [placement]="placement" 
 	style="position: absolute; top: -10000px; left: -1000px; display: block;"
 	(click)="onVariantsClick()">
-   <i class="fa fa-angle-down fa-xs" aria-hidden="true"></i>
+        <i name="variants" class="fa fa-ellipsis" aria-hidden="true"></i>
 </button>
 <ng-template #popoverContent let-popOv="popOv" let-clientURL="clientURL">
 	<div class="modal-body">
