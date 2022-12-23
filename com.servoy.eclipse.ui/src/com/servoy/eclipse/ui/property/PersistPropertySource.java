@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Point;
 import java.beans.IntrospectionException;
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
@@ -146,6 +147,7 @@ import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormController;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
@@ -176,6 +178,7 @@ import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -1469,6 +1472,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					resultingPropertyDescriptor = createVariantPropertyController(persistContext.getPersist(), id, displayName, flattenedEditingSolution);
 				}
+				else if (propertyType == LabelForPropertyType.INSTANCE)
+				{
+					resultingPropertyDescriptor = createLabelForPropertyController(id, displayName, form, flattenedEditingSolution);
+				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
 					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE);
@@ -1517,7 +1524,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						resultingPropertyDescriptor = retVal;
 					}
 					else if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE ||
-						propertyType == LabelForPropertyType.INSTANCE || propertyType == VariantPropertyType.INSTANCE)
+						propertyType == VariantPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
 							new ICellEditorFactory()
@@ -1791,6 +1798,78 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				values != null ? (String)values.getRealDefault() : null, tooltip, null);
 		}
 		return propertyController;
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param form
+	 * @param flattenedSolution
+	 * @return
+	 */
+	public static PropertyController<String, ? > createLabelForPropertyController(Object id, String displayName, Form frm, FlattenedSolution fs)
+	{
+
+		final FlattenedSolution flattenedEditingSolution = fs;
+		Form flattenedForm = flattenedEditingSolution.getFlattenedForm(frm);
+		int bodyStart = -1, bodyEnd = -1;
+		if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
+		{
+			bodyStart = 0;
+			Iterator<Part> parts = flattenedForm.getParts();
+			while (parts.hasNext())
+			{
+				Part part = parts.next();
+				if (part.getPartType() == Part.BODY)
+				{
+					bodyEnd = part.getHeight();
+					break;
+				}
+				bodyStart = part.getHeight();
+			}
+		}
+
+		List<String> names = new ArrayList<String>();
+		for (IPersist object : flattenedForm.getAllObjectsAsList())
+		{
+			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
+			{
+				boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+					!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
+				if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
+				{
+					// TableView, add elements in the body
+					Point location = ((IFormElement)object).getLocation();
+					add = (location != null && location.y >= bodyStart && location.y < bodyEnd);
+				}
+				if (add)
+				{
+					names.add(((IFormElement)object).getName());
+				}
+			}
+			else if (object instanceof LayoutContainer)
+			{
+				((LayoutContainer)object).acceptVisitor(new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						boolean add = (o instanceof WebComponent &&
+							!((WebComponent)o).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
+						if (add)
+						{
+							names.add(((WebComponent)o).getName());
+						}
+						return IPersistVisitor.CONTINUE_TRAVERSAL;
+					}
+				});
+			}
+		}
+		String[] array = names.toArray(new String[names.size()]);
+		Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
+
+		return new EditableComboboxPropertyController(id, displayName, array, null);
 	}
 
 	/**
