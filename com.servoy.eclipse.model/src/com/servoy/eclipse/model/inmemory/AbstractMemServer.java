@@ -58,6 +58,7 @@ import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.dataprocessing.datasource.JSConnectionDefinition;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.ColumnName;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -84,7 +85,6 @@ import com.servoy.j2db.server.util.SQLKeywords;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -461,7 +461,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServer#getTenantColumns()
 	 */
 	@Override
-	public List<Pair<String, String>> getTenantColumns() throws RepositoryException, RemoteException
+	public List<ColumnName> getTenantColumns() throws RepositoryException, RemoteException
 	{
 		return emptyList();
 	}
