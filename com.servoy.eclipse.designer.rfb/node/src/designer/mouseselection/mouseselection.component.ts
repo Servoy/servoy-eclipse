@@ -22,7 +22,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     leftAdjust: number;
     contentRect: DOMRect;
     lassostarted = false;
-
+    lastTimestamp: number;
+     
     mousedownpoint: Point;
     fieldLocation: Point;
     selectedRefSubscription: Subscription;
@@ -98,9 +99,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
         //fix this
         if (redrawDecorators) {
-       //     setTimeout(() => {
-                this.redrawDecorators();
-       //     }, 400);
+            //     setTimeout(() => {
+            this.redrawDecorators();
+            //     }, 400);
         }
     }
 
@@ -138,15 +139,15 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName,
-                            autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                         })
                     }
                 });
                 this.nodes = newNodes;
             });
         } else {
-			this.nodes = new Array<SelectionNode>();
-		}
+            this.nodes = new Array<SelectionNode>();
+        }
     }
 
     private calculateAdjustToMainRelativeLocation() {
@@ -175,7 +176,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
-			
+
             this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
@@ -199,6 +200,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 return;
             }
         }
+        
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
             const elements = this.editorContentService.getAllContentElements();
             const newNodes = new Array<SelectionNode>();
@@ -226,7 +228,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName: layoutName,
-                        autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                     };
                     newNodes.push(newNode);
                     newSelection.push(node.getAttribute('svy-id'))
@@ -279,7 +281,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName: layoutName,
-                        autowizardProperties:  this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                     };
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
@@ -309,6 +311,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.lassostarted = false;
         this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
         this.applyWireframe();
+        
+        if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
+            // dblclick event; is not triggered by event
+            if (this.nodes && this.nodes.length > 0 && this.nodes[0].maxLevelDesign) {
+                this.editorSession.executeAction('zoomIn');
+            }
+        }
+        this.lastTimestamp = event.timeStamp;
     }
 
     private applyWireframe() {
@@ -386,7 +396,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         event.stopPropagation();
         this.editorSession.executeAction('copy');
     }
-    
+
     openWizardAction(event: MouseEvent, property: string) {
         event.stopPropagation();
         this.editorSession.openConfigurator(property);

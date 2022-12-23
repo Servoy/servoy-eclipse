@@ -54,6 +54,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
@@ -223,6 +224,7 @@ import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
@@ -1459,9 +1461,13 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 						}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 				}
-				else if (propertyType == StyleClassPropertyType.INSTANCE)
+				else if (propertyType == StyleClassPropertyType.INSTANCE || propertyType == NGStyleClassPropertyType.NG_INSTANCE)
 				{
 					resultingPropertyDescriptor = createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
+				}
+				else if (propertyType == VariantPropertyType.INSTANCE)
+				{
+					resultingPropertyDescriptor = createVariantPropertyController(persistContext.getPersist(), id, displayName, flattenedEditingSolution);
 				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
@@ -1795,6 +1801,47 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param styleLookupname
 	 * @return
 	 */
+	public static PropertyController<String, ? > createVariantPropertyController(IPersist persist, Object id, String displayName, FlattenedSolution fs)
+	{
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+			((WebComponent)persist).getTypeName());
+		String category = spec.getStyleVariantCategory();
+		JSONArray variantsForCategory = fs.getVariantsHandler().getVariantsForCategory(category);
+
+		String[] variantIds = new String[variantsForCategory.length()];
+		String[] variantNames = new String[variantsForCategory.length()];
+
+		for (var i = 0; i < variantsForCategory.length(); i++)
+		{
+			JSONObject variant = variantsForCategory.getJSONObject(i);
+			variantIds[i] = variant.getString("name");
+			variantNames[i] = variant.getString("displayName");
+		}
+
+		ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(variantIds, variantNames);
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved);
+//		{
+//			@Override
+//			protected String getWarningMessage()
+//			{
+//				if (getModel().getRealValues().length == 1)
+//				{
+//					// only 1 value (DEFAULT)
+//					return "No style classes available for lookup '" + styleLookupname + "'";
+//				}
+//				return null;
+//			}
+//		};
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param styleLookupname
+	 * @return
+	 */
 	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, Object id, String displayName,
 		final String styleLookupname, Form form)
 	{
@@ -2029,7 +2076,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
 						{
-							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc);
+							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc, persistContext.getPersist());
 						}
 						return defaultValue;
 					}

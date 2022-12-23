@@ -99,7 +99,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     @HostListener('document:click', ['$event'])
     onClick(event: MouseEvent) {
 		if (event.offsetX > 50 && event.offsetY > 50) {
-			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY, isAbsoluteFormLayout: this.urlParser.isAbsoluteFormLayout() }, '*');
 		}
     }
 
