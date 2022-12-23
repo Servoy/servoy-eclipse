@@ -315,16 +315,16 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             return;
         }
         const container = this.document.getElementsByClassName('flex').item(0).parentElement;
+        const formHeight = Math.ceil(container.getBoundingClientRect().height);
         let formWidth = 0;
-        const containerHeight = Math.ceil(container.getBoundingClientRect().height);
         for (const variant of variants) {
             const variantChild = variant.firstChild.firstChild as Element;
-            formWidth = Math.max(formWidth, variantChild.clientLeft + variantChild.clientWidth + 2*this.variantMarginSize);
+            formWidth = Math.max(formWidth, variantChild.clientLeft + Math.ceil(variantChild.getBoundingClientRect().width) + 2*this.variantMarginSize);
         }
         formWidth += 2 * this.formMarginSize;
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
             formWidth,
-            formHeight: container.clientHeight}, '*');
+            formHeight}, '*');
     }
 
     public onVariantsMouseDown(event: MouseEvent) {
@@ -487,7 +487,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     public isFormAvailable(name: string): boolean {
-        // console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
         return this.formservice.hasFormCacheEntry(name);
     }
 

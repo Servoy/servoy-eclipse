@@ -6,7 +6,8 @@ import { EditorContentService } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-variantscontent',
-    templateUrl: './variantscontent.component.html'
+    templateUrl: './variantscontent.component.html',
+    styleUrls: ['./variantscontent.component.css'],
 })
 export class VariantsContentComponent implements OnInit {
 
@@ -15,6 +16,8 @@ export class VariantsContentComponent implements OnInit {
 	variantItemBeingDragged: Node;
 	variantsIFrame: HTMLIFrameElement;
 	activeVariant = false;
+    firstQuery = true;
+
 
 	private variantsQueryHandler: ReturnType<typeof setInterval>;
     
@@ -57,6 +60,12 @@ export class VariantsContentComponent implements OnInit {
         });
     }
 
+    getVariantContentMargin() {
+        //TODO: find a better way to do right alignment of variantscontent component
+        //maybe using divs. For now adding this line due to time contraints
+        return this.component.name === 'bootstrapcomponents-button' ? '30px' : '37px';
+    }
+
 	sendStylesToVariantsForm() {
 		void this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
 			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
@@ -74,7 +83,13 @@ export class VariantsContentComponent implements OnInit {
 			if (this.variantsQueryHandler) {
 				clearInterval(this.variantsQueryHandler);
 			}
-			this.variantsQueryHandler = setInterval(() => {this.variantsIFrame.contentWindow.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
+            this.firstQuery = true;
+			this.variantsQueryHandler = setInterval(() => {
+                if (this.firstQuery) {
+                    this.firstQuery = false;
+                    return;
+                }
+                this.variantsIFrame.contentWindow.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
 		});
 	}
 		
