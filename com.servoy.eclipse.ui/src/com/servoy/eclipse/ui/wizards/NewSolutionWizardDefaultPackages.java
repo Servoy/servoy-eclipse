@@ -182,7 +182,7 @@ public class NewSolutionWizardDefaultPackages
 	{
 		try
 		{
-			if (downloadedPackages.containsKey(name) && /*hack for hackathon follows because it would always download and use bootstrap.zip with old specs no matter what the version we had integrated*/!"bootstrapcomponents".equals(name))
+			if (downloadedPackages.containsKey(name))
 			{
 				File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
 				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));

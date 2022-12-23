@@ -71,7 +71,7 @@ public class WebPackageManagerEndpoint
 			message = incomingPartialMessage.toString();
 			incomingPartialMessage.setLength(0);
 		}
-		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
+		String handleMessage = this.webPackagesServiceHandler.handleMessage(message);
 		send(handleMessage);
 	}
 

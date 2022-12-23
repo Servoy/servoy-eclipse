@@ -1,0 +1,8 @@
+.variantBtn {
+	background-color: transparent;
+    border: 0px;
+    border-radius: 3px;
+}
+.variantBtn:hover {
+  background-color: lightgray;
+}
