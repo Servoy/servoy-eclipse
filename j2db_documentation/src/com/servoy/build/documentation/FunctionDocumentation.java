@@ -1015,6 +1015,7 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 			{
 				Element argType = arguments.next();
 				String ccs = argType.attributeValue(ATTR_TYPECODE);
+
 				Class< ? > cc = null;
 				try
 				{
@@ -1022,7 +1023,7 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				}
 				catch (Throwable e)
 				{
-					System.out.println("Cannot load type from '" + type + "' at argument type of function '" + name + "'.");
+					System.out.println("Cannot load type from '" + type + "' at argument type " + ccs + "  of function '" + name + "'.");
 				}
 				if (cc != null)
 				{
