@@ -18,6 +18,8 @@
 package com.servoy.eclipse.model.inmemory;
 
 
+import static java.util.Collections.emptyList;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -56,6 +58,7 @@ import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.dataprocessing.datasource.JSConnectionDefinition;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.ColumnName;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -452,6 +455,16 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IServer#getTenantColumns()
+	 */
+	@Override
+	public List<ColumnName> getTenantColumns() throws RepositoryException, RemoteException
+	{
+		return emptyList();
+	}
 
 	private void deletePersist(TableNode persist)
 	{
