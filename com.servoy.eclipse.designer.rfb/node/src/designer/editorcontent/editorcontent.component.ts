@@ -123,8 +123,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
 
             // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
             const contentArea = this.editorContentService.getContentArea();
-            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 'px');
-            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 'px');
+            //add a small scroll space in order to make margins visible
+            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 20 + 'px');
+            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 20 + 'px');
         });
     }
 
