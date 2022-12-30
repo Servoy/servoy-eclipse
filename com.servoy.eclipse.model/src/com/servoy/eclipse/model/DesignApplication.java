@@ -57,6 +57,7 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.RuntimeWindowManager;
 import com.servoy.j2db.cmd.ICmdManager;
 import com.servoy.j2db.dataprocessing.ClientInfo;
+import com.servoy.j2db.dataprocessing.DataServerProxy;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.FoundSetManagerConfig;
@@ -224,6 +225,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IDataServer getDataServer()
 	{
 		return getClient().getDataServer();
+	}
+
+	public DataServerProxy getDataServerProxy()
+	{
+		return getClient().getDataServerProxy();
 	}
 
 	public IClientHost getClientHost()
