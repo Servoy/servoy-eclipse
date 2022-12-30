@@ -15,20 +15,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>${tycho.version}</version>
-				<configuration>
-					<environments>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
-							<arch>aarch64</arch>
-						</environment>
-					</environments>
-				</configuration>
-			</plugin>
-			<plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
                 <version>1.6.7</version>

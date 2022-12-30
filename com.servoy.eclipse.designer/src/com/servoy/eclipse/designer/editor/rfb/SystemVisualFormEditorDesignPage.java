@@ -105,4 +105,10 @@ public class SystemVisualFormEditorDesignPage extends RfbVisualFormEditorDesignP
 	{
 		browser.setFocus();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#refreshPersists(java.util.List, boolean)
+	 */
 }

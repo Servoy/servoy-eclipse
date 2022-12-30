@@ -51,7 +51,7 @@ import com.servoy.j2db.ClientVersion;
 public class NGDesktopConfiguration extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/2022.12.0/ngdesktop-versions-2022.12.txt";
+	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/2023.03.0/ngdesktop-versions-2023.03.txt";
 	private static List<String> remoteVersions = new ArrayList<String>();
 
 	private Combo srcVersionCombo;

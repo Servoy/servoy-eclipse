@@ -170,10 +170,17 @@ public class Startup implements IStartup
 												if (releasePackage != null)
 												{
 													String version = releasePackage.optString("version");
-													if (version != null && (SemVerComparator.compare(version, projectVersion) > 0))
+													if (version != null)
 													{
-														mustUpdate = true;
-														break;
+														// we have at least one version we could update to
+														if (!mustUpdate) mustUpdate = true;
+
+														if (SemVerComparator.compare(version, projectVersion) <= 0)
+														{
+															// project version is the same or better then a compatible one, so update can be skipped
+															mustUpdate = false;
+															break;
+														}
 													}
 												}
 											}
