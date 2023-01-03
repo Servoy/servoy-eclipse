@@ -90,7 +90,11 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     onKeyUp(event: KeyboardEvent) {
         // delete , f4 (open form hierarchy) and f5
         if (event.keyCode == 46 || event.keyCode == 115 || event.keyCode == 116) {
+           
             this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
+            if (event.keyCode == 46) {//delete key
+                this.editorSession.setSelection([]); //select the form
+            }
             return false;
         }
         return true;
