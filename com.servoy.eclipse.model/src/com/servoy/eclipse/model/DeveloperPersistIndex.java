@@ -302,7 +302,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				// if this is a WebCustomType this can be created multiply times for the same thing
 				// we should check if it is the same parent and the same index then assume this is the same thing
 				boolean isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
-					(existingPersist.getAncestor(IRepository.WEBCOMPONENTS) == persist.getAncestor(IRepository.WEBCOMPONENTS)) &&
+					(existingPersist.getAncestor(IRepository.WEBCOMPONENTS).getUUID().equals(persist.getAncestor(IRepository.WEBCOMPONENTS).getUUID())) &&
 					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex()));
 				if (isDifferent)
 				{
