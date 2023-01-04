@@ -29,7 +29,7 @@ export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivEl
                 }
                 break;
             case 'foreground':
-                this.renderer.setStyle(this.getNativeElement(), 'borderColor', change.currentValue ? change.currentValue : '#000000');
+                if (change.currentValue) this.renderer.setStyle(this.getNativeElement(), 'borderColor', change.currentValue);
                 break;
             case 'roundedRadius':
                 this.renderer.setStyle(this.getNativeElement(), 'borderRadius', change.currentValue/2 + 'px');
