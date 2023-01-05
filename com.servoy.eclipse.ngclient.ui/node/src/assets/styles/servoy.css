@@ -412,6 +412,10 @@ fieldset[disabled] .btn-default.focus {
   border-color: #ccc;
 }
 
+.btn-default:disabled{
+    border-color: #ccc;
+}
+
 .svy-main-window-container {
 	z-index: 0;
 }
