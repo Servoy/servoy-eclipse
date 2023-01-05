@@ -209,7 +209,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     svyOnInit() {
         super.svyOnInit();
 
-        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1 && !this.servoyApi.isInDesigner() && this.containedForm.absoluteLayout;
+        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1
+            && !this.servoyApi.isInDesigner() && this.containedForm?.absoluteLayout;
         if (this.useScrolling) {
             this.agGridOptions = {
                 context: {
