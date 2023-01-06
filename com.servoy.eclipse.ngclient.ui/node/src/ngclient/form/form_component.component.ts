@@ -334,7 +334,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             const me = this;
             // eslint-disable-next-line
             func = function(event) {
-                if (event) event.preventDefault();
+                if (event && event.preventDefault instanceof Function) event.preventDefault();
                 return me.formservice.executeEvent(me.name, item.name, handler, ignoreNGBlockDuplicateEvents, arguments);
             };
             itemCache[handler] = func;
