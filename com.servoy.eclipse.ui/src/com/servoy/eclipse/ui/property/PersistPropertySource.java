@@ -1882,7 +1882,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 */
 	public static PropertyController<String, ? > createVariantPropertyController(IPersist persist, Object id, String displayName, FlattenedSolution fs)
 	{
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 			((IBasicWebObject)persist).getTypeName());
 		String category = spec.getStyleVariantCategory();
 		JSONArray variantsForCategory = fs.getVariantsHandler().getVariantsForCategory(category);
