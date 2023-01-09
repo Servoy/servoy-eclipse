@@ -132,8 +132,10 @@ public class AutoWizardPropertiesComposite
 		natTable.setLayerPainter(new HorizontalGridLineCellLayerPainter());
 
 		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration();
-		natTable.addConfiguration(
-			new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext, flattenedSolution));
+		PainterConfiguration painterConfiguration = new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext,
+			flattenedSolution);
+		natTable.addConfiguration(painterConfiguration);
+		natTable.addDisposeListener((e) -> painterConfiguration.dispose());
 		natTable.addConfiguration(linkClickConfiguration);
 		composeLayer.addConfiguration(new AbstractLayerConfiguration<AbstractLayer>()
 		{

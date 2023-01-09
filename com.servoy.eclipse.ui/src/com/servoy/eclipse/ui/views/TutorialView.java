@@ -48,6 +48,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.Image;
@@ -173,10 +174,10 @@ public class TutorialView extends ViewPart
 			Label nameLabel = new Label(mainContainer, SWT.NONE);
 			nameLabel.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			nameLabel.setText(dataModel.optString("name"));
-			FontDescriptor descriptor = FontDescriptor.createFrom(nameLabel.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			descriptor = descriptor.increaseHeight(12);
-			nameLabel.setFont(descriptor.createFont(this.getViewSite().getShell().getDisplay()));
+			FontDescriptor boldFontWithDifferentHeightDescriptor = FontDescriptor.createFrom(nameLabel.getFont()).setStyle(SWT.BOLD).increaseHeight(12);
+			Font boldFontWithDifferentHeight = boldFontWithDifferentHeightDescriptor.createFont(this.getViewSite().getShell().getDisplay());
+			nameLabel.setFont(boldFontWithDifferentHeight);
+			nameLabel.addDisposeListener((e) -> boldFontWithDifferentHeightDescriptor.destroyFont(boldFontWithDifferentHeight));
 
 			JSONArray steps = dataModel.optJSONArray("steps");
 			if (steps != null)
@@ -250,11 +251,13 @@ public class TutorialView extends ViewPart
 					Label name = new Label(row, SWT.WRAP);
 					name.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 					name.setText(dataTutorialsList.getJSONObject(i).optString(hasDivider ? "divider" : "title"));
-					name.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
-					FontDescriptor descriptor = FontDescriptor.createFrom(name.getFont());
-					descriptor = descriptor.setStyle(hasDivider ? SWT.BOLD : SWT.ITALIC);
-					descriptor = descriptor.increaseHeight(hasDivider ? 7 : 5);
-					name.setFont(descriptor.createFont(mainContainer.getDisplay()));
+					Cursor handCursor = mainContainer.getDisplay().getSystemCursor(SWT.CURSOR_HAND);
+					name.setCursor(handCursor);
+					FontDescriptor fontDescriptor = FontDescriptor.createFrom(name.getFont()).setStyle(hasDivider ? SWT.BOLD : SWT.ITALIC)
+						.increaseHeight(hasDivider ? 7 : 5);
+					Font font = fontDescriptor.createFont(mainContainer.getDisplay());
+					name.setFont(font);
+					name.addDisposeListener((e) -> fontDescriptor.destroyFont(font));
 
 					Label description = new Label(row, SWT.WRAP);
 					description.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
@@ -262,9 +265,10 @@ public class TutorialView extends ViewPart
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 					gd.widthHint = widthHint - 90;
 					description.setLayoutData(gd);
-					descriptor = FontDescriptor.createFrom(description.getFont());
-					descriptor = descriptor.increaseHeight(2);
-					description.setFont(descriptor.createFont(mainContainer.getDisplay()));
+					FontDescriptor fontWithMoreHeightDescriptor = FontDescriptor.createFrom(description.getFont()).increaseHeight(2);
+					Font fontWithMoreHeight = fontWithMoreHeightDescriptor.createFont(mainContainer.getDisplay());
+					description.setFont(fontWithMoreHeight);
+					description.addDisposeListener((e) -> fontWithMoreHeightDescriptor.destroyFont(fontWithMoreHeight));
 
 					if (!hasDivider)
 					{
@@ -278,9 +282,7 @@ public class TutorialView extends ViewPart
 						buttonsComposite.setLayout(buttonsLayout);
 
 						StyledText openLink = createDefaultColorsStyledText(buttonsComposite, "open tutorial");
-						openLink.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
-						descriptor = FontDescriptor.createFrom(openLink.getFont());
-						openLink.setFont(descriptor.createFont(mainContainer.getDisplay()));
+						openLink.setCursor(handCursor);
 						openLink.addMouseListener(new MouseAdapter()
 						{
 							@Override
@@ -300,9 +302,7 @@ public class TutorialView extends ViewPart
 						createDefaultColorsStyledText(buttonsComposite, " / ");
 
 						StyledText watchVideo = createDefaultColorsStyledText(buttonsComposite, "watch video");
-						watchVideo.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
-						descriptor = FontDescriptor.createFrom(watchVideo.getFont());
-						watchVideo.setFont(descriptor.createFont(mainContainer.getDisplay()));
+						watchVideo.setCursor(handCursor);
 						watchVideo.addMouseListener(new MouseAdapter()
 						{
 							@Override
@@ -359,7 +359,8 @@ public class TutorialView extends ViewPart
 			Image image = uiActivator.loadImageFromBundle("list_orange_24px.png", false);
 			listButton.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			listButton.setToolTipText("Go back to tutorials list");
-			listButton.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
+			Cursor handCursor = mainContainer.getDisplay().getSystemCursor(SWT.CURSOR_HAND);
+			listButton.setCursor(handCursor);
 			listButton.setImage(image);
 			listButton.setSize(40, 40);
 			listButton.addMouseListener(new MouseAdapter()
@@ -379,7 +380,7 @@ public class TutorialView extends ViewPart
 			image = uiActivator.loadImageFromBundle("play_orange_24px.png", false);
 			currentTutorial.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			currentTutorial.setToolTipText("Play the video for this tutorial.");
-			currentTutorial.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
+			currentTutorial.setCursor(handCursor);
 			currentTutorial.setImage(image);
 			currentTutorial.setSize(40, 40);
 			currentTutorial.addListener(SWT.Selection, new Listener()
@@ -411,7 +412,7 @@ public class TutorialView extends ViewPart
 				GridData gridData = new GridData();
 				gridData.horizontalAlignment = GridData.END;
 				nextTutorial.setLayoutData(gridData);
-				nextTutorial.setCursor(new Cursor(mainContainer.getDisplay(), SWT.CURSOR_HAND));
+				nextTutorial.setCursor(handCursor);
 				nextTutorial.addListener(SWT.Selection, new Listener()
 				{
 					@Override
@@ -454,10 +455,10 @@ public class TutorialView extends ViewPart
 			Label stepName = new Label(row, SWT.NONE);
 			stepName.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			stepName.setText(index + ". " + rowData.optString("name"));
-			FontDescriptor descriptor = FontDescriptor.createFrom(stepName.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			descriptor = descriptor.increaseHeight(6);
-			stepName.setFont(descriptor.createFont(parent.getDisplay()));
+			FontDescriptor fontDescriptor = FontDescriptor.createFrom(stepName.getFont()).setStyle(SWT.BOLD).increaseHeight(6);
+			Font font = fontDescriptor.createFont(parent.getDisplay());
+			stepName.setFont(font);
+			stepName.addDisposeListener((e) -> fontDescriptor.destroyFont(font));
 
 			String description = rowData.optString("description");
 			// separate the code snippet from the description
@@ -498,10 +499,11 @@ public class TutorialView extends ViewPart
 			StyleRange styleRange = getDefaultColorStyleRange(0, 6, true);
 			styleRange.underline = true;
 			//gifURL.setStyleRange(styleRange);
-			gifURL.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
-			descriptor = FontDescriptor.createFrom(gifURL.getFont());
-			descriptor = descriptor.setHeight(10);
-			gifURL.setFont(descriptor.createFont(parent.getDisplay()));
+			gifURL.setCursor(parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+			FontDescriptor fontDescriptor1 = FontDescriptor.createFrom(gifURL.getFont()).setHeight(10);
+			Font font1 = fontDescriptor1.createFont(parent.getDisplay());
+			gifURL.setFont(font1);
+			gifURL.addDisposeListener((e) -> fontDescriptor1.destroyFont(font1));
 			gifURL.addMouseListener(new MouseAdapter()
 			{
 				@Override
@@ -654,9 +656,10 @@ public class TutorialView extends ViewPart
 			StyledText styledText = new StyledText(row, SWT.WRAP | SWT.READ_ONLY);
 			styledText.setText(removeHTMLTags(text, images));
 			styledText.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-			FontDescriptor descriptor = FontDescriptor.createFrom(styledText.getFont());
-			descriptor = descriptor.increaseHeight(2);
-			styledText.setFont(descriptor.createFont(parent.getDisplay()));
+			FontDescriptor fontDescriptor = FontDescriptor.createFrom(styledText.getFont()).increaseHeight(2);
+			Font font = fontDescriptor.createFont(parent.getDisplay());
+			styledText.setFont(font);
+			styledText.addDisposeListener((e) -> fontDescriptor.destroyFont(font));
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = widthHint - 70;
 			styledText.setLayoutData(gd);
@@ -766,17 +769,14 @@ public class TutorialView extends ViewPart
 			codeSnippet.setLayoutData(gdCode);
 			int margin = 5;
 			codeSnippet.setMargins(margin, margin, margin, margin);
-			FontDescriptor descriptor = FontDescriptor.createFrom(codeSnippet.getFont());
-			descriptor = descriptor.increaseHeight(2);
-			codeSnippet.setFont(descriptor.createFont(codeWrapper.getDisplay()));
-			codeSnippet.addDisposeListener(new DisposeListener()
-			{
-				@Override
-				public void widgetDisposed(DisposeEvent e)
+			FontDescriptor fontDescriptor = FontDescriptor.createFrom(codeSnippet.getFont()).increaseHeight(2);
+			Font font = fontDescriptor.createFont(codeWrapper.getDisplay());
+			codeSnippet.setFont(font);
+			codeSnippet.addDisposeListener((e) ->
 				{
 					color.dispose();
-				}
-			});
+					fontDescriptor.destroyFont(font);
+				});
 		}
 	}
 

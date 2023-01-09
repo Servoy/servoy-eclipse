@@ -588,11 +588,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 				GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-				FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
-				descriptor = descriptor.setStyle(SWT.BOLD);
+				FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
 				Font font = descriptor.createFont(getShell().getDisplay());
 
-				addLabel(composite, backgroundColor, gd, "Module", font);
+				addLabel(composite, backgroundColor, gd, "Module", font).addDisposeListener((e) -> descriptor.destroyFont(font));
 				addLabel(composite, backgroundColor, gd, "Workspace Version", font);
 				addLabel(composite, backgroundColor, gd, "Import Version", font);
 				addLabel(composite, backgroundColor, gd, "Action Taken", font);
@@ -610,13 +609,15 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				return super.createCustomArea(parent);
 			}
 
-			protected void addLabel(Composite composite, Color backgroundColor, GridData gd, String text, Font font)
+			protected Label addLabel(Composite composite, Color backgroundColor, GridData gd, String text, Font font)
 			{
 				Label l = new Label(composite, SWT.NONE);
 				l.setBackground(backgroundColor);
 				l.setLayoutData(gd);
 				if (font != null) l.setFont(font);
 				l.setText(text);
+
+				return l;
 			}
 		}
 

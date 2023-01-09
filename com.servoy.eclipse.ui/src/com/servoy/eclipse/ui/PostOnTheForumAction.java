@@ -44,6 +44,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -186,9 +187,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			Label topicLabel = new Label(topLevel, SWT.NONE);
 			topicLabel.setText("Topic");
 			topicLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			FontDescriptor descriptor = FontDescriptor.createFrom(topicLabel.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			topicLabel.setFont(descriptor.createFont(getShell().getDisplay()));
+			FontDescriptor descriptor = FontDescriptor.createFrom(topicLabel.getFont()).setStyle(SWT.BOLD);
+			Font font = descriptor.createFont(getShell().getDisplay());
+			topicLabel.setFont(font);
+			topicLabel.addDisposeListener((e) -> descriptor.destroyFont(font));
 
 			topicsCombo = new Combo(topLevel, SWT.READ_ONLY);
 			topicsCombo.setItems(topics);
@@ -202,7 +204,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			Label subjectLabel = new Label(topLevel, SWT.NONE);
 			subjectLabel.setText("Subject");
 			subjectLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			subjectLabel.setFont(descriptor.createFont(getShell().getDisplay()));
+			subjectLabel.setFont(font);
 			subjectText = new Text(topLevel, SWT.BORDER);
 			subjectText.setLayoutData(gridData);
 

@@ -220,9 +220,8 @@ public class LessPropertiesComposite extends Composite
 		area.setLayout(layout);
 //		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		FontDescriptor descriptor = FontDescriptor.createFrom(sc.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
-		Font font = descriptor.createFont(getShell().getDisplay());
+		FontDescriptor boldFontDescriptor = FontDescriptor.createFrom(sc.getFont()).setStyle(SWT.BOLD);
+		Font boldFont = boldFontDescriptor.createFont(getShell().getDisplay());
 
 		try
 		{
@@ -237,7 +236,8 @@ public class LessPropertiesComposite extends Composite
 			Label l = new Label(comp, SWT.NONE);
 			l.setText("Servoy Theme Version");
 			l.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-			l.setFont(font);
+			l.setFont(boldFont);
+			l.addDisposeListener((e) -> boldFontDescriptor.destroyFont(boldFont));
 			combo = new CCombo(comp, SWT.READ_ONLY | SWT.BORDER);
 			combo.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			combo.setItems(ThemeResourceLoader.VERSIONS);
@@ -268,9 +268,9 @@ public class LessPropertiesComposite extends Composite
 			{
 				ExpandBar expandBar = new ExpandBar(area, SWT.NONE);
 				expandBar.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-				expandBar.setFont(font);
+				expandBar.setFont(boldFont);
 				expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, font,
+				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, boldFont,
 					categoryName);
 				categoryComposites.add(expandComposite);
 				expandComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);

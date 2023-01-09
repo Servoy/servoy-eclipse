@@ -178,12 +178,14 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	private ImportSettingsPage importPage;
 	private DeployPage deployPage;
 	private DeployProgressPage deployProgressPage;
+	private ExportConfirmationPage exportConfirmationPage;
 
 	private final IFileAccess workspace;
 
 	private boolean activeSolutionDbDownErrors = false;
 
 	private Font labelBoldFont;
+	private FontDescriptor labelBoldFontDescriptor;
 
 	private boolean deployToApplicationServer;
 	private String deployURL;
@@ -407,8 +409,6 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 	}
 
-	private ExportConfirmationPage exportConfirmationPage;
-
 	@Override
 	public void addPages()
 	{
@@ -460,8 +460,8 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	{
 		if (labelBoldFont == null)
 		{
-			FontDescriptor boldDescriptor = FontDescriptor.createFrom(label.getFont()).setStyle(SWT.BOLD);
-			labelBoldFont = boldDescriptor.createFont(label.getDisplay());
+			labelBoldFontDescriptor = FontDescriptor.createFrom(label.getFont()).setStyle(SWT.BOLD);
+			labelBoldFont = labelBoldFontDescriptor.createFont(label.getDisplay());
 		}
 		return labelBoldFont;
 	}
@@ -556,7 +556,9 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	{
 		if (labelBoldFont != null)
 		{
-			labelBoldFont.dispose();
+			labelBoldFontDescriptor.destroyFont(labelBoldFont);
+			labelBoldFontDescriptor = null;
+			labelBoldFont = null;
 		}
 		super.dispose();
 	}

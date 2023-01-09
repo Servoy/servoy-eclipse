@@ -77,9 +77,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	private String dlgPassword = "";
 	private String errorMessage = null;
 
-	private FontDescriptor labelFontDescriptor;
-	private Font labelFont;
-
 	public ServoyLoginDialog(Shell parentShell)
 	{
 		super(parentShell);
@@ -228,10 +225,11 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		Label lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Email");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		labelFontDescriptor = FontDescriptor.createFrom(lbl.getFont());
-		labelFontDescriptor = labelFontDescriptor.setStyle(SWT.BOLD);
-		labelFont = labelFontDescriptor.createFont(getShell().getDisplay());
+		final FontDescriptor labelFontDescriptor = FontDescriptor.createFrom(lbl.getFont()).setStyle(SWT.BOLD);
+		final Font labelFont = labelFontDescriptor.createFont(getShell().getDisplay());
 		lbl.setFont(labelFont);
+		lbl.addDisposeListener((e) -> labelFontDescriptor.destroyFont(labelFont));
+
 		Text usernameTxt = new Text(composite, SWT.BORDER);
 		usernameTxt.setText(dlgUsername);
 		usernameTxt.selectAll();
@@ -269,22 +267,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		if (Utils.isAppleMacOS()) passwordTxt.setEchoChar('\u2022');
 
 		return composite;
-	}
-
-	@Override
-	public boolean close()
-	{
-		boolean returnValue = super.close();
-		if (returnValue)
-		{
-			if (labelFontDescriptor != null && labelFont != null)
-			{
-				labelFontDescriptor.destroyFont(labelFont);
-			}
-			labelFontDescriptor = null;
-			labelFont = null;
-		}
-		return returnValue;
 	}
 
 	@Override
@@ -327,7 +309,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
 		gd.horizontalIndent = 10;
 		lbl.setLayoutData(gd);
-		lbl.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+		Cursor handCursor = parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND);
+		lbl.setCursor(handCursor);
 		if (Util.isMac())
 		{
 			Label lbl2 = new Label(parent, SWT.NONE);
@@ -345,7 +328,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			GridData gd2 = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
 			gd2.horizontalIndent = 10;
 			lbl2.setLayoutData(gd2);
-			lbl2.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+			lbl2.setCursor(handCursor);
 		}
 
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));

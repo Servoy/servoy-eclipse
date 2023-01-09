@@ -71,6 +71,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -856,9 +857,10 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			data.right = new FormAttachment(100, 0);
 			infoLabel.setLayoutData(data);
 
-			FontDescriptor descriptor = FontDescriptor.createFrom(infoLabel.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			infoLabel.setFont(descriptor.createFont(infoLabel.getDisplay()));
+			FontDescriptor descriptor = FontDescriptor.createFrom(infoLabel.getFont()).setStyle(SWT.BOLD);
+			Font font = descriptor.createFont(infoLabel.getDisplay());
+			infoLabel.setFont(font);
+			infoLabel.addDisposeListener((e) -> descriptor.destroyFont(font));
 
 			Button checkBox = new Button(topLevel, SWT.CHECK | SWT.WRAP);
 			checkBox.setSelection(true);
@@ -887,9 +889,10 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			data.right = new FormAttachment(100, 0);
 			infoLabel2.setLayoutData(data);
 
-			descriptor = FontDescriptor.createFrom(infoLabel2.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			infoLabel2.setFont(descriptor.createFont(infoLabel2.getDisplay()));
+			FontDescriptor descriptor1 = FontDescriptor.createFrom(infoLabel2.getFont()).setStyle(SWT.BOLD);
+			Font font1 = descriptor1.createFont(infoLabel2.getDisplay());
+			infoLabel2.setFont(font1);
+			infoLabel2.addDisposeListener((e) -> descriptor1.destroyFont(font1));
 
 			final Button checkBox2 = new Button(topLevel, SWT.CHECK | SWT.WRAP);
 			checkBox2.setSelection(false);

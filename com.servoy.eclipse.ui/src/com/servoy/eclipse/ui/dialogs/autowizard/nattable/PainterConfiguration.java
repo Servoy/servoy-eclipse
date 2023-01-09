@@ -76,6 +76,9 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	private final FlattenedSolution flattenedSolution;
 	private final IDataProvider bodyDataProvider;
 
+	private Font boldFont;
+	private FontDescriptor boldDescriptor;
+
 	public PainterConfiguration(PropertyWizardDialogConfigurator propertiesConfig, LinkClickConfiguration linkClickConfiguration,
 		IDataProvider bodyDataProvider,
 		PersistContext context, FlattenedSolution flattenedSolution)
@@ -366,8 +369,11 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	private void registerColumnHeaderStyle(IConfigRegistry configRegistry)
 	{
 		Style style = new Style();
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(Display.getDefault().getSystemFont()).setStyle(SWT.BOLD);
-		Font boldFont = boldDescriptor.createFont(Display.getDefault());
+		if (boldDescriptor == null)
+		{
+			boldDescriptor = FontDescriptor.createFrom(Display.getDefault().getSystemFont()).setStyle(SWT.BOLD);
+			boldFont = boldDescriptor.createFont(Display.getDefault());
+		}
 		style.setAttributeValue(
 			CellStyleAttributes.FONT,
 			boldFont);
@@ -377,6 +383,16 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			style,
 			DisplayMode.NORMAL,
 			GridRegion.COLUMN_HEADER);
+	}
+
+	public void dispose()
+	{
+		if (boldDescriptor != null)
+		{
+			boldDescriptor.destroyFont(boldFont);
+			boldDescriptor = null;
+			boldFont = null;
+		}
 	}
 
 	private void registerTextColumn(IConfigRegistry configRegistry, PropertyDescription dp)
