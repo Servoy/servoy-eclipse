@@ -211,8 +211,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 
     getContainerStyle(name: string) {
         const styl = {  };
-        let minHeight;
-        if (this.height) {
+        let minHeight: string | number;
+        if (this.height && this.height !== '0') {
             minHeight = this.height;
         } else if (this.containedForm || name) {
             // for absolute form default height is design height, for responsive form default height is 0
