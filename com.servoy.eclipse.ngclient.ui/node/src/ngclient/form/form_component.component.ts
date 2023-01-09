@@ -206,7 +206,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     absolutFormPosition = {};
 
-    private handlerCache: { [property: string]: { [property: string]: () => void } } = {};
+    private handlerCache: { [property: string]: { [property: string]: (event:Event) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
 
@@ -414,7 +414,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         if (func == null && item.handlers && item.handlers.indexOf(handler) >= 0) {
             const me = this;
             // eslint-disable-next-line
-            func = function() {
+            func = function(event) {
+                if (event && event.preventDefault instanceof Function) event.preventDefault();
                 return me.formservice.executeEvent(me.name, item.name, handler, arguments);
             };
             itemCache[handler] = func;

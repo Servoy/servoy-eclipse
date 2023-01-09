@@ -24,10 +24,10 @@ export class VariantsPreviewComponent implements AfterViewInit {
     margin = 16; //ng-popover margin
 	variantItemBeingDragged: Node;
 	variantsIFrame: HTMLIFrameElement;
-	top = 0;
-	left = 0;
+	top = -1000;
+	left = -1000;
 	placement = 'right';
-	isPopoverClosed = true;
+	isPopoverInitialized = false;
 	popoverFooterHeight = 0;
 	document: Document;
 	minPopupWidth = 100;
@@ -50,7 +50,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		});
 
 		this.editorSession.variantsScroll.subscribe((value) => {
-			if (!this.isPopoverClosed) {
+			if (this.isPopoverInitialized) {
 				const popoverCtrl = this.document.getElementById('VariantsCtrl');
 				popoverCtrl.style.top = this.top - value.scrollPos + 'px';
 			}
@@ -81,11 +81,20 @@ export class VariantsPreviewComponent implements AfterViewInit {
                 this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
 			}
         });
-		if (this.isPopoverClosed) {
-			this.isPopoverClosed = false;
-			this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
-			this.hidePopover('block');
+        if (!this.isPopoverInitialized) {
+			this.isPopoverInitialized = true;
+			this.initPopover();
 		}
+    }
+
+    initPopover() {
+        this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
+        this.top = -1000;
+        this.left = -1000;
+        //need to create the form prior to correctly rendering variants in designer
+        this.setPopoverSizeAndPosition(100, 100);
+		this.hidePopover('block');
+
     }
 
 	hidePopover(iframeDisplay: string) {
@@ -128,6 +137,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		const popoverCtrl = this.document.getElementById('VariantsCtrl');
 		popoverCtrl.style.top = this.top - palette.scrollTop + 'px';
 		popoverCtrl.style.left = this.left + 'px';
+        popoverCtrl.style.display = 'inline-block';
 
 		const contentArea = this.document.getElementsByClassName('variant-content-area').item(0) as HTMLElement;
 		const contentOverlay = this.document.getElementsByClassName('variant-content-overlay').item(0) as HTMLElement;

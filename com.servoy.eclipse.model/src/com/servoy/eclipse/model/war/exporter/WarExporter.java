@@ -1097,7 +1097,7 @@ public class WarExporter
 				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
-				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF")) continue;
+				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
 				File fl = new File(destdir, je.getName());
 				if (!fl.exists())
 				{
@@ -2240,7 +2240,8 @@ public class WarExporter
 			}
 			else
 			{
-				if (specFilesOnly && !file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF")) continue;
+				if (specFilesOnly && !file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF") && !file.getName().endsWith(".json"))
+					continue;
 				File newFile = new File(destDir, file.getName());
 				copyFile(file, newFile);
 				if (allTemplates != null && newFile.getName().endsWith(".html"))

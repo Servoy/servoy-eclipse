@@ -43,6 +43,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -75,6 +76,9 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	private String dlgUsername = "";
 	private String dlgPassword = "";
 	private String errorMessage = null;
+
+	private FontDescriptor labelFontDescriptor;
+	private Font labelFont;
 
 	public ServoyLoginDialog(Shell parentShell)
 	{
@@ -224,9 +228,10 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		Label lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Email");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		FontDescriptor descriptor = FontDescriptor.createFrom(lbl.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
-		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
+		labelFontDescriptor = FontDescriptor.createFrom(lbl.getFont());
+		labelFontDescriptor = labelFontDescriptor.setStyle(SWT.BOLD);
+		labelFont = labelFontDescriptor.createFont(getShell().getDisplay());
+		lbl.setFont(labelFont);
 		Text usernameTxt = new Text(composite, SWT.BORDER);
 		usernameTxt.setText(dlgUsername);
 		usernameTxt.selectAll();
@@ -244,7 +249,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Password");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
+		lbl.setFont(labelFont);
 		// On MacOS, SWT 3.5 does not send events to listeners on password fields.
 		// See: http://www.eclipse.org/forums/index.php?t=msg&goto=508058&
 		int style = SWT.BORDER;
@@ -264,6 +269,22 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		if (Utils.isAppleMacOS()) passwordTxt.setEchoChar('\u2022');
 
 		return composite;
+	}
+
+	@Override
+	public boolean close()
+	{
+		boolean returnValue = super.close();
+		if (returnValue)
+		{
+			if (labelFontDescriptor != null && labelFont != null)
+			{
+				labelFontDescriptor.destroyFont(labelFont);
+			}
+			labelFontDescriptor = null;
+			labelFont = null;
+		}
+		return returnValue;
 	}
 
 	@Override

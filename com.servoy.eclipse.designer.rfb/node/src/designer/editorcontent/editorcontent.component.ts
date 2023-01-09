@@ -90,7 +90,11 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     onKeyUp(event: KeyboardEvent) {
         // delete , f4 (open form hierarchy) and f5
         if (event.keyCode == 46 || event.keyCode == 115 || event.keyCode == 116) {
+           
             this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
+            if (event.keyCode == 46) {//delete key
+                this.editorSession.setSelection([]); //select the form
+            }
             return false;
         }
         return true;
@@ -99,7 +103,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     @HostListener('document:click', ['$event'])
     onClick(event: MouseEvent) {
 		if (event.offsetX > 50 && event.offsetY > 50) {
-			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY }, '*');
+			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY, isAbsoluteFormLayout: this.urlParser.isAbsoluteFormLayout() }, '*');
 		}
     }
 
@@ -123,8 +127,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
 
             // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
             const contentArea = this.editorContentService.getContentArea();
-            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 'px');
-            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 'px');
+            //add a small scroll space in order to make margins visible
+            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 20 + 'px');
+            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 20 + 'px');
         });
     }
 

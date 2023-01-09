@@ -1257,7 +1257,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			return;
 		}
 		Job[] jobs = Job.getJobManager().find(CopySourceFolderAction.JOB_FAMILY);
-		if (jobs.length > 0 && scheduled.get() != 2)
+		if (jobs.length > 0 && scheduled.get() == 0)
+		{
+			// continue
+		}
+		else if (jobs.length > 0 && scheduled.get() != 2)
 		{
 			return;
 		}

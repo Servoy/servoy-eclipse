@@ -71,6 +71,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
+import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -188,7 +189,7 @@ public class ModelUtils
 				}
 				if (pd.hasDefault() && pd.getDefaultValue() != null)
 				{
-					defaultValue = pd.getDefaultValue().toString();
+					defaultValue = NGStyleClassPropertyType.NG_INSTANCE.fromDesignValue(pd.getDefaultValue().toString(), pd, persist);
 				}
 			}
 		}

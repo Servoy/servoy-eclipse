@@ -49,12 +49,13 @@
     </style>
     <script>
     	window.parent.addEventListener('message', handlerMessage);
-		function handlerMessage(ev) {
+		function handlerMessage(ev) {			
 			if (ev.data.id == 'positionClick') {
 				const btn = document.querySelector('.btn-rebuild');
-				const minX = btn.getBoundingClientRect().x;
+				const margin = ev.data.isAbsoluteFormLayout ? 0 : 20;
+				const minX = btn.getBoundingClientRect().x + margin;
 				const maxX = minX + 130; // width of the btn -> css
-				const minY = btn.getBoundingClientRect().y;
+				const minY = btn.getBoundingClientRect().y + margin;
 				const maxY = minY + 30; // height of the btn -> css
 				if ((ev.data.x >= minX && ev.data.x <= maxX) && (ev.data.y >= minY && ev.data.y <= maxY)) {
 					window.parent.postMessage({ id: 'buildTitaniumClient' }, '*');

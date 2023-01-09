@@ -90,7 +90,8 @@ public class LayoutContainerPropertyHandler implements IPropertyHandler
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{
-					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription);
+					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription,
+						persistContext.getPersist());
 				}
 				return defaultValue;
 			}
