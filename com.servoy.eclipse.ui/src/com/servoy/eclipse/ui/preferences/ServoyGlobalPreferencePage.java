@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -42,6 +41,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.PrefUtil;
 
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.ObjectWrapper;
@@ -290,7 +290,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		{
 			iconPreferences.setUseDarkThemeIcons(useDarkIconsButton.getSelection());
 			iconPreferences.save(true);
-			if (MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
+			if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
 				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 			{
 				PlatformUI.getWorkbench().restart();

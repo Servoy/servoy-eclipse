@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.Preferences;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 
@@ -113,7 +114,7 @@ public class EclipseCSSThemeListener
 									else
 									{
 										setThemePreferences(it.getId()); //if nothing is overwritten, just import preferences
-										if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
 											label + " theme was detected",
 											"It is strongly recommended to restart the developer for the " + label +
 												" theme preferences to be applied. Would you like to restart now?"))
@@ -130,7 +131,7 @@ public class EclipseCSSThemeListener
 						IconPreferences.getInstance().save(true);
 						ServoyModelManager.getServoyModelManager().getServoyModel()
 							.addDoneListener(() -> {
-								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+								if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
 									"Theming is disabled",
 									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
 								{

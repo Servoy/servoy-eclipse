@@ -351,6 +351,12 @@ public class UIUtils
 		}
 
 		@Override
+		protected void setShellStyle(int newShellStyle)
+		{
+			super.setShellStyle((newShellStyle & ~SWT.APPLICATION_MODAL) | SWT.PRIMARY_MODAL);
+		}
+
+		@Override
 		protected Control createCustomArea(Composite parent)
 		{
 			Label l = new Label(parent, SWT.NONE);

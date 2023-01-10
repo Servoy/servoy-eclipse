@@ -60,7 +60,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
@@ -1397,7 +1396,7 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															MessageDialog.openError(new Shell(), "Servoy update problem",
+															ServoyMessageDialog.openError(new Shell(), "Servoy update problem",
 																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater.");
 														}
 													});
@@ -1408,7 +1407,8 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "ApplicationServer updated",
+															if (ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+																"ApplicationServer updated",
 																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
 															{
 																PlatformUI.getWorkbench().restart();
