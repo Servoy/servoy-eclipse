@@ -190,11 +190,12 @@ export class ComponentCache implements IComponentCache {
 
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
+        elType: string, // can be undefined in which case specName is used (this will only be defined in case of default tabless/accordion)
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string },
         private readonly typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
-            this.type = ComponentCache.convertToJSName(specName);
+            this.type = ComponentCache.convertToJSName(elType ? elType : specName);
             this.model = this.createModel();
             this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
                 parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
@@ -202,8 +203,8 @@ export class ComponentCache implements IComponentCache {
 
     private static convertToJSName(webObjectSpecName: string) {
         if (webObjectSpecName) {
-            // transform webObjectSpecName like testpackage-myTestService (as it is defined in the .spec files) into testPackageMyTestService - as
-            // this is needed sometimes client-side
+            // transform webObjectSpecName like testpackage-myTestService (as it is defined in the .spec files) into
+            // testPackageMyTestService - as this is needed sometimes client-side
             // but who knows, maybe someone will try the dashed version and wonder why it doesn't work
 
             // this should do the same as ClientService.java #convertToJSName()
@@ -371,6 +372,7 @@ export class FormComponentCache extends ComponentCache {
     constructor(
         name: string,
         specName: string,
+        elType: string,
         handlers: Array<string>,
         public responsive: boolean,
         layout: { [property: string]: string },
@@ -378,7 +380,7 @@ export class FormComponentCache extends ComponentCache {
         public readonly hasFoundset: boolean,
         typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
-            super(name, specName, handlers, layout, typesRegistry, parentAccessForSubpropertyChanges);
+            super(name, specName, elType, handlers, layout, typesRegistry, parentAccessForSubpropertyChanges);
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {

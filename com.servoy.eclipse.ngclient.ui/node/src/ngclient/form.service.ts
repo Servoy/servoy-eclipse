@@ -626,7 +626,7 @@ export class FormService {
                     }
 
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.handlers, elem.responsive, elem.position, formComponentProperties,
+                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position, formComponentProperties,
                                         !!elem.model.foundset, this.typesRegistry, this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
 
                     this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
@@ -640,7 +640,7 @@ export class FormService {
                     }
                 } else {
                     // simple component
-                    const comp = new ComponentCache(elem.name, elem.specName, elem.handlers, elem.position, this.typesRegistry,
+                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry,
                                                         this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
                     this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
 

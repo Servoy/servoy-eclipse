@@ -95,7 +95,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
                     sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
-        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.handlers, serverSentData.position, typesRegistry, {
+        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry, {
 
                 shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.__internalState.ignoreChanges,
 
@@ -511,6 +511,8 @@ interface IServerSentData {
     n?: boolean;
     name?: string;
     componentDirectiveName?: string;
+    /** usually undefined, except for default tabless panel and accordion (which share tabpanel .spec file but have different client side component names) */
+    elType?: string,
     handlers?: Array<string>;
     forFoundset?: string;
     model?: Record<string, any>;
