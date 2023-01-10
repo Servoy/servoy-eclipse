@@ -359,12 +359,10 @@ public class VisualFormEditorSecurityPage extends Composite
 	{
 		List<IPersist> formElements = new ArrayList<IPersist>();
 		Form flatForm = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm());
-		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? flatForm.getFlattenedObjects(NameComparator.INSTANCE).iterator()
-			: flatForm.getAllObjects();
-		while (it.hasNext())
+		List<IFormElement> elements = flatForm.getFlattenedObjects(NameComparator.INSTANCE);
+		for (IFormElement elem : elements)
 		{
-			IPersist elem = it.next();
-			if (elem instanceof IFormElement && ((IFormElement)elem).getName() != null && ((IFormElement)elem).getName().length() != 0)
+			if (elem.getName() != null && elem.getName().length() != 0)
 			{
 				formElements.add(elem);
 			}

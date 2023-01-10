@@ -18,7 +18,6 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -80,10 +79,8 @@ public class ElementSettingsModel
 			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, parent);
 			if (infos != null)
 			{
-				Iterator<SecurityInfo> iterator = infos.iterator();
-				while (iterator.hasNext())
+				for (SecurityInfo info : infos)
 				{
-					SecurityInfo info = iterator.next();
 					if (info.element_uid.equals(uuid.toString()))
 					{
 						access = info.access;
@@ -129,28 +126,23 @@ public class ElementSettingsModel
 		try
 		{
 			ArrayList<IPersist> formElements = new ArrayList<IPersist>();
-			Iterator< ? extends IPersist> it = form.isResponsiveLayout() ? form.getFlattenedObjects(NameComparator.INSTANCE).iterator() : form.getAllObjects();
-			while (it.hasNext())
+			List<IFormElement> elements = form.getFlattenedObjects(NameComparator.INSTANCE);
+			for (IFormElement elem : elements)
 			{
-				IPersist elem = it.next();
-				if (elem instanceof IFormElement && ((IFormElement)elem).getName() != null && ((IFormElement)elem).getName().length() != 0)
+				if (elem.getName() != null && elem.getName().length() != 0)
 				{
 					formElements.add(elem);
 				}
 			}
 			String solutionName = form.getSolution().getName();
 			formElements.add(0, form);
-			Iterator<String> iterator = securityInfo.keySet().iterator();
-			while (iterator.hasNext())
+			for (String group : securityInfo.keySet())
 			{
-				String group = iterator.next();
 				Map<UUID, Integer> currentGroupSecurityInfo = securityInfo.get(group);
 				if (currentGroupSecurityInfo != null)
 				{
-					Iterator<UUID> uuidIterator = currentGroupSecurityInfo.keySet().iterator();
-					while (uuidIterator.hasNext())
+					for (UUID uuid : currentGroupSecurityInfo.keySet())
 					{
-						UUID uuid = uuidIterator.next();
 						if (elementIsInList(formElements, uuid))
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().setFormSecurityAccess(
@@ -170,10 +162,9 @@ public class ElementSettingsModel
 
 	private boolean elementIsInList(ArrayList<IPersist> formElements, UUID uuid)
 	{
-		Iterator<IPersist> iterator = formElements.iterator();
-		while (iterator.hasNext())
+		for (IPersist formElement : formElements)
 		{
-			if (iterator.next().getUUID().equals(uuid)) return true;
+			if (formElement.getUUID().equals(uuid)) return true;
 		}
 		return false;
 	}
