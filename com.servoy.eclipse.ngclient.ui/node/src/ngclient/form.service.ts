@@ -394,7 +394,7 @@ export class FormService {
     public pushEditingStarted(formName: string, componentName: string, propertyName: string) {
         FormService.pushEditingStarted(this.formsCache.get(formName).getComponent(componentName).model, propertyName,
             (foundsetLinkedRowId: string, propertyNameToSend: string) => {
-                const messageForServer = { formName, componentName, property: propertyNameToSend };
+                const messageForServer = { formname: formName, beanname: componentName, property: propertyNameToSend };
                 if (foundsetLinkedRowId) messageForServer['fslRowID'] = foundsetLinkedRowId; // if it was a foundset linked DP we give the row identifier as well
 
                 this.sabloService.callService('formService', 'startEdit', messageForServer, true);
