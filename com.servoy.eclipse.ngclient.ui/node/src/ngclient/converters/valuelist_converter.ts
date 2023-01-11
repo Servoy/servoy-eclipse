@@ -113,6 +113,12 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
     hasChanges(): boolean {
         return this.allChanged || this.diplayValueReq !== undefined || this.filterStringReq !== undefined;
     }
+    
+    clearChanges(): void {
+        super.clearChanges();
+        this.diplayValueReq = this.filterStringReq = undefined;
+    }
+
 }
 
 export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue {

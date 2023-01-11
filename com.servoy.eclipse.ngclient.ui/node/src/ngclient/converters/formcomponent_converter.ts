@@ -35,7 +35,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
                 if (instanceOfChangeAwareValue(childCompElem)) {
                     childCompElem.getInternalState().setChangeListener((doNotPush?: boolean) => {
-                        formComponentPropertyValue.notifyChangeListener(doNotPush);
+                        formComponentPropertyValue.markAllChanged(true);
                     });
                 }
             }
@@ -56,6 +56,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
                         oldClientData && oldClientData.childElements ? oldClientData.childElements[idx] : null, propertyContext);
             }
         }
+        newClientData.clearChanges();
         return [changes, newClientData];
     }
 
