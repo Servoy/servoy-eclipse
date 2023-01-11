@@ -110,6 +110,9 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
         this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
     }
 
+    hasChanges(): boolean {
+        return this.allChanged || this.diplayValueReq !== undefined || this.filterStringReq !== undefined;
+    }
 }
 
 export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue {
