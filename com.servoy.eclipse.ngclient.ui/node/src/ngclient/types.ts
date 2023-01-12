@@ -193,7 +193,7 @@ export class ComponentCache implements IComponentCache {
         elType: string, // can be undefined in which case specName is used (this will only be defined in case of default tabless/accordion)
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string },
-        private readonly typesRegistry: TypesRegistry,
+        public readonly typesRegistry: TypesRegistry,
         parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
             this.model = this.createModel();

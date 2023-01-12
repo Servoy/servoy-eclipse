@@ -117,7 +117,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
 
         const componentSpecification = typesRegistry.getComponentSpecification(this.specName);
         this.__internalState = new ComponentTypeInternalState(this, oldClientValue?.__internalState, componentSpecification, converterService,
-                viewportService, sabloService, uiBlockerService, log, () => propertyContext.getProperty(forFoundsetPropertyName));
+                viewportService, sabloService, uiBlockerService, log, this.typesRegistry, () => propertyContext.getProperty(forFoundsetPropertyName));
 
         this.__internalState.initializeFullValueFromServer(serverSentData);
     }
@@ -205,6 +205,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                     public readonly sabloService: SabloService,
                     private uiBlockerService: UIBlockerService,
                     log: LoggerService,
+                    private readonly typesRegistry: TypesRegistry,
                     forFoundset?: () => IFoundset) {
 
         super(forFoundset, log);
@@ -363,7 +364,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                     if (rowId) req.svyApply[ViewportService.ROW_ID_COL_KEY] = rowId; // rowId that identifies which component it is in the viewport of foundset linked components
                     if (foundsetLinkedDPRowId) req.svyApply._svyRowIdOfProp = foundsetLinkedDPRowId; // rowId that identifies the row inside the
                                             //component for the foundset linked DP of the component (that is linked to another property of type foundset inside the component itself)
-                });
+                }, this.typesRegistry);
             this.requests.push(req);
             this.notifyChangeListener();
         } else if (!rowId) {

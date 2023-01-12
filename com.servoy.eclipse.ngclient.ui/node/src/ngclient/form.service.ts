@@ -154,7 +154,8 @@ export class FormService {
 
     public static pushApplyDataprovider(componentModel: { [property: string]: any }, propertyName: string, propertyType: IType<any>,
                                             newValue: any, componentSpec: IWebObjectSpecification, converterService: ConverterService, oldValue: any,
-                                            sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void) {
+                                            sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void,
+                                            typesRegistry: TypesRegistry) {
         let valueToSendToServer: any;
 
         let fslRowID = null;
@@ -188,9 +189,15 @@ export class FormService {
                 }
             }
 
-            // apply default conversion if needed as we don't search for/generate client side type, property context etc. for props nested with . and [
+            // the old value could be just null and the type system doesn't know this is a Date type (if it is a 'date' DataproviderType on server)
+            // have special support for it by checking the instanceof so we always map on the DateType for javascript Dates;
+            // Dataprovider type on server will know to expect date based on DP type
+            if (newValue instanceof Date) propertyType = typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SVY);
+            
+            // apply default or date conversion if needed as we don't search for/generate client side type, property context etc. for props nested with . and [
             // see TODO above if the lack of type/property context causes problems
-            converted = converterService.convertFromClientToServer(newValue, undefined, undefined, undefined);
+            converted = converterService.convertFromClientToServer(newValue, propertyType, undefined, undefined);
+
             valueToSendToServer = converted[0];
             set(componentModel, propertyName, converted[1]);
         }
@@ -507,12 +514,6 @@ export class FormService {
         const formState = this.formsCache.get(formName);
         let typeOfData  = formState.getClientSideType(componentName, propertyName);
 
-        // the old value could be just null and the type system doesn't know this is a Date type
-        // have special support for it by checking the instanceof so we always map on the DateType for javascript Dates
-        if (!typeOfData && newValue instanceof Date) {
-            typeOfData = this.typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SVY);
-        }
-
         FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, typeOfData,
             newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
             (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => {
@@ -524,7 +525,7 @@ export class FormService {
                 }
 
                 this.sabloService.callService('formService', 'svyPush', dpChange, true);
-            });
+            }, this.typesRegistry);
     }
 
     private formMessageHandler(formCache: FormCache, formName: string, msg: any, servoyService: ServoyService) {
