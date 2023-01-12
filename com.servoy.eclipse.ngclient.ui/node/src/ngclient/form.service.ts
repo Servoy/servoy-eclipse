@@ -9,6 +9,7 @@ import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties,
 import { ClientFunctionService } from './services/clientfunction.service';
 import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
+import { DateType } from '../sablo/converters/date_converter';
 
 @Injectable({
   providedIn: 'root'
@@ -504,7 +505,15 @@ export class FormService {
         if (this.isInDesigner) return; // form designer doesn't send stuff back to server (doesn't even have access to wsSession in SabloService to do that)
 
         const formState = this.formsCache.get(formName);
-        FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, formState.getClientSideType(componentName, propertyName),
+        let typeOfData  = formState.getClientSideType(componentName, propertyName);
+
+        // the old value could be just null and the type system doesn't know this is a Date type
+        // have special support for it by checking the instanceof so we always map on the DateType for javascript Dates
+        if (!typeOfData && newValue instanceof Date) {
+            typeOfData = this.typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SVY);
+        }
+
+        FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, typeOfData,
             newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
             (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => {
                 const changes = {};
