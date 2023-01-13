@@ -640,6 +640,12 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		// avoid calling super okPressed, let our own listener get the key modifiers first
 	}
 
+	@Override
+	protected void handleDoubleClick()
+	{
+		superOkPressed();
+	}
+
 	private void superOkPressed()
 	{
 		super.okPressed();
