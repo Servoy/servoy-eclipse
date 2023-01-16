@@ -302,7 +302,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		exportNG2Mode = "true";
-		if (argsMap.containsKey("ng2") && !Utils.getAsBoolean(argsMap.get("active"))) exportNG2Mode = argsMap.get("ng2");
+		if (argsMap.containsKey("ng2")) exportNG2Mode = argsMap.get("ng2");
 		exportNG1 = false;
 		if (argsMap.containsKey("ng1")) exportNG1 = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
