@@ -28,7 +28,7 @@ import { PopupFormService } from '../services/popupform.service';
 import { AddAttributeDirective } from '../../servoycore/addattribute.directive';
 
 import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
-import { ObjectType } from '../../ngclient/converters/object_converter';
+import { ObjectType } from '../../sablo/converters/object_converter';
 
 import { By } from '@angular/platform-browser';
 
@@ -189,7 +189,7 @@ describe('FormComponentComponentTest', () => {
         converterService = TestBed.inject(ConverterService);
 
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_arr', new CustomArrayTypeFactory(typesRegistry, converterService));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_arr', new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_obj', new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
 
         // here we feed in the client side equivalent some (imaginary test) servoy .spec file
@@ -258,7 +258,7 @@ describe('FormComponentComponentTest', () => {
                     children: [
                         {
                             name: 'myCustomTestComponent',
-                            type: 'customTestComponent',
+                            specName: 'customTestComponent',
                             model: {
                                 divLocation: 15,
                                 cssPosition: {

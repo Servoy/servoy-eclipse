@@ -211,6 +211,9 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
     }
 
     fromClientToServer(newClientData: any, oldClientData: CustomArrayValue<any>, propertyContext: IPropertyContext): [ICATDataToServer, CustomArrayValue<any>] | null {
+        // note: oldClientData could be uninitialized (so not yet instance of CustomArrayValue) if a parent obj/array decides to send itself fully when an
+        // element/subproperty was added - in which case it will be the same as newClientData... at least until SVY-17854 gets implemented and then old would be null
+        // as expected in that scenario
 
         const elemPropertyContext = propertyContext ? new PropertyContext(propertyContext.getProperty,
                 PushToServerUtils.combineWithChildStatic(propertyContext.getPushToServerCalculatedValue(), this.pushToServerForElements)) : undefined;
@@ -224,7 +227,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     // this can happen when an array value was set completely in browser
                     // any 'smart' child elements will initialize in their fromClientToServer conversion;
                     // set it up, make it 'smart' and mark it as all changed to be sent to server...
-                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
                     internalState.markAllChanged(false);
@@ -232,12 +235,16 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                 } else if (newClientData !== oldClientData) {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
-                    // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location
+                    // clear old internal state proxy and get non-proxied value in order to re-initialize/start fresh in the new location (old proxy would send change notif to wrong place)
+                    // we only need from the old internal state the dynamic types
+                    const oldDynamicTypesHolder = newClientData.getInternalState().dynamicPropertyTypesHolder;
                     newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
+                    delete newClientData[ChangeAwareState.INTERNAL_STATE_MEMBER_NAME];
 
-                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
+                    internalState.dynamicPropertyTypesHolder = oldDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
                 } else {
@@ -355,14 +362,15 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
     }
 
     private initArrayValue(arrayToInitialize: Array<any>, contentVersion: number,
-                                pushToServerCalculatedValue: PushToServerEnum): CustomArrayValue<T> {
+                                pushToServerCalculatedValue: PushToServerEnum, force?: boolean): CustomArrayValue<T> {
 
         let proxiedArray: CustomArrayValue<T>;
-        if (!instanceOfCustomArray(arrayToInitialize)) {
+        if (!instanceOfCustomArray(arrayToInitialize) || force) {
             // this setPrototypeOf seems to be faster (did some benchmarking) then creating a new CustomArrayValue and copying all elements over to it
             // and it is better then having just an interface instead of CustomArrayValue and using Object.defineProperties(...) to define methods of
             // that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
-            Object.setPrototypeOf(arrayToInitialize, CustomArrayValue.prototype);
+            if (Object.getPrototypeOf(arrayToInitialize) !== CustomArrayValue.prototype) Object.setPrototypeOf(arrayToInitialize, CustomArrayValue.prototype);
+            // TODO if initial array is not a standard array but something that extends Array, we could include the custom prototypes in the prototype chain between CustomObjectValue and array...
 
             const array = arrayToInitialize as CustomArrayValue<any>;
 

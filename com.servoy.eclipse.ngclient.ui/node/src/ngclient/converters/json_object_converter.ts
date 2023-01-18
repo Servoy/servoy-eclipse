@@ -175,6 +175,10 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     }
 
     fromClientToServer(newClientData: CustomObjectValue, oldClientData: CustomObjectValue, propertyContext: IPropertyContext): [ICOTDataToServer, CustomObjectValue] | null {
+        // note: oldClientData could be uninitialized (so not yet instance of CustomObjectValue) if a parent obj/array decides to send itself fully when an
+        // element/subproperty was added - in which case it will be the same as newClientData... at least until SVY-17854 gets implemented and then old would be null
+        // as expected in that scenario
+
         let internalState: CustomObjectState;
         let newClientDataInited: CustomObjectValue;
 
@@ -184,20 +188,26 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     // this can happen when a new obj. value was set completely in browser
                     // any 'smart' child elements will initialize in their fromClientToServer conversion;
                     // set it up, make it 'smart' and mark it as all changed to be sent to server...
-                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
-                              propertyContext?.getPushToServerCalculatedValue());
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
+                                oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                                propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
                 } else if (newClientData !== oldClientData) {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
-                    // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location
+                    // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location (old proxy would send change notif to wrong place)
+                    // we only need from the old internal state the dynamic types
+                    const oldDynamicTypesHolder = newClientData.getInternalState().dynamicPropertyTypesHolder;
                     newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
 
-                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, oldClientData ? oldClientData.getInternalState().contentVersion : 0,
-                              propertyContext?.getPushToServerCalculatedValue());
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
+                                oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                                propertyContext?.getPushToServerCalculatedValue(), true);
                     internalState = newClientDataInited.getInternalState();
+
+                    internalState.dynamicPropertyTypesHolder = oldDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
                 } else {
@@ -331,14 +341,15 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     }
 
     private initCustomObjectValue(objectToInitialize: any, contentVersion: number,
-                                pushToServerCalculatedValue: PushToServerEnum): CustomObjectValue {
+                                pushToServerCalculatedValue: PushToServerEnum, force?: boolean): CustomObjectValue {
 
         let proxiedCustomObject: CustomObjectValue;
-        if (!instanceOfChangeAwareValue(objectToInitialize)) {
+        if (!instanceOfChangeAwareValue(objectToInitialize) || force) {
             // this setPrototypeOf seems to be faster then creating a new CustomObjectValue and copying all elements over to it
             // and it is better then having just an interface for CustomObjectValue and adding via Object.defineProperties(...) all (deprecated or valid)
             // methods of that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
-            Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
+            if (Object.getPrototypeOf(objectToInitialize) !== CustomObjectValue.prototype) Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
+            // TODO if initial object is not a standard object but something that extends Object we could include the custom prototypes in the prototype chain between CustomObjectValue and object...
 
             const object = objectToInitialize as CustomObjectValue;
 

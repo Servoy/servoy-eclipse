@@ -6,11 +6,11 @@ import { ServicesService } from '../../sablo/services.service';
 import { FoundsetType, FoundsetValue } from './foundset_converter';
 import { SabloDeferHelper } from '../../sablo/defer.service';
 import { ViewportService } from '../services/viewport.service';
-import { DateType } from './date_converter';
+import { DateType } from '../../sablo/converters/date_converter';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { IPropertyContext, PushToServerEnum, TypesRegistry } from '../../sablo/types_registry';
-import { ObjectType } from './object_converter';
+import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe('FoundsetConverter', () => {
 

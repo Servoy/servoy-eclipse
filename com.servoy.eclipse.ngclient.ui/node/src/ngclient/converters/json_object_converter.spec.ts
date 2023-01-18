@@ -9,8 +9,8 @@ import { TypesRegistry, ICustomTypesFromServer, IPropertiesFromServer, IProperty
             IFactoryTypeDetails, IPropertyContext, PushToServerEnum } from '../../sablo/types_registry';
 import { CustomObjectTypeFactory, CustomObjectType, ICOTFullValueFromServer, ICOTGranularUpdatesToServer, BaseCustomObjectState,
             ICOTFullObjectToServer, ICOTNoOpToServer, ICOTGranularUpdatesFromServer, ICOTGranularOpToServer,  } from './json_object_converter';
-import { DateType } from './date_converter';
-import { ObjectType } from './object_converter';
+import { DateType } from '../../sablo/converters/date_converter';
+import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe('JSONObjectConverter', () => {
 

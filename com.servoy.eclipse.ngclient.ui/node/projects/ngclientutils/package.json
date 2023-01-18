@@ -2,9 +2,9 @@
   "name": "@servoy/ngclientutils",
   "version": "2021.12.0",
   "peerDependencies": {
-    "@servoy/public": "*",
     "@angular/common": "^14",
-    "@angular/core": "^14"
+    "@angular/core": "^14",
+    "@servoy/public": "*"
   },
   "dependencies": {
     "tslib": "*"

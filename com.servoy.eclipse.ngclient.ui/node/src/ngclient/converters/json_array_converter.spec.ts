@@ -9,8 +9,8 @@ import { CustomArrayTypeFactory, CustomArrayType, ICATFullValueFromServer, ICATG
             ICATFullArrayToServer, ICATGranularUpdatesFromServer, ICATOpTypeEnum } from './json_array_converter';
 import { CustomObjectTypeFactory, CustomObjectType, ICOTFullValueFromServer, ICOTGranularUpdatesToServer,
             ICOTFullObjectToServer, ICOTNoOpToServer, ICOTGranularUpdatesFromServer } from './json_object_converter';
-import { DateType } from './date_converter';
-import { ObjectType } from './object_converter';
+import { DateType } from '../../sablo/converters/date_converter';
+import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe( 'JSONArrayConverter', () => {
     let converterService: ConverterService;
@@ -47,7 +47,7 @@ describe( 'JSONArrayConverter', () => {
 
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, new DateType(), true);
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, loggerFactory));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, loggerFactory));
 
         // IWebObjectTypesFromServer { [specName: string]: IWebObjectSpecificationFromServer; }
@@ -373,11 +373,11 @@ describe( 'JSONArrayConverter', () => {
         expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
         expect( changes.v.length ).toBe( 2, 'should have 2 values' );
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
-        expect( fullTabChange.vEr ).toBe( 0 );
+        expect( fullTabChange.vEr ).toBe( 1 );
         expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
         expect( fullTabChange.v.myvalue ).toBe( 'test1', 'item[0].myvalue should be test1' );
         fullTabChange = changes.v[1];
-        expect( fullTabChange.vEr ).toBe( 0 );
+        expect( fullTabChange.vEr ).toBe( 1 );
         expect( fullTabChange.v.name ).toBe( 'test3', 'item[1].name should be test3' );
         expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[1].myvalue should be test3' );
 
@@ -401,7 +401,7 @@ describe( 'JSONArrayConverter', () => {
         expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
         expect( changes.v.length ).toBe( 4, 'should have 4 values' );
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
-        expect( fullTabChange.vEr ).toBe( 0 );
+        expect( fullTabChange.vEr ).toBe( 1 );
         fullTabChange = changes.v[3];
         expect( fullTabChange.vEr ).toBe( 0 );
         expect( fullTabChange.v.name ).toBe( 'test5', 'item[3].name should be test5' );
@@ -425,11 +425,11 @@ describe( 'JSONArrayConverter', () => {
         expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
         expect( changes.v.length ).toBe( 2, 'should have 2 values' );
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
-        expect( fullTabChange.vEr ).toBe( 0 );
+        expect( fullTabChange.vEr ).toBe( 1 );
         expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
         expect( fullTabChange.v.myvalue ).toBe( 'test4', 'item[0].myvalue should be test1' );
         fullTabChange = changes.v[1];
-        expect( fullTabChange.vEr ).toBe( 0 );
+        expect( fullTabChange.vEr ).toBe( 1 );
         expect( fullTabChange.v.name ).toBe( 'test3', 'item[1].name should be test3' );
         expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[1].myvalue should be test3' );
 
@@ -587,7 +587,7 @@ describe( 'JSONArrayConverter', () => {
         let changedTabFull: ICOTFullObjectToServer = changedTabsFull.v[0];
         expect( changedTabFull.v.name ).toBe( 'test1' );
         expect( changedTabFull.v.myvalue ).toBe( 'test1' );
-        expect( changedTabFull.vEr ).toBe( 0 );
+        expect( changedTabFull.vEr ).toBe( 1 );
 
         changedTabFull = changedTabsFull.v[3];
         expect( changedTabFull.v.name ).toBe( 'test4' );
