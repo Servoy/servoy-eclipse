@@ -425,8 +425,9 @@ export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Array<Package>, text: string): Array<Package> {
         if (items)
             return items.filter(item => {
+				if (!item.components || item.components.length == 0) return false;
                 if (!text) return true;
-                const compBool = (!item.components || item.components.length == 0) ? false : item.components.filter(component => {
+                const compBool =  item.components.filter(component => {
                     return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
                 }).length > 0;
                 const catKeys = item.categories ? Object.keys(item.categories) : [];
@@ -443,7 +444,7 @@ export class SearchTextDeepPipe implements PipeTransform {
 						}
 					}
 				}
-				return compBool || catBool;
+				return (compBool || catBool);
             });
         return items;
     }
