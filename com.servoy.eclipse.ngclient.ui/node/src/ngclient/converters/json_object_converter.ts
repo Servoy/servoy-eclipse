@@ -233,7 +233,10 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                             if (instanceOfChangeAwareValue(val)) val.getInternalState().markAllChanged(false); // we are sending a full value to server so subprops must be full as well
 
                             const converted = this.converterService.convertFromClientToServer(val, this.getPropertyType(internalState, key),
-                                                undefined, propertyContextCreator.withPushToServerFor(key));
+                                                oldClientData ? oldClientData[key] : undefined, propertyContextCreator.withPushToServerFor(key));
+                            // TODO although this is a full change, we give oldClientData[key] (oldvalue) because server side does the same for some reason,
+                            // but normally both should use undefined/null for old value of subprops as this is a full change; SVY-17854 is created for looking into this
+
                             toBeSentObj[key] = converted[0];
 
                             if (val !== converted[1]) newClientDataInited[key] = converted[1];

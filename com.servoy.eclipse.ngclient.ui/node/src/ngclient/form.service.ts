@@ -666,12 +666,16 @@ export class FormService {
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied,
 
             changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {
+                // this is not really needed if we think that components on the root level will do "emit()" on the properties that change,
+                // so the @Output emitter from the component's property that calls FormComponent.datachange()...
+                // and the new value that we see below as componentModel?.[key] is not actually correct, as properties from the component model
+                // are sent as @Input s to the component impls., so changing that by reference without emit() will not update the componentModel...
+                // so componentModel?.[key] is still the old value
 //                if (! doNotPushNow) {
-//                    // this is not really needed; it is already done via the @Output emitter from the component's property that calls FormComponent.datachange()
 //                    const formState = this.formsCache.get(formName);
 //                    const componentModel = formState?.getComponent(componentName)?.model;
 //
-//                    this.dataPush(formName, componentName, key as string, componentModel?.[key], oldValue);
+//                   this.dataPush(formName, componentName, key as string, componentModel?.[key] problem here we need 'emit(...)' on the @Input of the component for this prop to get the correct new value..., oldValue);
 //                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
 //                  // nested values towards this root prop; so nothing to do here then
             }

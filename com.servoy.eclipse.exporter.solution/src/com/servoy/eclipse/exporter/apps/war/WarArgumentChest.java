@@ -279,9 +279,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
-			+ "        -ng2 true / false / sourcemaps - export ng2  binaries (default true). You  can give\n"
-			+ "             'sourcemaps' as value in order to generate sourcemaps.\n"
-			+ "        -ng1 ... export NGClient1 resources (default false)\n"
+			+ "        -ng2 true / false / sourcemaps ... export Titanium NG2 binaries.  If 'sourcemaps' is\n"
+			+ "             given, sourcemaps will be generated for .ts files - useful for debugging.\n"
+			+ "             Default: true\n"
+			+ "        -ng1 ... export NG1 client resources; not exported by default.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}

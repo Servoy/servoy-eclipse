@@ -272,7 +272,9 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                                 val.getInternalState().markAllChanged(false);
                             }
                             const converted = this.converterService.convertFromClientToServer(val, this.getElementType(internalState, idx),
-                                                    undefined, elemPropertyContext);
+                                                    oldClientData ? oldClientData[idx] : undefined, elemPropertyContext);
+                            // TODO although this is a full change, we give oldClientData[idx] (oldvalue) because server side does the same for some reason,
+                            // but normally both should use undefined/null for old value of elements as this is a full change; SVY-17854 is created for looking into this
 
                             if (val !== converted[1]) newClientDataInited[idx] = converted[1];
                             // if it's a nested obj/array or other smart prop that just got smart in convertFromClientToServer call in line above,
