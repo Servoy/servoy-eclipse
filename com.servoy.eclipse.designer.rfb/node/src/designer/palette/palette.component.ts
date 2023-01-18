@@ -425,11 +425,25 @@ export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Array<Package>, text: string): Array<Package> {
         if (items)
             return items.filter(item => {
-                if (!item.components || item.components.length == 0) return false;
                 if (!text) return true;
-                return item.components.filter(component => {
+                const compBool = (!item.components || item.components.length == 0) ? false : item.components.filter(component => {
                     return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
                 }).length > 0;
+                const catKeys = item.categories ? Object.keys(item.categories) : [];
+                let catBool = false;
+                if (catKeys.length > 0) {
+					for (const prop of catKeys){
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						const catProp: Array<PaletteComp> = item.categories[prop];
+						catBool = catProp.filter(component => {
+							return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
+						}).length > 0;
+						if (catBool) {
+							break;
+						}
+					}
+				}
+				return compBool || catBool;
             });
         return items;
     }
