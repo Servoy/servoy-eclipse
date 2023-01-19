@@ -77,6 +77,8 @@ public class NodeFolderCreatorJob extends Job
 	{
 		boolean executeNpmInstall = false;
 		File fullyGenerated = new File(nodeFolder.getParent(), ".fullygenerated");
+		ConsoleFactory consoleTiNG = new ConsoleFactory();
+		consoleTiNG.openConsole();
 		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 		try
 		{
