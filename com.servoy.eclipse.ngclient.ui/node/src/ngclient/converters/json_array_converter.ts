@@ -343,7 +343,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                 }
             }
         } finally {
-            internalState.ignoreChanges = false;
+            if (internalState) internalState.ignoreChanges = false;
         }
 
         return null; // newClientDataInitedshould be undefined / null if we reach this code
