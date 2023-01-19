@@ -177,7 +177,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     fromClientToServer(newClientData: CustomObjectValue, oldClientData: CustomObjectValue, propertyContext: IPropertyContext): [ICOTDataToServer, CustomObjectValue] | null {
         // note: oldClientData could be uninitialized (so not yet instance of CustomObjectValue) if a parent obj/array decides to send itself fully when an
         // element/subproperty was added - in which case it will be the same as newClientData... at least until SVY-17854 gets implemented and then old would be null
-        // as expected in that scenario
+        // as expected in that scenario; there was one more scenario for arrays at least (see comment from json_array_converter.ts) where getInternalState() could be
+        // present on the oldValue but return undefined - so we check for that as well here
 
         let internalState: CustomObjectState;
         let newClientDataInited: CustomObjectValue;
@@ -189,7 +190,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     // any 'smart' child elements will initialize in their fromClientToServer conversion;
                     // set it up, make it 'smart' and mark it as all changed to be sent to server...
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
-                                oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                                oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
                                 propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
                     internalState.markAllChanged(false);
@@ -203,7 +204,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
 
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
-                                oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                                oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
                                 propertyContext?.getPushToServerCalculatedValue(), true);
                     internalState = newClientDataInited.getInternalState();
 

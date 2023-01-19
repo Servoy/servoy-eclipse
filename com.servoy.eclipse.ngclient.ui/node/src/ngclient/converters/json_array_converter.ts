@@ -213,7 +213,9 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
     fromClientToServer(newClientData: any, oldClientData: CustomArrayValue<any>, propertyContext: IPropertyContext): [ICATDataToServer, CustomArrayValue<any>] | null {
         // note: oldClientData could be uninitialized (so not yet instance of CustomArrayValue) if a parent obj/array decides to send itself fully when an
         // element/subproperty was added - in which case it will be the same as newClientData... at least until SVY-17854 gets implemented and then old would be null
-        // as expected in that scenario
+        // as expected in that scenario; there is another scenario when this can happen - if or example a new full array value is assigner from JS using
+        // a oldValue.filter(...) - that will create a shallow copy with correct prototype of the oldValue (so it has .getInternalState(), but that returns undefined)
+        // because .filter(...) doesn't copy over non-enumerable internalState prop.
 
         const elemPropertyContext = propertyContext ? new PropertyContext(propertyContext.getProperty,
                 PushToServerUtils.combineWithChildStatic(propertyContext.getPushToServerCalculatedValue(), this.pushToServerForElements)) : undefined;
@@ -227,7 +229,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     // this can happen when an array value was set completely in browser
                     // any 'smart' child elements will initialize in their fromClientToServer conversion;
                     // set it up, make it 'smart' and mark it as all changed to be sent to server...
-                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
                     internalState.markAllChanged(false);
@@ -241,7 +243,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
                     delete newClientData[ChangeAwareState.INTERNAL_STATE_MEMBER_NAME];
 
-                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState ? oldClientData.getInternalState().contentVersion : 0,
+                    newClientDataInited = newClientData = this.initArrayValue(newClientData, oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
                               propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
                     internalState.dynamicPropertyTypesHolder = oldDynamicTypesHolder;
