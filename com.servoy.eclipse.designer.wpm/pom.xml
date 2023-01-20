@@ -6,10 +6,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.3.3745_LTS</version>
+		<version>2022.3.4.3746_LTS</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.wpm</artifactId>
-	<version>2022.3.3.3745_LTS</version>
+	<version>2022.3.4.3746_LTS</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
