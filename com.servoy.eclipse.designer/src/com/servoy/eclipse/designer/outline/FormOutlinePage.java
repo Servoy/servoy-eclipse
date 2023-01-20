@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ContentViewer;
@@ -49,7 +48,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
@@ -584,8 +582,5 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	public void setActionBars(IActionBars actionBars)
 	{
 		super.setActionBars(actionBars);
-		if (form.isResponsiveLayout()) return;
-		IMenuManager menuManager = actionBars.getMenuManager();
-		menuManager.add(GroupedOutlineViewToggleAction.addListener(this));
 	}
 }

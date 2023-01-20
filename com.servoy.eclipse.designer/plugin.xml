@@ -1433,25 +1433,6 @@
                      style="push">
                </command>
             </menu>
-            <menu
-                  label="Grouping">
-               <visibleWhen
-                     checkEnabled="false">
-	               <test
-	                     property="com.servoy.eclipse.designer.editor.rfb.isabsoluteform">
-	               </test>  
-               </visibleWhen>                  
-               <command
-                     commandId="com.servoy.eclipse.designer.rfb.group"
-                     label="Group"
-                     style="push">
-               </command>
-               <command
-                     commandId="com.servoy.eclipse.designer.rfb.ungroup"
-                     label="Ungroup"
-                     style="push">
-               </command>
-            </menu>
             <separator
                   name="com.servoy.eclipse.designer.separator1"
                   visible="true">
