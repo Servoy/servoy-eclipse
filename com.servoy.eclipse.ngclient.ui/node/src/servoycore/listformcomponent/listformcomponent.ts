@@ -38,14 +38,14 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     </ng-container>
 
     <ng-container *ngIf="!useScrolling">
-        <div *ngIf="containedForm.absoluteLayout">
+        <div *ngIf="containedForm&&containedForm.absoluteLayout">
             <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
                 <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
                 </div>
             </div>
         </div>
-        <div *ngIf="!containedForm.absoluteLayout">
+        <div *ngIf="containedForm&&!containedForm.absoluteLayout">
             <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
                 <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
             </div>
@@ -209,6 +209,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     svyOnInit() {
         super.svyOnInit();
+        
+        this.cache = this.parent.getFormCache().getFormComponent(this.name);
+        
+        if (this.servoyApi.isInDesigner()) {
+			return;
+		}
 
         this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1
             && !this.servoyApi.isInDesigner() && this.containedForm?.absoluteLayout;
@@ -259,8 +265,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             };
         }
-
-        this.cache = this.parent.getFormCache().getFormComponent(this.name);
 
         if(!this.useScrolling) {
             this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
@@ -391,7 +395,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.removeListenerFunction();
             this.removeListenerFunction = null;
         }
-        if (this.containedForm.childElements) {
+        if (this.containedForm && this.containedForm.childElements) {
             this.containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
     }
@@ -595,9 +599,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.numberOfCells = 1;
             return;
         }
-        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
+        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
         if (this.numberOfCells <= 0) {
-            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm.absoluteLayout) {
+            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout) {
                 const parentWidth = this.elementRef.nativeElement.offsetWidth;
                 const parentHeight = this.elementRef.nativeElement.offsetHeight;
                 const height = this.containedForm.formHeight;
@@ -610,7 +614,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             } else {
                 if(!this.servoyApi.isInAbsoluteLayout()) {
                     this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
-                } else if(!this.containedForm.absoluteLayout) {
+                } else if(this.containedForm && !this.containedForm.absoluteLayout) {
                     this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
                 }
             }
