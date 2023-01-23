@@ -44,6 +44,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.json.JSONArray;
@@ -65,6 +66,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.PaletteCommonsHandler;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -474,11 +476,14 @@ public class DesignerFilter implements Filter
 						jsonWriter.endObject();
 					}
 					jsonWriter.endArray();
-					servletResponse.getWriter().write(sw.toString());
+					JSONArray jsonArray = new JSONArray(sw.toString());
+					PaletteCommonsHandler paletteHandler = fl.getPaletteCommonsHandler(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+					jsonArray = paletteHandler.insertcommonsCategory(jsonArray);
+					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)
 				{
-					Debug.error("Exception during designe palette generation", ex);
+					Debug.error("Exception during designer palette generation", ex);
 				}
 				catch (BackingStoreException e)
 				{

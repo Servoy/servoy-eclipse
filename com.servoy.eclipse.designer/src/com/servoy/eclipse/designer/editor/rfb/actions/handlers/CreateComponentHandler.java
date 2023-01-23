@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.NotEnabledException;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -79,6 +82,7 @@ import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.PaletteCommonsHandler;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -335,6 +339,19 @@ public class CreateComponentHandler implements IServerService
 			if (args.has("name"))
 			{
 				String name = args.getString("name");
+				if (args.has("packageName")) //ghost components has no packageName
+				{
+
+					try
+					{
+						IPath wsPath = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+						PaletteCommonsHandler.getInstance(wsPath.toOSString()).updateComponentCounter(name);
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logWarning(e.getMessage(), e);
+					}
+				}
 				if (dropTarget instanceof WebComponent)
 				{
 					// see if target has a 'component' or 'component[]' typed property
