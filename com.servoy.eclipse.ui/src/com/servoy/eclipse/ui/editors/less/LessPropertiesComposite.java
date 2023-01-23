@@ -312,7 +312,7 @@ public class LessPropertiesComposite extends Composite
 		area.cacheChildren(true);
 		sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		Display.getCurrent().asyncExec(() -> {
-			if (firstText != null) firstText.setFocus();
+			if (firstText != null && !firstText.isDisposed()) firstText.setFocus();
 		});
 	}
 
