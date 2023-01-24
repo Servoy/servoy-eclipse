@@ -127,7 +127,7 @@ public class ConfluenceGenerator
 	{
 		HttpHost targetHost = new HttpHost("wiki.servoy.com", 443, "https");
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("docs", "wikidocs"));
+		credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("x", "y"));
 
 		AuthCache authCache = new BasicAuthCache();
 		authCache.put(targetHost, new BasicScheme());
