@@ -135,8 +135,6 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		body.style.height = height + this.margin + 'px';
 
 		//set popover position
-        const popArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
-
 		const popoverCtrl = this.document.getElementById('VariantsCtrl');
 		popoverCtrl.style.top = this.top - palette.scrollTop + 'px';
 		popoverCtrl.style.left = this.left + 'px';
