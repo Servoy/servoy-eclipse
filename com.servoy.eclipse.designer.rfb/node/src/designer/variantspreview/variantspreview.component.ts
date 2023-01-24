@@ -26,7 +26,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	variantsIFrame: HTMLIFrameElement;
 	top = -1000;
 	left = -1000;
-	placement = 'right';
+	placement = 'right right-top right-bottom top-left bottom-left';
 	isPopoverInitialized = false;
 	popoverFooterHeight = 0;
 	document: Document;
@@ -69,6 +69,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			if (event.data.id === 'resizePopover') {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
                 this.setPopoverSizeAndPosition(event.data.formWidth, event.data.formHeight);
+                
 				this.showPopover();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (event.data.id === 'onVariantMouseDown') {
@@ -134,6 +135,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		body.style.height = height + this.margin + 'px';
 
 		//set popover position
+        const popArrow = this.document.getElementsByClassName('popover-arrow').item(0) as HTMLElement;
+
 		const popoverCtrl = this.document.getElementById('VariantsCtrl');
 		popoverCtrl.style.top = this.top - palette.scrollTop + 'px';
 		popoverCtrl.style.left = this.left + 'px';
