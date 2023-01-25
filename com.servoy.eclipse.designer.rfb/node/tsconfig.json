@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
+    "target": "ES2022",
     "module": "es2020",
     "lib": [
       "es2018",
@@ -24,8 +24,11 @@
       "@servoy/public": [
         "../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/public-api"
       ],
-      "@angular/*": ["./node_modules/@angular/*"] 
-    }
+      "@angular/*": [
+        "./node_modules/@angular/*"
+      ]
+    },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,
