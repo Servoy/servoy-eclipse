@@ -20,7 +20,8 @@
           <div class="align-center">
             <div class= "select"> 
               <mat-form-field>
-                <mat-select [(value)]="package.selected" [placeholder]="getSelectedRelease(package)" matTooltip="{{ getReleaseTooltip(package) }}">
+                  <mat-label>{{getSelectedRelease(package)}}</mat-label>
+                <mat-select [(value)]="package.selected" matTooltip="{{ getReleaseTooltip(package) }}">
                   <mat-option *ngFor=" let release of package.releases" [value]="release.version">{{ release.version }}</mat-option>
                 </mat-select>
               </mat-form-field>
