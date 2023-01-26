@@ -278,11 +278,11 @@ public class WarExporter
 		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
 		if (exportModel.isNGExport())
 		{
+			monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
+			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, !exportModel.exportNG1());
+			if (monitor.isCanceled()) return;
 			if (exportModel.exportNG1())
 			{
-				monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
-				if (monitor.isCanceled()) return;
 				monitor.setWorkRemaining(6);
 				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
@@ -295,11 +295,8 @@ public class WarExporter
 			}
 			else
 			{
-				monitor.subTask("Copying components/services specs...");
-				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, true);
-				if (monitor.isCanceled()) return;
 				monitor.setWorkRemaining(5);
-				monitor.subTask("Copy exported components");
+				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
 			}
@@ -915,7 +912,7 @@ public class WarExporter
 	/**
 	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 */
-	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, boolean specFilesOnly) throws ExportException
+	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, boolean exportNG2Only) throws ExportException
 	{
 		try
 		{
@@ -924,7 +921,7 @@ public class WarExporter
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
 			Set<String> exportedPackages = exportModel.getExportedPackages();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates, exportNG2Only);
 
 			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
 			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(exportedPackages));
@@ -979,7 +976,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir);
 							}
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, specFilesOnly);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, exportNG2Only);
 						}
 						else
 						{
@@ -989,7 +986,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir + '/'); // extractaJar is startsWith because of the jar entries.
 							}
-							extractJar(name, resource, tmpWarDir, allTemplates, excludes, specFilesOnly);
+							extractJar(name, resource, tmpWarDir, allTemplates, excludes, exportNG2Only);
 						}
 					}
 				}
@@ -999,7 +996,7 @@ public class WarExporter
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 
-			if (!specFilesOnly)
+			if (!exportNG2Only)
 			{
 				copyAllHtmlTemplates(tmpWarDir, allTemplates);
 			}
