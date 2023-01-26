@@ -83,6 +83,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() rowStyleClass: string;
     @Input() rowStyleClassDataprovider: string;
     @Input() responsivePageSize: number;
+    @Input() responsiveRowHeight: number;
     @Input() pageLayout: string;
     @Input() onSelectionChanged: (event: any) => void;
 
@@ -217,7 +218,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 		}
 
         this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1
-            && !this.servoyApi.isInDesigner() && this.containedForm?.absoluteLayout;
+            && !this.servoyApi.isInDesigner();
         if (this.useScrolling) {
             this.agGridOptions = {
                 context: {
@@ -417,7 +418,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowHeight(): number {
-        return this.containedForm.formHeight;
+        return this.containedForm.formHeight ? this.containedForm.formHeight : this.responsiveRowHeight;
     }
 
     getRowWidth(): string {
@@ -619,6 +620,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             }
 
+        } else {
+            this.numberOfColumns = this.responsivePageSize;
         }
 
         if(!this.useScrolling) {
