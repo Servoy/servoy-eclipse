@@ -8,10 +8,7 @@ import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
-import { TempusDominus, DateTime, Namespace} from '@eonasdan/tempus-dominus';
-import { ChangeEvent } from '@eonasdan/tempus-dominus/types/utilities/event-types';
-import  Options from '@eonasdan/tempus-dominus/types/utilities/options';
-import Dates from '@eonasdan/tempus-dominus/types/dates';
+import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 
 @Component({
     selector: 'servoydefault-calendar',
@@ -138,7 +135,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
     }
 
-    public dateChanged(event: ChangeEvent) {
+    public dateChanged(event: any) {
         if (event.type === 'change.td') {
             if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
                 (!event.date && !this.dataProviderID)) return;
