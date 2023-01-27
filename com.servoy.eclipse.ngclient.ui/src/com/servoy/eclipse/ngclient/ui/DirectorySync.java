@@ -119,14 +119,17 @@ public class DirectorySync
 							}
 							else
 							{
-								System.out.println("copy changed file " + filename);
-								try (InputStream is = new FileInputStream(filename.toFile()))
+								if (filename.toFile().exists())
 								{
-									copyOrCreateFile(localPath.toString(), targetFolder, is);
-								}
-								catch (IOException e)
-								{
-									Activator.getInstance().getLog().error("Error copying file " + filename, e);
+									System.out.println("copy changed file " + filename);
+									try (InputStream is = new FileInputStream(filename.toFile()))
+									{
+										copyOrCreateFile(localPath.toString(), targetFolder, is);
+									}
+									catch (IOException e)
+									{
+										Activator.getInstance().getLog().error("Error copying file " + filename, e);
+									}
 								}
 							}
 						}
