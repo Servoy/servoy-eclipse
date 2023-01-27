@@ -62,11 +62,11 @@ import org.sablo.util.HTTPUtils;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.PaletteCommonsHandler;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -477,8 +477,9 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					PaletteCommonsHandler paletteHandler = fl.getPaletteCommonsHandler(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
-					jsonArray = paletteHandler.insertcommonsCategory(jsonArray);
+					jsonArray = PaletteCommonsHandler.getInstance(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString())
+						.insertcommonsCategory(jsonArray);
+					;
 					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)
