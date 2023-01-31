@@ -327,6 +327,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
+        this.renderGhosts();
     }
 
     onMouseMove(event: MouseEvent) {
