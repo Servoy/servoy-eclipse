@@ -709,6 +709,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection(); 
                 }
             }
         );
@@ -749,6 +750,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -789,6 +791,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -829,6 +832,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -878,6 +882,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -927,6 +932,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -945,6 +951,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_spacing');
+                this.updateSelection();
             }
         );
         this.btnDistributeHorizontalSpacing.disabledIcon = 'images/distribute_hspace-disabled.png';
@@ -955,6 +962,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_centers');
+                this.updateSelection();
             }
         );
         this.btnDistributeHorizontalCenters.disabledIcon = 'images/distribute_hcenters-disabled.png';
@@ -965,6 +973,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_pack');
+                this.updateSelection();
             }
         );
         this.btnDistributeLeftward.disabledIcon = 'images/distribute_leftward-disabled.png';
@@ -975,6 +984,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_spacing');
+                this.updateSelection();
             }
         );
         this.btnDistributeVerticalSpacing.disabledIcon = 'images/distribute_vspace-disabled.png';
@@ -985,6 +995,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_centers');
+                this.updateSelection();
             }
         );
         this.btnDistributeVerticalCenters.disabledIcon = 'images/distribute_vcenters-disabled.png';
@@ -995,6 +1006,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_pack');
+                this.updateSelection();
             }
         );
         this.btnDistributeUpward.disabledIcon = 'images/distribute_upward-disabled.png';
@@ -1165,6 +1177,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             });
         });
     }
+    
+    updateSelection(){
+		setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+	}
 
 }
 
