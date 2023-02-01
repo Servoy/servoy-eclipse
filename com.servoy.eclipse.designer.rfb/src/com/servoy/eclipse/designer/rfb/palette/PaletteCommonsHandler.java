@@ -38,6 +38,8 @@ import java.util.TreeSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+
 /**
  * @author vidmarian
  *
@@ -59,11 +61,12 @@ public class PaletteCommonsHandler
 	//todo: load from preferences
 	private final int historySize = 14;
 	private final int saveInterval = 24; //hours
-	private final int commonsCategorySize = 5;
 
 	private final JSONObject commonsCategory;
 	private final SortedSet<Map.Entry<String, Double>> commonsPercentage;
 
+	private static int commonsCategorySize = 5;
+	private static DesignerPreferences prefs;
 
 	private long historyTimestamp;
 
@@ -74,6 +77,7 @@ public class PaletteCommonsHandler
 		{
 			instance = new PaletteCommonsHandler(wsPath);
 		}
+		commonsCategorySize = prefs.getCommonlyUsedSize();
 		return instance;
 	}
 
@@ -97,6 +101,8 @@ public class PaletteCommonsHandler
 	@SuppressWarnings("unchecked")
 	private PaletteCommonsHandler(String wsPath)
 	{
+		prefs = new DesignerPreferences();
+
 		historyCfgPath = wsPath + File.separator + "resources" + File.separator + "hstCfg.obj"; //$NON-NLS-1$//$NON-NLS-2$
 		historyTsPath = wsPath + File.separator + "resources" + File.separator + "hstTs.obj"; //$NON-NLS-1$//$NON-NLS-2$
 		configPath = wsPath + File.separator + "resources" + File.separator + "cfg.obj"; //$NON-NLS-1$//$NON-NLS-2$

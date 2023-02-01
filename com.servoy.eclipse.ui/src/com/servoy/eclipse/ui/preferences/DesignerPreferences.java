@@ -78,6 +78,7 @@ public class DesignerPreferences
 	public static final String METRICS_SETTING = "preferdMetrics";
 	public static final String STEP_SIZE_SETTING = "stepSize";
 	public static final String COPY_PASTE_OFFSET_SETTING = "copyPasteOffset";
+	public static final String COMMONLY_USED_SIZE_SETTING = "commonlyUsedSize";
 	public static final String ALIGNMENT_THRESHOLD_SETTING = "alignmentThreshold";
 	public static final String ALIGNMENT_INDENT_SETTING = "alignmentIndent";
 	public static final String ALIGNMENT_DISTANCES_SETTING = "alignmentDistances";
@@ -125,6 +126,7 @@ public class DesignerPreferences
 	public static final String SNAP_TO_NONE = "none";
 
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
+	public static final int COMMONLY_USED_SIZE_DEFAULT = 5;
 	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 3;
 	public static final int ALIGNMENT_INDENT_DEFAULT = 5;
 	public static final int[] ALIGNMENT_DISTANCES_DEFAULT = { 5, 10, 15 }; // small, medium, large
@@ -300,6 +302,16 @@ public class DesignerPreferences
 	public void setCopyPasteOffset(int copyPasteOffset)
 	{
 		setProperty(COPY_PASTE_OFFSET_SETTING, copyPasteOffset);
+	}
+
+	public int getCommonlyUsedSize()
+	{
+		return getProperty(COMMONLY_USED_SIZE_SETTING, COMMONLY_USED_SIZE_DEFAULT);
+	}
+
+	public void setCommonlyUsedSize(int commonlyUsedSize)
+	{
+		setProperty(COMMONLY_USED_SIZE_SETTING, commonlyUsedSize);
 	}
 
 	public int getAlignmentThreshold()
