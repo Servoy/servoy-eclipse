@@ -314,6 +314,10 @@ export class ChangeAwareState {
         return this.allChanged/* || this.inNotify*/;
     }
 
+    hasChangeListener(): boolean {
+        return !!this.changeListener;
+    }
+
     clearChanges() {
         this.allChanged = false;
     }

@@ -77,8 +77,19 @@ export abstract class ServoyPublicService {
     public abstract getFormCacheByName(containedForm: string): IFormCache;
     /**
      * Services should use this function to push there changed model data to the server so the data is accesable in a servoy solution or stored for a browser refresh.
+     * @deprecated please use the version of this method that also gives the oldPropertyValue as an argument - sendServiceChangeToServer
      */
     public abstract sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any): void;
+    /**
+     * Services should use this function to push there changed model data to the server (when needed),
+     * so the data is accesable in a servoy solution or stored for a browser refresh.
+     *
+     * @param propertyValue the new value that the service has (and should send to server) for the given propertyName; if you didn't assign it yet to the service's property,
+     *                      this method will do it for you.
+     * @param oldPropertValue the value that this property used to have before (or has if you did not change the reference - in this case it should be the same as „propertyValue”);
+     *                        this value is used in case of smart types (custom array/custom objects) in order to detect if it's a full change by reference for example
+     */
+    public abstract sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void;
     /**
      * show a form popup {@link PopupForm}
      */

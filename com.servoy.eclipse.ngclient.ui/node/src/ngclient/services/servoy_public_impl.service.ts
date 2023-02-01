@@ -86,8 +86,15 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.formService.getFormCacheByName(containedForm);
     }
 
+    /** 
+     * @deprecated see interface jsDoc 
+     */
     sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
-        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue);
+        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, propertyValue);
+    }
+
+    sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void {
+        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, oldPropertyValue);
     }
 
     showForm(popup: PopupForm): void {

@@ -175,7 +175,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     }
 
     fromClientToServer(newClientData: CustomObjectValue, oldClientData: CustomObjectValue, propertyContext: IPropertyContext): [ICOTDataToServer, CustomObjectValue] | null {
-        // note: oldClientData could be uninitialized (so not yet instance of CustomObjectValue) if a parent obj/array decides to send itself fully when an
+        // note: oldClientData could be uninitialized (so not yet instance of CustomObjectValue) if a parent array decides to send itself fully when an
         // element/subproperty was added - in which case it will be the same as newClientData... at least until SVY-17854 gets implemented and then old would be null
         // as expected in that scenario; there was one more scenario for arrays at least (see comment from json_array_converter.ts) where getInternalState() could be
         // present on the oldValue but return undefined - so we check for that as well here
@@ -186,42 +186,40 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         try {
             if (newClientData) {
                 if (!instanceOfCustomObject(newClientData)) {
+                    // revoke proxy on old value if present; new value is an old dumb/non-initialized one
+                    if (oldClientData?.getInternalState && oldClientData.getInternalState()) oldClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
+
                     // this can happen when a new obj. value was set completely in browser
                     // any 'smart' child elements will initialize in their fromClientToServer conversion;
                     // set it up, make it 'smart' and mark it as all changed to be sent to server...
-                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
-                                oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
-                                propertyContext?.getPushToServerCalculatedValue());
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, 1, propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
+
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
-                } else if (newClientData !== oldClientData) {
+                } else if (newClientData !== oldClientData || !newClientData.getInternalState().hasChangeListener()) { // the hasChangeListener is meant to detect arguments that come as a api call to client and then are assigned to a property - and because of the now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, here old was === new value and we couldn't detect it correctly as a full change
+                    // revoke proxy on old value if present; new value is an old dumb/non-initialized one
+                    if (oldClientData?.getInternalState && oldClientData.getInternalState()) oldClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
+
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
                     // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location (old proxy would send change notif to wrong place)
                     // we only need from the old internal state the dynamic types
-                    const oldDynamicTypesHolder = newClientData.getInternalState().dynamicPropertyTypesHolder;
-                    newClientData = newClientData.getInternalState().destroyAndDeleteMeAndGetNonProxiedValueOfProp();
+                    const previousNewValDynamicTypesHolder = newClientData.getInternalState()?.dynamicPropertyTypesHolder;
+                    newClientData = newClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
+                    delete newClientData[ChangeAwareState.INTERNAL_STATE_MEMBER_NAME];
 
-                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData,
-                                oldClientData?.getInternalState && oldClientData.getInternalState() ? oldClientData.getInternalState().contentVersion : 0,
-                                propertyContext?.getPushToServerCalculatedValue(), true);
+                    newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, 1, propertyContext?.getPushToServerCalculatedValue(), true);
                     internalState = newClientDataInited.getInternalState();
 
-                    internalState.dynamicPropertyTypesHolder = oldDynamicTypesHolder;
+                    if (previousNewValDynamicTypesHolder) internalState.dynamicPropertyTypesHolder = previousNewValDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
-                } else {
+                } else { // same value as before
                     // new the same as old and already initialized
                     newClientDataInited = newClientData;
                     internalState = newClientDataInited.getInternalState();
                     internalState.ignoreChanges = true;
-
-                    // for example if a custom array value is initially received through a return value from server side api/handler call and not as a
-                    // normal model property and then the component/service assigns it to model, the push to server of it might have changed; use the one
-                    // received here as arg
-                    internalState.calculatedPushToServerOfWholeProp = propertyContext?.getPushToServerCalculatedValue();
-                    if (!internalState.calculatedPushToServerOfWholeProp) internalState.calculatedPushToServerOfWholeProp = PushToServerEnum.REJECT;
                 }
             } else newClientDataInited = newClientData; // null/undefined
 
@@ -232,11 +230,15 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
                 if (internalState.hasChanges()) {
                     const changes = {} as ICOTFullObjectToServer | ICOTGranularUpdatesToServer;
-                    changes.vEr = internalState.contentVersion;
                     if (internalState.allChanged) {
                         const fullChange = changes as ICOTFullObjectToServer;
-                        // structure might have changed; increase version number
-                        ++internalState.contentVersion; // we also increase the content version number - server will bump version number on full value update
+                        // we can't rely/use the contentVersion here because, in case of a change-by-reference in a service followed
+                        // by a now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, we sometimes do not have
+                        // access to the old contentVersion to be able to use it... so full change from client will ignore old contentVersion on client and on server
+                        // but that should not be a problem as those are meant more to ensure that granular updates don't happen on an wrong/obsolete value
+                        internalState.contentVersion = 1; // start fresh
+                        changes.vEr = 0; // server treats this as a "don't check server content version as it's a full new value from client"
+
                         // send all
                         const toBeSentObj = fullChange.v = {};
                         for (const key of Object.keys(newClientDataInited)) {
@@ -266,6 +268,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                             return [{ n: true }, newClientDataInited];
                         } else return [changes, newClientDataInited];
                     } else {
+                        changes.vEr = internalState.contentVersion;
+
                         const granularUpdateChanges = changes as ICOTGranularUpdatesToServer;
                         // send only changed keys
                         const changedElements = granularUpdateChanges.u = [] as ICOTGranularOpToServer[];
@@ -512,7 +516,7 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
         this.changedKeys.clear();
     }
 
-    public destroyAndDeleteMeAndGetNonProxiedValueOfProp(): VT {
+    public destroyAndGetNonProxiedValueOfProp(): VT {
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
         console.log("Revoking proxy of: " + JSON.stringify(this.originalNonProxiedInstanceOfCustomObject));

@@ -68,8 +68,14 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     getFormCacheByName(containedForm: string): IFormCache {
         return this.formService.getFormCacheByName(containedForm);
     }
+    
+    /** @deprecated */
     sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
 
+    }
+
+    sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void {
+        
     }
 
     showForm(popup: PopupForm): void {

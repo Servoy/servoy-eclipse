@@ -106,21 +106,16 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         this.localeNumberSymbol = symbol;
     }
 
-    public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+    /** @deprecated */
+    public sendServiceChanges(_serviceName: string, _propertyName: string, _propertyValue: any) {}
 
-    }
+    public sendServiceChangeToServer(_serviceName: string, _propertyName: string, _propertyValue: any, _oldPropertyValue: any): void {}
 
-    public showForm(popup: PopupForm): void{
+    public showForm(_popup: PopupForm): void {}
 
-    }
+    public cancelFormPopup(_disableClearPopupFormCallToServer: boolean): void {}
 
-    public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
-
-    }
-
-    public setFormStyleClasses(styleclasses: {property : string}): void{
-
-    }
+    public setFormStyleClasses(_styleclasses: {property: string}): void {}
 }
 @NgModule({
     declarations: [

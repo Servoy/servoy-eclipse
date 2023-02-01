@@ -93,7 +93,7 @@ export class ServicesService {
     public updateServiceScopes( services: any ) {
         for ( const servicename of Object.keys(services) ) {
             // current model
-            const service = this.serviceProvider.getService( servicename );
+            const service = this.serviceProvider.getService(servicename);
             if ( service ) {
                 const serviceData = services[servicename];
 
@@ -130,12 +130,21 @@ export class ServicesService {
         }
     }
 
+    /* Send granular changes - the property itself has not changed by reference */
     public sendServiceChanges(serviceName: string, propertyName: string) {
         const service = this.serviceProvider.getService(serviceName);
-        this.sendServiceChangesWithValue(serviceName, propertyName, service[propertyName]);
+        this.sendServiceChangesWithValue(serviceName, propertyName, service[propertyName], service[propertyName]);
     }
 
-    public sendServiceChangesWithValue(serviceName: string, propertyName: string, propertyValue: any) {
+    /**
+     * Send a changed property's value to server.
+     * 
+     * @param propertyValue the new value that the service has (and should send to server) for the given propertyName; if you didn't assign it yet to the service's property,
+     *                      this method will do it for you.
+     * @param oldPropertValue the value that this property used to have (or has if you did not change the reference - in this case it should be the same as „propertyValue”);
+     *                        this value is used in case of smart types (custom array/custom objects) in order to detect if it's a full change by reference for example
+     */
+    public sendServiceChangesWithValue(serviceName: string, propertyName: string, propertyValue: any, oldPropertValue: any) {
         const service = this.serviceProvider.getService(serviceName);
 
         const changes = {};
@@ -147,7 +156,7 @@ export class ServicesService {
             propertyType = this.getServiceDynamicClientSideTypes(serviceName)?.[propertyName];
         }
 
-        const converted = this.converterService.convertFromClientToServer(propertyValue, propertyType, service[propertyName],
+        const converted = this.converterService.convertFromClientToServer(propertyValue, propertyType, oldPropertValue,
                 {
                     getProperty: (propertyN: string) => service[propertyN],
                     getPushToServerCalculatedValue: () => serviceSpec ? serviceSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT
