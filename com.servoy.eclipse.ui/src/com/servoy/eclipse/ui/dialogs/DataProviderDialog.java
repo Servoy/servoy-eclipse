@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -162,9 +163,14 @@ public class DataProviderDialog extends TreeSelectDialog
 			String variableName = askUserDialog.getVariableName();
 			int variableType = askUserDialog.getVariableType();
 			String defaultValue = askUserDialog.getVariableDefaultValue();
+			boolean parentChanged = !parent.toString().equals(askUserDialog.getParentName());
 
 			if (variableName != null)
 			{
+				if (parentChanged && askUserDialog.getParentName() != null)
+				{
+					parent = ModelUtils.getEditingFlattenedSolution(persistContext.getContext()).getForm(askUserDialog.getParentName());
+				}
 				ScriptVariable variable = NewVariableAction.createNewVariable(getTreeViewer().getShell(), parent, scopeName, variableName, variableType,
 					defaultValue, false);
 				getTreeViewer().treeViewer.refresh();

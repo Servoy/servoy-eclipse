@@ -21,6 +21,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +43,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -63,6 +65,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -71,6 +74,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -82,6 +86,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.StringInCodeSerializer;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -93,7 +98,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  */
 public class NewVariableAction extends Action implements ISelectionChangedListener
 {
-
+	private static Object context;
 	private final SolutionExplorerView viewer;
 	private final ImageDescriptor newGlobalVariableImage;
 	private final ImageDescriptor newFormVariableImage;
@@ -181,6 +186,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 	public static VariableEditDialog showVariableEditDialog(Shell shell, final Object validationContext, String variableScopeType)
 	{
+		context = validationContext;
 		VariableEditDialog askUserDialog = new VariableEditDialog(shell, "Create a new " + variableScopeType + " variable", new IInputValidator()
 		{
 			public String isValid(String newText)
@@ -199,7 +205,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 					try
 					{
 						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
-							new ValidatorSearchContext(validationContext, IRepository.SCRIPTVARIABLES), false);
+							new ValidatorSearchContext(context, IRepository.SCRIPTVARIABLES), false);
 					}
 					catch (RepositoryException e)
 					{
@@ -343,6 +349,9 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 		private Button radioExactExpression;
 		private Button radioValue;
 
+		private Combo parentCombo;
+		private String pc;
+
 
 		/**
 		 * Creates a new Dialog for new variable name, type and default value.
@@ -388,6 +397,39 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			Label typeLabel = new Label(mainArea, SWT.NONE);
 			type = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
 			UIUtils.setDefaultVisibleItemCount(type);
+
+			List<AbstractBase> forms = PersistHelper.getOverrideHierarchy((Form)context);
+			if (forms.size() >= 2)
+			{
+				Label parentComboLabel = new Label(mainArea, SWT.NONE);
+				parentComboLabel.setText("Parent");
+				parentCombo = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
+
+				for (AbstractBase form : forms)
+				{
+					parentCombo.add(form.toString());
+				}
+
+				parentCombo.select(0);
+
+				parentCombo.addSelectionListener(new SelectionListener()
+				{
+
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						context = ModelUtils.getEditingFlattenedSolution((IPersist)context).getForm(parentCombo.getText());
+						validateDialogData();
+					}
+
+					@Override
+					public void widgetDefaultSelected(SelectionEvent e)
+					{
+						// TODO Auto-generated method stub
+					}
+
+				});
+			}
 
 			Group defaultValueRadioGroup = new Group(mainArea, SWT.NONE);
 			defaultValueRadioGroup.setText("Default value");
@@ -622,6 +664,10 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			nv = name.getText();
 			tv = Column.allDefinedTypes[type.getSelectionIndex()];
 			dv = defaultValue.getText();
+			if (parentCombo != null)
+			{
+				pc = parentCombo.getText();
+			}
 			super.okPressed();
 		}
 
@@ -665,6 +711,16 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 		public int getVariableType()
 		{
 			return tv;
+		}
+
+		/**
+		 * Returns the parent of the variable as given by the user.
+		 *
+		 * @return the parent of the variable as given by the user.
+		 */
+		public String getParentName()
+		{
+			return pc;
 		}
 
 	}
