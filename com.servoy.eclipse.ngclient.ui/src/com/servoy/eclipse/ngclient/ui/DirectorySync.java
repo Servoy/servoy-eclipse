@@ -90,7 +90,10 @@ public class DirectorySync
 						{
 							try
 							{
-								Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+								if (filename.toFile().exists())
+								{
+									Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+								}
 							}
 							catch (IOException e)
 							{

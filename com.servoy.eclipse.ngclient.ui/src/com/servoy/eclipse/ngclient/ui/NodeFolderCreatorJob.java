@@ -389,7 +389,10 @@ public class NodeFolderCreatorJob extends Job
 									{
 										try
 										{
-											Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+											if (filename.toFile().exists())
+											{
+												Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+											}
 										}
 										catch (IOException e)
 										{
@@ -418,14 +421,17 @@ public class NodeFolderCreatorJob extends Job
 										}
 										else
 										{
-											System.out.println("copy changed file " + filename);
-											try (InputStream is = new FileInputStream(filename.toFile()))
+											if (filename.toFile().exists())
 											{
-												copyOrCreateFile(localPath.toString(), targetFolder, is);
-											}
-											catch (IOException e)
-											{
-												Activator.getInstance().getLog().error("Error copying file " + filename, e);
+												System.out.println("copy changed file " + filename);
+												try (InputStream is = new FileInputStream(filename.toFile()))
+												{
+													copyOrCreateFile(localPath.toString(), targetFolder, is);
+												}
+												catch (IOException e)
+												{
+													Activator.getInstance().getLog().error("Error copying file " + filename, e);
+												}
 											}
 										}
 									}
