@@ -369,6 +369,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			}
 			$editorService.hideInheritedElements(btnHideInheritedElements.state);
 			$editorService.executeAction('toggleHideInherited');
+			editorScope.setSelection([]);
 		},
 	};
 

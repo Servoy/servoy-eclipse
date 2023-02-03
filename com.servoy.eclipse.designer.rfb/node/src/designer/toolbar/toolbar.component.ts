@@ -515,6 +515,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
+                this.editorSession.setSelection([]);
             }
         );
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
