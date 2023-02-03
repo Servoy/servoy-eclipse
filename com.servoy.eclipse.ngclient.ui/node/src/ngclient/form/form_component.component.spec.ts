@@ -347,7 +347,7 @@ describe('FormComponentComponentTest', () => {
                 formname: 'aForm',
                 beanname: 'myCustomTestComponent',
                 changes: {
-                    arrayOfCustomObjects: { vEr: 1,
+                    arrayOfCustomObjects: { vEr: 0,
                         v: [ { vEr: 0,
                                 v: { active: true }
                              }]}
@@ -366,7 +366,7 @@ describe('FormComponentComponentTest', () => {
                 beanname: 'myCustomTestComponent',
                 changes: {
                     arrayOfCustomObjects: {
-                        vEr: 2,
+                        vEr: 1,
                         u: [ {
                                 i: 0,
                                 v: {

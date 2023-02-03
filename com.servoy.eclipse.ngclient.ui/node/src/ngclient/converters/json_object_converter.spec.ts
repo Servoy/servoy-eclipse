@@ -163,7 +163,7 @@ describe('JSONObjectConverter', () => {
                         },
                      y: 8 }
                 }, // this is how ObjectPropertyType sends it JSON from server if it detects nested special types such as Date
-                f: { _T: DateType.TYPE_NAME_SVY, _V: '2017-12-03T10:15:30' }
+                f: { _T: DateType.TYPE_NAME_SVY, _V: '2017-12-03T10:15:30' }    
             },
             vEr: 1
         });
@@ -246,13 +246,16 @@ describe('JSONObjectConverter', () => {
         tab.myvalue = 'test2';
         tab.rejectString = 'thisWillNotBeSentToServer';
 
-        const changes: ICOTFullObjectToServer = converterService.convertFromClientToServer(tab, oneTabType, undefined, getParentPropertyContext(oneTabPushToServer))[0];
-        expect(changes).toBeDefined('change object should be generated');
-        expect(changes.vEr).toBe(0, 'new full value being sent to server');
-        expect(changes.v).toBeDefined('change object  shoulld have a value');
-        expect(changes.v.name).toBe('test');
-        expect(changes.v.myvalue).toBe('test2');
+        const changes: [ICOTFullObjectToServer, any] = converterService.convertFromClientToServer(tab, oneTabType, undefined, getParentPropertyContext(oneTabPushToServer));
+        expect(changes[0]).toBeDefined('change object should be generated');
+        expect(changes[0].vEr).toBe(0, 'new full value being sent to server');
+        expect(changes[0].v).toBeDefined('change object  shoulld have a value');
+        expect(changes[0].v.name).toBe('test');
+        expect(changes[0].v.myvalue).toBe('test2');
+        
+        const tabAsChangeAwareValue = changes[1] as IChangeAwareValue;
 
+        tabAsChangeAwareValue.getInternalState().setChangeListener(() => {});
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(tab, oneTabType, tab, getParentPropertyContext(oneTabPushToServer))[0];
         expect(changes2.n).toBe(true, 'should have no changes now');
     });
@@ -418,6 +421,7 @@ describe('JSONObjectConverter', () => {
             vEr: 1
         } as ICOTFullValueFromServer, tabHolderType , undefined, undefined, undefined, getParentPropertyContext(tabHolderPushToServer));
         const tabHolderAsSeenInternally = (tabHolder as any) as IChangeAwareValue;
+        tabHolderAsSeenInternally.getInternalState().setChangeListener(() => {});
         const tab2AsSeenInternally = (tabHolder.tab2 as any) as IChangeAwareValue;
 
         expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
@@ -460,6 +464,7 @@ describe('JSONObjectConverter', () => {
         const sendToServerResult = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined, getParentPropertyContext(tabHolderPushToServer));
         tabHolder = sendToServerResult[1]; // it has been converted into a Proxy of original object
         const tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
+        tabHolderSeenInternally.getInternalState().setChangeListener(() => {});
 
         const tab2SeenInternally = (tabHolder.tab2 as any) as IChangeAwareValue;
         let tab3SeenInternally = (tabHolder.tab3 as any) as IChangeAwareValue;
