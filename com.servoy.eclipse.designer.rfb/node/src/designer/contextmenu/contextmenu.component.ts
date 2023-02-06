@@ -593,7 +593,8 @@ export class ContextMenuComponent implements OnInit {
         };
         this.menuItems.push(entry);
 
-        entry = new ContextmenuItem(
+		// deprecated
+        /*entry = new ContextmenuItem(
             'Save as template ...',
             () => {
                 this.hide();
@@ -603,7 +604,7 @@ export class ContextMenuComponent implements OnInit {
         // entry.getIconStyle = () => {
         // 	return {'background-image':"url(designer/assets/images/template.png)"};
         // };
-        this.menuItems.push(entry);
+        this.menuItems.push(entry);*/
 
         entry = new ContextmenuItem(
             'Open in Script Editor',
