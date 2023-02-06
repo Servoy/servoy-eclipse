@@ -32,8 +32,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     formHeight: number;
     partTopPosition: number;
     
-    private isHideInheritedElements: boolean;
-    
     private topLimit = 0;
     private bottomLimit = 0;
     private isLowestPart = false;
@@ -117,13 +115,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     private renderGhostsInternal(ghostContainers: Array<GhostContainer>) {
-		const hideInheritedPromise = this.editorSession.isHideInherited();
-        void hideInheritedPromise.then((result: boolean) => {
-            this.isHideInheritedElements = !result;
-        });
-        if (this.isHideInheritedElements) {
-			return;
-		}
         if (!this.formWidth) {
             this.formWidth = this.urlParser.getFormWidth();
         }
