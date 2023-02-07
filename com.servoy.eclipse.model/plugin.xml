@@ -261,6 +261,17 @@
       </persistent>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.variantProblem"
+         name="Media Problems"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.calculationProblem"
          name="Calculation Problems"
          point="org.eclipse.core.resources.markers">

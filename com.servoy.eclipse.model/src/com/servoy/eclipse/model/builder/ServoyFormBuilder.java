@@ -125,6 +125,7 @@ import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetData
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -228,7 +229,7 @@ public class ServoyFormBuilder
 						((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
 							o.getTypeID())))
 					{
-						// Don't set meta data properties.
+						// Don't set meta data properties
 						if (element.isMetaData() || element.isDeprecated()) continue;
 
 						if (o instanceof AbstractBase && !((AbstractBase)o).hasProperty(element.getName()))
@@ -412,6 +413,9 @@ public class ServoyFormBuilder
 						}
 					}
 				}
+
+				checkVariants(markerResource, servoyProject, o, context, null, fs);
+
 				checkDataProviders(markerResource, servoyProject, o, context, null, fs);
 				if (o instanceof IFormElement)
 				{
@@ -1671,6 +1675,51 @@ public class ServoyFormBuilder
 		}
 	}
 
+	public static void checkVariants(IResource markerResource, ServoyProject project, final IPersist o, IPersist context, String datasource,
+		FlattenedSolution flattenedSolution)
+	{
+
+		if (o instanceof WebComponent webComp)
+		{
+			Collection<PropertyDescription> properties = new ArrayList<PropertyDescription>();
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)o).getTypeName());
+			properties.addAll(spec.getProperties().values());
+			for (PropertyDescription pd : properties)
+			{
+				if (pd.getType() instanceof VariantPropertyType)
+				{
+					Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
+					if (propertyValue != null)
+					{
+						String elementName = null;
+						if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
+						{
+							elementName = ((ISupportName)o).getName();
+						}
+						BuilderDependencies.getInstance().addVariantDependency((Form)context);
+						if (!flattenedSolution.getVariantsHandler().variantExists(propertyValue.toString()))
+						{
+							try
+							{
+								ServoyMarker mk = MarkerMessages.VariantIdUnresolved.fill(elementName != null ? elementName : "UNNAMED",
+									((Form)context).getName());
+								IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.VARIANT_ID_UNRESOLVED,
+									IMarker.PRIORITY_NORMAL, null, o);
+								//							marker.setAttribute("Uuid", valuelistUUID.toString());
+								marker.setAttribute("SolutionName", flattenedSolution.getName());
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+							}
+
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public static void checkDataProviders(IResource markerResource, ServoyProject project, final IPersist o, IPersist context, String datasource,
 		FlattenedSolution flattenedSolution)
 	{
@@ -2407,6 +2456,7 @@ public class ServoyFormBuilder
 				markerResource.deleteMarkers(ServoyBuilder.WRONG_OVERRIDE_PARENT, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.SUPERFORM_PROBLEM_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.VARIANT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			}
 		}
 		catch (CoreException e)

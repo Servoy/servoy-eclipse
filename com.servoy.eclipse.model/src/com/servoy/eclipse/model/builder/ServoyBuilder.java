@@ -238,6 +238,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DIFFERENT_RESOURCES_PROJECTS_MARKER_TYPE = _PREFIX + ".differentResourcesProblem";
 	public static final String PROJECT_RELATION_MARKER_TYPE = _PREFIX + ".relationProblem";
 	public static final String MEDIA_MARKER_TYPE = _PREFIX + ".mediaProblem";
+	public static final String VARIANT_MARKER_TYPE = _PREFIX + ".variantProblem";
 	public static final String CALCULATION_MARKER_TYPE = _PREFIX + ".calculationProblem";
 	public static final String SCRIPT_MARKER_TYPE = _PREFIX + ".scriptProblem";
 	public static final String EVENT_METHOD_MARKER_TYPE = _PREFIX + ".eventProblem";
@@ -310,6 +311,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> METHOD_NO_RETURN = new Pair<String, ProblemSeverity>("methodNoReturn",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MEDIA_TIFF = new Pair<String, ProblemSeverity>("mediaTiff", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> VARIANT_ID_UNRESOLVED = new Pair<String, ProblemSeverity>("variantIdUnresolved", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>("calculationFormAccess",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.WARNING);

@@ -286,6 +286,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_invalidTableReference;
 	public static String ErrorWarningPreferencePage_methodEventParameters;
 	public static String ErrorWarningPreferencePage_mediaTiff;
+	public static String ErrorWarningPreferencePage_variantId;
 	public static String ErrorWarningPreferencePage_calculationFormAccess;
 	public static String ErrorWarningPreferencePage_imageMediaNotSet;
 	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;

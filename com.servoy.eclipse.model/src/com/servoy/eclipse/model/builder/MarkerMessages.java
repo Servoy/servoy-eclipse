@@ -246,6 +246,11 @@ public class MarkerMessages
 	public static ServoyMarker MediaTIFF = new ServoyMarker(
 		"Media {0} will not display correctly in Webclient since many browsers do not support TIFF image format.", ServoyBuilder.MEDIA_MARKER_TYPE);
 
+
+	public static ServoyMarker VariantIdUnresolved = new ServoyMarker(
+		"Unresolved variant of element \"{0}\" in form \"{1}\"",
+		ServoyBuilder.VARIANT_MARKER_TYPE);
+
 	/**
 	 * This means that one of the modules referenced by the project could not be found in the workspace. This can happen if the module was manually deleted from the workspace folder.
 	 */
