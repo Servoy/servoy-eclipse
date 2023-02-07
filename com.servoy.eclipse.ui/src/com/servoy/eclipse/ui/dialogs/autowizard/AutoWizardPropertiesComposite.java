@@ -49,8 +49,9 @@ import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.layout.GridLayout;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
@@ -79,7 +80,7 @@ public class AutoWizardPropertiesComposite
 	private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
 
 
-	public AutoWizardPropertiesComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
+	public AutoWizardPropertiesComposite(final ScrolledComposite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
 		PropertyWizardDialogConfigurator configurator)
 	{
 		this.flattenedSolution = flattenedSolution;
@@ -96,7 +97,7 @@ public class AutoWizardPropertiesComposite
 	 * @param parent
 	 * @param configurator
 	 */
-	private void setupNatTable(final Composite parent, PropertyWizardDialogConfigurator configurator)
+	private void setupNatTable(final ScrolledComposite parent, PropertyWizardDialogConfigurator configurator)
 	{
 		this.propertyNames = propertiesConfigurator.getOrderedProperties().stream().filter(pd -> !propertiesConfigurator.getPrefillProperties().contains(pd))
 			.map(pd -> pd.getName()).collect(Collectors.toList());
@@ -122,6 +123,7 @@ public class AutoWizardPropertiesComposite
 		gridData.verticalAlignment = GridData.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
+		natTable.setLayout(new GridLayout(1, false));
 		natTable.setLayoutData(gridData);
 		ConfigRegistry configRegistry = new ConfigRegistry();
 		natTable.setConfigRegistry(configRegistry);
@@ -150,6 +152,14 @@ public class AutoWizardPropertiesComposite
 		natTable.setData(CSS_CLASS_NAME_KEY, "svyNatTable");
 		natTable.configure();
 		natTable.refresh();
+		parent.setContent(natTable);
+		parent.setMinSize(natTable.getWidth(), natTable.getHeight());
+		parent.update();
+
+		natTable.addListener(SWT.Resize, event -> {
+			parent.setMinSize(natTable.getWidth(), natTable.getHeight());
+			parent.update();
+		});
 	}
 
 	private IDataProvider setupBodyDataProvider()
@@ -222,6 +232,10 @@ public class AutoWizardPropertiesComposite
 	{
 		((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().add(row);
 		natTable.refresh(true);
+		ScrolledComposite parent = (ScrolledComposite)natTable.getParent();
+		parent.setMinSize(natTable.getWidth(), natTable.getHeight());
+		parent.update();
+		parent.setOrigin(0, natTable.getHeight());
 	}
 
 	public List<Map<String, Object>> getInput()

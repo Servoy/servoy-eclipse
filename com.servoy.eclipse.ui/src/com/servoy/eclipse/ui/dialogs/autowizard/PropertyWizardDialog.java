@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -108,6 +109,9 @@ public class PropertyWizardDialog extends Dialog
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 		Composite tableParentComposite = new Composite(form, SWT.BORDER);
 		tableParentComposite.setLayout(new FillLayout());
+		ScrolledComposite sc = new ScrolledComposite(tableParentComposite, SWT.V_SCROLL | SWT.BORDER);
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
 		int initialW = settings.get("weight") != null ? settings.getInt("weight") : 400;
 		form.setWeights(initialW, 1000 - initialW);
 		form2.addListener(SWT.Resize, e -> {
@@ -134,7 +138,7 @@ public class PropertyWizardDialog extends Dialog
 				persistContext, settings, flattenedSolution);
 		}
 
-		tableComposite = new AutoWizardPropertiesComposite(tableParentComposite, persistContext, flattenedSolution,
+		tableComposite = new AutoWizardPropertiesComposite(sc, persistContext, flattenedSolution,
 			configurator);
 		return area;
 	}
