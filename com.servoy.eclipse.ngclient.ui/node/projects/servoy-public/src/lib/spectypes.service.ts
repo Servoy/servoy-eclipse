@@ -274,6 +274,14 @@ export interface IValuelist extends Array<{ displayValue: string; realValue: any
     isRealValueDate(): boolean;
 }
 
+export interface IFoundsetTree extends Array<any> {
+    getChildren(parentID: string, level: number): Promise<any>;
+    updateSelection(idarray: Array<string>): void;
+    updateCheckboxValue(id: string, value: boolean): void;
+    getAndResetNewChildren(): {key: any};
+    getAndResetUpdatedCheckboxValues(): {key: boolean};
+}
+
 export interface IPopupSupportComponent {
     closePopup();
 }

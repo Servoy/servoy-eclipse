@@ -10,6 +10,7 @@ import { SabloDeferHelper } from '../sablo/defer.service';
 import { CustomObjectTypeFactory } from './converters/json_object_converter';
 import { CustomArrayTypeFactory } from './converters/json_array_converter';
 import { ValuelistType } from './converters/valuelist_converter';
+import { FoundsetTreeType } from './converters/foundsettree_converter';
 import { FoundsetType } from './converters/foundset_converter';
 import { FoundsetRefType } from './converters/foundset_ref_converter';
 import { RecordRefType } from './converters/record_ref_converter';
@@ -98,6 +99,7 @@ export class ServoyService {
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
 
         typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
+        typesRegistry.registerGlobalType(FoundsetTreeType.TYPE_NAME, new FoundsetTreeType(sabloDeferHelper));
         typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, logFactory));
         typesRegistry.registerGlobalType(RecordRefType.TYPE_NAME, new RecordRefType());
         typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
