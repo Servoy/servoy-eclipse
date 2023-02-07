@@ -460,7 +460,8 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					}
 				);
 			
-			$contextmenu.add(
+			// deprecated
+			/*$contextmenu.add(
 				{
 					text: "Save as template ...",
 					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.png)"}},
@@ -470,7 +471,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$editorService.openElementWizard('saveastemplate');
 					}
 				}
-			);			
+			);	*/		
 				
 			var openAction = {
 					text: "Open in Script Editor",
