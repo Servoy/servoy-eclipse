@@ -48,7 +48,6 @@
         }
     </style>
     <script>
-    	window.parent.addEventListener('message', handlerMessage);
 		function handlerMessage(ev) {			
 			if (ev.data.id == 'positionClick') {
 				const btn = document.querySelector('.btn-rebuild');
@@ -64,11 +63,13 @@
 		}
 		function pageLoaded() {
 			window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
-			if (window.parent === window || !window.parent) {
+			if (window.location.href.indexOf("/designer/solution/") == -1) {
 				const btn = document.querySelector('.btn-rebuild');
 				btn.style.display = 'none';
 				const content = document.querySelector('#content');
 				content.innerHTML = '(Maybe you should trigger a rebuild by using Copy the TiNG sources -> "Clean build" option from the context menu of the Servoy Packages node)';	
+			} else {
+				window.parent.addEventListener('message', handlerMessage);
 			}
 		}
     </script>
