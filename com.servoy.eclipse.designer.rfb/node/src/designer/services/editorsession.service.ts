@@ -68,17 +68,18 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     keyPressed(event: { ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number }) {
-        // remove selection if backspace or delete key was pressed
-        if (event.keyCode == 8 || event.keyCode == 46) {
-            this.updateSelection([], true, true);
-        }
         void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,
             shift: event.shiftKey,
             alt: event.altKey,
             meta: event.metaKey,
             keyCode: event.keyCode
-        }, true)
+        }, false).then(() => {
+            // remove selection if backspace or delete key was pressed
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                this.setSelection([]);
+            }
+        })
     }
 
     sendChanges(properties) {

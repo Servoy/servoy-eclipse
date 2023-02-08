@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -63,7 +63,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
         this.editorContentService.removeContentMessageListener(this);
     }
     
-    contentMessageReceived(id: string, data: { property: string, width? : number, height? : number }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    contentMessageReceived(id: string, data: { property: string, width? : number, height? : number, eventData?: any }) {
         if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = data.width + 'px';
             this.contentStyle['height'] = data.height + 'px';
@@ -75,6 +76,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             this.editorSession.buildTiNG();
             window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
 		}
+        if (id === 'deleteKey') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            this.editorSession.keyPressed(data.eventData);
+        }
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -89,12 +94,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     @HostListener('document:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {
         // delete , f4 (open form hierarchy) and f5
-        if (event.keyCode == 46 || event.keyCode == 115 || event.keyCode == 116) {
-           
-            this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
-            if (event.keyCode == 46) {//delete key
-                this.editorSession.setSelection([]); //select the form
-            }
+        if (event.keyCode == 46 || event.keyCode == 115 || event.keyCode == 116 ) {
+            this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));         
             return false;
         }
         return true;
