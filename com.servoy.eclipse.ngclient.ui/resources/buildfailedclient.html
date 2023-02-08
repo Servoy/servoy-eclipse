@@ -61,8 +61,7 @@
 				}
 			}
 		}
-		function pageLoaded() {
-			window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
+		function pageLoaded() {	
 			if (window.location.href.indexOf("/designer/solution/") == -1) {
 				const btn = document.querySelector('.btn-rebuild');
 				btn.style.display = 'none';
@@ -70,6 +69,7 @@
 				content.innerHTML = '(Maybe you should trigger a rebuild by using Copy the TiNG sources -> "Clean build" option from the context menu of the Servoy Packages node)';	
 			} else {
 				window.parent.addEventListener('message', handlerMessage);
+				window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
 			}
 		}
     </script>
