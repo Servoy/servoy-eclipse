@@ -64,6 +64,10 @@
 		}
 		function pageLoaded() {
 			window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
+			if (window.parent === window || !window.parent) {
+				const btn = document.querySelector('.btn-rebuild');
+				btn.style.display = 'none';
+			}
 		}
     </script>
 </head>
