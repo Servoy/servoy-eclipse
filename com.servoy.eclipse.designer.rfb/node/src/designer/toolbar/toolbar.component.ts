@@ -486,20 +486,21 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnSetMaxLevelContainer.incIcon = 'images/zoom_in_xs.png';
         this.btnSetMaxLevelContainer.state = false;
 
-        this.btnSaveAsTemplate = new ToolbarItem(
+		// deprecated
+        /*this.btnSaveAsTemplate = new ToolbarItem(
             'Save as template...',
             'toolbar/icons/template_save.png',
             true,
             () => {
                 this.editorSession.openElementWizard('saveastemplate');
             }
-        );
+        );*/
 
         this.add(this.btnZoomIn, TOOLBAR_CATEGORIES.ZOOM);
         this.add(this.btnZoomOut, TOOLBAR_CATEGORIES.ZOOM);
         this.add(this.btnSetMaxLevelContainer, TOOLBAR_CATEGORIES.ZOOM_LEVEL);
         this.add(this.btnTabSequence, TOOLBAR_CATEGORIES.FORM);
-        this.add(this.btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
+        //this.add(this.btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
         this.btnHideInheritedElements = new ToolbarItem(
             'Hide inherited elements',

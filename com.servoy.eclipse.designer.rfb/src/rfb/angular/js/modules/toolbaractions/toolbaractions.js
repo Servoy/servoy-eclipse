@@ -338,20 +338,21 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 		},
 	}
 	
-	var btnSaveAsTemplate = {
+	// deprecated
+	/*var btnSaveAsTemplate = {
 		text: "Save as template...",
 		icon: "toolbaractions/icons/template_save.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('saveastemplate');
 		},
-	};
+	};*/
 
 	$toolbar.add(btnZoomIn, TOOLBAR_CATEGORIES.ZOOM);
 	$toolbar.add(btnZoomOut, TOOLBAR_CATEGORIES.ZOOM);
 	$toolbar.add(btnSetMaxLevelContainer, TOOLBAR_CATEGORIES.ZOOM_LEVEL);
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
-	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
+	//$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
 	var btnHideInheritedElements = {
 		text: "Hide inherited elements",
