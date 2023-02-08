@@ -200,12 +200,10 @@ public class GhostHandler implements IServerService
 					{
 						SortedMap<String, Object> sortedDroppableProperties = filterAndSortDroppableProperties((WebComponent)basicWebComponent);
 
-						Iterator<Entry<String, Object>> droppablePropIt = sortedDroppableProperties.entrySet().iterator();
 						int droppablePropCount = sortedDroppableProperties.size(), i = 0;
 
-						while (droppablePropIt.hasNext())
+						for (Entry<String, Object> dropPropEntry : sortedDroppableProperties.entrySet())
 						{
-							Entry<String, Object> dropPropEntry = droppablePropIt.next();
 							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
 
 							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
@@ -277,12 +275,8 @@ public class GhostHandler implements IServerService
 
 				if (spec != null) // can be null if the developer introduced a syntax error for example in the spec file while editing it
 				{
-					Iterator<Entry<String, PropertyDescription>> propIt = spec.getProperties().entrySet().iterator();
-					while (propIt.hasNext())
+					for (Entry<String, PropertyDescription> propEntry : spec.getProperties().entrySet())
 					{
-						Entry<String, PropertyDescription> propEntry = propIt.next();
-
-
 						if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
 						{
 							Object value = webComponent.getProperty(propEntry.getKey());
@@ -395,7 +389,7 @@ public class GhostHandler implements IServerService
 				{
 					do
 					{
-						parent = parent.getParent();
+						parent = PersistHelper.getRealParent(parent);
 					}
 					while (parent != null && parent != container);
 				}
