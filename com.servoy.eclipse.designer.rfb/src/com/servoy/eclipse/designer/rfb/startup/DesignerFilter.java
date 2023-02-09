@@ -314,6 +314,9 @@ public class DesignerFilter implements Filter
 									else layoutJson.put("layoutName", spec.getName());
 								}
 								else layoutJson.put("layoutName", spec.getName());
+
+								layoutJson.put("packageName", spec.getPackageName());
+
 								layoutJson.put("componentType", "layout");
 								layoutJson.put("displayName", spec.getDisplayName());
 
@@ -384,6 +387,7 @@ public class DesignerFilter implements Filter
 								{
 									JSONObject componentJson = new JSONObject();
 									componentJson.put("name", spec.getName());
+									componentJson.put("packageName", spec.getPackageName());
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
