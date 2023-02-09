@@ -43,6 +43,7 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
@@ -172,6 +173,9 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 				{
 					((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().remove(rowIndex);
 					natTable.refresh(true);
+					ScrolledComposite parent = (ScrolledComposite)natTable.getParent();
+					parent.setMinSize(natTable.getWidth(), natTable.getHeight());
+					parent.update();
 				}
 			}
 		});
