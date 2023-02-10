@@ -244,6 +244,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
             if (component.x >= 0 && component.y >= 0) {
                 this.editorSession.createComponent(component);
+                this.editorContentService.getContentArea().focus();
             }
 
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });

@@ -319,31 +319,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         });
     }
 
-    @HostListener('document:keyup', ['$event'])
-    onKeyUp(event: KeyboardEvent) {
-        if (event.keyCode === 8 || event.keyCode === 46) {
-            this.windowRefService.nativeWindow.parent.postMessage({ id: 'deleteKey', eventData: this.getFixedKeyEvent(event) });
-        }
-        return true;
-    }
-
-    getFixedKeyEvent(event: KeyboardEvent) {
-        let keyCode = event.keyCode;
-        if ((event.metaKey && event.key === 'Meta') || (event.ctrlKey && event.key === 'Control') || (event.altKey && event.key === 'Alt')) {
-            //standalone special keys have a javascript keyCode (91 = Meta, 17 = Ctrl, 18 = Alt) which may be wrongly interpreted in the KeyPressHandler (server side)
-            //they must produce no action by themselves
-            keyCode = 0;
-        }
-
-        return {
-            keyCode,
-            ctrlKey: event.ctrlKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            metaKey: event.metaKey
-        };
-    }
-
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('flex-item');
         if (!this.variantsLoaded || variants.length === 0) {
@@ -381,7 +356,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         targetElement = targetElement.firstElementChild;
         //not adding 3 px then the text content is getting clipped after drop
         const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
-        
+
         let selectedVariant: StructureCache;
         if (variantId) {
             for (const variant of this.insertedVariants) {
