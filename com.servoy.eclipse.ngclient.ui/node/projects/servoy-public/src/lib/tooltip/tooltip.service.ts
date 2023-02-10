@@ -36,7 +36,7 @@ export class TooltipService {
 
         const tDiv = this.getTooltipDiv();
         tDiv.innerHTML = message;
-        tDiv.style.zIndex = '1600';
+        tDiv.style.zIndex = '99999';
         tDiv.style.width = '';
         tDiv.style.overflow = 'hidden';
 
