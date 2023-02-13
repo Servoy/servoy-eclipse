@@ -22,7 +22,9 @@ export class SabloService {
         this.log = logFactory.getLogger('SabloService');
         this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
             sessionStorage.remove('svy_session_lock');
-//            websocketService.disconnect();
+        });
+        this.windowRefService.nativeWindow.window.addEventListener('pagehide', () => {
+            sessionStorage.remove('svy_session_lock');
         });
 
         if (sessionStorage.has('svy_session_lock')) {
