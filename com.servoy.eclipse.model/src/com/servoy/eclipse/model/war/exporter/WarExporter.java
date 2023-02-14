@@ -268,7 +268,9 @@ public class WarExporter
 			monitor.subTask("Copy the active solution (" + SDF.format(new Date()) + ")");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
+			monitor.subTask("Compile less resources (" + SDF.format(new Date()) + ")");
 			compileLessResources(tmpWarDir);
+			monitor.worked(1);
 		}
 
 		exportAdminUser(tmpWarDir);
@@ -284,30 +286,28 @@ public class WarExporter
 				monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
 				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
 				if (monitor.isCanceled()) return;
-			monitor.setWorkRemaining(6);
+				monitor.setWorkRemaining(6);
 				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
 				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 				monitor.worked(2);
 				monitor.subTask("Grouping JS and CSS resources (" + SDF.format(new Date()) + ")");
 				copyMinifiedAndGrouped(tmpWarDir, monitor);
 				if (monitor.isCanceled()) return;
-				monitor.subTask("Compile less resources (" + SDF.format(new Date()) + ")");
-				monitor.worked(1);
 			}
 			else
 			{
 				monitor.setWorkRemaining(5);
-			monitor.subTask("Copy exported components");
-			copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-			monitor.worked(2);
+				monitor.subTask("Copy exported components");
+				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+				monitor.worked(2);
 			}
 			if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 			{
 				monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
 				try
-			{
-				copyNGClient2(tmpWarDir, monitor);
-			}
+				{
+					copyNGClient2(tmpWarDir, monitor);
+				}
 				catch (RuntimeException e)
 				{
 					if (monitor.isCanceled()) return;
@@ -689,12 +689,12 @@ public class WarExporter
 
 				}
 				if (!monitor.isCanceled() && proc.exitValue() != 0)
-			{
-				ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
-				throw new ExportException(
-					"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
-						message.toString());
-			}
+				{
+					ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
+					throw new ExportException(
+						"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
+							message.toString());
+				}
 			}
 
 			//delete unneeded files
