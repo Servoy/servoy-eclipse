@@ -10,7 +10,7 @@
 		<version>2023.3.0.3840_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</artifactId>
-	<version>18.12.1</version>
+	<version>18.14.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
