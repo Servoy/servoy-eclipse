@@ -1683,36 +1683,40 @@ public class ServoyFormBuilder
 		{
 			Collection<PropertyDescription> properties = new ArrayList<PropertyDescription>();
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)o).getTypeName());
-			properties.addAll(spec.getProperties().values());
-			for (PropertyDescription pd : properties)
+			if (spec != null)
 			{
-				if (pd.getType() instanceof VariantPropertyType)
+				properties.addAll(spec.getProperties().values());
+				for (PropertyDescription pd : properties)
 				{
-					Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
-					if (propertyValue != null)
+					if (pd.getType() instanceof VariantPropertyType)
 					{
-						String elementName = null;
-						if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
+						Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
+						if (propertyValue != null)
 						{
-							elementName = ((ISupportName)o).getName();
-						}
-						BuilderDependencies.getInstance().addVariantDependency((Form)context);
-						if (!flattenedSolution.getVariantsHandler().variantExists(propertyValue.toString()))
-						{
-							try
+							String elementName = null;
+							if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
 							{
-								ServoyMarker mk = MarkerMessages.VariantIdUnresolved.fill(elementName != null ? elementName : "UNNAMED",
-									((Form)context).getName());
-								IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.VARIANT_ID_UNRESOLVED,
-									IMarker.PRIORITY_NORMAL, null, o);
-								//							marker.setAttribute("Uuid", valuelistUUID.toString());
-								marker.setAttribute("SolutionName", flattenedSolution.getName());
+								elementName = ((ISupportName)o).getName();
 							}
-							catch (CoreException e)
+							BuilderDependencies.getInstance().addVariantDependency((Form)context);
+							if (!flattenedSolution.getVariantsHandler().variantExists(propertyValue.toString()))
 							{
-								ServoyLog.logError(e);
-							}
+								try
+								{
+									ServoyMarker mk = MarkerMessages.VariantIdUnresolved.fill(elementName != null ? elementName : "UNNAMED",
+										((Form)context).getName());
+									IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+										ServoyBuilder.VARIANT_ID_UNRESOLVED,
+										IMarker.PRIORITY_NORMAL, null, o);
+									//							marker.setAttribute("Uuid", valuelistUUID.toString());
+									marker.setAttribute("SolutionName", flattenedSolution.getName());
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
 
+							}
 						}
 					}
 				}
