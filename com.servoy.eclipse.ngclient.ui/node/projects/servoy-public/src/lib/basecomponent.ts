@@ -53,9 +53,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
             console.log('component should have #element it its template for correct initalization for targetting the main div');
             console.log(this);
         }
-        if (this.cdRef !== null) {
-			this.cdRef.detectChanges();
-		} 
+        this.cdRef.detectChanges();
     }
 
     /**

@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef } from '@angular/core';
+import { Component, ChangeDetectorRef, Input, Renderer2 } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
@@ -9,12 +9,9 @@ import { ServoyBaseComponent } from '@servoy/public';
 export class ErrorBean extends ServoyBaseComponent<HTMLDivElement> {
 
     @Input() error;
-    @Input() servoyApi;
     @Input() toolTipText: string;
 
-    @ViewChild('element') elementRef: ElementRef;
-
-    constructor(renderer: Renderer2 ) {
-        super(renderer, null);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
 }
