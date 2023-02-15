@@ -53,7 +53,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
             for (let idx = 0; idx < newClientData.childElements.length; idx++) {
                 changes[idx] = this.converterService.convertFromClientToServer(newClientData.childElements[idx],
                         this.typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
-                        oldClientData && oldClientData.childElements ? oldClientData.childElements[idx] : null, propertyContext);
+                        oldClientData && oldClientData.childElements ? oldClientData.childElements[idx] : null, propertyContext)[0];
             }
         }
         newClientData.clearChanges();
