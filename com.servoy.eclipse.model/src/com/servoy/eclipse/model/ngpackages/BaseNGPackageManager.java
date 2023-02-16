@@ -255,6 +255,15 @@ public abstract class BaseNGPackageManager
 									list = new ArrayList<>();
 									packageReaders.put(reader.getPackageName(), list);
 								}
+								else
+								{
+									if (list.stream().anyMatch(r -> r instanceof ContainerPackageReader))
+									{
+										// if there is a ContainerPackageReader already, skip this one
+										// source projects always fully override the zip package.
+										continue;
+									}
+								}
 								list.add(reader);
 								getReadersListForThisPackageNameReferencedByTheSolutionProject(project.getName(), reader.getPackageName()).add(reader);
 							}
