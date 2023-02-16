@@ -16,9 +16,14 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -41,7 +46,9 @@ import com.servoy.j2db.persistence.ITable;
 
 public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 {
-	private Shell shell = new Shell(SWT.NO_TRIM);
+	private Shell shell = null;
+	private I18nCompositeText tableKyes = null;
+	private String selectedValue = null;
 
 	private final ITable table;
 	private final String title;
@@ -95,7 +102,7 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 			if (this.getControl() != null && !this.getControl().isDisposed() && !isMouseOnShell)
 			{
 				this.getControl().setVisible(false);
-				shell.dispose();
+				closeShell();
 			}
 		}
 	}
@@ -112,10 +119,23 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 				public void keyReleased(KeyEvent e)
 				{
 					super.keyReleased(e);
-					if (text.getText().startsWith("i18n:")) //$NON-NLS-1$
+					if (text.getText().startsWith("i18n:") && e.keyCode != 13) //$NON-NLS-1$
 					{
-						shell.dispose();
 						showShell();
+					}
+					else
+					{
+						closeShell();
+					}
+
+					if (e.keyCode == 16777218)
+					{
+						showShell();
+						changeMousePosition(text.toDisplay(text.getLocation()).x + 30, text.toDisplay(text.getLocation()).y + 30);
+						if (!shell.isDisposed())
+						{
+							shell.setFocus();
+						}
 					}
 				}
 			});
@@ -140,16 +160,22 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 		markDirty();
 		doSetValue(newValue);
 		fireApplyEditorValue();
-		shell.dispose();
+		closeShell();
 	}
 
 	private void showShell()
 	{
-		shell = new Shell(SWT.NO_TRIM);
-		shell.setLayout(new FillLayout());
-		shell.setMinimumSize(text.getSize().x, text.getSize().y);
+		if (shell == null || shell.isDisposed())
+		{
+			shell = new Shell(SWT.NO_TRIM);
+			shell.setLayout(new FillLayout(SWT.HORIZONTAL));
+		}
 
-		I18nCompositeText tableKyes = new I18nCompositeText(shell, SWT.PUSH, application, false);
+		if (tableKyes == null || tableKyes.isDisposed())
+		{
+			tableKyes = new I18nCompositeText(shell, SWT.PUSH, application);
+		}
+
 		tableKyes.handleFilterChanged(text.getText().substring(5));
 
 		tableKyes.getTableViewer().addDoubleClickListener(new IDoubleClickListener()
@@ -158,13 +184,46 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 			@Override
 			public void doubleClick(DoubleClickEvent event)
 			{
-				setNewValue(tableKyes.getSelectedKey());
+				setNewValue(selectedValue);
 			}
 
 		});
+		tableKyes.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
+		{
 
-		shell.setLocation(text.toDisplay(text.getLocation()).x, text.toDisplay(text.getLocation()).y + 20);
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				selectedValue = tableKyes.getSelectedKey();
+			}
+		});
+
+		shell.setLocation(text.toDisplay(text.getLocation()).x - 275, text.toDisplay(text.getLocation()).y + 20);
 		shell.pack();
+		shell.setSize(550, 600);
 		shell.setVisible(true);
+	}
+
+	private void closeShell()
+	{
+		if (shell != null)
+		{
+			shell.dispose();
+		}
+		shell = null;
+		tableKyes = null;
+	}
+
+	private void changeMousePosition(int x, int y)
+	{
+		try
+		{
+			// Move the cursor
+			Robot robot = new Robot();
+			robot.mouseMove(x, y);
+		}
+		catch (AWTException err)
+		{
+		}
 	}
 }

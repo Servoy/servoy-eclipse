@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -23,10 +24,7 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -127,21 +125,21 @@ public class I18nCompositeText extends Composite
 	private final String i18nDatasource;
 	private ISelectionChangedListener selectionChangedListener;
 
-	public I18nCompositeText(Composite parent, int style, IApplication application, boolean addActionColumns)
+	public I18nCompositeText(Composite parent, int style, IApplication application)
 	{
-		this(parent, style, application, addActionColumns, null);
+		this(parent, style, application, null);
 	}
 
 
-	public I18nCompositeText(Composite parent, int style, IApplication application, boolean addActionColumns, String i18nDatasource)
+	public I18nCompositeText(Composite parent, int style, IApplication application, String i18nDatasource)
 	{
 		super(parent, style);
 		this.application = application;
 		this.i18nDatasource = i18nDatasource;
-		initialise(addActionColumns);
+		initialise();
 	}
 
-	private void initialise(boolean addActionColumns)
+	private void initialise()
 	{
 		dialogSettings = Activator.getDefault().getDialogSettings();
 		String initialFilter = dialogSettings.get(DIALOGSTORE_FILTER);
@@ -185,54 +183,11 @@ public class I18nCompositeText extends Composite
 		TableColumn defaultColumn = new TableColumn(tableViewer.getTable(), SWT.NONE);
 		defaultColumn.setText("default");
 
-		TableColumn localeColumn = new TableColumn(tableViewer.getTable(), SWT.NONE);
-		localeColumn.setText("locale");
-		TableColumn delColumn = null;
-		TableColumn copyColumn = null;
-		if (addActionColumns)
-		{
-			copyColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_COPY);
-			copyColumn.setToolTipText("Copy key");
+		keyColumn.setWidth(275);
+		defaultColumn.setWidth(270);
+		tableContainer.setLayout(new FillLayout());
 
-			delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
-			delColumn.setToolTipText("Delete key");
-		}
-		IDialogSettings tableSettings = dialogSettings.getSection(COLUMN_WIDTHS);
-		if (tableSettings == null || addActionColumns)
-		{
-			final TableColumnLayout layout = new TableColumnLayout();
-			tableContainer.setLayout(layout);
-			layout.setColumnData(keyColumn, new ColumnWeightData(10, 50, true));
-			layout.setColumnData(defaultColumn, new ColumnWeightData(10, 50, true));
-			layout.setColumnData(localeColumn, new ColumnWeightData(10, 50, true));
-			if (delColumn != null) layout.setColumnData(delColumn, new ColumnPixelData(20, true));
-			if (copyColumn != null) layout.setColumnData(copyColumn, new ColumnPixelData(20, true));
-		}
-		else
-		{
-			int keyWidth = DEFAULT_WIDTH;
-			int defaultWidth = DEFAULT_WIDTH;
-			int localeWidth = DEFAULT_WIDTH;
-			try
-			{
-				keyWidth = tableSettings.getInt(KEY_COLUMN);
-				defaultWidth = tableSettings.getInt(DEFAULT_COLUMN);
-				localeWidth = tableSettings.getInt(LOCALE_COLUMN);
-				if (keyWidth < MIN_COLUMN_WIDTH) keyWidth = MIN_COLUMN_WIDTH;
-				if (defaultWidth < MIN_COLUMN_WIDTH) defaultWidth = MIN_COLUMN_WIDTH;
-				if (localeWidth < MIN_COLUMN_WIDTH) localeWidth = MIN_COLUMN_WIDTH;
-			}
-			catch (Exception ex)
-			{
-				// just ignore, an exception just means that the setting wasnt there yet.
-			}
-			keyColumn.setWidth(keyWidth);
-			localeColumn.setWidth(localeWidth);
-			defaultColumn.setWidth(defaultWidth);
-			tableContainer.setLayout(new FillLayout());
-		}
 		setLayout(new FillLayout());
-		setSize(200, 200);
 
 		String lang_country = dialogSettings.get(DIALOGSTORE_LANG_COUNTRY);
 		if (lang_country != null)
@@ -259,8 +214,8 @@ public class I18nCompositeText extends Composite
 
 		fill("".equals(initialFilter) ? null : initialFilter);
 
-		tableViewer.setComparator(new ColumnsSorter(tableViewer, new TableColumn[] { keyColumn, defaultColumn, localeColumn },
-			new Comparator[] { I18NEditorKeyColumnComparator.INSTANCE, I18NEditorDefaultColumnComparator.INSTANCE, I18NEditorLocaleColumnComparator.INSTANCE }));
+		tableViewer.setComparator(new ColumnsSorter(tableViewer, new TableColumn[] { keyColumn, defaultColumn },
+			new Comparator[] { I18NEditorKeyColumnComparator.INSTANCE, I18NEditorDefaultColumnComparator.INSTANCE }));
 
 		addDisposeListener(new DisposeListener()
 		{
@@ -280,8 +235,17 @@ public class I18nCompositeText extends Composite
 
 	protected void fill(String filter)
 	{
-		tableViewer.setInput(
-			messagesModel.getMessages(filter, null, null, null, ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null));
+		ArrayList<Object> inputsFinal = new ArrayList<>();
+		Object[] inputs = messagesModel.getMessages(filter, null, null, null,
+			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null).toArray();
+		for (int i = 0; i < inputs.length; i++)
+		{
+			if (i < 30)
+			{
+				inputsFinal.add(inputs[i]);
+			}
+		}
+		tableViewer.setInput(inputsFinal);
 	}
 
 	public void handleFilterChanged(String text)
