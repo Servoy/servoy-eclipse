@@ -6,7 +6,7 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:4 -->
+  <!--  servoy web.xml version:5 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
@@ -25,7 +25,7 @@
        <filter-class>org.sablo.filter.SeparateSessionFilter</filter-class>
        <init-param>
            <param-name>paths</param-name>
-           <param-value>/rfb/:/websocket/:/solutions/:/spec/:/resources/</param-value>
+           <param-value>/rfb/:/websocket/:/solutions/:/solution/:/spec/:/resources/</param-value>
        </init-param>
    </filter>
 
