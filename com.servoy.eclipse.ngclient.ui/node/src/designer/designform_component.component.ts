@@ -43,8 +43,8 @@ import { TypesRegistry} from '../sablo/types_registry';
             </div>
             <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
-      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
-            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items">
+      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
+            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
             </div>
       </div>
@@ -125,8 +125,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private dropHighlight: string = null;
     private dropHighlightIgnoredIds: Array<string> = null;
     private allowedChildren: unknown;
-    private formMarginSize = 1;
-    private variantMarginSize = 5;
+    private variantContainerMargin = 2;
+    private variantItemMargin = 10;
     private variantsLoaded = false;
 
     constructor(private formservice: FormService,
@@ -319,18 +319,18 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     sendVariantSizes() {
-        const variants = this.document.getElementsByClassName('flex-item');
+        const variants = this.document.getElementsByClassName('variant_item');
         if (!this.variantsLoaded || variants.length === 0) {
             return;
         }
-        const container = this.document.getElementsByClassName('flex').item(0).parentElement;
-        const formHeight = Math.ceil(container.getBoundingClientRect().height);
+        const container = this.document.getElementsByClassName('variants_container').item(0).parentElement;
+        const formHeight = Math.ceil(container.getBoundingClientRect().height) + 2 * this.variantContainerMargin;
         let formWidth = 0;
         for (const variant of variants) {
             const variantChild = variant.firstChild.firstChild as Element;
-            formWidth = Math.max(formWidth, variantChild.clientLeft + Math.ceil(variantChild.getBoundingClientRect().width) + 2*this.variantMarginSize);
+            formWidth = Math.max(formWidth, variantChild.clientLeft + Math.ceil(variantChild.getBoundingClientRect().width) + 2*this.variantItemMargin);
         }
-        formWidth += 2 * this.formMarginSize;
+        formWidth += 2 * this.variantContainerMargin;
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
             formWidth,
             formHeight}, '*');

@@ -444,6 +444,10 @@ fieldset[disabled] .btn-default.focus {
     height: 100%;
 }
 
+.variants_container > .variant_item {
+    display: flex;
+} 
+
 .variants_container > .variant_item > * {
     display: flex;
 } 
@@ -453,12 +457,12 @@ fieldset[disabled] .btn-default.focus {
  corner resize handles, as well as one of the individual classes below.
 */
 .dragresize {
- position: absolute;
- width: 5px;
- height: 5px;
- font-size: 1px;
- background: #EEE;
- border: 1px solid #333;
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    font-size: 1px;
+    background: #EEE;
+    border: 1px solid #333;
 }
 
 /*
