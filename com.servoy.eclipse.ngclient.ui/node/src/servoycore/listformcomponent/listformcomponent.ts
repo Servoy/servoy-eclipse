@@ -607,7 +607,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 const parentHeight = this.elementRef.nativeElement.offsetHeight;
                 const height = this.containedForm.formHeight;
                 const width = this.containedForm.formWidth;
-                this.numberOfColumns = (this.pageLayout === 'listview') ? 1 : Math.floor(parentWidth / width);
+                this.numberOfColumns = (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
                 const numberOfRows = Math.floor(parentHeight / height);
                 this.numberOfCells = numberOfRows * this.numberOfColumns;
                 // always just render 1
