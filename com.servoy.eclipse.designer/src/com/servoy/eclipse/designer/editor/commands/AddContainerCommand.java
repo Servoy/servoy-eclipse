@@ -525,7 +525,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					PropertyDescription property = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getProperty(string);
 					if (template != null && template.hasProperty(string))
 					{
-						customType.setProperty(string, template.getProperty(string));
+						Object propValue = template.getProperty(string);
+
+						if ("id".equals(string))
+						{
+							propValue = createUniqueID(arrayValue, propValue.toString());
+						}
+
+						customType.setProperty(string, propValue);
 					}
 					else
 						if (property != null && property.getInitialValue() != null)
@@ -541,5 +548,44 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			return customType;
 		}
 		return null;
+	}
+
+	private static String createUniqueID(IChildWebObject[] columns, String id)
+	{
+		String newID = id;
+		if (newID != null)
+		{
+			List<String> columnsID = new ArrayList<String>();
+			for (IChildWebObject column : columns)
+			{
+				if (column.getJson().has("id"))
+				{
+					columnsID.add(column.getJson().getString("id"));
+				}
+			}
+			for (int i = 0; i < 100; i++)
+			{
+				if (columnsID.contains(newID))
+				{
+					newID = generateID(id, i + 1);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		return newID;
+	}
+
+	private static String generateID(String id, int n)
+	{
+		StringBuffer sb = new StringBuffer(id.length() + n);
+		sb.append(id);
+		for (int i = 0; i < n; i++)
+		{
+			sb.append("_c");
+		}
+		return sb.toString();
 	}
 }
