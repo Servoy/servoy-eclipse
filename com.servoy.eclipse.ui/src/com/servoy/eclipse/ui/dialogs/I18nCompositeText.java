@@ -309,10 +309,11 @@ public class I18nCompositeText extends Composite
 			}
 		}
 
-		if (!found)
-		{
-			tableViewer.setSelection(new StructuredSelection());
-		}
+		// don't reset the selection, then keep it what it is (for the cell editor )
+//		if (!found)
+//		{
+//			tableViewer.setSelection(new StructuredSelection());
+//		}
 	}
 
 	public void saveTableColumnWidths()

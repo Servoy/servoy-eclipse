@@ -16,13 +16,14 @@
  */
 package com.servoy.eclipse.ui.editors;
 
-import java.awt.AWTException;
-import java.awt.Robot;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -30,6 +31,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,6 +44,7 @@ import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.persistence.ITable;
 
 public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
@@ -118,25 +121,32 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 				@Override
 				public void keyReleased(KeyEvent e)
 				{
-					super.keyReleased(e);
-					if (text.getText().startsWith("i18n:") && e.keyCode != 13) //$NON-NLS-1$
+					if (shell == null) return;
+					if (text.getText().startsWith("i18n:") && (e.keyCode != SWT.CR && e.keyCode != SWT.KEYPAD_CR)) //$NON-NLS-1$
 					{
 						showShell();
+						tableKyes.handleFilterChanged(text.getText().substring(5));
+						Collection<I18NMessagesModelEntry> input = (Collection)tableKyes.getTableViewer().getInput();
+						if ((e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN) && input.size() > 0)
+						{
+							IStructuredSelection selection = tableKyes.getTableViewer().getStructuredSelection();
+							// this will also handle no selection because then the first element is null and the index 0 will be set
+							ArrayList<I18NMessagesModelEntry> lst = new ArrayList<>(input);
+							int index = lst.indexOf(selection.getFirstElement());
+							index = e.keyCode == SWT.ARROW_UP ? index - 1 : index + 1;
+							index = index < 0 ? 0 : index;
+							index = index >= input.size() ? input.size() - 1 : index;
+							tableKyes.selectKey("i18n:" + lst.get(index).key);
+							e.doit = false;
+						}
 					}
 					else
 					{
+						setNewValue(tableKyes.getSelectedKey());
 						closeShell();
 					}
 
-					if (e.keyCode == 16777218)
-					{
-						showShell();
-						changeMousePosition(text.toDisplay(text.getLocation()).x + 30, text.toDisplay(text.getLocation()).y + 30);
-						if (!shell.isDisposed())
-						{
-							shell.setFocus();
-						}
-					}
+
 				}
 			});
 			contents.addMouseListener(new MouseAdapter()
@@ -152,6 +162,12 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 				}
 			});
 		}
+		if (getValue() instanceof String && ((String)getValue()).startsWith("i18n:")) //$NON-NLS-1$
+		{
+			Display.getCurrent().asyncExec(() -> {
+				showShell();
+			});
+		}
 		return contents;
 	}
 
@@ -163,45 +179,53 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 		closeShell();
 	}
 
+	@Override
+	protected void handleDefaultSelection(SelectionEvent event)
+	{
+		if (shell != null)
+		{
+			setNewValue(tableKyes.getSelectedKey());
+		}
+		super.handleDefaultSelection(event);
+	}
+
 	private void showShell()
 	{
 		if (shell == null || shell.isDisposed())
 		{
 			shell = new Shell(SWT.NO_TRIM);
 			shell.setLayout(new FillLayout(SWT.HORIZONTAL));
-		}
-
-		if (tableKyes == null || tableKyes.isDisposed())
-		{
 			tableKyes = new I18nCompositeText(shell, SWT.PUSH, application);
+
+			String v = (String)getValue();
+			tableKyes.handleFilterChanged(v.substring(5));
+			tableKyes.selectKey(v);
+
+			tableKyes.getTableViewer().addDoubleClickListener(new IDoubleClickListener()
+			{
+
+				@Override
+				public void doubleClick(DoubleClickEvent event)
+				{
+					setNewValue(selectedValue);
+				}
+
+			});
+			tableKyes.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
+			{
+
+				@Override
+				public void selectionChanged(SelectionChangedEvent event)
+				{
+					selectedValue = tableKyes.getSelectedKey();
+				}
+			});
+			shell.setLocation(text.toDisplay(text.getLocation()).x - 275, text.toDisplay(text.getLocation()).y + 20);
+			shell.pack();
+			shell.setSize(550, 600);
+			shell.setVisible(true);
 		}
 
-		tableKyes.handleFilterChanged(text.getText().substring(5));
-
-		tableKyes.getTableViewer().addDoubleClickListener(new IDoubleClickListener()
-		{
-
-			@Override
-			public void doubleClick(DoubleClickEvent event)
-			{
-				setNewValue(selectedValue);
-			}
-
-		});
-		tableKyes.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
-		{
-
-			@Override
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				selectedValue = tableKyes.getSelectedKey();
-			}
-		});
-
-		shell.setLocation(text.toDisplay(text.getLocation()).x - 275, text.toDisplay(text.getLocation()).y + 20);
-		shell.pack();
-		shell.setSize(550, 600);
-		shell.setVisible(true);
 	}
 
 	private void closeShell()
@@ -212,18 +236,5 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 		}
 		shell = null;
 		tableKyes = null;
-	}
-
-	private void changeMousePosition(int x, int y)
-	{
-		try
-		{
-			// Move the cursor
-			Robot robot = new Robot();
-			robot.mouseMove(x, y);
-		}
-		catch (AWTException err)
-		{
-		}
 	}
 }
