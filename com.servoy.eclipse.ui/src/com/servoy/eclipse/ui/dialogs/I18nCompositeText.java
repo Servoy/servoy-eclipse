@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -183,8 +182,8 @@ public class I18nCompositeText extends Composite
 		TableColumn defaultColumn = new TableColumn(tableViewer.getTable(), SWT.NONE);
 		defaultColumn.setText("default");
 
-		keyColumn.setWidth(275);
-		defaultColumn.setWidth(270);
+		keyColumn.setWidth(263);
+		defaultColumn.setWidth(263);
 		tableContainer.setLayout(new FillLayout());
 
 		setLayout(new FillLayout());
@@ -235,17 +234,8 @@ public class I18nCompositeText extends Composite
 
 	protected void fill(String filter)
 	{
-		ArrayList<Object> inputsFinal = new ArrayList<>();
-		Object[] inputs = messagesModel.getMessages(filter, null, null, null,
-			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null).toArray();
-		for (int i = 0; i < inputs.length; i++)
-		{
-			if (i < 30)
-			{
-				inputsFinal.add(inputs[i]);
-			}
-		}
-		tableViewer.setInput(inputsFinal);
+		tableViewer.setInput(messagesModel.getMessages(filter, null, null, null,
+			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null));
 	}
 
 	public void handleFilterChanged(String text)
