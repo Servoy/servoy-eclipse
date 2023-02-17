@@ -99,7 +99,15 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         else if (this.valuelistID.hasRealValues()) {
             // on purpose test with == so that "2" equals to 2
             // eslint-disable-next-line eqeqeq
-            const value = this.valuelistID.find((item) => item.realValue == result);
+            const value = this.valuelistID.find((item) => {
+                if (item.realValue == result){
+                    return true;
+                }
+                if (item.realValue instanceof Date && result instanceof Date){
+                    return item.realValue.getTime() === result.getTime()
+                }
+                return false;
+            });
             if (value) {
                 result = value.displayValue;
             } else {
