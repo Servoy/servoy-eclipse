@@ -119,9 +119,17 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 			contents.addKeyListener(new KeyAdapter()
 			{
 				@Override
+				public void keyPressed(KeyEvent e)
+				{
+					if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN)
+					{
+						e.doit = false;
+					}
+				}
+
+				@Override
 				public void keyReleased(KeyEvent e)
 				{
-					if (shell == null) return;
 					if (text.getText().startsWith("i18n:") && (e.keyCode != SWT.CR && e.keyCode != SWT.KEYPAD_CR)) //$NON-NLS-1$
 					{
 						showShell();
@@ -137,16 +145,12 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 							index = index < 0 ? 0 : index;
 							index = index >= input.size() ? input.size() - 1 : index;
 							tableKyes.selectKey("i18n:" + lst.get(index).key);
-							e.doit = false;
 						}
 					}
 					else
 					{
-						setNewValue(tableKyes.getSelectedKey());
 						closeShell();
 					}
-
-
 				}
 			});
 			contents.addMouseListener(new MouseAdapter()
