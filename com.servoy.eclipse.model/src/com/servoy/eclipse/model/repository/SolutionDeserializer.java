@@ -489,13 +489,11 @@ public class SolutionDeserializer
 				}
 			}
 
-			// parse the forms/tablenodes js objects
-			Iterator<Entry<File, List<JSONObject>>> childrenJSObjectMapIte = childrenJSObjectMap.entrySet().iterator();
 			Entry<File, List<JSONObject>> childrenJSObjectMapEntry;
 			File jsonFile, jsFile;
-			while (childrenJSObjectMapIte.hasNext())
+			for (Entry<File, List<JSONObject>> element : childrenJSObjectMap.entrySet())
 			{
-				childrenJSObjectMapEntry = childrenJSObjectMapIte.next();
+				childrenJSObjectMapEntry = element;
 				jsFile = childrenJSObjectMapEntry.getKey();
 				String jsFileName = jsFile.getName();
 				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
@@ -1366,7 +1364,36 @@ public class SolutionDeserializer
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-						if (current == null || (!current.startsWith("{Array") && !current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+						if (current == null || (!current.startsWith("{Array") && !current.startsWith("Array") && !current.endsWith("[]")))
+						{
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+							List<Expression> items = ((ArrayInitializer)code).getItems();
+							if (items != null && items.size() > 0)
+							{
+								boolean isString = true;
+								boolean isNumber = true;
+								for (Expression item : items)
+								{
+									if (!(item instanceof StringLiteral))
+									{
+										isString = false;
+									}
+									if (!(item instanceof DecimalLiteral))
+									{
+										isNumber = false;
+									}
+								}
+								if (isString)
+								{
+									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<String>");
+								}
+								else if (isNumber)
+								{
+									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<Number>");
+								}
+							}
+
+						}
 					}
 					else if (code instanceof BooleanLiteral)
 					{
@@ -1857,10 +1884,8 @@ public class SolutionDeserializer
 					//it.remove() cannot remove on unmodifiable list, should use removeChild later on
 				}
 			}
-			Iterator<IPersist> removalIterator = itemsToRemove.iterator();
-			while (removalIterator.hasNext())
+			for (IPersist persist : itemsToRemove)
 			{
-				IPersist persist = removalIterator.next();
 				persist.getParent().removeChild(persist);
 			}
 		}
@@ -1922,10 +1947,8 @@ public class SolutionDeserializer
 	private void completePersist(Map<IPersist, JSONObject> persist_json_map, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
 	{
 		SimpleJSDocParser jsdocParser = new SimpleJSDocParser();
-		Iterator<Map.Entry<IPersist, JSONObject>> it = persist_json_map.entrySet().iterator();
-		while (it.hasNext())
+		for (Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 		{
-			Map.Entry<IPersist, JSONObject> entry = it.next();
 			IPersist retval = entry.getKey();
 			JSONObject obj = entry.getValue();
 			if (retval instanceof ScriptVariable)
@@ -1956,13 +1979,10 @@ public class SolutionDeserializer
 					if (comment != null)
 					{
 						JSDocTags jsDocTags = jsdocParser.parse(comment, 0);
-						Iterator<JSDocTag> jsDocTagIte = jsDocTags.iterator();
-						JSDocTag jsDocTag;
 						String jsDocTagName;
 						String jsDocTagValue;
-						while (jsDocTagIte.hasNext())
+						for (JSDocTag jsDocTag : jsDocTags)
 						{
-							jsDocTag = jsDocTagIte.next();
 							jsDocTagName = jsDocTag.name();
 							jsDocTagValue = jsDocTag.value();
 
