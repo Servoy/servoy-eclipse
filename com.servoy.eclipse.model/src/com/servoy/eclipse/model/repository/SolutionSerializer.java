@@ -791,6 +791,10 @@ public class SolutionSerializer
 		// Add the "@type" tag.
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);
 		ArgumentType argumentType = ArgumentType.convertFromColumnType(type, jsType);
+		// If primitive type in @type JSDOc tag was authored in all lower caps, keep it that way
+		String stringifiedType = argumentType.isPrimitive() && argumentType.getName().toLowerCase().equals(jsType)
+			? jsType
+			: argumentType.getName();
 		// don't replace object types see SolutionDeserializer.parseJSFile()
 		if (jsType == null || !jsType.contains("{{"))
 		{
@@ -800,7 +804,7 @@ public class SolutionSerializer
 				if (index != -1)
 				{
 					int lineEnd = sb.indexOf("\n", index);
-					sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + argumentType.getName() + '}');
+					sb.replace(index + TYPEKEY.length() + 1, lineEnd, '{' + stringifiedType + '}');
 				}
 				else
 				{
@@ -816,7 +820,7 @@ public class SolutionSerializer
 						// else insert after comment start
 						lineEnd = sb.indexOf("\n", sb.indexOf(SV_COMMENT_START));
 					}
-					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + argumentType.getName() + "}\n *");
+					sb.insert(lineEnd, "\n * " + TYPEKEY + " {" + stringifiedType + "}\n *");
 				}
 			}
 			else if (jsType != null && ArgumentType.isGeneratedType(jsType))
