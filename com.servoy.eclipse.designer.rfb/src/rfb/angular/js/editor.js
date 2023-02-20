@@ -350,7 +350,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							});
 						} else {
 							showAndPositionGhostContainer(ghostContainer, p.getBoundingClientRect());
-							ghostContainer.style.display = "block";
+							if (p?.parentElement.classList.contains('maxLevelDesign')) {
+								ghostContainer.style.display = "none";
+							} else {
+								ghostContainer.style.display = "block";
+							}	
 						}
 					}
 				} else {

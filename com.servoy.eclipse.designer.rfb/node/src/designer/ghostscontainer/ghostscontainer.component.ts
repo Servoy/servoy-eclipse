@@ -156,6 +156,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     ghostContainer.style.width = this.formWidth + 'px';
                     ghostContainer.style.height = this.formHeight + 'px';
                 }
+                
+                if (this.editorContentService.getContentElement(ghostContainer.uuid)?.parentElement?.parentElement?.classList.contains('maxLevelDesign')) {
+					ghostContainer.style.display = 'none';
+				}
 
                 for (const ghost of ghostContainer.ghosts) {
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
