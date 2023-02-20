@@ -28,16 +28,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 
 /**
@@ -53,10 +59,10 @@ public class PaletteCommonsHandler
 	private HashMap<String, Integer> configMap;
 	private HashMap<String, Long> tsMap;
 
-	private final String historyCfgPath;
-	private final String historyTsPath;
-	private final String configPath;
-	private final String tsPath;
+	private final File historyCfgPath;
+	private final File historyTsPath;
+	private final File configPath;
+	private final File tsPath;
 
 	//todo: load from preferences
 	private final int historySize = 14;
@@ -65,48 +71,34 @@ public class PaletteCommonsHandler
 	private final JSONObject commonsCategory;
 	private final SortedSet<Map.Entry<String, Double>> commonsPercentage;
 
-	private static int commonsCategorySize = 5;
-	private static DesignerPreferences prefs;
+	private final DesignerPreferences prefs;
 
 	private long historyTimestamp;
 
 
-	public static PaletteCommonsHandler getInstance(String wsPath)
+	public static PaletteCommonsHandler getInstance()
 	{
 		if (instance == null)
 		{
-			instance = new PaletteCommonsHandler(wsPath);
+			instance = new PaletteCommonsHandler();
 		}
-		commonsCategorySize = prefs.getCommonlyUsedSize();
 		return instance;
 	}
 
-	class MyComparator implements Comparator
-	{
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(Object o1, Object o2)
-		{
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-	}
-
 	@SuppressWarnings("unchecked")
-	private PaletteCommonsHandler(String wsPath)
+	private PaletteCommonsHandler()
 	{
+		IPath stateLocation = Activator.getDefault().getStateLocation();
+		// take a sub dir where we store the files
+		IPath paletteResoucesPath = stateLocation.append("palette_resources");
+		// make sure it does exists.
+		paletteResoucesPath.toFile().mkdirs();
 		prefs = new DesignerPreferences();
 
-		historyCfgPath = wsPath + File.separator + "resources" + File.separator + "hstCfg.obj"; //$NON-NLS-1$//$NON-NLS-2$
-		historyTsPath = wsPath + File.separator + "resources" + File.separator + "hstTs.obj"; //$NON-NLS-1$//$NON-NLS-2$
-		configPath = wsPath + File.separator + "resources" + File.separator + "cfg.obj"; //$NON-NLS-1$//$NON-NLS-2$
-		tsPath = wsPath + File.separator + "resources" + File.separator + "ts.obj"; //$NON-NLS-1$//$NON-NLS-2$
+		historyCfgPath = paletteResoucesPath.append("hstCfg.obj").toFile();
+		historyTsPath = paletteResoucesPath.append("hstTs.obj").toFile();
+		configPath = paletteResoucesPath.append("cfg.obj").toFile();
+		tsPath = paletteResoucesPath.append("ts.obj").toFile();
 
 
 		historyCfgMap = (TreeMap<Long, HashMap<String, Integer>>)getMapFromFile(historyCfgPath);
@@ -138,7 +130,7 @@ public class PaletteCommonsHandler
 		});
 	}
 
-	private Map< ? , ? > getMapFromFile(String filePath)
+	private Map< ? , ? > getMapFromFile(File filePath)
 	{
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath)))
 		{
@@ -151,50 +143,59 @@ public class PaletteCommonsHandler
 
 	}
 
-	private void saveMapToFile(Map< ? , ? > map, String filePath) throws IOException
+	private void saveMapToFile(Map< ? , ? > map, File filePath)
 	{
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath)))
 		{
 			oos.writeObject(map);
 		}
+		catch (IOException e)
+		{
+			ServoyLog.logError("Cant save file " + filePath, e);
+		}
 
 	}
 
-	public void updateComponentCounter(String componentName) throws IOException
+	public void updateComponentCounter(String componentName)
 	{
-		Integer counter = configMap.get(componentName);
-		if (counter == null) counter = 0;
-		counter++;
-		configMap.put(componentName, counter);
-		saveMapToFile(configMap, configPath);
+		ICoreRunnable runnable = (monitor) -> {
+			Integer counter = configMap.get(componentName);
+			if (counter == null) counter = 0;
+			counter++;
+			configMap.put(componentName, counter);
+			saveMapToFile(configMap, configPath);
 
-		long utcTimestamp = ZonedDateTime.now().toInstant().toEpochMilli();
-		tsMap.put(componentName, utcTimestamp);
-		saveMapToFile(tsMap, tsPath);
+			long utcTimestamp = ZonedDateTime.now().toInstant().toEpochMilli();
+			tsMap.put(componentName, utcTimestamp);
+			saveMapToFile(tsMap, tsPath);
 
-		if (((utcTimestamp - historyTimestamp) > saveInterval * 60 * 60 * 1000))
-		{
-			if (historyTsMap.size() > this.historySize)
+			if (((utcTimestamp - historyTimestamp) > saveInterval * 60 * 60 * 1000))
 			{
-				Long lastKey = historyTsMap.descendingMap().lastKey();//oldest record
-				historyTsMap.remove(lastKey);
-			}
-			HashMap<String, Long> tsCopy = new HashMap<>();
-			tsMap.forEach((k, v) -> tsCopy.put(k, v));
-			historyTsMap.put(utcTimestamp, tsCopy);
-			saveMapToFile(historyTsMap, historyTsPath);
+				if (historyTsMap.size() > this.historySize)
+				{
+					Long lastKey = historyTsMap.descendingMap().lastKey();//oldest record
+					historyTsMap.remove(lastKey);
+				}
+				HashMap<String, Long> tsCopy = new HashMap<>();
+				tsMap.forEach((k, v) -> tsCopy.put(k, v));
+				historyTsMap.put(utcTimestamp, tsCopy);
+				saveMapToFile(historyTsMap, historyTsPath);
 
-			if (historyCfgMap.size() > this.historySize)
-			{
-				Long lastKey = historyCfgMap.descendingMap().lastKey();//oldest record
-				historyCfgMap.remove(lastKey);
+				if (historyCfgMap.size() > this.historySize)
+				{
+					Long lastKey = historyCfgMap.descendingMap().lastKey();//oldest record
+					historyCfgMap.remove(lastKey);
+				}
+				HashMap<String, Integer> cfgCopy = new HashMap<>();//clone config
+				configMap.forEach((k, v) -> cfgCopy.put(k, v));
+				historyCfgMap.put(utcTimestamp, cfgCopy);
+				saveMapToFile(historyCfgMap, historyCfgPath);
 			}
-			HashMap<String, Integer> cfgCopy = new HashMap<>();//clone config
-			configMap.forEach((k, v) -> cfgCopy.put(k, v));
-			historyCfgMap.put(utcTimestamp, cfgCopy);
-			saveMapToFile(historyCfgMap, historyCfgPath);
-		}
-
+		};
+		Job job = Job.create("Saving the commonly used palette data", runnable);
+		job.setSystem(true);
+		job.setRule(SchedulingRule.INSTANCE);
+		job.schedule();
 		//printMaps();
 	}
 
@@ -275,10 +276,8 @@ public class PaletteCommonsHandler
 		Long timestamp = tsMap.get(key);
 		if (counter == null)
 		{
-			Iterator<Map.Entry<Long, HashMap<String, Integer>>> it = historyCfgMap.descendingMap().entrySet().iterator();//map is in descending order
-			while (it.hasNext())
+			for (Entry<Long, HashMap<String, Integer>> entry : historyCfgMap.descendingMap().entrySet())
 			{
-				Map.Entry<Long, HashMap<String, Integer>> entry = it.next(); //palette config
 				counter = entry.getValue().get(key);
 				if (counter != null)
 				{
@@ -298,7 +297,7 @@ public class PaletteCommonsHandler
 
 	private void addComponentKeyToCommonsPercentageList(String key, double usagePercentage)
 	{
-		if (commonsPercentage.size() < commonsCategorySize)
+		if (commonsPercentage.size() < prefs.getCommonlyUsedSize())
 		{
 			boolean added = commonsPercentage.add(Map.entry(key, usagePercentage));
 		}
@@ -318,17 +317,13 @@ public class PaletteCommonsHandler
 	{
 		System.out.println("########################");
 		System.out.println("HISTORY");
-		Iterator<Map.Entry<Long, HashMap<String, Integer>>> it = historyCfgMap.descendingMap().entrySet().iterator();
 		int hsIndex = 0;
-		while (it.hasNext())
+		for (Entry<Long, HashMap<String, Integer>> entry : historyCfgMap.descendingMap().entrySet())
 		{
-			Map.Entry<Long, HashMap<String, Integer>> entry = it.next(); //palette config
 			Long hashmapTS = entry.getKey();
 			System.out.println("   HS[" + hsIndex++ + "]" + hashmapTS);
-			Iterator<Map.Entry<String, Integer>> it1 = entry.getValue().entrySet().iterator();
-			while (it1.hasNext())
+			for (Entry<String, Integer> entry1 : entry.getValue().entrySet())
 			{
-				Map.Entry<String, Integer> entry1 = it1.next();
 				System.out.println("        " + historyTsMap.get(entry.getKey()).get(entry1.getKey()) + " - " + entry1.getKey() + " - " + entry1.getValue());
 
 			}
@@ -337,13 +332,28 @@ public class PaletteCommonsHandler
 		System.out.println("-----------------");
 		System.out.println();
 		System.out.println("LAST CONFIG");
-		Iterator<Map.Entry<String, Integer>> cfgIt = configMap.entrySet().iterator();
-		while (cfgIt.hasNext())
+		for (Entry<String, Integer> entry : configMap.entrySet())
 		{
-			Map.Entry<String, Integer> entry = cfgIt.next();
 			System.out.println("        " + tsMap.get(entry.getKey()) + " - " + entry.getKey() + " - " + entry.getValue());
 		}
 		System.out.println("########################");
 		System.out.println();
+	}
+
+	private static class SchedulingRule implements ISchedulingRule
+	{
+		static SchedulingRule INSTANCE = new SchedulingRule();
+
+		@Override
+		public boolean contains(ISchedulingRule rule)
+		{
+			return rule == this;
+		}
+
+		@Override
+		public boolean isConflicting(ISchedulingRule rule)
+		{
+			return rule == this;
+		}
 	}
 }

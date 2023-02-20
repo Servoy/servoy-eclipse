@@ -44,7 +44,6 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.json.JSONArray;
@@ -481,7 +480,7 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					jsonArray = PaletteCommonsHandler.getInstance(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString())
+					jsonArray = PaletteCommonsHandler.getInstance()
 						.insertcommonsCategory(jsonArray);
 					;
 					servletResponse.getWriter().write(jsonArray.toString());
