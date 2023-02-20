@@ -46,12 +46,24 @@ export class SpecTypesService {
 }
 
 /**
- * This type is DEPRECATED (you can remove extends BaseCustomObject from any custom types you have and even make them interfaces).
- * You can even turn your custom types into interfaces (that can also implement ICustomObjectValue - if you need that; see details below). The system
- * will automatically generate the correct object for that interface (as long as it follows what is defined in the .spec file for this custom
+ * This type is DEPRECATED.
+ * 
+ * You can remove extends BaseCustomObject from any custom types you have and even make them interfaces).
+ * 
+ * You can even turn your custom types into interfaces (that can also - optionally - implement ICustomObjectValue - if you need that; see details below). The
+ * system will automatically generate the correct object for that interface (as long as it follows what is defined in the .spec file for this custom
  * object) - and you can use it.
+ * 
+ * For example you can use something like ('extends ICustomObjectValue' is only needed for sending deeply nested changes to server in case of plain 'object'
+ * typed subproperties):
+ *      @Input() myCustomObjectProperty: IMyCustomObject;
+ * 
+ *      interface IMyCustomObject extends ICustomObjectValue {
+ *          p1: string; // for example
+ *          (... any properties that are defined in the component's spec file for this custom object ...)
+ *      }
  *
- * Now, more .spec info about components/services is being sent to client (types + pushToServer info), and
+ * Now, more .spec info about components/services is being automatically sent to client (types + pushToServer info), and
  * for pushToServer SHALLOW/DEEP or even for ALLOW in .spec file (for custom objects/custom arrays), a proxy object will be used
  * on client to automatically detect reference changes in subproperties (and send them to server if it is SHALLOW/DEEP) (note: for deep nested JSON changes
  * in plain 'object' subproperties - if any - you need to use ICustomObjectValue interface in order to tell the system that it changed, but
@@ -129,7 +141,8 @@ export class BaseCustomObjectState {
 }
 
 /**
- * This type is DEPRECATED (you can stop using ICustomArray for arrays declared as such in component/service .spec files; just use them as Array<T>).
+ * This type is DEPRECATED (you can stop using ICustomArray for arrays declared as such in component/service .spec files; just use them as Array<T> or 
+ * ICustomArrayValue<T>).
  *
  * You can expect these custom arrays to implement ICustomArrayValue (if you need that; see details below). The system
  * will automatically generate the correct value implementing that interface for typed arrays (as long as it follows what is defined in the .spec file)
@@ -203,12 +216,21 @@ export const getDeprecatedCustomArrayState = (): ArrayState => {
     return deprecatedCustomArrayState;
 }
 
-/** Value present for properties in model of Servoy components/services if they are declared in the .spec file as arrays. (someType[]) */
+/**
+ * Value present for properties in model of Servoy components/services if they are declared in the .spec file as custom arrays. (someType[])
+ * 
+ * For example you can use:
+ *     @Input() myCustomArrayProperty: Array<MyArrayElementType>;
+ * 
+ * or, if you needed to send deeply nested changes to server in case of plain 'object' array element type (see markElementAsHavingDeepChanges(...) method jsdoc):
+ *     @Input() myCustomArrayProperty: ICustomArrayValue<MyArrayElementType>;
+ * 
+ */
 export interface ICustomArrayValue<T> extends Array<T> {
 
     /**
      * Calling this method is (rarely) only needed if both:
-     *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is > ALLOW)
+     *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is >= ALLOW)
      *   2. AND you store in the array simple json values that are nested, and type elements simply as 'object' in the .spec file. So if the array
      *      is declared in the .spec file as 'object[]' and you change an element/index in it client-side not by reference, but
      *      by content nested inside the array element value (e.g. myArray[5].subProp = 15) instead. Calling this method is not needed if you do
@@ -222,10 +244,10 @@ export interface ICustomArrayValue<T> extends Array<T> {
      * (so they are not typed as simple 'object'). That is why you do not need to call this method for those situations. Call it only for
      * nested JSON element values typed as 'object' in the .spec file, that have changes in them but are not changed by reference.
      *
-     * These marked elements, if they have ALLOW pushToServer, not higher, will not be sent to server right away, but whenever a send of the
-     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered via
-     * FormComponent.datachange(..., rootPropertyName, ...) or automatically by some other SHALLOW or DEEP pushToServer value change somewhere else
-     * in the same root property.
+     * These marked elements, if they have ALLOW pushToServer, not higher, will not be sent to server right away, but whenever a send/emit of the
+     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered directly via
+     * an .emit(...) on the @Output() of a component's root property (and in case of services, ServoyPublicService.sendServiceChanges(...)) or automatically
+     * by some other SHALLOW or DEEP pushToServer value change somewhere else in the same root property.
      *
      * IMPORTANT: This method is available for custom arrays received from server and for ones created client - side by components, but, for the latter, only after
      * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
@@ -235,12 +257,28 @@ export interface ICustomArrayValue<T> extends Array<T> {
 
 }
 
-/** Value present for properties in model of Servoy components/services if they are declared in the .spec file as custom types. (in the 'types' section) */
+/**
+ * Value present for properties in model of Servoy components/services if they are declared in the .spec file as custom object types. (sp in the 'types' section).
+ * 
+ * You can declare your custom types as simple interfaces (that can also - optionally - implement ICustomObjectValue - if you need that; see details in jsdoc of
+ * markSubPropertyAsHavingDeepChanges(...) method). The system will automatically generate the correct object for that interface (as long as it follows what is
+ * defined in the .spec file for this custom object) - and you can use it.
+ * 
+ * For example you can use something like ('extends ICustomObjectValue' is only needed for sending deeply nested changes to server in case of plain 'object'
+ * typed subproperties):
+ * 
+ *      @Input() myCustomObjectProperty: IMyCustomObject;
+ * 
+ *      interface IMyCustomObject extends ICustomObjectValue {
+ *          p1: string; // for example
+ *          (... any properties that are defined in the component's spec file for this custom object type ...)
+ *      }
+ */
 export interface ICustomObjectValue extends Record<string, any> {
 
     /**
      * Calling this method is (rarely) only needed if both:
-     *   1. you want to send client side changes back to the server manually (calculated pushToServer .spec config for the elements of this array is > ALLOW)
+     *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is >= ALLOW)
      *   2. AND you store in the object simple json values that are nested, and type subproperties simply as 'object' in the .spec file. So if the
      *      subprop. is declared in the .spec file as 'object' and you change that subproperty in it client-side not by reference, but
      *      by content nested inside the subproperty value (e.g. myCustomObject.subProp[3].x = 15) instead. Calling this method is not needed if you do
@@ -255,9 +293,9 @@ export interface ICustomObjectValue extends Record<string, any> {
      * the component/service .spec file, but are not changed by reference.
      *
      * These marked subproperties, if they have ALLOW pushToServer, not higher, will not be sent to server right away, but whenever a send of the
-     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered via
-     * FormComponent.datachange(..., rootPropertyName, ...) or automatically by some other SHALLOW or DEEP pushToServer value change somewhere else
-     * in the same root property.
+     * component's/service's root property (that contains this value - can be even this value directly) is sent to server. This can be triggered directly via
+     * an .emit(...) on the @Output() of a component's root property (and in case of services, ServoyPublicService.sendServiceChanges(...)) or automatically by
+     * some other SHALLOW or DEEP pushToServer value change somewhere else in the same root property.
      *
      * IMPORTANT: This method is available for custom objects received from server and for ones created client - side by components, but, for the latter, only after
      * they were sent once to server (you have to get them again from model or parent obj/array as they will be replaced by a new instance - that has this method).
