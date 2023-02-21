@@ -174,7 +174,8 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 				if (!sel.isEmpty())
 				{
 					Object[] selection = sel.toArray();
-					persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0] : PersistContext.create((IPersist)selection[0]);
+					persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0]
+						: PersistContext.create((IPersist)selection[0], activeEditor.getForm());
 				}
 			}
 		}

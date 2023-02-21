@@ -31,7 +31,10 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
@@ -68,6 +71,15 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponent.getTypeName());
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
+
+		try
+		{
+			webComponent = (WebComponent)ElementUtil.getOverridePersist(persistContext);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
 
 		for (int i = 0; i < result.size(); i++)
 		{
