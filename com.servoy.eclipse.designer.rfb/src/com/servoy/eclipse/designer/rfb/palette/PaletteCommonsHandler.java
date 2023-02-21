@@ -111,6 +111,9 @@ public class PaletteCommonsHandler
 		configMap = configMap != null ? configMap : new HashMap<String, Integer>();
 		tsMap = tsMap != null ? tsMap : new HashMap<String, Long>();
 
+		//init historyTimestamp
+		historyTimestamp = historyCfgMap.size() > 0 ? historyCfgMap.descendingKeySet().first().longValue() : ZonedDateTime.now().toInstant().toEpochMilli();
+
 		commonsCategory = new JSONObject();
 		commonsCategory.put("packageName", "commons");
 		commonsCategory.put("packageDisplayname", "Commonly Used");
@@ -179,6 +182,7 @@ public class PaletteCommonsHandler
 				HashMap<String, Long> tsCopy = new HashMap<>();
 				tsMap.forEach((k, v) -> tsCopy.put(k, v));
 				historyTsMap.put(utcTimestamp, tsCopy);
+				historyTimestamp = utcTimestamp;
 				saveMapToFile(historyTsMap, historyTsPath);
 
 				if (historyCfgMap.size() > this.historySize)
