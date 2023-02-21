@@ -130,7 +130,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 					}
 					wizard.init(PlatformUI.getWorkbench(), selection);
 
-					WizardDialog dlg = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
+					WizardDialog dlg = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 					if (wizard instanceof IPageChangedListener)
 					{
 						dlg.addPageChangedListener((IPageChangedListener)wizard);
