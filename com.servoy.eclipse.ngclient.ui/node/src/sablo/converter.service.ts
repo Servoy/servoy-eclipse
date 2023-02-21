@@ -238,8 +238,11 @@ export function isChanged(now: any, prev: any) {
         return now.getInternalState().hasChanges();
     }
 
-    if (now === prev) return false;
-    if (now && prev) {
+    if (now === prev) return (typeof now) === 'object'; // typeof [] and {} is 'object'; as the reference might be the same but some nested
+                                            // thing might have changed and component/sevice called 'emit' on it, it will return true; (we don't really have a deepcopy of the old value to compare with then, we are not on angular1 with deep watches)
+                                            // if it's a primitive and it's the same then return false
+
+    if (now && prev) { // so (now !== prev) here
         if (now instanceof Array) {
             if (prev instanceof Array) {
                 if (now.length !== prev.length) return true;
@@ -254,21 +257,12 @@ export function isChanged(now: any, prev: any) {
             return true;
         }
 
-        if ((now instanceof Object) && (prev instanceof Object)) {
+        if ((now instanceof Object) && (prev instanceof Object)) { // this is true both for objects and for arrays
             // first build up a list of all the properties both have.
             const fulllist = ConverterService.getCombinedPropertyNames(now, prev);
             for (const prop in fulllist) {
-                // TODO I think this comment line below can be removed - as ng2/new Angular I think no longer needs this check...
-                // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
-                if (prev[prop] !== now[prop]) {
-                    if (prop === '$$hashKey') continue; // TODO I think this line can be removed - as ng2/new Angular I think no longer needs this check...
-                    if (typeof now[prop] === 'object') {
-                        if (isChanged(now[prop], prev[prop])) {
-                            return true;
-                        }
-                    } else {
-                        return true;
-                    }
+                if (isChanged(now[prop], prev[prop])) {
+                    return true;
                 }
             }
             return false;
@@ -375,6 +369,7 @@ export class SubpropertyChangeByReferenceHandler {
         this.setChangeListenerToSubValueIfNeeded(parentValue[propertyName] /* markIfChanged call above might have upated it again due to clientToServer conversion for array/custom
                                                                                         obj returning new proxy for client side created values; so read it again instead of using "value"*/,
             (dontPushNow?: boolean) => {
+                // here parentValue[propertyName] is both old and new value as this is a smart change listener that is being triggered
                 this.parentAccess.changeNeedsToBePushedToServer(propertyName, parentValue[propertyName], dontPushNow);
             });
     }

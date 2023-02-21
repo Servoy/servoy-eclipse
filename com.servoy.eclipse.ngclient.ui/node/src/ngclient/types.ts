@@ -242,7 +242,7 @@ export class ComponentCache implements IComponentCache {
         if (this.hasSubPropsWithShallowOrDeep()) {
             // hmm the proxy itself might not be needed for actual push to server when the values change by reference because
             // the component normally emits those via it's @Output and FormComponent.datachange(...) will send them to server
-            // but we use it to also handle the scenario where a change-aware value (object / array) is changed by reference and we need to set it's setChangeListener(...)
+            // BUT we use it to also handle the scenario where a change-aware value (object / array) is changed by reference and we need to set it's setChangeListener(...)
             modelOfComponent = new Proxy({}, this.getProxyHandler());
         } else modelOfComponent = {};
 
@@ -259,7 +259,6 @@ export class ComponentCache implements IComponentCache {
 
     /**
      * Handler for the Proxy object that will detect reference changes in the component model where it is needed
-     * This implements the shallow PushToServer behavior.
      */
     private getProxyHandler() {
         return {

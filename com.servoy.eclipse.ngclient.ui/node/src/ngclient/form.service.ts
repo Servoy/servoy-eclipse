@@ -498,9 +498,13 @@ export class FormService {
         this.setChangeListenerIfSmartProperty(converted[1], formName, componentName, propertyName);
         componentModel[propertyName] = converted[1];
 
-        if (propertyType) {
+        if (propertyType || (typeof oldValue === 'object')) {
             this.sabloService.callService('formService', 'dataPush', { formname: formName, beanname: componentName, changes }, true);
         } else {
+            // we only send oldValue to server for primives... see typeof oldValue === 'object' check in the if above (as well as in isChanged(...) impl)
+            // because in case of plain nested arrays/objects with subproperty/element changes, the old value is not
+            // correct, the same object reference being used (we are not on angular1 here with deep watches that create deep copies of JSON for comparison...)
+
             // if this is a simple property change without any special client side type - then push the old value as well
             const oldValues = {};
             oldValues[propertyName] = this.converterService.convertFromClientToServer(oldValue, undefined, undefined, propertyContext)[0]; // just for any default conversions
@@ -660,24 +664,26 @@ export class FormService {
         });
     }
 
-    private createParentAccessForSubpropertyChanges(_formName: string, _componentName: string): IParentAccessForSubpropertyChanges<number | string> {
+    private createParentAccessForSubpropertyChanges(formName: string, componentName: string): IParentAccessForSubpropertyChanges<number | string> {
         // this is needed to handle subproperty change-by-reference for pushToServer SHALLOW or DEEP subproperties
         return  {
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied,
 
-            changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {
-                // this is not really needed if we think that components on the root level will do "emit()" on the properties that change,
-                // so the @Output emitter from the component's property that calls FormComponent.datachange()...
-                // and the new value that we see below as componentModel?.[key] is not actually correct, as properties from the component model
-                // are sent as @Input s to the component impls., so changing that by reference without emit() will not update the componentModel...
-                // so componentModel?.[key] is still the old value
-//                if (! doNotPushNow) {
-//                    const formState = this.formsCache.get(formName);
-//                    const componentModel = formState?.getComponent(componentName)?.model;
-//
-//                   this.dataPush(formName, componentName, key as string, componentModel?.[key] problem here we need 'emit(...)' on the @Input of the component for this prop to get the correct new value..., oldValue);
-//                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
-//                  // nested values towards this root prop; so nothing to do here then
+            changeNeedsToBePushedToServer: (key: number | string, oldValue: any, doNotPushNow?: boolean) => {
+                // this will only be used currently by the smart properties to push changes, not
+                // for root property change-by reference, because a component doesn't have direct
+                // access to it's model, just to individual properties via @Input and @Output, and when
+                // it does change an @Input by reference it has to call .emit(...) on the corresponding output
+                // anyway in order to update the property in the model - so we can't use a Proxy () on the model to
+                // automatically detect and send these changes; we rely in emits for that that updates the model and calls that calls FormComponent.datachange() anyway
+                
+                if (! doNotPushNow) {
+                    const formState = this.formsCache.get(formName);
+                    const componentModel = formState?.getComponent(componentName)?.model;
+
+                    this.dataPush(formName, componentName, key as string, componentModel?.[key], oldValue);
+                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+                  // nested values towards this root prop; so nothing to do here then
             }
         };
     }
