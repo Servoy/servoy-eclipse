@@ -131,7 +131,10 @@ public class DirectorySync
 									}
 									catch (IOException e)
 									{
-										Activator.getInstance().getLog().error("Error copying file " + filename, e);
+										if (filename.toFile().exists())
+										{
+											Activator.getInstance().getLog().error("Error copying file " + filename, e);
+										}
 									}
 								}
 							}
