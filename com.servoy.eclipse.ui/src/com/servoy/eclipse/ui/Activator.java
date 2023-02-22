@@ -19,10 +19,12 @@ package com.servoy.eclipse.ui;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -230,79 +232,78 @@ public class Activator extends AbstractUIPlugin
 									{
 										try
 										{
-											boolean useRef = false;
 											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-											List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
-											ArrayList<IProject> packages = new ArrayList<IProject>();
+											ArrayList<IProject> packagesSource = new ArrayList<IProject>();
+											List<String> packagesHelp = new ArrayList<String>();
+											List<String> packagesFinal = new ArrayList<String>();
+											List<String> packagesNeeded = processedPackages.entrySet().stream().map(Map.Entry::getKey)
+												.collect(Collectors.toList());
 											IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
-											for (IProject iProject : allProjects)
+											if (allProjects.length > 0)
 											{
-												if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+												for (IProject project : allProjects)
 												{
-													String packName = iProject.getName();
-													if (input.contains(packName) ||
-														(packName.equals("servoy-extra-components") && input.contains("servoyextra")))
+													if (project.isAccessible() && project.hasNature(ServoyNGPackageProject.NATURE_ID))
 													{
-														packages.add(iProject);
+														String packageName = project.getName();
+														if (packagesNeeded.contains(packageName) ||
+															(packageName.equals("servoy-extra-components") && packagesNeeded.contains("servoyextra")))
+														{
+															packagesSource.add(project);
+															packagesHelp.add(packageName.equals("servoy-extra-components") ? "servoyextra" : packageName);
+														}
 													}
 												}
+												for (String packageName : packagesNeeded)
+												{
+													packagesFinal.add(packagesHelp.contains(packageName) ? (packageName + " (uncheck will use source project)")
+														: packageName);
+												}
 											}
-
-											List<String> finalInput = new ArrayList<String>();
-											if (input.size() == packages.size())
+											if (packagesFinal.size() == 0)
 											{
-												useRef = true;
-												finalInput.add("Use reference component(unchecking this option will import the default component)");
+												packagesFinal = packagesNeeded;
 											}
-											else
-											{
-												finalInput = input;
-											}
-
-											final ListSelectionDialog lsd = new ListSelectionDialog(active, finalInput, new ArrayContentProvider(),
+											final ListSelectionDialog lsd = new ListSelectionDialog(active, packagesFinal, new ArrayContentProvider(),
 												new LabelProvider(),
 												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
-											lsd.setInitialElementSelections(finalInput);
+											lsd.setInitialElementSelections(packagesFinal);
 											lsd.setBlockOnOpen(true);
+											lsd.setTitle("Solution needs packages, install them from wpm/source");
 											int pressedButton = lsd.open();
 											if (pressedButton == 0)
 											{
 												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
 													IAutomaticImportWPMPackages.EXTENSION_ID);
-												Object[] result = lsd.getResult();
-												if (useRef)
+												List<String> result = Arrays.asList(lsd.getResult()).stream().map(object -> Objects.toString(object, null))
+													.toList();
+												for (String packageName : packagesFinal)
 												{
-													if (result == null || result.length == 0)
+													String realPackageName = packageName.substring(0,
+														packageName.indexOf(" (") != -1 ? packageName.indexOf(" (") : packageName.length());
+													if (result.contains(packageName))
 													{
 														if (defaultImports != null && defaultImports.size() > 0)
 														{
-															for (String o : input)
-															{
-																defaultImports.get(0).importPackage(o);
-															}
+															defaultImports.get(0).importPackage(realPackageName);
 														}
 													}
-													else
+													else if (packagesSource.size() > 0)
 													{
 														String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution()
 															.getName();
 														IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
 														IProjectDescription solutionProjectDescription = solutionProject.getDescription();
-														for (IProject o : packages)
+														for (IProject project : packagesSource)
 														{
-															AddAsWebPackageAction.addReferencedProjectToDescription(o, solutionProjectDescription);
+															String packName = project.getName();
+															if (packName.equals(realPackageName) ||
+																(packName.equals("servoy-extra-components") && realPackageName.equals("servoyextra")))
+															{
+																AddAsWebPackageAction.addReferencedProjectToDescription(project, solutionProjectDescription);
+															}
 														}
 														solutionProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
-													}
-												}
-												else
-												{
-													if (defaultImports != null && defaultImports.size() > 0)
-													{
-														for (Object o : result)
-														{
-															defaultImports.get(0).importPackage((String)o);
-														}
 													}
 												}
 											}
