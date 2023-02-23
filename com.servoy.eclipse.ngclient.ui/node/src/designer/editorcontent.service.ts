@@ -349,7 +349,7 @@ export class EditorContentService {
         const propertyContextCreator = new RootPropertyContextCreator((propertyName: string) => component.model?.[propertyName], componentSpec);
 
         for (const propName of Object.keys(elem.model)) {
-            const value = component.model[propName] = this.converterService.convertFromServerToClient(elem.model[propName],
+            const value = this.converterService.convertFromServerToClient(elem.model[propName],
                             componentSpec?.getPropertyType(propName), component.model[propName],
                             componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
             // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
@@ -361,11 +361,14 @@ export class EditorContentService {
                    (
                        propName === 'cssPosition' &&
                        (component.model[propName].top !== value.top || component.model[propName].bottom !== value.bottom ||
-                       component.model[propName].left !== value.left || component.model[propName].right !== value.right)
+                       component.model[propName].left !== value.left || component.model[propName].right !== value.right ||
+                       component.model[propName].width !== value.width || component.model[propName].height !== value.height)
                    )
                ) {
                 redrawDecorators = true;
             }
+
+            component.model[propName] = value;
         }
         for (const property of Object.keys(component.model)) {
             if (elem.model[property] === undefined) {

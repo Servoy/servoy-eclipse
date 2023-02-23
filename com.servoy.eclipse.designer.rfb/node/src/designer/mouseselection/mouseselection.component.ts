@@ -189,7 +189,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getGlassPane().scrollTop - this.contentRect?.top - this.topAdjust });
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
         if (this.editorSession.getState().dragging) return;
