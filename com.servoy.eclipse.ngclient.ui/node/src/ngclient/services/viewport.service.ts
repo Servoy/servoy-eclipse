@@ -452,10 +452,11 @@ export class ViewportService {
                     this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined), clearNotifier);
         } else {
             for (const columnName of Object.getOwnPropertyNames(viewPort[rowIdx])) { // (in case of a child component viewport) we only want to iterate on properties from the viewport, not from the model that is not record dependent (that is a prototype of the row here)
-                if (columnName !== ViewportService.ROW_ID_COL_KEY) this.updateChangeAwareNotifiersForCell(viewPort[rowIdx][columnName], viewPort, internalState,
-                                                                            rowIdx, columnName,
-                                                                            this.getCellPropertyContextFor(propertyContextCreator, viewPort[rowIdx], columnName),
-                                                                            clearNotifier);
+                if (columnName !== ViewportService.ROW_ID_COL_KEY && viewPort[rowIdx].propertyIsEnumerable(columnName))
+                    this.updateChangeAwareNotifiersForCell(viewPort[rowIdx][columnName], viewPort, internalState,
+                        rowIdx, columnName,
+                        this.getCellPropertyContextFor(propertyContextCreator, viewPort[rowIdx], columnName),
+                        clearNotifier);
             }
         }
     }
