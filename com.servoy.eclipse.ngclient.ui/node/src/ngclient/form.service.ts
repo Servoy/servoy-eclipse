@@ -157,6 +157,7 @@ export class FormService {
                                             sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void,
                                             typesRegistry: TypesRegistry) {
         let valueToSendToServer: any;
+        let propertyNameForServer = propertyName;
 
         let fslRowID = null;
         let converted: [any, any];
@@ -185,7 +186,7 @@ export class FormService {
                 const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyName, componentModel);
                 if (foundsetLinkedDPInfo) {
                     fslRowID = foundsetLinkedDPInfo.rowId;
-                    propertyName = foundsetLinkedDPInfo.propertyNameForServer;
+                    propertyNameForServer = foundsetLinkedDPInfo.propertyNameForServer;
                 }
             }
 
@@ -202,7 +203,7 @@ export class FormService {
             set(componentModel, propertyName, converted[1]);
         }
 
-        sendApplyDataproviderFunc(fslRowID, propertyName, valueToSendToServer);
+        sendApplyDataproviderFunc(fslRowID, propertyNameForServer, valueToSendToServer);
     }
 
     private static getFoundsetLinkedDPInfo(propertyName: string, componentModel: { [property: string]: any }): { propertyNameForServer: string; rowId?: string } {

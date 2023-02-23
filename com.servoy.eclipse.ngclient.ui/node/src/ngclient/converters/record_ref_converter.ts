@@ -34,7 +34,11 @@ export class RecordRefType implements IType<any> {
 }
 
 export const instanceOfServerSentRecordRef = (obj: any): obj is ServerSentRecordRef =>
-    obj != null && (obj as ServerSentRecordRef).recordhash !== undefined;
+    obj != null && (
+        ((obj as ServerSentRecordRef).recordhash !== undefined) ||
+        ((obj as ServerSentRecordRef).foundsetId !== undefined && (obj as ServerSentRecordRef)._svyRowId !== undefined)
+    ); // server will always send all 3 subproperties but some components (datagrid) for example used to take advantage of internal impls
+       // and generate a new plain object to send to server with only foundsetId and _svyRowId instead of giving a RowValue or a real ServerSentRecordRef
 
 class ServerSentRecordRef {
     recordhash: string;
