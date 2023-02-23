@@ -6,13 +6,11 @@ export class RecordRefType implements IType<any> {
 
     public static readonly TYPE_NAME = 'record';
 
-    private static readonly FOUNDSET_ID = 'foundsetId';
-
     // eslint-disable-next-line @typescript-eslint/ban-types
-    static generateRecordRef(rowId: string, foundsetId: number): object {
-        const recordRef = {};
-        recordRef[ViewportService.ROW_ID_COL_KEY] = rowId;
-        recordRef[RecordRefType.FOUNDSET_ID] = foundsetId;
+    static generateRecordRef(rowId: string, foundsetId: number): RecordRefForServer {
+        const recordRef = new RecordRefForServer();
+        recordRef._svyRowId = rowId;
+        recordRef.foundsetId = foundsetId;
         return recordRef;
     }
 
@@ -26,22 +24,24 @@ export class RecordRefType implements IType<any> {
 		return serverJSONValue;
 	}
 
-	fromClientToServer(newClientData: RowValue | ServerSentRecordRef, _oldClientData: any, _propertyContext: IPropertyContext): [any, RowValue | ServerSentRecordRef] {
-        if (instanceOfServerSentRecordRef(newClientData)) return [newClientData, newClientData];
+	fromClientToServer(newClientData: RowValue | RecordRefForServer | ServerSentRecordRef, _oldClientData: any, _propertyContext: IPropertyContext): [any, RowValue | RecordRefForServer | ServerSentRecordRef] {
+        if (instanceOfServerSentRecordRef(newClientData) || instanceOfRecordRefForServer(newClientData)) return [newClientData, newClientData];
 		else return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
 	}
 
 }
 
-export const instanceOfServerSentRecordRef = (obj: any): obj is ServerSentRecordRef =>
-    obj != null && (
-        ((obj as ServerSentRecordRef).recordhash !== undefined) ||
-        ((obj as ServerSentRecordRef).foundsetId !== undefined && (obj as ServerSentRecordRef)._svyRowId !== undefined)
-    ); // server will always send all 3 subproperties but some components (datagrid) for example used to take advantage of internal impls
-       // and generate a new plain object to send to server with only foundsetId and _svyRowId instead of giving a RowValue or a real ServerSentRecordRef
+const instanceOfServerSentRecordRef = (obj: any): obj is ServerSentRecordRef =>
+    obj != null && (obj as ServerSentRecordRef).recordhash !== undefined;
+    
+const instanceOfRecordRefForServer = (obj: any): obj is RecordRefForServer =>
+    obj != null && ((obj as RecordRefForServer).foundsetId !== undefined && (obj as RecordRefForServer)._svyRowId !== undefined);
 
-class ServerSentRecordRef {
-    recordhash: string;
+export class RecordRefForServer {
     foundsetId: number;
      _svyRowId: string;
+}
+
+class ServerSentRecordRef extends RecordRefForServer {
+    recordhash: string;
 }

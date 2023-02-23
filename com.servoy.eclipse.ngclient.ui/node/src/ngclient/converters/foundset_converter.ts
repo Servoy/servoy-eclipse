@@ -5,7 +5,7 @@ import { Deferred, LoggerService, LoggerFactory, RequestInfoPromise, IFoundset, 
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { ViewportService, FoundsetViewportState, ConversionInfoFromServerForViewport, RowUpdate, IPropertyContextCreatorForRow } from '../services/viewport.service';
-import { RecordRefType } from './record_ref_converter';
+import { RecordRefType, RecordRefForServer } from './record_ref_converter';
 
 export class FoundsetType implements IType<FoundsetValue> {
 
@@ -424,7 +424,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    public getRecordRefByRowID(rowID: string): object {
+    public getRecordRefByRowID(rowID: string): RecordRefForServer {
         if (rowID) {
             return RecordRefType.generateRecordRef(rowID, this.foundsetId);
         }
