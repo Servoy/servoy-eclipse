@@ -256,7 +256,8 @@ public class Activator extends AbstractUIPlugin
 												}
 												for (String packageName : packagesNeeded)
 												{
-													packagesFinal.add(packagesHelp.contains(packageName) ? (packageName + " (uncheck will use source project)")
+													packagesFinal.add(packagesHelp.contains(packageName)
+														? (packageName + " (source project used, check for download the wpm package)")
 														: packageName);
 												}
 											}
@@ -267,7 +268,7 @@ public class Activator extends AbstractUIPlugin
 											final ListSelectionDialog lsd = new ListSelectionDialog(active, packagesFinal, new ArrayContentProvider(),
 												new LabelProvider(),
 												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
-											lsd.setInitialElementSelections(packagesFinal);
+											lsd.setInitialElementSelections(packagesNeeded);
 											lsd.setBlockOnOpen(true);
 											lsd.setTitle("Solution needs packages, install them from wpm/source");
 											int pressedButton = lsd.open();
