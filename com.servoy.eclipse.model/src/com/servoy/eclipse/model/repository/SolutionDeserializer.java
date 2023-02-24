@@ -1366,7 +1366,6 @@ public class SolutionDeserializer
 						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
 						if (current == null || (!current.startsWith("{Array") && !current.startsWith("Array") && !current.endsWith("[]")))
 						{
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 							List<Expression> items = ((ArrayInitializer)code).getItems();
 							if (items != null && items.size() > 0)
 							{
