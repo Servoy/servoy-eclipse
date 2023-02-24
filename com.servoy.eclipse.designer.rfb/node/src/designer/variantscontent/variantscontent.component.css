@@ -2,6 +2,7 @@
 	background-color: transparent;
     border: 0px;
     border-radius: 3px;
+    padding: 0px;
 }
 .variantBtn:hover {
   background-color: lightgray;
