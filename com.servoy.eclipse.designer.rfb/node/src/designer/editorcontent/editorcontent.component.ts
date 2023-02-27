@@ -76,10 +76,6 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             this.editorSession.buildTiNG();
             window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
 		}
-        if (id === 'deleteKey') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            this.editorSession.keyPressed(data.eventData);
-        }
     }
 
     @HostListener('document:keydown', ['$event'])

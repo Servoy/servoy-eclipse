@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -286,6 +287,8 @@ public class FormElementDeleteCommand extends Command
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(children));
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite().getSelectionProvider()
+			.setSelection(StructuredSelection.EMPTY);
 		try
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().saveEditingSolutionNodes(

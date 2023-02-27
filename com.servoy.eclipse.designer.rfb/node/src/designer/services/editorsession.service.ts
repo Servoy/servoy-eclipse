@@ -74,12 +74,7 @@ export class EditorSessionService implements ServiceProvider {
             alt: event.altKey,
             meta: event.metaKey,
             keyCode: event.keyCode
-        }, false).then(() => {
-            // remove selection if backspace or delete key was pressed
-            if (event.keyCode == 8 || event.keyCode == 46) {
-                this.setSelection([]);
-            }
-        })
+        }, true)
     }
 
     sendChanges(properties) {
@@ -232,6 +227,7 @@ export class EditorSessionService implements ServiceProvider {
 
     updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean) {
         this.selection = ids;
+        ids.forEach(id =>this.consoleLog(id));
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
 
