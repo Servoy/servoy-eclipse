@@ -227,7 +227,6 @@ export class EditorSessionService implements ServiceProvider {
 
     updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean) {
         this.selection = ids;
-        ids.forEach(id =>this.consoleLog(id));
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
 
