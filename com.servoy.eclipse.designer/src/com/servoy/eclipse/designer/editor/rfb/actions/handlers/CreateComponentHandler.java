@@ -631,6 +631,10 @@ public class CreateComponentHandler implements IServerService
 										if (form != null)
 										{
 											Dimension size = form.getSize();
+											if (size.height == 0)
+											{
+												size.height = CSSPositionUtils.getSize(webComponent).height;
+											}
 											CSSPositionUtils.setSize(webComponent, size.width, size.height);
 										}
 									}

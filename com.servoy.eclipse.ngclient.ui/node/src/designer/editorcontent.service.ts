@@ -49,7 +49,7 @@ export class EditorContentService {
                             // we moved it to another parent
                             container.parent.removeChild(container);
                             newParent.addChild(container);
-                        } else if (newParent?.items.indexOf(container) < 0){
+                        } else if (newParent?.items.indexOf(container) < 0) {
                             newParent.addChild(container);
                         }
                         if (reorderLayoutContainers.indexOf(newParent) < 0) {
@@ -80,7 +80,7 @@ export class EditorContentService {
                             }
                         }
                     } else if (formCache.absolute) {
-                         formCache.partComponentsCache.push(container);
+                        formCache.partComponentsCache.push(container);
                     } else {
                         // dropped directly on form
                         if (formCache.mainStructure == null) {
@@ -127,8 +127,8 @@ export class EditorContentService {
 
                     for (const propName of Object.keys(rawModelProperties)) {
                         elem.model[propName] = this.converterService.convertFromServerToClient(rawModelProperties[propName],
-                                                componentSpec?.getPropertyType(propName), null,
-                                                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+                            componentSpec?.getPropertyType(propName), null,
+                            componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
                         // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
                     }
 
@@ -155,7 +155,7 @@ export class EditorContentService {
                             }
                             if (minWidth) {
                                 layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored,
-                                                                       // allow it to grow in width to fill responsive space
+                                // allow it to grow in width to fill responsive space
 
                                 if (continingFormIsResponsive && widthExplicitlySet) {
                                     // if container is in a responsive form, content is anchored and width model property is explicitly set
@@ -228,6 +228,7 @@ export class EditorContentService {
                                         const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
                                         if (container) {
                                             formComponent.removeChild(formComponentComponent);
+                                            container.removeChild(formComponentComponent);
                                             container.addChild(formComponentComponent);
                                         }
                                     } else {
@@ -273,18 +274,18 @@ export class EditorContentService {
             toDelete.forEach((elem) => {
                 const comp = formCache.getComponent(elem);
                 if (comp) {
-                    formCache.removeComponent(elem);
-                    if (!formCache.absolute) {
-                        this.removeChildFromParentRecursively(comp, formCache.mainStructure);
-                    } else if (comp.parent) {
-                        comp.parent.removeChild(comp);
-                    }
-                } else {
-                    const fc = formCache.getFormComponent(elem);
-                    if (fc) {
+                    if (comp instanceof FormComponentCache) {
                         formCache.removeFormComponent(elem);
                         if (!formCache.absolute) {
-                            this.removeChildFromParentRecursively(fc, formCache.mainStructure);
+                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                        }
+                    }
+                    else {
+                        formCache.removeComponent(elem);
+                        if (!formCache.absolute) {
+                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                        } else if (comp.parent) {
+                            comp.parent.removeChild(comp);
                         }
                     }
                 }
@@ -350,21 +351,21 @@ export class EditorContentService {
 
         for (const propName of Object.keys(elem.model)) {
             const value = this.converterService.convertFromServerToClient(elem.model[propName],
-                            componentSpec?.getPropertyType(propName), component.model[propName],
-                            componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+                componentSpec?.getPropertyType(propName), component.model[propName],
+                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
             // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
 
             if (
-                   (propName === 'size' && (component.model[propName].width !== value.width || component.model[propName].height !== value.height)) ||
-                   (propName === 'location' && (component.model[propName].x !== value.x || component.model[propName].y !== value.y)) ||
-                   (propName === 'anchors' && component.model[propName] !== value) ||
-                   (
-                       propName === 'cssPosition' &&
-                       (component.model[propName].top !== value.top || component.model[propName].bottom !== value.bottom ||
-                       component.model[propName].left !== value.left || component.model[propName].right !== value.right ||
-                       component.model[propName].width !== value.width || component.model[propName].height !== value.height)
-                   )
-               ) {
+                (propName === 'size' && (component.model[propName].width !== value.width || component.model[propName].height !== value.height)) ||
+                (propName === 'location' && (component.model[propName].x !== value.x || component.model[propName].y !== value.y)) ||
+                (propName === 'anchors' && component.model[propName] !== value) ||
+                (
+                    propName === 'cssPosition' &&
+                    (component.model[propName].top !== value.top || component.model[propName].bottom !== value.bottom ||
+                        component.model[propName].left !== value.left || component.model[propName].right !== value.right ||
+                        component.model[propName].width !== value.width || component.model[propName].height !== value.height)
+                )
+            ) {
                 redrawDecorators = true;
             }
 
