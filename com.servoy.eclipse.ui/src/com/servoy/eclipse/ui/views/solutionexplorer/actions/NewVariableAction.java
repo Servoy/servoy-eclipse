@@ -43,7 +43,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -412,22 +411,14 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 				parentCombo.select(0);
 
-				parentCombo.addSelectionListener(new SelectionListener()
+				parentCombo.addSelectionListener(new SelectionAdapter()
 				{
-
 					@Override
-					public void widgetSelected(SelectionEvent e)
+					public void widgetSelected(SelectionEvent event)
 					{
 						context = ModelUtils.getEditingFlattenedSolution((IPersist)context).getForm(parentCombo.getText());
 						validateDialogData();
 					}
-
-					@Override
-					public void widgetDefaultSelected(SelectionEvent e)
-					{
-						// TODO Auto-generated method stub
-					}
-
 				});
 			}
 
