@@ -50,8 +50,6 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
@@ -118,13 +116,6 @@ public class AutoWizardPropertiesComposite
 		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
 		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer, 0, 1);
 		natTable = new NatTable(parent, SWT.NONE, composeLayer, false);
-		GridData gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		natTable.setLayout(new GridLayout(1, false));
-		natTable.setLayoutData(gridData);
 		ConfigRegistry configRegistry = new ConfigRegistry();
 		natTable.setConfigRegistry(configRegistry);
 		configRegistry.registerConfigAttribute(

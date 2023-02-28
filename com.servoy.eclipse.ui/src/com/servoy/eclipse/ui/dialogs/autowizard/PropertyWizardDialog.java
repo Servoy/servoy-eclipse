@@ -109,7 +109,7 @@ public class PropertyWizardDialog extends Dialog
 		SashForm form2 = new SashForm(form, SWT.VERTICAL);
 		Composite tableParentComposite = new Composite(form, SWT.BORDER);
 		tableParentComposite.setLayout(new FillLayout());
-		ScrolledComposite sc = new ScrolledComposite(tableParentComposite, SWT.V_SCROLL | SWT.BORDER);
+		ScrolledComposite sc = new ScrolledComposite(tableParentComposite, SWT.V_SCROLL | SWT.H_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		int initialW = settings.get("weight") != null ? settings.getInt("weight") : 400;
