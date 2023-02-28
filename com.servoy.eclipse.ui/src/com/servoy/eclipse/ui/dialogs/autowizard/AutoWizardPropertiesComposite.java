@@ -37,7 +37,6 @@ import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
@@ -45,9 +44,7 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
-import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.json.JSONObject;
@@ -260,13 +257,7 @@ public class AutoWizardPropertiesComposite
 			accumulator.add(columnLabelAccumulator);
 			bodyDataLayer.setConfigLabelAccumulator(accumulator);
 
-			ColumnReorderLayer columnReorderLayer = new ColumnReorderLayer(
-				bodyDataLayer);
-			ColumnHideShowLayer columnHideShowLayer = new ColumnHideShowLayer(
-				columnReorderLayer);
-			this.selectionLayer = new SelectionLayer(columnHideShowLayer);
-			ViewportLayer viewportLayer = new ViewportLayer(this.selectionLayer);
-			setUnderlyingLayer(viewportLayer);
+			this.selectionLayer = new SelectionLayer(bodyDataLayer);
 			setUnderlyingLayer(bodyDataLayer);
 		}
 
