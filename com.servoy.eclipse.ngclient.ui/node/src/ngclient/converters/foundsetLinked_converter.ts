@@ -238,21 +238,33 @@ class SingleValueState {
     private conversionInfo: ConversionInfoFromServerForViewport;
     private viewportSizeChangedListener: () => void;
 
-    constructor(sabloService: SabloService, iS: FSLinkedInternalState) {
+    constructor(sabloService: SabloService, private iS: FSLinkedInternalState) {
         // add a listener for foundset prop. size to regenerate the viewport when that changes - fill it up again fully with single values
         sabloService.addIncomingMessageHandlingDoneTask(() => { // do it after all incomming properties have been converted so we are sure to have the forFoundset prop. ready
             const fs: IFoundset = iS.forFoundset();
-            if (fs) this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
-                if (event.viewPortSizeChanged || event.fullValueChanged) {
-                    let newSize = iS.forFoundset()?.viewPort.size;
-                    if (newSize === undefined || newSize === null) newSize = 0;
-                    if (newSize === this.viewPortSize) return;
+            if (fs) {
+                this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
+                    if (event.viewPortSizeChanged || event.fullValueChanged) {
+                        this.checkFoundsetSizeAndRegenerateIfNeeded();
+                    }
+                });
 
-                    const wholeViewport = this.regenerateWholeViewportDueToSizeChange(newSize);
-                    iS.updateWholeViewport(wholeViewport, this.conversionInfo);
-                }
-            });
+                // if both foundset and foundset linked come in the same json from server, it might
+                // happen that the foundset linked fromServerToClient is done before the foundset one - so the foundset prop. might not yet be available
+                // or not updated (so the single value viewport is not populated in that case because we do not know the size); in that case we need to
+                // regenerateWholeViewportDueToSizeChange once when addIncomingMessageHandlingDoneTask starts executing (then all props. from that data burst are processed)        const foundsetPropValue = iS.forFoundset();
+                this.checkFoundsetSizeAndRegenerateIfNeeded();
+            }
         });
+    }
+    
+    private checkFoundsetSizeAndRegenerateIfNeeded() {
+        let newSize = this.iS.forFoundset()?.viewPort.size;
+        if (newSize === undefined || newSize === null) newSize = 0;
+        if (newSize === this.viewPortSize) return;
+
+        const wholeViewport = this.regenerateWholeViewportDueToSizeChange(newSize);
+        this.iS.updateWholeViewport(wholeViewport, this.conversionInfo);
     }
 
     dispose() {
