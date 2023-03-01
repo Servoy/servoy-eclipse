@@ -1437,11 +1437,11 @@
                   name="com.servoy.eclipse.designer.separator1"
                   visible="true">
             </separator>
-            <command
+            <!-- command
                   commandId="com.servoy.eclipse.designer.rfb.saveastemplate"
                   label="Save as template ..."
                   style="push">
-            </command> 
+            </command --> 
             <command
               	  commandId="com.servoy.eclipse.designer.rfb.copyContainer"
                   label="Copy"
