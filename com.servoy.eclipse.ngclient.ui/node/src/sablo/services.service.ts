@@ -170,6 +170,25 @@ export class ServicesService {
         this.sabloService.sendServiceChangesJSON(serviceName, changes);
     }
 
+    /**
+     * If a service defines a server side scripting file in it's .spec ("serverscript" key), the client side of the service can call server-side apis defined
+     * on that scope.
+     */
+    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): Promise<T> {
+        const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
+
+        // convert args as needed
+        if (args && args.length) for (let i = 0; i < args.length; i++) {
+            args[i] = this.converterService.convertFromClientToServer(args[i], apiSpec?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
+        }
+
+        // convert return value as needed
+        return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args })
+                    .then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+                    // in case of a reject/errorCallback we just let it propagete to caller;
+    }
+
     private setChangeListenerIfSmartProperty(propertyValue: any, serviceName: string, propertyName: string): void {
         if (instanceOfChangeAwareValue(propertyValue)) {
             const changeListenerFunction = this.getChangeListener(serviceName, propertyName);

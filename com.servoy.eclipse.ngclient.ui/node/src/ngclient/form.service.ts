@@ -427,6 +427,9 @@ export class FormService {
                                      undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
     }
 
+    /**
+     * @deprecated use ServicesService.callServiceServerSideApi instead
+     */
     public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): Promise<T> {
         const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
 
