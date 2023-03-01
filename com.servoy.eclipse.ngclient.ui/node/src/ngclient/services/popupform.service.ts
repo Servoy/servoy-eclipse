@@ -2,9 +2,10 @@ import { Injectable, Inject, ComponentRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
+import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
-import { MainViewRefService, PopupForm, ServoyPublicService } from '@servoy/public';
+import { MainViewRefService, PopupForm } from '@servoy/public';
 
 @Injectable()
 export class PopupFormService {
@@ -13,8 +14,8 @@ export class PopupFormService {
 
     constructor(private mainViewRefService: MainViewRefService,
         private formService: FormService,
+        private servicesService: ServicesService,
         private servoyService: ServoyService,
-        private servoyPublicService: ServoyPublicService,
         private utils: SvyUtilsService,
         @Inject(DOCUMENT) private doc: Document) {
     }
@@ -66,7 +67,7 @@ export class PopupFormService {
          *       form popup but a null scope.model.popupform on server which is wrong... that is the purpose of "disableClearPopupFormCallToServer" flag
          */
         if (!disableClearPopupFormCallToServer) {
-            this.servoyPublicService.callServiceServerSideApi('window', 'clearPopupForm', []);
+            this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
         }
         if (this.formPopupComponent) {
             this.formPopupComponent.destroy();
