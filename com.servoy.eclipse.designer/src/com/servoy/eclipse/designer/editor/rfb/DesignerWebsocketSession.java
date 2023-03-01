@@ -880,9 +880,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							childParentMap);
 						if (fcGhosts) ghost = fcGhosts;
 					}
-					if (frm.isResponsiveLayout())
+					if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
 					{
 						Iterator<LayoutContainer> it = frm.getLayoutContainers();
+						if (!it.hasNext() || frm.containsResponsiveLayout())
+						{
+							it = frm.getFormLayoutContainers();
+						}
 						while (it.hasNext())
 						{
 							LayoutContainer container = it.next();

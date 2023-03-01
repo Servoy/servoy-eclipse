@@ -224,14 +224,13 @@ export class EditorContentService {
                             data.formComponentsComponents.forEach((child: string) => {
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     const formComponentComponent = formCache.getComponent(child);
-                                    if (formComponent.responsive) {
-                                        const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
-                                        if (container) {
-                                            formComponent.removeChild(formComponentComponent);
-                                            container.removeChild(formComponentComponent);
-                                            container.addChild(formComponentComponent);
-                                        }
+                                    const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
+                                    if ((formComponent.responsive && container) || container) {
+										formComponent.removeChild(formComponentComponent);
+										container.removeChild(formComponentComponent);
+										container.addChild(formComponentComponent);
                                     } else {
+										formComponent.removeChild(formComponentComponent);
                                         formComponent.addChild(formComponentComponent);
                                     }
                                 }
