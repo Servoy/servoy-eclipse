@@ -31,7 +31,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
-        return this.formService.callServiceServerSideApi(servicename, methodName, args);
+        return this.servicesService.callServiceServerSideApi(servicename, methodName, args);
     }
 
     getI18NMessages(...keys: string[]): Promise<any> {
