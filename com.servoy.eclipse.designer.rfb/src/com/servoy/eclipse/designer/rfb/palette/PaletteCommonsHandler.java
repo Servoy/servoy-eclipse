@@ -203,7 +203,7 @@ public class PaletteCommonsHandler
 		//printMaps();
 	}
 
-	public JSONArray insertcommonsCategory(JSONArray packages)
+	public synchronized JSONArray insertcommonsCategory(JSONArray packages)
 	{
 		long utcTimestamp = ZonedDateTime.now().toInstant().toEpochMilli();
 		commonsPercentage.clear();
