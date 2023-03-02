@@ -411,8 +411,8 @@ export class FormComponentCache extends ComponentCache {
 }
 
 export class FormComponentProperties {
-    constructor(public readonly classes: Array<string>,
-        public readonly layout: { [property: string]: string },
+    constructor(public classes: Array<string>,
+        public layout: { [property: string]: string },
         public readonly attributes: { [property: string]: string }) {
     }
 }

@@ -115,6 +115,12 @@ export class EditorContentService {
                     } else if (formCache.absolute) {
                         reorderPartComponents = true;
                     }
+                    if ( (elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') &&  !elem.responsive) {
+                        const layout: { [property: string]: string } = {};
+                        this.fillLayout(elem, formCache, layout);
+                        (component as FormComponentCache).formComponentProperties.layout = layout;
+                        (component as FormComponentCache).formComponentProperties.classes = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
+                    }
                 } else if (formCache.getFormComponent(elem.name) == null) {
                     redrawDecorators = true;
 
@@ -135,36 +141,7 @@ export class EditorContentService {
                     if (elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') {
                         const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
                         const layout: { [property: string]: string } = {};
-                        if (!elem.responsive) {
-                            // form component content is anchored layout
-
-                            const continingFormIsResponsive = !formCache.absolute;
-                            let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight : elem.model.height; // height is deprecated in favor of minHeight but they do the same thing;
-                            let minWidth = elem.model.minWidth !== undefined ? elem.model.minWidth : elem.model.width; // width is deprecated in favor of minWidth but they do the same thing;;
-                            let widthExplicitlySet: boolean;
-
-                            if (!minHeight && elem.model.containedForm) minHeight = elem.model.containedForm.formHeight;
-                            if (!minWidth && elem.model.containedForm) {
-                                widthExplicitlySet = false;
-                                minWidth = elem.model.containedForm.formWidth;
-                            } else widthExplicitlySet = true;
-
-                            if (minHeight) {
-                                layout['min-height'] = minHeight + 'px';
-                                if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
-                            }
-                            if (minWidth) {
-                                layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored,
-                                // allow it to grow in width to fill responsive space
-
-                                if (continingFormIsResponsive && widthExplicitlySet) {
-                                    // if container is in a responsive form, content is anchored and width model property is explicitly set
-                                    // then we assume that developer wants to really set width of the form component so it can put multiple of them inside
-                                    // for example a 12grid column; that means they should not simply be div / block elements; we change float as well
-                                    layout['float'] = 'left';
-                                }
-                            }
-                        }
+                        this.fillLayout(elem, formCache, layout);
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position,
                             formComponentProperties, elem.model.foundset, this.typesRegistry, undefined).initForDesigner(elem.model);
@@ -437,6 +414,38 @@ export class EditorContentService {
                 }
                 return 1;
             });
+        }
+    }
+    
+    private fillLayout(elem: any, formCache: FormCache, layout: { [property: string]: string } ) {
+          if (!elem.responsive) {
+            // form component content is anchored layout
+            const continingFormIsResponsive = !formCache.absolute;
+            let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight : elem.model.height; // height is deprecated in favor of minHeight but they do the same thing;
+            let minWidth = elem.model.minWidth !== undefined ? elem.model.minWidth : elem.model.width; // width is deprecated in favor of minWidth but they do the same thing;;
+            let widthExplicitlySet: boolean;
+
+            if (!minHeight && elem.model.containedForm) minHeight = elem.model.containedForm.formHeight;
+            if (!minWidth && elem.model.containedForm) {
+                widthExplicitlySet = false;
+                minWidth = elem.model.containedForm.formWidth;
+            } else widthExplicitlySet = true;
+
+            if (minHeight) {
+                layout['min-height'] = minHeight + 'px';
+                if (!continingFormIsResponsive) layout['height'] = '100%'; // allow anchoring to bottom in anchored form + anchored form component
+            }
+            if (minWidth) {
+                layout['min-width'] = minWidth + 'px'; // if the form that includes this form component is responsive and this form component is anchored,
+                // allow it to grow in width to fill responsive space
+
+                if (continingFormIsResponsive && widthExplicitlySet) {
+                    // if container is in a responsive form, content is anchored and width model property is explicitly set
+                    // then we assume that developer wants to really set width of the form component so it can put multiple of them inside
+                    // for example a 12grid column; that means they should not simply be div / block elements; we change float as well
+                    layout['float'] = 'left';
+                }
+            }
         }
     }
 }
