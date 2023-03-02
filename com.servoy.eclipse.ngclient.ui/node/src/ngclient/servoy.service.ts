@@ -24,6 +24,7 @@ import { FormSettings } from './types';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
+import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -77,6 +78,8 @@ export class ServoyService {
     private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
+    private resizeObservable$: Observable<Event>;
+    private resizeSubscription$: Subscription;
 
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
@@ -147,6 +150,15 @@ export class ServoyService {
             // update the main app window with the right size
             wsSession.callService('$windowService', 'resize',
                 { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true);
+
+            this.resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
+            this.resizeSubscription$ = this.resizeObservable$.pipe(debounceTime(500)).subscribe( evt => {
+                wsSession.callService('$windowService', 'resize',
+                    { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true);
+            });
+            wsSession.onclose(() => {
+                this.resizeSubscription$.unsubscribe();
+            });
             // set the correct locale, first test if it is set in the sessionstorage
             let locale = this.sessionStorageService.get('locale');
             if (locale) {
