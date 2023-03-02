@@ -124,6 +124,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     contentRefresh() {
+        if (this.mainForm === 'VariantsForm') return;
         this.wsSession.callService("$editor", "getData", {
             form: this.mainForm,
             solution: this.solutionName,

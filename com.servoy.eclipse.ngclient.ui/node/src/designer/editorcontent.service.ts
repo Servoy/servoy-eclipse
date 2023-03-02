@@ -19,8 +19,8 @@ export class EditorContentService {
     }
 
     updateFormData(updates: string) {
+        if (this.designFormCallback.getFormName() === 'VariantsForm') return;
         const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
-        if (formCache.formname === 'VariantsForm') return;
 
         const data = JSON.parse(updates);
         const reorderLayoutContainers: Array<StructureCache> = new Array();
