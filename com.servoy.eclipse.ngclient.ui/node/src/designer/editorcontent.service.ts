@@ -29,6 +29,49 @@ export class EditorContentService {
         let redrawDecorators = false;
         let refresh = false;
         let reorderPartComponents: boolean;
+        
+        let toDelete = [];
+        if (data.updatedFormComponentsDesignId) {
+            for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
+                const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
+                const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
+                //delete components of the old form component
+                const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0));
+                if (found) {
+                    found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
+                    toDelete.push(...found);
+                    // how can we know if the old components had ghosts or not
+                    renderGhosts = true;
+                }
+            }
+        }
+        if (data.deleted) {
+            toDelete = toDelete.concat(data.deleted);
+        }
+        if (toDelete.length > 0) {
+            toDelete.forEach((elem) => {
+                const comp = formCache.getComponent(elem);
+                if (comp) {
+                    if (comp instanceof FormComponentCache) {
+                        formCache.removeFormComponent(elem);
+                        if (!formCache.absolute) {
+                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                        }
+                    }
+                    else {
+                        formCache.removeComponent(elem);
+                        if (!formCache.absolute) {
+                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                        } else if (comp.parent) {
+                            comp.parent.removeChild(comp);
+                        }
+                    }
+                }
+            });
+            refresh = true;
+            redrawDecorators = true;
+        }
+        
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
@@ -106,7 +149,7 @@ export class EditorContentService {
                         const currentParent = data.childParentMap[component.name];
                         if (currentParent && component.parent.id !== currentParent.uuid) {
                             component.parent.removeChild(component);
-                            formCache.getLayoutContainer(currentParent.uuid).addChild(component);
+                            formCache.getLayoutContainer(currentParent.uuid)?.addChild(component);
                         }
                         redrawDecorators = true;
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
@@ -226,48 +269,6 @@ export class EditorContentService {
                 // TODO else create FC SVY-16912
             });
             refresh = true;
-        }
-        let toDelete = [];
-        if (data.updatedFormComponentsDesignId) {
-            for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
-                const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
-                const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
-                //delete components of the old form component
-                const found = [...formCache.componentCache.keys()].filter(comp =>
-                    (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(comp) === -1));
-                if (found) {
-                    found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
-                    toDelete.push(...found);
-                    // how can we know if the old components had ghosts or not
-                    renderGhosts = true;
-                }
-            }
-        }
-        if (data.deleted) {
-            toDelete = toDelete.concat(data.deleted);
-        }
-        if (toDelete.length > 0) {
-            toDelete.forEach((elem) => {
-                const comp = formCache.getComponent(elem);
-                if (comp) {
-                    if (comp instanceof FormComponentCache) {
-                        formCache.removeFormComponent(elem);
-                        if (!formCache.absolute) {
-                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
-                        }
-                    }
-                    else {
-                        formCache.removeComponent(elem);
-                        if (!formCache.absolute) {
-                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
-                        } else if (comp.parent) {
-                            comp.parent.removeChild(comp);
-                        }
-                    }
-                }
-            });
-            refresh = true;
-            redrawDecorators = true;
         }
         if (data.deletedContainers) {
             data.deletedContainers.forEach((elem) => {
