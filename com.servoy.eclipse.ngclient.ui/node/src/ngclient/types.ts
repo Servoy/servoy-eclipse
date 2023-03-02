@@ -13,7 +13,7 @@ export class FormCache implements IFormCache {
     public size: Dimension;
     public partComponentsCache: Array<ComponentCache | StructureCache>;
     public layoutContainersCache: Map<string, StructureCache>;
-    public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
+    public formComponents: Array<FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
     private _mainStructure: StructureCache;
@@ -26,7 +26,7 @@ export class FormCache implements IFormCache {
         this.componentCache = new Map();
         this.partComponentsCache = new Array();
         this._parts = [];
-        this.formComponents = new Map();
+        this.formComponents = [];
         this.layoutContainersCache = new Map();
     }
 
@@ -69,11 +69,13 @@ export class FormCache implements IFormCache {
     }
 
     public addFormComponent(formComponent: FormComponentCache) {
-        this.formComponents.set(formComponent.name, formComponent);
+        const index = this.formComponents.findIndex( elem => elem.name == formComponent.name);
+        if (index == -1) this.formComponents.push(formComponent);
+        else this.formComponents[index] = formComponent;
     }
 
     public getFormComponent(name: string): FormComponentCache {
-        return this.formComponents.get(name);
+        return this.formComponents.find(elem => elem.name == name);
     }
 
     public getComponent(name: string): ComponentCache {
@@ -104,12 +106,15 @@ export class FormCache implements IFormCache {
     }
 
     public removeFormComponent(name: string) {
-         this.formComponents.delete(name);
+        const index = this.formComponents.findIndex( elem => elem.name == name);
+        if (index > -1) {
+            this.formComponents.splice(index, 1);
+        }
     }
 
     public getComponentSpecification(componentName: string) {
         let componentCache: ComponentCache = this.componentCache.get(componentName);
-        if (!componentCache) componentCache = this.formComponents.get(componentName);
+        if (!componentCache) componentCache = this.getFormComponent(componentName);
         return componentCache ? this.typesRegistry.getComponentSpecification(componentCache.specName) : undefined;
     }
 
@@ -118,7 +123,7 @@ export class FormCache implements IFormCache {
 
         let type = componentSpec.getPropertyType(propertyName);
         if (!type) type = this.componentCache.get(componentName)?.dynamicClientSideTypes[propertyName];
-        if (!type) type = this.formComponents.get(componentName)?.dynamicClientSideTypes[propertyName];
+        if (!type) type = this.getFormComponent(componentName)?.dynamicClientSideTypes[propertyName];
 
         return type;
     }
