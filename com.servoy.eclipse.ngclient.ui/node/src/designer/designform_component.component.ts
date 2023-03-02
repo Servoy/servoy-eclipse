@@ -378,7 +378,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     public detectChanges() {
-        this.changeHandler.markForCheck();
+        this.changeHandler.detectChanges();
     }
 
     public formCacheChanged(): void {
