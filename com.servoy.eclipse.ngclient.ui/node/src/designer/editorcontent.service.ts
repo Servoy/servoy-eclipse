@@ -30,48 +30,24 @@ export class EditorContentService {
         let refresh = false;
         let reorderPartComponents: boolean;
         
-        let toDelete = [];
         if (data.updatedFormComponentsDesignId) {
             for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
                 const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
-                //delete components of the old form component
-                const found = [...formCache.componentCache.keys()].filter(comp => (comp.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0));
-                if (found) {
-                    found.forEach(comp => fc.removeChild(formCache.getComponent(comp)));
-                    toDelete.push(...found);
-                    // how can we know if the old components had ghosts or not
-                    renderGhosts = true;
-                }
+                fc.items.forEach(item => {
+                    if (item instanceof ComponentCache)
+                        formCache.removeComponent(item.name);
+                    else if (item instanceof StructureCache) {
+                        formCache.removeLayoutContainer(item.id);
+                       	this.removeChildrenRecursively(item, formCache);
+                    }
+                });
+                formCache.removeFormComponent(fcname.replace(/_/g, '-'));
+                renderGhosts = true;
+                redrawDecorators = true;
             }
         }
-        if (data.deleted) {
-            toDelete = toDelete.concat(data.deleted);
-        }
-        if (toDelete.length > 0) {
-            toDelete.forEach((elem) => {
-                const comp = formCache.getComponent(elem);
-                if (comp) {
-                    if (comp instanceof FormComponentCache) {
-                        formCache.removeFormComponent(elem);
-                        if (!formCache.absolute) {
-                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
-                        }
-                    }
-                    else {
-                        formCache.removeComponent(elem);
-                        if (!formCache.absolute) {
-                            this.removeChildFromParentRecursively(comp, formCache.mainStructure);
-                        } else if (comp.parent) {
-                            comp.parent.removeChild(comp);
-                        }
-                    }
-                }
-            });
-            refresh = true;
-            redrawDecorators = true;
-        }
-        
+                
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
@@ -149,7 +125,7 @@ export class EditorContentService {
                         const currentParent = data.childParentMap[component.name];
                         if (currentParent && component.parent.id !== currentParent.uuid) {
                             component.parent.removeChild(component);
-                            formCache.getLayoutContainer(currentParent.uuid)?.addChild(component);
+                            formCache.getLayoutContainer(currentParent.uuid).addChild(component);
                         }
                         redrawDecorators = true;
                         if (reorderLayoutContainers.indexOf(component.parent) < 0) {
@@ -241,7 +217,7 @@ export class EditorContentService {
                                 });
                             }
                             component.responsive = elem.responsive;
-                            data.formComponentsComponents.forEach((child: string) => {
+                            data.formComponentsComponents?.forEach((child: string) => {
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     const formComponentComponent = formCache.getComponent(child);
                                     const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
@@ -270,19 +246,7 @@ export class EditorContentService {
             });
             refresh = true;
         }
-        if (data.deletedContainers) {
-            data.deletedContainers.forEach((elem) => {
-                const container = formCache.getLayoutContainer(elem);
-                if (container) {
-                    formCache.removeLayoutContainer(elem);
-                    if (formCache.mainStructure) this.removeChildFromParentRecursively(container, formCache.mainStructure);
-                    else if (container.parent) container.parent.removeChild(container);
-                    this.removeChildrenRecursively(container, formCache);
-                }
-            });
-            refresh = true;
-            redrawDecorators = true;
-        }
+        
         if (reorderPartComponents) {
             // make sure the order of components in absolute layout is correct, based on formindex
             this.sortChildren(formCache.partComponentsCache);
