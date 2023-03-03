@@ -606,10 +606,17 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="javax.persistence-api"
+         id="jakarta.persistence-api"
          download-size="0"
          install-size="0"
-         version="2.2.0"
+         version="3.1.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.hibernate.orm.community.dialects"
+         download-size="0"
+         install-size="0"
+         version="3.1.0"
          unpack="false"/>
 
    <plugin
