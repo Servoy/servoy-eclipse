@@ -397,9 +397,9 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			type = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
 			UIUtils.setDefaultVisibleItemCount(type);
 
-			if (!(context instanceof String))
+			if (context instanceof Form frm)
 			{
-				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy((Form)context);
+				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(frm);
 				if (forms.size() >= 2)
 				{
 					Label parentComboLabel = new Label(mainArea, SWT.NONE);
