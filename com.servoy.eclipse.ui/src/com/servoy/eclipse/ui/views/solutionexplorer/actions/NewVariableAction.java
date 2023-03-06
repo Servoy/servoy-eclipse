@@ -397,29 +397,32 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			type = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
 			UIUtils.setDefaultVisibleItemCount(type);
 
-			List<AbstractBase> forms = PersistHelper.getOverrideHierarchy((Form)context);
-			if (forms.size() >= 2)
+			if (!(context instanceof String))
 			{
-				Label parentComboLabel = new Label(mainArea, SWT.NONE);
-				parentComboLabel.setText("Parent");
-				parentCombo = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-				for (AbstractBase form : forms)
+				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy((Form)context);
+				if (forms.size() >= 2)
 				{
-					parentCombo.add(form.toString());
-				}
+					Label parentComboLabel = new Label(mainArea, SWT.NONE);
+					parentComboLabel.setText("Parent");
+					parentCombo = new Combo(mainArea, SWT.DROP_DOWN | SWT.READ_ONLY);
 
-				parentCombo.select(0);
-
-				parentCombo.addSelectionListener(new SelectionAdapter()
-				{
-					@Override
-					public void widgetSelected(SelectionEvent event)
+					for (AbstractBase form : forms)
 					{
-						context = ModelUtils.getEditingFlattenedSolution((IPersist)context).getForm(parentCombo.getText());
-						validateDialogData();
+						parentCombo.add(form.toString());
 					}
-				});
+
+					parentCombo.select(0);
+
+					parentCombo.addSelectionListener(new SelectionAdapter()
+					{
+						@Override
+						public void widgetSelected(SelectionEvent event)
+						{
+							context = ModelUtils.getEditingFlattenedSolution((IPersist)context).getForm(parentCombo.getText());
+							validateDialogData();
+						}
+					});
+				}
 			}
 
 			Group defaultValueRadioGroup = new Group(mainArea, SWT.NONE);
