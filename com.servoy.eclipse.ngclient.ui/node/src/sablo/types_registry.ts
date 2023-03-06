@@ -366,6 +366,7 @@ class WebObjectSpecification implements IWebObjectSpecification {
         return this.propertyDescriptions[propertyName].getPropertyPushToServer();
     }
 
+        /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
     getPropertyDescriptions(): ObjectOfIPropertyDescription {
         return this.propertyDescriptions;
     }
@@ -583,6 +584,7 @@ export interface IWebObjectSpecification {
      */
     getPropertyPushToServer(propertyName: string): PushToServerEnum;
 
+    /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
     getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription };
     getHandler(handlerName: string): IEventHandler;
     getApiFunction(apiFunctionName: string): IWebObjectFunction;
