@@ -256,7 +256,7 @@ export class ComponentCache implements IComponentCache {
 
     private hasSubPropsWithShallowOrDeep(): boolean {
         const componentSpec = this.typesRegistry.getComponentSpecification(this.specName);
-        if (componentSpec) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
+        if (componentSpec && componentSpec.getPropertyDescriptions()) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
             if (propertyDescription.getPropertyPushToServer() > PushToServerEnum.ALLOW) return true;
         }
         return false;

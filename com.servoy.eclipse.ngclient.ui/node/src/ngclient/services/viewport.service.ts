@@ -563,7 +563,7 @@ export class ViewportService {
             // component property type viewport probably; we search for push to server at least specified value on spec property names
             internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = false;
             const pds = defaultColumnTypes.getPropertyDescriptions();
-            for (const propName of Object.keys(pds)) {
+            if (pds) for (const propName of Object.keys(pds)) {
                 if (pds[propName].getPropertyPushToServer() >= atLeastPushToServer) { // this is for component root properties, so no need for parent prop. push-to-server
                     internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = true;
                     break;
