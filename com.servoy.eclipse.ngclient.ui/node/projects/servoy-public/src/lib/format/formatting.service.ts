@@ -489,8 +489,9 @@ export class FormattingService {
 
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
-        dateFormat = this.convertFormat(dateFormat);
-        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
+        // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
+        dateFormat = this.convertFormat(dateFormat).replace("''","'svy_quote'");
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote',"'");
         return formatted.trim ? formatted.trim() : formatted;
     }
 
