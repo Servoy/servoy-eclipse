@@ -527,7 +527,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						Object propValue = template.getProperty(string);
 
-						if (!(property.getTag("wizard") instanceof String) && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
+						if (property.getTag("wizard") != null && property.getTag("wizard") instanceof JSONObject &&
+							((JSONObject)property.getTag("wizard")).has("unique") && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
 						{
 							propValue = createUniqueID(property, arrayValue, propValue.toString());
 						}
