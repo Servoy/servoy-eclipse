@@ -527,9 +527,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						Object propValue = template.getProperty(string);
 
-						if ("id".equals(string))
+						if (!(property.getTag("wizard") instanceof String) && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
 						{
-							propValue = createUniqueID(arrayValue, propValue.toString());
+							propValue = createUniqueID(property, arrayValue, propValue.toString());
 						}
 
 						customType.setProperty(string, propValue);
@@ -550,24 +550,24 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return null;
 	}
 
-	private static String createUniqueID(IChildWebObject[] columns, String id)
+	private static String createUniqueID(PropertyDescription pd, IChildWebObject[] columns, String value)
 	{
-		String newID = id;
-		if (newID != null)
+		String newValue = value;
+		if (newValue != null)
 		{
 			List<String> columnsID = new ArrayList<String>();
 			for (IChildWebObject column : columns)
 			{
-				if (column.getJson().has("id"))
+				if (column.getJson().has(pd.getName()))
 				{
-					columnsID.add(column.getJson().getString("id"));
+					columnsID.add(column.getJson().getString(pd.getName()));
 				}
 			}
 			for (int i = 0; i < 100; i++)
 			{
-				if (columnsID.contains(newID))
+				if (columnsID.contains(newValue))
 				{
-					newID = generateID(id, i + 1);
+					newValue = generateID(value, i + 1);
 				}
 				else
 				{
@@ -575,13 +575,13 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 			}
 		}
-		return newID;
+		return newValue;
 	}
 
-	private static String generateID(String id, int n)
+	private static String generateID(String value, int n)
 	{
-		StringBuffer sb = new StringBuffer(id.length() + n);
-		sb.append(id);
+		StringBuffer sb = new StringBuffer(value.length() + n);
+		sb.append(value);
 		for (int i = 0; i < n; i++)
 		{
 			sb.append("_c");
