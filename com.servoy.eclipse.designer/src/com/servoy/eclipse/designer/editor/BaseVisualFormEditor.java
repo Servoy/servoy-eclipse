@@ -873,6 +873,11 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IViewPart contentOutline = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView("org.eclipse.ui.views.ContentOutline");
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(contentOutline);
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.ContentOutline");
+
+		if (this != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(this);
+		}
 	}
 
 	protected void createDesignPage(DesignPagetype designPagetype) throws PartInitException
