@@ -163,7 +163,7 @@ export class EditorContentService {
                         this.fillLayout(elem, formCache, layout);
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position,
-                            formComponentProperties, elem.model.foundset, this.typesRegistry, undefined).initForDesigner(elem.model);
+                            formComponentProperties, elem.model.foundset, this.typesRegistry/*, undefined*/).initForDesigner(elem.model);
                         formCache.addFormComponent(fcc);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -177,7 +177,7 @@ export class EditorContentService {
                             }
                         }
                     } else {
-                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry, undefined).initForDesigner(elem.model);
+                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry/*, undefined*/).initForDesigner(elem.model);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {

@@ -161,9 +161,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         });
                     }
                 } else {
-                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined, [], model, typesRegistry, undefined).initForDesigner(event.data.model);
+                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined, [], model, typesRegistry/*, undefined*/).initForDesigner(event.data.model);
                     this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, undefined, [], model_inserted,
-                                                typesRegistry, undefined).initForDesigner(event.data.model); //TODO only in responsive
+                                                typesRegistry/*, undefined*/).initForDesigner(event.data.model); //TODO only in responsive
                 }
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
@@ -192,7 +192,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     variantAttributes['svy-id'] = variantId;
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
-                    const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry, undefined);
+                    const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry/*, undefined*/);
                     variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
 
                     const componentModel = variantElement.model;
@@ -249,13 +249,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
                         this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers,
-                            this.insertedClone.layout, this.typesRegistry, undefined).initForDesigner(oldModel);
+                            this.insertedClone.layout, this.typesRegistry/*, undefined*/).initForDesigner(oldModel);
 
                         parent.addChild(this.insertedClone);
                     }
 
                     this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers, this.insertedClone.layout,
-                                                    this.typesRegistry, undefined).initForDesigner(oldModel);
+                                                    this.typesRegistry/*, undefined*/).initForDesigner(oldModel);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
                 this.designMode = this.showWireframe;

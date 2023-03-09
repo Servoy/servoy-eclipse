@@ -171,10 +171,10 @@ export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
 export class ComponentCache implements IComponentCache {
 
-    private static NO_PUSH_PARENT_ACCESS_FOR_DESIGNER = {
-        shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => true,
-        changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {}
-    };
+//    private static NO_PUSH_PARENT_ACCESS_FOR_DESIGNER = {
+//        shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => true,
+//        changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {}
+//    };
 
     /**
      * The dynamic client side types of a component's properties (never null, can be an empty obj). These are client side types sent from server that are
@@ -191,7 +191,7 @@ export class ComponentCache implements IComponentCache {
 
     public parent: StructureCache;
 
-    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
+//    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
 
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
@@ -199,11 +199,11 @@ export class ComponentCache implements IComponentCache {
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string },
         public readonly typesRegistry: TypesRegistry,
-        parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
+        /*parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>*/) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
             this.model = this.createModel();
-            this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
-                parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
+//            this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
+//                parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
     }
 
     private static convertToJSName(webObjectSpecName: string) {
@@ -244,58 +244,67 @@ export class ComponentCache implements IComponentCache {
         // if object & elements have SHALLOW or DEEP (which in ng2 does the same as SHALLOW) pushToServer, add a Proxy obj to intercept client side changes to array and send them to server
         let modelOfComponent: { [property: string]: any };
 
-        if (this.hasSubPropsWithShallowOrDeep()) {
-            // hmm the proxy itself might not be needed for actual push to server when the values change by reference because
-            // the component normally emits those via it's @Output and FormComponent.datachange(...) will send them to server
-            // BUT we use it to also handle the scenario where a change-aware value (object / array) is changed by reference and we need to set it's setChangeListener(...)
-            modelOfComponent = new Proxy({}, this.getProxyHandler());
-        } else modelOfComponent = {};
+//        if (this.hasSubPropsWithShallowOrDeep()) {
+//            // hmm the proxy itself might not be needed for actual push to server when the values change by reference because
+//            // the component normally emits those via it's @Output and FormComponent.datachange(...) will send them to server
+//            // BUT we use it to also handle the scenario where a change-aware value (object / array) is changed by reference and we need to set it's setChangeListener(...)
+
+//            // I think we can remove this proxy completely as FormComponent.datachange(...) treats the setChangeListener(...) as well and we now just create it for > ALLOW? ALLOW/REJECT props might be smart too right?
+//            // the initial intent of this proxy was to automatically handle shallow/deep on component models, but those are not set in the model object unless an .emit() happens on them so a proxy is not needed I think
+//            modelOfComponent = new Proxy({}, this.getProxyHandler());
+/*        } else */modelOfComponent = {};
 
         return modelOfComponent;
     }
 
-    private hasSubPropsWithShallowOrDeep(): boolean {
-        const componentSpec = this.typesRegistry.getComponentSpecification(this.specName);
-        if (componentSpec && componentSpec.getPropertyDescriptions()) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
-            if (propertyDescription.getPropertyPushToServer() > PushToServerEnum.ALLOW) return true;
-        }
-        return false;
-    }
+//    private hasSubPropsWithShallowOrDeep(): boolean {
+//        const componentSpec = this.typesRegistry.getComponentSpecification(this.specName);
+//        if (componentSpec && componentSpec.getPropertyDescriptions()) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
+//            if (propertyDescription.getPropertyPushToServer() > PushToServerEnum.ALLOW) return true;
+//        }
+//        return false;
+//    }
 
-    /**
-     * Handler for the Proxy object that will detect reference changes in the component model where it is needed
-     */
-    private getProxyHandler() {
-        return {
-            set: (underlyingModelObject: { [property: string]: any }, prop: any, v: any) => {
-                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingModelObject, prop, v);
-
-                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
-                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
-
-                if (pushToServer > PushToServerEnum.ALLOW) {
-                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
-                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
-                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, v, true); // 1 element has changed by ref
-                    return true;
-                } else return Reflect.set(underlyingModelObject, prop, v);
-            },
-
-            deleteProperty: (underlyingModelObject: { [property: string]: any }, prop: any) => {
-                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingModelObject, prop);
-
-                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
-                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
-
-                if (pushToServer > PushToServerEnum.ALLOW) {
-                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
-                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
-                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, undefined, true); // 1 element deleted
-                    return true;
-                } else return Reflect.deleteProperty(underlyingModelObject, prop);
-            }
-        };
-    }
+//    /**
+//     * Handler for the Proxy object that will detect reference changes in the component model where it is needed
+//     */
+//    private getProxyHandler() {
+//        return {
+//            set: (underlyingModelObject: { [property: string]: any }, prop: any, v: any, receiver: any) => {
+//                // we are only interested in set operations on the actual proxied object here, not on other objects that might use the proxied object as a prototype
+//                // so if a set comes from example for a component property types's ModelInSpecificRow (so a foundset linked component), we want to set it on that object (receiver),
+//                // not end up calling subPropertyChangeByReferenceHandler which will set it on the underlyingModelObject
+//                if (underlyingModelObject !== receiver) return Reflect.set(underlyingModelObject, prop, v, receiver);
+//
+//                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress())
+//                    return Reflect.set(underlyingModelObject, prop, v, receiver);
+//
+//                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
+//                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
+//
+//                if (pushToServer > PushToServerEnum.ALLOW) {
+//                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
+//                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
+//                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, v, true); // 1 element has changed by ref
+//                    return true;
+//                } else return Reflect.set(underlyingModelObject, prop, v, receiver);
+//            },
+//
+//            deleteProperty: (underlyingModelObject: { [property: string]: any }, prop: any) => {
+//                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingModelObject, prop);
+//
+//                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
+//                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
+//
+//                if (pushToServer > PushToServerEnum.ALLOW) {
+//                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
+//                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
+//                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, undefined, true); // 1 element deleted
+//                    return true;
+//                } else return Reflect.deleteProperty(underlyingModelObject, prop);
+//            }
+//        };
+//    }
 
 }
 
@@ -383,8 +392,8 @@ export class FormComponentCache extends ComponentCache {
         public readonly formComponentProperties: FormComponentProperties,
         public readonly hasFoundset: boolean,
         typesRegistry: TypesRegistry,
-        parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>) {
-            super(name, specName, elType, handlers, layout, typesRegistry, parentAccessForSubpropertyChanges);
+        /*parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>*/) {
+            super(name, specName, elType, handlers, layout, typesRegistry/*, parentAccessForSubpropertyChanges*/);
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {
