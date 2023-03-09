@@ -519,7 +519,6 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
     public destroyAndGetNonProxiedValueOfProp(): VT {
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
-        console.log("Revoking proxy of: " + JSON.stringify(this.originalNonProxiedInstanceOfCustomObject));
 
         return this.originalNonProxiedInstanceOfCustomObject;
     }

@@ -32,7 +32,8 @@ export abstract class ServoyPublicService {
      */
     public abstract getLocaleObject(): Locale;
     /**
-     * Internal api, directives can use this to call server side registered services
+     * Internal api, directives can use this to call server side registered services. (this is internal Servoy services).
+     * Do not try to use this instead of callServiceServerSideApi() - which has to be used for calling server side JS scripting of custom services from packages.
      */
     public abstract callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T>;
     /**
