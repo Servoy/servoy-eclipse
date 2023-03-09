@@ -227,6 +227,7 @@ import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGObjectPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
@@ -1535,7 +1536,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								}
 							});
 					}
-					else if (propertyType == ObjectPropertyType.INSTANCE)
+					else if (propertyType == ObjectPropertyType.INSTANCE || propertyType == NGObjectPropertyType.NG_INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
 						{
