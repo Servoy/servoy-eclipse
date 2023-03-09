@@ -1,14 +1,14 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-samesize-indicator',
     templateUrl: './samesizeindicator.component.html',
     styleUrls: ['./samesizeindicator.component.css']
 })
-export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener {
+export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener  {
     SAME_WIDTH_IMAGE = 'designer/assets/images/samewidthindicator.png';
     SAME_HEIGHT_IMAGE = 'designer/assets/images/sameheightindicator.png';
 
@@ -18,6 +18,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
         this.editorSession.addSelectionChangedListener(this);
+        this.editorContentService.addContentMessageListener(this);
     }
 
     ngAfterViewInit(): void {
@@ -39,6 +40,12 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
 
     ngOnDestroy(): void {
         this.editorStateSubscription.unsubscribe();
+    }
+    
+    contentMessageReceived(id: string) {
+        if (id === 'redrawDecorators') {
+            this.selectionChanged(this.editorSession.getSelection());
+        }
     }
 
     selectionChanged(selection: Array<string>): void {
