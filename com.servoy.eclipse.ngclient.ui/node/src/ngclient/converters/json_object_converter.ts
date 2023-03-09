@@ -400,7 +400,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         internalState.proxyRevokerFunc = softProxyRevoker.getRevokeFunction();
 
         return {
-            set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any) => {
+            set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any, receiver: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingCustomObject, prop, v);
 
                 const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
@@ -409,7 +409,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     const dontPushNow = subPropCalculatedPushToServer === PushToServerEnum.ALLOW;
                     internalState.setPropertyAndHandleChanges(underlyingCustomObject, prop, v, dontPushNow); // 1 element has changed by ref
                     return true;
-                } else return Reflect.set(underlyingCustomObject, prop, v);
+                } else return Reflect.set(underlyingCustomObject, prop, v, receiver);
             },
 
             deleteProperty: (underlyingCustomObject: CustomObjectValue, prop: any) => {

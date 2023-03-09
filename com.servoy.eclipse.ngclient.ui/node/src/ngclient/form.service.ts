@@ -26,7 +26,7 @@ export class FormService {
      * Set this to true before updating form/component models with changes/values from server, and set it to false when you are done updating.
      * When this is set to true, Proxy triggers of any SHALLOW/DEEP (property pushToServer) properties will be ignored as they are not client side generated changes.
      */
-    private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+//    private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
     private isInDesigner = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
@@ -282,12 +282,12 @@ export class FormService {
 
     public createFormCache(formName: string, jsonData: any,  url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
-        try {
-            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
+//        try {
+//            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
             this.walkOverChildren(jsonData.children, formCache);
-        } finally {
-            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
-        }
+//        } finally {
+//            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+//        }
 
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
@@ -520,8 +520,8 @@ export class FormService {
 
     private formMessageHandler(formCache: FormCache, formName: string, msg: any, servoyService: ServoyService) {
         const formComponent = this.formComponentCache.get(formName) as IFormComponent;
-        try {
-            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
+//        try {
+//            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = true;
 
             const newFormData = msg.forms[formName];
             const newFormProperties = newFormData['']; // properties of the form itself
@@ -557,9 +557,9 @@ export class FormService {
                                 (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
                                     formComponent.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
             }
-        } finally {
-            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
-        }
+//        } finally {
+//            this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
+//        }
         formComponent.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
     }
 
@@ -627,7 +627,7 @@ export class FormService {
 
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                     const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position, formComponentProperties,
-                                        !!elem.model.foundset, this.typesRegistry, this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
+                                        !!elem.model.foundset, this.typesRegistry/*, this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name)*/);
 
                     this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
 
@@ -640,8 +640,8 @@ export class FormService {
                     }
                 } else {
                     // simple component
-                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry,
-                                                        this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name));
+                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry/*,
+                                                        this.createParentAccessForSubpropertyChanges(formCache.formname, elem.name)*/);
                     this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
 
                     formCache.add(comp, parent);
@@ -650,29 +650,29 @@ export class FormService {
         });
     }
 
-    private createParentAccessForSubpropertyChanges(formName: string, componentName: string): IParentAccessForSubpropertyChanges<number | string> {
-        // this is needed to handle subproperty change-by-reference for pushToServer SHALLOW or DEEP subproperties
-        return  {
-            shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied,
-
-            changeNeedsToBePushedToServer: (key: number | string, oldValue: any, doNotPushNow?: boolean) => {
-                // this will only be used currently by the smart properties to push changes, not
-                // for root property change-by reference, because a component doesn't have direct
-                // access to it's model, just to individual properties via @Input and @Output, and when
-                // it does change an @Input by reference it has to call .emit(...) on the corresponding output
-                // anyway in order to update the property in the model - so we can't use a Proxy () on the model to
-                // automatically detect and send these changes; we rely in emits for that that updates the model and calls that calls FormComponent.datachange() anyway
-                
-                if (! doNotPushNow) {
-                    const formState = this.formsCache.get(formName);
-                    const componentModel = formState?.getComponent(componentName)?.model;
-
-                    this.dataPush(formName, componentName, key as string, componentModel?.[key], oldValue);
-                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
-                  // nested values towards this root prop; so nothing to do here then
-            }
-        };
-    }
+//    private createParentAccessForSubpropertyChanges(formName: string, componentName: string): IParentAccessForSubpropertyChanges<number | string> {
+//        // this is needed to handle subproperty change-by-reference for pushToServer SHALLOW or DEEP subproperties
+//        return  {
+//            shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied,
+//
+//            changeNeedsToBePushedToServer: (key: number | string, oldValue: any, doNotPushNow?: boolean) => {
+//                // this will only be used currently by the smart properties to push changes, not
+//                // for root property change-by reference, because a component doesn't have direct
+//                // access to it's model, just to individual properties via @Input and @Output, and when
+//                // it does change an @Input by reference it has to call .emit(...) on the corresponding output
+//                // anyway in order to update the property in the model - so we can't use a Proxy () on the model to
+//                // automatically detect and send these changes; we rely in emits for that that updates the model and calls that calls FormComponent.datachange() anyway
+//
+//                if (! doNotPushNow) {
+//                    const formState = this.formsCache.get(formName);
+//                    const componentModel = formState?.getComponent(componentName)?.model;
+//
+//                    this.dataPush(formName, componentName, key as string, componentModel?.[key], oldValue);
+//                } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
+//                  // nested values towards this root prop; so nothing to do here then
+//            }
+//        };
+//    }
 
     private handleComponentModelConversionsAndChangeListeners(jsonFromServerForComponent: any, componentCache: ComponentCache,
                 componentSpec: IWebObjectSpecification, formCache: FormCache) {
