@@ -257,7 +257,7 @@ public class Activator extends AbstractUIPlugin
 												for (String packageName : packagesNeeded)
 												{
 													packagesFinal.add(packagesHelp.contains(packageName)
-														? (packageName + " (source project used, check for download the wpm package)")
+														? (packageName + " (existing source package project will be used; checking this will download the wpm package)")
 														: packageName);
 												}
 											}
