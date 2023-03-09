@@ -373,6 +373,19 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
+		configuredHandlers.put("initialized", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				// first set focus is too early, make sure focus is properly set
+				if (editorPart == PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+				{
+					editorPart.setFocus();
+				}
+				return null;
+			}
+		});
 		configuredHandlers.put("reload", new IServerService()
 		{
 			@Override
