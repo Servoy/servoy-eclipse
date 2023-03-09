@@ -246,7 +246,37 @@ export class EditorContentService {
             });
             refresh = true;
         }
-        
+
+        if (data.deleted) {
+            data.deleted.forEach((elem) => {
+                const comp = formCache.getComponent(elem);
+                if (comp) {
+                    formCache.removeComponent(elem);
+                    if (!formCache.absolute) {
+                        this.removeChildFromParentRecursively(comp, formCache.mainStructure);
+                    } else if (comp.parent) {
+                        comp.parent.removeChild(comp);
+                    }
+                }
+            });
+            refresh = true;
+            redrawDecorators = true;
+        }
+
+        if (data.deletedContainers) {
+            data.deletedContainers.forEach((elem) => {
+                const container = formCache.getLayoutContainer(elem);
+                if (container) {
+                    formCache.removeLayoutContainer(elem);
+                    if (formCache.mainStructure) this.removeChildFromParentRecursively(container, formCache.mainStructure);
+                    else if (container.parent) container.parent.removeChild(container);
+                    this.removeChildrenRecursively(container, formCache);
+                }
+            });
+            refresh = true;
+            redrawDecorators = true;
+        }
+
         if (reorderPartComponents) {
             // make sure the order of components in absolute layout is correct, based on formindex
             this.sortChildren(formCache.partComponentsCache);
