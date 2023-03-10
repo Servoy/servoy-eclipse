@@ -17,6 +17,9 @@
 package com.servoy.eclipse.model.repository;
 
 
+import static com.servoy.base.util.DataSourceUtilsBase.getDBServernameTablename;
+import static com.servoy.base.util.DataSourceUtilsBase.isCompleteDBbServerTable;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,7 +53,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -1647,8 +1649,8 @@ public class SolutionSerializer
 		serverNameTableName[1] = tableNode.getTableName();
 		if (useOldName && tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty) != null)
 		{
-			String[] names = DataSourceUtilsBase.getDBServernameTablename(tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty));
-			if (names != null && names.length == 2)
+			String[] names = getDBServernameTablename(tableNode.getRuntimeProperty(AbstractBase.NameChangeProperty));
+			if (isCompleteDBbServerTable(names))
 			{
 				serverNameTableName = names;
 			}
