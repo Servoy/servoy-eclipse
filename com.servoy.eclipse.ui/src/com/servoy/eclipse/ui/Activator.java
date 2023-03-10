@@ -232,7 +232,7 @@ public class Activator extends AbstractUIPlugin
 									{
 										try
 										{
-											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+											Shell active = new Shell(PlatformUI.getWorkbench().getDisplay().getActiveShell(), SWT.PRIMARY_MODAL);
 											ArrayList<IProject> packagesSource = new ArrayList<IProject>();
 											List<String> packagesHelp = new ArrayList<String>();
 											List<String> packagesFinal = new ArrayList<String>();
