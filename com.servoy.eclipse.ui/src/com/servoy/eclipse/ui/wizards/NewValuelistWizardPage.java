@@ -293,7 +293,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		}
 		else if (!IdentDocumentValidator.isJavaIdentifier(valuelistNameText.getText()))
 		{
-			error = "Invalid relation name";
+			error = "Invalid valuelist name";
 		}
 		else if (((IStructuredSelection)tableViewer.getSelection()).isEmpty())
 		{
