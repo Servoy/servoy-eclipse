@@ -143,7 +143,11 @@ export class SabloService {
     }
 
     public addIncomingMessageHandlingDoneTask(func: () => any) {
-        this.wsSession.addIncomingMessageHandlingDoneTask(func);
+        if (this.wsSession) this.wsSession.addIncomingMessageHandlingDoneTask(func);
+        else {
+            // it can be undefined in form designer, as updates from server come via a different route and this.websocketService.connect() is called from a different place 
+            this.websocketService.getSession().then((session) => session.addIncomingMessageHandlingDoneTask(func));
+        }
     }
 
     public getCurrentRequestInfo(): any {
