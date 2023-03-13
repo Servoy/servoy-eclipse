@@ -63,11 +63,11 @@ mat-select.repository .mat-mdc-select-arrow {
 
 .mdc-text-field--filled:not(.mdc-text-field--disabled)
 {
-    background-color: unset;;
+    background-color: unset;
 }
 
 .mat-mdc-select-value, .mat-mdc-select-disabled .mat-mdc-select-value {
-    color: unset;;
+    color: unset;
 }
 /* workaround for IE, see: https://github.com/angular/material2/issues/11609 */
 .cdk-overlay-pane {
@@ -80,10 +80,21 @@ html, body {
     height: 100%;
 }
 
-.dark .content {
+.dark .content, .dark .mat-mdc-dialog-content.mdc-dialog__content, .dark .mat-mdc-dialog-title.mdc-dialog__title, .dark .mat-mdc-dialog-actions.mdc-dialog__actions {
     background: #262626;
     color: #ffffff;
-    height: 100%;
+}
+
+.dark .content {
+	 height: 100%;
+}
+
+.dark .mat-mdc-button:not(:disabled) {
+	color: #ffffff;
+}
+
+.dark .mdc-checkbox__background  {
+	border-color: #ffffff !important;
 }
 
 .dark .mat-mdc-select-value, 
