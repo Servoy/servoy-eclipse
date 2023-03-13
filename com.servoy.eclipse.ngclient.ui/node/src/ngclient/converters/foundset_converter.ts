@@ -1,4 +1,4 @@
-import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
+import { ConverterService, IChangeAwareValue, IUIDestroyAwareValue } from '../../sablo/converter.service';
 import { IType, IPropertyContext } from '../../sablo/types_registry';
 import { Deferred, LoggerService, LoggerFactory, RequestInfoPromise, IFoundset, ViewPort, FoundsetChangeEvent, FoundsetChangeListener,
     IFoundsetFieldsOnly} from '@servoy/public';
@@ -241,7 +241,7 @@ export class FoundsetType implements IType<FoundsetValue> {
 
 }
 
-export class FoundsetValue implements IChangeAwareValue, IFoundset {
+export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAwareValue {
 
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' and
@@ -454,6 +454,9 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
         return this.__internalState;
     }
 
+    uiDestroyed(): void{
+        this.__internalState.sabloDeferHelper.cancelAll(this.getInternalState());
+    }
 }
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {

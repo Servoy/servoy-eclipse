@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { LoggerService, LoggerFactory, Deferred } from '@servoy/public';
-import { ConverterService, IParentAccessForSubpropertyChanges, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged } from '../sablo/converter.service';
+import { ConverterService, IParentAccessForSubpropertyChanges, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
@@ -274,6 +274,29 @@ export class FormService {
 
     public destroy(formName: string) {
         this.formComponentCache.delete(formName);
+        const form = this.formsCache.get(formName);
+        if (form) {
+            form.componentCache.forEach((comp) => {
+                Object.values(comp.model).forEach((elem) => {
+                     this.callOnDestroy(elem);
+                });
+            });
+        }
+    }
+
+    callOnDestroy(value: any){
+        if (!value) return;
+        if (instanceOfUIDestroyAwareValue(value)){
+            value.uiDestroyed();
+        } else if (Array.isArray(value)){
+            value.forEach((elem) => {
+                this.callOnDestroy(elem);
+            });
+        } else if (typeof value === 'object'){
+            Object.values(value).forEach((elem) => {
+                this.callOnDestroy(elem);
+            });
+        }
     }
 
     public hasFormCacheEntry(name: string): boolean {
