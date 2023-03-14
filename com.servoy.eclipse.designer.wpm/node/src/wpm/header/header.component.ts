@@ -93,7 +93,7 @@ export class HeaderComponent implements OnInit {
  
   updateStateForUpdateAllButton() { 
       // the update all button will be disabled if all packages have the latest version installed
-      this.isUpdateAllButtonDisabled = this.packages.find(p => !p.hasLatestVersion && !p.markedAsRemoved && p.installedIsWPA) ? false : true;
+      this.isUpdateAllButtonDisabled = this.packages.find(p => !p.hasLatestVersion && !p.markedAsRemoved && (p.installedIsWPA || p.installedIsWPA === undefined)) ? false : true;
   }
 
   isLatestRelease(p: Package): boolean {
