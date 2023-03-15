@@ -399,6 +399,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.containedForm && this.containedForm.childElements) {
             this.containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
+        this.getViewportRows().forEach(elem => elem._cache = null);
     }
 
     getViewportRows(): ViewPortRow[] {
