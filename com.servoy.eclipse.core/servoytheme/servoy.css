@@ -33,7 +33,7 @@
 	background-color: #FFFFFF;
 }
 
-ToolItem[style~='SWT.CHECK'] {
+ToolItem {
 	background-color: unset;
 }
 

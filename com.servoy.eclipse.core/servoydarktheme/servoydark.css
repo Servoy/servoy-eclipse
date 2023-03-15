@@ -63,6 +63,6 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 	text-trim: false;
 }
 
-ToolItem[style~='SWT.CHECK'] {
+ToolItem {
 	background-color: unset;
 }
