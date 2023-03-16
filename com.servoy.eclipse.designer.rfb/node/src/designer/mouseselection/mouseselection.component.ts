@@ -20,7 +20,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     contentInit = false;
     topAdjust: number;
     leftAdjust: number;
-    contentRect: DOMRect;
     lassostarted = false;
     lastTimestamp: number;
 
@@ -152,9 +151,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private calculateAdjustToMainRelativeLocation() {
         if (!this.topAdjust) {
-            const content = this.editorContentService.getContentArea();
-            this.contentRect = content.getBoundingClientRect()
-            const computedStyle = window.getComputedStyle(content, null)
+            const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
             this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
             this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
         }
@@ -176,9 +173,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
-
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top + 'px');
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
@@ -189,7 +186,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top - this.topAdjust });
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
         if (this.editorSession.getState().dragging) return;
@@ -210,10 +208,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 this.designerUtilsService.adjustElementRect(node, position);
                 const iframeLeft = this.editorContentService.getLeftPositionIframe();
                 const iframeTop = this.editorContentService.getTopPositionIframe();
-                if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft, y: position.y + iframeTop }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft + position.width, y: position.y + iframeTop }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft, y: position.y + iframeTop + position.height }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft + position.width, y: position.y + iframeTop + position.height })) {
+                const rect1 =  new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY , this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY  - this.mousedownpoint.y))
+                const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height );
+                if ( this.rectanglesIntersect(rect1, rect2)) {
                     const layoutName = node.getAttribute('svy-layoutname');
                     const newNode: SelectionNode = {
                         style: {
@@ -392,11 +389,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseMove(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
         if (this.lassostarted) {
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             if (event.pageX < this.mousedownpoint.x) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect.left + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
             }
             if (event.pageY < this.mousedownpoint.y) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect.top + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
             }
             if (this.lassoRef.nativeElement.style.display === 'none') {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
@@ -406,23 +404,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
-    }
-
-    private rectangleContainsPoint(p1: Point, p2: Point, toCheck: Point): boolean {
-        if (p1.x > p2.x) {
-            const temp = p1.x;
-            p1.x = p2.x;
-            p2.x = temp;
-        }
-        if (p1.y > p2.y) {
-            const temp = p1.y;
-            p1.y = p2.y;
-            p2.y = temp;
-        }
-        if (p1.x <= toCheck.x && p2.x >= toCheck.x && p1.y <= toCheck.y && p2.y >= toCheck.y) {
-            return true;
-        }
-        return false;
     }
 
     private rectanglesIntersect(r1: DOMRect,r2: DOMRect) : boolean {
