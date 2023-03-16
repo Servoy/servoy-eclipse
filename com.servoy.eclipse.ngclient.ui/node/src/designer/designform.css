@@ -79,3 +79,11 @@
 .variants_container {
 	margin: 2px;
 }
+
+.variants_container > .variant_item {
+    display: flex;
+} 
+
+.variants_container > .variant_item > * {
+    display: flex;
+} 

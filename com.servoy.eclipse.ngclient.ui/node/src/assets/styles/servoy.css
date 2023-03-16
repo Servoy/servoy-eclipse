@@ -444,14 +444,6 @@ fieldset[disabled] .btn-default.focus {
     height: 100%;
 }
 
-.variants_container > .variant_item {
-    display: flex;
-} 
-
-.variants_container > .variant_item > * {
-    display: flex;
-} 
-
 /*
  The DragResize object name is automatically applied to all generated
  corner resize handles, as well as one of the individual classes below.
