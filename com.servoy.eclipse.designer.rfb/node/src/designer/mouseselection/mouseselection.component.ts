@@ -23,7 +23,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     contentRect: DOMRect;
     lassostarted = false;
     lastTimestamp: number;
-     
+
     mousedownpoint: Point;
     fieldLocation: Point;
     selectedRefSubscription: Subscription;
@@ -200,7 +200,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 return;
             }
         }
-        
+
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
             const elements = this.editorContentService.getAllContentElements();
             const newNodes = new Array<SelectionNode>();
@@ -244,7 +244,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.calculateAdjustToMainRelativeLocation();
 
             const elements = this.editorContentService.getAllContentElements();
-            Array.from(elements).reverse().find((node) => {
+            const newNode = Array.from(elements).reverse().find((node) => {
                 const position = node.getBoundingClientRect();
                 this.designerUtilsService.adjustElementRect(node, position);
                 let addToSelection = false;
@@ -263,10 +263,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         addToSelection = true;
                     }
                 }
-
                 if (addToSelection) {
                     const id = node.getAttribute('svy-id');
                     let selection = this.editorSession.getSelection();
+                    if (selection && selection.length > 0 && event.shiftKey) return node;
                     const layoutName = node.getAttribute('svy-layoutname');
                     const newNode = {
                         style: {
@@ -307,11 +307,54 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     return node;
                 }
             });
+            if (event.shiftKey && newNode) {
+                const selection = this.editorSession.getSelection();
+                if (selection && selection.length > 0) {
+                    const position1 = newNode.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(newNode, position1);
+
+                    const element = this.editorContentService.getContentElement(selection[0]);
+                    if (element) {
+                        const position2 = element.getBoundingClientRect();
+                        this.designerUtilsService.adjustElementRect(element, position2);
+                        const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
+                        Array.from(elements).forEach((node) => {
+                            const position = node.getBoundingClientRect();
+                            this.designerUtilsService.adjustElementRect(node, position);
+                            if (this.rectanglesIntersect(rect1 ,position)) {
+                                const id = node.getAttribute('svy-id');
+                                const layoutName = node.getAttribute('svy-layoutname');
+                                const newNode = {
+                                    style: {
+                                        height: position.height + 'px',
+                                        width: position.width + 'px',
+                                        top: position.top + this.topAdjust + 'px',
+                                        left: position.left + this.leftAdjust + 'px',
+                                        display: 'block'
+                                    } as CSSStyleDeclaration,
+                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                                    svyid: node.getAttribute('svy-id'),
+                                    isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
+                                    maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                                    containerName: layoutName,
+                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                                };
+                                this.nodes.push(newNode);
+                                selection.push(id);
+                            }
+                        });
+                        this.editorSession.setSelection(selection, this);
+                        this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
+                            this.applyWireframe();
+                        })
+                    }
+                }
+            }
         }
         this.lassostarted = false;
         this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
         this.applyWireframe();
-        
+
         if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
             // dblclick event; is not triggered by event
             if (this.nodes && this.nodes.length > 0 && this.nodes[0].maxLevelDesign) {
@@ -380,6 +423,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             return true;
         }
         return false;
+    }
+
+    private rectanglesIntersect(r1: DOMRect,r2: DOMRect) : boolean {
+         return !(r2.left > r1.right || 
+           r2.right < r1.left || 
+           r2.top > r1.bottom ||
+           r2.bottom < r1.top);
     }
 
     deleteAction(event: MouseEvent) {
