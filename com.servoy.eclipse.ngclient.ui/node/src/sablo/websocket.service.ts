@@ -4,7 +4,7 @@ import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.w
 import { WindowRefService } from '@servoy/public';
 import { Deferred } from '@servoy/public';
 import { ConverterService } from './converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
+import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 
 @Injectable({
@@ -58,6 +58,15 @@ export class WebsocketService {
         } else if (this.connectionArguments['queryArgs']) {
             this.connectionArguments['queryArgs'].delete(arg);
         }
+    }
+
+    public wrapPromiseToPropagateCustomRequestInfoInternal(originalPromise: RequestInfoPromise<any>,
+                                                               spawnedPromise: RequestInfoPromise<any>): RequestInfoPromise<any> {
+        return Object.defineProperty(spawnedPromise, "requestInfo", {
+            set(value) {
+                originalPromise.requestInfo = value;
+            }
+        });        
     }
 
     public setConnectionPathArguments(args) {
@@ -268,7 +277,18 @@ export class WebsocketSession {
     }
 
     // api
-    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): Promise<T> {
+    /**
+     * IMPORTANT!
+     * 
+     * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
+     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using $websocket.wrapPromiseToPropagateCustomRequestInfoInternal().
+     * 
+     * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
+     * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
+     * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
+     * return it back to the user (component/service code).   
+     */
+    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): RequestInfoPromise<T> {
         const cmd = {
             service: serviceName,
             methodname: methodName,
