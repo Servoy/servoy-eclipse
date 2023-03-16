@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener, RequestInfoPromise } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { ServicesService } from '../../sablo/services.service';
@@ -46,7 +46,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.sabloService.getClientnr();
     }
 
-    callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
+    callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
         return this.sabloService.callService(serviceName, methodName, argsObject, async);
     }
 

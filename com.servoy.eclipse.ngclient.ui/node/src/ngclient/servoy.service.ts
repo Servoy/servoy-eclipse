@@ -4,7 +4,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
 import { TypesRegistry } from '../sablo/types_registry';
-import { WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
+import { WindowRefService, LoggerFactory, SessionStorageService, RequestInfoPromise } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
 import { CustomObjectTypeFactory } from './converters/json_object_converter';
@@ -183,7 +183,7 @@ export class ServoyService {
         return this.uiBlockerService;
     }
 
-    public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
+    public executeInlineScript<T>(formname: string, script: string, params: any[]): RequestInfoPromise<T> {
         return this.sabloService.callService('formService', 'executeInlineScript',
             { formname, script, params }, false);
     }

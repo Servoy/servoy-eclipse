@@ -1,5 +1,5 @@
 import { Injectable, } from '@angular/core';
-import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale } from '@servoy/public';
+import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale, RequestInfoPromise } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 
@@ -122,7 +122,18 @@ export class SabloService {
         this.locale = loc;
     }
 
-    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
+    /**
+     * IMPORTANT!
+     * 
+     * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
+     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using $websocket.wrapPromiseToPropagateCustomRequestInfoInternal().
+     * 
+     * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
+     * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
+     * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
+     * return it back to the user (component/service code).   
+     */
+    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): RequestInfoPromise<T> {
         const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
@@ -166,7 +177,7 @@ export class SabloService {
         }
     }
 
-    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): Promise<T>{
+    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T>{
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise;
@@ -175,19 +186,16 @@ export class SabloService {
         this.currentServiceCallDone = false;
         this.currentServiceCallWaiting = times.length;
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
-        return Object.defineProperty(promise.then((arg) => {
+
+        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((arg) => {
                 this.currentServiceCallDone = true;
                 return arg;
             }, (arg) => {
                 this.currentServiceCallDone = true;
                 return Promise.reject(arg);
-            }), 'requestInfo', {
-                			set : (value: any) => {
-                				promise['requestInfo'] = value;
-            			}
-        });
+            }));
     }
-//
+
 //    private getAPICallFunctions(call, formState) {
 //        let funcThis: Record<string, () => any>;
 //        if (call.viewIndex !== undefined) {

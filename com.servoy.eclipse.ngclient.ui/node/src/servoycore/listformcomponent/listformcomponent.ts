@@ -46,7 +46,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
             </div>
         </div>
         <div *ngIf="containedForm&&!containedForm.absoluteLayout">
-            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index; trackBy: trackByFn" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
                 <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
             </div>
         </div>
@@ -178,6 +178,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             }
         }
+    }
+    
+    trackByFn(index: number, row: ViewPortRow) {
+      return row._svyRowId;
     }
 
     onRowClick(row: any, event: Event) {
@@ -399,6 +403,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.containedForm && this.containedForm.childElements) {
             this.containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
+        this.getViewportRows().forEach(elem => elem._cache = null);
     }
 
     getViewportRows(): ViewPortRow[] {
