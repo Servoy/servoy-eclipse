@@ -50,6 +50,8 @@ body {
 mat-select.repository {
   width: unset;
   padding-top: 10px;
+  position: absolute;
+  right: 10px;
 }
 
 mat-select.repository .mat-mdc-select-value-text {
