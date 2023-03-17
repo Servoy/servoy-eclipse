@@ -2382,8 +2382,11 @@ public class TypeCreator extends TypeCache
 							String type = parameter.getType();
 							if (type != null)
 							{
+								type = type.replace("<", "&lt;").replace(">", "&gt;");
+								type = parameter.isVarArgs() ? type.replace("[]", "...") : type;
+
 								sb.append("{");
-								sb.append(type.replace("<", "&lt;").replace(">", "&gt;"));
+								sb.append(type);
 								sb.append("} ");
 							}
 							sb.append(parameter.getName());
