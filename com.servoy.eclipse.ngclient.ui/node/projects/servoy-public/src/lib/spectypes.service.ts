@@ -739,7 +739,7 @@ export interface IChildComponentPropertyValue extends IComponentCache {
 
     /**
      * This function has to be set/provided by the ng2 component that uses this child "component" typed property, because
-     * that one controls the UI of the child components represented by this property (or child components in case of
+     * that one controls the UI of the child component represented by this property (or child components in case of
      * foundset linked components like in list form component for example). Then when there are changes comming from server, the 'component'
      * property type will call this function as needed.
      */

@@ -252,6 +252,8 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 	public boolean isEnabled()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		return node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
+		if (node != null)
+			return node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
+		return false;
 	}
 }

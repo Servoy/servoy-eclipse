@@ -400,7 +400,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         internalState.proxyRevokerFunc = softProxyRevoker.getRevokeFunction();
 
         return {
-            set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any) => {
+            set: (underlyingCustomObject: CustomObjectValue, prop: any, v: any, receiver: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingCustomObject, prop, v);
 
                 const subPropCalculatedPushToServer = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp,
@@ -409,7 +409,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     const dontPushNow = subPropCalculatedPushToServer === PushToServerEnum.ALLOW;
                     internalState.setPropertyAndHandleChanges(underlyingCustomObject, prop, v, dontPushNow); // 1 element has changed by ref
                     return true;
-                } else return Reflect.set(underlyingCustomObject, prop, v);
+                } else return Reflect.set(underlyingCustomObject, prop, v, receiver);
             },
 
             deleteProperty: (underlyingCustomObject: CustomObjectValue, prop: any) => {
@@ -519,7 +519,6 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
     public destroyAndGetNonProxiedValueOfProp(): VT {
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
-        console.log("Revoking proxy of: " + JSON.stringify(this.originalNonProxiedInstanceOfCustomObject));
 
         return this.originalNonProxiedInstanceOfCustomObject;
     }

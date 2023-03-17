@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { Deferred, I18NListener } from '@servoy/public';
+import { WebsocketService } from '../../sablo/websocket.service';
+import { Deferred, I18NListener, RequestInfoPromise } from '@servoy/public';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class  I18NProvider {
 
     private readonly listeners: Set<Listener> = new Set();
 
-    constructor(private sabloService: SabloService) {
+    constructor(private sabloService: SabloService, private websocketService: WebsocketService) {
     }
 
     public addDefaultTranslations(translations: {[key: string]: string}) {
@@ -31,7 +32,7 @@ export class  I18NProvider {
      *
      * @deprecated use listenForI18NMessages(...keys: string[]):I18NListener
      */
-    public getI18NMessages(...keys: string[]): Promise<any> {
+    public getI18NMessages(...keys: string[]): RequestInfoPromise<any> {
         const retValue = {};
         const serverKeys = {};
         let serverKeysCounter = 0;
@@ -44,14 +45,13 @@ export class  I18NProvider {
         });
         if (serverKeysCounter > 0) {
             const promiseA = this.sabloService.callService('i18nService', 'getI18NMessages', serverKeys, false);
-            const promiseB = promiseA.then((result) => {
+            return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promiseA, promiseA.then((result) => {
                 for (const key of Object.keys(result)) {
                     this.cachedMessages[key] = result[key];
                     retValue[key] = result[key];
                 }
                 return retValue;
-            }, (error) => Promise.reject(error));
-            return promiseB;
+            }, (error) => Promise.reject(error)));
         } else {
             const defered = new Deferred<any>();
             defered.resolve(retValue);

@@ -664,4 +664,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2.19.0"
          unpack="false"/>
 
+   <plugin
+         id="slf4j.api"
+         download-size="0"
+         install-size="0"
+         version="1.7.36"
+         unpack="false"/>
+
 </feature>

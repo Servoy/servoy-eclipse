@@ -11,14 +11,18 @@
                 <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                     <span>
                     <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
-                    <img draggable="false" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
                     </span>
                     <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
                     <ul>
-                    	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><span><img draggable="false" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</span></li>
+                    	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
+                    	   <span>
+                    	       <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
+                    	   </span>
+                    	</li>
                     </ul>
                     <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
-                        <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><span><img draggable="false" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</span></li>
+                        <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</span></li>
                     </ul>
                 </li>
             </ul>
@@ -27,7 +31,7 @@
                     <div>{{categoryObject.key}}</div>
                     <ul>
                          <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
-                             <span><img draggable="false" [src]="'/'+component.icon" alt=""/>{{component.displayName}}</span>
+                             <span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}</span>
                          </li>
                     </ul>
                 </li>

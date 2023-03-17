@@ -439,7 +439,12 @@
                                         <replaceregexp
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
                                             match="${project.version}" replace="${newVersion}"
-                                            byline="true" />									</target>
+                                            byline="true" />
+                                        <replaceregexp
+                                            file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package_solution.json"
+                                            match="${project.version}" replace="${newVersion}"
+                                            byline="true" />
+                                    </target>
 								</configuration>
 							</execution>
 						</executions>

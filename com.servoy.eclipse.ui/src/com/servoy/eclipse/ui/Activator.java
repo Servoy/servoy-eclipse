@@ -232,7 +232,7 @@ public class Activator extends AbstractUIPlugin
 									{
 										try
 										{
-											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+											Shell active = new Shell(PlatformUI.getWorkbench().getDisplay().getActiveShell(), SWT.PRIMARY_MODAL);
 											ArrayList<IProject> packagesSource = new ArrayList<IProject>();
 											List<String> packagesHelp = new ArrayList<String>();
 											List<String> packagesFinal = new ArrayList<String>();
@@ -257,7 +257,7 @@ public class Activator extends AbstractUIPlugin
 												for (String packageName : packagesNeeded)
 												{
 													packagesFinal.add(packagesHelp.contains(packageName)
-														? (packageName + " (source project used, check for download the wpm package)")
+														? (packageName + " (existing source package project will be used; checking this will download the wpm package)")
 														: packageName);
 												}
 											}

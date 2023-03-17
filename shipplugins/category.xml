@@ -111,5 +111,8 @@
     </bundle>	
     <bundle id='org.objectweb.asm.commons'>
         <category name="bundles" />
+    </bundle> 
+     <bundle id='org.antlr.antlr4-runtime'>
+        <category name="bundles" />
     </bundle>   
 </site>

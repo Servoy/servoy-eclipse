@@ -106,7 +106,14 @@ public class BrowserDialog extends Dialog
 
 	public Object open(boolean useChromiumHint)
 	{
-		Rectangle size = getParent().getBounds();
+		Shell parent = getParent();
+
+		while (parent.getParent() instanceof Shell)
+		{
+			parent = (Shell)parent.getParent();
+		}
+
+		Rectangle size = parent.getBounds();
 		int newWidth = (int)(size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
 		int newHeight = (int)(size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
 		Dimension newSize = new Dimension(newWidth, newHeight);

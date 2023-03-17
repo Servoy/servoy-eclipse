@@ -563,7 +563,7 @@ export class ViewportService {
             // component property type viewport probably; we search for push to server at least specified value on spec property names
             internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = false;
             const pds = defaultColumnTypes.getPropertyDescriptions();
-            for (const propName of Object.keys(pds)) {
+            if (pds) for (const propName of Object.keys(pds)) {
                 if (pds[propName].getPropertyPushToServer() >= atLeastPushToServer) { // this is for component root properties, so no need for parent prop. push-to-server
                     internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = true;
                     break;
@@ -602,8 +602,8 @@ export class ViewportService {
         });
 
         return {
-            set: (underlyingViewport: T, prop: any, v: any) => {
-                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(underlyingViewport, prop, v);
+            set: (underlyingViewport: T, prop: any, v: any, receiver: any) => {
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(underlyingViewport, prop, v, receiver);
 
                 // eslint-disable-next-line radix
                 const i = Number.parseInt(prop);
@@ -614,7 +614,7 @@ export class ViewportService {
                     }
                 }
 
-                return Reflect.set(underlyingViewport, prop, v);
+                return Reflect.set(underlyingViewport, prop, v, receiver);
             },
 
             deleteProperty: (underlyingViewport: T, prop: any) => {
@@ -655,11 +655,11 @@ export class ViewportService {
         });
 
         return {
-            set: (row: any, prop: any, v: any) => {
-                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(row, prop, v);
+            set: (row: any, prop: any, v: any, receiver: any) => {
+                if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(row, prop, v, receiver);
 
                 if (instanceOfISomePropertiesInRowAreNotFoundsetLinked(internalState) && !internalState.isFoundsetLinkedProperty(prop))
-                    return Reflect.set(row, prop, v);   // the viewport proxy doesn't want to intercept changes on shared part (that is done elsewhere)
+                    return Reflect.set(row, prop, v, receiver);   // the viewport proxy doesn't want to intercept changes on shared part (that is done elsewhere)
                                                         // of the component's model - in case this is a viewport for a component property type
 
                 if (this.getCellPropertyContextFor(propertyContextCreator, viewPort[rowIndex], prop).getPushToServerCalculatedValue() > PushToServerEnum.ALLOW) {

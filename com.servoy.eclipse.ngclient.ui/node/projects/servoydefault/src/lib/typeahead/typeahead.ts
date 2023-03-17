@@ -69,8 +69,15 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         if (changes.readOnly || changes.enabled) {
             this.instance.setDisabledState(this.readOnly || !this.enabled);
         }
-        if ((changes.format || changes.findmode) && this.valuelistID) {
-            this.instance.writeValue(this.dataProviderID);
+        if (changes.format || changes.findmode) {
+             if (this.format && this.format.maxLength) {
+                if (!this.findmode) {
+                    this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+                } else {
+                    this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
+                }
+            }
+            if (this.valuelistID) this.instance.writeValue(this.dataProviderID);
         }
     }
 

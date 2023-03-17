@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
-import { LoggerService, LoggerFactory } from '@servoy/public';
+import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
 import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from '../sablo/types_registry';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
@@ -17,7 +17,7 @@ export class ServicesService {
 
     constructor( private converterService: ConverterService,
                     private readonly typesRegistry: TypesRegistry,
-                    websocketService: WebsocketService,
+                    private websocketService: WebsocketService,
                     private sabloService: SabloService,
                     logFactory: LoggerFactory ) {
         this.log = logFactory.getLogger('ServicesService');
@@ -174,7 +174,7 @@ export class ServicesService {
      * If a service defines a server side scripting file in it's .spec ("serverscript" key), the client side of the service can call server-side apis defined
      * on that scope.
      */
-    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): Promise<T> {
+    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): RequestInfoPromise<T> {
         const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
 
         // convert args as needed
@@ -183,9 +183,10 @@ export class ServicesService {
         }
 
         // convert return value as needed
-        return this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args })
-                    .then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
-                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+        const promise = this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args });
+        
+        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
                     // in case of a reject/errorCallback we just let it propagete to caller;
     }
 

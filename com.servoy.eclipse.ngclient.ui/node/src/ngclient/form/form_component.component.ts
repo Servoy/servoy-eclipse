@@ -220,48 +220,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.log = logFactory.getLogger('FormComponent');
     }
 
-    get containers() {
-        return this._containers;
-    }
-
-    @Input()
-    set containers(containers: { added: any; removed: any }) {
-        if (!containers) return;
-        this._containers = containers;
-        for (const containername of Object.keys(containers.added)) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.added[containername].forEach((cls: string) => this.renderer.addClass(container, cls));
-            }
-        }
-        for (const containername of Object.keys(containers.removed)) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                containers.removed[containername].forEach((cls: string) => this.renderer.removeClass(container, cls));
-            }
-        }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/member-ordering
-    get cssStyles() {
-        return this._cssstyles;
-    }
-
-    @Input()
-    set cssStyles(cssStyles: { [x: string]: any }) {
-        if (!cssStyles) return;
-        this._cssstyles = cssStyles;
-        for (const containername of Object.keys(cssStyles)) {
-            const container = this.getContainerByName(containername);
-            if (container) {
-                const stylesMap = cssStyles[containername];
-                for (const key of Object.keys(stylesMap)) {
-                    this.renderer.setStyle(container, key, stylesMap[key]);
-                }
-            }
-        }
-    }
-
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
                         converterService: ConverterService, log: LoggerService): Promise<any> {
         const callSpec = componentSpec?.getApiFunction(apiName);

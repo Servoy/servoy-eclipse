@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.IServoyLoginListener;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -163,6 +164,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		String authHeader = "Basic " + new String(encodedAuth);
 		httpget.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
 		httpget.addHeader(HttpHeaders.ACCEPT, "application/json");
+		httpget.addHeader("servoyVersion", ClientVersion.getBundleVersion());
+		httpget.addHeader("os", Utils.getPlatformAsString());
 
 		// execute the request
 		CloseableHttpResponse response;

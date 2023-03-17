@@ -60,7 +60,7 @@ describe('ServoyDefaultAccordion', () => {
         expect(tabs[0].nativeElement.textContent.trim()).toBe('tab1');
         expect(tabs[1].nativeElement.textContent.trim()).toBe('tab2');
         expect(tabs[2].nativeElement.textContent.trim()).toBe('tab3');
-        tabs[1].children[0].triggerEventHandler('click', { target: tabs[1].children[0].nativeElement });
+        tabs[1].triggerEventHandler('click', { target: tabs[1].nativeElement });
         tick();
         expect(component.onChangeMethodID).toHaveBeenCalled();
         expect(component.tabIndex).toBe(2);

@@ -409,15 +409,15 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
         internalState.proxyRevokerFunc = softProxyRevoker.getRevokeFunction();
         // note - if a proxy was set, we know push to server for elements is ALLOW or higher, otherwise the proxy handler would not be registered
         return {
-            set: (underlyingArray: CustomArrayValue<T>, prop: any, v: any) => {
-                if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingArray, prop, v);
+            set: (underlyingArray: CustomArrayValue<T>, prop: any, v: any, receiver: any) => {
+                if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingArray, prop, v, receiver);
 
                 // eslint-disable-next-line radix
                 const i = Number.parseInt(prop);
                 if (Number.isInteger(i)) {
                     const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
                     if (i >= underlyingArray.length) {
-                        const ret = Reflect.set(underlyingArray, prop, v);
+                        const ret = Reflect.set(underlyingArray, prop, v, receiver);
                         // TODO make this smarter to be able to send this as well as granular updates - so a javascript port of java class ArrayGranularChangeKeeper
                         internalState.markAllChanged(true, dontPushNow); // element added
                         return ret;
@@ -428,12 +428,12 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                 } else if ('length' === prop && underlyingArray.length !== v) {
                     // TODO make this smarter to be able to send this as well as granular updates - so a javascript port of java class ArrayGranularChangeKeeper
                     const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
-                    const ret = Reflect.set(underlyingArray, prop, v);
+                    const ret = Reflect.set(underlyingArray, prop, v, receiver);
                     internalState.markAllChanged(true, dontPushNow); // length of array changed
                     return ret;
                 }
 
-                return Reflect.set(underlyingArray, prop, v);
+                return Reflect.set(underlyingArray, prop, v, receiver);
             },
 
             deleteProperty: (underlyingArray: CustomArrayValue<T>, prop: any) => {

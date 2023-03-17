@@ -37,6 +37,9 @@ export class EditorSessionService implements ServiceProvider {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null);
+        this.editorContentService.executeOnlyAfterInit(() => {
+            this.initialized();
+        });
     }
 
     public getService(name: string) {
@@ -66,7 +69,11 @@ export class EditorSessionService implements ServiceProvider {
     activated() {
         return this.wsSession.callService('formeditor', 'activated')
     }
-
+    
+    initialized() {
+        void this.wsSession.callService('formeditor', 'initialized');
+    }
+    
     keyPressed(event: { ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number }) {
         void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,

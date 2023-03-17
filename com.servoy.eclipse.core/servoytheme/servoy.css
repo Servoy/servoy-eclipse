@@ -33,6 +33,10 @@
 	background-color: #FFFFFF;
 }
 
+ToolItem {
+	background-color: unset;
+}
+
 #svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, 
 #svyeditor > * > * > Label, #svyeditor > * > * > XLControl, #svyeditor > * > * > FormText, 
 #svyeditor > * > * > * > ExpandBarWidthAware, #svyeditor > * > * > * > ExpandBarWidthAware > ExpandBar  {

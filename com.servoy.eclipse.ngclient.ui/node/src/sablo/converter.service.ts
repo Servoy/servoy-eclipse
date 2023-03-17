@@ -286,6 +286,15 @@ export interface IChangeAwareValue {
     getInternalState(): ChangeAwareState;
 }
 
+export const instanceOfUIDestroyAwareValue = (obj: any): obj is IUIDestroyAwareValue =>
+    obj != null && obj.uiDestroyed instanceof Function;
+
+export interface IUIDestroyAwareValue {
+
+    uiDestroyed(): void;
+}
+
+
 export class ChangeAwareState {
     
     public static INTERNAL_STATE_MEMBER_NAME = "__internalState";

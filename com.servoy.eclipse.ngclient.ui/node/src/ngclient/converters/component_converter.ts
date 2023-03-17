@@ -95,7 +95,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
                     sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
-        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry, {
+        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry/*, {
 
                 shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.__internalState.ignoreChanges,
 
@@ -116,7 +116,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
                       // nested values towards this root prop; so nothing to do here then
                 }
 
-            } as IParentAccessForSubpropertyChanges<string>);
+            } as IParentAccessForSubpropertyChanges<string>*/);
 
         const forFoundsetPropertyName = serverSentData.forFoundset;
 
@@ -248,8 +248,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         FormService.updateComponentModelPropertiesFromServer(serverSentData.model, this.componentValue,
                         this.componentSpecification, this.converterService,
                         this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
-                        (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
-                            this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1));
+                        (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
+                            this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1) : undefined));
 
         // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
         const wholeViewportUpdateFromServer = serverSentData.model_vp;
@@ -296,8 +296,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             FormService.updateComponentModelPropertiesFromServer(nonFSLinkedModelUpdates, this.componentValue,
                             this.componentSpecification, this.converterService,
                             this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
-                            (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) =>
-                                this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1));
+                            (propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
+                                this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1) : undefined));
             done = true;
         }
 
@@ -458,11 +458,11 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             ModelInSpecificRow.prototype = this.componentValue.model;
 
             return new Proxy(new ModelInSpecificRow(), {
-                set: (row: any, prop: any, v: any) => {
+                set: (row: any, prop: any, v: any, receiver: any) => {
                     if (!this.isFoundsetLinkedProperty(prop)) {
                         delete row[prop]; // should always be undefined as it's not record linked but do make sure
-                        return Reflect.set(this.componentValue.model, prop, v); // forward non record based prop. assignments to shared model
-                    } else return Reflect.set(row, prop, v);
+                        return Reflect.set(this.componentValue.model, prop, v, this.componentValue.model); // forward non record based prop. assignments to shared model
+                    } else return Reflect.set(row, prop, v, receiver);
                 },
 
                 deleteProperty: (row: any, prop: any) => {
@@ -506,8 +506,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         applyUpdatesFunction(cellUpdatedFromServerListener);
 
         // trigger ngOnChanges for properties that had updates but the ref remained the same (as those will not automatically be triggered by root detectChanges())
-        cellsChangedButNotByRef.forEach((rowEntriesChangedButNotByRef) =>
-                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex));
+        cellsChangedButNotByRef.forEach((rowEntriesChangedButNotByRef) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
+                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex) : undefined));
     }
 
 }
