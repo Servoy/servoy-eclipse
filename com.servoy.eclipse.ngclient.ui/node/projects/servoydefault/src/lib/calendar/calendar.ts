@@ -65,7 +65,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         this.config.localization.locale = servoyService.getLocale();
         this.loadCalendarLocale(this.config.localization.locale);
         this.log = logFactory.getLogger('default-calendar');
-        this.config.localization.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocale());
+        this.config.localization.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocaleObject() ? servoyService.getLocaleObject().full : servoyService.getLocale());
         const lts = LuxonDateTime.now().setLocale(servoyService.getLocale()).toLocaleString(LuxonDateTime.DATETIME_FULL).toUpperCase();
         this.config.display.components.useTwentyfourHour = lts.indexOf('AM') >= 0 || lts.indexOf('PM') >= 0;
     }
