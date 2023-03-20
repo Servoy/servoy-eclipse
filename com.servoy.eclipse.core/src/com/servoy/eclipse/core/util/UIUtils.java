@@ -982,11 +982,11 @@ public class UIUtils
 								break;
 							}
 						}
+						if (returnValue != null) while (returnValue.getParent() instanceof Shell && returnValue.getParent().isVisible())
+						{
+							returnValue = (Shell)returnValue.getParent();
+						}
 					}
-				}
-				if (returnValue != null) while (returnValue.getParent() instanceof Shell && returnValue.getParent().isVisible())
-				{
-					returnValue = (Shell)returnValue.getParent();
 				}
 			}
 		};
