@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -674,8 +675,10 @@ public class ConfluenceGenerator
 						}
 						else
 						{
-							for (IParameterDocumentation paramDoc : fd.getArguments().values())
+							Iterator<IParameterDocumentation> iterator = fd.getArguments().values().iterator();
+							while (iterator.hasNext())
 							{
+								IParameterDocumentation paramDoc = iterator.next();
 								String description = paramDoc.getDescription();
 								description = description == null ? " ;" : description;
 								String paramType = getPublicName(paramDoc.getType());
@@ -692,6 +695,10 @@ public class ConfluenceGenerator
 									{
 										paramType = "Object";
 									}
+								}
+								if (!iterator.hasNext() && fd.isVarargs() && paramType != null)
+								{
+									paramType = paramType.replace("[]", "...");
 								}
 								start = start.e(MCR).a(NM, "tr").e(RTB).e(MCR).a(NM, "td").e(MCR).a(NM, "div").e(RTB).e(LNK).e(PG).a(CT, paramType).up(5).e(
 									MCR).a(NM, "td").e(RTB).t(paramDoc.getName()).up(2).e(MCR).a(NM, "td").e(RTB).t(description).up(4);

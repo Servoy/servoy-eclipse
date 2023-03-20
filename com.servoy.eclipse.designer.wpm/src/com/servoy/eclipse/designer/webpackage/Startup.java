@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
@@ -43,6 +44,7 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
 import com.servoy.eclipse.designer.webpackage.endpoint.InstallWebPackageHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -221,7 +223,8 @@ public class Startup implements IStartup
 								ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 								if (servoyProject == activeProject)
 								{
-									doMustUpdate[0] = ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "SPM",
+									Shell activeShell = UIUtils.getActiveShell();
+									doMustUpdate[0] = ServoyMessageDialog.openQuestion(activeShell, "SPM",
 										"The following packages are not compatible with this Servoy version and must be updated.\n\n" +
 											mustUpdatePackagesNames +
 											"\nClick Yes to update them now.");

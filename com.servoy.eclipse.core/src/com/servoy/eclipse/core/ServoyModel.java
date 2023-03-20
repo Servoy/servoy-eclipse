@@ -81,10 +81,12 @@ import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -1349,7 +1351,14 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			try
 			{
-				PlatformUI.getWorkbench().getProgressService().run(true, false, op);
+				new ProgressMonitorDialog(UIUtils.getActiveShell())
+				{
+					@Override
+					protected void setShellStyle(int newShellStyle)
+					{
+						super.setShellStyle((newShellStyle & ~SWT.APPLICATION_MODAL) | SWT.PRIMARY_MODAL);
+					}
+				}.run(true, false, op);
 			}
 			catch (InvocationTargetException e)
 			{
