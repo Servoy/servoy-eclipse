@@ -60,8 +60,8 @@ import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -134,7 +134,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
 				String stylesheetName = styleSheets.get(i);
-				if (new DesignerPreferences().showNG2Designer())
+				if (new Ng2DesignerPreferences().showNG2Designer())
 				{
 					int lastPoint = stylesheetName.lastIndexOf('.');
 					String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);

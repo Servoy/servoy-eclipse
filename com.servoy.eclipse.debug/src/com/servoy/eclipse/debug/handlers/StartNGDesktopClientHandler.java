@@ -63,8 +63,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.NGDesktopConfiguration;
 import com.servoy.eclipse.ui.preferences.NgDesktopPreferences;
 import com.servoy.j2db.persistence.Solution;
@@ -330,7 +330,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private void updateJsonFile(Solution solution)
 	{
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() +
-			((new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
+			((new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
 		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";

@@ -85,7 +85,7 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 			{
 				public void openEditor(MediaNode value)
 				{
-					EditorUtil.openMediaViewer(value.getMedia());
+					openMediaViewer(value);
 				}
 
 				public boolean canEdit(MediaNode value)
@@ -94,6 +94,14 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 				}
 			}, isReadOnly(), new MediaContentProvider.MediaListOptions(includeNone), SWT.NONE, getListSelectControlFactory(), "selectImageDialog");
 		return listSelectCellEditor;
+	}
+
+	/**
+	 * @param value
+	 */
+	protected void openMediaViewer(MediaNode value)
+	{
+		EditorUtil.openMediaViewer(value.getMedia());
 	}
 
 	protected ListSelectControlFactory getListSelectControlFactory()
