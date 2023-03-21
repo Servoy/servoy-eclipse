@@ -873,6 +873,17 @@
       </super>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.missingPropetyFromSpec"
+         name="Missing property from spec"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
+   <extension
          point="org.eclipse.dltk.core.buildParticipant">
       <buildParticipant
             class="com.servoy.eclipse.model.builder.JSFileExternalize"

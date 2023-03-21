@@ -54,7 +54,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
@@ -100,6 +103,7 @@ import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -286,6 +290,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_PROJECT_REFERENCE = _PREFIX + ".missingProjectReference";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
+	public static final String MISSING_PROPERTY_FROM_SPEC = _PREFIX + ".missingPropetyFromSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
 	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
@@ -501,6 +506,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MISSING_PROPERTY_FROM_SPECIFICATION = new Pair<String, ProblemSeverity>("missingPropetyFromSpec",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_HANDLER = new Pair<String, ProblemSeverity>("deprecatedHandler", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
 		ProblemSeverity.WARNING);
@@ -895,6 +902,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
+					deleteMarkers(module.getProject(), MISSING_PROPERTY_FROM_SPEC);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -960,6 +968,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ServoyLog.logError(e);
 					}
 				}
+			}
+			else
+			{
+				checkMissingProperties(((WebComponent)o).getJson(), spec, o, project);
 			}
 		}
 		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
@@ -1623,6 +1635,75 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private static void checkMissingProperties(JSONObject json, PropertyDescription description, IPersist o, IProject project)
+	{
+		for (String key : json.keySet())
+		{
+			if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(key) || StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(key) ||
+				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(key) ||
+				IChildWebObject.UUID_KEY.equals(key))
+			{
+				continue;
+			}
+			PropertyDescription pd = description.getProperty(key);
+			if (pd == null)
+			{
+				addMissingPropertyFromSpecMarker(o, project, key);
+			}
+			else
+			{
+				Object value = json.opt(key);
+				if (value instanceof JSONObject)
+				{
+					checkMissingProperties((JSONObject)value, pd, o, project);
+				}
+				else if (value instanceof JSONArray)
+				{
+					JSONArray arr = ((JSONArray)value);
+					for (int i = 0; i < arr.length(); i++)
+					{
+						if (arr.get(i) instanceof JSONObject)
+						{
+							checkMissingProperties((JSONObject)arr.get(i), pd, o, project);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void addMissingPropertyFromSpecMarker(IPersist persist, IProject project,
+		String propertyName)
+	{
+		Form form = (Form)persist.getAncestor(IRepository.FORMS);
+		ServoyMarker mk = MarkerMessages.MissingPropertyFromSpecification.fill(((WebComponent)persist).getName(), form.getName(),
+			propertyName);
+		IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(form), mk.getType(), mk.getText(), -1, MISSING_PROPERTY_FROM_SPECIFICATION,
+			IMarker.PRIORITY_NORMAL,
+			null, persist);
+		if (marker != null)
+		{
+			try
+			{
+				marker.setAttribute("Uuid", persist.getUUID().toString());
+				marker.setAttribute("SolutionName", project.getName());
+				marker.setAttribute("PropertyName", propertyName);
+				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertyName, persist.getClass()));
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers)
 	{
 		String serverName = null;
@@ -1766,6 +1847,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
+		deleteMarkers(project, MISSING_PROPERTY_FROM_SPEC);
 		deleteMarkers(project, PARAMETERS_MISMATCH);
 		deleteMarkers(project, NAMED_FOUNDSET_DATASOURCE);
 		try
@@ -2539,11 +2621,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (server != null) // server may have become invalid in the mean time
 				{
 					List<String> tableNames = server.getTableAndViewNames(true);
-					Iterator<String> tables = tableNames.iterator();
-					while (tables.hasNext())
+					for (String tableName : tableNames)
 					{
-						final String tableName = tables.next();
-
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
 							final ITable table = server.getTable(tableName);
