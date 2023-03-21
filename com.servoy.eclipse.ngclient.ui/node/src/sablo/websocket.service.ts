@@ -60,15 +60,6 @@ export class WebsocketService {
         }
     }
 
-    public wrapPromiseToPropagateCustomRequestInfoInternal(originalPromise: RequestInfoPromise<any>,
-                                                               spawnedPromise: RequestInfoPromise<any>): RequestInfoPromise<any> {
-        return Object.defineProperty(spawnedPromise, "requestInfo", {
-            set(value) {
-                originalPromise.requestInfo = value;
-            }
-        });        
-    }
-
     public setConnectionPathArguments(args) {
         this.connectionArguments['args'] = args;
     }
@@ -281,7 +272,7 @@ export class WebsocketSession {
      * IMPORTANT!
      * 
      * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
-     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using $websocket.wrapPromiseToPropagateCustomRequestInfoInternal().
+     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using wrapPromiseToPropagateCustomRequestInfoInternal() from websocket.service.ts.
      * 
      * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
      * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
@@ -646,4 +637,13 @@ export class SabloUtils {
     }
 
 }
+
+export const wrapPromiseToPropagateCustomRequestInfoInternal = (originalPromise: RequestInfoPromise<any>,
+    spawnedPromise: RequestInfoPromise<any>): RequestInfoPromise<any> => {
+        return Object.defineProperty(spawnedPromise, "requestInfo", {
+            set(value) {
+                originalPromise.requestInfo = value;
+            }
+        });        
+    }
 

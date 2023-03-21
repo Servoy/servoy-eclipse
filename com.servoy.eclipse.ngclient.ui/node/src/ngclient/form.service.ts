@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { WebsocketService } from '../sablo/websocket.service';
+import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { LoggerService, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
-import { ConverterService, IParentAccessForSubpropertyChanges, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
+import { ConverterService, /*IParentAccessForSubpropertyChanges, */IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
@@ -29,7 +29,7 @@ export class FormService {
 //    private ignoreProxyTriggeredChangesAsServerUpdatesAreBeingApplied = false;
     private isInDesigner = false;
 
-    constructor(private sabloService: SabloService, private converterService: ConverterService, private websocketService: WebsocketService, logFactory: LoggerFactory,
+    constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
         private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
 
         this.log = logFactory.getLogger('FormService');
@@ -364,7 +364,7 @@ export class FormService {
 
                 // call handler
                 let promise = this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false);
-                promise = this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then(
+                promise = wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then(
                         // convert return value from server to client
                         (retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
                                         undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
@@ -448,7 +448,7 @@ export class FormService {
 
         const promise = this.sabloService.callService('formService', 'callServerSideApi', { formname: formName, beanname: componentName, methodName, args });
 
-        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+        return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
                                      undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
 
