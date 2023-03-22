@@ -62,6 +62,7 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONPropertyType;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -1657,7 +1658,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addMissingPropertyFromSpecMarker(o, project, key);
 			}
-			else
+			else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
 			{
 				Object value = json.opt(key);
 				if (value instanceof JSONObject)

@@ -2450,6 +2450,7 @@ public class ServoyFormBuilder
 				markerResource.deleteMarkers(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.MEDIA_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.MISSING_SPEC, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SPEC, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.OBSOLETE_ELEMENT, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
