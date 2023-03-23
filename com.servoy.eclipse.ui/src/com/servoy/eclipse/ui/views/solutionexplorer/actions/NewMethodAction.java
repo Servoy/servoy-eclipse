@@ -336,10 +336,12 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									Object defaultValue = null;
 									if (config.has("returns"))
 									{
+										String returnTypeUnprocessed;
 										if (config.get("returns") instanceof JSONObject)
 										{
 											JSONObject returns = config.getJSONObject("returns");
-											returnType = ArgumentType.valueOf(returns.optString("type", ""));
+											returnTypeUnprocessed = returns.optString("type", "");
+											returnType = ArgumentType.valueOf(returnTypeUnprocessed);
 											returnTypeDescription = returns.optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS,
 												returns.optString("description", ""));
 											if (returns.has("default"))
@@ -350,13 +352,14 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										}
 										else
 										{
-											returnType = ArgumentType.valueOf(config.getString("returns"));
+											returnTypeUnprocessed = config.getString("returns");
+											returnType = ArgumentType.valueOf(returnTypeUnprocessed);
 										}
 										if (!hasDefaultValue)
 										{
 											IPropertyType< ? > pt = null;
-											if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
-												(pt = TypesRegistry.getType(returnType.getName())) != null)
+											if (returnTypeUnprocessed != null && !returnTypeUnprocessed.equals("") && defaultMethodCode.equals("") &&
+												(pt = TypesRegistry.getType(returnTypeUnprocessed)) != null)
 											{
 												hasDefaultValue = true;
 												defaultValue = pt.defaultValue(def);

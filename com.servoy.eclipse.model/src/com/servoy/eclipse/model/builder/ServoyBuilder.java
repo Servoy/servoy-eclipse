@@ -1555,37 +1555,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static void checkDeprecatedPropertyUsage(IPersist persist, IResource markerResource, IProject project)
 	{
-		if (persist instanceof Solution)
-		{
-			Solution solution = (Solution)persist;
-
-			// loginForm is deprecated, use loginSolution (not needed for WebClient)
-			if (solution.getLoginFormID() > 0)
-			{
-				try
-				{
-					if (solution.getLoginSolutionName() != null)
-					{
-						// login form will be ignored
-						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
-					}
-					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
-						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
-					{
-						// loginForm is deprecated
-						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		}
+//		if (persist instanceof Solution)
+//		{
+//			Solution solution = (Solution)persist;
+//
+//			// loginForm is deprecated, use loginSolution (not needed for WebClient)
+//			if (solution.getLoginFormID() > 0)
+//			{
+//				try
+//				{
+//					if (solution.getLoginSolutionName() != null)
+//					{
+//						// login form will be ignored
+//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+//							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
+//					}
+//					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
+//						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
+//					{
+//						// loginForm is deprecated
+//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+//							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
+//					}
+//				}
+//				catch (Exception e)
+//				{
+//					ServoyLog.logError(e);
+//				}
+//			}
+//		}
 
 		if (persist instanceof Form || persist instanceof Portal)
 		{

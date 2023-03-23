@@ -135,7 +135,7 @@ export class ViewportService {
 
                 // clear notifiers for any old smart values
                 for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
-                    this.updateChangeAwareNotifiersForRow(i, viewPort, internalState, simpleRowValue, propertyContextCreator, true);
+                    this.updateChangeAwareNotifiersForRow(j, viewPort, internalState, simpleRowValue, propertyContextCreator, true);
                 }
 
                 const convertedRowChangeData = this.expandTypeInfoAndApplyConversions(rowUpdate._T, defaultColumnTypes,
