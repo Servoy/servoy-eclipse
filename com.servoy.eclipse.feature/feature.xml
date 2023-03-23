@@ -664,4 +664,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.7.36"
          unpack="false"/>
 
+   <plugin
+         id="com.servoy.eclipse.cloud"
+         download-size="0"
+         install-size="0"
+         version="2023.6.0.3880_rc"
+         unpack="false"/>
+
 </feature>

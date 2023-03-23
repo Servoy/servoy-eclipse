@@ -85,7 +85,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.nebula.widgets.nattable.core,
  org.eclipse.nebula.widgets.nattable.extension.nebula,
  org.eclipse.e4.ui.css.swt,
- org.eclipse.nebula.widgets.nattable.extension.e4
+ org.eclipse.nebula.widgets.nattable.extension.e4,
+ com.servoy.eclipse.cloud
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

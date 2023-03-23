@@ -72,7 +72,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public static final String SERVOY_LOGIN_USERNAME = "USERNAME";
 	public static final String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	public static final String SERVOY_LOGIN_TOKEN = "TOKEN";
-	public static final String CROWD_URL = "https://analytics-prod.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
+//	public static final String CROWD_URL = "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer_auth/getAuthToken";
+	public static final String CROWD_URL = "https://middleware-prod.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer_auth/getAuthToken";
 
 	private String dlgUsername = "";
 	private String dlgPassword = "";
