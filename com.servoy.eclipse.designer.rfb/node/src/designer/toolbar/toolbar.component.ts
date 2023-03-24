@@ -516,7 +516,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
-                this.editorSession.setSelection([]);
             }
         );
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
@@ -1168,6 +1167,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     applyHideInherited(hideInherited: boolean) {
         this.editorContentService.executeOnlyAfterInit(() => {
+            
+            this.updateSelection(hideInherited); //this is removing selection for hidden element
+
             const elements = this.editorContentService.querySelectorAllInContent('.inherited_element').concat(Array.from(this.editorContentService.querySelectorAll('.inherited_element')));
             elements.forEach((node) => {
                 if (hideInherited) {
@@ -1175,13 +1177,59 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 else {
                     this.renderer.setStyle(node, 'visibility', 'visible');
+                    //if there is only one eleent in the current selection we must trigger a redraw decorators
+                    const selection = this.editorSession.getSelection();
+                    if (selection.length === 1) {
+                        this.editorSession.updateSelection(selection, true);
+                    }
                 }
             });
+            
+            this.updateSameSizeIndicator(hideInherited);
         });
     }
+
+    updateSameSizeIndicator(hideInherited: boolean) {
+        if (hideInherited) {
+            const initialSelection = this.editorSession.getSelection(); //note: in this context the hidden elements are no longer returned
+            const elements = this.editorContentService.getAllContentElements(); //return all elements having an svy-id
+            const filteredSvyIds: string[] = [];
     
-    updateSelection(){
-		setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+            elements.forEach((element) => {
+                let wrapper = element.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                    wrapper = wrapper.parentElement;
+                }
+    
+                if (!(wrapper && wrapper.classList.contains('inherited_element'))) {
+                    filteredSvyIds.push(element.getAttribute('svy-id'));
+                }
+            });
+            this.editorSession.updateSelection(filteredSvyIds, true); //this is changing also the initial selection so we need to restore
+            this.editorSession.setSelection(initialSelection);
+        }
+    }
+
+    updateSelection(hideInherited?: boolean){
+        if (hideInherited === undefined) {
+           setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+        } else if (hideInherited) {
+            const selection = this.editorSession.getSelection();
+            const filteredSelection: string[] = [];
+        
+            selection.forEach((selectionId) => {
+              let wrapper = this.editorContentService.getContentElement(selectionId);
+        
+              while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                wrapper = wrapper.parentElement;
+              }
+        
+              if (!(wrapper && wrapper.classList.contains('inherited_element'))) {
+                filteredSelection.push(selectionId);
+              }
+            });
+            this.editorSession.setSelection(filteredSelection);
+          }
 	}
 
 }

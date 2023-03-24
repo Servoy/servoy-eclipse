@@ -166,7 +166,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 return;  //already selected
             }
             else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
-                this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+                //check for hidden
+                let wrapper = found.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                    wrapper = wrapper.parentElement;
+                }
+                if (!wrapper || wrapper.style.visibility !== 'hidden') {
+                    this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+                }
             }
         }
         else {
@@ -204,31 +211,35 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             const newNodes = new Array<SelectionNode>();
             const newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
-                const position = node.getBoundingClientRect();
-                this.designerUtilsService.adjustElementRect(node, position);
-                const iframeLeft = this.editorContentService.getLeftPositionIframe();
-                const iframeTop = this.editorContentService.getTopPositionIframe();
-                const rect1 =  new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY , this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY  - this.mousedownpoint.y))
-                const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height );
-                if ( this.rectanglesIntersect(rect1, rect2)) {
-                    const layoutName = node.getAttribute('svy-layoutname');
-                    const newNode: SelectionNode = {
-                        style: {
-                            height: position.height + 'px',
-                            width: position.width + 'px',
-                            top: position.top + this.topAdjust + 'px',
-                            left: position.left + this.leftAdjust + 'px',
-                            display: 'block'
-                        } as CSSStyleDeclaration,
-                        svyid: node.getAttribute('svy-id'),
-                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
-                        maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                        containerName: layoutName,
-                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
-                    };
-                    newNodes.push(newNode);
-                    newSelection.push(node.getAttribute('svy-id'))
+                let wrapper = node.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
+                if (!(wrapper && wrapper.style.visibility === 'hidden')) {
+                    const position = node.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(node, position);
+                    const iframeLeft = this.editorContentService.getLeftPositionIframe();
+                    const iframeTop = this.editorContentService.getTopPositionIframe();
+                    const rect1 =  new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY , this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY  - this.mousedownpoint.y))
+                    const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height );
+                    if ( this.rectanglesIntersect(rect1, rect2)) {
+                        const layoutName = node.getAttribute('svy-layoutname');
+                        const newNode: SelectionNode = {
+                            style: {
+                                height: position.height + 'px',
+                                width: position.width + 'px',
+                                top: position.top + this.topAdjust + 'px',
+                                left: position.left + this.leftAdjust + 'px',
+                                display: 'block'
+                            } as CSSStyleDeclaration,
+                            svyid: node.getAttribute('svy-id'),
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
+                            maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                            containerName: layoutName,
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                        };
+                        newNodes.push(newNode);
+                        newSelection.push(node.getAttribute('svy-id'))
+                    }
                 }
             });
             this.nodes = newNodes;
@@ -246,7 +257,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 this.designerUtilsService.adjustElementRect(node, position);
                 let addToSelection = false;
                 if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
-                    addToSelection = true;
+                    let wrapper = node.parentElement;
+                    while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
+                    addToSelection = wrapper && wrapper.style.visibility === 'hidden' ? false : true;
+                    
                 }
                 else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
                     const computedStyle = window.getComputedStyle(node, ':before');
