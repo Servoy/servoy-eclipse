@@ -61,6 +61,27 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
             this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null, 1);
         }
         super.svyOnChanges(changes);
+        if (changes) {
+            for (const property of Object.keys(changes)) {
+                const change = changes[property];
+                switch (property) {
+                    case 'styleClass':
+                        if (change.previousValue) {
+                            const array = change.previousValue.trim().split(' ');
+                            array.filter((elementStyleClass: string) => elementStyleClass !== '').forEach(
+                                (elementStyleClass: string) => this.renderer.removeClass(this.getNativeElement(), elementStyleClass)
+                            );
+                        }
+                        if (change.currentValue) {
+                            const array = change.currentValue.trim().split(' ');
+                            array.filter((elementStyleClass: string) => elementStyleClass !== '').forEach(
+                                (elementStyleClass: string) => this.renderer.addClass(this.getNativeElement(), elementStyleClass)
+                            );
+                        }
+                    break;
+                }
+            }
+        }
     }
 
     onChange( location ) {
