@@ -145,7 +145,7 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
 
     uiDestroyed(): void{
         this.sabloDeferHelper.cancelAll(this.getInternalState());
-        this.internalState.realToDisplayCache = new Map<string, Observable<any>>();
+        this.internalState.realToDisplayCache.clear();
     }
 
     filterList(filterString: string): Observable<any> {
@@ -184,7 +184,7 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
                     return val;
                 }).catch(() => {
                      delete this.internalState.realToDisplayCache[key];
-                });;
+                });
 
                 this.internalState.notifyChangeListener();
                 promiseOrValue = this.internalState.realToDisplayCache[key];

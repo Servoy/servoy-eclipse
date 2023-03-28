@@ -456,6 +456,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
     uiDestroyed(): void{
         this.__internalState.sabloDeferHelper.cancelAll(this.getInternalState());
+        delete this.__internalState.selectionUpdateDefer;
     }
 }
 
