@@ -182,7 +182,9 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
                 this.internalState.realToDisplayCache[key] = this.internalState.deferred[this.internalState.diplayValueReq.id].defer.promise.then((val) => {
                     this.internalState.realToDisplayCache[key] = val;
                     return val;
-                });
+                }).catch(() => {
+                     delete this.internalState.realToDisplayCache[key];
+                });;
 
                 this.internalState.notifyChangeListener();
                 promiseOrValue = this.internalState.realToDisplayCache[key];
