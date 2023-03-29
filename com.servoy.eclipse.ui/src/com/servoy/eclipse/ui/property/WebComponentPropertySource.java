@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.wicket.util.string.Strings;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -181,6 +183,12 @@ public class WebComponentPropertySource extends PDPropertySource
 	@Override
 	public String toString()
 	{
-		return getPropertyDescription().getDisplayName() + " - " + persistContext.getPersist();
+		String packageName = getPropertyDescription().getPackageName();
+		if (WebComponentSpecProvider.isLoaded())
+		{
+			String packageDisplayName = WebComponentSpecProvider.getSpecProviderState().getPackageDisplayName(packageName);
+			if (!Strings.isEmpty(packageDisplayName)) packageName = packageDisplayName;
+		}
+		return getPropertyDescription().getDisplayName() + " (" + packageName + ")";
 	}
 }
