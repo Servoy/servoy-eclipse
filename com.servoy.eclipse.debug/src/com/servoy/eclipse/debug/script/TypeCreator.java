@@ -2329,7 +2329,7 @@ public class TypeCreator extends TypeCache
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
-						docBuilder.append(toolTip);
+						docBuilder.append(toolTip.replace("\r\n", "<br/>").replace("\n", "<br/>"));
 						docBuilder.append("<br/>");
 					}
 					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, clientType);
