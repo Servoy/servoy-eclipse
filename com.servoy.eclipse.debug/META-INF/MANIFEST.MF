@@ -46,5 +46,6 @@ Export-Package: com.servoy.eclipse.debug,
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
+ org.apache.commons.text,
  org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.debug
