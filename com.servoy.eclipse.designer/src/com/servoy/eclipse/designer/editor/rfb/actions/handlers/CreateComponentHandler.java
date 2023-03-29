@@ -570,12 +570,7 @@ public class CreateComponentHandler implements IServerService
 					if (spec != null)
 					{
 						String compName = null;
-						String componentName = name;
-						int index = componentName.indexOf("-");
-						if (index != -1)
-						{
-							componentName = componentName.substring(index + 1);
-						}
+						String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 						componentName = componentName.replaceAll("-", "_");
 						compName = componentName + "_" + id.incrementAndGet();
 						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
@@ -961,12 +956,7 @@ public class CreateComponentHandler implements IServerService
 		if (spec != null)
 		{
 			String compName = null;
-			String componentName = componentSpecName;
-			int index = componentName.indexOf("-");
-			if (index != -1)
-			{
-				componentName = componentName.substring(index + 1);
-			}
+			String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 			componentName = componentName.replaceAll("-", "_");
 			compName = componentName + "_" + id.incrementAndGet();
 			while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
