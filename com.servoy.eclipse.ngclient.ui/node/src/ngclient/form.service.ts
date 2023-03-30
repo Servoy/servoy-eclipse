@@ -87,7 +87,7 @@ export class FormService {
                         this.formComponentCache.set(componentCall.form, new Deferred<any>());
                     }
                     const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
-                    deferred.promise.then(callItNow(false));
+                    deferred.promise.then(() => callItNow(false));
                 }
             });
         });
