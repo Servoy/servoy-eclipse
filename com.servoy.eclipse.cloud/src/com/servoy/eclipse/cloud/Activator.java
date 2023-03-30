@@ -21,7 +21,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.egit.core.credentials.UserPasswordCredentials;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.viewers.ArrayContentProvider;
