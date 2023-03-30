@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IProject;
