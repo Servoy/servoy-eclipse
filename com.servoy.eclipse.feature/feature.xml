@@ -513,6 +513,41 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
+         id="org.hibernate.orm.core"
+         download-size="0"
+         install-size="0"
+         version="5.6.15.Servoy2"
+         unpack="false"/>
+
+   <plugin
+         id="hibernate-commons-annotations"
+         download-size="0"
+         install-size="0"
+         version="5.1.2.Final"
+         unpack="false"/>
+
+   <plugin
+         id="jaxb-api"
+         download-size="0"
+         install-size="0"
+         version="2.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.classmate"
+         download-size="0"
+         install-size="0"
+         version="1.5.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.jandex"
+         download-size="0"
+         install-size="0"
+         version="2.4.3.Final"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
