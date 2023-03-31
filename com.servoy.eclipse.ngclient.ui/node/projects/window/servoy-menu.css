@@ -54,3 +54,13 @@
 .svy-popup-menu .dropdown-item{
     cursor: pointer;
 }
+
+.dropdown-item:has(.dropdown-divider),
+.dropdown-item:has(.dropdown-divider):hover {
+    cursor: default;
+    background-color: transparent;;
+}
+
+.dropdown-menu .dropdown-item > i { 
+    margin-right: 5px;
+}
