@@ -234,6 +234,7 @@ import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValuelistConfigPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
@@ -1432,6 +1433,32 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				});
 			}
+			else if (ValuelistConfigPropertyType.TYPE_NAME.equals(propertyType.getName()))
+			{
+				resultingPropertyDescriptor = new PropertyController<JSONObject, Object>(id, displayName, new ComplexPropertyConverter<JSONObject>()
+				{
+					@Override
+					public Object convertProperty(Object property, JSONObject value)
+					{
+						return new ComplexProperty<JSONObject>(value)
+						{
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								ValuelistConfigPropertySource valuelistConfigPropertySource = new ValuelistConfigPropertySource(this);
+								valuelistConfigPropertySource.setReadonly(readOnly);
+								return valuelistConfigPropertySource;
+							}
+						};
+					}
+				}, ValuelistConfigPropertySource.getLabelProvider(), new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return ValuelistConfigPropertySource.createPropertyEditor(parent);
+					}
+				});
+			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
 				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
@@ -1943,7 +1970,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// responsive forms or ng-client solution: use multi-select for style class
 				multiSelect = true;
 			}
-
+			multiSelect = false;
 			if (multiSelect)
 			{
 				// ng client, style at solutionlevel
