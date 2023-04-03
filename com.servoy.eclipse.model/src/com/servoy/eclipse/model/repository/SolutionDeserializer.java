@@ -74,7 +74,7 @@ import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
 import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
@@ -1023,7 +1023,6 @@ public class SolutionDeserializer
 		try
 		{
 			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
-			JavaScriptParser parser = new JavaScriptParser();
 			final List<IProblem> problems = new ArrayList<IProblem>();
 			IProblemReporter reporter = new IProblemReporter()
 			{
@@ -1040,7 +1039,7 @@ public class SolutionDeserializer
 			Script script = null;
 			try
 			{
-				script = parser.parse(fileContent, reporter);
+				script = JavaScriptParserUtil.parse(fileContent, reporter);
 			}
 			catch (Throwable t)
 			{
