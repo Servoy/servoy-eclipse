@@ -21,17 +21,6 @@
             <unit id="org.antlr.runtime" version="3.0.0.v200803061811"/>
             <unit id="org.antlr.runtime.source" version="3.0.0.v200803061811"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2023.03/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202302131538"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202302231624"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.10"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.10"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="95.0.10"/>
-        </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/nattable/releases/2.0.3/repository/"/>
 		    <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.0.3.202208090440"/>
@@ -103,6 +92,17 @@
 		    <unit id="tus-java-server" version="2.0.0.s2"/>
 		    <unit id="xstream" version="1.4.20"/>
 	    </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/95"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.10"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.10"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="95.0.10"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2023.06/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202304031322"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202304031354"/>
+        </location>
     </locations>
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>
