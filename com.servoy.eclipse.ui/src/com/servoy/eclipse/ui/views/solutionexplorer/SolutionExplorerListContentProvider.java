@@ -2752,46 +2752,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String tooltip = null;
 			Class< ? > returnType = null;
-			String returnDescription = null;
 			String[] paramNames = null;
 			boolean namesOnly = false;
 			if (scriptObject != null)
 			{
-				String description = "";
 				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes instanceof Class[])
 				{
 					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
+					tooltip = ((XMLScriptObjectAdapter)scriptObject).getExtendedTooltip(name, (Class[])parameterTypes, csp, resolver);
 					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, (Class[])parameterTypes);
-					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
-					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
-					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					String sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes);
-					if (sample != null)
-					{
-						tooltip += "\n<i>" + Text.processTags(HtmlUtils.escapeMarkup(sample).toString(), resolver).toString() + "</i>";
-					}
-					if (parameters != null)
-					{
-						paramNames = new String[parameters.length];
-						tooltip += "\n";
-						for (int i = 0; i < parameters.length; i++)
-						{
-							paramNames[i] = parameters[i].getName();
-							tooltip = tooltip + "\n <b>@param</b> {" + parameters[i].getType() + "} " + parameters[i].getName() + " " +
-								parameters[i].getDescription();
-						}
-					}
-					if (returnType != null)
-					{
-						tooltip = tooltip + "\n <b>@return</b> {" + getReturnTypeString(returnType) + "} ";
-						if (returnDescription != null) tooltip += returnDescription;
-					}
+					paramNames = ((XMLScriptObjectAdapter)scriptObject).getParameterNames(name, (Class[])parameterTypes);
 				}
 				else
 				{
 					namesOnly = true;
-					description = scriptObject.getToolTip(name);
+					String description = scriptObject.getToolTip(name);
 					paramNames = scriptObject.getParameterNames(name);
 					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
@@ -2804,8 +2779,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			StringBuilder tmp = new StringBuilder("<b>" + (returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
-				getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
+			StringBuilder tmp = new StringBuilder(
+				"<b>" + (returnTypeString != null ? returnTypeString : XMLScriptObjectAdapter.getReturnTypeString(returnType)) + " " + name + "(" +
+					getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
 			if ("".equals(tooltip))
 			{
 				tooltip = tmp.toString();
@@ -3119,7 +3095,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Object bp = ijm.getField(name, false);
 				if (bp instanceof JavaMembers.BeanProperty)
 				{
-					tmp = "<b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
+					tmp = "<b>" + XMLScriptObjectAdapter.getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
 				}
 				else if (bp instanceof Field)
 				{
@@ -3220,19 +3196,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return "<pre><b>" + c.getTypeAsString() + " " + c.getDataProviderID() + "</b></pre>";
 		}
 
-	}
-
-	public static String getReturnTypeString(Class returnType)
-	{
-		if (returnType == null) return "*unknown*";
-		StringBuilder sb = new StringBuilder();
-		while (returnType.isArray())
-		{
-			sb.append("[]");
-			returnType = returnType.getComponentType();
-		}
-		sb.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));
-		return sb.toString();
 	}
 
 }

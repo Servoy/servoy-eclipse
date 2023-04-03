@@ -43,6 +43,17 @@ body {
     opacity: unset;
 }
 
+.mat-mdc-select-value,
+.mat-mdc-option.mdc-list-item  {
+    font-family: initiali;
+    font-size: initial;
+}
+
+.mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+    padding-bottom: 0px;
+    min-height: unset;
+}
+
 .mat-mdc-tab-group .mat-mdc-ink-bar {
     background-color: #e4844a !important;
 }

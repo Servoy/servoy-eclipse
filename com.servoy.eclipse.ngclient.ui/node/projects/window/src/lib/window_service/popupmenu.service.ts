@@ -1,14 +1,15 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, SecurityContext } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
 import { createPopper } from '@popperjs/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Injectable()
 export class PopupMenuService {
 
     menu: HTMLElement = null;
 
-    constructor(private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
     }
 
@@ -131,7 +132,7 @@ export class PopupMenuService {
                     link.style.color = item.foregroundColor;
                 }
                 const span = this.doc.createElement('span');
-                span.textContent = item.text ? item.text : 'no text';
+                span.innerHTML= item.text ? this.domSanitizer.sanitize(SecurityContext.HTML, item.text) : 'no text';
                 link.appendChild(span);
 
                 if (item.items) {

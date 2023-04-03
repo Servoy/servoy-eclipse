@@ -68,8 +68,10 @@ tr.wpm-package-description > td > mat-card-content {
     -ms-flex-pack: center;
     justify-content: center;
     vertical-align: baseline;
-    line-height: 48px;
+    line-height: 32px;
 }
+
+.mat-mdc-form-field-infix
 
 .table-package td > div.align-right {
     -webkit-justify-content: flex-end;
