@@ -500,12 +500,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             const cache = row._cache.get(cm.name);
             if (cache) return cache;
         }
-        // special case for svyAttriutes and testing mode.
-        if (item?.model?.servoyAttributes['data-svy-name']) {
+
+        if(item?.model?.servoyAttributes) {
             if (!cm.model.servoyAttributes) {
                 cm.model.servoyAttributes = {};
             }
-            cm.model.servoyAttributes['data-svy-name'] = item?.model?.servoyAttributes['data-svy-name'];
+            cm.model.servoyAttributes = Object.assign(cm.model.servoyAttributes, item.model.servoyAttributes);
         }
 
         if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
