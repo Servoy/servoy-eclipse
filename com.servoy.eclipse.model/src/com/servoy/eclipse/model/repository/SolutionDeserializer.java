@@ -253,7 +253,7 @@ public class SolutionDeserializer
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
-		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark, false, false);
+		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark, false, false, false);
 
 		if (!useFilesForDirtyMark)
 		{
@@ -282,7 +282,7 @@ public class SolutionDeserializer
 	 * @throws RepositoryException
 	 */
 	public List<File> updateSolution(File solutionDir, final Solution solution, List<File> changedFiles, List<IPersist> strayCats, boolean readAll,
-		boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting) throws RepositoryException
+		boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting, boolean doCleanup) throws RepositoryException
 	{
 		if (solution == null) return null;
 		try
@@ -306,7 +306,7 @@ public class SolutionDeserializer
 			}
 			Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
 			readObjectFilesFromSolutionDir(solutionDir, solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark,
-				shouldReset, testExisting);
+				shouldReset, testExisting, doCleanup);
 			readMediasFromSolutionDir(solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark, shouldReset,
 				testExisting);
 			completePersist(persist_json_map, useFilesForDirtyMark);
@@ -352,7 +352,8 @@ public class SolutionDeserializer
 	}
 
 	private void readObjectFilesFromSolutionDir(File solutionDir, File dir, ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
-		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting)
+		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset, boolean testExisting,
+		boolean doCleanup)
 		throws RepositoryException, JSONException
 	{
 		if (dir != null && dir.exists())
@@ -404,7 +405,7 @@ public class SolutionDeserializer
 							}
 							else if (file.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 							{
-								List<JSONObject> scriptObjects = parseJSFile(f, changed);
+								List<JSONObject> scriptObjects = parseJSFile(f, changed, doCleanup);
 								if (dir.equals(solutionDir))
 								{
 									// the scope name for global methods/variables is based on the filename
@@ -586,7 +587,7 @@ public class SolutionDeserializer
 				{
 					ISupportChilds newParent = (subdirPersist instanceof ISupportChilds) ? (ISupportChilds)subdirPersist : parent;
 					readObjectFilesFromSolutionDir(solutionDir, subdir, newParent, persist_json_map, changedFiles, strayCats, readAll, useFilesForDirtyMark,
-						shouldReset, testExisting);
+						shouldReset, testExisting, doCleanup);
 				}
 			}
 		}
@@ -992,7 +993,7 @@ public class SolutionDeserializer
 		}
 	}
 
-	private List<JSONObject> parseJSFile(final File file, boolean markAsChanged) throws JSONException
+	private List<JSONObject> parseJSFile(final File file, boolean markAsChanged, boolean doCleanup) throws JSONException
 	{
 		String fileContent = jsContent;
 		if (jsFile != file)
@@ -1336,7 +1337,8 @@ public class SolutionDeserializer
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-							if (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+							if (doCleanup && (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))))
+								json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
 						}
 						else
 						{
@@ -1363,7 +1365,7 @@ public class SolutionDeserializer
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
 						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-						if (current == null || (!current.startsWith("{Array") && !current.startsWith("Array") && !current.endsWith("[]")))
+						if (doCleanup && (current == null || (!current.startsWith("{Array") && !current.startsWith("Array")) && !current.endsWith("[]")))
 						{
 							List<Expression> items = ((ArrayInitializer)code).getItems();
 							if (items != null && items.size() > 0)
@@ -1396,7 +1398,7 @@ public class SolutionDeserializer
 					else if (code instanceof BooleanLiteral)
 					{
 						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
+						if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
 					}
 					else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
 					{
@@ -1405,12 +1407,12 @@ public class SolutionDeserializer
 						if (le instanceof StringLiteral || re instanceof StringLiteral)
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
+							if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
 						}
 						else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
 						{
 							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
+							if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
 						}
 					}
 					else
