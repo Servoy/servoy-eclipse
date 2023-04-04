@@ -96,6 +96,9 @@
                 "max": {
                     "type": "number"
                 },
+                "config": {
+                    "type": "string"
+                },
                 "lazyLoading": {
                     "type": "boolean"
                 },
@@ -405,6 +408,9 @@
                                 },
                                 "max": {
                                     "type": "number"
+                                },
+                                "config": {
+                                    "type": "string"
                                 },
                                 "lazyLoading": {
                                     "type": "boolean"
@@ -828,6 +834,9 @@
                                         },
                                         "max": {
                                             "type": "number"
+                                        },
+                                        "config": {
+                                            "type": "string"
                                         },
                                         "lazyLoading": {
                                             "type": "boolean"
