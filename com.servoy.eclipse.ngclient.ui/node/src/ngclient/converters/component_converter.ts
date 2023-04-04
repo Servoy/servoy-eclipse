@@ -95,28 +95,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
                     sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
-        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry/*, {
-
-                shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => this.__internalState.ignoreChanges,
-
-                changeNeedsToBePushedToServer: (key: string, oldValue: any, doNotPushNow?: boolean) => {
-                    // this will only be used currently by the child's smart properties (non foundset-linked) to push changes, not
-                    // for root property change-by reference, because a component doesn't have direct
-                    // access to it's model, just to individual properties via @Input and @Output, and when
-                    // it does change an @Input by reference it has to call .emit(...) on the corresponding output
-                    // anyway in order to update the property in the model - so we can't use a Proxy () on the model to
-                    // automatically detect and send these changes; we rely in emits for that that updates the model and calls that calls FormComponent.datachange() anyway
-
-                    if (!doNotPushNow) {
-                        // rowId is undefined because this is a non-fs-linked property (it's from this.model not this.modelViewport); see comment
-                        // from changeListenerGeneratorForSmartNonFSLinkedProps as well about rowId
-                        this.__internalState.sendChanges(key, this.model[key], oldValue, undefined, false);
-                                             // dataPush not applyDP currently so we give false here
-                    } // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
-                      // nested values towards this root prop; so nothing to do here then
-                }
-
-            } as IParentAccessForSubpropertyChanges<string>*/);
+        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry);
 
         const forFoundsetPropertyName = serverSentData.forFoundset;
 
