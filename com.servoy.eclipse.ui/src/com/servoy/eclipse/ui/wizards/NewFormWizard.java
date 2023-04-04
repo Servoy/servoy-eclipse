@@ -968,16 +968,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 			ParallelGroup parallelGroupForHorizontalValues = groupLayout.createParallelGroup(GroupLayout.LEADING)
 				.add(typeFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
 				.add(projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
-				.add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
 				.add(workingSetNameCombo.getCombo(), GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE);
-
+			if (showTemplate())
+			{
+				parallelGroupForHorizontalValues.add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE);
+			}
 			if (!isNGSolution)
 			{
 				parallelGroupForHorizontalLabels.add(styleLabel);
 				parallelGroupForHorizontalValues.add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE);
 			}
 
-			parallelGroupForHorizontalLabels.add(templateLabel).add(workingSetLabel).add(typeFormLabel);
+			parallelGroupForHorizontalLabels.add(workingSetLabel).add(typeFormLabel);
+			if (showTemplate())
+			{
+				parallelGroupForHorizontalLabels.add(templateLabel);
+			}
 			parallelGroupForHorizontalValues.add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
 				.add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
 				.add(groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
@@ -1003,9 +1009,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(styleLabel));
 			}
 
+			if (showTemplate())
+			{
+				sequentialVerticalGroup.addPreferredGap(LayoutStyle.RELATED)
+					.add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(templateLabel));
+			}
 			sequentialVerticalGroup
-				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(templateLabel))
 				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(workingSetNameCombo.getCombo(),
@@ -1152,6 +1162,19 @@ public class NewFormWizard extends Wizard implements INewWizard
 				return null;
 			}
 			return super.getNextPage();
+		}
+
+		public boolean showTemplate()
+		{
+			List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+			for (IRootObject template : templates)
+			{
+				if (template instanceof Template && new ServoyJSONObject(((Template)template).getContent(), false).has(Template.PROP_FORM))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public void fillTemplateCombo(String templateName)
