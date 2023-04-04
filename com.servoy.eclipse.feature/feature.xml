@@ -520,13 +520,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="hibernate-commons-annotations"
-         download-size="0"
-         install-size="0"
-         version="5.1.2.Final"
-         unpack="false"/>
-
-   <plugin
          id="jaxb-api"
          download-size="0"
          install-size="0"
@@ -704,6 +697,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="2023.6.0.3880_rc"
+         unpack="false"/>
+
+   <plugin
+         id="org.hibernate.common.hibernate-commons-annotations"
+         download-size="0"
+         install-size="0"
+         version="5.1.2.Final"
          unpack="false"/>
 
 </feature>
