@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, Host
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService } from '@servoy/public';
+import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 
@@ -16,11 +16,12 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     @ViewChild('instance', { static: true }) instance: NgbTypeahead;
     focus$ = new Subject<string>();
     click$ = new Subject<string>();
-    
+
     currentValue: any;
+    showPopupOnFocusGain: boolean;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
+        formattingService: FormattingService, @Inject(DOCUMENT) doc: Document,protected servoyService: ServoyPublicService) {
         super(renderer, cdRef, formattingService, doc);
     }
 
@@ -39,6 +40,10 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         });
         // add custom class to the popup, needed by ng-grids (ag-grid) so it can be used in form editors (popups)
         this.instance.popupClass = 'ag-custom-component-popup';
+        this.showPopupOnFocusGain = this.servoyApi.getClientProperty('TypeAhead.showPopupOnFocusGain');
+        if (this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined){
+           this.showPopupOnFocusGain = this.servoyService.getUIProperty('TypeAhead.showPopupOnFocusGain');
+        }
     }
 
     onFocus = () => {
@@ -47,6 +52,17 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
             popup.style.width = this.getFocusElement().clientWidth + 'px';
         }
     };
+
+    focusGained(){
+        if(this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) {
+            this.focus$.next('');
+        }
+    }
+    onClick(){
+        if(this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) {
+            this.click$.next('');
+        }
+    }
 
     scroll() {
         if (!this.instance.isPopupOpen()) {
