@@ -59,7 +59,7 @@ public class Activator extends Plugin
 		String targetFolder = getSystemOrEvironmentProperty("servoy.ng2.target.folder");
 		if (targetFolder != null)
 		{
-			this.mainTargetFolder = new File(targetFolder);
+			this.mainTargetFolder = new File(targetFolder).getCanonicalFile();
 		}
 		else
 		{
