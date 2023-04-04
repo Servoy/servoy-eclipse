@@ -2706,7 +2706,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			final IContainer workspace = project.getParent();
 
 			SolutionDeserializer sd = new SolutionDeserializer(ApplicationServerRegistry.get().getDeveloperRepository(), servoyProject);
-			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd);
+			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd, false);
 			// Regenerate script files for parents that have changed script elements.
 			if (changedScriptElements.size() > 0)
 			{
@@ -2829,12 +2829,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 * @throws RepositoryException
 	 */
 	public Set<IPersist> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
-		SolutionDeserializer sd) throws RepositoryException
+		SolutionDeserializer sd, boolean doCleanup) throws RepositoryException
 	{
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
-		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true);
+		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true, doCleanup);
 
 		// see if modules were changed
 		String newModules = solution.getModulesNames();
