@@ -3,7 +3,6 @@ import { ConverterService } from '../sablo/converter.service';
 import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
 import { LoggerFactory, ServoyPublicService, SessionStorageService, IDeferred, WindowRefService } from '@servoy/public';
-import { ServicesService } from '../sablo/services.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ServoyPublicServiceImpl } from '../ngclient/services/servoy_public_impl.service';
@@ -14,7 +13,7 @@ import { ServoyService } from '../ngclient/servoy.service';
 import { I18NProvider } from '../ngclient/services/i18n_provider.service';
 import { SvyUtilsService } from '../ngclient/utils.service';
 import { SabloService } from '../sablo/sablo.service';
-
+import { PopupFormService } from '../ngclient/services/popupform.service';
 
 class TestDeferred implements IDeferred<any> {
   promise: Promise<any>;
@@ -77,7 +76,7 @@ export class TestSabloService extends SabloService {
     { provide: ApplicationService, useValue: {} },
     { provide: ServoyService, useValue: {} },
     ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
-    LocaleService, I18NProvider, SvyUtilsService
+    LocaleService, I18NProvider, SvyUtilsService,PopupFormService
              ],
   schemas: [
 
