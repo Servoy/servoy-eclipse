@@ -39,7 +39,7 @@ export class FormattingService {
      */
     public format(data: any, format: Format, useEditFormat: boolean): string {
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
-            if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
+            if (!format && (typeof data === 'number') && !isNaN(data)) {
                 // make sure is always returned with correct type, otherwise compare will not work well
                 return data.toString();
             }
