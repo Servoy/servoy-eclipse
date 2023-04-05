@@ -28,7 +28,7 @@ describe('TypeaheadComponent', () => {
   let servoyApi;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
+    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent', 'getClientProperty']);
     mockData.hasRealValues = () => true;
     mockData.filterList = () => of(mockData);
 
