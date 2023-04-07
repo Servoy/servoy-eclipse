@@ -971,13 +971,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									{
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageFolder);
 										if (directorySync != null) directorySync.destroy();
-										try
+										if (packageFolder.exists())
 										{
-											Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
-										}
-										catch (IOException e)
-										{
-											Debug.error(e);
+											try
+											{
+												Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+											}
+											catch (IOException e)
+											{
+												Debug.error(e);
+											}
 										}
 
 										File srcDir = file.getLocation().toFile();
