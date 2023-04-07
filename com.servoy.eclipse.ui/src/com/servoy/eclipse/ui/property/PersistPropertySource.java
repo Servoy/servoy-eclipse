@@ -1970,7 +1970,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// responsive forms or ng-client solution: use multi-select for style class
 				multiSelect = true;
 			}
-			multiSelect = false;
 			if (multiSelect)
 			{
 				// ng client, style at solutionlevel
