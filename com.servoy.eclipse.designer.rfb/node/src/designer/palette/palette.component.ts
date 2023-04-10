@@ -394,8 +394,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                                 }
                                 packages[i].components[j].components = newPropertyValues;
                             }
-                            else {
+                            else if (packages[i].components[j].name != 'servoycore-listformcomponent'){
+                                // added autowizard for list form component 
                                 packages[i].components[j].components = propertyValues;
+                            }
+                            else{
+                                packages[i].components[j].properties = null;
                             }
                         }
                     }

@@ -34,14 +34,16 @@ export class EditorContentService {
             for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
                 const fc = formCache.getFormComponent(fcname.replace(/_/g, '-'));
-                fc.items.forEach(item => {
-                    if (item instanceof ComponentCache)
-                        formCache.removeComponent(item.name);
-                    else if (item instanceof StructureCache) {
-                        formCache.removeLayoutContainer(item.id);
-                       	this.removeChildrenRecursively(item, formCache);
-                    }
-                });
+                if (fc){
+                    fc.items.forEach(item => {
+                        if (item instanceof ComponentCache)
+                            formCache.removeComponent(item.name);
+                        else if (item instanceof StructureCache) {
+                            formCache.removeLayoutContainer(item.id);
+                            this.removeChildrenRecursively(item, formCache);
+                        }
+                    });
+                }
                 formCache.removeFormComponent(fcname.replace(/_/g, '-'));
                 renderGhosts = true;
                 redrawDecorators = true;
@@ -252,6 +254,7 @@ export class EditorContentService {
                 const comp = formCache.getComponent(elem);
                 if (comp) {
                     formCache.removeComponent(elem);
+                     formCache.removeFormComponent(elem);
                     if (!formCache.absolute) {
                         this.removeChildFromParentRecursively(comp, formCache.mainStructure);
                     } else if (comp.parent) {

@@ -76,6 +76,7 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -119,6 +120,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -641,7 +643,16 @@ public class CreateComponentHandler implements IServerService
 								}
 								if ("autoshow".equals(property.getTag("wizard")))
 								{
-									autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
+									if (property.getType() == FormComponentPropertyType.INSTANCE && property.getConfig() instanceof ComponentTypeConfig &&
+										((ComponentTypeConfig)property.getConfig()).forFoundset != null)
+									{
+										// list form component
+										FormComponentTreeSelectDialog.selectFormComponent(webComponent, editorPart.getForm());
+									}
+									else
+									{
+										autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
+									}
 								}
 							}
 						}
