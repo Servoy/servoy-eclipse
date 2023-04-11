@@ -38,7 +38,7 @@ public class AggregationTypeEditingSupport extends EditingSupport
 	{
 		count(QueryAggregate.COUNT),
 		countDistinct(QueryAggregate.COUNT, QueryAggregate.DISTINCT, "count(distinct)"),
-		maximun(QueryAggregate.MAX),
+		maximum(QueryAggregate.MAX),
 		minimum(QueryAggregate.MIN),
 		average(QueryAggregate.AVG),
 		sum(QueryAggregate.SUM);
