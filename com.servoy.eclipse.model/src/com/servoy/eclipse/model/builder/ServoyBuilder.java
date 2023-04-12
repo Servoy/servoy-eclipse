@@ -1638,41 +1638,45 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private static void checkMissingProperties(JSONObject json, PropertyDescription description, IPersist o, IProject project)
 	{
-		for (String key : json.keySet())
+		if (json != null)
 		{
-			if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(key) || StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(key) ||
-				StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(key) ||
-				IChildWebObject.UUID_KEY.equals(key))
+			for (String key : json.keySet())
 			{
-				continue;
-			}
-			PropertyDescription pd = description.getProperty(key);
-			if (pd == null)
-			{
-				addMissingPropertyFromSpecMarker(o, project, key);
-			}
-			else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
-			{
-				Object value = json.opt(key);
-				if (value instanceof JSONObject)
+				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(key) ||
+					IChildWebObject.UUID_KEY.equals(key))
 				{
-					checkMissingProperties((JSONObject)value, pd, o, project);
+					continue;
 				}
-				else if (value instanceof JSONArray)
+				PropertyDescription pd = description.getProperty(key);
+				if (pd == null)
 				{
-					JSONArray arr = ((JSONArray)value);
-					for (int i = 0; i < arr.length(); i++)
+					addMissingPropertyFromSpecMarker(o, project, key);
+				}
+				else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
+				{
+					Object value = json.opt(key);
+					if (value instanceof JSONObject)
 					{
-						if (arr.get(i) instanceof JSONObject)
+						checkMissingProperties((JSONObject)value, pd, o, project);
+					}
+					else if (value instanceof JSONArray)
+					{
+						JSONArray arr = ((JSONArray)value);
+						for (int i = 0; i < arr.length(); i++)
 						{
-							checkMissingProperties((JSONObject)arr.get(i), pd, o, project);
+							if (arr.get(i) instanceof JSONObject)
+							{
+								checkMissingProperties((JSONObject)arr.get(i), pd, o, project);
+							}
 						}
 					}
 				}
