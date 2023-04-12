@@ -4,7 +4,7 @@ import { WebsocketService, WebsocketSession, wrapPromiseToPropagateCustomRequest
 import { ConverterService } from './converter.service';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class SabloService {
 
@@ -15,7 +15,7 @@ export class SabloService {
     private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts;
     private log: LoggerService;
-
+    private inLogCall = false;
 
     constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService,
         private windowRefService: WindowRefService, logFactory: LoggerFactory) {
@@ -28,11 +28,91 @@ export class SabloService {
         });
 
         if (sessionStorage.has('svy_session_lock')) {
-            this.clearSabloInfo()
+            this.clearSabloInfo();
             this.log.warn('Found a lock in session storage. The storage was cleared.');
         }
 
         sessionStorage.set('svy_session_lock', '1');
+
+        const oldError = this.windowRefService.nativeWindow.window.console.error;
+        const oldLog = this.windowRefService.nativeWindow.window.console.log;
+        this.windowRefService.nativeWindow.window.console.log = (...msg: any[]) => {
+            try {
+                oldLog.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    this.callService('consoleLogger', 'info', { message: (msg ? msg.join(' ') : '') }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+        };
+
+        this.windowRefService.nativeWindow.window.console.error = (...msg: any[]) => {
+            try {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    this.callService('consoleLogger', 'error', { message: (msg ? msg.join(' ') : '') }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+        };
+
+        const oldWarn = this.windowRefService.nativeWindow.window.console.warn;
+        this.windowRefService.nativeWindow.window.console.warn = (...msg: any[]) => {
+            try {
+                oldWarn.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    this.callService('consoleLogger', 'warn', { message: (msg ? msg.join(' ') : '') }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+        };
+
+        const oldInfo = this.windowRefService.nativeWindow.window.console.info;
+        this.windowRefService.nativeWindow.window.console.info = (...msg: any[]) => {
+            try {
+                oldInfo.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    this.callService('consoleLogger', 'info', { message: (msg ? msg.join(' ') : '') }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+        };
+
+        const oldDebug = this.windowRefService.nativeWindow.window.console.debug;
+        this.windowRefService.nativeWindow.window.console.debug = (...msg: any[]) => {
+            try {
+                oldDebug.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    this.callService('consoleLogger', 'debug', { message: (msg ? msg.join(' ') : '') }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+        };
+
+        this.windowRefService.nativeWindow.window.onerror = function(message, source, lineno, colno, error) {
+            const msg = message + '\n' + source + ':' + lineno + ':' + colno + '\n' + error;
+            this.callService('consoleLogger', 'error', { message: msg }, true);
+        };
     }
 
     public connect(context, queryArgs, websocketUri): WebsocketSession {
@@ -177,7 +257,7 @@ export class SabloService {
         }
     }
 
-    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T>{
+    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T> {
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise;
@@ -188,36 +268,46 @@ export class SabloService {
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
 
         return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((arg) => {
-                this.currentServiceCallDone = true;
-                return arg;
-            }, (arg) => {
-                this.currentServiceCallDone = true;
-                return Promise.reject(arg);
-            }));
+            this.currentServiceCallDone = true;
+            return arg;
+        }, (arg) => {
+            this.currentServiceCallDone = true;
+            return Promise.reject(arg);
+        }));
     }
 
-//    private getAPICallFunctions(call, formState) {
-//        let funcThis: Record<string, () => any>;
-//        if (call.viewIndex !== undefined) {
-//            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
-//            // it wants to allow calling API on non-selected rows, but it is not used
-//            funcThis = formState.api[call.bean][call.viewIndex];
-//        } else if (call.propertyPath !== undefined) {
-//            // handle nested components; the property path is an array of string or int keys going
-//            // through the form's model starting with the root bean name, then it's properties (that could be nested)
-//            // then maybe nested child properties and so on
-//            let obj = formState.model;
-//            for (const pp of call.propertyPath) obj = obj[pp];
-//            funcThis = obj.api;
-//        } else {
-//            funcThis = formState.api[call.bean];
-//        }
-//        return funcThis;
-//    }
+    //    private getAPICallFunctions(call, formState) {
+    //        let funcThis: Record<string, () => any>;
+    //        if (call.viewIndex !== undefined) {
+    //            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
+    //            // it wants to allow calling API on non-selected rows, but it is not used
+    //            funcThis = formState.api[call.bean][call.viewIndex];
+    //        } else if (call.propertyPath !== undefined) {
+    //            // handle nested components; the property path is an array of string or int keys going
+    //            // through the form's model starting with the root bean name, then it's properties (that could be nested)
+    //            // then maybe nested child properties and so on
+    //            let obj = formState.model;
+    //            for (const pp of call.propertyPath) obj = obj[pp];
+    //            funcThis = obj.api;
+    //        } else {
+    //            funcThis = formState.api[call.bean];
+    //        }
+    //        return funcThis;
+    //    }
 
     private clearSabloInfo() {
         this.sessionStorage.remove('windownr');
         this.sessionStorage.remove('clientnr');
     }
 
+    private buildStackMessage(msg: any[]): Array<any> {
+        const arr = new Array();
+        arr.push(...msg);
+        let message = new Error().stack;
+        if (message.startsWith('Error')) {
+            message = message.substring(5);
+        }
+        arr.push(message)
+        return arr;
+    }
 }
