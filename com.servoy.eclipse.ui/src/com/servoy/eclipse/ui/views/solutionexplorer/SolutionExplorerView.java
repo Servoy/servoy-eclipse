@@ -197,6 +197,7 @@ import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.actions.PublishToCloudAction;
 import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -399,6 +400,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private ChangeResourcesProjectAction changeResourcesProjectAction;
 	private RemoveSolutionProtectionAction removeSolutionProtectionAction;
+
+	private PublishToCloudAction publishToCloudAction;
 
 	private DuplicatePersistAction duplicateFormAction;
 	private MovePersistAction moveFormAction;
@@ -2691,6 +2694,8 @@ public class SolutionExplorerView extends ViewPart
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 		if (configureLessTheme.isEnabled()) manager.add(configureLessTheme);
 
+		manager.add(publishToCloudAction);
+
 		if (copyTable.isEnabled()) manager.add(copyTable);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
 
@@ -3061,6 +3066,7 @@ public class SolutionExplorerView extends ViewPart
 		hideUnhideTablesAction = new HideUnhideTablesAction();
 		synchronizeTableDataAction = new SynchronizeTableDataAction(shell);
 		loadRelationsAction = new LoadRelationsAction(this);
+		publishToCloudAction = new PublishToCloudAction(shell);
 
 		newActionInTreePrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
@@ -3477,6 +3483,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
 		addTreeSelectionChangedListener(configureLessTheme);
+		addTreeSelectionChangedListener(publishToCloudAction);
 
 		addTreeSelectionChangedListener(addComponentIcon);
 

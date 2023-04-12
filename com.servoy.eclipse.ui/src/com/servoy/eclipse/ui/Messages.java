@@ -27,7 +27,6 @@ public class Messages extends NLS
 {
 	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages";
 
-
 	public static String MoveTextAction_moveCode;
 	public static String MoveTextAction_moveSample;
 	public static String RefreshAction_refresh;
@@ -295,6 +294,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 	public static String ErrorWarningPreferencePage_methodNoReturn;
 	public static String EditComponentVariantsAction_editVariants;
+	public static String Cloud_publishToCloud;
 
 	static
 	{
