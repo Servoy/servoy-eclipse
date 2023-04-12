@@ -193,12 +193,12 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true), DisplayMode.NORMAL,
+			new TextCellEditor(true, true, true), DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true), DisplayMode.EDIT,
+			new TextCellEditor(true, true, true), DisplayMode.EDIT,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
@@ -418,6 +418,11 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			CellConfigAttributes.CELL_PAINTER,
 			checkboxPainter,
 			DisplayMode.NORMAL,
+			dp.getName());
+		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.CELL_PAINTER,
+			checkboxPainter,
+			DisplayMode.SELECT,
 			dp.getName());
 
 		// using a CheckBoxCellEditor also needs a Boolean conversion to work correctly

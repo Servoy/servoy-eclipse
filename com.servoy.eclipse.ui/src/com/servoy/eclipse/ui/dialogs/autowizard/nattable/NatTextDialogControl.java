@@ -104,4 +104,9 @@ public class NatTextDialogControl extends Composite
 			((Label)control).setText(labelProvider.getText(value));
 		}
 	}
+
+	public Object getControl()
+	{
+		return control;
+	}
 }
