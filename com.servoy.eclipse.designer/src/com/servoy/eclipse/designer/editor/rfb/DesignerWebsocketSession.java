@@ -885,7 +885,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Iterator<LayoutContainer> it = frm.getLayoutContainers();
 						if (!it.hasNext() || frm.containsResponsiveLayout())
 						{
-							it = frm.getFormLayoutContainers();
+							it = frm.getAllLayoutContainers();
 						}
 						while (it.hasNext())
 						{
