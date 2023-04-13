@@ -882,11 +882,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					}
 					if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
 					{
-						Iterator<LayoutContainer> it = frm.getLayoutContainers();
-						if (!it.hasNext() || frm.containsResponsiveLayout())
-						{
-							it = frm.getAllLayoutContainers();
-						}
+						Iterator<LayoutContainer> it = frm.getAllLayoutContainers();
 						while (it.hasNext())
 						{
 							LayoutContainer container = it.next();
