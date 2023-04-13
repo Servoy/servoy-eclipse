@@ -54,7 +54,7 @@ public class LinkClickConfiguration extends AbstractUiBindingConfiguration imple
 		CellLabelMouseEventMatcher mouseHoverMatcher = new CellLabelMouseEventMatcher(GridRegion.BODY, 0, LINK_CELL_LABEL);
 
 		// Inform the button painter of the click.
-		uiBindingRegistry.registerMouseDownBinding(mouseEventMatcher, this);
+		uiBindingRegistry.registerFirstMouseDownBinding(mouseEventMatcher, this);
 
 		// show hand cursor, which is usually used for links
 		uiBindingRegistry.registerFirstMouseMoveBinding(mouseHoverMatcher, (natTable, event) -> {
