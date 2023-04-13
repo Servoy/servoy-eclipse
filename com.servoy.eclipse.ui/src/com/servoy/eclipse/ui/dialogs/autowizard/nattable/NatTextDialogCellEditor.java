@@ -121,6 +121,7 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 		{
 			case SWT.ARROW_DOWN :
 			case SWT.CR :
+			case SWT.KEYPAD_CR :
 				commit(MoveDirectionEnum.DOWN, true);
 				break;
 			case SWT.ARROW_UP :
@@ -133,6 +134,9 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 			case SWT.ARROW_RIGHT :
 				if (textControl.getText().length() == 0 || textControl.getCaretPosition() == textControl.getText().length())
 					commit(MoveDirectionEnum.RIGHT, true);
+				break;
+			case SWT.ESC :
+				if (e.stateMask == 0) close();
 				break;
 		}
 	}
