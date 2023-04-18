@@ -161,6 +161,8 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			LinkClickConfiguration.LINK_CELL_LABEL);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
 			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png")), DisplayMode.NORMAL, "delete");
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
+			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("trash.png")), DisplayMode.SELECT, "delete");
 		linkClickConfig.addClickListener(new IMouseAction()
 		{
 			@Override
