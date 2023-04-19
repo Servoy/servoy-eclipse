@@ -87,7 +87,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     }
 
     private removeHiddenElements(elements: Array<HTMLElement>) {
-        elements.forEach((element) => {
+        const filteredElements = elements.filter((element) => {
             let wrapper = element.parentElement;
             
             while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
@@ -95,13 +95,12 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             }
             
             if (wrapper && window.getComputedStyle(wrapper).getPropertyValue('visibility') === 'hidden') {
-              const index = elements.indexOf(element);
-              if (index > -1) {
-                elements.splice(index, 1);
-              }
+              return false;
             }
+      
+          return true;
         });
-        return elements
+        return filteredElements;
     }
 
     private addSameSizeIndicator(newindicators: SameSizeIndicator[], elementRect: DOMRect, horizontal: boolean) {
