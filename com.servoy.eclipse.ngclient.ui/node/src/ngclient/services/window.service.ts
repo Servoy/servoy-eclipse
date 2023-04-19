@@ -361,7 +361,7 @@ export class WindowService {
         return { x: left, y: top };
     }
 
-    public switchForm(name: string, form: FormSettings, navigatorForm: FormSettings) {
+    public switchForm(name: string, form: FormSettings, navigatorForm: FormSettings, isLoginForm?: boolean) {
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.switchForm) {
@@ -385,7 +385,7 @@ export class WindowService {
             if (this.servoyService.getSolutionSettings().windowName === name) { // main window form switch
                 this.servoyService.getSolutionSettings().mainForm = form;
                 this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
-                if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false) {
+                if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false && !isLoginForm) {
                     // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
                     const state = this.platformLocation.getState();
                     if (state && state['navigationId'])
