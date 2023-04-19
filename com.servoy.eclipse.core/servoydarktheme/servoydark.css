@@ -39,9 +39,12 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 	text-align: center;
 }
 
-.svyNatTable:select {
-    painter-resolution: true;
-	cell-background-color:  #e7f1ff;
+.svyNatTable > .delete {
+	cell-background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
+}
+
+.svyNatTable :select {
+	cell-background-color: '#org-eclipse-ui-workbench-ACTIVE_TAB_OUTLINE_COLOR';
 }
 
 .svyNatTable > .COLUMN_HEADER {
