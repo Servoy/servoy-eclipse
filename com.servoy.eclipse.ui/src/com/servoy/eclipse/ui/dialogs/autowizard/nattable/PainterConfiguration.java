@@ -34,6 +34,7 @@ import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
 import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
@@ -44,6 +45,7 @@ import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
@@ -169,17 +171,12 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			public void run(NatTable natTable, MouseEvent event)
 			{
 				NatEventData eventData = NatEventData.createInstanceFromEvent(event);
-				int rowIndex = natTable.getRowIndexByPosition(eventData.getRowPosition());
-				int columnIndex = natTable.getColumnIndexByPosition(eventData.getColumnPosition());
-				if (columnIndex == natTable.getColumnCount() - 1) // delete
-				{
-					((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().remove(rowIndex);
-					natTable.refresh(true);
-					ScrolledComposite parent = (ScrolledComposite)natTable.getParent();
-					parent.setMinSize(natTable.getWidth(), natTable.getHeight());
-					parent.update();
-				}
+				deleteRow(natTable, eventData.getRowPosition(), eventData.getColumnPosition());
 			}
+		});
+		linkClickConfig.addKeyListener((NatTable natTable, KeyEvent event) -> {
+			ILayerCell selectedCell = linkClickConfig.getSelectionLayer().getSelectedCells().iterator().next();
+			deleteRow(natTable, selectedCell.getRowPosition(), selectedCell.getColumnPosition());
 		});
 	}
 
@@ -450,5 +447,19 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, new CheckBoxCellEditor(),
 			DisplayMode.EDIT, dp.getName());
+	}
+
+	public void deleteRow(NatTable natTable, int _rowIndex, int _columnIndex)
+	{
+		int rowIndex = natTable.getRowIndexByPosition(_rowIndex);
+		int columnIndex = natTable.getColumnIndexByPosition(_columnIndex);
+		if (columnIndex == natTable.getColumnCount() - 1) // delete
+		{
+			((ListDataProvider<Map<String, Object>>)bodyDataProvider).getList().remove(rowIndex);
+			natTable.refresh(true);
+			ScrolledComposite parent = (ScrolledComposite)natTable.getParent();
+			parent.setMinSize(natTable.getWidth(), natTable.getHeight());
+			parent.update();
+		}
 	}
 }

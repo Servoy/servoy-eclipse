@@ -18,25 +18,58 @@
 package com.servoy.eclipse.ui.dialogs.autowizard.nattable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.ui.action.IKeyAction;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.CellLabelMouseEventMatcher;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.KeyEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 
 /**
  * @author emera
  */
-public class LinkClickConfiguration extends AbstractUiBindingConfiguration implements IMouseAction
+public class LinkClickConfiguration extends AbstractUiBindingConfiguration implements IMouseAction, IKeyAction
 {
+	class LinkCellLabelKeyMatcher extends KeyEventMatcher
+	{
+		public LinkCellLabelKeyMatcher(int keyCode)
+		{
+			super(keyCode);
+		}
+
+		@Override
+		public boolean matches(KeyEvent event)
+		{
+			Collection<ILayerCell> selectedCells = selectionLayer.getSelectedCells();
+			if (selectedCells.size() == 1)
+			{
+				ILayerCell cell = selectedCells.iterator().next();
+				return super.matches(event) && cell.getConfigLabels().contains(LINK_CELL_LABEL);
+			}
+			return false;
+		}
+	}
+
 	public static final String LINK_CELL_LABEL = "LINK_CELL_LABEL";
 	private final List<IMouseAction> clickListeners = new ArrayList<>();
+	private final SelectionLayer selectionLayer;
+	private final List<IKeyAction> keyListeners = new ArrayList<>();
+
+	public LinkClickConfiguration(SelectionLayer selectionLayer)
+	{
+		this.selectionLayer = selectionLayer;
+	}
 
 	/**
 	 * Configure the UI bindings for the mouse click
@@ -61,6 +94,17 @@ public class LinkClickConfiguration extends AbstractUiBindingConfiguration imple
 			natTable.setCursor(natTable.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 		});
 
+		uiBindingRegistry.registerFirstKeyBinding(new LinkCellLabelKeyMatcher(SWT.SPACE), this);
+		uiBindingRegistry.registerFirstKeyBinding(new LinkCellLabelKeyMatcher(SWT.F2), this);
+	}
+
+	@Override
+	public void run(NatTable natTable, KeyEvent event)
+	{
+		for (IKeyAction listener : this.keyListeners)
+		{
+			listener.run(natTable, event);
+		}
 	}
 
 	@Override
@@ -72,6 +116,16 @@ public class LinkClickConfiguration extends AbstractUiBindingConfiguration imple
 		}
 	}
 
+	public void addKeyListener(IKeyAction keyAction)
+	{
+		this.keyListeners.add(keyAction);
+	}
+
+	public void removeKeyListener(IKeyAction keyAction)
+	{
+		this.keyListeners.remove(keyAction);
+	}
+
 	public void addClickListener(IMouseAction mouseAction)
 	{
 		this.clickListeners.add(mouseAction);
@@ -80,5 +134,10 @@ public class LinkClickConfiguration extends AbstractUiBindingConfiguration imple
 	public void removeClickListener(IMouseAction mouseAction)
 	{
 		this.clickListeners.remove(mouseAction);
+	}
+
+	public SelectionLayer getSelectionLayer()
+	{
+		return selectionLayer;
 	}
 }
