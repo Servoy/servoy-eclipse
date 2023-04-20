@@ -4,7 +4,7 @@
               [svyTooltip]="toolTipText"
               [sabloTabseq]="tabSeq"
               #element>
-<div  style="width:100%; overflow:hidden; position:relative; white-space:nowrap; pointer-events: none;" #child>
+<div  style="width:calc(100% - 10px); overflow:hidden; position:absolute; white-space:nowrap; pointer-events: none;" #child>
             <span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID,  rollOverImg:rolloverImageMediaID, mediaOptions: mediaOptions}' [hostComponent]="this"></span>
  	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID ) | formatFilter: format | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
 </div> 
