@@ -1659,6 +1659,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				PropertyDescription pd = description.getProperty(key);
 				if (pd == null)
 				{
+					if ((description instanceof WebObjectSpecification) && ((WebObjectSpecification)description).getHandler(key) != null)
+						continue;
 					addMissingPropertyFromSpecMarker(o, project, key);
 				}
 				else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
@@ -1666,7 +1668,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					Object value = json.opt(key);
 					if (value instanceof JSONObject)
 					{
-						checkMissingProperties((JSONObject)value, pd, o, project);
+						checkMissingProperties((JSONObject)value, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o, project);
 					}
 					else if (value instanceof JSONArray)
 					{
@@ -1675,7 +1677,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							if (arr.get(i) instanceof JSONObject)
 							{
-								checkMissingProperties((JSONObject)arr.get(i), pd, o, project);
+								checkMissingProperties((JSONObject)arr.get(i), ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o,
+									project);
 							}
 						}
 					}
