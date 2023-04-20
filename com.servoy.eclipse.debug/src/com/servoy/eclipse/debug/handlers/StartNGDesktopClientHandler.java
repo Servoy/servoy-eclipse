@@ -130,7 +130,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		{
 			result = requestedVersion;
 		}
-		final String srcNumbers[] = result.split(".");
+		final String srcNumbers[] = result.split("\\.");
 		if (srcNumbers.length < 3)
 		{
 			result += ".0";
