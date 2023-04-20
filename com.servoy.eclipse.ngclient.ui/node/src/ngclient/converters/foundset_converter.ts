@@ -125,7 +125,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                     currentClientValue.viewPort.size = viewPortUpdate.size;
                 }
                 if (viewPortUpdate.rows !== undefined) {
-                    const oldRows = currentClientValue.viewPort.rows;
+                    const oldRows = currentClientValue.viewPort.rows.slice(); // create shallow copy of old rows as ref. will be the same otherwise
                     currentClientValue.viewPort.rows =
                         this.viewportService.updateWholeViewport(currentClientValue.viewPort.rows, internalState, viewPortUpdate.rows,
                                                         viewPortUpdate[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], undefined, internalState.propertyContextCreator,

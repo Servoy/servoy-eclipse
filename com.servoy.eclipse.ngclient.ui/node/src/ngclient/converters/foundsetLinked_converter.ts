@@ -209,6 +209,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
     public updateWholeViewport(wholeViewport: any[], conversionInfo: ConversionInfoFromServerForViewport) {
         // disable smart watches and proxy notifiers; server side send changes are going to be applied
         this.ignoreChanges = true;
+        const oldVal = this.foundsetLinkedValue.slice(); // create shallow copy of old rows as ref. will be the same otherwise
 
         // normally foundsetLinkedValue will remain the same reference below except for when it is the first initialization from
         // server and only if we have SHALLOW/DEEP watches in spec for this prop., in which case a proxy of the initial value will be returned by viewport code
@@ -221,7 +222,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
         if (this.changeListeners.length > 0) {
             this.log.spam(this.log.buildMessage(() => ('svy foundset linked * firing change listener: full viewport changed...')));
             // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
-            this.fireChanges({ viewportRowsCompletelyChanged: { oldValue: this.foundsetLinkedValue, newValue: this.foundsetLinkedValue } });
+            this.fireChanges({ viewportRowsCompletelyChanged: { oldValue: oldVal, newValue: this.foundsetLinkedValue } });
         }
     }
 

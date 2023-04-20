@@ -303,9 +303,9 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
 
         this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (relativeRowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
             if (wholeViewportUpdate) {
-                const oldRows = this.componentValue.modelViewport;
+                const oldRows = this.componentValue.modelViewport.slice(); // create shallow copy of old rows as ref. will be the same otherwise
 
-                this.componentValue.modelViewport = this.viewportService.updateWholeViewport(oldRows,
+                this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
                         this, wholeViewportUpdate, granularUpdateFromServer._T,
                         this.componentSpecification,
                         this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
