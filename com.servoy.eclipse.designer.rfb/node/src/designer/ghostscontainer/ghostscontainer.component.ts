@@ -1,4 +1,3 @@
-import { StatusBarComponent } from './../statusbar/statusbar.component';
 import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -419,7 +418,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
         // not sure how to detect when we really need to redraw
         if (designerChange) this.renderGhosts();
-        //this.renderGhostsInternal(this.ghosts);
+        else{
+             this.renderGhostsInternal(this.ghostContainers);
+        }
     }
 
     getAutoscrollLockId(): string {
