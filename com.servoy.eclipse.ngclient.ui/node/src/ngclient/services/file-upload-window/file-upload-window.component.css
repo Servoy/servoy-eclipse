@@ -82,3 +82,7 @@
   #svy-upload-id {
       display: none;
   }
+  
+  .svy-upload-btn-select, .svy-upload-btn-upload {
+  	margin-right: 5px;
+  }
