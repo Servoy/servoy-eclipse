@@ -1,7 +1,7 @@
 import { Inject, Injectable, SecurityContext } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
-import { createPopper } from '@popperjs/core';
+import { createPopper, VirtualElement } from '@popperjs/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Injectable()
@@ -67,10 +67,30 @@ export class PopupMenuService {
     }
 
     public showMenu(x: number, y: number) {
-        this.menu.style.left = x + 'px';
-        this.menu.style.top = y + 'px';
         this.menu.style.visibility = 'visible';
-        this.doc.body.appendChild(this.menu);
+        const virtualElement: VirtualElement = {
+            getBoundingClientRect: () => {
+                return {
+                    width: 0,
+                    height: 0,
+                    top: y,
+                    right: x,
+                    bottom: y,
+                    left: x
+                } as DOMRect;
+            }
+        };
+        createPopper(virtualElement, this.menu, {
+            modifiers: [
+                {
+                  name: 'preventOverflow',
+                  options: {
+                    padding: 8,
+                    rootBoundary: 'document'
+                  },
+                },
+              ],
+          });
     }
 
     private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
