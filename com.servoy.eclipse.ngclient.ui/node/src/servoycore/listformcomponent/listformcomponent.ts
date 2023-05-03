@@ -273,6 +273,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if(!this.useScrolling) {
             this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
+                if (event.serverFoundsetSizeChanged) this.updatePagingControls();
                 if (event.viewportRowsUpdated) {
                     const changes = event.viewportRowsUpdated;
                     let insertOrDeletes = false;
@@ -281,9 +282,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     });
                     if (insertOrDeletes) this.calculateCells();
                 } else {
-                    if (event.serverFoundsetSizeChanged)
-                        this.updatePagingControls();
-
                     if (event.viewportRowsCompletelyChanged) {
                         this.calculateCells();
                         return;
@@ -523,7 +521,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 };
 
                 if (relativeRowIndex === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
-                else triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
+                else  if(this.foundset.viewPort.startIndex + relativeRowIndex < this.componentCache.length) {
+                    triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
+                }
             };
         }
 
