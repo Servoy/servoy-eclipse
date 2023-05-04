@@ -156,10 +156,10 @@ export class ServicesService {
             propertyType = this.getServiceDynamicClientSideTypes(serviceName)?.[propertyName];
         }
 
-        const converted = this.converterService.convertFromClientToServer(propertyValue, propertyType, oldPropertValue,
-                {
+        const converted = this.converterService.convertFromClientToServer(propertyValue, propertyType, oldPropertValue, {
                     getProperty: (propertyN: string) => service[propertyN],
-                    getPushToServerCalculatedValue: () => serviceSpec ? serviceSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT
+                    getPushToServerCalculatedValue: () => serviceSpec ? serviceSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT,
+                    isInsideModel: true
                 });
         changes[propertyName] = converted[0];
         service[propertyName] = converted[1];

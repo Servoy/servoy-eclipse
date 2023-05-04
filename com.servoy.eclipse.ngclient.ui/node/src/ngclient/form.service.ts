@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { LoggerService, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
-import { ConverterService, IParentAccessForSubpropertyChanges, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged } from '../sablo/converter.service';
+import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
@@ -167,7 +167,8 @@ export class FormService {
             // for which no propertyType will be found directly in spec - due to the index or any dots
             const propertyContext = {
                 getProperty: (otherPropertyName: string) => componentModel[otherPropertyName],
-                getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT)
+                getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT),
+                isInsideModel: true
             };
             converted = converterService.convertFromClientToServer(newValue, propertyType, oldValue, propertyContext);
             valueToSendToServer = converted[0];
@@ -473,7 +474,8 @@ export class FormService {
         const componentSpec = formState.getComponentSpecification(componentName);
         const propertyContext = {
             getProperty: (otherPropertyName: string) => componentModel[otherPropertyName],
-            getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT)
+            getPushToServerCalculatedValue: () => (componentSpec ? componentSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT),
+            isInsideModel: true
         };
 
         const changes = {};
