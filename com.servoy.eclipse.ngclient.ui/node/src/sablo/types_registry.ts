@@ -203,11 +203,12 @@ export class ChildPropertyContextCreator implements IPropertyContextCreator {
 
     constructor(private readonly getProperty: IPropertyContextGetterMethod,
             private readonly propertyDescriptions: { [propName: string]: IPropertyDescription },
-            private readonly computedParentPushToServer: PushToServerEnum) {}
+            private readonly computedParentPushToServer: PushToServerEnum,
+            private readonly isInsideModel: boolean) {}
 
     withPushToServerFor(childPropertyName: string): PropertyContext {
         return new PropertyContext(this.getProperty, PushToServerUtils.combineWithChildStatic(this.computedParentPushToServer,
-                    this.propertyDescriptions[childPropertyName]?.getPropertyDeclaredPushToServer()), true); // getPropertyDeclaredPushToServer not getPropertyPushToServer
+                    this.propertyDescriptions[childPropertyName]?.getPropertyDeclaredPushToServer()), this.isInsideModel); // getPropertyDeclaredPushToServer not getPropertyPushToServer
     }
 }
 
@@ -297,8 +298,8 @@ export class PushToServerUtils {
 
     public static newChildPropertyContextCreator(getProperty: IPropertyContextGetterMethod,
                 propertyDescriptions: { [propName: string]: IPropertyDescription },
-                computedParentPushToServer: PushToServerEnum): IPropertyContextCreator {
-        return new ChildPropertyContextCreator(getProperty, propertyDescriptions, computedParentPushToServer);
+                computedParentPushToServer: PushToServerEnum, isInsideModel: boolean): IPropertyContextCreator {
+        return new ChildPropertyContextCreator(getProperty, propertyDescriptions, computedParentPushToServer, isInsideModel);
     }
 
 }
