@@ -521,7 +521,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 };
 
                 if (relativeRowIndex === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
-                else  if(this.foundset.viewPort.startIndex + relativeRowIndex < this.componentCache.length) {
+                else  if(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex] /* do we really need this check? we should not get a change event for a component at an inexistent position */) {
                     triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
                 }
             };
