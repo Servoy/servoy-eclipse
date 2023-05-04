@@ -195,7 +195,7 @@ export class RootPropertyContextCreator implements IPropertyContextCreator {
 
     withPushToServerFor(rootPropertyName: string): PropertyContext {
         return new PropertyContext(this.getProperty, this.webObjectSpec ? this.webObjectSpec.getPropertyPushToServer(rootPropertyName)
-                        : PushToServerEnum.REJECT); // getPropertyPushToServer not getPropertyDeclaredPushToServer
+                        : PushToServerEnum.REJECT, true); // getPropertyPushToServer not getPropertyDeclaredPushToServer
     }
 }
 
@@ -207,13 +207,15 @@ export class ChildPropertyContextCreator implements IPropertyContextCreator {
 
     withPushToServerFor(childPropertyName: string): PropertyContext {
         return new PropertyContext(this.getProperty, PushToServerUtils.combineWithChildStatic(this.computedParentPushToServer,
-                    this.propertyDescriptions[childPropertyName]?.getPropertyDeclaredPushToServer())); // getPropertyDeclaredPushToServer not getPropertyPushToServer
+                    this.propertyDescriptions[childPropertyName]?.getPropertyDeclaredPushToServer()), true); // getPropertyDeclaredPushToServer not getPropertyPushToServer
     }
 }
 
 export class PropertyContext implements IPropertyContext {
 
-    constructor(public readonly getProperty: IPropertyContextGetterMethod, private readonly pushToServerComputedValue: PushToServerEnum) {}
+    constructor(public readonly getProperty: IPropertyContextGetterMethod,
+        private readonly pushToServerComputedValue: PushToServerEnum,
+        public readonly isInsideModel: boolean) {}
 
     getPushToServerCalculatedValue(): PushToServerEnum {
         return this.pushToServerComputedValue;
@@ -255,12 +257,14 @@ export class PushToServerUtils {
 
 
     public static readonly PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES: IPropertyContext = {
+        isInsideModel: false,
         // arguments/return values received from server in case of api calls/handlers are not properties of a component or service so can't return sibling properties
         getProperty: (_propertyName: string): any  => undefined,
         getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
     };
 
     public static readonly PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES: IPropertyContext = {
+        isInsideModel: false,
         // arguments/return values sent to server in case of api calls/handlers are not properties of a component or service so can't return sibling properties
         getProperty: (_propertyName: string): any  => undefined,
         getPushToServerCalculatedValue: () => PushToServerEnum.ALLOW
@@ -561,7 +565,25 @@ export type IPropertyContextGetterMethod = (propertyName: string) => any;
  * websocket.ts implements this in it's sablo.propertyTypes.PropertyContext class.
  */
 export interface IPropertyContext {
+    /**
+     * "true" is the property that uses this context is part (directly or in a nested fashion) of a service or component model.
+     * So if it's a property of that component.
+     * "false" if this context is for component/service api call/handler arguments or return values.
+     * 
+     * Some change-aware property types need to keep track of relocations within the model - if they are used as part of the model. But they need
+     * to differentiate between situations when they are relocated between the model or they are just being sent as arguments to handlers for example, remaining
+     * in the same location in the model as well.
+     */
+    readonly isInsideModel: boolean;
+
+    /**
+     * Can be used to get other sibling properties of the property that this context is used for. If the property is in the root of the component/service model,
+     * then this getter will provide access to other properties in the root of the model. If the context is that of a custom object, this getter will first
+     * return sibling properties from the same custom object, and, if such a sibling is not found, forward to a parent property context (either another custom
+     * object or the root model property context).
+     */
     getProperty: IPropertyContextGetterMethod;
+
     getPushToServerCalculatedValue(): PushToServerEnum;
 }
 

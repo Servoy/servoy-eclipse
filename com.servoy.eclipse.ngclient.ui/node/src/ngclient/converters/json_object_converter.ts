@@ -197,8 +197,10 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
-                } else if (newClientData !== oldClientData || !newClientData.getInternalState().hasChangeListener()) { // the hasChangeListener is meant to detect arguments that come as a api call to client and then are assigned to a property - and because of the now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, here old was === new value and we couldn't detect it correctly as a full change
-                    // revoke proxy on old value if present; new value is an old dumb/non-initialized one
+                } else if (propertyContext?.isInsideModel && (newClientData !== oldClientData || !newClientData.getInternalState().hasChangeListener())) { // the hasChangeListener is meant to detect arguments that come as a api call to client and then are assigned to a property - and because of the now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, here old was === new value and we couldn't detect it correctly as a full change
+                    // revoke proxy on old value if present; new value is already initialized;
+                    // this code means to make sure that values that are inside the model of components/services do change notifications to the correct parent even if relocated
+                    // and that old values (that were before in the model but are no more) no longer send the change notifications
                     if (oldClientData?.getInternalState && oldClientData.getInternalState()) oldClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
 
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
@@ -215,10 +217,11 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     if (previousNewValDynamicTypesHolder) internalState.dynamicPropertyTypesHolder = previousNewValDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
-                } else { // same value as before
-                    // new the same as old and already initialized
-                    newClientDataInited = newClientData;
+                } else { // same value as before or an already initialized value (that is used maybe as and argument or return value to api calls/handlers) that can be used
+                    newClientDataInited = newClientData; // it was already initialized in the past (it's not a new client side created value)
                     internalState = newClientDataInited.getInternalState();
+
+                    if (newClientData !== oldClientData) internalState.markAllChanged(false); // arg or return value to apis/calls? (see previous if branch)
                     internalState.ignoreChanges = true;
                 }
             } else newClientDataInited = newClientData; // null/undefined
@@ -232,13 +235,19 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     const changes = {} as ICOTFullObjectToServer | ICOTGranularUpdatesToServer;
                     if (internalState.allChanged) {
                         const fullChange = changes as ICOTFullObjectToServer;
-                        // we can't rely/use the contentVersion here because, in case of a change-by-reference in a service followed
+                        // we can't rely/use the current contentVersion here because, in case of a change-by-reference in a service followed
                         // by a now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, we sometimes do not have
                         // access to the old contentVersion to be able to use it... so full change from client will ignore old contentVersion on client and on server
                         // but that should not be a problem as those are meant more to ensure that granular updates don't happen on an wrong/obsolete value
-                        internalState.contentVersion = 1; // start fresh
                         changes.vEr = 0; // server treats this as a "don't check server content version as it's a full new value from client"
 
+                        // we only reset client side contentVersion when sending full changes for model properties (so things that might have an equivalent on server);
+                        // (args and return values to api/handlers should not reset client side state version when being sent to server (there they will be
+                        // full new values anyway with no previous value - and not in sync with any client side value), because it is possible to send as argument or
+                        // return value a value that is also present in the model at the same time, in which case this full send as an arg/return value should not
+                        // alter client side version in the model - that version must remain unaltered, in sync with the server side version in the model)
+                        if (propertyContext?.isInsideModel) internalState.contentVersion = 1; // start fresh;
+                        
                         // send all
                         const toBeSentObj = fullChange.v = {};
                         for (const key of Object.keys(newClientDataInited)) {

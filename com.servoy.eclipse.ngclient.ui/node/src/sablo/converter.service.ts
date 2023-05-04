@@ -229,7 +229,7 @@ export class SoftProxyRevoker {
     }
 
     getRevokeFunction(): () => void {
-        return () => ( this.proxyIsDisabled = false );
+        return () => ( this.proxyIsDisabled = true );
     }
 }
 

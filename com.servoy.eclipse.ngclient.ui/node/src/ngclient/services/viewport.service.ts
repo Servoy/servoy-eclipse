@@ -59,7 +59,8 @@ export class ViewportService {
 
     private static NULL_AND_REJECT_PROP_CONTEXT: IPropertyContext = {
         getProperty: (_propertyName: string) => null,
-        getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
+        getPushToServerCalculatedValue: () => PushToServerEnum.REJECT,
+        isInsideModel: true
     };
 
     constructor(private converterService: ConverterService,
