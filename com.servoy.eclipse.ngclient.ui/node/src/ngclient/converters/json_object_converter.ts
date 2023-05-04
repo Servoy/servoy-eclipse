@@ -93,7 +93,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
                 const propertyContextCreator = new ChildPropertyContextCreator(
                         this.getCustomObjectPropertyContextGetter(newValue, propertyContext),
-                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
+                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue(), propertyContext?.isInsideModel);
 
                 internalState.contentVersion = serverJSONValue.vEr;
 
@@ -138,7 +138,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
                     const propertyContextCreator = new ChildPropertyContextCreator(
                             this.getCustomObjectPropertyContextGetter(currentClientValue, propertyContext),
-                            this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
+                            this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue(), propertyContext?.isInsideModel);
 
                     for (const update of updates) {
                         const key = update.k;
@@ -229,7 +229,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             if (newClientDataInited) {
                 const propertyContextCreator = new ChildPropertyContextCreator(
                         this.getCustomObjectPropertyContextGetter(newClientDataInited, propertyContext),
-                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue());
+                        this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue(), propertyContext?.isInsideModel);
 
                 if (internalState.hasChanges()) {
                     const changes = {} as ICOTFullObjectToServer | ICOTGranularUpdatesToServer;
