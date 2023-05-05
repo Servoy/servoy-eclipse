@@ -34,7 +34,8 @@ describe( 'JSONArrayConverter', () => {
 
     const getParentPropertyContext = (pushToServerCalculatedValueForProp: PushToServerEnum): IPropertyContext => ({
             getProperty: (_propertyName: string) => undefined,
-            getPushToServerCalculatedValue: () => pushToServerCalculatedValueForProp
+            getPushToServerCalculatedValue: () => pushToServerCalculatedValueForProp,
+            isInsideModel: true
         });
 
     beforeEach(() => {

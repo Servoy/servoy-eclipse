@@ -4,6 +4,8 @@ import {TooltipService} from './tooltip.service';
 import {Component, DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import { WindowRefService } from '../services/windowref.service';
+import { ServoyPublicServiceTestingImpl } from '../testing/publictesting.module';
+import { ServoyPublicService } from '../services/servoy_public.service';
 const mouseEnter: Event = new Event('mouseenter');
 
 @Component({
@@ -20,10 +22,12 @@ describe('Directive: Tooltip', () => {
 
   let directiveInstance: TooltipDirective;
 
+ const service = new ServoyPublicServiceTestingImpl();
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [TooltipDirective, TestTooltipWrapperComponent],
-      providers: [TooltipService, WindowRefService]
+      providers: [TooltipService, WindowRefService,
+        { provide: ServoyPublicService, useValue: service }]
     });
 
     fixture = TestBed.createComponent(TestTooltipWrapperComponent);

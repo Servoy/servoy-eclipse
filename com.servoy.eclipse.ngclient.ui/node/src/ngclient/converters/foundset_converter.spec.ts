@@ -52,15 +52,18 @@ describe('FoundsetConverter', () => {
 
         propertyContextWithReject = {
             getProperty: (_propertyName) => undefined,
-            getPushToServerCalculatedValue: () => PushToServerEnum.REJECT
+            getPushToServerCalculatedValue: () => PushToServerEnum.REJECT,
+            isInsideModel: true
         };
         propertyContextWithAllow = {
             getProperty: (_propertyName) => undefined,
-            getPushToServerCalculatedValue: () => PushToServerEnum.ALLOW
+            getPushToServerCalculatedValue: () => PushToServerEnum.ALLOW,
+            isInsideModel: true
         };
         propertyContextWithShallow = {
             getProperty: (_propertyName) => undefined,
-            getPushToServerCalculatedValue: () => PushToServerEnum.SHALLOW
+            getPushToServerCalculatedValue: () => PushToServerEnum.SHALLOW,
+            isInsideModel: true
         };
     });
 

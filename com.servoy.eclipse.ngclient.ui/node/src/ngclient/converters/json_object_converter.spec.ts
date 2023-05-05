@@ -129,7 +129,8 @@ describe('JSONObjectConverter', () => {
     const createTabJSON = (): ICOTFullValueFromServer => ({ v: { name: 'test', myvalue: 'test' }, vEr: 1});
     const getParentPropertyContext = (pushToServerCalculatedValueForProp: PushToServerEnum): IPropertyContext => ({
             getProperty: (_propertyName: string) => undefined,
-            getPushToServerCalculatedValue: () => pushToServerCalculatedValueForProp
+            getPushToServerCalculatedValue: () => pushToServerCalculatedValueForProp,
+            isInsideModel: true
         });
 
     const createSimpleCustomObjectWithUntypedAndSpecificPTSOnSubprops = (): ICOTFullValueFromServer => {
