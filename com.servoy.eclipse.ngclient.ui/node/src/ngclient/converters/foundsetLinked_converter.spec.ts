@@ -72,7 +72,7 @@ describe('FoundsetLinked Converter', () => {
                 }
             };
             const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
-            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT);
+            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT, true);
 
             serverValue = { forFoundset: 'myfoundset' };
 
@@ -114,7 +114,7 @@ describe('FoundsetLinked Converter', () => {
                 }
             };
             const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
-            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT);
+            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT, true);
 
             serverValue = { forFoundset: 'myfoundset' };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
@@ -167,7 +167,7 @@ describe('FoundsetLinked Converter', () => {
                 }
             };
             const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
-            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.ALLOW);
+            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.ALLOW, true);
 
             serverValue = { forFoundset: 'myfoundset', w: false };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
@@ -229,7 +229,7 @@ describe('FoundsetLinked Converter', () => {
                 }
             };
             const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
-            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.SHALLOW);
+            propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.SHALLOW, true);
 
             serverValue = { forFoundset: 'myfoundset', w: false };
 
