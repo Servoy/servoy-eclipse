@@ -290,7 +290,7 @@ export class ChangeAwareState {
     
     public static INTERNAL_STATE_MEMBER_NAME = "__internalState";
 
-    public allChanged = false;
+    private allChanged = false;
 
     private changeListener: ChangeListenerFunction;
 //    private inNotify = false;
