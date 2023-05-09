@@ -41,11 +41,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONPropertyType;
 import org.sablo.specification.property.ICustomType;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -122,8 +124,11 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ValueListConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
@@ -302,7 +307,7 @@ public class ServoyFormBuilder
 					throw new RuntimeException(e);
 				}
 
-				addWebComponentMissingHandlers(markerResource, fs, o, form, form.getDataSource());
+				addWebComponentMissingReferences(markerResource, fs, o, form, form.getDataSource());
 
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
@@ -408,7 +413,7 @@ public class ServoyFormBuilder
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
 										fs);
-									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
+									addWebComponentMissingReferences(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
 								}
 							}
 						}
@@ -1555,7 +1560,7 @@ public class ServoyFormBuilder
 		});
 	}
 
-	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
+	public static void addWebComponentMissingReferences(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1656,6 +1661,113 @@ public class ServoyFormBuilder
 					}
 				}
 
+			}
+			if (spec != null)
+			{
+				addWebComponentMissingReferences((WebComponent)o, spec, ((WebComponent)o).getFlattenedJson(), flattenedSolution, form, markerResource);
+			}
+		}
+	}
+
+	private static void addWebComponentMissingReferences(WebComponent wc, PropertyDescription spec, JSONObject json, FlattenedSolution flattenedSolution,
+		Form form, IResource markerResource)
+	{
+		if (spec != null)
+		{
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			if (properties != null)
+			{
+				for (PropertyDescription pd : properties.values())
+				{
+					Object value = json.opt(pd.getName());
+					if (value != null && !"".equals(value) && value != JSONObject.NULL)
+					{
+						if (pd.getType() instanceof MediaPropertyType)
+						{
+							Media media = flattenedSolution.getMedia(value.toString());
+							if (media != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, media);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof ValueListPropertyType)
+						{
+							ValueList vl = flattenedSolution.getValueList(value.toString());
+							if (vl != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, vl);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof RelationPropertyType)
+						{
+							Relation rel = flattenedSolution.getRelation(value.toString());
+							if (rel != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, rel);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof FormPropertyType)
+						{
+							Form frm = flattenedSolution.getForm(value.toString());
+							if (frm != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, frm);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
+						{
+							if (value instanceof JSONObject)
+							{
+								addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), (JSONObject)value,
+									flattenedSolution, form, markerResource);
+							}
+							else if (value instanceof JSONArray)
+							{
+								JSONArray arr = ((JSONArray)value);
+								for (int i = 0; i < arr.length(); i++)
+								{
+									if (arr.get(i) instanceof JSONObject)
+									{
+										addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(),
+											(JSONObject)arr.get(i), flattenedSolution, form, markerResource);
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
