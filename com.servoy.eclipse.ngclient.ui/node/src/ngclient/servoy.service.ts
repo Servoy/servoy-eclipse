@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { WebsocketService } from '../sablo/websocket.service';
+import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
 import { PushToServerUtils, TypesRegistry } from '../sablo/types_registry';
@@ -186,7 +186,7 @@ export class ServoyService {
     public executeInlineScript<T>(formname: string, script: string, params: any[]): RequestInfoPromise<T> {
         const promise = this.sabloService.callService('formService', 'executeInlineScript', { formname, script, params }, false);
             
-        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise,
+        return wrapPromiseToPropagateCustomRequestInfoInternal(promise,
                     promise.then((serviceCallResult) =>
                         this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
