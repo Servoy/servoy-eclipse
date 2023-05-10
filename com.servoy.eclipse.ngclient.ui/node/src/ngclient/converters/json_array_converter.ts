@@ -267,6 +267,12 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
             } else newClientDataInited = newClientData; // null/undefined
 
             if (newClientDataInited) {
+                let calculatedPushToServerOfWholeProp: PushToServerEnum; 
+                if (propertyContext.isInsideModel) {
+                    internalState.calculatedPushToServerOfWholeProp = (typeof propertyContext?.getPushToServerCalculatedValue() != 'undefined' ? propertyContext?.getPushToServerCalculatedValue() : PushToServerEnum.REJECT);
+                    calculatedPushToServerOfWholeProp = internalState.calculatedPushToServerOfWholeProp;
+                } else calculatedPushToServerOfWholeProp = PushToServerEnum.ALLOW; // args/return values are always "allow"
+
                 if (!propertyContext?.isInsideModel || internalState.hasChanges()) { // so either it has changes or it's used as an arg/return value to a handler/api call
                     const changes = {} as (ICATFullArrayToServer | ICATGranularUpdatesToServer);
 
@@ -309,7 +315,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                             if (!elemPropertyContext || elemPropertyContext.getPushToServerCalculatedValue() > PushToServerEnum.REJECT) toBeSentArray[idx] = converted[0];
                         }
 
-                        if (internalState.calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
+                        if (calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
                             // if whole value is reject, don't sent anything
                             internalState.clearChanges(); // they are never going to be sent anyway so clear them
                             return [{ n: true }, newClientDataInited];

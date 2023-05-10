@@ -227,6 +227,12 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             } else newClientDataInited = newClientData; // null/undefined
 
             if (newClientDataInited) {
+                let calculatedPushToServerOfWholeProp: PushToServerEnum; 
+                if (propertyContext.isInsideModel) {
+                    internalState.calculatedPushToServerOfWholeProp = (typeof propertyContext?.getPushToServerCalculatedValue() != 'undefined' ? propertyContext?.getPushToServerCalculatedValue() : PushToServerEnum.REJECT);
+                    calculatedPushToServerOfWholeProp = internalState.calculatedPushToServerOfWholeProp;
+                } else calculatedPushToServerOfWholeProp = PushToServerEnum.ALLOW; // args/return values are always "allow"
+
                 const propertyContextCreator = new ChildPropertyContextCreator(
                         this.getCustomObjectPropertyContextGetter(newClientDataInited, propertyContext),
                         this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue(), propertyContext?.isInsideModel);
@@ -269,13 +275,13 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                             if (instanceOfChangeAwareValue(converted[1]))
                                 converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, key));
 
-                            if (PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.propertyDescriptions[key]?.getPropertyDeclaredPushToServer())
+                            if (PushToServerUtils.combineWithChildStatic(calculatedPushToServerOfWholeProp, this.propertyDescriptions[key]?.getPropertyDeclaredPushToServer())
                                  === PushToServerEnum.REJECT) delete toBeSentObj[key]; // don't send to server pushToServer reject keys
                         }
 
                         if (propertyContext?.isInsideModel) internalState.clearChanges();
 
-                        if (internalState.calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
+                        if (calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
                             // if whole value is reject, don't sent anything
                             return [{ n: true }, newClientDataInited];
                         } else return [changes, newClientDataInited];
