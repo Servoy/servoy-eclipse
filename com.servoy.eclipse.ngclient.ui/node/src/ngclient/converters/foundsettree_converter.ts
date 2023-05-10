@@ -95,7 +95,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
     }
 
     hasChanges(): boolean {
-        return this.allChanged || this.getChildrenReq !== undefined || this.updateSelectionReq !== undefined || this.updateCheckboxValueReq !== undefined;
+        return super.hasChanges() || this.getChildrenReq !== undefined || this.updateSelectionReq !== undefined || this.updateCheckboxValueReq !== undefined;
     }
 
     clearChanges(): void {

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { TypesRegistry } from '../sablo/types_registry';
+import { PushToServerUtils, TypesRegistry } from '../sablo/types_registry';
 import { WindowRefService, LoggerFactory, SessionStorageService, RequestInfoPromise } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
@@ -87,7 +87,7 @@ export class ServoyService {
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
-        converterService: ConverterService,
+        private converterService: ConverterService,
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,
@@ -184,8 +184,11 @@ export class ServoyService {
     }
 
     public executeInlineScript<T>(formname: string, script: string, params: any[]): RequestInfoPromise<T> {
-        return this.sabloService.callService('formService', 'executeInlineScript',
-            { formname, script, params }, false);
+        const promise = this.sabloService.callService('formService', 'executeInlineScript', { formname, script, params }, false);
+            
+        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise,
+                    promise.then((serviceCallResult) =>
+                        this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
 
     public loaded(): Promise<any> {

@@ -111,7 +111,7 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
     }
 
     hasChanges(): boolean {
-        return this.allChanged || this.diplayValueReq !== undefined || this.filterStringReq !== undefined;
+        return super.hasChanges() || this.diplayValueReq !== undefined || this.filterStringReq !== undefined;
     }
     
     clearChanges(): void {

@@ -235,9 +235,11 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     newClientDataInited = newClientData = this.initArrayValue(newClientData, 1, propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
 
-                    internalState.markAllChanged(false);
+                    if (propertyContext?.isInsideModel) internalState.markAllChanged(false); // otherwise it will always be sent fully anyway
                     internalState.ignoreChanges = true;
-                } else if (propertyContext?.isInsideModel && (newClientData !== oldClientData || !newClientData.getInternalState().hasChangeListener())) { // the hasChangeListener is meant to detect arguments that come as a api call to client and then are assigned to a property - and because of the now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, here old was === new value and we couldn't detect it correctly as a full change 
+                } else if (propertyContext?.isInsideModel && (newClientData !== oldClientData || !newClientData.getInternalState().hasChangeListener())) { // the hasChangeListener is meant to detect arguments that come as a api call to client and then are assigned to a property - and because of the now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, here old was === new value and we couldn't detect it correctly as a change by ref
+                    // the conversion happens for a value from the model (not handler/api arg or return value); and we see it as a change by ref
+
                     // revoke proxy on old value if present; new value is already initialized;
                     // this code means to make sure that values that are inside the model of components/services do change notifications to the correct parent even if relocated
                     // and that old values (that were before in the model but are no more) no longer send the change notifications
@@ -257,21 +259,24 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     if (previousNewValDynamicTypesHolder) internalState.dynamicPropertyTypesHolder = previousNewValDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
-                } else { // same value as before or an already initialized value (that is used maybe as and argument or return value to api calls/handlers) that can be used
+                } else { // an already initialized value that is either the same value as before or it is used here as an argument or return value to api calls/handlers
                     newClientDataInited = newClientData; // it was already initialized in the past (it's not a new client side created value)
                     internalState = newClientData.getInternalState();
-
-                    if (newClientData !== oldClientData) internalState.markAllChanged(false); // arg or return value to apis/calls? (see previous if branch)
                     internalState.ignoreChanges = true;
                 }
             } else newClientDataInited = newClientData; // null/undefined
 
             if (newClientDataInited) {
-                const arrayChanges = internalState.changedKeys;
-                if (arrayChanges.size > 0 || internalState.allChanged) {
+                let calculatedPushToServerOfWholeProp: PushToServerEnum; 
+                if (propertyContext.isInsideModel) {
+                    internalState.calculatedPushToServerOfWholeProp = (typeof propertyContext?.getPushToServerCalculatedValue() != 'undefined' ? propertyContext?.getPushToServerCalculatedValue() : PushToServerEnum.REJECT);
+                    calculatedPushToServerOfWholeProp = internalState.calculatedPushToServerOfWholeProp;
+                } else calculatedPushToServerOfWholeProp = PushToServerEnum.ALLOW; // args/return values are always "allow"
+
+                if (!propertyContext?.isInsideModel || internalState.hasChanges()) { // so either it has changes or it's used as an arg/return value to a handler/api call
                     const changes = {} as (ICATFullArrayToServer | ICATGranularUpdatesToServer);
 
-                    if (internalState.allChanged) {
+                    if (!propertyContext?.isInsideModel || internalState.hasFullyChanged()) { // fully changed or arg/return value of handler/api call
                         const fullChange = changes as ICATFullArrayToServer;
                         // we can't rely/use the current contentVersion here because, in case of a change-by-reference in a service followed
                         // by a now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, we sometimes do not have
@@ -290,10 +295,11 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                         const toBeSentArray = fullChange.v = [];
                         for (let idx = 0; idx < newClientDataInited.length; idx++) {
                             const val = newClientDataInited[idx];
-                            if (instanceOfChangeAwareValue(val)) {
-                                // even if child value has only partial changes that we want to send, do send the full value as we are sending full array value here
-                                val.getInternalState().markAllChanged(false);
-                            }
+                            
+                            // even if child value has only partial changes or no changes, do send the full elem. value as we are sending full array value here
+                            // that is, if this conversion is sending model values; otherwise (handler/api call arg/return values) it will always be sent fully anyway
+                            if (instanceOfChangeAwareValue(val) && propertyContext?.isInsideModel) val.getInternalState().markAllChanged(false);
+
                             const converted = this.converterService.convertFromClientToServer(val, this.getElementType(internalState, idx),
                                                     oldClientData ? oldClientData[idx] : undefined, elemPropertyContext);
                             // TODO although this is a full change, we give oldClientData[idx] (oldvalue) because server side does the same for some reason,
@@ -305,12 +311,11 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                             if (instanceOfChangeAwareValue(converted[1]))
                                 converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
 
-
                             // do not send to server if elem pushToServer is reject
                             if (!elemPropertyContext || elemPropertyContext.getPushToServerCalculatedValue() > PushToServerEnum.REJECT) toBeSentArray[idx] = converted[0];
                         }
 
-                        if (internalState.calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
+                        if (calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
                             // if whole value is reject, don't sent anything
                             internalState.clearChanges(); // they are never going to be sent anyway so clear them
                             return [{ n: true }, newClientDataInited];
@@ -322,7 +327,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                         // send only changed indexes
                         const changedElements = granularUpdateChanges.u = [] as ICATGranularOpToServer[];
 
-                        for (const [idx, oldVal] of arrayChanges) {
+                        for (const [idx, oldVal] of internalState.changedKeys) {
                             const newVal = newClientDataInited[idx];
 
                             let changed = (newVal !== oldVal);
@@ -354,7 +359,9 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                         }
                     }
 
-                    internalState.clearChanges();
+                    if (propertyContext?.isInsideModel) internalState.clearChanges(); // otherwise it was just sent as an arg/return val of a handler/api call so this operation
+                                                                                      // should not affect the change flags that are meant only for operations on values contained
+                                                                                      // in the model of components/services
                     return [changes, newClientDataInited];
                 } else {
                     return [{ n: true }, newClientDataInited];
