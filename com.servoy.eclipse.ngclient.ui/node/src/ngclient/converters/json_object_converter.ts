@@ -1,5 +1,5 @@
 import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
-            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction, SoftProxyRevoker } from '../../sablo/converter.service';
+            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction, SoftProxyRevoker, CASBackup } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
@@ -208,15 +208,15 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
                     // clear old internal state and get non-proxied value in order to re-initialize/start fresh in the new location (old proxy would send change notif to wrong place)
-                    // we only need from the old internal state the dynamic types
-                    const previousNewValDynamicTypesHolder = newClientData.getInternalState()?.dynamicPropertyTypesHolder;
+                    // some things that need to be restored afterwards will be stored in "savedInternalState"
+                    const savedInternalState = newClientData.getInternalState().saveInternalState();
                     newClientData = newClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
                     delete newClientData[ChangeAwareState.INTERNAL_STATE_MEMBER_NAME];
 
                     newClientDataInited = newClientData = this.initCustomObjectValue(newClientData, 1, propertyContext?.getPushToServerCalculatedValue(), true);
                     internalState = newClientDataInited.getInternalState();
+                    internalState.restoreSavedInternalState(savedInternalState);
 
-                    if (previousNewValDynamicTypesHolder) internalState.dynamicPropertyTypesHolder = previousNewValDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
                 } else { // an already initialized value that is either the same value as before or it is used here as an argument or return value to api calls/handlers
@@ -309,15 +309,16 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                                 const ch = {} as ICOTGranularOpToServer;
                                 ch.k = key;
 
-                                const wasSmartBeforeConversion = instanceOfChangeAwareValue(newVal);
                                 const converted = this.converterService.convertFromClientToServer(newVal, this.getPropertyType(internalState, key), oldVal,
                                                         propertyContextCreator.withPushToServerFor(key));
 
                                 ch.v = converted[0];
-                                if (newVal !== converted[1]) newClientDataInited[key] = converted[1];
-                                if (!wasSmartBeforeConversion && instanceOfChangeAwareValue(converted[1]))
-                                    // if it was a new object/array set in this key, which was initialized by convertFromClientToServer call above, do add the change notifier to it
-                                    converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, key));
+                                if (newVal !== converted[1]) {
+                                    newClientDataInited[key] = converted[1];
+                                    if (instanceOfChangeAwareValue(converted[1]) && !converted[1].getInternalState().hasChangeListener())
+                                        // if it was a new object/array set in this key, which was initialized by convertFromClientToServer call above, do add the change notifier to it
+                                        converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, key));
+                                }
 
                                 changedElements.push(ch);
                             }
@@ -500,6 +501,10 @@ class CustomObjectValue extends BaseCustomObject implements IChangeAwareValue, I
 
 }
 
+export interface BCOSBackup extends CASBackup {
+    dynamicPropertyTypesHolder: Record<string, any>;
+}
+
 export class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState implements IParentAccessForSubpropertyChanges<KeyT> {
 
     public contentVersion: number;
@@ -541,8 +546,19 @@ export class BaseCustomObjectState<KeyT extends number | string, VT> extends Cha
     public destroyAndGetNonProxiedValueOfProp(): VT {
         // this basically makes sure that the original thing will no longer be updated via the old proxy (which would notify changes to a wrong location...)
         if (this.proxyRevokerFunc) this.proxyRevokerFunc();
-
         return this.originalNonProxiedInstanceOfCustomObject;
+    }
+    
+    public saveInternalState(): BCOSBackup {
+        const superSBackup = super.saveInternalState() as BCOSBackup;
+        superSBackup.dynamicPropertyTypesHolder = this.dynamicPropertyTypesHolder;
+        // saves it before it's destroyed and recreated by caller; some things need to stay the same
+        return superSBackup;
+    }
+    
+    public restoreSavedInternalState(saved: BCOSBackup) {
+        this.dynamicPropertyTypesHolder = saved.dynamicPropertyTypesHolder;
+        super.restoreSavedInternalState(saved);
     }
 
     public shouldIgnoreChangesBecauseFromOrToServerIsInProgress(): boolean {

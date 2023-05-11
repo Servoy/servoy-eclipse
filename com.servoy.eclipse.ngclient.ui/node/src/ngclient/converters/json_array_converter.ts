@@ -248,15 +248,15 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                     // if a different smart value from the browser is assigned to replace old value it is a full value change; also adjust the version to it's new location
 
                     // clear old internal state proxy and get non-proxied value in order to re-initialize/start fresh in the new location (old proxy would send change notif to wrong place)
-                    // we only need from the old internal state the dynamic types
-                    const previousNewValDynamicTypesHolder = newClientData.getInternalState()?.dynamicPropertyTypesHolder;
+                    // some things that need to be restored afterwards will be stored in "savedInternalState"
+                    const savedInternalState = newClientData.getInternalState().saveInternalState();
                     newClientData = newClientData.getInternalState().destroyAndGetNonProxiedValueOfProp();
                     delete newClientData[ChangeAwareState.INTERNAL_STATE_MEMBER_NAME];
 
                     newClientDataInited = newClientData = this.initArrayValue(newClientData, 1, propertyContext?.getPushToServerCalculatedValue());
                     internalState = newClientDataInited.getInternalState();
+                    internalState.restoreSavedInternalState(savedInternalState);
 
-                    if (previousNewValDynamicTypesHolder) internalState.dynamicPropertyTypesHolder = previousNewValDynamicTypesHolder;
                     internalState.markAllChanged(false);
                     internalState.ignoreChanges = true;
                 } else { // an already initialized value that is either the same value as before or it is used here as an argument or return value to api calls/handlers
@@ -345,14 +345,15 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                                const ch = {} as ICATGranularOpToServer;
                                ch.i = idx;
 
-                                const wasSmartBeforeConversion = instanceOfChangeAwareValue(newVal);
                                 const converted = this.converterService.convertFromClientToServer(newVal, this.getElementType(internalState, idx), oldVal, elemPropertyContext);
                                 ch.v = converted[0];
-                                if (newVal !== converted[1]) newClientDataInited[idx] = converted[1];
+                                if (newVal !== converted[1]) {
+                                    newClientDataInited[idx] = converted[1];
+                                    if (instanceOfChangeAwareValue(converted[1]) && !converted[1].getInternalState().hasChangeListener())
+                                        // if it was a new object/array set at this index which was initialized by convertFromClientToServer call, do add the change notifier to it
+                                        converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
+                                }
 
-                                if (!wasSmartBeforeConversion && instanceOfChangeAwareValue(converted[1]))
-                                    // if it was a new object/array set at this index which was initialized by convertFromClientToServer call, do add the change notifier to it
-                                    converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
 
                                 changedElements.push(ch);
                             }

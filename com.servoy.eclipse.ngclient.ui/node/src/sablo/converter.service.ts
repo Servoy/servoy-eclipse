@@ -286,6 +286,10 @@ export interface IChangeAwareValue {
     getInternalState(): ChangeAwareState;
 }
 
+export interface CASBackup {
+    changeListener: ChangeListenerFunction;
+}
+
 export class ChangeAwareState {
     
     public static INTERNAL_STATE_MEMBER_NAME = "__internalState";
@@ -328,6 +332,17 @@ export class ChangeAwareState {
 //        this.inNotify = true;
         if (this.changeListener) this.changeListener(doNotPushNow);
 //        this.inNotify = false;
+    }
+    
+    public saveInternalState(): CASBackup {
+        // saves it before it's destroyed and recreated by caller; some things need to stay the same
+        return {
+            changeListener: this.changeListener
+        }
+    }
+    
+    public restoreSavedInternalState(saved: CASBackup) {
+        this.changeListener = saved.changeListener;
     }
 
 }
