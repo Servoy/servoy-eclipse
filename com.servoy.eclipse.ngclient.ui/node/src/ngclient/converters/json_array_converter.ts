@@ -347,13 +347,11 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
                                 const converted = this.converterService.convertFromClientToServer(newVal, this.getElementType(internalState, idx), oldVal, elemPropertyContext);
                                 ch.v = converted[0];
-                                if (newVal !== converted[1]) {
-                                    newClientDataInited[idx] = converted[1];
-                                    if (instanceOfChangeAwareValue(converted[1]) && !converted[1].getInternalState().hasChangeListener())
-                                        // if it was a new object/array set at this index which was initialized by convertFromClientToServer call, do add the change notifier to it
-                                        converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
-                                }
+                                if (newVal !== converted[1]) newClientDataInited[idx] = converted[1];
 
+                                if (instanceOfChangeAwareValue(converted[1]))
+                                    // if it was a new object/array set at this index which was initialized by convertFromClientToServer call, do add the change notifier to it (the same is true for values that move by reference in the model, their change listener must always be up-to-date)
+                                    converted[1].getInternalState().setChangeListener(this.getChangeListener(newClientDataInited, idx));
 
                                 changedElements.push(ch);
                             }
