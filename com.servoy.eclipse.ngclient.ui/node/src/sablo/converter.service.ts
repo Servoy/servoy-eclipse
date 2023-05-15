@@ -295,7 +295,6 @@ export interface IUIDestroyAwareValue {
 }
 
 export interface CASBackup {
-    changeListener: ChangeListenerFunction;
 }
 
 export class ChangeAwareState {
@@ -342,15 +341,19 @@ export class ChangeAwareState {
 //        this.inNotify = false;
     }
     
+    /**
+     * Saves relevant internal state properties in case a value's internal state is recreated after a move from one place to another (in the model).
+     * Some parts of the internal state might need to be restored in the newly created internal state in that case.
+     */
     public saveInternalState(): CASBackup {
-        // saves it before it's destroyed and recreated by caller; some things need to stay the same
-        return {
-            changeListener: this.changeListener
-        }
+        // classes that extend this one need to save state (see json_array_converter and json_object_converter)
+        return {};
     }
     
-    public restoreSavedInternalState(saved: CASBackup) {
-        this.changeListener = saved.changeListener;
+    /**
+     * Restores into this internal state whatever saveInternalState() saved.
+     */
+    public restoreSavedInternalState(_saved: CASBackup) {
     }
 
 }
