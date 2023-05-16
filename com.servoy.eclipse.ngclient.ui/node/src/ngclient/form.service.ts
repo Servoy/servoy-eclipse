@@ -537,12 +537,15 @@ export class FormService {
 
         const newFormData = msg.forms[formName];
         const newFormProperties = newFormData['']; // properties of the form itself
+        
+        const comp: ComponentCache = formCache.getComponent('');
 
         if (newFormProperties) {
             // properties of the form itself were received
             // currently what server side sends for the form itself doesn't need client side conversions
             for (const p of Object.keys(newFormProperties)) {
-                formComponent[p] = newFormProperties[p];
+				comp.model[p] = newFormProperties[p];
+                formComponent[p] = newFormProperties[p]; 
             }
         }
 
@@ -559,6 +562,7 @@ export class FormService {
                 this.log.debug(this.log.buildMessage(() => ('got message for ' + componentName + ' of form ' + formName + ' but that component is not in the cache')));
                 continue;
             }
+            
             // get static client side types for this component - if it has any
             const componentSpec: IWebObjectSpecification = formCache.getComponentSpecification(componentName);
 

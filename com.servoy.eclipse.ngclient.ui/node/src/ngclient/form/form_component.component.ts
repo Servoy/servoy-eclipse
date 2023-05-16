@@ -78,12 +78,12 @@ export abstract class AbstractFormComponent {
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
-    get cssStyles() {
+    get cssstyles() {
         return this._cssstyles;
     }
 
     @Input()
-    set cssStyles(cssStyles: { [x: string]: any }) {
+    set cssstyles(cssStyles: { [x: string]: any }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
         for (const containername of Object.keys(cssStyles)) {
