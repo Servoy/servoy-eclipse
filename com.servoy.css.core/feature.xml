@@ -80,7 +80,7 @@
          id="org.eclipse.wst.common.project.facet.core"
          download-size="0"
          install-size="0"
-         version="1.4.402.v202111212041"
+         version="1.4.403.v202303031844"
          unpack="false"/>
 
    <plugin
@@ -108,7 +108,7 @@
          id="org.eclipse.wst.css.core"
          download-size="0"
          install-size="0"
-         version="1.3.200.v202211200019"
+         version="1.3.300.v202301080257"
          unpack="false"/>
 
    <plugin
@@ -136,14 +136,14 @@
          id="org.eclipse.wst.server.core"
          download-size="0"
          install-size="0"
-         version="1.10.300.v202211100535"
+         version="1.11.0.v202301110442"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.wst.sse.core"
          download-size="0"
          install-size="0"
-         version="1.2.900.v202211200019"
+         version="1.2.1000.v202301190221"
          unpack="false"/>
 
    <plugin
@@ -192,7 +192,7 @@
          id="org.eclipse.jem.util"
          download-size="0"
          install-size="0"
-         version="2.1.300.v202103232321"
+         version="2.1.300.v202301170743"
          unpack="false"/>
 
    <plugin
