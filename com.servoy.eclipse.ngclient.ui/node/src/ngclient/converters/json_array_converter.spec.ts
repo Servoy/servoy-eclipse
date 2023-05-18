@@ -3,7 +3,7 @@ import { TypesRegistry, ICustomTypesFromServer, IPropertiesFromServer, IProperty
             IFactoryTypeDetails, IPropertyContext, PushToServerEnum, PushToServerUtils } from '../../sablo/types_registry';
 
 import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
-import { LoggerFactory, WindowRefService, ICustomArrayValue } from '@servoy/public';
+import { LoggerFactory, WindowRefService, ICustomArrayValue, SpecTypesService } from '@servoy/public';
 
 import { CustomArrayTypeFactory, CustomArrayType, ICATFullValueFromServer, ICATGranularUpdatesToServer, ICATNoOpToServer,
             ICATFullArrayToServer, ICATGranularUpdatesFromServer, ICATOpTypeEnum } from './json_array_converter';
@@ -16,6 +16,7 @@ describe( 'JSONArrayConverter', () => {
     let converterService: ConverterService;
     let loggerFactory: LoggerFactory;
     let typesRegistry: TypesRegistry;
+    let specTypesService: SpecTypesService;
 
     let stringArrayType: CustomArrayType<string>;
     let stringArrayPushToServer: PushToServerEnum;
@@ -40,16 +41,17 @@ describe( 'JSONArrayConverter', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule( {
-            providers: [ConverterService, LoggerFactory, WindowRefService]
+            providers: [ConverterService, LoggerFactory, WindowRefService, SpecTypesService]
         } );
         converterService = TestBed.inject( ConverterService );
         loggerFactory = TestBed.inject(LoggerFactory);
         typesRegistry = TestBed.inject(TypesRegistry);
+        specTypesService = TestBed.inject(SpecTypesService);
 
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, new DateType(), true);
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, loggerFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, loggerFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, loggerFactory));
 
         // IWebObjectTypesFromServer { [specName: string]: IWebObjectSpecificationFromServer; }
         // IWebObjectSpecificationFromServer {

@@ -4,7 +4,7 @@ import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } fro
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
 import { PushToServerUtils, TypesRegistry } from '../sablo/types_registry';
-import { WindowRefService, LoggerFactory, SessionStorageService, RequestInfoPromise } from '@servoy/public';
+import { WindowRefService, LoggerFactory, SessionStorageService, RequestInfoPromise, SpecTypesService } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
 import { CustomObjectTypeFactory } from './converters/json_object_converter';
@@ -91,7 +91,8 @@ export class ServoyService {
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,
-        viewportService: ViewportService) {
+        viewportService: ViewportService,
+        specTypesService: SpecTypesService) {
 
         this.uiProperties = new UIProperties(sessionStorageService);
         this.uiBlockerService = new UIBlockerService(this);
@@ -99,7 +100,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
 
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
 
         typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
         typesRegistry.registerGlobalType(FoundsetTreeType.TYPE_NAME, new FoundsetTreeType(sabloDeferHelper));

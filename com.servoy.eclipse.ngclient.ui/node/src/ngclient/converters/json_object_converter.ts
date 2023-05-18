@@ -3,7 +3,7 @@ import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
-import { LoggerFactory, LoggerService, BaseCustomObject  } from '@servoy/public';
+import { LoggerFactory, LoggerService, BaseCustomObject, SpecTypesService  } from '@servoy/public';
 import { ICustomObjectValue } from '@servoy/public';
 
 export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
@@ -18,7 +18,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
     private readonly logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
-            private readonly converterService: ConverterService,
+            private readonly converterService: ConverterService, private readonly specTypesService: SpecTypesService,
             logFactory: LoggerFactory) {
         this.logger = logFactory.getLogger('CustomObjectTypeFactory');
     }
@@ -50,7 +50,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
         // create empty CustomObjectType instances for all custom types in this .spec
         for (const customTypeName of Object.keys(details)) {
              // create just an empty type reference that will be populated below with child property types
-            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService, this.logger);
+            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService, this.specTypesService, this.logger, webObjectSpecName + '.' + customTypeName);
         }
 
         // set the sub-properties of each CustomObjectType to the correct IType
@@ -71,7 +71,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
     private propertyDescriptions: { [propName: string]: IPropertyDescription };
 
-    constructor(private converterService: ConverterService, private readonly logger: LoggerService) {}
+    constructor(private converterService: ConverterService, private readonly specTypesService: SpecTypesService,
+        private readonly logger: LoggerService, private readonly fullyQulifiedTypeName: string) {}
 
     // this will always get called once with a non-null param before the CustomObjectType is used for conversions;
     // it can't be given in constructor as types might depend on each other and they are all created before being 'linked'; see factory code above
@@ -363,6 +364,17 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         return propType;
     }
 
+    private static clonePrototypeDeep(p) {
+        // used so that we can augment the property chain of server or client code created custom objects
+        // so that CustomObjectValue.class is the first thing in their prototype but then the following prototypes on the value can remain unchanged
+        // for each type of custom object value
+        const clonedP = {};
+        Object.getOwnPropertyNames(p).forEach((memberName) => clonedP[memberName] = p[memberName]);
+        const prot = Object.getPrototypeOf(p);
+        if (prot && prot !== Object.prototype) Object.setPrototypeOf(clonedP, CustomObjectType.clonePrototypeDeep(prot));
+        return clonedP;
+    }
+
     private initCustomObjectValue(objectToInitialize: any, contentVersion: number,
                                 pushToServerCalculatedValue: PushToServerEnum, force?: boolean): CustomObjectValue {
 
@@ -371,8 +383,35 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             // this setPrototypeOf seems to be faster then creating a new CustomObjectValue and copying all elements over to it
             // and it is better then having just an interface for CustomObjectValue and adding via Object.defineProperties(...) all (deprecated or valid)
             // methods of that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
-            if (Object.getPrototypeOf(objectToInitialize) !== CustomObjectValue.prototype) Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
-            // TODO if initial object is not a standard object but something that extends Object we could include the custom prototypes in the prototype chain between CustomObjectValue and object...
+            let protoOfObj = Object.getPrototypeOf(objectToInitialize);
+            
+            // if it doesn't yet extend our custom object behavior do integrate that into the prototype chain 
+            if (protoOfObj !== CustomObjectValue.prototype) {
+                // add our functionality to it via prototype chain;
+                let protoOfOurInternalImpl: any; 
+                if (protoOfObj === Object.prototype) {
+                    // if the previous proto was just Object.prototype (so it was just a plain object)
+                    const registeredCustomObjectTypeConstructor = this.specTypesService.getRegisteredCustomObjectTypeConstructor(this.fullyQulifiedTypeName);
+                    if (registeredCustomObjectTypeConstructor) {
+                        // if it's a value that comes from the server and the component/service did register a class for it via SpecTypesService.registerCustomObjectType(...)
+                        // do use that so that the component/service had nicely customized custom obj. values
+
+                        // we can't use here CustomObjectValue.prototype because setting the prototype of that to what the obj. currently has would affect all custom
+                        // objects in the system then, that is why clone is used here
+                        protoOfOurInternalImpl = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype);
+                        Object.setPrototypeOf(protoOfOurInternalImpl, registeredCustomObjectTypeConstructor.prototype); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
+                    } else protoOfOurInternalImpl = CustomObjectValue.prototype; // we just use CustomObjectValue.prototype (which has as prototype Object.prototype as well)
+                } else {
+                    // if it had a different prototype before (so it has a class, it was not a plain JS object), we need a new CustomObjectValue() as prototype
+                    // and we can safely set the prototype of that then to what the object now has - so it keeps both our behavior and the behavior it previously had
+
+                    // we can't use here CustomObjectValue.prototype because setting the prototype of that to what the obj. currently has would affect all custom
+                    // objects in the system then, that is why clone is used here
+                    protoOfOurInternalImpl = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype)
+                    Object.setPrototypeOf(protoOfOurInternalImpl, protoOfObj); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
+                } 
+                Object.setPrototypeOf(objectToInitialize, protoOfOurInternalImpl);
+            }
 
             const object = objectToInitialize as CustomObjectValue;
 
@@ -450,14 +489,7 @@ const instanceOfCustomObject = (obj: any): obj is CustomObjectValue =>
     instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof CustomObjectState;
 
 /** implementers of this interface are generated via initCustomObjectValue */
-interface CustomObjectValue extends IChangeAwareValue, ICustomObjectValue {
-
-    /** do not call this methods from component/service impls.; this state is meant to be used only by the property type impl. */
-    getInternalState(): CustomObjectState;
-
-}
-
-class CustomObjectValue extends BaseCustomObject implements IChangeAwareValue, ICustomObjectValue {
+class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue {
 
     // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
     // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)

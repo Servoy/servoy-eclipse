@@ -1,39 +1,61 @@
-import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs';
 import { IComponentCache } from './services/servoy_public.service';
 import { LoggerFactory, LoggerService } from './logger.service';
+import { Injectable } from '@angular/core';
 
-/**
- * This service is DEPRECATED, as now, more .spec info about components/services is being sent to client (types + pushToServer info), and
- * for pushToServer SHALLOW or DEEP in .spec file (for custom objects/custom arrays), a proxy object will be used
- * on client to automatically detect reference changes and send them to server as needed.
- *
- * So there isn't a need anymore to provide 'watched' properties list by extending BaseCustomObject or manually pushing them. Just make sure that, if it
- * has pushToServer > ALLOW and if you assign a new full value (array or obj) to the property on client, read it back from the model (as that will be
- * updated to a proxy of your new value) and use it instead.
- *
- * @deprecated
- */
+export type CustomObjectTypeConstructor = (new() => ICustomObjectValue);
+
 @Injectable({
   providedIn: 'root'
 })
 export class SpecTypesService {
 
     private log: LoggerService;
+    private registeredCustomObjectTypes = new Map<string, CustomObjectTypeConstructor>();
 
     constructor(logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SpecTypesService');
     }
 
     /**
-     * DEPRECATED. See jsDoc/comment from SpecTypesService.
+     * This method is DEPRECATED, as now, more .spec info about components/services is being sent to client (types + pushToServer info), and
+     * for pushToServer SHALLOW or DEEP in .spec file (for custom objects/custom arrays), a proxy object will be used
+     * on client to automatically detect reference changes and send them to server as needed.
+     *
+     * So there isn't a need anymore to provide 'watched' properties list by extending BaseCustomObject or manually pushing them. Just make sure that, if it
+     * has pushToServer > ALLOW and if you assign a new full value (array or obj) to the property on client, read it back from the model after it's pushed to server (as that will be
+     * updated/wrapped into a Proxy of your new value) and use that one instead.
+     * 
+     * If you still need/want to use a custom class for your custom objects (maybe you want to have methods on them or do instanceof Checks in code...) you
+     * can do that by calling registerCustomObjectType(...) instead; the constructor's class you give there does not need to be a BaseCustomObject. For backwards
+     * compatibility, this method will call the new registerCustomObjectType(...).
      *
      * @deprecated
      */
-    registerType(name: string, classRef: typeof BaseCustomObject) {
+    registerType(customObjectTypeName: string, customObjectTypeConstructor: typeof BaseCustomObject) {
         this.log.info(this.log.buildMessage(() => ('SpecTypesService * SpecTypesService.registerTypeupdates and extending BaseCustomObject is no longer necessary. Code that registers it for "'
-                                                        + name + '", "' + classRef + '" should be safe to remove/clean up (as long as the servoy component definition .spec file is ok).')));
+                    + customObjectTypeName + '", "' + customObjectTypeConstructor + '" should be safe to remove/clean up (as long as the servoy component definition .spec file is ok). If you really need a custom class for these custom objects client-side '
+                    + ' do call registerCustomObjectType() instead, so that the no-arg constructor that you give there can be used for new objects that come from the server.')));
+        this.registerCustomObjectType(customObjectTypeName, customObjectTypeConstructor);
+    }
+
+    /**
+     * Registers a custom object type constructor to the system for components that want to use specialized classes for custom objects that come from the server.
+     * 
+     * Calling this IS NOT MANDATORY. You can just use simple interfaces (or interfaces that extend as well ICustomObjectValue) for your custom objects now. See .registerType(...) deprecation comment for more information.
+     * 
+     * @param customObjectTypeName the type name as defined in the .spec of the component/service, prefixed with the name of the
+     *          component/service + ".". For example "bootstrapextracomponents-navbar.menuItem". 
+     * @param customObjectTypeConstructor a constructor that custom object type should use when receiving new values from the server for
+     *          the given customObjectTypeName. Be aware though that the values of the given class constructor will be augmented (via prototype chain)
+     *          with some internal implementation of the custom object type.
+     */
+    registerCustomObjectType(customObjectTypeName: string, customObjectTypeConstructor: CustomObjectTypeConstructor) {
+        this.registeredCustomObjectTypes.set(customObjectTypeName, customObjectTypeConstructor);
+    }
+    
+    getRegisteredCustomObjectTypeConstructor(customObjectTypeName: string) {
+        return this.registeredCustomObjectTypes.get(customObjectTypeName);
     }
 
 //  the old methods
@@ -48,7 +70,7 @@ export class SpecTypesService {
 /**
  * This type is DEPRECATED.
  * 
- * You can remove extends BaseCustomObject from any custom types you have and even make them interfaces).
+ * You can remove extends BaseCustomObject from any custom types that you have.
  * 
  * You can even turn your custom types into interfaces (that can also - optionally - implement ICustomObjectValue - if you need that; see details below). The
  * system will automatically generate the correct object for that interface (as long as it follows what is defined in the .spec file for this custom
@@ -277,6 +299,8 @@ export interface ICustomArrayValue<T> extends Array<T> {
 export interface ICustomObjectValue extends Record<string, any> {
 
     /**
+     * If you extend this interface DO NOT IMPLEMENT THIS METHOD YOURSELF; it will be added under the hood by the custom object type code.
+     * 
      * Calling this method is (rarely) only needed if both:
      *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is >= ALLOW)
      *   2. AND you store in the object simple json values that are nested, and type subproperties simply as 'object' in the .spec file. So if the
