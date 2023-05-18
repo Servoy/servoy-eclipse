@@ -4,7 +4,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, Component, ViewChild, TemplateRef,
             Renderer2, ChangeDetectorRef, DebugElement } from '@angular/core';
 
 import { FormattingService, TooltipService, LoggerFactory, ServoyBaseComponent,
-            ICustomObjectValue, ICustomArrayValue, ServoyPublicModule, WindowRefService } from '@servoy/public';
+            ICustomObjectValue, ICustomArrayValue, ServoyPublicModule, WindowRefService, SpecTypesService } from '@servoy/public';
 import { LocaleService } from '../../ngclient/locale.service';
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
 
@@ -136,6 +136,7 @@ describe('FormComponentComponentTest', () => {
     let websocketService: jasmine.SpyObj<WebsocketService>;
     let logFactory: LoggerFactory;
     let typesRegistry: TypesRegistry;
+    let specTypesService: SpecTypesService;
 
     let formService: FormService;
     let testComponentModel: ComponentModelContents;
@@ -176,7 +177,8 @@ describe('FormComponentComponentTest', () => {
                 ClientFunctionService,
 
                 FormService,
-                PopupFormService
+                PopupFormService,
+                SpecTypesService
             ],
             schemas: [
                 CUSTOM_ELEMENTS_SCHEMA
@@ -187,10 +189,11 @@ describe('FormComponentComponentTest', () => {
         typesRegistry = TestBed.inject(TypesRegistry);
         logFactory = TestBed.inject(LoggerFactory);
         converterService = TestBed.inject(ConverterService);
+        specTypesService = TestBed.inject(SpecTypesService);
 
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_arr', new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_obj', new CustomObjectTypeFactory(typesRegistry, converterService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_obj', new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
 
         // here we feed in the client side equivalent some (imaginary test) servoy .spec file
         // so we can play a bit with push to server settings in tests

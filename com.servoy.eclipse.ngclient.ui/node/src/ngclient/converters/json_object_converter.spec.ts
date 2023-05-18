@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 
 import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
-import { LoggerFactory } from '@servoy/public';
+import { LoggerFactory, SpecTypesService } from '@servoy/public';
 import { WindowRefService, ICustomObjectValue } from '@servoy/public';
 
 import { TypesRegistry, ICustomTypesFromServer, IPropertiesFromServer, IPropertyDescriptionFromServerWithMultipleEntries, ITypeFromServer,
@@ -18,6 +18,7 @@ describe('JSONObjectConverter', () => {
     let converterService: ConverterService;
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
+    let specTypesService: SpecTypesService;
 
     let oneTabType: CustomObjectType;
     let oneTabPushToServer: PushToServerEnum;
@@ -37,15 +38,16 @@ describe('JSONObjectConverter', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [ConverterService, LoggerFactory, WindowRefService]
+            providers: [ConverterService, LoggerFactory, WindowRefService, SpecTypesService]
         });
         converterService = TestBed.inject(ConverterService);        typesRegistry = TestBed.inject(TypesRegistry);
         loggerFactory = TestBed.inject(LoggerFactory);
+        specTypesService = TestBed.inject(SpecTypesService);
 
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, new DateType(), true);
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, loggerFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, loggerFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, loggerFactory));
 
         // IWebObjectTypesFromServer { [specName: string]: IWebObjectSpecificationFromServer; }
         // IWebObjectSpecificationFromServer {
