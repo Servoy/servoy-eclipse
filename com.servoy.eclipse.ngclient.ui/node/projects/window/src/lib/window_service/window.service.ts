@@ -118,15 +118,20 @@ export class WindowPluginService {
                         this.servoyService.sendServiceChanges('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     });
                     this.popupMenuService.initMenu(this._popupmenus[i]);
-                    if (this._popupMenuShowCommand.elementId) {
-                        const element = this.doc.getElementById(this._popupMenuShowCommand.elementId);
-                        if (element) {
-                            this.popupMenuService.showMenuAt(element);
+                    if (this._popupMenuShowCommand?.elementId) {
+                        const element = this.doc.querySelector("[id^="+this._popupMenuShowCommand.elementId+"]") as HTMLElement;
+                        if (element && this._popupMenuShowCommand.x && this._popupMenuShowCommand.y) {
+							const x = element.getBoundingClientRect().x + this._popupMenuShowCommand.x + (element.getBoundingClientRect().width / 2);
+							const y = element.getBoundingClientRect().y + this._popupMenuShowCommand.y;
+							this.popupMenuService.showMenu(x, y, this._popupMenuShowCommand?.positionTop || false);
+						}
+                        else if (element) {
+                            this.popupMenuService.showMenuAt(element, this._popupMenuShowCommand?.positionTop || false);
                         } else {
                             this.log.error('Cannot display popup, element with id:' + this._popupMenuShowCommand.elementId + ' , not found');
                         }
                     } else {
-                        this.popupMenuService.showMenu(this._popupMenuShowCommand.x, this._popupMenuShowCommand.y);
+                        this.popupMenuService.showMenu((this._popupMenuShowCommand.x + 70), this._popupMenuShowCommand.y, this._popupMenuShowCommand?.positionTop || false);
                     }
                     break;
                 }

@@ -40,7 +40,7 @@ export class PopupMenuService {
         this.menu.classList.add('dropdown-menu');
         this.menu.classList.add('svy-popup-menu');
         this.menu.style.visibility = 'hidden';
-        if (popup.cssClass)this. menu.classList.add(popup.cssClass);
+        if (popup.cssClass) this.menu.classList.add(popup.cssClass);
 
         this.generateMenuItems(popup.items, this.menu, false);
 
@@ -51,9 +51,10 @@ export class PopupMenuService {
         this.doc.body.appendChild(this.menu);
     }
 
-    public showMenuAt(element: HTMLElement) {
+    public showMenuAt(element: HTMLElement, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
         createPopper(element, this.menu, {
+			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
                 {
                   name: 'preventOverflow',
@@ -66,7 +67,7 @@ export class PopupMenuService {
           });
     }
 
-    public showMenu(x: number, y: number) {
+    public showMenu(x: number, y: number, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
         const virtualElement: VirtualElement = {
             getBoundingClientRect: () => {
@@ -81,6 +82,7 @@ export class PopupMenuService {
             }
         };
         createPopper(virtualElement, this.menu, {
+			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
                 {
                   name: 'preventOverflow',
