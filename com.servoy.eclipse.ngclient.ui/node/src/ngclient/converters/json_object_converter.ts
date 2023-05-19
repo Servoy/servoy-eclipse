@@ -3,7 +3,7 @@ import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
-import { LoggerFactory, LoggerService, BaseCustomObject, SpecTypesService  } from '@servoy/public';
+import { LoggerFactory, LoggerService, SpecTypesService  } from '@servoy/public';
 import { ICustomObjectValue } from '@servoy/public';
 
 export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
@@ -50,7 +50,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
         // create empty CustomObjectType instances for all custom types in this .spec
         for (const customTypeName of Object.keys(details)) {
              // create just an empty type reference that will be populated below with child property types
-            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService, this.specTypesService, this.logger, webObjectSpecName + '.' + customTypeName);
+            customTypesForThisSpec[customTypeName] = new CustomObjectType(this.converterService, this.specTypesService, this.logger, customTypeName);
         }
 
         // set the sub-properties of each CustomObjectType to the correct IType
@@ -364,7 +364,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         return propType;
     }
 
-    private static clonePrototypeDeep(p) {
+    private static clonePrototypeDeep(p: any) {
         // used so that we can augment the property chain of server or client code created custom objects
         // so that CustomObjectValue.class is the first thing in their prototype but then the following prototypes on the value can remain unchanged
         // for each type of custom object value
