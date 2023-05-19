@@ -3,7 +3,7 @@ import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
-import { LoggerFactory, LoggerService, SpecTypesService  } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, SpecTypesService  } from '@servoy/public';
 import { ICustomObjectValue } from '@servoy/public';
 
 export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
@@ -66,10 +66,62 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 
 }
 
+/** implementers of this interface are generated via initCustomObjectValue */
+class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue {
+
+    // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
+    // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
+    // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
+    // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
+    // avoid iteration/enumeration/public access to/on it
+    __internalState: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
+
+    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
+        Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
+            configurable: true,
+            enumerable: false,
+            writable: false,
+            value: new CustomObjectState(this, propertyDescriptions)
+        }); // we use Object.defineProperty to make the internal state not enumerable (so that it does not appear when iterating using 'in' or 'of')
+        this.__internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
+        this.__internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
+        this.__internalState.dynamicPropertyTypesHolder = {};
+    }
+
+    /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
+    getInternalState(): CustomObjectState {
+        return this.__internalState;
+    }
+
+    markSubPropertyAsHavingDeepChanges(subPropertyName: string): void {
+        // this can be called by user for >= ALLOW pushToServer combined with 'object' type,
+        // so simple JSON subproperties, that change by content, not reference
+        const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(this.__internalState.calculatedPushToServerOfWholeProp,
+                                                    this.__internalState.propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
+
+        if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
+            this.__internalState.changedKeys.set(subPropertyName, this[subPropertyName]);
+
+            // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
+            // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
+            this.__internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
+        }
+    }
+
+}
+
 /** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
 export class CustomObjectType implements IType<CustomObjectValue> {
 
     private propertyDescriptions: { [propName: string]: IPropertyDescription };
+    
+    private static customObjectValuePrototypeWithDeprecated: any;
+    static {
+        let lastClonedProto: any;
+        [CustomObjectType.customObjectValuePrototypeWithDeprecated, lastClonedProto] = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype);
+        Object.setPrototypeOf(lastClonedProto, BaseCustomObject.prototype); // for backwards compatibilility;
+                // otherwise CustomObjectType.customObjectValuePrototypeWithDeprecated could just be CustomObjectValue.prototype
+    }
 
     constructor(private converterService: ConverterService, private readonly specTypesService: SpecTypesService,
         private readonly logger: LoggerService, private readonly fullyQulifiedTypeName: string) {}
@@ -364,15 +416,24 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         return propType;
     }
 
-    private static clonePrototypeDeep(p: any) {
+    /**
+     * @return [clonedProto, lastClonedProto] clonedProto tha is returned it the clone of the given prototype; lastClonedProto is the inner most prototype
+     *              that was cloned before Object.prototype (as the cloning is recursive).
+     */
+    private static clonePrototypeDeep(p: any): [any, any] {
         // used so that we can augment the property chain of server or client code created custom objects
         // so that CustomObjectValue.class is the first thing in their prototype but then the following prototypes on the value can remain unchanged
         // for each type of custom object value
         const clonedP = {};
+        let lastClonedP = clonedP;
         Object.getOwnPropertyNames(p).forEach((memberName) => clonedP[memberName] = p[memberName]);
-        const prot = Object.getPrototypeOf(p);
-        if (prot && prot !== Object.prototype) Object.setPrototypeOf(clonedP, CustomObjectType.clonePrototypeDeep(prot));
-        return clonedP;
+        const childProt = Object.getPrototypeOf(p);
+        if (childProt && childProt !== Object.prototype) {
+            let clonedChildProt: any;
+            [clonedChildProt, lastClonedP] = CustomObjectType.clonePrototypeDeep(childProt);
+            Object.setPrototypeOf(clonedP, clonedChildProt);
+        }
+        return [clonedP, lastClonedP];
     }
 
     private initCustomObjectValue(objectToInitialize: any, contentVersion: number,
@@ -386,7 +447,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             let protoOfObj = Object.getPrototypeOf(objectToInitialize);
             
             // if it doesn't yet extend our custom object behavior do integrate that into the prototype chain 
-            if (protoOfObj !== CustomObjectValue.prototype) {
+            if (protoOfObj !== CustomObjectValue.prototype && protoOfObj.constructor !== CustomObjectValue.prototype.constructor) { // so check if CustomObjectValue or a clone  is already there / either directly or as a clone (that has the same constructor)
                 // add our functionality to it via prototype chain;
                 let protoOfOurInternalImpl: any; 
                 if (protoOfObj === Object.prototype) {
@@ -398,17 +459,24 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
                         // we can't use here CustomObjectValue.prototype because setting the prototype of that to what the obj. currently has would affect all custom
                         // objects in the system then, that is why clone is used here
-                        protoOfOurInternalImpl = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype);
-                        Object.setPrototypeOf(protoOfOurInternalImpl, registeredCustomObjectTypeConstructor.prototype); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
-                    } else protoOfOurInternalImpl = CustomObjectValue.prototype; // we just use CustomObjectValue.prototype (which has as prototype Object.prototype as well)
+                        let lastClonedProto: any;
+                        [protoOfOurInternalImpl, lastClonedProto] = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype);
+                        Object.setPrototypeOf(lastClonedProto, registeredCustomObjectTypeConstructor.prototype); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
+                    } else {
+                        // so this is likely a value that arrived from server (plain object), and the component has not registered a special class for this custom object type via specTypesService.register...
+                        // this means that, for backwards compatibility we have to add BaseCustomObject as well in the prototype chain (for example collapsible.ts used custom object before without registering the type with specTypesService; but it expected .getStateHolder() to be there and it added changed keys etc.)
+                        // we just use CustomObjectValue.prototype + the deprecated BaseCustomObject.prototype (which has as prototype Object.prototype as well)
+                        protoOfOurInternalImpl = CustomObjectType.customObjectValuePrototypeWithDeprecated; 
+                    }
                 } else {
                     // if it had a different prototype before (so it has a class, it was not a plain JS object), we need a new CustomObjectValue() as prototype
                     // and we can safely set the prototype of that then to what the object now has - so it keeps both our behavior and the behavior it previously had
 
                     // we can't use here CustomObjectValue.prototype because setting the prototype of that to what the obj. currently has would affect all custom
                     // objects in the system then, that is why clone is used here
-                    protoOfOurInternalImpl = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype)
-                    Object.setPrototypeOf(protoOfOurInternalImpl, protoOfObj); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
+                    let lastClonedProto: any;
+                    [protoOfOurInternalImpl, lastClonedProto] = CustomObjectType.clonePrototypeDeep(CustomObjectValue.prototype)
+                    Object.setPrototypeOf(lastClonedProto, protoOfObj); // we insert our proto on the obj itself and keep previous obj proto as proto of our impl - so keep what behavior it used to have...
                 } 
                 Object.setPrototypeOf(objectToInitialize, protoOfOurInternalImpl);
             }
@@ -487,50 +555,6 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
 const instanceOfCustomObject = (obj: any): obj is CustomObjectValue =>
     instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof CustomObjectState;
-
-/** implementers of this interface are generated via initCustomObjectValue */
-class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue {
-
-    // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
-    // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
-    // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
-    // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
-    // avoid iteration/enumeration/public access to/on it
-    __internalState: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
-
-    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
-        Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
-            configurable: true,
-            enumerable: false,
-            writable: false,
-            value: new CustomObjectState(this, propertyDescriptions)
-        }); // we use Object.defineProperty to make the internal state not enumerable (so that it does not appear when iterating using 'in' or 'of')
-        this.__internalState.contentVersion = contentVersion; // being full content updates, we don't care about the version, we just accept it
-        this.__internalState.calculatedPushToServerOfWholeProp = calculatedPushToServerOfWholeProp;
-        this.__internalState.dynamicPropertyTypesHolder = {};
-    }
-
-    /** do not call this method from component/service impls.; this state is meant to be used only by the property type impl. */
-    getInternalState(): CustomObjectState {
-        return this.__internalState;
-    }
-
-    markSubPropertyAsHavingDeepChanges(subPropertyName: string): void {
-        // this can be called by user for >= ALLOW pushToServer combined with 'object' type,
-        // so simple JSON subproperties, that change by content, not reference
-        const pushToServerOnSubProp = PushToServerUtils.combineWithChildStatic(this.__internalState.calculatedPushToServerOfWholeProp,
-                                                    this.__internalState.propertyDescriptions[subPropertyName]?.getPropertyDeclaredPushToServer());
-
-        if (pushToServerOnSubProp >= PushToServerEnum.ALLOW) {
-            this.__internalState.changedKeys.set(subPropertyName, this[subPropertyName]);
-
-            // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
-            // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
-            this.__internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
-        }
-    }
-
-}
 
 export interface BCOSBackup extends CASBackup {
     dynamicPropertyTypesHolder: Record<string, any>;
