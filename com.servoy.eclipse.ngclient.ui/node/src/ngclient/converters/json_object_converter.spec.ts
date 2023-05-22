@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 
 import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
-import { LoggerFactory, SpecTypesService } from '@servoy/public';
-import { WindowRefService, ICustomObjectValue } from '@servoy/public';
+import { LoggerFactory, SpecTypesService, WindowRefService, ICustomObjectValue, BaseCustomObject } from '@servoy/public';
 
 import { TypesRegistry, ICustomTypesFromServer, IPropertiesFromServer, IPropertyDescriptionFromServerWithMultipleEntries, ITypeFromServer,
             IFactoryTypeDetails, IPropertyContext, PushToServerEnum, PushToServerUtils } from '../../sablo/types_registry';
@@ -934,7 +933,6 @@ describe('JSONObjectConverter', () => {
         expect(changes2.n).toBe(true, 'should have no changes now');
     } );
 
-
     it( 'test deep change in a custom object with DEEP "object" subprops', () => {
         const val: DumbSubpropsWithInheritedPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedSubprops(),
                untypedObjectWithDEEPOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer));
@@ -991,13 +989,160 @@ describe('JSONObjectConverter', () => {
         expect(changes2.n).toBe(true, 'should have no changes now');
     } );
 
+    it('legacy TabDeprecated created from server with correct instance, with old api available', () => {
+        specTypesService.registerType("Tab", TabDeprecated);
+        
+        const val = converterService.convertFromServerToClient(createTabJSON(),
+               oneTabType , undefined, undefined, undefined, getParentPropertyContext(oneTabPushToServer));
+
+        const tabAsSeenInternally = val as IChangeAwareValue;
+        const tab = val as TabDeprecated;
+        
+        expect(tab).toBeDefined();
+        expect(tab.name).toBe('test', 'name should be test');
+        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+
+        expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
+        expect(tab.myvalue).toBe('test101', 'myvalue should be test101');
+
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        
+        expect(tab instanceof TabDeprecated).toBeTrue();
+        expect(tab instanceof BaseCustomObject).toBeTrue();
+        
+        const tabNewImpl = val as ICustomObjectValue;
+        expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
+        
+        expect(tab.get2ConcattedProps()).toEqual("test - test101");
+        specTypesService.registerType("Tab", undefined);
+    });
+
+    it('legacy TabDeprecated that was not registered with specTypesService, created from server should include deprecated BaseCustomObject, with old api available', () => {
+        const val = converterService.convertFromServerToClient(createTabJSON(),
+               oneTabType , undefined, undefined, undefined, getParentPropertyContext(oneTabPushToServer));
+
+        const tabAsSeenInternally = val as IChangeAwareValue;
+        const tab = val as TabDeprecated;
+        
+        expect(tab).toBeDefined();
+        expect(tab.name).toBe('test', 'name should be test');
+        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+
+        expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
+        tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
+        expect(tab.myvalue).toBe('test101', 'myvalue should be test101');
+
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        
+        expect(tab instanceof TabDeprecated).toBeFalse();
+        expect(tab instanceof BaseCustomObject).toBeTrue();
+        
+        const tabNewImpl = val as ICustomObjectValue;
+        expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
+        
+        expect(tab.get2ConcattedProps).toBeUndefined();
+    });
+
+    it('legacy TabDeprecated created from client with correct instance, should get new impl. as well after send to server', () => {
+        specTypesService.registerType("Tab", TabDeprecated);
+        let tab = new TabDeprecated();
+        
+        tab.name = 'test';
+        tab.myvalue = 'test';
+
+        [, tab] = converterService.convertFromClientToServer(tab, oneTabType, undefined,
+            getParentPropertyContext(oneTabPushToServer));
+        
+        expect(tab instanceof TabDeprecated).toBeTrue();
+        expect(tab instanceof BaseCustomObject).toBeTrue();
+
+        const tabNewImpl = tab as ICustomObjectValue;
+        expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
+        expect(tab.get2ConcattedProps()).toEqual("test - test");
+        specTypesService.registerType("Tab", undefined);
+    });
+
+    it('new Tab created from server with correct instance, with new api available but not old api', () => {
+        specTypesService.registerCustomObjectType("Tab", Tab);
+        
+        const val = converterService.convertFromServerToClient(createTabJSON(),
+               oneTabType , undefined, undefined, undefined, getParentPropertyContext(oneTabPushToServer));
+
+        const tabAsSeenInternally = val as IChangeAwareValue;
+        const tab = val as Tab;
+        
+        expect(tab).toBeDefined();
+        expect(tab.name).toBe('test', 'name should be test');
+        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+
+        expect(tab instanceof BaseCustomObject).toBeFalse(); // Tab is the new approch; doesn't need old/legacy API
+        expect(tab['getWatchedProperties']).toBeUndefined();
+        expect(tab['getStateHolder']).toBeUndefined();
+        
+        
+        const tabNewImpl = tab as ICustomObjectValue;
+        expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
+
+        tabNewImpl.markSubPropertyAsHavingDeepChanges("myvalue"); // we are faking it - actually it doesn't have any changes
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+
+        expect(tab.get2ConcattedProps()).toEqual("test - test");
+        specTypesService.registerCustomObjectType("Tab", undefined);
+    });
+
+    it('new Tab created from client with correct instance, should get new impl. as well after send to server', () => {
+        specTypesService.registerCustomObjectType("Tab", Tab);
+        let tab = new Tab();
+        
+        tab.name = 'test';
+        tab.myvalue = 'test';
+
+        [, tab] = converterService.convertFromClientToServer(tab, oneTabType, undefined,
+            getParentPropertyContext(oneTabPushToServer));
+        
+        expect(tab instanceof Tab).toBeTrue();
+        expect(tab instanceof BaseCustomObject).toBeFalse();
+
+        const tabNewImpl = tab as ICustomObjectValue;
+        expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
+        expect(tab.get2ConcattedProps()).toEqual("test - test");
+        specTypesService.registerCustomObjectType("Tab", undefined);
+    });
+
 });
 
-class Tab {
+class Tab implements ICustomObjectValue {
 
     name: string;
     myvalue: string;
     rejectString: string;
+
+    get2ConcattedProps() {
+        return this.name + " - " + this.myvalue;
+    }
+
+}
+
+class TabDeprecated extends BaseCustomObject { // test deprecated scenario as well
+
+    name: string;
+    myvalue: string;
+    rejectString: string;
+
+    get2ConcattedProps() {
+        return this.name + " - " + this.myvalue;
+    }
 
 }
 
