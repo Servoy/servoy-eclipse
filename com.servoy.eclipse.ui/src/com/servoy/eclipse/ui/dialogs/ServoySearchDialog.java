@@ -786,6 +786,14 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						contentProvider.add(new Table(DataSourceUtils.createInmemDataSource(tableName)), itemsFilter);
 					}
 				}
+				tables = servoyProject.getViewFoundsetsServer().getTableNames(false);
+				if (tables != null)
+				{
+					for (String tableName : tables)
+					{
+						contentProvider.add(new Table(DataSourceUtils.createViewDataSource(tableName)), itemsFilter);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -860,6 +868,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				if (server.equals(IServer.INMEM_SERVER))
 				{
 					name = table + " - InMemory Server";
+				}
+				else if (server.equals(IServer.VIEW_SERVER))
+				{
+					name = table + " - VIEW Server";
 				}
 				else name = table + " - " + server;
 			}
