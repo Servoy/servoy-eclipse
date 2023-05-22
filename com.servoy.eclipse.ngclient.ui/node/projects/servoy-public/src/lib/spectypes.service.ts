@@ -288,31 +288,47 @@ export interface ICustomArrayValue<T> extends Array<T> {
  * 
  * For example you can use something like ('extends ICustomObjectValue' is only needed for sending deeply nested changes to server in case of plain 'object'
  * typed subproperties):
- * 
+ * <pre><code>
  *      @Input() myCustomObjectProperty: IMyCustomObject;
  * 
- *      interface IMyCustomObject extends ICustomObjectValue {
+ *      interface IMyCustomObject extends ICustomObjectValue { // extends ICustomObjectValue is optional; the ICustomObjectValue.markSubPropertyAsHavingDeepChanges method will be added automatically
  *          p1: string; // for example
- *          (... any properties that are defined in the component's spec file for this custom object type ...)
+ *          (... all other properties that are defined in the component's spec file for this custom object type ...)
  *      }
+ * </code></pre>
+ * If you feel like the interface is not enough and your custom types need to have some client-side special class with client side only methods, for example if you
+ * have a tab-panel component with some 'tab' type, that is possible. You have to declare your class:
+ * <pre><code>
+ *     class Tab implements ICustomObjectValue { ...your_fields_and_methods... } // implements ICustomObjectValue is optional; do not declare the markSubPropertyAsHavingDeepChanges - that will be added automatically (when from/to server happens)
+ * </code></pre>
+ * then call:
+ * <pre><code>
+ *     specTypesService.registerCustomObjectType("mycomponent.tab", Tab);
+ * </code></pre>
+ * The custom objects sent from server for 'mycomponent.tab' type will have Tab added to their prototype chain automatically. Both those comming from server
+ * and any new Tab instances created on client (after they are sent to the server the first time) will have the markSubPropertyAsHavingDeepChanges method added
+ * to them automatically via the prototype chain as well. So you can use then something like this (if you ever need to):
+ * <pre><code>
+ *     (tab as ICustomObjectValue).markSubPropertyAsHavingDeepChanges(nameOfSomePlainObjectPropertyWithNestedJSONContentInIt);
+ * </code></pre>
  */
 export interface ICustomObjectValue extends Record<string, any> {
 
     /**
-     * If you extend this interface DO NOT IMPLEMENT THIS METHOD YOURSELF; it will be added under the hood by the custom object type code.
+     * If you extend/implement this interface, DO NOT IMPLEMENT THIS METHOD YOURSELF; it will be added under the hood by the custom object type code.
      * 
      * Calling this method is (rarely) only needed if both:
      *   1. you want to send client side changes back to the server (calculated pushToServer .spec config for the elements of this array is >= ALLOW)
-     *   2. AND you store in the object simple json values that are nested, and type subproperties simply as 'object' in the .spec file. So if the
-     *      subprop. is declared in the .spec file as 'object' and you change that subproperty in it client-side not by reference, but
+     *   2. AND you store in the custom object's subproperties simple json values that are nested, and type subproperties simply as 'object' in the .spec
+     *      file. So if the subprop. is declared in the .spec file as 'object' and you change that subproperty in it client-side not by reference, but
      *      by content nested inside the subproperty value (e.g. myCustomObject.subProp[3].x = 15) instead. Calling this method is not needed if you do
-     *      for example myCustomObject.subProp = [ { x: [14, 0], y: true } ], so a change by reference of index 5.
+     *      for example myCustomObject.subProp = [ { x: [14, 0], y: true } ], so a change by reference of subProp.
      *
      * In that case (1 and 2), in order for the updated subproperty value to be marked as needing to be sent to server, call this method.
      *
      * Calling this is generally not needed because, if pushToServer is ALLOW or greater (SHALLOW / DEEP) on a subproperty, the custom object will mark
      * automatically as needing to be sent to server any new/deleted subproperties and changes by reference in the object. It will mark an element as changed
-     * as well in case of  nested changes that happen in other array or custom object types ONLY if they are declared as such in the .spec file (so not
+     * as well in case of nested changes that happen in other custom array or custom object types ONLY if they are declared as such in the .spec file (so not
      * simple 'object's), so you do not need to call this method for those situations. Only for nested JSON subproperty values that change, are typed as 'object' in
      * the component/service .spec file, but are not changed by reference.
      *
