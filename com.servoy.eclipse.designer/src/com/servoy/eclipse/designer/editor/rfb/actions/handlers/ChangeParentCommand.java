@@ -248,7 +248,22 @@ public class ChangeParentCommand extends Command
 				else
 				{
 					insertIndex = sortedChildren.indexOf(targetChild);
-					if (insertIndex != -1 && insertAfterTarget) insertIndex++;
+					if (insertIndex != -1 && insertAfterTarget)
+					{
+						int count = 0;
+						Iterator<IPersist> it = newParent.getAllObjects();
+
+						while (it.hasNext())
+						{
+							IPersist persist = it.next();
+							if (persist != null)
+							{
+								count++;
+							}
+						}
+
+						insertIndex = count - 1;
+					}
 				}
 			}
 			if (insertIndex >= 0)
