@@ -32,6 +32,7 @@ describe( 'JSONArrayConverter', () => {
     let untypedObjectArrayWithSHALLOWOnElementsPushToServer: PushToServerEnum;
     let untypedObjectArrayWithDEEPOnElementsType: CustomArrayType<any>;
     let untypedObjectArrayWithDEEPOnElementsPushToServer: PushToServerEnum;
+    let tabJustForTypeType: CustomObjectType;
 
     const getParentPropertyContext = (pushToServerCalculatedValueForProp: PushToServerEnum): IPropertyContext => ({
             getProperty: (_propertyName: string) => undefined,
@@ -91,6 +92,7 @@ describe( 'JSONArrayConverter', () => {
                     untypedObjectArrayALLOW: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, null] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
                     untypedObjectArraySHALLOW: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, { t: null, s: 2}] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
                     untypedObjectArrayDEEP: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, { t: null, s: 3 }] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
+                    tabJustForType: [CustomObjectTypeFactory.TYPE_FACTORY_NAME, 'Tab']
                 },
                 ftd: factoryTypeDetails
             }
@@ -103,6 +105,7 @@ describe( 'JSONArrayConverter', () => {
         stringArrayWithShallowOnElementsPushToServer = spec.getPropertyPushToServer('stringArrayWithShallowOnElements'); // so computed not declared (undefined -> REJECT)
         tabArrayWithShallowOnElementsType = spec.getPropertyType('tabArray') as CustomArrayType<Tab>;
         tabArrayWithShallowOnElementsPushToServer = spec.getPropertyPushToServer('tabArray'); // so computed not declared (undefined -> REJECT)
+        tabJustForTypeType = spec.getPropertyType('tabJustForType') as CustomObjectType;
         tabHolderElementsType = spec.getPropertyType('tabHolder') as CustomObjectType;
         tabHolderElementsPushToServer = spec.getPropertyPushToServer('tabHolder'); // so computed not declared (undefined -> REJECT)
         untypedObjectArrayWithALLOWOnElementsType = spec.getPropertyType('untypedObjectArrayALLOW') as CustomArrayType<any>;
@@ -980,6 +983,66 @@ describe( 'JSONArrayConverter', () => {
         changes2 = converterService.convertFromClientToServer(val, untypedObjectArrayWithDEEPOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer))[0];
         expect(changes2.n).toBe(true, 'should have no changes now');
+    } );
+
+    it( 'when an already smart value (received as return value from an server side api call for example) is assigned into the model into a new location and sent to server, it should still work - have a correct change listener etc.', () => {
+        // in model
+        const val = converterService.convertFromServerToClient(createArrayWithJSONObject() as ICATFullValueFromServer, tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+        
+        let tabArray = val as Tab[];
+        let changeListenerWasCalled = false;
+        (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+
+        expect(changeListenerWasCalled).toBeFalse();
+
+        // received as return value from a server side api call
+        const childTab = converterService.convertFromServerToClient(createTabJSON('iAmArg'),
+               tabJustForTypeType , undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
+        
+        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
+
+        // assign it to model val's subproperty
+        tabArray[2] = childTab;
+
+        expect(changeListenerWasCalled).toBeTrue();
+        changeListenerWasCalled = false;
+
+        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+
+        debugger;
+        // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
+        const changesAndVal: [ICATGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabArray, tabArrayWithShallowOnElementsType, tabArray,
+             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+        let changes = changesAndVal[0];
+        
+        tabArray = changesAndVal[1] as Tab[];
+        let tabArrayAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
+        
+        expect(tabArrayAsSeenInternally.getInternalState().hasChangeListener()).toBeTrue();
+        expect(((tabArray[2] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        
+        expect(changes.vEr).toBe(1);
+        expect(changes.u.length).toBe(1);
+        expect(changes.u[0].i).toBe(2);
+        const tabChanges = changes.u[0].v as ICOTFullObjectToServer;
+        expect(tabChanges.vEr).toBe(0);
+        expect(tabChanges.v).toEqual({name: 'iAmArg', myvalue: 'iAmArg'});
+
+        tabArray[2].myvalue = 'iAmModel';
+
+        expect(changeListenerWasCalled).toBe(true);
+
+        const changes2: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(tabArray, tabArrayWithShallowOnElementsType, tabArray,
+            getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
+        
+        expect(changes2.vEr).toBe(1);
+        expect(changes2.u.length).toBe(1);
+        expect(changes2.u[0].i).toBe(2); 
+        const tabsUpdate = changes2.u[0].v as ICOTGranularUpdatesToServer;
+        expect(tabsUpdate.vEr).toBe(1);
+        expect(tabsUpdate.u.length).toBe(1);
+        expect(tabsUpdate.u[0].k).toBe('myvalue');
+        expect(tabsUpdate.u[0].v).toEqual('iAmModel');
     } );
 
 } );
