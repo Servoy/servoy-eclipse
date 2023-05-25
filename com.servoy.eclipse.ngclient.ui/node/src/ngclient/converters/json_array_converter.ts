@@ -342,8 +342,8 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                             }
 
                             if (changed) {
-                               const ch = {} as ICATGranularOpToServer;
-                               ch.i = idx;
+                                const ch = {} as ICATGranularOpToServer;
+                                ch.i = idx;
 
                                 const converted = this.converterService.convertFromClientToServer(newVal, this.getElementType(internalState, idx), oldVal, elemPropertyContext);
                                 ch.v = converted[0];

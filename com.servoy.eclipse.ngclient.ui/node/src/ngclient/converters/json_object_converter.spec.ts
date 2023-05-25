@@ -10,7 +10,7 @@ import { CustomObjectTypeFactory, CustomObjectType, ICOTFullValueFromServer, ICO
             ICOTFullObjectToServer, ICOTNoOpToServer, ICOTGranularUpdatesFromServer, ICOTGranularOpToServer,  } from './json_object_converter';
 import { DateType } from '../../sablo/converters/date_converter';
 import { ObjectType } from '../../sablo/converters/object_converter';
-import { CustomArrayTypeFactory, ICATFullArrayToServer, ICATGranularUpdatesToServer } from './json_array_converter';
+import { CustomArrayType, CustomArrayTypeFactory, ICATFullArrayToServer, ICATGranularUpdatesToServer } from './json_array_converter';
 
 describe('JSONObjectConverter', () => {
 
@@ -22,6 +22,7 @@ describe('JSONObjectConverter', () => {
     let oneTabType: CustomObjectType;
     let oneTabPushToServer: PushToServerEnum;
     let tabHolderType: CustomObjectType;
+    let tabArrayType: CustomArrayType<Tab>;
     let tabHolderPushToServer: PushToServerEnum;
 
     let untypedObjectALLOWWithVariousSubpropPTSType: CustomObjectType;
@@ -108,6 +109,8 @@ describe('JSONObjectConverter', () => {
                     untypedObjectDEEP: {
                         t: [CustomObjectTypeFactory.TYPE_FACTORY_NAME, 'DumbSubpropsThatInheritPTSFromParent'] as ITypeFromServer,
                         s: 3 } as IPropertyDescriptionFromServerWithMultipleEntries,
+                    tabArrayJustForType: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, [CustomObjectTypeFactory.TYPE_FACTORY_NAME, 'Tab']] as ITypeFromServer, s: 1 } as
+                        IPropertyDescriptionFromServerWithMultipleEntries
                 },
                 ftd: factoryTypeDetails
             }
@@ -117,6 +120,7 @@ describe('JSONObjectConverter', () => {
         oneTabType = spec.getPropertyType('oneTab') as CustomObjectType;
         oneTabPushToServer = spec.getPropertyPushToServer('oneTab'); // so computed not declared (undefined -> REJECT)
         tabHolderType = spec.getPropertyType('tabHolder') as CustomObjectType;
+        tabArrayType = spec.getPropertyType('tabArrayJustForType') as CustomArrayType<Tab>;
         tabHolderPushToServer = spec.getPropertyPushToServer('tabHolder'); // so computed not declared (undefined -> REJECT)
 
         untypedObjectALLOWWithVariousSubpropPTSType = spec.getPropertyType('untypedObjectALLOWWithVariousSubpropPTS') as CustomObjectType;
@@ -280,7 +284,7 @@ describe('JSONObjectConverter', () => {
         expect( changes2.u[0].v ).toBe( 'test4', 'checking that it is the correct value');
     } );
 
-    it( 'change subprop. by ref but do not send to server (so it still has changes to send for the model property), then send array as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
+    it( 'change subprop. by ref but do not send to server (so it still has changes to send for the model property), then send obj as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
         let tabHolder = new TabHolder();
         tabHolder.id = 'test';
         tabHolder.tab = new Tab();
@@ -1120,6 +1124,77 @@ describe('JSONObjectConverter', () => {
         specTypesService.registerCustomObjectType("Tab", undefined);
     });
 
+    it( 'when an already smart value (received as return value from an server side api call for example) is assigned into the model into a new location and sent to server, it should still work - have a correct change listener etc.', () => {
+        // in model
+        const val = converterService.convertFromServerToClient({
+            v: { id: 'test', tab2: createTabJSON() },
+            vEr: 1
+        } as ICOTFullValueFromServer, tabHolderType , undefined, undefined, undefined, getParentPropertyContext(tabHolderPushToServer));
+        
+        let tabHolder = val as TabHolder;
+        let changeListenerWasCalled = false;
+        (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+
+        expect(changeListenerWasCalled).toBeFalse();
+
+        // received as return value from a server side api call
+        const childArray = converterService.convertFromServerToClient({ v: [ createTabJSON() ], vEr: 1},
+               tabArrayType , undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
+        
+        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
+        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+
+        // assign it to model val's subproperty
+        tabHolder.tabs = childArray;
+
+        expect(changeListenerWasCalled).toBeTrue();
+        changeListenerWasCalled = false;
+
+        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+
+        // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
+        const changesAndVal: [ICOTGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
+             getParentPropertyContext(tabHolderPushToServer));
+        let changes = changesAndVal[0];
+        
+        tabHolder = changesAndVal[1] as TabHolder;
+        let tabHolderAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
+        
+        expect(tabHolderAsSeenInternally.getInternalState().hasChangeListener()).toBeTrue();
+        expect(((tabHolder.tabs as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(((tabHolder.tabs[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        
+        expect(changes.vEr).toBe(1);
+        expect(changes.u.length).toBe(1);
+        expect(changes.u[0].k).toBe('tabs');
+        const tabsChanges = changes.u[0].v as ICATFullArrayToServer;
+        expect(tabsChanges.vEr).toBe(0);
+        const changes1 = tabsChanges.v[0] as ICOTFullValueFromServer;
+        expect(changes1.vEr).toBe(0);
+        expect(changes1.v).toEqual({ name: 'test', myvalue: 'test' });
+
+        tabHolder.tabs[0].myvalue = 'test42';
+
+        expect(changeListenerWasCalled).toBe(true);
+
+        const changes2: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
+            getParentPropertyContext(tabHolderPushToServer))[0];
+        
+        expect(changes2.vEr).toBe(1);
+        expect(changes2.u.length).toBe(1);
+        expect(changes2.u[0].k).toBe('tabs'); 
+        const tabsUpdate = changes2.u[0].v as ICATGranularUpdatesToServer;
+        expect(tabsUpdate.vEr).toBe(1);
+        expect(tabsUpdate.u.length).toBe(1);
+        expect(tabsUpdate.u[0].i).toBe(0);
+        const tabChanges = tabsUpdate.u[0].v as ICOTGranularUpdatesToServer;
+        expect(tabChanges.vEr).toBe(1);
+        expect(tabChanges.u.length).toBe(1);
+        expect(tabChanges.u[0].k).toBe('myvalue');
+        expect(tabChanges.u[0].v).toEqual('test42');
+    } );
+    
 });
 
 class Tab implements ICustomObjectValue {
