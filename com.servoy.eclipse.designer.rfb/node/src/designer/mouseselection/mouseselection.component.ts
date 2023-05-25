@@ -350,8 +350,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                     containerName: layoutName,
                                     autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                                 };
-                                this.nodes.push(newNode);
-                                selection.push(id);
+                                if (!selection.includes(id)) {
+									this.nodes.push(newNode);
+									selection.push(id);
+								}
                             }
                         });
                         this.editorSession.setSelection(selection, this);

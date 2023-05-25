@@ -88,18 +88,14 @@ export class KeyboardLayoutDirective {
 						if (isResize) {
 							if (elementInfo.width + changeW > 0) elementInfo.width = elementInfo.width + changeW;
 							if (elementInfo.height + changeH > 0) elementInfo.height = elementInfo.height + changeH;
+							element.style.width = elementInfo.width + 'px';
+							element.style.height = elementInfo.height + 'px';
 						} else {
 							if (elementInfo.y + changeY > -1) elementInfo.y = elementInfo.y + changeY;
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
+							element.style.left = elementInfo.x + 'px';
+							element.style.top = elementInfo.y + 'px';
 						}
-                        const changes = {}; 
-                        changes[node] = {
-                            x: elementInfo.x,
-                            y: elementInfo.y,
-                            width: elementInfo.width,
-                            height: elementInfo.height
-                        }
-                        this.editorSession.sendChanges(changes);
                     }
                     else if (!isResize) {
 						// var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
@@ -151,7 +147,7 @@ export class KeyboardLayoutDirective {
                 }
             }
         }
-        if (this.isSendChanges) {
+        if (this.isSendChanges && Object.keys(changes).length) {
             this.editorSession.sendChanges(changes);
         } else {
             if (event.keyCode > 36 && event.keyCode < 41) {
